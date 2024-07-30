@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -85,9 +85,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -111,9 +111,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, plugins: PluginsSetup) => ",
@@ -139,9 +139,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -180,9 +180,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: PluginsStart) => ",
@@ -208,9 +208,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -506,9 +506,9 @@
           "({\n  id,\n  params,\n  http,\n  signal,\n}: { id: string; http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; params: Record<string, unknown>; signal?: AbortSignal | undefined; }) => Promise<",
@@ -557,9 +557,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -612,9 +612,9 @@
           "({ http, featureId, includeSystemActions, }: { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; featureId?: string | undefined; includeSystemActions?: boolean | undefined; }) => Promise<",
@@ -652,9 +652,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -774,9 +774,9 @@
           "(http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           ", indexes: string[]) => Promise<",
@@ -797,9 +797,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -838,9 +838,9 @@
           "(http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           ", pattern: string) => Promise<",
@@ -861,9 +861,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -1190,9 +1190,9 @@
           "({\n  http,\n  ruleId,\n}: { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; ruleId: string; }) => Promise<",
@@ -1238,9 +1238,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -1313,9 +1313,9 @@
           "({\n  http,\n  ruleId,\n  numberOfExecutions,\n}: { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; ruleId: string; numberOfExecutions?: number | undefined; }) => Promise<",
@@ -1353,9 +1353,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -1405,9 +1405,9 @@
           "({ http }: { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; }) => Promise<",
@@ -1445,9 +1445,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -1832,9 +1832,9 @@
           "({\n  http,\n  connector,\n  id,\n}: { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; connector: Pick<",
@@ -1842,9 +1842,9 @@
           "<Record<string, unknown>, Record<string, unknown>>, \"config\" | \"secrets\" | \"name\">; id: string; }) => Promise<",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.ActionConnector",
+            "section": "def-public.ActionConnector",
             "text": "ActionConnector"
           },
           "<Record<string, unknown>, Record<string, unknown>>>"
@@ -1874,9 +1874,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-common.HttpSetup",
+                    "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
                 ],
@@ -2056,9 +2056,9 @@
           "<Partial<",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           "> & ",
@@ -2227,9 +2227,9 @@
               "(validator: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ConnectorValidationFunc",
+                "section": "def-public.ConnectorValidationFunc",
                 "text": "ConnectorValidationFunc"
               },
               ") => void"
@@ -2248,9 +2248,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/alerts-ui-shared",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnAlertsUiSharedPluginApi",
-                    "section": "def-common.ConnectorValidationFunc",
+                    "section": "def-public.ConnectorValidationFunc",
                     "text": "ConnectorValidationFunc"
                   }
                 ],
@@ -2275,9 +2275,9 @@
         "signature": [
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.ActionParamsProps",
+            "section": "def-public.ActionParamsProps",
             "text": "ActionParamsProps"
           },
           "<TParams>"
@@ -2397,9 +2397,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.RuleFormParamsErrors",
+                "section": "def-public.RuleFormParamsErrors",
                 "text": "RuleFormParamsErrors"
               }
             ],
@@ -2480,9 +2480,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionConnector",
+                "section": "def-public.ActionConnector",
                 "text": "ActionConnector"
               },
               "<Record<string, unknown>, Record<string, unknown>> | undefined"
@@ -2557,9 +2557,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionConnectorMode",
+                "section": "def-public.ActionConnectorMode",
                 "text": "ActionConnectorMode"
               },
               " | undefined"
@@ -2735,9 +2735,9 @@
         "signature": [
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.ActionTypeModel",
+            "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
           "<ActionConfig, ActionSecrets, ActionParams>"
@@ -2807,9 +2807,9 @@
               "(actionParams: ActionParams) => Promise<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.GenericValidationResult",
+                "section": "def-public.GenericValidationResult",
                 "text": "GenericValidationResult"
               },
               "<unknown>>"
@@ -2847,9 +2847,9 @@
               "React.LazyExoticComponent<React.ComponentType<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionConnectorFieldsProps",
+                "section": "def-public.ActionConnectorFieldsProps",
                 "text": "ActionConnectorFieldsProps"
               },
               ">> | null"
@@ -2869,33 +2869,33 @@
               "React.ExoticComponent<(",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionParamsProps",
+                "section": "def-public.ActionParamsProps",
                 "text": "ActionParamsProps"
               },
               "<ActionParams> & React.RefAttributes<React.Component<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionParamsProps",
+                "section": "def-public.ActionParamsProps",
                 "text": "ActionParamsProps"
               },
               "<ActionParams>, any, any>>) | (",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionParamsProps",
+                "section": "def-public.ActionParamsProps",
                 "text": "ActionParamsProps"
               },
               "<ActionParams> & { children?: React.ReactNode; })> & { readonly _result: React.ComponentType<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionParamsProps",
+                "section": "def-public.ActionParamsProps",
                 "text": "ActionParamsProps"
               },
               "<ActionParams>>; }"
@@ -2932,9 +2932,9 @@
               "React.LazyExoticComponent<React.ComponentType<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionReadOnlyElementProps",
+                "section": "def-public.ActionReadOnlyElementProps",
                 "text": "ActionReadOnlyElementProps"
               },
               ">> | undefined"
@@ -2983,9 +2983,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.CustomConnectorSelectionItem",
+                "section": "def-public.CustomConnectorSelectionItem",
                 "text": "CustomConnectorSelectionItem"
               },
               " | undefined"
@@ -3864,9 +3864,9 @@
             "signature": [
               "{ [x: string]: Partial<",
               {
-                "pluginId": "ruleRegistry",
+                "pluginId": "@kbn/alerting-types",
                 "scope": "common",
-                "docId": "kibRuleRegistryPluginApi",
+                "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.BrowserField",
                 "text": "BrowserField"
               },
@@ -3996,9 +3996,9 @@
         "signature": [
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.GenericValidationResult",
+            "section": "def-public.GenericValidationResult",
             "text": "GenericValidationResult"
           },
           "<T>"
@@ -4234,25 +4234,25 @@
               "{ get: (id: string) => ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
+                "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>; list: () => ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
+                "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>[]; register: (objectType: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
+                "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
@@ -4751,9 +4751,9 @@
               "string | ((docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
+                "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               },
               ") => string) | null"
@@ -4773,9 +4773,9 @@
               "(ruleParams: Params, isServerless?: boolean | undefined) => ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ValidationResult",
+                "section": "def-public.ValidationResult",
                 "text": "ValidationResult"
               }
             ],
@@ -5345,9 +5345,9 @@
           " extends ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           }
         ],
@@ -5563,9 +5563,9 @@
               "(crumbs: ",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeBreadcrumb",
+                "section": "def-public.ChromeBreadcrumb",
                 "text": "ChromeBreadcrumb"
               },
               "[]) => void"
@@ -5584,9 +5584,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-common.ChromeBreadcrumb",
+                    "section": "def-public.ChromeBreadcrumb",
                     "text": "ChromeBreadcrumb"
                   },
                   "[]"
@@ -5610,25 +5610,25 @@
               "{ get: (id: string) => ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
+                "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>; list: () => ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
+                "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>[]; register: (objectType: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.ActionTypeModel",
+                "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
@@ -5733,9 +5733,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
+                "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
               "<unknown>"
@@ -5789,9 +5789,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
+                "section": "def-public.I18nStart",
                 "text": "I18nStart"
               }
             ],
@@ -5809,9 +5809,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               }
             ],
@@ -6033,25 +6033,25 @@
         "signature": [
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.PreConfiguredActionConnector",
+            "section": "def-public.PreConfiguredActionConnector",
             "text": "PreConfiguredActionConnector"
           },
           " | ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.SystemAction",
+            "section": "def-public.SystemAction",
             "text": "SystemAction"
           },
           " | ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.UserConfiguredActionConnector",
+            "section": "def-public.UserConfiguredActionConnector",
             "text": "UserConfiguredActionConnector"
           },
           "<Config, Secrets>"
@@ -6094,25 +6094,25 @@
           "{ get: (id: string) => ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.ActionTypeModel",
+            "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
           "<Connector, Params, any>; list: () => ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.ActionTypeModel",
+            "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
           "<Connector, Params, any>[]; register: (objectType: ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.ActionTypeModel",
+            "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
           "<Connector, Params, any>) => void; has: (id: string) => boolean; }"
@@ -6276,9 +6276,9 @@
           "; oldAlertsData: { field: string; value: string[]; }[][]; ecsAlertsData: unknown[]; querySnapshot?: ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.EsQuerySnapshot",
+            "section": "def-public.EsQuerySnapshot",
             "text": "EsQuerySnapshot"
           },
           " | undefined; refetchAlerts: () => void; alertsCount: number; onSortChange: (sort: ",
@@ -6384,9 +6384,9 @@
           " & { http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           "; }"
@@ -6421,17 +6421,17 @@
           "Pick<",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.UserConfiguredActionConnector",
+            "section": "def-public.UserConfiguredActionConnector",
             "text": "UserConfiguredActionConnector"
           },
           "<Config, Secrets>, \"config\" | \"secrets\" | \"actionTypeId\" | \"isDeprecated\"> & Partial<Pick<",
           {
             "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-common.UserConfiguredActionConnector",
+            "section": "def-public.UserConfiguredActionConnector",
             "text": "UserConfiguredActionConnector"
           },
           "<Config, Secrets>, \"id\" | \"name\">>"
@@ -7598,9 +7598,9 @@
             "<",
             {
               "pluginId": "@kbn/alerts-ui-shared",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnAlertsUiSharedPluginApi",
-              "section": "def-common.ActionTypeModel",
+              "section": "def-public.ActionTypeModel",
               "text": "ActionTypeModel"
             },
             "<any, any, any>>"
@@ -7673,9 +7673,9 @@
             "<",
             {
               "pluginId": "@kbn/alerts-ui-shared",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnAlertsUiSharedPluginApi",
-              "section": "def-common.ActionTypeModel",
+              "section": "def-public.ActionTypeModel",
               "text": "ActionTypeModel"
             },
             "<any, any, any>>"
@@ -8109,9 +8109,9 @@
             "QueryDslQueryContainer",
             ", \"ids\" | \"bool\">; initialPageSize?: number | undefined; browserFields?: ",
             {
-              "pluginId": "ruleRegistry",
+              "pluginId": "@kbn/alerting-types",
               "scope": "common",
-              "docId": "kibRuleRegistryPluginApi",
+              "docId": "kibKbnAlertingTypesPluginApi",
               "section": "def-common.BrowserFields",
               "text": "BrowserFields"
             },
@@ -8181,9 +8181,9 @@
                 "QueryDslQueryContainer",
                 ", \"ids\" | \"bool\">; initialPageSize?: number | undefined; browserFields?: ",
                 {
-                  "pluginId": "ruleRegistry",
+                  "pluginId": "@kbn/alerting-types",
                   "scope": "common",
-                  "docId": "kibRuleRegistryPluginApi",
+                  "docId": "kibKbnAlertingTypesPluginApi",
                   "section": "def-common.BrowserFields",
                   "text": "BrowserFields"
                 },

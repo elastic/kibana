@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-status-server-internal",
-        "id": "def-common.StatusService",
+        "id": "def-server.StatusService",
         "type": "Class",
         "tags": [],
         "label": "StatusService",
@@ -28,9 +20,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-status-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreStatusServerInternalPluginApi",
-            "section": "def-common.StatusService",
+            "section": "def-server.StatusService",
             "text": "StatusService"
           },
           " implements ",
@@ -45,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusService.Unnamed",
+            "id": "def-server.StatusService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -59,7 +51,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-status-server-internal",
-                "id": "def-common.StatusService.Unnamed.$1",
+                "id": "def-server.StatusService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -77,7 +69,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusService.preboot",
+            "id": "def-server.StatusService.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -93,7 +85,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-status-server-internal",
-                "id": "def-common.StatusService.preboot.$1",
+                "id": "def-server.StatusService.preboot.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ http }",
@@ -111,7 +103,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusService.setup",
+            "id": "def-server.StatusService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -120,9 +112,9 @@
               "({ analytics, elasticsearch, pluginDependencies, http, metrics, savedObjects, environment, coreUsageData, }: ",
               {
                 "pluginId": "@kbn/core-status-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreStatusServerInternalPluginApi",
-                "section": "def-common.StatusServiceSetupDeps",
+                "section": "def-server.StatusServiceSetupDeps",
                 "text": "StatusServiceSetupDeps"
               },
               ") => Promise<{ core$: ",
@@ -181,7 +173,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-status-server-internal",
-                "id": "def-common.StatusService.setup.$1",
+                "id": "def-server.StatusService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n  }",
@@ -189,9 +181,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-status-server-internal",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreStatusServerInternalPluginApi",
-                    "section": "def-common.StatusServiceSetupDeps",
+                    "section": "def-server.StatusServiceSetupDeps",
                     "text": "StatusServiceSetupDeps"
                   }
                 ],
@@ -205,7 +197,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusService.start",
+            "id": "def-server.StatusService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -221,7 +213,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusService.stop",
+            "id": "def-server.StatusService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -242,7 +234,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-status-server-internal",
-        "id": "def-common.registerStatusRoute",
+        "id": "def-server.registerStatusRoute",
         "type": "Function",
         "tags": [],
         "label": "registerStatusRoute",
@@ -256,7 +248,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.registerStatusRoute.$1",
+            "id": "def-server.registerStatusRoute.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  router,\n  config,\n  metrics,\n  status,\n  incrementUsageCounter,\n}",
@@ -277,7 +269,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-status-server-internal",
-        "id": "def-common.StatusServiceSetupDeps",
+        "id": "def-server.StatusServiceSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "StatusServiceSetupDeps",
@@ -288,7 +280,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.analytics",
+            "id": "def-server.StatusServiceSetupDeps.analytics",
             "type": "Object",
             "tags": [],
             "label": "analytics",
@@ -360,7 +352,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.elasticsearch",
+            "id": "def-server.StatusServiceSetupDeps.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
@@ -386,7 +378,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.environment",
+            "id": "def-server.StatusServiceSetupDeps.environment",
             "type": "Object",
             "tags": [],
             "label": "environment",
@@ -400,7 +392,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.pluginDependencies",
+            "id": "def-server.StatusServiceSetupDeps.pluginDependencies",
             "type": "Object",
             "tags": [],
             "label": "pluginDependencies",
@@ -414,7 +406,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.http",
+            "id": "def-server.StatusServiceSetupDeps.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -428,7 +420,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.metrics",
+            "id": "def-server.StatusServiceSetupDeps.metrics",
             "type": "Object",
             "tags": [],
             "label": "metrics",
@@ -436,9 +428,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               }
             ],
@@ -448,7 +440,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.savedObjects",
+            "id": "def-server.StatusServiceSetupDeps.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -467,9 +459,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectStatusMeta",
+                "section": "def-server.SavedObjectStatusMeta",
                 "text": "SavedObjectStatusMeta"
               },
               ">>; }"
@@ -480,7 +472,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.StatusServiceSetupDeps.coreUsageData",
+            "id": "def-server.StatusServiceSetupDeps.coreUsageData",
             "type": "Object",
             "tags": [],
             "label": "coreUsageData",
@@ -489,9 +481,9 @@
               "{ incrementUsageCounter: ",
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreIncrementUsageCounter",
+                "section": "def-server.CoreIncrementUsageCounter",
                 "text": "CoreIncrementUsageCounter"
               },
               "; }"
@@ -508,7 +500,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-status-server-internal",
-        "id": "def-common.StatusConfigType",
+        "id": "def-server.StatusConfigType",
         "type": "Type",
         "tags": [],
         "label": "StatusConfigType",
@@ -525,7 +517,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-status-server-internal",
-        "id": "def-common.statusConfig",
+        "id": "def-server.statusConfig",
         "type": "Object",
         "tags": [],
         "label": "statusConfig",
@@ -536,7 +528,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.statusConfig.path",
+            "id": "def-server.statusConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -547,7 +539,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-internal",
-            "id": "def-common.statusConfig.schema",
+            "id": "def-server.statusConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -578,5 +570,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }
