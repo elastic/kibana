@@ -10,21 +10,18 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createKnowledgeBaseModel, deleteKnowledgeBaseModel, TINY_ELSER } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const ml = getService('ml');
-  const KNOWLEDGE_BASE_API_URL = `/internal/observability_ai_assistant/kb`;
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe(`${KNOWLEDGE_BASE_API_URL}/status`, () => {
+  describe('/internal/observability_ai_assistant/kb/status', () => {
     before(async () => {
       await createKnowledgeBaseModel(ml);
 
-      await supertest
-        .post(`${KNOWLEDGE_BASE_API_URL}/setup`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200)
-        .then((response) => {
-          expect(response.body).to.eql({});
-        });
+      await observabilityAIAssistantAPIClient
+        .editorUser({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+        })
+        .expect(200);
     });
 
     after(async () => {
@@ -32,28 +29,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns correct status after knowledge base is setup', async () => {
-      return await supertest
-        .get(`${KNOWLEDGE_BASE_API_URL}/status`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200)
-        .then((response) => {
-          expect(response.body.deployment_state).to.eql('started');
-          expect(response.body.model_name).to.eql('pt_tiny_elser');
-        });
+      const res = await observabilityAIAssistantAPIClient
+        .editorUser({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+        })
+        .expect(200);
+      expect(res.body.deployment_state).to.eql('started');
+      expect(res.body.model_name).to.eql(TINY_ELSER.id);
     });
 
     it('returns correct status after elser is stopped', async () => {
       await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-      return await supertest
-        .get(`${KNOWLEDGE_BASE_API_URL}/status`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200)
-        .then((response) => {
-          expect(response.body).to.eql({
-            ready: false,
-            model_name: TINY_ELSER.id,
-          });
-        });
+
+      const res = await observabilityAIAssistantAPIClient
+        .editorUser({
+          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+        })
+        .expect(200);
+
+      expect(res.body).to.eql({
+        ready: false,
+        model_name: TINY_ELSER.id,
+      });
     });
   });
 }
