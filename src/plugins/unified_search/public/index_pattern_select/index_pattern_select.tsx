@@ -120,7 +120,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
     this.setState({
       isLoading: false,
-      options,
+      options: options.sort((a, b) => a.label.localeCompare(b.label)),
     });
 
     if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
