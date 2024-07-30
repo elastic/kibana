@@ -17,7 +17,7 @@ function range(start: number, end: number) {
 }
 
 export const MAX_PARTITIONS = 256;
-const TEN_SECONDS = 10000;
+const CACHE_INTERVAL = 10000;
 
 export class TaskPartitioner {
   private readonly allPartitions: number[];
@@ -31,7 +31,7 @@ export class TaskPartitioner {
     this.podName = podName;
     this.kibanaDiscoveryService = kibanaDiscoveryService;
     this.podPartitions = [];
-    this.podPartitionsLastUpdated = Date.now() - TEN_SECONDS;
+    this.podPartitionsLastUpdated = Date.now() - CACHE_INTERVAL;
   }
 
   getAllPartitions(): number[] {
@@ -46,8 +46,8 @@ export class TaskPartitioner {
     const lastUpdated = new Date(this.podPartitionsLastUpdated).getTime();
     const now = Date.now();
 
-    // update the pod partitions every 10 seconds
-    if (now - lastUpdated >= TEN_SECONDS) {
+    // update the pod partitions cache after 10 seconds
+    if (now - lastUpdated >= CACHE_INTERVAL) {
       const allPodNames = await this.getAllPodNames();
       this.podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
       this.podPartitionsLastUpdated = now;
