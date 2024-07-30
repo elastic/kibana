@@ -54,7 +54,8 @@ export class MonacoEditorActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void
+    private setEditorActionsCss: (css: CSSProperties) => void,
+    private isDevMode: boolean
   ) {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
@@ -99,7 +100,7 @@ export class MonacoEditorActionsProvider {
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
       }
-      if (event.keyCode === monaco.KeyCode.F1) {
+      if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
         this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
       }
     });

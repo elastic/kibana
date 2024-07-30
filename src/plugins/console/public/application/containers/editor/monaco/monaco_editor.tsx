@@ -38,6 +38,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const {
     services: { notifications, esHostService, settings: settingsService, autocompleteInfo },
     docLinkVersion,
+    config: { isDevMode },
   } = context;
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
@@ -70,7 +71,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
@@ -90,6 +91,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       sendRequestsCallback,
       setupResizeChecker,
       setInputEditor,
+      isDevMode,
     ]
   );
 
