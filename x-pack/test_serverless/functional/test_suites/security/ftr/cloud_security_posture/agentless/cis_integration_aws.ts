@@ -87,6 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
         await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
@@ -102,6 +103,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
         await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
+        await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
