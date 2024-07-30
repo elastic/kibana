@@ -65,7 +65,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     onRenderComplete,
     timeRange,
   } = input;
-  // console.log(timeRange);
 
   const { filters, query } = useFilterQueryUpdates();
 
@@ -247,9 +246,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
       setFieldValidationResult(validationResult);
       const { categories, hasExamples } = categorizationResult;
-
-      // eslint-disable-next-line no-console
-      console.log('categories', categories);
 
       if (minTimeRange.useSubAgg) {
         const categoriesInBucket = categorizationResult.categories
