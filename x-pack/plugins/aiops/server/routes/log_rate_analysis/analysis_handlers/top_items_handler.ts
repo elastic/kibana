@@ -55,8 +55,6 @@ export const topItemsHandlerFactory =
     keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
-
     // This will store the combined count of detected log patterns and keywords
     let fieldValuePairsCount = 0;
 
@@ -95,7 +93,6 @@ export const topItemsHandlerFactory =
       if (Array.isArray(overridesRemainingFieldCandidates)) {
         keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
         remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
-        keywordFieldCandidatesCount = keywordFieldCandidates.length;
         loadingStepSizeTopTerms =
           LOADED_FIELD_CANDIDATES +
           PROGRESS_STEP_P_VALUES -
@@ -111,7 +108,6 @@ export const topItemsHandlerFactory =
       if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
         keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
         remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
-        keywordFieldCandidatesCount = keywordFieldCandidates.length;
         loadingStepSizeTopTerms =
           LOADED_FIELD_CANDIDATES +
           PROGRESS_STEP_P_VALUES -
@@ -123,15 +119,17 @@ export const topItemsHandlerFactory =
 
     logDebugMessage('Fetch top items.');
 
-    const loadingStep =
-      (1 / (keywordFieldCandidatesCount + textFieldCandidates.length)) * loadingStepSizeTopTerms;
+    const topTermsQueueChunks = [
+      ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+        keywordFieldCandidates: d,
+      })),
+      ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
+    ];
+    const loadingStepSize = (1 / topTermsQueueChunks.length) * loadingStepSizeTopTerms;
 
     const topTermsQueue = queue(async function (payload: QueueFieldCandidate) {
-      let queueItemLoadingStep = 0;
-
       if (isKeywordFieldCandidates(payload)) {
         const { keywordFieldCandidates: fieldNames } = payload;
-        queueItemLoadingStep = loadingStep * fieldNames.length;
         let fetchedTopTerms: Awaited<ReturnType<typeof fetchTopTerms>>;
 
         try {
@@ -163,7 +161,7 @@ export const topItemsHandlerFactory =
           responseStream.push(addSignificantItems(fetchedTopTerms));
         }
 
-        stateHandler.loaded(queueItemLoadingStep, false);
+        stateHandler.loaded(loadingStepSize, false);
 
         responseStream.push(
           updateLoadingState({
@@ -184,12 +182,11 @@ export const topItemsHandlerFactory =
         );
       } else if (isTextFieldCandidates(payload)) {
         const { textFieldCandidates: fieldNames } = payload;
-        queueItemLoadingStep = loadingStep * fieldNames.length;
 
         const topCategoriesForField = await await fetchTopCategories(
           esClient,
           requestBody,
-          textFieldCandidates,
+          fieldNames,
           logger,
           stateHandler.sampleProbability(),
           responseStream.pushError,
@@ -202,30 +199,22 @@ export const topItemsHandlerFactory =
           fieldValuePairsCount += topCategoriesForField.length;
         }
 
-        stateHandler.loaded(queueItemLoadingStep, false);
+        stateHandler.loaded(loadingStepSize, false);
       }
     }, MAX_CONCURRENT_QUERIES);
 
-    topTermsQueue.push(
-      [
-        ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
-          keywordFieldCandidates: d,
-        })),
-        ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
-      ],
-      (err) => {
-        if (err) {
-          logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
-          responseStream.pushError(`Failed to fetch p-values.`);
-          topTermsQueue.kill();
-          responseStream.end();
-        } else if (stateHandler.shouldStop()) {
-          logDebugMessage('shouldStop fetching p-values.');
-          topTermsQueue.kill();
-          responseStream.end();
-        }
+    topTermsQueue.push(topTermsQueueChunks, (err) => {
+      if (err) {
+        logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+        responseStream.pushError(`Failed to fetch p-values.`);
+        topTermsQueue.kill();
+        responseStream.end();
+      } else if (stateHandler.shouldStop()) {
+        logDebugMessage('shouldStop fetching p-values.');
+        topTermsQueue.kill();
+        responseStream.end();
       }
-    );
+    });
     await topTermsQueue.drain();
 
     fieldValuePairsCount = topCategories.length + topTerms.length;
