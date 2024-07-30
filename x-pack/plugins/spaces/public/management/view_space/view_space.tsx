@@ -8,7 +8,6 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -182,29 +181,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     );
   };
 
-  const SettingsButton = () => {
-    const href = getUrlForApp('management', {
-      path: `/kibana/spaces/edit/${space.id}`,
-    });
-
-    return capabilities.spaces.manage ? (
-      <a
-        href={href}
-        onClick={(event) => {
-          event.preventDefault();
-          navigateToUrl(href);
-        }}
-      >
-        <EuiButtonEmpty iconType="gear">
-          <FormattedMessage
-            id="xpack.spaces.management.viewSpace.spaceSettingsButton.label"
-            defaultMessage="Settings"
-          />
-        </EuiButtonEmpty>
-      </a>
-    ) : null;
-  };
-
   return (
     <ViewSpaceContextProvider
       capabilities={capabilities}
@@ -218,7 +194,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
           <EuiFlexItem grow={false}>
             <HeaderAvatar />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={true}>
             <EuiTitle size="l">
               <h1 data-test-subj="spaceTitle">
                 {space.name}
@@ -257,31 +233,24 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
               </p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem>
-                <SettingsButton />
-              </EuiFlexItem>
-              {userActiveSpace?.id !== space.id ? (
-                <EuiFlexItem>
-                  <EuiButton
-                    iconType="merge"
-                    href={addSpaceIdToPath(
-                      props.serverBasePath,
-                      space.id,
-                      `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${space.id}`
-                    )}
-                    data-test-subj="spaceSwitcherButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
-                      defaultMessage="Switch to this space"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {userActiveSpace?.id !== space.id ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="merge"
+                href={addSpaceIdToPath(
+                  props.serverBasePath,
+                  space.id,
+                  `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${space.id}`
+                )}
+                data-test-subj="spaceSwitcherButton"
+              >
+                <FormattedMessage
+                  id="xpack.spaces.management.spaceDetails.space.switchToSpaceButton.label"
+                  defaultMessage="Switch to this space"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
 
         <EuiSpacer />
