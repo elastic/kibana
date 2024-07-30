@@ -100,7 +100,7 @@ export function InternalDashboardTopNav({
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
-  const managed = true; // dashboard.select((state) => state.componentState.managed);
+  const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const query = dashboard.select((state) => state.explicitInput.query);
@@ -324,6 +324,7 @@ export function InternalDashboardTopNav({
           dashboard={dashboard}
           isLoading={isLoading}
           setIsLoading={setIsLoading}
+          redirectTo={redirectTo}
         />
       );
       allBadges.push({
@@ -342,6 +343,7 @@ export function InternalDashboardTopNav({
     dashboard,
     isLoading,
     setIsLoading,
+    redirectTo,
   ]);
 
   return (

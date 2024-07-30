@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DashboardAPI } from '../..';
+import { DashboardRedirect } from '../../dashboard_container/types';
 
 interface ManagedPopoverProps {
   text: string;
@@ -27,6 +28,7 @@ interface ManagedPopoverProps {
   dashboard: DashboardAPI;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
+  redirectTo: DashboardRedirect;
 }
 
 export const ManagedPopover = ({
@@ -36,6 +38,7 @@ export const ManagedPopover = ({
   dashboard,
   isLoading,
   setIsLoading,
+  redirectTo,
 }: ManagedPopoverProps) => {
   const button = (
     <EuiButton
@@ -75,7 +78,7 @@ export const ManagedPopover = ({
             fill
             onClick={() => {
               setIsLoading(true);
-              dashboard.duplicate();
+              dashboard.duplicate(redirectTo);
               setIsLoading(false);
             }}
             data-test-subj="managedContentPopoverDuplicateButton"

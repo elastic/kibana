@@ -31,7 +31,7 @@ import {
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
+import { DashboardRedirect, DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
@@ -335,7 +335,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
   });
 }
 
-export async function duplicate(this: DashboardContainer) {
+export async function duplicate(this: DashboardContainer, redirectTo: DashboardRedirect) {
   const {
     dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
@@ -346,7 +346,7 @@ export async function duplicate(this: DashboardContainer) {
     try {
       const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
 
-      let copyCount = baseCount;
+      let copyCount = baseCount + 1;
       let newTitle = `${baseTitle} (${copyCount})`;
 
       while (
@@ -407,15 +407,21 @@ export async function duplicate(this: DashboardContainer) {
           title: newTitle,
         },
       });
+
       this.savedObjectReferences = saveResult.references ?? [];
+      this.saveNotification$.next();
+      this.savedObjectReferences = saveResult.references ?? [];
+      this.dispatch.setLastSavedInput(stateToSave);
+
       resolve(saveResult);
-      return saveResult.id
-        ? {
-            id: saveResult.id,
-          }
-        : {
-            error: saveResult.error,
-          };
+      redirectTo({
+        id: saveResult.id,
+        editMode: true,
+        useReplace: true,
+        destination: 'dashboard',
+      });
+
+      return saveResult;
     } catch (error) {
       reject(error);
       return error;
