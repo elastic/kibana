@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
+import deepEqual from 'react-fast-compare';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
@@ -68,7 +69,6 @@ export const getOptionsListControlFactory = (
       );
       const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
       const excludeSelected$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
-      const searchString$ = new BehaviorSubject<string>('');
 
       /** Creation options state - cannot currently be changed after creation, but need subjects for comparators */
       const placeholder$ = new BehaviorSubject<string | undefined>(initialState.placeholder);
@@ -78,6 +78,7 @@ export const getOptionsListControlFactory = (
       const hideSort$ = new BehaviorSubject<boolean | undefined>(initialState.hideSort);
 
       /** Runtime / component state - none of this is serialized */
+      const searchString$ = new BehaviorSubject<string>('');
       const searchStringValid$ = new BehaviorSubject<boolean>(true);
       const requestSize$ = new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE);
 
@@ -265,10 +266,22 @@ export const getOptionsListControlFactory = (
           exclude: [excludeSelected$, (selected) => excludeSelected$.next(selected)],
           existsSelected: [existsSelected$, (selected) => existsSelected$.next(selected)],
           runPastTimeout: [runPastTimeout$, (runPast) => runPastTimeout$.next(runPast)],
-          searchTechnique: [searchTechnique$, (technique) => searchTechnique$.next(technique)],
-          selectedOptions: [selections$, (selections) => selections$.next(selections)],
+          searchTechnique: [
+            searchTechnique$,
+            (technique) => searchTechnique$.next(technique),
+            (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
+          ],
+          selectedOptions: [
+            selections$,
+            (selections) => selections$.next(selections),
+            (a, b) => deepEqual(a ?? [], b ?? []),
+          ],
           singleSelect: [singleSelect$, (selected) => singleSelect$.next(selected)],
-          sort: [sort$, (sort) => sort$.next(sort)],
+          sort: [
+            sort$,
+            (sort) => sort$.next(sort),
+            (a, b) => (a ?? OPTIONS_LIST_DEFAULT_SORT) === (b ?? OPTIONS_LIST_DEFAULT_SORT),
+          ],
 
           /** This state cannot currently be changed after the control is created */
           placeholder: [placeholder$, (placeholder) => placeholder$.next(placeholder)],
