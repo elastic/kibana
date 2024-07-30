@@ -63,7 +63,7 @@ export const RowMenuControlCell = ({
 
   return (
     <EuiPopover
-      id="rowMenuActionsPopover"
+      id={`rowMenuActionsPopover_${props.rowIndex}`}
       button={
         <DataTableRowControl size={Size.normal}>
           <EuiToolTip content={buttonLabel} delay="long">
