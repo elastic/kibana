@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { union } from 'lodash';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
   RuleDataSource,
@@ -13,16 +13,15 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  determineDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
   MissingVersion,
   DataSourceType,
-  determineOrderAgnosticDiffOutcome,
   ThreeWayDiffConflict,
+  determineDiffOutcomeForDataSource,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { mergeDedupedArrays } from './helpers';
+import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
 export const dataSourceDiffAlgorithm = (
   versions: ThreeVersionsOf<RuleDataSource>
@@ -33,36 +32,7 @@ export const dataSourceDiffAlgorithm = (
     target_version: targetVersion,
   } = versions;
 
-  let diffOutcome: ThreeWayDiffOutcome;
-
-  if (baseVersion === MissingVersion) {
-    if (
-      currentVersion.type === DataSourceType.index_patterns &&
-      targetVersion.type === DataSourceType.index_patterns
-    ) {
-      diffOutcome = determineOrderAgnosticDiffOutcome(
-        MissingVersion,
-        currentVersion.index_patterns,
-        targetVersion.index_patterns
-      );
-    } else {
-      diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
-    }
-  } else {
-    if (
-      baseVersion.type === DataSourceType.index_patterns &&
-      currentVersion.type === DataSourceType.index_patterns &&
-      targetVersion.type === DataSourceType.index_patterns
-    ) {
-      diffOutcome = determineOrderAgnosticDiffOutcome(
-        baseVersion.index_patterns,
-        currentVersion.index_patterns,
-        targetVersion.index_patterns
-      );
-    } else {
-      diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
-    }
-  }
+  const diffOutcome = determineDiffOutcomeForDataSource(baseVersion, currentVersion, targetVersion);
 
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
@@ -134,18 +104,31 @@ const mergeVersions = ({
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       if (
-        dedupedBaseVersion &&
-        dedupedBaseVersion.type === DataSourceType.index_patterns &&
         dedupedCurrentVersion.type === DataSourceType.index_patterns &&
         dedupedTargetVersion.type === DataSourceType.index_patterns
       ) {
+        if (dedupedBaseVersion && dedupedBaseVersion.type === DataSourceType.index_patterns) {
+          // If all versions are index pattern types, merge all arrays
+          return {
+            conflict: ThreeWayDiffConflict.SOLVABLE,
+            mergeOutcome: ThreeWayMergeOutcome.Merged,
+            mergedVersion: {
+              type: DataSourceType.index_patterns,
+              index_patterns: mergeDedupedArrays(
+                dedupedBaseVersion.index_patterns,
+                dedupedCurrentVersion.index_patterns,
+                dedupedTargetVersion.index_patterns
+              ),
+            },
+          };
+        }
+        // If just the current and target versions are index pattern types, return the union of the arrays as the merged version
         return {
           conflict: ThreeWayDiffConflict.SOLVABLE,
           mergeOutcome: ThreeWayMergeOutcome.Merged,
           mergedVersion: {
             type: DataSourceType.index_patterns,
-            index_patterns: mergeDedupedArrays(
-              dedupedBaseVersion.index_patterns,
+            index_patterns: union(
               dedupedCurrentVersion.index_patterns,
               dedupedTargetVersion.index_patterns
             ),
@@ -172,14 +155,4 @@ const mergeVersions = ({
     default:
       return assertUnreachable(diffOutcome);
   }
-};
-
-const getDedupedDataSourceVersion = (version: RuleDataSource): RuleDataSource => {
-  if (version.type === DataSourceType.index_patterns) {
-    return {
-      ...version,
-      index_patterns: uniq(version.index_patterns),
-    };
-  }
-  return version;
 };

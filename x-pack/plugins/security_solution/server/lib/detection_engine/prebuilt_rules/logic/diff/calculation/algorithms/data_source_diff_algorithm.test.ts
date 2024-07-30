@@ -166,32 +166,53 @@ describe('dataSourceDiffAlgorithm', () => {
     });
   });
 
-  it('returns current_version as merged output if current version is different but it matches the update - scenario ABB', () => {
-    const mockVersions: ThreeVersionsOf<RuleDataSource> = {
-      base_version: {
-        type: DataSourceType.index_patterns,
-        index_patterns: ['one', 'two', 'three'],
-      },
-      current_version: {
-        type: DataSourceType.index_patterns,
-        index_patterns: ['one', 'three', 'four'],
-      },
-      target_version: {
-        type: DataSourceType.index_patterns,
-        index_patterns: ['one', 'three', 'four'],
-      },
-    };
+  describe('returns current_version as merged output if current version is different but it matches the update - scenario ABB', () => {
+    it('if all versions are index patterns', () => {
+      const mockVersions: ThreeVersionsOf<RuleDataSource> = {
+        base_version: {
+          type: DataSourceType.index_patterns,
+          index_patterns: ['one', 'two', 'three'],
+        },
+        current_version: {
+          type: DataSourceType.index_patterns,
+          index_patterns: ['one', 'three', 'four'],
+        },
+        target_version: {
+          type: DataSourceType.index_patterns,
+          index_patterns: ['one', 'three', 'four'],
+        },
+      };
 
-    const result = dataSourceDiffAlgorithm(mockVersions);
+      const result = dataSourceDiffAlgorithm(mockVersions);
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        merged_version: mockVersions.current_version,
-        diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Current,
-        conflict: ThreeWayDiffConflict.NONE,
-      })
-    );
+      expect(result).toEqual(
+        expect.objectContaining({
+          merged_version: mockVersions.current_version,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NONE,
+        })
+      );
+    });
+
+    it('if all versions are data views', () => {
+      const mockVersions: ThreeVersionsOf<RuleDataSource> = {
+        base_version: { type: DataSourceType.data_view, data_view_id: '123' },
+        current_version: { type: DataSourceType.data_view, data_view_id: '456' },
+        target_version: { type: DataSourceType.data_view, data_view_id: '456' },
+      };
+
+      const result = dataSourceDiffAlgorithm(mockVersions);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          merged_version: mockVersions.current_version,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NONE,
+        })
+      );
+    });
   });
 
   describe('returns current_version as merged output if all three versions are different - scenario ABC', () => {
@@ -260,14 +281,19 @@ describe('dataSourceDiffAlgorithm', () => {
         },
       };
 
+      const expectedMergedVersion: RuleDataSource = {
+        type: DataSourceType.index_patterns,
+        index_patterns: ['one', 'three', 'four', 'two', 'five'],
+      };
+
       const result = dataSourceDiffAlgorithm(mockVersions);
 
       expect(result).toEqual(
         expect.objectContaining({
-          merged_version: mockVersions.current_version,
+          merged_version: expectedMergedVersion,
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+          merge_outcome: ThreeWayMergeOutcome.Merged,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
         })
       );
     });

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { difference, union } from 'lodash';
+import { difference, union, uniq } from 'lodash';
+import type { RuleDataSource } from '../../../../../../../../common/api/detection_engine';
+import { DataSourceType } from '../../../../../../../../common/api/detection_engine';
 
 export const mergeDedupedArrays = <T>(
   dedupedBaseVersion: T[],
@@ -22,4 +24,14 @@ export const mergeDedupedArrays = <T>(
   const bothRemoved = union(removedCurrent, removedTarget);
 
   return difference(union(dedupedBaseVersion, bothAdded), bothRemoved);
+};
+
+export const getDedupedDataSourceVersion = (version: RuleDataSource): RuleDataSource => {
+  if (version.type === DataSourceType.index_patterns) {
+    return {
+      ...version,
+      index_patterns: uniq(version.index_patterns),
+    };
+  }
+  return version;
 };
