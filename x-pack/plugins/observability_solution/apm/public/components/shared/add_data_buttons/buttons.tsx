@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '@kbn/core/public';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
