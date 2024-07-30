@@ -17,7 +17,7 @@ export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
 export const bedrockToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
   [
     'system',
-    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response.',
+    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.',
   ],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
