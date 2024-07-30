@@ -95,7 +95,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
-  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/inference_endpoints`;
+  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<

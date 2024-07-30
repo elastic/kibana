@@ -38,7 +38,7 @@ export class SearchInferenceEndpointsPlugin
 
     core.application.register({
       id: PLUGIN_ID,
-      appRoute: '/app',
+      appRoute: '/app/search_inference_endpoints',
       title: PLUGIN_NAME,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
