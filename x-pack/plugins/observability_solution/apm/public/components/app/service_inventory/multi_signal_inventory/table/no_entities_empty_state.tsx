@@ -18,10 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
 import { dashboardsLight } from '@kbn/shared-svg';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 import { useLocalStorage } from '../../../../../hooks/use_local_storage';
 import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
@@ -33,9 +31,7 @@ import {
 } from '../../../../shared/add_data_buttons/buttons';
 
 export function NoEntitiesEmptyState() {
-  const { core } = useApmPluginContext();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { basePath } = core.http;
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.uiNewExperienceCallout',
     false
