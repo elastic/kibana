@@ -16,9 +16,9 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { ControlsExampleStartDeps } from '../plugin';
@@ -48,7 +48,7 @@ const App = ({
   }
 
   return (
-    <I18nProvider>
+    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
       <EuiPage>
         <EuiPageBody>
           <EuiPageSection>
@@ -78,7 +78,7 @@ const App = ({
           </EuiPageTemplate.Section>
         </EuiPageBody>
       </EuiPage>
-    </I18nProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
