@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
+import { createKnowledgeBaseModel, deleteKnowledgeBaseModel } from './helpers';
 
 interface KnowledgeBaseEntry {
   id: string;
@@ -17,30 +17,17 @@ interface KnowledgeBaseEntry {
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  const TINY_ELSER = {
-    ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
-    id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-  };
+
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
   describe('Knowledge base', () => {
     before(async () => {
-      const config = {
-        ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
-        input: {
-          field_names: ['text_field'],
-        },
-      };
-      await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
-      await ml.api.assureMlStatsIndexExists();
+      await createKnowledgeBaseModel(ml);
     });
 
     after(async () => {
-      await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-      await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-      await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
+      await deleteKnowledgeBaseModel(ml);
     });
 
     it('returns 200 on knowledge base setup', async () => {
