@@ -94,7 +94,7 @@ export const createCustomThresholdExecutor = ({
       executionId,
     });
 
-    const { searchSourceClient, alertsClient } = services;
+    const { searchSourceClient, alertsClient, uiSettingsClient } = services;
 
     if (!alertsClient) {
       throw new AlertsClientError();
@@ -143,6 +143,7 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear,
       logger,
       { end: dateEnd, start: dateStart },
+      uiSettingsClient,
       state.lastRunTimestamp,
       previousMissingGroups
     );
