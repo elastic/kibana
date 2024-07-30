@@ -9,16 +9,17 @@ import { chunk } from 'lodash';
 import { queue } from 'async';
 
 import { i18n } from '@kbn/i18n';
-import type { SignificantItem, NumericChartData } from '@kbn/ml-agg-utils';
+import type {
+  SignificantItem,
+  SignificantItemHistogram,
+  NumericChartData,
+} from '@kbn/ml-agg-utils';
 import { QUEUE_CHUNKING_SIZE } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 import {
   addSignificantItemsHistogram,
   updateLoadingState,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
-import {
-  fetchDateHistograms,
-  type LogRateAnalysisMiniDateHistogram,
-} from '@kbn/aiops-log-rate-analysis/queries/fetch_date_histograms';
+import { fetchMiniHistogramsForSignificantItems } from '@kbn/aiops-log-rate-analysis/queries/fetch_mini_histograms_for_significant_items';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import {
@@ -75,10 +76,10 @@ export const histogramHandlerFactory =
         }
 
         if (overallTimeSeries !== undefined) {
-          let histograms: LogRateAnalysisMiniDateHistogram[];
+          let histograms: SignificantItemHistogram[];
 
           try {
-            histograms = await fetchDateHistograms(
+            histograms = await fetchMiniHistogramsForSignificantItems(
               esClient,
               requestBody,
               payload,

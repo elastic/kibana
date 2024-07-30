@@ -11,10 +11,11 @@ import { queue } from 'async';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { i18n } from '@kbn/i18n';
-import {
-  type SignificantItem,
-  type SignificantItemGroup,
-  type NumericChartData,
+import type {
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemGroupHistogram,
+  NumericChartData,
 } from '@kbn/ml-agg-utils';
 import { QUEUE_CHUNKING_SIZE } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 import {
@@ -27,10 +28,7 @@ import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_erro
 import { fetchFrequentItemSets } from '@kbn/aiops-log-rate-analysis/queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from '@kbn/aiops-log-rate-analysis/queries/fetch_terms_2_categories_counts';
 import { getSignificantItemGroups } from '@kbn/aiops-log-rate-analysis/queries/get_significant_item_groups';
-import {
-  fetchDateHistograms,
-  type LogRateAnalysisMiniDateHistogram,
-} from '@kbn/aiops-log-rate-analysis/queries/fetch_date_histograms';
+import { fetchMiniHistogramsForSignificantGroups } from '@kbn/aiops-log-rate-analysis/queries/fetch_mini_histograms_for_significant_groups';
 
 import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
 import type { ResponseStreamFetchOptions } from '../response_stream_factory';
@@ -156,10 +154,10 @@ export const groupingHandlerFactory =
           }
 
           if (overallTimeSeries !== undefined) {
-            let histograms: LogRateAnalysisMiniDateHistogram[];
+            let histograms: SignificantItemGroupHistogram[];
 
             try {
-              histograms = await fetchDateHistograms(
+              histograms = await fetchMiniHistogramsForSignificantGroups(
                 esClient,
                 requestBody,
                 payload,

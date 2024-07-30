@@ -12,10 +12,10 @@ import type { Logger } from '@kbn/logging';
 import type {
   NumericChartData,
   SignificantItem,
-  SignificantItemGroup,
+  SignificantItemHistogram,
   SignificantItemHistogramItem,
 } from '@kbn/ml-agg-utils';
-import { isSignificantItem, isSignificantItemGroup } from '@kbn/ml-agg-utils';
+import { isSignificantItem } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
@@ -23,32 +23,30 @@ import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_q
 import { RANDOM_SAMPLER_SEED } from '../constants';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
-import { getGroupFilter } from './get_group_filter';
 import { getHistogramQuery } from './get_histogram_query';
 
-export interface LogRateAnalysisMiniDateHistogram {
-  fieldName: SignificantItem['fieldName'];
-  fieldValue: SignificantItem['fieldValue'];
-  histogram: SignificantItemHistogramItem[];
-}
-
-interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
+interface Aggs extends estypes.AggregationsSingleBucketAggregateBase {
   doc_count: number;
-  bg_count: number;
-  buckets: estypes.AggregationsSignificantLongTermsBucket[];
+  mini_histogram: {
+    buckets: Array<
+      estypes.AggregationsSingleBucketAggregateBase & estypes.AggregationsHistogramBucketKeys
+    >;
+  };
 }
 
-export const fetchDateHistograms = async (
+const HISTOGRAM_AGG_PREFIX = 'histogram_';
+
+export const fetchMiniHistogramsForSignificantItems = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
-  significantItems: Array<SignificantItemGroup | SignificantItem>,
+  significantItems: SignificantItem[],
   overallTimeSeries: NumericChartData,
   logger: Logger,
   // The default value of 1 means no sampling will be used
   randomSamplerProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-): Promise<LogRateAnalysisMiniDateHistogram[]> => {
+): Promise<SignificantItemHistogram[]> => {
   const histogramQuery = getHistogramQuery(params);
 
   const histogramAggs = significantItems.reduce<
@@ -69,15 +67,11 @@ export const fetchDateHistograms = async (
           regex: '',
         },
       ]);
-    } else if (isSignificantItemGroup(significantItem)) {
-      filter = {
-        bool: { filter: getGroupFilter(significantItem) },
-      };
     } else {
       throw new Error('Invalid significant item type.');
     }
 
-    aggs[`histogram_${index}`] = {
+    aggs[`${HISTOGRAM_AGG_PREFIX}${index}`] = {
       filter,
       aggs: {
         mini_histogram: {
@@ -115,8 +109,6 @@ export const fetchDateHistograms = async (
     { signal: abortSignal, maxRetries: 0 }
   );
 
-  const results: LogRateAnalysisMiniDateHistogram[] = [];
-
   if (resp.aggregations === undefined) {
     if (!isRequestAbortedError(resp)) {
       if (logger) {
@@ -129,17 +121,17 @@ export const fetchDateHistograms = async (
         emitError(`Failed to fetch the histogram data chunk.`);
       }
     }
-    return results;
+    return [];
   }
 
   const unwrappedResp = unwrap(resp.aggregations) as Record<string, Aggs>;
 
-  for (const [index, significantItem] of significantItems.entries()) {
-    const histogram =
+  return significantItems.map((significantItem, index) => {
+    const histogram: SignificantItemHistogramItem[] =
       overallTimeSeries.data.map((o) => {
-        const current = unwrappedResp[`histogram_${index}`].mini_histogram.buckets.find(
-          (d1) => d1.key_as_string === o.key_as_string
-        ) ?? {
+        const current = unwrappedResp[
+          `${HISTOGRAM_AGG_PREFIX}${index}`
+        ].mini_histogram.buckets.find((d1) => d1.key_as_string === o.key_as_string) ?? {
           doc_count: 0,
         };
 
@@ -151,19 +143,10 @@ export const fetchDateHistograms = async (
         };
       }) ?? [];
 
-    if (isSignificantItem(significantItem)) {
-      results.push({
-        fieldName: significantItem.fieldName,
-        fieldValue: significantItem.fieldValue,
-        histogram,
-      });
-    } else if (isSignificantItemGroup(significantItem)) {
-      results.push({
-        id: significantItem.id,
-        histogram,
-      });
-    }
-  }
-
-  return results;
+    return {
+      fieldName: significantItem.fieldName,
+      fieldValue: significantItem.fieldValue,
+      histogram,
+    };
+  });
 };
