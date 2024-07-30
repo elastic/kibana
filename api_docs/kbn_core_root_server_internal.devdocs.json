@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.Root",
+        "id": "def-server.Root",
         "type": "Class",
         "tags": [],
         "label": "Root",
@@ -33,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.logger",
+            "id": "def-server.Root.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -53,7 +45,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.Unnamed",
+            "id": "def-server.Root.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -67,7 +59,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$1",
+                "id": "def-server.Root.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "rawConfigProvider",
@@ -88,7 +80,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$2",
+                "id": "def-server.Root.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "env",
@@ -109,7 +101,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$3",
+                "id": "def-server.Root.Unnamed.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "onShutdown",
@@ -127,7 +119,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.preboot",
+            "id": "def-server.Root.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -145,7 +137,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.setup",
+            "id": "def-server.Root.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -163,7 +155,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.start",
+            "id": "def-server.Root.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -181,7 +173,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.shutdown",
+            "id": "def-server.Root.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -195,7 +187,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.shutdown.$1",
+                "id": "def-server.Root.shutdown.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "reason",
@@ -218,7 +210,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.registerServiceConfig",
+        "id": "def-server.registerServiceConfig",
         "type": "Function",
         "tags": [],
         "label": "registerServiceConfig",
@@ -234,7 +226,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.registerServiceConfig.$1",
+            "id": "def-server.registerServiceConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "configService",
@@ -252,6 +244,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
