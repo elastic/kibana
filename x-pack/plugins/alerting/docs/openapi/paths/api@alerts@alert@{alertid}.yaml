@@ -1,5 +1,5 @@
 delete:
-  summary: Permanently removes an alert.
+  summary: Delete an alert
   operationId: legaryDeleteAlert
   deprecated: true
   description: >
@@ -9,15 +9,13 @@ delete:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   responses:
     '204':
       description: Indicates a successful call.
@@ -29,22 +27,20 @@ delete:
             $ref: '../components/schemas/401_response.yaml'
 
 get:
-  summary: Retrieves an alert by its identifier.
+  summary: Get an alert by identifier
   operationId: legacyGetAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the get rule API instead.
   tags:
     - alerting
   parameters:
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   responses:
     '200':
       description: Indicates a successful call.
@@ -60,7 +56,7 @@ get:
             $ref: '../components/schemas/401_response.yaml'
 
 post:
-  summary: Create an alert.
+  summary: Create an alert
   operationId: legacyCreateAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the create rule API instead.
@@ -74,9 +70,7 @@ post:
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
-    - $ref: '../components/parameters/space_id.yaml'
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   requestBody:
     required: true
     content:
@@ -112,7 +106,7 @@ post:
                       If you don't need this functionality, set it to `default`.
                   id:
                     type: string
-                    description: The ID of the action saved object to execute.
+                    description: The ID of the action saved object.
                   params:
                     type: object
                     description: >
@@ -148,9 +142,8 @@ post:
               properties:
                 interval:
                   type: string
-                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-                  examples:
-                    - "10s"
+                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.
+                  example: "10s"
             tags:
               type: array
               items:
@@ -178,7 +171,7 @@ post:
             $ref: '../components/schemas/401_response.yaml'
 
 put:
-  summary: Updates the attributes for an alert.
+  summary: Update an alert
   operationId: legacyUpdateAlert
   deprecated: true
   description: Deprecated in 7.13.0. Use the update rule API instead.
@@ -186,15 +179,13 @@ put:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: The identifier for the alert.
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
   requestBody:
     required: true
     content:
@@ -228,7 +219,7 @@ put:
                       If you don't need this functionality, set it to `default`.
                   id:
                     type: string
-                    description: The ID of the action saved object to execute.
+                    description: The ID of the action saved object.
                   params:
                     type: object
                     description: >
@@ -255,9 +246,8 @@ put:
               properties:
                 interval:
                   type: string
-                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.
-                  examples:
-                    - "1d"
+                  description: The interval format specifies the interval in seconds, minutes, hours or days at which the alert should run.
+                  example: "1d"
             tags:
               type: array
               items:

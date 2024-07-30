@@ -79,6 +79,7 @@ export const getRuleRoute = (
     options: {
       access: 'public',
       summary: `Get rule details`,
+      tags: ['oas-tag:alerting'],
     },
   });
 

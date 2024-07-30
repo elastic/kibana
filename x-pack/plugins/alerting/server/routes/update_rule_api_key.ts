@@ -24,7 +24,8 @@ export const updateRuleApiKeyRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_update_api_key`,
       options: {
         access: 'public',
-        summary: `Update the API key for a rule`,
+        summary: 'Update the API key for a rule',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         params: paramSchema,

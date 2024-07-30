@@ -1,5 +1,5 @@
 post:
-  summary: Mutes an alert.
+  summary: Mute an alert
   operationId: muteAlert
   description: >
     You must have `all` privileges for the appropriate Kibana features,
@@ -14,7 +14,6 @@ post:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/alert_id.yaml'
     - $ref: '../components/parameters/rule_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.

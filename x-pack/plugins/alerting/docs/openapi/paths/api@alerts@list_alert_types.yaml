@@ -1,12 +1,10 @@
 get:
-  summary: Retrieves a list of alert types.
+  summary: Get the alert types
   operationId: legacyGetAlertTypes
   deprecated: true
   description: Deprecated in 7.13.0. Use the get rule types API instead.
   tags:
     - alerting
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
