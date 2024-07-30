@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../deployment_agnostic/ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/painless_lab';
 

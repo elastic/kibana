@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '../../deployment_agnostic/stateful.config.base';
+import { createStatefulTestConfig } from '../../stateful.config.base';
 
 export default createStatefulTestConfig({
   testFiles: [require.resolve('.')],

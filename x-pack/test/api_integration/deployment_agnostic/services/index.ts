@@ -18,4 +18,5 @@ export const services = {
   ...deploymentAgnosticServices,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
   svlUserManager: commonFunctionalServices.samlAuthProvider,
+  // create a new deployment-agonstic service and load here
 };

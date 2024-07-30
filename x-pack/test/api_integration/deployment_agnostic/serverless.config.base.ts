@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, Config } from '@kbn/test';
 
 import { ServerlessProjectType } from '@kbn/es';
 import { services } from './services';
@@ -19,7 +19,7 @@ interface CreateTestConfigOptions {
 }
 
 export function createServerlessTestConfig(options: CreateTestConfigOptions) {
-  return async ({ readConfigFile }: FtrConfigProviderContext) => {
+  return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../../test_serverless/shared/config.base.ts')
     );

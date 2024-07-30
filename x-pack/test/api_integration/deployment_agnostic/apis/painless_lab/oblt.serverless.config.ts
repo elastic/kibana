@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '../../deployment_agnostic/serverless.config.base';
+import { createServerlessTestConfig } from '../../serverless.config.base';
 
 export default createServerlessTestConfig({
   serverlessProject: 'oblt',

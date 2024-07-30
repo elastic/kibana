@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Painless Lab', () => {
     loadTestFile(require.resolve('./painless_lab'));
   });

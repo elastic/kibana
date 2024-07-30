@@ -1,7 +1,7 @@
 disabled:
   # Deployment-agnostic default config + example
-  - x-pack/test/api_integration/deployment_agnostic/stateful.config.base.ts
-  - x-pack/test/api_integration/apis/painless_lab/oblt.serverless.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/serverless.config.base.ts
+  - x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/oblt.serverless.config.ts
   # Base config files, only necessary to inform config finding script
   - x-pack/test_serverless/functional/test_suites/observability/cypress/oblt_config.base.ts
 

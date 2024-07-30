@@ -6,33 +6,23 @@
  */
 
 import _ from 'lodash';
-
 import { services as apiIntegrationServices } from '../../services';
 
 /**
- * List only services that support both stateful & serverless deployments (including Cloud/MKI),
- * e.g. `supertest` has multiple implementations and not compatible.
+ * Load only services that support both stateful & serverless deployments (including Cloud/MKI),
+ * e.g. `randomness` or `retry` are deployment agnostic
  */
-const services = _.pick(apiIntegrationServices, [
+export const deploymentAgnosticServices = _.pick(apiIntegrationServices, [
   'supertest', // TODO: review its behaviour
-  'esSupertest', // TODO: review its behaviour
-  'deployment',
   'es',
   'esArchiver',
-  'esDeleteAllIndices',
+  'esSupertest', // TODO: review its behaviour
   'indexPatterns',
   'ingestPipelines',
-  'indexManagement',
   'kibanaServer',
   'ml',
   'randomness',
   'retry',
   'security',
   'usageAPI',
-  'console',
-  'securitySolutionApi',
 ]);
-
-export const deploymentAgnosticServices = {
-  ...services,
-};
