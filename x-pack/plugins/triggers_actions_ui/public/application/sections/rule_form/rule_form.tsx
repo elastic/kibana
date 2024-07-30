@@ -43,7 +43,10 @@ import {
   EuiToolTip,
   EuiCallOut,
   EuiAccordion,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import {
@@ -199,6 +202,7 @@ export const RuleForm = ({
     dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
+  const { colorMode } = useEuiTheme();
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
@@ -765,24 +769,26 @@ export const RuleForm = ({
               </SectionLoading>
             }
           >
-            <RuleParamsExpressionComponent
-              id={rule.id}
-              ruleParams={rule.params}
-              ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
-              ruleThrottle={''}
-              alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
-              errors={errors}
-              setRuleParams={setRuleParams}
-              setRuleProperty={setRuleProperty}
-              defaultActionGroupId={defaultActionGroupId}
-              actionGroups={selectedRuleType.actionGroups}
-              metadata={metadata}
-              charts={charts}
-              data={data}
-              dataViews={dataViews}
-              unifiedSearch={unifiedSearch}
-              onChangeMetaData={onChangeMetaData}
-            />
+            <EuiThemeProvider darkMode={colorMode === COLOR_MODES_STANDARD.dark}>
+              <RuleParamsExpressionComponent
+                id={rule.id}
+                ruleParams={rule.params}
+                ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
+                ruleThrottle={''}
+                alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
+                errors={errors}
+                setRuleParams={setRuleParams}
+                setRuleProperty={setRuleProperty}
+                defaultActionGroupId={defaultActionGroupId}
+                actionGroups={selectedRuleType.actionGroups}
+                metadata={metadata}
+                charts={charts}
+                data={data}
+                dataViews={dataViews}
+                unifiedSearch={unifiedSearch}
+                onChangeMetaData={onChangeMetaData}
+              />
+            </EuiThemeProvider>
           </Suspense>
         </EuiErrorBoundary>
       ) : null}

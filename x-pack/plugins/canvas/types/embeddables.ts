@@ -8,7 +8,7 @@
 import type { TimeRange } from '@kbn/es-query';
 import { Filter } from '@kbn/es-query';
 import { EmbeddableInput as Input } from '@kbn/embeddable-plugin/common';
-import {
+import type {
   HasAppContext,
   HasDisableTriggers,
   PublishesViewMode,

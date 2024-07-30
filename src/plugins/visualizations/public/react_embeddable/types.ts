@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasEditCapabilities,
+  HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
   SerializedTimeRange,
@@ -32,7 +34,8 @@ export type ExtraSavedObjectProperties = Pick<
 >;
 
 export type VisualizeRuntimeState = SerializedTitles &
-  SerializedTimeRange & {
+  SerializedTimeRange &
+  Partial<DynamicActionsSerializedState> & {
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;
@@ -75,6 +78,7 @@ export type VisualizeApi = HasEditCapabilities &
   PublishesDataLoading &
   HasVisualizeConfig &
   HasInspectorAdapters &
+  HasSupportedTriggers &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;

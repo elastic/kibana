@@ -9,7 +9,7 @@ import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
@@ -21,7 +21,6 @@ import {
   CANNOT_PERFORM_ACTION_SYNTHETICS,
   NoPermissionsTooltip,
 } from '../../../common/components/permissions';
-import { TagsBadges } from '../../../common/components/tag_badges';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
@@ -103,7 +102,7 @@ export function useMonitorListColumns({
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorTypeBadge
-          monitor={monitor}
+          monitorType={monitor[ConfigKey.MONITOR_TYPE]}
           ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
           onClick={() => {
             history.push({
@@ -146,7 +145,7 @@ export function useMonitorListColumns({
         defaultMessage: 'Tags',
       }),
       render: (tags: string[]) => (
-        <TagsBadges
+        <TagsList
           tags={tags}
           onClick={(tag) => {
             history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });

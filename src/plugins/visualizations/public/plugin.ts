@@ -69,6 +69,8 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -179,6 +181,7 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 /**
@@ -400,11 +403,11 @@ export class VisualizationsPlugin
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
-        plugins: { embeddable: embeddableStart },
+        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
       const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
-      return getVisualizeEmbeddableFactory(embeddableStart);
+      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
       onAdd: (container, savedObject) => {

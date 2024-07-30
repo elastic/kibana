@@ -34,7 +34,8 @@
       "spaces",
       "savedObjectsTaggingOss",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "embeddableEnhanced"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "charts", "savedObjects"],
     "extraPublicDirs": [

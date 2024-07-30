@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { ViewMode } from '@kbn/embeddable-plugin/public';
 import { PublishingSubject } from '../publishing_subject';
 
-export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
+export type { ViewMode };
 
 /**
  * This API publishes a universal view mode which can change compatibility of actions and the
