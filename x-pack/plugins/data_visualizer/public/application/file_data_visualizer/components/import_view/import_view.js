@@ -58,7 +58,7 @@ const DEFAULT_STATE = {
   createDataView: true,
   dataView: '',
   dataViewId: '',
-  pipelineId: '',
+  pipelineId: null,
   errors: [],
   importFailures: [],
   docCount: 0,
@@ -75,6 +75,7 @@ const DEFAULT_STATE = {
   checkingValidIndex: false,
   combinedFields: [],
   importer: undefined,
+  createPipeline: true,
 };
 
 export class ImportView extends Component {
@@ -324,14 +325,11 @@ export class ImportView extends Component {
               onIndexSettingsStringChange={this.onIndexSettingsStringChange}
               onMappingsStringChange={this.onMappingsStringChange}
               onPipelineStringChange={this.onPipelineStringChange}
-              onPipelineIdChange={this.onPipelineIdChange}
               indexNameError={indexNameError}
               dataViewNameError={dataViewNameError}
               combinedFields={combinedFields}
               onCombinedFieldsChange={this.onCombinedFieldsChange}
               results={this.props.results}
-              pipelineId={pipelineId}
-              setPipelineId={this.setPipelineId}
             />
 
             <EuiSpacer size="m" />
