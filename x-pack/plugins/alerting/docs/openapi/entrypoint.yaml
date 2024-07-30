@@ -59,17 +59,3 @@ paths:
     $ref: 'paths/api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_mute.yaml'
   '/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute':
     $ref: 'paths/api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_unmute.yaml'
-
-# components:
-#   securitySchemes:
-#     basicAuth:
-#       type: http
-#       scheme: basic
-#     apiKeyAuth:
-#       type: apiKey
-#       in: header
-#       name: Authorization
-#       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-# security:
-#   - basicAuth: []
-#   - apiKeyAuth: []
