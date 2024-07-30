@@ -202,7 +202,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createJobUrl]);
 
-  return selectedOptions.length || shouldUseDropdownJobCreate ? (
+  return jobIds.size || shouldUseDropdownJobCreate ? (
     <EuiFormRow
       data-test-subj="mlAnomalyJobSelectionControls"
       fullWidth
@@ -229,6 +229,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     </EuiFormRow>
   ) : (
     <EuiEmptyPrompt
+      data-test-subj="mlAnomalyJobSelectionControls"
       titleSize="xxs"
       iconType="warning"
       title={
