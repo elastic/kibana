@@ -14,18 +14,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-metrics-server-mocks",
-        "id": "def-common.metricsServiceMock",
+        "id": "def-server.metricsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "metricsServiceMock",
@@ -36,7 +28,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.create",
+            "id": "def-server.metricsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +44,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createSetupContract",
+            "id": "def-server.metricsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -61,9 +53,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               },
               ">"
@@ -76,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createStartContract",
+            "id": "def-server.metricsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -85,9 +77,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               },
               ">"
@@ -100,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createInternalSetupContract",
+            "id": "def-server.metricsServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -109,9 +101,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               },
               ">"
@@ -124,7 +116,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createInternalStartContract",
+            "id": "def-server.metricsServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -133,9 +125,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
+                "section": "def-server.MetricsServiceSetup",
                 "text": "MetricsServiceSetup"
               },
               ">"
@@ -148,7 +140,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createEventLoopDelaysMonitor",
+            "id": "def-server.metricsServiceMock.createEventLoopDelaysMonitor",
             "type": "Function",
             "tags": [],
             "label": "createEventLoopDelaysMonitor",
@@ -157,9 +149,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-metrics-collectors-server-internal",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-                "section": "def-common.EventLoopDelaysMonitor",
+                "section": "def-server.EventLoopDelaysMonitor",
                 "text": "EventLoopDelaysMonitor"
               }
             ],
@@ -174,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-server-mocks",
-        "id": "def-common.sampleEsClientMetrics",
+        "id": "def-server.sampleEsClientMetrics",
         "type": "Object",
         "tags": [],
         "label": "sampleEsClientMetrics",
@@ -185,7 +177,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.sampleEsClientMetrics.totalActiveSockets",
+            "id": "def-server.sampleEsClientMetrics.totalActiveSockets",
             "type": "number",
             "tags": [],
             "label": "totalActiveSockets",
@@ -196,7 +188,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.sampleEsClientMetrics.totalIdleSockets",
+            "id": "def-server.sampleEsClientMetrics.totalIdleSockets",
             "type": "number",
             "tags": [],
             "label": "totalIdleSockets",
@@ -207,7 +199,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.sampleEsClientMetrics.totalQueuedRequests",
+            "id": "def-server.sampleEsClientMetrics.totalQueuedRequests",
             "type": "number",
             "tags": [],
             "label": "totalQueuedRequests",
@@ -220,5 +212,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

@@ -2295,9 +2295,17 @@
             "label": "dispatch",
             "description": [],
             "signature": [
-              "{ deselectOption: (payload: string) => void; setSearchString: (payload: string) => void; setAllowExpensiveQueries: (payload: boolean) => void; setInvalidSelectionWarningOpen: (payload: boolean) => void; setPopoverOpen: (payload: boolean) => void; setSort: (payload: Partial<",
+              "{ deselectOption: (payload: ",
+              "OptionsListSelection",
+              ") => void; setSearchString: (payload: string) => void; setAllowExpensiveQueries: (payload: boolean) => void; setInvalidSelectionWarningOpen: (payload: boolean) => void; setPopoverOpen: (payload: boolean) => void; setSort: (payload: Partial<",
               "OptionsListSortingType",
-              ">) => void; selectExists: (payload: boolean) => void; selectOption: (payload: string) => void; replaceSelection: (payload: string) => void; clearSelections: (payload: unknown) => void; setExclude: (payload: boolean) => void; clearValidAndInvalidSelections: (payload: unknown) => void; setValidAndInvalidSelections: (payload: { validSelections: string[]; invalidSelections: string[]; }) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setField: (payload: ",
+              ">) => void; selectExists: (payload: boolean) => void; selectOption: (payload: ",
+              "OptionsListSelection",
+              ") => void; replaceSelection: (payload: ",
+              "OptionsListSelection",
+              ") => void; clearSelections: (payload: unknown) => void; setExclude: (payload: boolean) => void; clearValidAndInvalidSelections: (payload: unknown) => void; setValidAndInvalidSelections: (payload: Pick<",
+              "OptionsListComponentState",
+              ", \"validSelections\" | \"invalidSelections\">) => void; setErrorMessage: (payload: string | undefined) => void; setLoading: (payload: boolean) => void; setField: (payload: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2307,7 +2315,7 @@
               },
               " | undefined) => void; updateQueryResults: (payload: Pick<",
               "OptionsListComponentState",
-              ", \"availableOptions\" | \"invalidSelections\" | \"validSelections\" | \"totalCardinality\">) => void; publishFilters: (payload: ",
+              ", \"validSelections\" | \"invalidSelections\" | \"availableOptions\" | \"totalCardinality\">) => void; publishFilters: (payload: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -5556,7 +5564,8 @@
             "label": "selectedOptions",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "OptionsListSelection",
+              "[] | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -7513,7 +7522,8 @@
             "label": "selectedOptions",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "OptionsListSelection",
+              "[] | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,

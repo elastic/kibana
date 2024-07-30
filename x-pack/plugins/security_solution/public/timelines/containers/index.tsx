@@ -286,11 +286,10 @@ export const useTimelineEventsHandler = ({
 
         if (request.language === 'eql') {
           prevTimelineRequest.current = activeTimeline.getEqlRequest();
-          refetch.current = asyncSearch.bind(null, activeTimeline.getEqlRequest());
         } else {
           prevTimelineRequest.current = activeTimeline.getRequest();
-          refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
         }
+        refetch.current = asyncSearch;
 
         setTimelineResponse((prevResp) => {
           const resp =

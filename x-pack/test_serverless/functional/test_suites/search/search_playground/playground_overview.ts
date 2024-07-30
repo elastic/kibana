@@ -112,7 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      describe('with existing indices', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/189314
+      describe.skip('with existing indices', () => {
         before(async () => {
           await createConnector();
           await createIndex();
