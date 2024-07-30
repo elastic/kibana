@@ -33,7 +33,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
     "@kbn/config-schema",
-    "@kbn/lists-plugin",
     "@kbn/securitysolution-list-constants",
     "@kbn/security-plugin",
     "@kbn/management-settings-ids",
@@ -43,5 +42,6 @@
     "@kbn/actions-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/repo-info",
+    "@kbn/securitysolution-endpoint-exceptions-common",
   ]
 }

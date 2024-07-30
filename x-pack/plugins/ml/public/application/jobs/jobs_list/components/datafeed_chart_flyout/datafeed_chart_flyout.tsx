@@ -272,7 +272,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       <EuiFlyout
         size="m"
         ownFocus
-        onClose={onClose.bind(null, false)}
+        onClose={onClose}
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',
         })}

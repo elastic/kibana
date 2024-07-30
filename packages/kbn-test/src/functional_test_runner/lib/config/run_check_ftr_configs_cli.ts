@@ -41,6 +41,8 @@ export async function runCheckFtrConfigsCli() {
         .split('\n')
         .map((file) => Path.resolve(REPO_ROOT, file));
 
+      const loadingConfigs = [];
+
       const possibleConfigs = files.filter((file) => {
         if (IGNORED_PATHS.includes(file)) {
           return false;
@@ -66,24 +68,45 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/mocks.ts$/)) {
+        // No FTR configs in /packages/
+        if (file.match(/\/packages\//)) {
+          return false;
+        }
+
+        if (file.match(/(mock|mocks).ts$/)) {
           return false;
         }
 
         const fileContent = readFileSync(file).toString();
 
-        if (fileContent.match(/(testRunner)|(testFiles)/)) {
+        if (
+          // explicitly define 'testRunner' or 'testFiles'
+          fileContent.match(/(testRunner)|(testFiles)/) ||
+          // export default createTestConfig
+          fileContent.match(/export\s+default\s+createTestConfig/) ||
+          // export default async function ({ readConfigFile }: FtrConfigProviderContext)
+          // async function config({ readConfigFile }: FtrConfigProviderContext)
+          // export default async function (ftrConfigProviderContext: FtrConfigProviderContext)
+          fileContent.match(
+            /(?:export\s+default\s+)?async\s+function(?:\s+\w+)?\s*\(\s*(?:\{\s*readConfigFile\s*\}|\w+)\s*(?::\s*FtrConfigProviderContext\s*)?\)/
+          )
+        ) {
           // test config
           return true;
         }
 
-        if (fileContent.match(/(describe)|(defineCypressConfig)/)) {
+        if (file.match(/config.ts$/) && fileContent.match(/export\s+default\s+configs\./)) {
+          return true;
+        }
+
+        if (fileContent.match(/(describe)|(defineCypressConfig)|(cy\.)/)) {
           // test file or Cypress config
           return false;
         }
 
         // FTR config file should have default export
         try {
+          loadingConfigs.push(file);
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           const exports = require(file);
           const defaultExport = exports.__esModule ? exports.default : exports;
@@ -93,6 +116,10 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
       });
+
+      if (loadingConfigs.length) {
+        log.info(`${loadingConfigs.length} files were loaded as FTR configs for validation`);
+      }
 
       const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
 
