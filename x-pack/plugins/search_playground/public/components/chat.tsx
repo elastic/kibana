@@ -88,8 +88,8 @@ export const Chat = () => {
   );
 
   const isToolBarActionsDisabled = useMemo(
-    () => chatMessages.length <= 1 || !!error || isRegenerating || isSubmitting,
-    [chatMessages, error, isSubmitting, isRegenerating]
+    () => chatMessages.length <= 1 || isRegenerating || isSubmitting,
+    [chatMessages, isSubmitting, isRegenerating]
   );
 
   const regenerateMessages = async () => {
