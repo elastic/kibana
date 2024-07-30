@@ -8,22 +8,57 @@
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import React, { useEffect } from 'react';
+import type { EuiCardProps } from '@elastic/eui';
+import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import { NoDataConfig } from '@kbn/shared-ux-page-no-data-config-types';
+import { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
 import {
-  noMetricIndicesPromptDescription,
-  noMetricIndicesPromptPrimaryActionTitle,
   NoRemoteCluster,
-} from '../../components/empty_states';
-import { SourceErrorPage } from '../../components/source_error_page';
-import { SourceLoadingPage } from '../../components/source_loading_page';
-import { useMetricsDataViewContext, useSourceContext } from '../../containers/metrics_source';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { ErrorCallout } from './hosts/components/error_callout';
+  noMetricIndicesPromptDescription,
+  noMetricIndicesPromptTitle,
+} from '../../../components/empty_states';
+import { SourceErrorPage } from '../../../components/source_error_page';
+import { useMetricsDataViewContext, useSourceContext } from '../../../containers/metrics_source';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { ErrorCallout } from '../hosts/components/error_callout';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { getNoDataConfigDetails } from './no_data_config';
 
-export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
+export const getNoDataConfig = ({
+  hasData,
+  loading,
+  defaultCardConfig,
+  defaultPageConfig,
+  noDataConfigOverride,
+  onboardingHref,
+}: {
+  hasData: boolean;
+  loading: boolean;
+  defaultCardConfig?: Pick<EuiCardProps, 'title' | 'description'>;
+  defaultPageConfig?: Pick<NoDataPageProps, 'pageTitle' | 'pageDescription' | 'docsLink'>;
+  noDataConfigOverride?: NoDataConfig;
+  onboardingHref?: string;
+}): NoDataConfig | undefined => {
+  if (hasData || loading) {
+    return;
+  }
+
+  return (
+    noDataConfigOverride &&
+    getNoDataConfigDetails({ card: defaultCardConfig, page: defaultPageConfig, onboardingHref })
+  );
+};
+
+export const MetricsPageTemplate = ({
   'data-test-subj': _dataTestSubj,
+  dataAvailabilityModules,
+  onboardingFlow = 'infra',
+  noDataConfig: noDataConfigOverride,
   ...pageTemplateProps
+}: LazyObservabilityPageTemplateProps & {
+  dataAvailabilityModules?: string[];
+  onboardingFlow?: 'infra' | 'logs';
 }) => {
   const {
     services: {
@@ -37,26 +72,35 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
   } = useKibanaContextForPlugin();
 
   const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
-  const href = onboardingLocator?.getRedirectUrl({ category: 'infra' });
+  const href = onboardingLocator?.getRedirectUrl({ category: onboardingFlow });
+
   const { source, error: sourceError, loadSource, isLoading } = useSourceContext();
   const { error: dataViewLoadError, refetch: loadDataView } = useMetricsDataViewContext();
-  const { remoteClustersExist, metricIndicesExist } = source?.status ?? {};
+  const { remoteClustersExist } = source?.status ?? {};
 
-  const noDataConfig: NoDataConfig | undefined = metricIndicesExist
-    ? undefined
-    : {
-        solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
-          defaultMessage: 'Observability',
-        }),
-        action: {
-          beats: {
-            title: noMetricIndicesPromptPrimaryActionTitle,
-            description: noMetricIndicesPromptDescription,
-            href,
-          },
-        },
-        docsLink: docLinks.links.observability.guide,
-      };
+  const { data, status } = useFetcher(async (callApi) => {
+    return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
+      method: 'GET',
+      query: {
+        modules: dataAvailabilityModules,
+      },
+    });
+  });
+
+  const hasData = !!data?.hasData;
+  const noDataConfig = getNoDataConfig({
+    hasData,
+    loading: isPending(status),
+    defaultCardConfig: {
+      title: noMetricIndicesPromptTitle,
+      description: noMetricIndicesPromptDescription,
+    },
+    defaultPageConfig: {
+      docsLink: docLinks.links.observability.guide,
+    },
+    noDataConfigOverride,
+    onboardingHref: href,
+  });
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
@@ -70,7 +114,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
         },
       ],
       starterPrompts: [
-        ...(!metricIndicesExist
+        ...(!hasData
           ? [
               {
                 title: i18n.translate(
@@ -91,11 +135,9 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
           : []),
       ],
     });
-  }, [metricIndicesExist, setScreenContext, source]);
+  }, [hasData, setScreenContext, source]);
 
-  if (isLoading && !source) return <SourceLoadingPage />;
-
-  if (!remoteClustersExist) {
+  if (!isLoading && !remoteClustersExist) {
     return <NoRemoteCluster />;
   }
 
@@ -121,7 +163,7 @@ export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> =
 
   return (
     <PageTemplate
-      data-test-subj={metricIndicesExist ? _dataTestSubj : 'noDataPage'}
+      data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
       noDataConfig={noDataConfig}
       {...pageTemplateProps}
     />

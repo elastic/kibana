@@ -18,7 +18,7 @@ import { InfraLoadingPanel } from '../../../components/loading';
 import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { MetricsPageTemplate } from '../page_template';
+import { MetricsPageTemplate } from '../templates/page_template';
 
 export const MetricDetailPage = () => {
   const {

@@ -16,7 +16,7 @@ import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
-import { MetricsPageTemplate } from '../page_template';
+import { MetricsPageTemplate } from '../templates/page_template';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';

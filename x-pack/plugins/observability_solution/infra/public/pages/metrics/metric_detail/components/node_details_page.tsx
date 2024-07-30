@@ -22,7 +22,7 @@ import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
 import { MetadataContext } from '../containers/metadata_context';
-import { MetricsPageTemplate } from '../../page_template';
+import { MetricsPageTemplate } from '../../templates/page_template';
 
 interface Props {
   name: string;

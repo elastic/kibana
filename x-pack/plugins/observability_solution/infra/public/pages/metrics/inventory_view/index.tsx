@@ -11,7 +11,7 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { MetricsPageTemplate } from '../page_template';
+import { MetricsPageTemplate } from '../templates/page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
