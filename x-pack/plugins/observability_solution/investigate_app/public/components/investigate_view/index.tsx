@@ -7,7 +7,6 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -39,8 +38,7 @@ const gridContainerClassName = css`
 
 const sideBarClassName = css`
   width: 240px;
-  position: sticky;
-  top: 0;
+  max-width: 240px;
   padding: 0px 12px 32px 12px;
 `;
 
@@ -164,11 +162,11 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   }
 
   return (
-    <EuiFlexGroup direction="row" className={containerClassName}>
-      <EuiFlexItem grow className={scrollContainerClassName}>
-        <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexEnd">
+    <EuiFlexGroup direction="row">
+      <EuiFlexItem grow={8}>
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem className={searchBarContainerClassName}>
+            <EuiFlexItem>
               <InvestigateSearchBar
                 rangeFrom={range.from}
                 rangeTo={range.to}
@@ -193,7 +191,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
               />
             </EuiFlexItem>
 
-            <EuiFlexItem className={gridContainerClassName} grow={false}>
+            <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
                 items={gridItems}
                 onItemsChange={async (nextGridItems) => {
@@ -233,17 +231,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AddNoteUI
-                user={user}
-                filters={revision.parameters.filters}
-                timeRange={revision.parameters.timeRange}
-                onWidgetAdd={(widget) => {
-                  return createWidgetRef.current(widget);
-                }}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
+
           <AddObservationUI
             filters={revision.parameters.filters}
             timeRange={revision.parameters.timeRange}
@@ -254,11 +243,15 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} className={sideBarClassName}>
-        {i18n.translate(
-          'xpack.investigateApp.investigateViewWithUser.placeholderForRightSidebarFlexItemLabel',
-          { defaultMessage: 'placeholder for right sidebar' }
-        )}
+      <EuiFlexItem grow={2}>
+        <AddNoteUI
+          user={user}
+          filters={revision.parameters.filters}
+          timeRange={revision.parameters.timeRange}
+          onWidgetAdd={(widget) => {
+            return createWidgetRef.current(widget);
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
