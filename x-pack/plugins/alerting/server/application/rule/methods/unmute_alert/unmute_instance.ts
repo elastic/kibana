@@ -5,39 +5,43 @@
  * 2.0.
  */
 
-import { Rule, RawRule } from '../../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { MuteOptions } from '../types';
-import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import Boom from '@hapi/boom';
+import type { Rule } from '../../../../types';
+import type { RulesClientContext } from '../../../../rules_client/types';
+import type { UnmuteAlertParams } from './types';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { unmuteAlertParamsSchema } from './schemas';
+import { updateMeta } from '../../../../rules_client/lib';
+import { updateRuleSo } from '../../../../data/rule';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 
 export async function unmuteInstance(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: MuteOptions
+  params: UnmuteAlertParams
 ): Promise<void> {
+  const ruleId = params.alertId;
+  try {
+    unmuteAlertParamsSchema.validate(params);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate params: ${error.message}`);
+  }
+
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.unmuteInstance('${alertId}')`,
-    async () => await unmuteInstanceWithOCC(context, { alertId, alertInstanceId })
+    `rulesClient.unmuteInstance('${ruleId}')`,
+    async () => await unmuteInstanceWithOCC(context, params)
   );
 }
 
 async function unmuteInstanceWithOCC(
   context: RulesClientContext,
-  {
-    alertId,
-    alertInstanceId,
-  }: {
-    alertId: string;
-    alertInstanceId: string;
-  }
+  { alertId: ruleId, alertInstanceId }: UnmuteAlertParams
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     RULE_SAVED_OBJECT_TYPE,
-    alertId
+    ruleId
   );
 
   try {
@@ -54,7 +58,7 @@ async function unmuteInstanceWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNMUTE_ALERT,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: alertId },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
         error,
       })
     );
@@ -65,7 +69,7 @@ async function unmuteInstanceWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.UNMUTE_ALERT,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: alertId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
     })
   );
 
@@ -73,15 +77,15 @@ async function unmuteInstanceWithOCC(
 
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-    await context.unsecuredSavedObjectsClient.update<RawRule>(
-      RULE_SAVED_OBJECT_TYPE,
-      alertId,
-      updateMeta(context, {
+    await updateRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      savedObjectsUpdateOptions: { version },
+      id: ruleId,
+      updateRuleAttributes: updateMeta(context, {
+        mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
-        mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
       }),
-      { version }
-    );
+    });
   }
 }
