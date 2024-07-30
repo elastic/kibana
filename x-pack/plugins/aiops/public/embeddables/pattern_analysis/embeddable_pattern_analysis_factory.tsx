@@ -131,7 +131,7 @@ export const getPatternAnalysisEmbeddableFactory = (
           ...patternAnalysisControlsApi,
           getTypeDisplayName: () =>
             i18n.translate('xpack.aiops.patternAnalysis.typeDisplayName', {
-              defaultMessage: 'Pattern analysis',
+              defaultMessage: 'pattern analysis',
             }),
           isEditingEnabled: () => true,
           onEdit: async () => {
