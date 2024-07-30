@@ -7,4 +7,3 @@
  */
 
 export { reducerStreamReducer } from './reducer';
-export type { ReducerStreamRequestBodySchema } from '../../../server/routes/schemas/reducer_stream';
