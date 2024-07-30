@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { Connector } from '@kbn/search-connectors/types/connectors';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
+import * as Constants from '../../../../shared/constants';
 import { GenerateConfigButton } from '../../connector_detail/components/generate_config_button';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
 import { DeploymentLogic } from '../../connector_detail/deployment_logic';
@@ -109,7 +110,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.enterpriseSearch.startStep.euiFormRow.connectorLabel',
+                    'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorLabel',
                     { defaultMessage: 'Connector' }
                   )}
                 >
@@ -126,7 +127,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.enterpriseSearch.startStep.euiFormRow.connectorNameLabel',
+                    'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
                     { defaultMessage: 'Connector name' }
                   )}
                 >
@@ -149,7 +150,7 @@ export const StartStep: React.FC<StartStepProps> = ({
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
-                  'xpack.enterpriseSearch.startStep.euiFormRow.descriptionLabel',
+                  'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.descriptionLabel',
                   { defaultMessage: 'Description' }
                 )}
               >
@@ -167,7 +168,7 @@ export const StartStep: React.FC<StartStepProps> = ({
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="s">
               <h4>
-                {i18n.translate('xpack.enterpriseSearch.startStep.h4.setUpLabel', {
+                {i18n.translate('xpack.enterpriseSearch.createConnector.startStep.h4.setUpLabel', {
                   defaultMessage: 'Set up',
                 })}
               </h4>
@@ -175,10 +176,13 @@ export const StartStep: React.FC<StartStepProps> = ({
             <EuiSpacer size="m" />
             <EuiText size="s">
               <p>
-                {i18n.translate('xpack.enterpriseSearch.startStep.p.whereDoYouWantLabel', {
-                  defaultMessage:
-                    'Where do you want to store the connector and how do you want to manage it?',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.createConnector.startStep.p.whereDoYouWantLabel',
+                  {
+                    defaultMessage:
+                      'Where do you want to store the connector and how do you want to manage it?',
+                  }
+                )}
               </p>
             </EuiText>
             <EuiSpacer size="m" />
@@ -187,7 +191,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 <EuiRadio
                   id={elasticManagedRadioButtonId}
                   label={i18n.translate(
-                    'xpack.enterpriseSearch.startStep.euiRadio.elasticManagedLabel',
+                    'xpack.enterpriseSearch.createConnector.startStep.euiRadio.elasticManagedLabel',
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={!selfManaged}
@@ -207,7 +211,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 <EuiRadio
                   id={selfManagedRadioButtonId}
                   label={i18n.translate(
-                    'xpack.enterpriseSearch.startStep.euiRadio.selfManagedLabel',
+                    'xpack.enterpriseSearch.createConnector.startStep.euiRadio.selfManagedLabel',
                     { defaultMessage: 'Self managed' }
                   )}
                   checked={selfManaged}
@@ -235,9 +239,12 @@ export const StartStep: React.FC<StartStepProps> = ({
                 }
               >
                 <h3>
-                  {i18n.translate('xpack.enterpriseSearch.startStep.h4.deploymentLabel', {
-                    defaultMessage: 'Deployment',
-                  })}
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.startStep.h4.deploymentLabel',
+                    {
+                      defaultMessage: 'Deployment',
+                    }
+                  )}
                 </h3>
               </EuiText>
               <EuiSpacer size="m" />
@@ -248,10 +255,13 @@ export const StartStep: React.FC<StartStepProps> = ({
                 size="s"
               >
                 <p>
-                  {i18n.translate('xpack.enterpriseSearch.startStep.p.youWillStartTheLabel', {
-                    defaultMessage:
-                      'You will start the process of creating a new index, API key, and a Web Crawler Connector ID manually. Optionally you can bring your own configuration as well.',
-                  })}
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.startStep.p.youWillStartTheLabel',
+                    {
+                      defaultMessage:
+                        'You will start the process of creating a new index, API key, and a Web Crawler Connector ID manually. Optionally you can bring your own configuration as well.',
+                    }
+                  )}
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
@@ -261,9 +271,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 fill
                 disabled={connectorSelected.name === '' || connectorName === ''}
               >
-                {i18n.translate('xpack.enterpriseSearch.startStep.nextButtonLabel', {
-                  defaultMessage: 'Next',
-                })}
+                {Constants.NEXT_BUTTON_LABEL}
               </EuiButton>
             </EuiPanel>
           </EuiFlexItem>
@@ -281,9 +289,12 @@ export const StartStep: React.FC<StartStepProps> = ({
                 }
               >
                 <h3>
-                  {i18n.translate('xpack.enterpriseSearch.startStep.h4.configureIndexAndAPILabel', {
-                    defaultMessage: 'Configure index and API key',
-                  })}
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.startStep.h4.configureIndexAndAPILabel',
+                    {
+                      defaultMessage: 'Configure index and API key',
+                    }
+                  )}
                 </h3>
               </EuiText>
               <EuiSpacer size="m" />
@@ -294,10 +305,13 @@ export const StartStep: React.FC<StartStepProps> = ({
                 size="s"
               >
                 <p>
-                  {i18n.translate('xpack.enterpriseSearch.startStep.p.thisProcessWillCreateLabel', {
-                    defaultMessage:
-                      'This process will create a new index, API key, and a Connector ID. Optionally you can bring your own configuration as well.',
-                  })}
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.startStep.p.thisProcessWillCreateLabel',
+                    {
+                      defaultMessage:
+                        'This process will create a new index, API key, and a Connector ID. Optionally you can bring your own configuration as well.',
+                    }
+                  )}
                 </p>
               </EuiText>
               <EuiSpacer size="m" />
@@ -320,10 +334,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     fill
                     onClick={() => setCurrentStep(currentStep + 1)}
                   >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.startStep.generateConfigurationButtonLabel',
-                      { defaultMessage: 'Continue' }
-                    )}
+                    {Constants.NEXT_BUTTON_LABEL}
                   </EuiButton>
                 </>
               ) : (

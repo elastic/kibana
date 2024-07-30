@@ -193,6 +193,58 @@ export const INFERENCE_ENDPOINTS_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const CREATE_CONNECTOR_PLUGIN = {
+  CLI_SNIPPET: `#Create an index
+PUT /my-index-000001
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 3,  
+      "number_of_replicas": 2 
+    }
+  }
+}
+
+# Create an API key
+POST /_security/api_key
+{   
+  "name": "my-api-key",   
+  "expiration": "1d",      
+  "role_descriptors": 
+    {
+       "role-a": {       
+          "cluster": ["all"],
+            "indices": [
+                          {           
+                            "names": ["index-a*"],
+                             "privileges": ["read"]
+                          }       
+                        ]     
+                          }, 
+                            "role-b": {  
+                            "cluster": ["all"],       
+                            "indices": [ 
+                              { 
+                                "names": ["index-b*"],
+                                  "privileges": ["all"]
+                              }]     
+                            }   
+                          }, "metadata": 
+                          {  "application": "my-application",     
+                             "environment": { 
+                              "level": 1,        
+                              "trusted": true,        
+                              "tags": ["dev", "staging"]     
+                          }  
+      }
+  }`,
+  CONSOLE_SNIPPET: `./bin/connectors connector create \  
+  --index-name my-index \    
+  --index-language en \  
+  --from-file config.yml
+  `,
+};
+
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
 
 export const JSON_HEADER = {

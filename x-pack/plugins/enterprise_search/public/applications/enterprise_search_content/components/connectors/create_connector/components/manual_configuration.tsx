@@ -36,6 +36,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { CREATE_CONNECTOR_PLUGIN } from '../../../../../../../common/constants';
 import { KibanaDeps } from '../../../../../../../common/types';
 
 import { AttachIndexBox } from '../../../connector_detail/attach_index_box';
@@ -73,41 +74,46 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
-  const cliCode = `./bin/connectors connector create \  
---index-name my-index \    
---index-language en \  
---from-file config.yml
-`;
+  const cliCode = CREATE_CONNECTOR_PLUGIN.CLI_SNIPPET;
 
   const flyoutCliContent: React.FC = () => (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={simpleFlyoutTitleId}>
-            {i18n.translate('xpack.enterpriseSearch.manualConfiguration.h2.cliLabel', {
-              defaultMessage: 'CLI',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.createConnector.manualConfiguration.h2.cliLabel',
+              {
+                defaultMessage: 'CLI',
+              }
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.enterpriseSearch.manualConfiguration.p.youCanAlsoUseLabel', {
-              defaultMessage: 'You can also use the',
-            })}{' '}
+            {i18n.translate(
+              'xpack.enterpriseSearch.createConnector.manualConfiguration.p.youCanAlsoUseLabel',
+              {
+                defaultMessage: 'You can also use the',
+              }
+            )}{' '}
             <EuiLink
               data-test-subj="enterpriseSearchManualConfigurationConnectorsCliLink"
               href="https://github.com/elastic/connectors/blob/main/docs/CLI.md"
               target="_blank"
               external
             >
-              {i18n.translate('xpack.enterpriseSearch.manualConfiguration.connectorsCLILinkLabel', {
-                defaultMessage: 'connectors CLI',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorsCLILinkLabel',
+                {
+                  defaultMessage: 'connectors CLI',
+                }
+              )}
             </EuiLink>{' '}
             {i18n.translate(
-              'xpack.enterpriseSearch.manualConfiguration.p.commandlineInterfaceTheFollowingLabel',
+              'xpack.enterpriseSearch.createConnector.manualConfiguration.p.commandlineInterfaceTheFollowingLabel',
               {
                 defaultMessage:
                   'command-line interface. The following command creates a new connector attached to the',
@@ -133,27 +139,30 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={simpleFlyoutTitleId}>
-            {i18n.translate('xpack.enterpriseSearch.manualConfiguration.h2.cliLabel', {
-              defaultMessage: 'Manual configuration',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.createConnector.manualConfiguration.h2.cliLabel',
+              {
+                defaultMessage: 'Manual configuration',
+              }
+            )}
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.flyoutManualConfigContent.p.thisManualOptionIsLabel',
+              'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel',
               { defaultMessage: 'This manual option is an alternative to the' }
             )}
             <b>
               {' '}
               {i18n.translate(
-                'xpack.enterpriseSearch.flyoutManualConfigContent.p.thisManualOptionIsLabel',
+                'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel',
                 { defaultMessage: 'Generate configuration' }
               )}
             </b>{' '}
             {i18n.translate(
-              'xpack.enterpriseSearch.flyoutManualConfigContent.p.optionWhichCreatesALabel',
+              'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.optionWhichCreatesALabel',
               { defaultMessage: 'option which creates a new index and API key automatically.' }
             )}
           </p>
@@ -164,16 +173,19 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
           <EuiPanel hasBorder>
             <EuiTitle size="s">
               <h3>
-                {i18n.translate('xpack.enterpriseSearch.manualConfiguration.connectorName', {
-                  defaultMessage: 'Connector',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName',
+                  {
+                    defaultMessage: 'Connector',
+                  }
+                )}
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               fullWidth
               label={i18n.translate(
-                'xpack.enterpriseSearch.startStep.euiFormRow.connectorNameLabel',
+                'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
                 { defaultMessage: 'Connector name' }
               )}
               helpText="Names should be lowercase and cannot contain spaces or special characters."
@@ -201,20 +213,23 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
           <EuiPanel hasBorder>
             <EuiTitle size="s">
               <h3>
-                {i18n.translate('xpack.enterpriseSearch.manualConfiguration.connectorName', {
-                  defaultMessage: 'Bring your API key',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName',
+                  {
+                    defaultMessage: 'Bring your API key',
+                  }
+                )}
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               fullWidth
               helpText={i18n.translate(
-                'xpack.enterpriseSearch.startStep.euiFormRow.connectorNameLabel',
+                'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
                 { defaultMessage: 'If no API key is provided, one will be generated for you.' }
               )}
               label={i18n.translate(
-                'xpack.enterpriseSearch.startStep.euiFormRow.connectorNameLabel',
+                'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
                 { defaultMessage: 'API key name' }
               )}
             >
@@ -234,9 +249,12 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
               target="_blank"
               external
             >
-              {i18n.translate('xpack.enterpriseSearch.manualConfiguration.createAPIKey', {
-                defaultMessage: 'Manage API key',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.manualConfiguration.createAPIKey',
+                {
+                  defaultMessage: 'Manage API key',
+                }
+              )}
             </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
@@ -251,7 +269,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
               flush="left"
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.flyoutManualConfigContent.closeButtonEmptyLabel',
+                'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.closeButtonEmptyLabel',
                 { defaultMessage: 'Close' }
               )}
             </EuiButtonEmpty>
@@ -272,7 +290,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
               fill
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.flyoutManualConfigContent.saveConfigurationButtonLabel',
+                'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel',
                 { defaultMessage: 'Save configuration' }
               )}
             </EuiButton>
@@ -293,7 +311,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       }}
     >
       {i18n.translate(
-        'xpack.enterpriseSearch.finishUpStep.manageAttachedIndexContextMenuItemLabel',
+        'xpack.enterpriseSearch.createConnector.finishUpStep.manageAttachedIndexContextMenuItemLabel',
         { defaultMessage: 'Manual configuration' }
       )}
     </EuiContextMenuItem>,
@@ -307,53 +325,13 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
         application={services.application}
         sharePlugin={services.share}
         consolePlugin={services.console}
-        content={i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.link', {
-          defaultMessage: `Try in Console`,
-        })}
-        request={`#Create an index
-PUT /my-index-000001
-{
-  "settings": {
-    "index": {
-      "number_of_shards": 3,  
-      "number_of_replicas": 2 
-    }
-  }
-}
-
-# Create an API key
-POST /_security/api_key
-{   
-  "name": "my-api-key",   
-  "expiration": "1d",      
-  "role_descriptors": 
-    {
-       "role-a": {       
-          "cluster": ["all"],
-            "indices": [
-                          {           
-                            "names": ["index-a*"],
-                             "privileges": ["read"]
-                          }       
-                        ]     
-                          }, 
-                            "role-b": {  
-                            "cluster": ["all"],       
-                            "indices": [ 
-                              { 
-                                "names": ["index-b*"],
-                                  "privileges": ["all"]
-                              }]     
-                            }   
-                          }, "metadata": 
-                          {  "application": "my-application",     
-                             "environment": { 
-                              "level": 1,        
-                              "trusted": true,        
-                              "tags": ["dev", "staging"]     
-                          }  
-      }
-  }`}
+        content={i18n.translate(
+          'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel',
+          {
+            defaultMessage: `Try in Console`,
+          }
+        )}
+        request={CREATE_CONNECTOR_PLUGIN.CONSOLE_SNIPPET}
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
@@ -365,9 +343,12 @@ POST /_security/api_key
         closePopover();
       }}
     >
-      {i18n.translate('xpack.enterpriseSearch.finishUpStep.scheduleASyncContextMenuItemLabel', {
-        defaultMessage: 'Try with CLI',
-      })}
+      {i18n.translate(
+        'xpack.enterpriseSearch.createConnector.finishUpStep.scheduleASyncContextMenuItemLabel',
+        {
+          defaultMessage: 'Try with CLI',
+        }
+      )}
     </EuiContextMenuItem>,
   ];
 
@@ -383,7 +364,7 @@ POST /_security/api_key
             size="m"
             iconType="boxesVertical"
             aria-label={i18n.translate(
-              'xpack.enterpriseSearch.finishUpStep.euiButtonIcon.moreLabel',
+              'xpack.enterpriseSearch.createConnector.finishUpStep.euiButtonIcon.moreLabel',
               { defaultMessage: 'More' }
             )}
             onClick={onButtonClick}

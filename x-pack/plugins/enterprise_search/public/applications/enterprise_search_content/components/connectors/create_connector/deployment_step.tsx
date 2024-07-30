@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ConnectorDeployment } from '../../connector_detail/deployment';
+import * as Constants from '../../../../shared/constants';
 
 interface DeploymentStepProps {
   currentStep: number;
@@ -59,9 +60,12 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
           }, 100);
         }}
       >
-        {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
-          defaultMessage: 'Simulate: Connected',
-        })}
+        {i18n.translate(
+          'xpack.enterpriseSearch.createConnector.configurationStep.button.simulateSave',
+          {
+            defaultMessage: 'Simulate: Connected',
+          }
+        )}
       </EuiButtonEmpty>
       <EuiFlexItem>
         <EuiPanel
@@ -72,17 +76,23 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
         >
           <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
             <h3>
-              {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.title', {
-                defaultMessage: 'Configuration',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.title',
+                {
+                  defaultMessage: 'Configuration',
+                }
+              )}
             </h3>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiText color={isNextStepEnabled ? 'default' : 'subdued'} size="s">
             <p>
-              {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.description', {
-                defaultMessage: 'Now configure your Elastic crawler and sync the data.',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.description',
+                {
+                  defaultMessage: 'Now configure your Elastic crawler and sync the data.',
+                }
+              )}
             </p>
           </EuiText>
           <EuiSpacer size="m" />
@@ -92,9 +102,7 @@ export const DeploymentStep: React.FC<DeploymentStepProps> = ({
             fill
             disabled={!isNextStepEnabled}
           >
-            {i18n.translate('xpack.enterpriseSearch.DeploymentStep.Configuration.button.continue', {
-              defaultMessage: 'Continue',
-            })}
+            {Constants.NEXT_BUTTON_LABEL}
           </EuiButton>
         </EuiPanel>
       </EuiFlexItem>

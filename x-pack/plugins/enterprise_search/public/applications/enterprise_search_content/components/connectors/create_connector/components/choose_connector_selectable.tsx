@@ -52,7 +52,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         append.push(
           <EuiBadge iconType="beaker" color="hollow">
             {i18n.translate(
-              'xpack.enterpriseSearch.chooseConnectorSelectable.thechPreviewBadgeLabel',
+              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.thechPreviewBadgeLabel',
               { defaultMessage: 'Tech preview' }
             )}
           </EuiBadge>
@@ -61,9 +61,12 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
       if (connector.isBeta) {
         append.push(
           <EuiBadge iconType={'beta'} color="hollow">
-            {i18n.translate('xpack.enterpriseSearch.chooseConnectorSelectable.BetaBadgeLabel', {
-              defaultMessage: 'Beta',
-            })}
+            {i18n.translate(
+              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.BetaBadgeLabel',
+              {
+                defaultMessage: 'Beta',
+              }
+            )}
           </EuiBadge>
         );
       }
@@ -71,7 +74,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
         append.push(
           <EuiBadge iconType={'warning'} color="warning">
             {i18n.translate(
-              'xpack.enterpriseSearch.chooseConnectorSelectable.OnlySelfManagedBadgeLabel',
+              'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.OnlySelfManagedBadgeLabel',
               {
                 defaultMessage: 'Self managed',
               }
@@ -117,7 +120,7 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
 
       <EuiSelectable
         aria-label={i18n.translate(
-          'xpack.enterpriseSearch.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
+          'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiSelectable.selectableInputPopoverLabel',
           { defaultMessage: 'Selectable + input popover example' }
         )}
         css={css`

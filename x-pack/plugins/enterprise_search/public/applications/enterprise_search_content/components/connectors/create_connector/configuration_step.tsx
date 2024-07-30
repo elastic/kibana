@@ -24,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
 import { Connector } from '@kbn/search-connectors/types/connectors';
 
+import * as Constants from '../../../../shared/constants';
+
 interface ConfigurationStepProps {
   connector: Connector;
   currentStep: number;
@@ -82,9 +84,12 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
                 }, 100);
               }}
             >
-              {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
-                defaultMessage: 'Simulates: Save',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.configurationStep.button.simulateSave',
+                {
+                  defaultMessage: 'Simulates: Save',
+                }
+              )}
             </EuiButtonEmpty>
             <EuiButtonEmpty
               size="s"
@@ -100,9 +105,12 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
                 }, 100);
               }}
             >
-              {i18n.translate('xpack.enterpriseSearch.configurationStep.button.simulateSave', {
-                defaultMessage: 'Simulates: Save and sync',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.createConnector.configurationStep.button.simulateSave',
+                {
+                  defaultMessage: 'Simulates: Save and sync',
+                }
+              )}
             </EuiButtonEmpty>
             {syncing && (
               <EuiProgress size="xs" position="absolute" style={{ top: 'calc(100% - 2px)' }} />
@@ -118,18 +126,24 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
           >
             <EuiText color={isNextStepEnabled ? 'default' : 'subdued'}>
               <h3>
-                {i18n.translate('xpack.enterpriseSearch.configurationStep.h4.finishUpLabel', {
-                  defaultMessage: 'Finish up',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.createConnector.configurationStep.h4.finishUpLabel',
+                  {
+                    defaultMessage: 'Finish up',
+                  }
+                )}
               </h3>
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText color={isNextStepEnabled ? 'default' : 'subdued'} size="s">
               <p>
-                {i18n.translate('xpack.enterpriseSearch.configurationStep.p.description', {
-                  defaultMessage:
-                    'You can manually sync your data, schedule a recurring sync or manage your domains.',
-                })}
+                {i18n.translate(
+                  'xpack.enterpriseSearch.createConnector.configurationStep.p.description',
+                  {
+                    defaultMessage:
+                      'You can manually sync your data, schedule a recurring sync or manage your domains.',
+                  }
+                )}
               </p>
             </EuiText>
             <EuiSpacer size="m" />
@@ -139,9 +153,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
               fill
               disabled={!isNextStepEnabled}
             >
-              {i18n.translate('xpack.enterpriseSearch.configurationStep.button', {
-                defaultMessage: 'Continue',
-              })}
+              {Constants.NEXT_BUTTON_LABEL}
             </EuiButton>
           </EuiPanel>
         </EuiFlexItem>

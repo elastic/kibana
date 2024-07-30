@@ -33,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
+import * as Constants from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
@@ -58,47 +59,47 @@ export const CreateConnector: React.FC = () => {
   if (connector) {
     connector.status = 'created' as ConnectorStatus;
     connector.api_key_id = '123';
-    connector.api_key_secret_id = '456';
-    // connector.configuration = {};
-    connector.custom_scheduling = {};
-    connector.description = 'Example connector';
-    connector.error = null;
-    connector.features = {};
-    connector.filtering = [];
-    connector.id = '789';
-    connector.index_name = 'example_index';
-    connector.is_native = true;
-    connector.language = 'en';
-    connector.last_access_control_sync_error = null;
-    connector.last_access_control_sync_scheduled_at = null;
-    connector.last_access_control_sync_status = null;
-    connector.last_deleted_document_count = 10;
-    connector.last_incremental_sync_scheduled_at = null;
-    connector.last_indexed_document_count = 20;
-    connector.last_seen = null;
-    connector.last_sync_error = null;
-    connector.last_sync_scheduled_at = null;
-    connector.last_sync_status = null;
-    connector.last_synced = null;
-    connector.name = 'My Connector';
-    connector.pipeline = null;
-    connector.scheduling = {
-      access_control: {
-        enabled: false,
-        interval: '',
-      },
-      full: {
-        enabled: false,
-        interval: '',
-      },
-      incremental: {
-        enabled: false,
-        interval: '',
-      },
-    };
-    connector.service_type = 'service';
-    connector.status = 'active' as ConnectorStatus;
-    connector.sync_now = false;
+    // connector.api_key_secret_id = '456';
+    // // connector.configuration = {};
+    // connector.custom_scheduling = {};
+    // connector.description = 'Example connector';
+    // connector.error = null;
+    // connector.features = {};
+    // connector.filtering = [];
+    // connector.id = '789';
+    // connector.index_name = 'example_index';
+    // connector.is_native = true;
+    // connector.language = 'en';
+    // connector.last_access_control_sync_error = null;
+    // connector.last_access_control_sync_scheduled_at = null;
+    // connector.last_access_control_sync_status = null;
+    // connector.last_deleted_document_count = 10;
+    // connector.last_incremental_sync_scheduled_at = null;
+    // connector.last_indexed_document_count = 20;
+    // connector.last_seen = null;
+    // connector.last_sync_error = null;
+    // connector.last_sync_scheduled_at = null;
+    // connector.last_sync_status = null;
+    // connector.last_synced = null;
+    // connector.name = 'My Connector';
+    // connector.pipeline = null;
+    // connector.scheduling = {
+    //   access_control: {
+    //     enabled: false,
+    //     interval: '',
+    //   },
+    //   full: {
+    //     enabled: false,
+    //     interval: '',
+    //   },
+    //   incremental: {
+    //     enabled: false,
+    //     interval: '',
+    //   },
+    // };
+    // connector.service_type = 'service';
+    // connector.status = 'active' as ConnectorStatus;
+    // connector.sync_now = false;
   }
   useEffect(() => {
     fetchConnector({ connectorId: 'eIwou5AB7hZjs4c7Qmm4' });
@@ -370,21 +371,17 @@ export const CreateConnector: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
         ...connectorsBreadcrumbs,
-        i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.breadcrumb', {
+        i18n.translate('xpack.enterpriseSearch.createConnector..breadcrumb', {
           defaultMessage: 'New connector',
         }),
       ]}
       pageViewTelemetry="create_connector"
       isLoading={false}
       pageHeader={{
-        description: i18n.translate(
-          'xpack.enterpriseSearch.content.indices.selectConnector.description',
-          {
-            defaultMessage:
-              'Extract, transform, index and sync data from a third-party data source.',
-          }
-        ),
-        pageTitle: i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.title', {
+        description: i18n.translate('xpack.enterpriseSearch.createConnector.description', {
+          defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
+        }),
+        pageTitle: i18n.translate('xpack.enterpriseSearch.createConnector..title', {
           defaultMessage: 'Create a connector',
         }),
       }}
@@ -415,9 +412,7 @@ export const CreateConnector: React.FC = () => {
                     size="s"
                     onClick={() => updateStep('back')}
                   >
-                    {i18n.translate('xpack.enterpriseSearch.createConnector.backButtonEmptyLabel', {
-                      defaultMessage: 'Back',
-                    })}
+                    {Constants.BACK_BUTTON_LABEL}
                   </EuiButtonEmpty>
                 </EuiFlexGroup>
                 <EuiSpacer size="xl" />
