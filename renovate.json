@@ -75,7 +75,7 @@
       "matchDepNames": ["@redocly/cli"],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "Team:Core", "backport:all-open"],
+      "labels": ["release_note:skip", "Team:Core", "backport:skip"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
