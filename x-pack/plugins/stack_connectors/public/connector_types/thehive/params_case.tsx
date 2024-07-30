@@ -23,10 +23,6 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
   errors,
   messageVariables,
 }) => {
-  const [severity, setSeverity] = useState(severityOptions[1].value);
-  const [tlp, setTlp] = useState(tlpOptions[2].value);
-  const [selectedOptions, setSelected] = useState<Array<{ label: string }>>([]);
-
   const { incident, comments } = useMemo(
     () =>
       (actionParams.subActionParams as ExecutorSubActionPushParams) ??
@@ -39,6 +35,12 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         comments: [],
       } as unknown as ExecutorSubActionPushParams),
     [actionParams.subActionParams]
+  );
+
+  const [severity, setSeverity] = useState(incident.severity ?? severityOptions[1].value);
+  const [tlp, setTlp] = useState(incident.tlp ?? tlpOptions[2].value);
+  const [selectedOptions, setSelected] = useState<Array<{ label: string }>>(
+    incident.tags?.map((tag) => ({ label: tag })) ?? []
   );
 
   const editSubActionProperty = useCallback(
@@ -133,10 +135,10 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         <EuiComboBox
           data-test-subj="tagsInput"
           fullWidth
-          placeholder={translations.TAGS_PLACEHOLDER}
           selectedOptions={selectedOptions}
           onCreateOption={onCreateOption}
           onChange={onChange}
+          noSuggestions
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables

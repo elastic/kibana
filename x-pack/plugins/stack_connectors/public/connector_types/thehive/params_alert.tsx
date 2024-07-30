@@ -23,10 +23,6 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
   errors,
   messageVariables,
 }) => {
-  const [severity, setSeverity] = useState(severityOptions[1].value);
-  const [tlp, setTlp] = useState(tlpOptions[2].value);
-  const [selectedOptions, setSelected] = useState<Array<{ label: string }>>([]);
-
   const alert = useMemo(
     () =>
       (actionParams.subActionParams as ExecutorSubActionCreateAlertParams) ??
@@ -36,6 +32,12 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         tags: [],
       } as unknown as ExecutorSubActionCreateAlertParams),
     [actionParams.subActionParams]
+  );
+
+  const [severity, setSeverity] = useState(alert.severity ?? severityOptions[1].value);
+  const [tlp, setTlp] = useState(alert.tlp ?? tlpOptions[2].value);
+  const [selectedOptions, setSelected] = useState<Array<{ label: string }>>(
+    alert.tags?.map((tag) => ({ label: tag })) ?? []
   );
 
   const onCreateOption = (searchValue: string) => {
@@ -179,10 +181,10 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         <EuiComboBox
           data-test-subj="tagsInput"
           fullWidth
-          placeholder={translations.TAGS_PLACEHOLDER}
           selectedOptions={selectedOptions}
           onCreateOption={onCreateOption}
           onChange={onChange}
+          noSuggestions
         />
       </EuiFormRow>
     </>
