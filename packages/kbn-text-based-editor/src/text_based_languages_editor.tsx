@@ -469,8 +469,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               abortController
             ).result;
             const columns =
-              // Forcing esType! here because esType will never be undefined
-              table?.columns.map((c) => ({ name: c.name, type: c.meta.esType! })) || [];
+              table?.columns.map((c) => ({ name: c.name, type: c.meta.esType ?? 'unknown' })) || [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
