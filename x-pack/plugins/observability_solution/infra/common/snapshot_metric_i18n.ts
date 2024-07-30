@@ -141,17 +141,17 @@ export const toMetricOpt = (
           : TranslationsLowercase.OutboundTraffic,
         value: 'tx',
       };
-    case 'rxNew':
+    case 'rxV2':
       return {
         text: Translations.InboundTraffic,
         textLC: TranslationsLowercase.InboundTraffic,
-        value: 'rxNew',
+        value: 'rxV2',
       };
-    case 'txNew':
+    case 'txV2':
       return {
         text: Translations.OutboundTraffic,
         textLC: TranslationsLowercase.OutboundTraffic,
-        value: 'txNew',
+        value: 'txV2',
       };
     case 'logRate':
       return {

@@ -6,10 +6,10 @@
  */
 
 import { MetricsUIAggregation } from '../../../types';
-export const rxNew: MetricsUIAggregation = {
-  rx_sum: {
+export const txV2: MetricsUIAggregation = {
+  tx_sum: {
     sum: {
-      field: 'host.network.ingress.bytes',
+      field: 'host.network.egress.bytes',
     },
   },
   min_timestamp: {
@@ -22,10 +22,10 @@ export const rxNew: MetricsUIAggregation = {
       field: '@timestamp',
     },
   },
-  rxNew: {
+  txV2: {
     bucket_script: {
       buckets_path: {
-        value: 'rx_sum',
+        value: 'tx_sum',
         minTime: 'min_timestamp',
         maxTime: 'max_timestamp',
       },

@@ -16,8 +16,8 @@ export const InfraMetricTypeRT = rt.keyof({
   memoryFree: null,
   rx: null,
   tx: null,
-  rxNew: null,
-  txNew: null,
+  rxV2: null,
+  txV2: null,
 });
 
 export const RangeRT = rt.type({

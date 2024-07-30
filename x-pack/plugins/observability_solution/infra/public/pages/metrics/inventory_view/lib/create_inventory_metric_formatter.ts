@@ -65,8 +65,8 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
   rx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   tx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
-  rxNew: { formatter: InfraFormatterType.bits, template: '{{value}}' },
-  txNew: { formatter: InfraFormatterType.bits, template: '{{value}}' },
+  rxV2: { formatter: InfraFormatterType.bits, template: '{{value}}' },
+  txV2: { formatter: InfraFormatterType.bits, template: '{{value}}' },
   logRate: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',
