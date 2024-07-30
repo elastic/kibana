@@ -148,6 +148,7 @@ update_step_progress() {
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
+  rm -rf "./${elastic_agent_artifact_name}" "./${elastic_agent_artifact_name}.tar.gz"
   curl -L -O $download_url --silent --fail
 
   if [ "$?" -eq 0 ]; then
