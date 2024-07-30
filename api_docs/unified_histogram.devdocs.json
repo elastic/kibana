@@ -963,9 +963,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
