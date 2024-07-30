@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-execution-context-browser-mocks",
-        "id": "def-common.executionContextServiceMock",
+        "id": "def-public.executionContextServiceMock",
         "type": "Object",
         "tags": [],
         "label": "executionContextServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
-            "id": "def-common.executionContextServiceMock.create",
+            "id": "def-public.executionContextServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -62,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
-            "id": "def-common.executionContextServiceMock.createSetupContract",
+            "id": "def-public.executionContextServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -71,9 +55,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">"
@@ -86,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
-            "id": "def-common.executionContextServiceMock.createStartContract",
+            "id": "def-public.executionContextServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -95,9 +79,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">"
@@ -110,7 +94,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
-            "id": "def-common.executionContextServiceMock.createInternalSetupContract",
+            "id": "def-public.executionContextServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -119,9 +103,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">"
@@ -134,7 +118,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
-            "id": "def-common.executionContextServiceMock.createInternalStartContract",
+            "id": "def-public.executionContextServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -143,9 +127,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">"
@@ -160,5 +144,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }
