@@ -56,7 +56,7 @@ export const Chat = () => {
     handleSubmit,
     getValues,
   } = useFormContext<ChatForm>();
-  const { messages, append, stop: stopRequest, setMessages, reload, error } = useChat();
+  const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const messagesRef = useAutoBottomScroll();
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
