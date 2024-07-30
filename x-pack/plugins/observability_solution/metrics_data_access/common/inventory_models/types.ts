@@ -387,7 +387,7 @@ export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: MetricsUIAggregation | undefined };
   defaultSnapshot: SnapshotMetricType;
-  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
+  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metrics like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;
 }
 

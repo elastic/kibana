@@ -247,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxNew" | "txNew"'
+          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
         );
       });
 
