@@ -6,7 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getOptionalSubAggregation } from '../../../../common/components/alerts_treemap/query';
+import { getOptionalSubAggregation } from '../alerts_treemap_panel/alerts_treemap/query';
 
 export const DEFAULT_STACK_BY_FIELD0_SIZE = 1000;
 export const DEFAULT_STACK_BY_FIELD1_SIZE = 1000;
