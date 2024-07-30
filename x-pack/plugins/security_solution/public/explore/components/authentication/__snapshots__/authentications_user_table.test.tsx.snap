@@ -39,10 +39,6 @@ exports[`Authentication User Table Component rendering it renders the user authe
 
 .c4 {
   margin-top: 4px;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
 }
 
 @media only screen and (min-width:575px) {
@@ -356,7 +352,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
     </table>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-l-flexStart-center-row"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-l-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
