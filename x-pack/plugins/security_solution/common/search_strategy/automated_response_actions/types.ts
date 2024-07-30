@@ -8,7 +8,6 @@
 import type { IEsSearchRequest } from '@kbn/search-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
-import type { LogsEndpointActionWithHosts } from '../../../endpoint/types';
 import type { ResponseActionsQueries } from '.';
 
 export enum SortOrder {
@@ -20,12 +19,4 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   factoryQueryType: ResponseActionsQueries;
 }
 
-export type ResponseActionsSearchHit = estypes.SearchHit<
-  LogsOsqueryAction | LogsEndpointActionWithHosts
->;
-
-export interface Inspect {
-  dsl: string[];
-}
-
-export type Maybe<T> = T | null;
+export type ResponseActionsSearchHit = estypes.SearchHit<LogsOsqueryAction>;

@@ -68,6 +68,13 @@ export const EndpointActionListRequestSchema = {
         schema.string({ minLength: 1 }),
       ])
     ),
+    /** Filter actions by alertIDs (normally stored when an automated response action is executed) */
+    alertIds: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        schema.string({ minLength: 1 }),
+      ])
+    ),
     withOutputs: schema.maybe(
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), {

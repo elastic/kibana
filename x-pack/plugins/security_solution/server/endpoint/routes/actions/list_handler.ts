@@ -56,6 +56,7 @@ export const actionListHandler = (
         startDate,
         endDate,
         userIds,
+        alertIds,
         commands,
         statuses,
         withOutputs,
@@ -101,6 +102,7 @@ export const actionListHandler = (
         startDate,
         endDate,
         userIds: formatRequestParams(userIds),
+        alertIds: formatRequestParams(alertIds),
         logger,
       };
       // wrapper method to branch logic for

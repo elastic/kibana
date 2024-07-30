@@ -36,6 +36,7 @@ export interface FetchActionRequestsOptions {
   commands?: ResponseActionsApiCommandNames[];
   elasticAgentIds?: string[];
   userIds?: string[];
+  alertIds?: string[];
   unExpiredOnly?: boolean;
   types?: ResponseActionType[];
 }
@@ -59,6 +60,7 @@ interface FetchActionRequestsResponse {
  * @param size
  * @param startDate
  * @param userIds
+ * @param alertIds
  * @param unExpiredOnly
  * @param types
  */
@@ -73,6 +75,7 @@ export const fetchActionRequests = async ({
   endDate,
   startDate,
   userIds,
+  alertIds,
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
@@ -92,6 +95,10 @@ export const fetchActionRequests = async ({
 
   if (unExpiredOnly) {
     additionalFilters.push({ range: { expiration: { gte: 'now' } } });
+  }
+
+  if (alertIds?.length) {
+    additionalFilters.push({ terms: { 'data.alert_id': alertIds } });
   }
 
   const must: QueryDslQueryContainer[] = [

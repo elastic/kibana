@@ -37,6 +37,7 @@ interface OptionalFilterParams {
   pageSize?: number;
   startDate?: string;
   userIds?: string[];
+  alertIds?: string[];
   /** Will filter out the action requests so that only those show `expiration` date is greater than now */
   unExpiredOnly?: boolean;
   /** list of action Ids that should have outputs */
@@ -44,6 +45,12 @@ interface OptionalFilterParams {
   /** Include automated response actions */
   types?: string[];
 }
+
+export type GetActionListOptions = OptionalFilterParams & {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  metadataService: EndpointMetadataService;
+};
 
 /**
  * Similar to #getActionList but takes statuses filter options
@@ -66,12 +73,7 @@ export const getActionListByStatus = async ({
   unExpiredOnly = false,
   types,
   withOutputs,
-}: OptionalFilterParams & {
-  statuses: ResponseActionStatus[];
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  metadataService: EndpointMetadataService;
-}): Promise<ActionListApiResponse> => {
+}: GetActionListOptions & { statuses: ResponseActionStatus[] }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
 
@@ -128,14 +130,11 @@ export const getActionList = async ({
   pageSize,
   startDate,
   userIds,
+  alertIds,
   unExpiredOnly = false,
   withOutputs,
   types,
-}: OptionalFilterParams & {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  metadataService: EndpointMetadataService;
-}): Promise<ActionListApiResponse> => {
+}: GetActionListOptions): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
   // # of hits to skip
@@ -153,6 +152,7 @@ export const getActionList = async ({
     size,
     startDate,
     userIds,
+    alertIds,
     unExpiredOnly,
     withOutputs,
     types,
@@ -191,6 +191,7 @@ const getActionDetailsList = async ({
   size,
   startDate,
   userIds,
+  alertIds,
   unExpiredOnly,
   withOutputs,
   types,
@@ -214,6 +215,7 @@ const getActionDetailsList = async ({
       from,
       size,
       userIds,
+      alertIds,
       unExpiredOnly,
       types: types as ResponseActionType[],
       logger,

@@ -6,13 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type {
-  SortOrder,
-  Inspect,
-  Maybe,
-  RequestBasicOptions,
-  ResponseActionsSearchHit,
-} from './types';
+import type { SortOrder, RequestBasicOptions, ResponseActionsSearchHit } from './types';
+
+import type { Inspect, Maybe } from '../common';
 
 export interface ActionRequestOptions extends RequestBasicOptions {
   alertIds: string[];
