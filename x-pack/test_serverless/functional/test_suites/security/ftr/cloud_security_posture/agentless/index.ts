@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud_security_posture', function () {
     this.tags(['cloud_security_posture_agentless']);
-    loadTestFile(require.resolve('./cis_integration_aws'));
-    loadTestFile(require.resolve('./cis_integration_gcp'));
+    loadTestFile(require.resolve('./cis_integration_onboarding_flow'));
+    loadTestFile(require.resolve('./cis_integration_cloud_credentials'));
   });
 }
