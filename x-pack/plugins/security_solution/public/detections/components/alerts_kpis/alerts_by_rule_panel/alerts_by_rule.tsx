@@ -81,11 +81,11 @@ export const AlertsByRule: React.FC<AlertsByRuleProps> = ({ data, isLoading }) =
   };
 
   return (
-    <Wrapper data-test-subj="alerts-by-type">
+    <Wrapper data-test-subj="alerts-by-rule">
       <EuiSpacer size="xs" />
       <TableWrapper className="eui-yScroll">
         <EuiInMemoryTable
-          data-test-subj="alerts-by-type-table"
+          data-test-subj="alerts-by-rule-table"
           columns={COLUMNS}
           items={data}
           loading={isLoading}

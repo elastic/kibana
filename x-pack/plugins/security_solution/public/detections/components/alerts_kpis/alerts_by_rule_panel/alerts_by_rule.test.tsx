@@ -35,10 +35,10 @@ describe('Alert by rule chart', () => {
         </TestProviders>
       );
       expect(
-        container.querySelector('[data-test-subj="alerts-by-type-table"]')
+        container.querySelector('[data-test-subj="alerts-by-rule-table"]')
       ).toBeInTheDocument();
       expect(
-        container.querySelector('[data-test-subj="alerts-by-type-table"] tbody')?.textContent
+        container.querySelector('[data-test-subj="alerts-by-rule-table"] tbody')?.textContent
       ).toEqual('No items found');
     });
   });
