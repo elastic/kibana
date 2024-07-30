@@ -194,10 +194,11 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
           if (res.total === 0) {
             await createBasePrompts(notifications, http);
           }
-        } catch (_) {}
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
 
-      setBasePromptsLoaded(true)
+      setBasePromptsLoaded(true);
     });
     createSecurityPrompts();
   }, [
