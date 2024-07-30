@@ -17,12 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "../tsconfig.json"
-    },
-    {
-      "path": "../../test_serverless/tsconfig.json"
-    },
+    "@kbn/test-suites-serverless",
     "@kbn/expect",
     "@kbn/security-solution-plugin",
     "@kbn/repo-info",
