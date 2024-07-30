@@ -108,7 +108,7 @@ export const LatestFindingsTable = ({
 
     return async (http: HttpSetup) => createDetectionRuleFromBenchmarkRule(http, finding.rule);
   };
-  console.log(rows);
+
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       {error ? (
