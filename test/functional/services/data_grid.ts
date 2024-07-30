@@ -139,6 +139,9 @@ export class DataGridService extends FtrService {
       'euiDataGridCellExpandButton'
     );
     await actionButton.click();
+    await this.retry.waitFor('popover to be opened', async () => {
+      return await this.testSubjects.exists('euiDataGridExpansionPopover');
+    });
   }
 
   /**
