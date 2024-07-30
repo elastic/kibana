@@ -26,7 +26,7 @@ export class EntityClient implements IEntityClient {
       return await this.http.put('/internal/entities/managed/enablement');
     } catch (err) {
       if (err.body?.statusCode === 403) {
-        throw new EntityManagerUnauthorizedError(err.message);
+        throw new EntityManagerUnauthorizedError(err.body.message);
       }
       throw err;
     }
@@ -37,7 +37,7 @@ export class EntityClient implements IEntityClient {
       return await this.http.delete('/internal/entities/managed/enablement');
     } catch (err) {
       if (err.body?.statusCode === 403) {
-        throw new EntityManagerUnauthorizedError(err.message);
+        throw new EntityManagerUnauthorizedError(err.body.message);
       }
       throw err;
     }
