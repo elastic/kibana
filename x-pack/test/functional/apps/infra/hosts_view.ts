@@ -109,7 +109,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
-  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
 
   const pageObjects = getPageObjects([
     'assetDetails',
@@ -201,42 +200,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     describe('#Onboarding', function () {
       before(async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
-
-        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
-        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
-        await metricIndicesInput.type('metrics-apm*');
-
-        await infraSourceConfigurationForm.saveInfraSettings();
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.getInfraMissingMetricsIndicesCallout();
-
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
-
-        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
-        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
-        await metricIndicesInput.type('metrics-*,metricbeat-*');
-
-        await infraSourceConfigurationForm.saveInfraSettings();
-
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.getInfraMissingRemoteClusterIndicesCallout();
       });
 
       it('should show hosts no data page and redirect onboarding page', async () => {
-        await pageObjects.infraHostsView.onboardingPageExists();
-        await pageObjects.infraHostsView.onboardingAddDataClick();
+        await pageObjects.infraHome.noDataPromptExists();
+        await pageObjects.infraHome.noDataPromptAddDataClick();
 
-        const currentUrl = await browser.getCurrentUrl();
-        const parsedUrl = new URL(currentUrl);
-        const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-        const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=logs`;
-        expect(currentUrl).to.equal(expectedUrlPattern);
+        await retry.try(async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=logs`;
+          expect(currentUrl).to.equal(expectedUrlPattern);
+        });
       });
     });
 

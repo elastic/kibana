@@ -33,14 +33,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.exists('infra-beta-badge');
     },
 
-    // Onboarding
-    async onboardingPageExists() {
-      return testSubjects.exists('kbnNoDataPage');
-    },
-    async onboardingAddDataClick() {
-      return testSubjects.click('noDataDefaultFooterAction');
-    },
-
     // Inventory UI
     async clickTryHostViewLink() {
       return testSubjects.click('inventory-hostsView-link');

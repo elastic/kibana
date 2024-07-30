@@ -9,18 +9,18 @@ import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
-import { NoRemoteCluster } from '../../../components/empty_states';
-import { SourceErrorPage } from '../../../components/source_error_page';
+import { NoRemoteCluster } from '../../empty_states';
+import { SourceErrorPage } from '../../source_error_page';
 import { useMetricsDataViewContext, useSourceContext } from '../../../containers/metrics_source';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ErrorCallout } from '../hosts/components/error_callout';
+import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { type OnboardingFlow, getNoDataConfig } from './no_data_config';
+import { OnboardingFlow, getNoDataConfig } from './no_data_config';
 
-export const MetricsPageTemplate = ({
+export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
   dataAvailabilityModules,
-  onboardingFlow = 'infra',
+  onboardingFlow = OnboardingFlow.Infra,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
   dataAvailabilityModules?: string[];

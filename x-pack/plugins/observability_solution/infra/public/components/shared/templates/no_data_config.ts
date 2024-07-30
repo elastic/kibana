@@ -10,13 +10,17 @@ import { i18n } from '@kbn/i18n';
 import type { EuiCardProps } from '@elastic/eui';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import {
-  noMetricIndicesPromptDescription,
-  noMetricIndicesPromptTitle,
-} from '../../../components/empty_states';
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+  type ObservabilityOnboardingLocatorParams,
+} from '@kbn/deeplinks-observability';
+import { noMetricIndicesPromptDescription, noMetricIndicesPromptTitle } from '../../empty_states';
 
-export type OnboardingFlow = 'infra' | 'hosts';
+export enum OnboardingFlow {
+  Infra = 'infra',
+  Hosts = 'logs',
+}
+
 interface NoDataConfigDetails {
   onboardingFlow: OnboardingFlow;
   docsLink?: string;
@@ -27,9 +31,11 @@ const createCardConfig = (
   onboardingFlow: OnboardingFlow,
   locators: LocatorClient
 ): Pick<EuiCardProps, 'title' | 'description' | 'href'> => {
-  const onboardingLocator = locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+  const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
   switch (onboardingFlow) {
-    case 'hosts': {
+    case OnboardingFlow.Hosts: {
       return {
         title: i18n.translate('xpack.infra.hostsViewPage.noData.card.cta', {
           defaultMessage: 'Add data',
@@ -38,14 +44,14 @@ const createCardConfig = (
           defaultMessage:
             'Start collecting data for your hosts to understand metric trends, explore logs and deep insight into their performance',
         }),
-        href: onboardingLocator?.getRedirectUrl({ category: 'logs' }),
+        href: onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
       };
     }
     default: {
       return {
         title: noMetricIndicesPromptTitle,
         description: noMetricIndicesPromptDescription,
-        href: onboardingLocator?.getRedirectUrl({ category: 'infra' }),
+        href: onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
       };
     }
   }
@@ -56,7 +62,7 @@ const createPageConfig = (
   docsLink?: string
 ): Pick<NoDataPageProps, 'pageTitle' | 'pageDescription' | 'docsLink'> | undefined => {
   switch (onboardingFlow) {
-    case 'hosts': {
+    case OnboardingFlow.Hosts: {
       return {
         pageTitle: i18n.translate('xpack.infra.hostsViewPage.noData.page.title', {
           defaultMessage: 'Detect and resolve problems with your hosts',

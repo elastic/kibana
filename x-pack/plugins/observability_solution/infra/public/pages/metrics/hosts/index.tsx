@@ -11,10 +11,11 @@ import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shar
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
+import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { MetricsPageTemplate } from '../templates/page_template';
 import { hostsTitle } from '../../../translations';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostContainer } from './components/hosts_container';
@@ -38,9 +39,9 @@ export const HostsPage = () => {
   return (
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
-        <MetricsPageTemplate
+        <InfraPageTemplate
           dataAvailabilityModules={[SYSTEM_INTEGRATION]}
-          onboardingFlow="hosts"
+          onboardingFlow={OnboardingFlow.Hosts}
           pageHeader={{
             alignItems: 'center',
             pageTitle: (
@@ -77,7 +78,7 @@ export const HostsPage = () => {
           }}
         >
           <HostContainer />
-        </MetricsPageTemplate>
+        </InfraPageTemplate>
       </div>
     </EuiErrorBoundary>
   );
