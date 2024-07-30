@@ -15,6 +15,7 @@ import {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DeepPartial } from '@kbn/utility-types';
@@ -33,6 +34,7 @@ export type ExtraSavedObjectProperties = Pick<
 >;
 
 export type VisualizeRuntimeState = SerializedTitles &
+  SerializedTimeRange &
   Partial<DynamicActionsSerializedState> & {
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;

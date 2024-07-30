@@ -10,7 +10,6 @@ import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { apiPublishesDataView, apiPublishesSettings } from '@kbn/presentation-containers';
@@ -19,10 +18,12 @@ import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
   apiIsOfType,
+  apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   apiPublishesViewMode,
   fetch$,
   getUnchangingComparator,
+  initializeTimeRange,
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -98,7 +99,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const visData$ = new BehaviorSubject<unknown>({});
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
-    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+    const timeRange = initializeTimeRange(state);
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
       expression: '',
     });
@@ -133,6 +134,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const api = buildApi(
       {
+        ...timeRange.api,
         ...titlesApi,
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         defaultPanelTitle,
@@ -164,6 +166,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
           const stateTransferService = embeddableStart.getStateTransfer();
           const visId = savedObjectId$.getValue();
           const editPath = visId ? urlFor(visId) : '#/edit_by_value';
+          const parentTimeRange = apiPublishesTimeRange(parentApi)
+            ? parentApi.timeRange$.getValue()
+            : {};
           await stateTransferService.navigateToEditor('visualize', {
             path: editPath,
             state: {
@@ -172,7 +177,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 savedVis: vis$.getValue().serialize(),
                 title: api.panelTitle?.getValue(),
                 description: api.panelDescription?.getValue(),
-                timeRange: timeRange$.getValue(),
+                timeRange: parentTimeRange,
               },
               originatingApp: parentApiContext?.currentAppId ?? '',
               searchSessionId: searchSessionId$.getValue() || undefined,
@@ -245,6 +250,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       },
       {
         ...titleComparators,
+        ...timeRange.comparators,
         ...(dynamicActionsApi?.dynamicActionsComparator ?? {
           enhancements: getUnchangingComparator(),
         }),
@@ -293,7 +299,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
             const searchSessionId = apiPublishesSearchSession(parentApi)
               ? data.searchSessionId
               : '';
-            timeRange$.next(data.timeRange);
             searchSessionId$.next(searchSessionId);
             const settings = apiPublishesSettings(parentApi)
               ? {
