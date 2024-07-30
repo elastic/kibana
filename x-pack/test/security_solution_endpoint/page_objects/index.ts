@@ -33,6 +33,10 @@ export const pageObjects = {
   trustedApps: TrustedAppsPageProvider,
   artifactEntriesList: ArtifactEntriesListPageProvider,
   fleetIntegrations: FleetIntegrations,
+};
+
+export const svlPageObjects = {
+  ...pageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
 };

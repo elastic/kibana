@@ -8,7 +8,6 @@
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
-import { pageObjects } from '../page_objects';
 import type { TargetTags } from '../target_tags';
 
 export const SUITE_TAGS: Record<
@@ -33,6 +32,7 @@ export const generateConfig = async ({
   kbnServerArgs = [],
   target,
   services,
+  pageObjects,
 }: {
   ftrConfigProviderContext: FtrConfigProviderContext;
   baseConfig: Config;
@@ -41,6 +41,7 @@ export const generateConfig = async ({
   kbnServerArgs?: string[];
   target: keyof typeof SUITE_TAGS;
   services: any;
+  pageObjects: any;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
   // services are not ready yet, so we need to import them here
