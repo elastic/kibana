@@ -21,7 +21,7 @@ interface CreateTestConfigOptions {
 export function createServerlessTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../test_serverless/shared/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
 
     return {
