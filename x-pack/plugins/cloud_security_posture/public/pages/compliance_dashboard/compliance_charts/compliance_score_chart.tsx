@@ -50,11 +50,13 @@ const CounterButtonLink = ({
   text,
   count,
   color,
+  testSubj,
   onClick,
 }: {
   count: number;
   text: string;
   color: EuiTextProps['color'];
+  testSubj: string;
   onClick: EuiLinkButtonProps['onClick'];
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -74,6 +76,7 @@ const CounterButtonLink = ({
       <EuiLink
         color="text"
         onClick={onClick}
+        data-test-subj={testSubj}
         css={css`
           display: flex;
           &:hover {
@@ -148,6 +151,7 @@ const PercentageLabels = ({
           text="Passed Findings"
           count={stats.totalPassed}
           color={statusColors.passed}
+          testSubj="dashboard-summary-passed-findings"
           onClick={() => onEvalCounterClick(RULE_PASSED)}
         />
       </EuiFlexItem>
@@ -156,6 +160,7 @@ const PercentageLabels = ({
           text="Failed Findings"
           count={stats.totalFailed}
           color={statusColors.failed}
+          testSubj="dashboard-summary-failed-findings"
           onClick={() => onEvalCounterClick(RULE_FAILED)}
         />
       </EuiFlexItem>
@@ -257,7 +262,12 @@ const CounterLink = ({
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiLink color="text" onClick={onClick} css={{ display: 'flex' }}>
+      <EuiLink
+        data-test-subj={`compliance-score-section-${text}`}
+        color="text"
+        onClick={onClick}
+        css={{ display: 'flex' }}
+      >
         <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
           <CompactFormattedNumber number={count} abbreviateAbove={999} />
           &nbsp;
