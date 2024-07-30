@@ -24,8 +24,9 @@ import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getQueryWithParams } from './get_query_with_params';
 
-const isMsearchResponseItem = (arg: unknown): arg is estypes.MsearchMultiSearchItem =>
-  isPopulatedObject(arg, ['aggregations']);
+export const isMsearchResponseItemWithAggs = (
+  arg: unknown
+): arg is estypes.MsearchMultiSearchItem => isPopulatedObject(arg, ['aggregations']);
 
 // Filter that includes docs from both the baseline and deviation time range.
 export const getBaselineOrDeviationFilter = (
@@ -147,7 +148,7 @@ export const fetchCategories = async (
   for (const [index, resp] of mSearchResponse.responses.entries()) {
     const fieldName = fieldNames[index];
 
-    if (isMsearchResponseItem(resp)) {
+    if (isMsearchResponseItemWithAggs(resp)) {
       const { aggregations } = resp;
 
       const {
