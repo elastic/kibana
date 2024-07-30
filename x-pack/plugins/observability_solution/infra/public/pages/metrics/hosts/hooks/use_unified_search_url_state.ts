@@ -42,8 +42,7 @@ export type HostsStateAction =
   | { type: 'SET_LIMIT'; limit: number }
   | { type: 'SET_FILTERS'; filters: HostsState['filters'] }
   | { type: 'SET_QUERY'; query: HostsState['query'] }
-  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] }
-  | { type: 'RESET_STATE' };
+  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] };
 
 const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
   switch (action.type) {
@@ -57,8 +56,6 @@ const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
       return { ...state, query: action.query };
     case 'SET_PANEL_FILTERS':
       return { ...state, panelFilters: action.panelFilters };
-    case 'RESET_STATE':
-      return INITIAL_HOSTS_STATE;
     default:
       return state;
   }

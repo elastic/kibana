@@ -6,9 +6,8 @@
  */
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { buildEsQuery, fromKueryExpression, type Query } from '@kbn/es-query';
-import { map, pairwise, skip, startWith, tap } from 'rxjs';
-import { combineLatest } from 'rxjs';
+import { buildEsQuery, Filter, fromKueryExpression, TimeRange, type Query } from '@kbn/es-query';
+import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useSearchSessionContext } from '../../../../hooks/use_search_session';
@@ -18,11 +17,10 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import {
-  HostsSearchPayload,
   useHostsUrlState,
   type HostsState,
   type StringDateRangeTimestamp,
-  type HostsStateAction,
+  StringDateRange,
 } from './use_unified_search_url_state';
 import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 
@@ -61,11 +59,7 @@ export const useUnifiedSearch = () => {
 
   const {
     data: {
-      query: {
-        filterManager: filterManagerService,
-        queryString: queryStringService,
-        timefilter: timeFilterService,
-      },
+      query: { filterManager: filterManagerService, queryString: queryStringService },
     },
     telemetry,
   } = services;
@@ -77,54 +71,52 @@ export const useUnifiedSearch = () => {
     [kibanaQuerySettings]
   );
 
-  const updateSearchState = useCallback(
-    (params?: HostsSearchPayload) => {
-      const actions: HostsStateAction[] = [];
-
-      if (params?.dateRange) {
-        actions.push({ type: 'SET_DATE_RANGE', dateRange: params.dateRange });
-      }
-      if (params?.limit) {
-        actions.push({ type: 'SET_LIMIT', limit: params.limit });
-      }
-      if (params?.filters) {
-        actions.push({ type: 'SET_FILTERS', filters: params.filters });
-      }
-      if (params?.query) {
-        actions.push({ type: 'SET_QUERY', query: params.query });
-      }
-      if (params?.panelFilters) {
-        actions.push({ type: 'SET_PANEL_FILTERS', panelFilters: params.panelFilters });
-      }
-
-      actions.forEach((action) => setSearch(action));
+  const onFiltersChange = useCallback(
+    (filters: Filter[]) => {
+      setSearch({ type: 'SET_FILTERS', filters });
     },
     [setSearch]
   );
 
-  const onSubmit = useCallback(
-    (params?: HostsSearchPayload) => {
+  const onPanelFiltersChange = useCallback(
+    (panelFilters: Filter[]) => {
+      setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
+    },
+    [setSearch]
+  );
+
+  const onLimitChange = useCallback(
+    (limit: number) => {
+      setSearch({ type: 'SET_LIMIT', limit });
+    },
+    [setSearch]
+  );
+
+  const onDateRangeChange = useCallback(
+    (dateRange: StringDateRange) => {
+      setSearch({ type: 'SET_DATE_RANGE', dateRange });
+    },
+    [setSearch]
+  );
+
+  const onQueryChange = useCallback(
+    (query: Query) => {
       try {
-        setError(null);
-        /*
-        / Validates the Search Bar input values before persisting them in the state.
-        / Since the search can be triggered by components that are unaware of the Unified Search state (e.g Controls and Host Limit),
-        / this will always validates the query bar value, regardless of whether it's been sent in the current event or not.
-        */
-        validateQuery(params?.query ?? (queryStringService.getQuery() as Query));
-        updateSearchState(params ?? {});
+        validateQuery(query);
+        setSearch({ type: 'SET_QUERY', query });
       } catch (err) {
-        /*
-        / Persists in the state the params so they can be used in case the query bar is fixed by the user.
-        / This is needed because the Unified Search observables are unnaware of the other componets in the search bar.
-        / Invalid query isn't persisted because it breaks the Control component
-        */
-        const { query, ...validParams } = params ?? {};
-        updateSearchState(validParams ?? {});
         setError(err);
       }
     },
-    [queryStringService, updateSearchState, validateQuery]
+    [validateQuery, setSearch]
+  );
+
+  const onSubmit = useCallback(
+    ({ dateRange }: { dateRange: TimeRange }) => {
+      onDateRangeChange(dateRange);
+      updateSearchSessionId();
+    },
+    [onDateRangeChange, updateSearchSessionId]
   );
 
   const parsedDateRange = useMemo(() => {
@@ -178,43 +170,31 @@ export const useUnifiedSearch = () => {
   });
 
   useEffect(() => {
-    const filters$ = filterManagerService.getUpdates$().pipe(
-      startWith(undefined),
-      map(() => filterManagerService.getFilters())
+    const subscription = new Subscription();
+    subscription.add(
+      filterManagerService
+        .getUpdates$()
+        .pipe(
+          map(() => filterManagerService.getFilters()),
+          tap((filters) => onFiltersChange(filters))
+        )
+        .subscribe()
     );
 
-    const query$ = queryStringService.getUpdates$().pipe(
-      startWith(undefined),
-      map(() => queryStringService.getQuery() as Query)
+    subscription.add(
+      queryStringService
+        .getUpdates$()
+        .pipe(
+          map(() => queryStringService.getQuery() as Query),
+          tap((query) => onQueryChange(query))
+        )
+        .subscribe()
     );
-
-    const subscription = combineLatest({
-      filters: filters$,
-      query: query$,
-    })
-      .pipe(
-        pairwise(),
-        skip(1),
-        tap(([prev, curr]) => {
-          onSubmit(curr);
-          if (prev) {
-            // Prevents this from being called during mouting
-            updateSearchSessionId();
-          }
-        })
-      )
-      .subscribe();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [
-    filterManagerService,
-    onSubmit,
-    queryStringService,
-    timeFilterService.timefilter,
-    updateSearchSessionId,
-  ]);
+  }, [filterManagerService, queryStringService, onQueryChange, onFiltersChange]);
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
@@ -231,6 +211,9 @@ export const useUnifiedSearch = () => {
     parsedDateRange,
     getDateRangeAsTimestamp,
     searchCriteria,
+    onDateRangeChange,
+    onLimitChange,
+    onPanelFiltersChange,
   };
 };
 
