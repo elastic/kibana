@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/core-ui-settings-browser-internal",
   "owner": "@elastic/appex-sharedux"
 }
