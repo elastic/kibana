@@ -9,7 +9,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 
