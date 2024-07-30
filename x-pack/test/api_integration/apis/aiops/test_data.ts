@@ -25,7 +25,49 @@ import {
 
 import type { TestData } from './types';
 
-export const API_VERSIONS: ApiVersion[] = ['2'];
+export const API_VERSIONS: ApiVersion[] = ['2', '3'];
+export const API_VERSIONS_FIELD_CANDIDATES: ApiVersion[] = ['3'];
+
+const expectedEcommerceFieldCandidates = [
+  'category.keyword',
+  'currency',
+  'customer_first_name.keyword',
+  'customer_full_name.keyword',
+  'customer_gender',
+  'customer_id',
+  'customer_last_name.keyword',
+  'customer_phone',
+  'day_of_week',
+  'email',
+  'geoip.city_name',
+  'geoip.continent_name',
+  'geoip.country_iso_code',
+  'geoip.region_name',
+  'manufacturer.keyword',
+  'order_id',
+  'products._id.keyword',
+  'products.category.keyword',
+  'products.manufacturer.keyword',
+  'products.product_name.keyword',
+  'products.sku',
+  'sku',
+  'type',
+  'user',
+];
+
+const expectedArtificialLogsFieldCandidates = {
+  isECS: false,
+  keywordFieldCandidates: ['response_code', 'url', 'user', 'version'],
+  selectedKeywordFieldCandidates: ['response_code', 'url', 'user', 'version'],
+  selectedTextFieldCandidates: [],
+  textFieldCandidates: [],
+};
+
+const expectedArtificialLogsFieldCandidatesWithTextfield = {
+  ...expectedArtificialLogsFieldCandidates,
+  selectedTextFieldCandidates: ['message'],
+  textFieldCandidates: ['message'],
+};
 
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
@@ -76,6 +118,13 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       ],
       groups: [],
       histogramLength: 20,
+      fieldCandidates: {
+        isECS: false,
+        keywordFieldCandidates: expectedEcommerceFieldCandidates,
+        selectedKeywordFieldCandidates: expectedEcommerceFieldCandidates,
+        selectedTextFieldCandidates: [],
+        textFieldCandidates: [],
+      },
     },
   },
   {
@@ -99,6 +148,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: artificialLogSignificantTerms,
       groups: artificialLogsSignificantItemGroups,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -122,6 +172,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: topTerms,
       groups: topTermsGroups,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -145,6 +196,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: topTerms,
       groups: topTermsGroups,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -168,6 +220,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
       groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidatesWithTextfield,
     },
   },
   {
@@ -191,6 +244,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: artificialLogSignificantTerms,
       groups: artificialLogsSignificantItemGroups,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -214,6 +268,7 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
       groups: artificialLogsSignificantItemGroupsTextfield,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidatesWithTextfield,
     },
   },
   {
@@ -237,6 +292,13 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       groups: frequentItemSetsLargeArraysGroups,
       significantItems: frequentItemSetsLargeArraysSignificantItems,
       histogramLength: 1,
+      fieldCandidates: {
+        isECS: false,
+        keywordFieldCandidates: ['items'],
+        selectedKeywordFieldCandidates: ['items'],
+        selectedTextFieldCandidates: [],
+        textFieldCandidates: [],
+      },
     },
   },
 ];
