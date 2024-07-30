@@ -48,7 +48,7 @@ export const ManagedPopover = ({
       }}
     >
       <EuiText size="s">
-        {i18n.translate('managedContentBadge.text', {
+        {i18n.translate('dashboard.managedContentBadge.text', {
           defaultMessage: 'Managed',
         })}
       </EuiText>
@@ -82,14 +82,14 @@ export const ManagedPopover = ({
           >
             {isLoading && <EuiLoadingSpinner size="m" />}
             <EuiText size="s">
-              {i18n.translate('managedContentPopoverFooterText', {
+              {i18n.translate('dashboard.managedContentPopoverFooterText', {
                 defaultMessage: 'Duplicate this dashboard',
               })}
             </EuiText>
           </EuiButton>
           <EuiButtonEmpty onClick={() => setIsPopoverOpen(false)}>
             <EuiText size="s">
-              {i18n.translate('managedContentPopoverFooterCancelText', {
+              {i18n.translate('dashboard.managedContentPopoverFooterCancelText', {
                 defaultMessage: 'Cancel',
               })}
             </EuiText>
