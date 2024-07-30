@@ -141,7 +141,7 @@ describe('autocomplete', () => {
   describe('show', () => {
     testSuggestions('show ', ['INFO']);
     for (const fn of ['info']) {
-      testSuggestions(`show ${fn} `, ['|']);
+      testSuggestions(`show ${fn} `, ['| ']);
     }
   });
 
@@ -176,7 +176,7 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
     ]);
     testSuggestions('from a | where stringField >= stringField ', [
-      '|',
+      '| ',
       ...getFunctionSignaturesByReturnType(
         'where',
         'boolean',
@@ -187,7 +187,7 @@ describe('autocomplete', () => {
       ),
     ]);
     testSuggestions.skip('from a | where stringField =~ stringField ', [
-      '|',
+      '| ',
       ...getFunctionSignaturesByReturnType(
         'where',
         'boolean',
@@ -304,7 +304,7 @@ describe('autocomplete', () => {
     for (const subExpression of subExpressions) {
       testSuggestions(`from a | ${subExpression} grok `, getFieldNamesByType('string'));
       testSuggestions(`from a | ${subExpression} grok stringField `, [constantPattern], ' ');
-      testSuggestions(`from a | ${subExpression} grok stringField ${constantPattern} `, ['|']);
+      testSuggestions(`from a | ${subExpression} grok stringField ${constantPattern} `, ['| ']);
     }
   });
 
@@ -321,7 +321,7 @@ describe('autocomplete', () => {
       testSuggestions(`from a | ${subExpression} dissect stringField `, [constantPattern], ' ');
       testSuggestions(
         `from a | ${subExpression} dissect stringField ${constantPattern} `,
-        ['APPEND_SEPARATOR = $0', '|'],
+        ['APPEND_SEPARATOR = $0', '| '],
         ' '
       );
       testSuggestions(
@@ -330,7 +330,7 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         `from a | ${subExpression} dissect stringField ${constantPattern} append_separator = ":" `,
-        ['|']
+        ['| ']
       );
     }
   });
@@ -340,20 +340,20 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
     ]);
-    testSuggestions('from a | sort stringField ', ['ASC', 'DESC', ',', '|']);
-    testSuggestions('from a | sort stringField desc ', ['NULLS FIRST', 'NULLS LAST', ',', '|']);
+    testSuggestions('from a | sort stringField ', ['ASC', 'DESC', ',', '| ']);
+    testSuggestions('from a | sort stringField desc ', ['NULLS FIRST', 'NULLS LAST', ',', '| ']);
     // @TODO: improve here
     // testSuggestions('from a | sort stringField desc ', ['first', 'last']);
   });
 
   describe('limit', () => {
     testSuggestions('from a | limit ', ['10', '100', '1000']);
-    testSuggestions('from a | limit 4 ', ['|']);
+    testSuggestions('from a | limit 4 ', ['| ']);
   });
 
   describe('mv_expand', () => {
     testSuggestions('from a | mv_expand ', getFieldNamesByType('any'));
-    testSuggestions('from a | mv_expand a ', ['|']);
+    testSuggestions('from a | mv_expand a ', ['| ']);
   });
 
   describe('rename', () => {
@@ -410,7 +410,7 @@ describe('autocomplete', () => {
         testSuggestions(`from a ${prevCommand}| enrich _${mode.toUpperCase()}:`, policyNames, ':');
         testSuggestions(`from a ${prevCommand}| enrich _${camelCase(mode)}:`, policyNames, ':');
       }
-      testSuggestions(`from a ${prevCommand}| enrich policy `, ['ON $0', 'WITH $0', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy `, ['ON $0', 'WITH $0', '| ']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
         'numberField',
@@ -424,28 +424,28 @@ describe('autocomplete', () => {
         '`any#Char$Field`',
         'kubernetes.something.something',
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['WITH $0', ',', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['WITH $0', ',', '| ']);
       testSuggestions(
         `from a ${prevCommand}| enrich policy on b with `,
-        ['var0 =', ...getPolicyFields('policy')],
+        ['var0 = ', ...getPolicyFields('policy')],
         ' '
       );
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 `, ['= $0', ',', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 `, ['= $0', ',', '| ']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = `, [
         ...getPolicyFields('policy'),
       ]);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = stringField `, [
         ',',
-        '|',
+        '| ',
       ]);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = stringField, `, [
-        'var1 =',
+        'var1 = ',
         ...getPolicyFields('policy'),
       ]);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = stringField, var1 `, [
         '= $0',
         ',',
-        '|',
+        '| ',
       ]);
       testSuggestions(
         `from a ${prevCommand}| enrich policy on b with var0 = stringField, var1 = `,
@@ -453,16 +453,20 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         `from a ${prevCommand}| enrich policy with `,
-        ['var0 =', ...getPolicyFields('policy')],
+        ['var0 = ', ...getPolicyFields('policy')],
         ' '
       );
-      testSuggestions(`from a ${prevCommand}| enrich policy with stringField `, ['= $0', ',', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy with stringField `, [
+        '= $0',
+        ',',
+        '| ',
+      ]);
     }
   });
 
   describe('eval', () => {
     testSuggestions('from a | eval ', [
-      'var0 =',
+      'var0 = ',
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
@@ -471,7 +475,7 @@ describe('autocomplete', () => {
         'number',
       ]),
       ',',
-      '|',
+      '| ',
     ]);
     testSuggestions('from index | EVAL stringField not ', ['LIKE $0', 'RLIKE $0', 'IN $0']);
     testSuggestions('from index | EVAL stringField NOT ', ['LIKE $0', 'RLIKE $0', 'IN $0']);
@@ -496,7 +500,7 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
     testSuggestions('from a | eval a=numberField, ', [
-      'var0 =',
+      'var0 = ',
       ...getFieldNamesByType('any'),
       'a',
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
@@ -541,7 +545,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('from a | eval a=round(numberField) ', [
       ',',
-      '|',
+      '| ',
       ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
         'number',
       ]),
@@ -567,7 +571,7 @@ describe('autocomplete', () => {
       ' '
     );
     testSuggestions('from a | eval a=round(numberField),', [
-      'var0 =',
+      'var0 = ',
       ...getFieldNamesByType('any'),
       'a',
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
@@ -595,7 +599,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats avg(numberField) by stringField | eval ',
       [
-        'var0 =',
+        'var0 = ',
         '`avg(numberField)`',
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ],
@@ -607,7 +611,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval abs(numberField) + 1 | eval ',
       [
-        'var0 =',
+        'var0 = ',
         ...getFieldNamesByType('any'),
         '`abs(numberField) + 1`',
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
@@ -617,7 +621,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats avg(numberField) by stringField | eval ',
       [
-        'var0 =',
+        'var0 = ',
         '`avg(numberField)`',
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ],
@@ -629,7 +633,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | stats avg(numberField), avg(kubernetes.something.something) by stringField | eval ',
       [
-        'var0 =',
+        'var0 = ',
         '`avg(numberField)`',
         '`avg(kubernetes.something.something)`',
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
@@ -723,7 +727,7 @@ describe('autocomplete', () => {
       'from a | eval var0 = abs(numberField) | eval abs(var0)',
       [
         ',',
-        '|',
+        '| ',
         ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
           'number',
         ]),
@@ -834,7 +838,7 @@ describe('autocomplete', () => {
         [
           ...dateSuggestions,
           ',',
-          '|',
+          '| ',
           ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
             'number',
           ]),
@@ -843,7 +847,7 @@ describe('autocomplete', () => {
       );
       testSuggestions('from a | eval a = 1 year ', [
         ',',
-        '|',
+        '| ',
         ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
           'time_interval',
         ]),
@@ -853,7 +857,7 @@ describe('autocomplete', () => {
         [
           ...dateSuggestions,
           ',',
-          '|',
+          '| ',
           ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
             'number',
           ]),
@@ -892,7 +896,7 @@ describe('autocomplete', () => {
   });
 
   describe('values suggestions', () => {
-    testSuggestions('FROM "a"', ['a', 'b'], undefined, 7, [
+    testSuggestions('FROM "a"', ['a ', 'b '], undefined, 7, [
       ,
       [
         { name: 'a', hidden: false },
@@ -962,18 +966,16 @@ describe('autocomplete', () => {
     }
     it('should trigger further suggestions for functions', async () => {
       const suggestions = await getSuggestionsFor('from a | eval ');
+      const [expectedWithTrigger, expectedWithoutTrigger] = partition(
+        suggestions,
+        ({ kind, label }) => kind === 'Function' || label === 'var0'
+      );
       // test that all functions will retrigger suggestions
       expect(
-        suggestions
-          .filter(({ kind }) => kind === 'Function')
-          .every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+        expectedWithTrigger.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
       ).toBeTruthy();
       // now test that non-function won't retrigger
-      expect(
-        suggestions
-          .filter(({ kind }) => kind !== 'Function')
-          .every(({ command }) => command == null)
-      ).toBeTruthy();
+      expect(expectedWithoutTrigger.every(({ command }) => command == null)).toBeTruthy();
     });
     it('should trigger further suggestions for commands', async () => {
       const suggestions = await getSuggestionsFor('from a | ');
@@ -1035,7 +1037,7 @@ describe('autocomplete', () => {
     );
 
     // FROM source
-    testSuggestions('FROM k', ['index1', 'index2'], undefined, 6, [
+    testSuggestions('FROM k', ['index1 ', 'index2 '], undefined, 6, [
       ,
       [
         { name: 'index1', hidden: false },
@@ -1044,7 +1046,7 @@ describe('autocomplete', () => {
     ]);
 
     // FROM source METADATA
-    testSuggestions('FROM index1 M', [',', 'METADATA $0', '|'], undefined, 13);
+    testSuggestions('FROM index1 M', [',', 'METADATA $0', '| '], undefined, 13);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _', METADATA_FIELDS, undefined, 22);
@@ -1053,7 +1055,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM index1 | EVAL b',
       [
-        'var0 =',
+        'var0 = ',
         ...getFieldNamesByType('any'),
         ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
       ],
@@ -1086,7 +1088,7 @@ describe('autocomplete', () => {
     );
 
     // ENRICH policy ON
-    testSuggestions('FROM index1 | ENRICH policy O', ['ON $0', 'WITH $0', '|'], undefined, 29);
+    testSuggestions('FROM index1 | ENRICH policy O', ['ON $0', 'WITH $0', '| '], undefined, 29);
 
     // ENRICH policy ON field
     testSuggestions('FROM index1 | ENRICH policy ON f', getFieldNamesByType('any'), undefined, 32);
@@ -1094,14 +1096,14 @@ describe('autocomplete', () => {
     // ENRICH policy WITH policyfield
     testSuggestions(
       'FROM index1 | ENRICH policy WITH v',
-      ['var0 =', ...getPolicyFields('policy')],
+      ['var0 = ', ...getPolicyFields('policy')],
       undefined,
       34
     );
 
     testSuggestions(
       'FROM index1 | ENRICH policy WITH \tv',
-      ['var0 =', ...getPolicyFields('policy')],
+      ['var0 = ', ...getPolicyFields('policy')],
       undefined,
       34
     );
@@ -1123,7 +1125,7 @@ describe('autocomplete', () => {
     // LIMIT argument
     // Here we actually test that the invoke trigger kind does not work
     // because it isn't very useful to see literal suggestions when typing a number
-    testSuggestions('FROM a | LIMIT 1', ['|'], undefined, 16);
+    testSuggestions('FROM a | LIMIT 1', ['| '], undefined, 16);
 
     // MV_EXPAND field
     testSuggestions('FROM index1 | MV_EXPAND f', getFieldNamesByType('any'), undefined, 25);
@@ -1149,12 +1151,12 @@ describe('autocomplete', () => {
     );
 
     // SORT field order
-    testSuggestions('FROM index1 | SORT stringField a', ['ASC', 'DESC', ',', '|'], undefined, 32);
+    testSuggestions('FROM index1 | SORT stringField a', ['ASC', 'DESC', ',', '| '], undefined, 32);
 
     // SORT field order nulls
     testSuggestions(
       'FROM index1 | SORT stringField ASC n',
-      ['NULLS FIRST', 'NULLS LAST', ',', '|'],
+      ['NULLS FIRST', 'NULLS LAST', ',', '| '],
       undefined,
       36
     );
@@ -1162,19 +1164,22 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions(
       'FROM index1 | STATS f',
-      ['var0 =', ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true })],
+      [
+        'var0 = ',
+        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }),
+      ],
       undefined,
       21
     );
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B', ['BY $0', ',', '|'], undefined, 39);
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B', ['BY $0', ',', '| '], undefined, 39);
 
     // STATS argument BY expression
     testSuggestions(
       'FROM index1 | STATS field BY f',
       [
-        'var0 =',
+        'var0 = ',
         ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
         ...getFieldNamesByType('any'),
       ],

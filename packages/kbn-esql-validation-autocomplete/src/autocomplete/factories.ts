@@ -184,9 +184,8 @@ export const buildSourcesDefinitions = (
 ): SuggestionRawDefinition[] =>
   sources.map(({ name, isIntegration, title }) => ({
     label: title ?? name,
-    text: getSafeInsertSourceText(name),
+    text: getSafeInsertSourceText(name) + (!isIntegration ? ' ' : ''),
     isSnippet: isIntegration,
-    ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
     kind: isIntegration ? 'Class' : 'Issue',
     detail: isIntegration
       ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
@@ -196,6 +195,7 @@ export const buildSourcesDefinitions = (
           defaultMessage: `Index`,
         }),
     sortText: 'A',
+    command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
 export const buildConstantsDefinitions = (
@@ -233,12 +233,13 @@ export const buildValueDefinitions = (
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
   return {
     label,
-    text: `${label} =`,
+    text: `${label} = `,
     kind: 'Variable',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new variable',
     }),
     sortText: '1',
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 };
 
