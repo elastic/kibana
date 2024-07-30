@@ -21,12 +21,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getDocLinks } from '@kbn/doc-links';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
-  const { capabilities, setBreadcrumbs, navigateToApp } = useAppContext();
+  const { capabilities, setBreadcrumbs, navigateToApp, buildFlavor, kibanaBranch } =
+    useAppContext();
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
   const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
+  const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
+  const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -97,7 +101,7 @@ export function AiAssistantSelectionPage() {
                           data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
                           external
                           target="_blank"
-                          href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
+                          href={observabilityDoc}
                         >
                           {i18n.translate(
                             'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkLabel',
@@ -169,7 +173,7 @@ export function AiAssistantSelectionPage() {
                           data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
                           external
                           target="_blank"
-                          href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                          href={securityDoc}
                         >
                           {i18n.translate(
                             'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',

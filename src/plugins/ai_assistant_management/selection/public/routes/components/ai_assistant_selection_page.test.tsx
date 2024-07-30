@@ -31,6 +31,8 @@ describe('AiAssistantSelectionPage', () => {
       capabilities,
       setBreadcrumbs,
       navigateToApp,
+      kibanaBranch: 'main',
+      buildFlavor: 'ess',
     });
     render(<AiAssistantSelectionPage />, {
       wrapper: I18nProvider,
@@ -94,7 +96,7 @@ describe('AiAssistantSelectionPage', () => {
           screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink')
         ).toHaveAttribute(
           'href',
-          'https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html'
+          'https://www.elastic.co/guide/en/observability/master/obs-ai-assistant.html'
         );
       });
     });
@@ -140,7 +142,7 @@ describe('AiAssistantSelectionPage', () => {
           screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink')
         ).toHaveAttribute(
           'href',
-          'https://www.elastic.co/guide/en/security/current/security-assistant.html'
+          'https://www.elastic.co/guide/en/security/master/security-assistant.html'
         );
       });
     });
