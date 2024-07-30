@@ -71,7 +71,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           helpText: '',
           isInvalid:
             errors['createAlertParam.title'] !== undefined &&
-            errors['createAlertParam.title'].length > 0 &&
+            Number(errors['createAlertParam.title'].length) > 0 &&
             alert.title !== undefined,
           error: errors['createAlertParam.title'] as string,
         }}
@@ -102,7 +102,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           helpText: '',
           isInvalid:
             errors['createAlertParam.type'] !== undefined &&
-            errors['createAlertParam.type'].length > 0 &&
+            Number(errors['createAlertParam.type'].length) > 0 &&
             alert.type !== undefined,
           error: errors['createAlertParam.type'] as string,
         }}
@@ -122,7 +122,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           helpText: '',
           isInvalid:
             errors['createAlertParam.source'] !== undefined &&
-            errors['createAlertParam.source'].length > 0 &&
+            Number(errors['createAlertParam.source'].length) > 0 &&
             alert.source !== undefined,
           error: errors['createAlertParam.source'] as string,
         }}
@@ -143,7 +143,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           helpText: '',
           isInvalid:
             errors['createAlertParam.sourceRef'] !== undefined &&
-            errors['createAlertParam.sourceRef'].length > 0 &&
+            Number(errors['createAlertParam.sourceRef'].length) > 0 &&
             alert.sourceRef !== undefined,
           error: errors['createAlertParam.sourceRef'] as string,
         }}
