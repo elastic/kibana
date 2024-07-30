@@ -905,7 +905,6 @@ export const UnifiedDataTable = ({
               <DataTableDocumentToolbarBtn
                 isPlainRecord={isPlainRecord}
                 isFilterActive={isFilterActive}
-                rows={rows!}
                 selectedDocs={usedSelectedDocs}
                 setSelectedDocs={setSelectedDocs}
                 setIsFilterActive={setIsFilterActive}
@@ -924,7 +923,6 @@ export const UnifiedDataTable = ({
     isPlainRecord,
     isFilterActive,
     enableComparisonMode,
-    rows,
     toastNotifications,
     visibleColumns,
   ]);
