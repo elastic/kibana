@@ -10,7 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { FlattenedBucket } from '../../../../common/components/alerts_treemap/types';
+import type { FlattenedBucket } from '../alerts_treemap_panel/alerts_treemap/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import type { GenericBuckets } from '../../../../../common/search_strategy/common';
 import * as i18n from './translations';
