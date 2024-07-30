@@ -152,11 +152,9 @@ export const BaseActionSchema = z.object({
 });
 
 export type NoParametersRequestSchema = z.infer<typeof NoParametersRequestSchema>;
-export const NoParametersRequestSchema = BaseActionSchema.merge(
-  z.object({
-    parameters: z.object({}).optional(),
-  })
-);
+export const NoParametersRequestSchema = z.object({
+  body: BaseActionSchema,
+});
 
 export type KillOrSuspendActionSchema = z.infer<typeof KillOrSuspendActionSchema>;
 export const KillOrSuspendActionSchema = BaseActionSchema.merge(

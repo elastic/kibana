@@ -164,14 +164,14 @@ components:
         - endpoint_ids
 
     NoParametersRequestSchema:
-      allOf:
-        - $ref: '#/components/schemas/BaseActionSchema'
-        - type: object
-          properties:
-            parameters:
-              type: object
-              properties: {}
-              required: []
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          $ref: '#/components/schemas/BaseActionSchema'
+
+
 
     KillOrSuspendActionSchema:
       allOf:
