@@ -248,6 +248,8 @@ export const FormControls: FC<{
         const isTimeBased = dataView.isTimeBased();
         setIsDataViewTimeBased(isTimeBased);
         if (isTimeBased === false) {
+          setFields([]);
+          setSelectedField(null);
           return;
         }
         const { dataViewFields, messageField } = getMessageField(dataView);
