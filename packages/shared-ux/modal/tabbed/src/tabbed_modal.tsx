@@ -29,6 +29,7 @@ import {
   type EuiTabProps,
   type CommonProps,
   useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import {
   ModalContextProvider,
@@ -169,6 +170,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       <EuiModalBody>
         <Fragment>
           <EuiTabs>{renderTabs()}</EuiTabs>
+          <EuiSpacer size="m" />
           {React.createElement(function RenderSelectedTabContent() {
             useLayoutEffect(onTabContentRender, []);
             return (
