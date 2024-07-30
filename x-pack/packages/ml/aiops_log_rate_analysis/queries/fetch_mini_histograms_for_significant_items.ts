@@ -13,7 +13,6 @@ import type {
   NumericChartData,
   SignificantItem,
   SignificantItemHistogram,
-  SignificantItemHistogramItem,
 } from '@kbn/ml-agg-utils';
 import { isSignificantItem } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
@@ -24,17 +23,12 @@ import { RANDOM_SAMPLER_SEED } from '../constants';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getHistogramQuery } from './get_histogram_query';
-
-interface Aggs extends estypes.AggregationsSingleBucketAggregateBase {
-  doc_count: number;
-  mini_histogram: {
-    buckets: Array<
-      estypes.AggregationsSingleBucketAggregateBase & estypes.AggregationsHistogramBucketKeys
-    >;
-  };
-}
-
-const HISTOGRAM_AGG_PREFIX = 'histogram_';
+import {
+  getMiniHistogramDataFromAggResponse,
+  getMiniHistogramAgg,
+  HISTOGRAM_AGG_PREFIX,
+  type MiniHistogramAgg,
+} from './mini_histogram_utils';
 
 export const fetchMiniHistogramsForSignificantItems = async (
   esClient: ElasticsearchClient,
@@ -73,19 +67,7 @@ export const fetchMiniHistogramsForSignificantItems = async (
 
     aggs[`${HISTOGRAM_AGG_PREFIX}${index}`] = {
       filter,
-      aggs: {
-        mini_histogram: {
-          histogram: {
-            field: params.timeFieldName,
-            interval: overallTimeSeries.interval,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: params.start,
-              max: params.end,
-            },
-          },
-        },
-      },
+      aggs: getMiniHistogramAgg(params, overallTimeSeries.interval),
     };
 
     return aggs;
@@ -124,29 +106,11 @@ export const fetchMiniHistogramsForSignificantItems = async (
     return [];
   }
 
-  const unwrappedResp = unwrap(resp.aggregations) as Record<string, Aggs>;
+  const unwrappedResp = unwrap(resp.aggregations) as Record<string, MiniHistogramAgg>;
 
-  return significantItems.map((significantItem, index) => {
-    const histogram: SignificantItemHistogramItem[] =
-      overallTimeSeries.data.map((o) => {
-        const current = unwrappedResp[
-          `${HISTOGRAM_AGG_PREFIX}${index}`
-        ].mini_histogram.buckets.find((d1) => d1.key_as_string === o.key_as_string) ?? {
-          doc_count: 0,
-        };
-
-        return {
-          key: o.key,
-          key_as_string: o.key_as_string ?? '',
-          doc_count_significant_item: current.doc_count,
-          doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-        };
-      }) ?? [];
-
-    return {
-      fieldName: significantItem.fieldName,
-      fieldValue: significantItem.fieldValue,
-      histogram,
-    };
-  });
+  return significantItems.map((significantItem, index) => ({
+    fieldName: significantItem.fieldName,
+    fieldValue: significantItem.fieldValue,
+    histogram: getMiniHistogramDataFromAggResponse(overallTimeSeries, unwrappedResp, index),
+  }));
 };
