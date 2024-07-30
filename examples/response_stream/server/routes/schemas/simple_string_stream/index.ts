@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { SimpleStringStreamRequestBodySchema } from '../../../server/routes/schemas/simple_string_stream';
+export { simpleStringStreamRequestBodySchema } from './request_body_schema';
+export type { SimpleStringStreamRequestBodySchema } from './request_body_schema';
