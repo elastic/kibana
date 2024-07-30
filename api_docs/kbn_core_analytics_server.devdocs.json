@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsClientInitContext",
+        "id": "def-server.AnalyticsClientInitContext",
         "type": "Interface",
         "tags": [],
         "label": "AnalyticsClientInitContext",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.AnalyticsClientInitContext.isDev",
+            "id": "def-server.AnalyticsClientInitContext.isDev",
             "type": "boolean",
             "tags": [],
             "label": "isDev",
@@ -48,7 +40,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.AnalyticsClientInitContext.sendTo",
+            "id": "def-server.AnalyticsClientInitContext.sendTo",
             "type": "CompoundType",
             "tags": [],
             "label": "sendTo",
@@ -64,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.AnalyticsClientInitContext.logger",
+            "id": "def-server.AnalyticsClientInitContext.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -89,7 +81,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ContextProviderOpts",
+        "id": "def-server.ContextProviderOpts",
         "type": "Interface",
         "tags": [],
         "label": "ContextProviderOpts",
@@ -112,7 +104,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ContextProviderOpts.name",
+            "id": "def-server.ContextProviderOpts.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -125,7 +117,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ContextProviderOpts.context$",
+            "id": "def-server.ContextProviderOpts.context$",
             "type": "Object",
             "tags": [],
             "label": "context$",
@@ -142,7 +134,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ContextProviderOpts.schema",
+            "id": "def-server.ContextProviderOpts.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -169,7 +161,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.Event",
+        "id": "def-server.Event",
         "type": "Interface",
         "tags": [],
         "label": "Event",
@@ -192,7 +184,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.timestamp",
+            "id": "def-server.Event.timestamp",
             "type": "string",
             "tags": [],
             "label": "timestamp",
@@ -205,7 +197,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.event_type",
+            "id": "def-server.Event.event_type",
             "type": "string",
             "tags": [],
             "label": "event_type",
@@ -218,7 +210,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.properties",
+            "id": "def-server.Event.properties",
             "type": "Uncategorized",
             "tags": [],
             "label": "properties",
@@ -234,7 +226,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.Event.context",
+            "id": "def-server.Event.context",
             "type": "Object",
             "tags": [],
             "label": "context",
@@ -259,7 +251,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.EventContext",
+        "id": "def-server.EventContext",
         "type": "Interface",
         "tags": [],
         "label": "EventContext",
@@ -272,7 +264,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.cluster_uuid",
+            "id": "def-server.EventContext.cluster_uuid",
             "type": "string",
             "tags": [],
             "label": "cluster_uuid",
@@ -288,7 +280,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.cluster_name",
+            "id": "def-server.EventContext.cluster_name",
             "type": "string",
             "tags": [],
             "label": "cluster_name",
@@ -304,7 +296,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.license_id",
+            "id": "def-server.EventContext.license_id",
             "type": "string",
             "tags": [],
             "label": "license_id",
@@ -320,7 +312,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.userId",
+            "id": "def-server.EventContext.userId",
             "type": "string",
             "tags": [],
             "label": "userId",
@@ -336,7 +328,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.cloudId",
+            "id": "def-server.EventContext.cloudId",
             "type": "string",
             "tags": [],
             "label": "cloudId",
@@ -352,7 +344,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.isElasticCloudUser",
+            "id": "def-server.EventContext.isElasticCloudUser",
             "type": "CompoundType",
             "tags": [],
             "label": "isElasticCloudUser",
@@ -368,7 +360,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.version",
+            "id": "def-server.EventContext.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -384,7 +376,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.pageName",
+            "id": "def-server.EventContext.pageName",
             "type": "string",
             "tags": [],
             "label": "pageName",
@@ -400,7 +392,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.applicationId",
+            "id": "def-server.EventContext.applicationId",
             "type": "string",
             "tags": [],
             "label": "applicationId",
@@ -416,7 +408,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.entityId",
+            "id": "def-server.EventContext.entityId",
             "type": "string",
             "tags": [],
             "label": "entityId",
@@ -432,7 +424,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventContext.Unnamed",
+            "id": "def-server.EventContext.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: unknown",
@@ -451,7 +443,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.EventTypeOpts",
+        "id": "def-server.EventTypeOpts",
         "type": "Interface",
         "tags": [],
         "label": "EventTypeOpts",
@@ -474,7 +466,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventTypeOpts.eventType",
+            "id": "def-server.EventTypeOpts.eventType",
             "type": "string",
             "tags": [],
             "label": "eventType",
@@ -487,7 +479,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.EventTypeOpts.schema",
+            "id": "def-server.EventTypeOpts.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -514,7 +506,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.IAnalyticsClient",
+        "id": "def-server.IAnalyticsClient",
         "type": "Interface",
         "tags": [],
         "label": "IAnalyticsClient",
@@ -527,7 +519,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.reportEvent",
+            "id": "def-server.IAnalyticsClient.reportEvent",
             "type": "Function",
             "tags": [
               "track-adoption"
@@ -1503,7 +1495,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.reportEvent.$1",
+                "id": "def-server.IAnalyticsClient.reportEvent.$1",
                 "type": "string",
                 "tags": [],
                 "label": "eventType",
@@ -1520,7 +1512,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.reportEvent.$2",
+                "id": "def-server.IAnalyticsClient.reportEvent.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "eventData",
@@ -1540,7 +1532,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.registerEventType",
+            "id": "def-server.IAnalyticsClient.registerEventType",
             "type": "Function",
             "tags": [],
             "label": "registerEventType",
@@ -1564,7 +1556,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerEventType.$1",
+                "id": "def-server.IAnalyticsClient.registerEventType.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "eventTypeOps",
@@ -1591,7 +1583,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.registerShipper",
+            "id": "def-server.IAnalyticsClient.registerShipper",
             "type": "Function",
             "tags": [],
             "label": "registerShipper",
@@ -1631,7 +1623,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerShipper.$1",
+                "id": "def-server.IAnalyticsClient.registerShipper.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "Shipper",
@@ -1655,7 +1647,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerShipper.$2",
+                "id": "def-server.IAnalyticsClient.registerShipper.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "shipperConfig",
@@ -1672,7 +1664,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerShipper.$3",
+                "id": "def-server.IAnalyticsClient.registerShipper.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -1699,7 +1691,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.optIn",
+            "id": "def-server.IAnalyticsClient.optIn",
             "type": "Function",
             "tags": [],
             "label": "optIn",
@@ -1723,7 +1715,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.optIn.$1",
+                "id": "def-server.IAnalyticsClient.optIn.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "optInConfig",
@@ -1749,7 +1741,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.registerContextProvider",
+            "id": "def-server.IAnalyticsClient.registerContextProvider",
             "type": "Function",
             "tags": [
               "track-adoption"
@@ -2053,7 +2045,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.registerContextProvider.$1",
+                "id": "def-server.IAnalyticsClient.registerContextProvider.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "contextProviderOpts",
@@ -2080,7 +2072,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.removeContextProvider",
+            "id": "def-server.IAnalyticsClient.removeContextProvider",
             "type": "Function",
             "tags": [],
             "label": "removeContextProvider",
@@ -2096,7 +2088,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IAnalyticsClient.removeContextProvider.$1",
+                "id": "def-server.IAnalyticsClient.removeContextProvider.$1",
                 "type": "string",
                 "tags": [],
                 "label": "contextProviderName",
@@ -2116,7 +2108,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.telemetryCounter$",
+            "id": "def-server.IAnalyticsClient.telemetryCounter$",
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
@@ -2141,7 +2133,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.flush",
+            "id": "def-server.IAnalyticsClient.flush",
             "type": "Function",
             "tags": [],
             "label": "flush",
@@ -2159,7 +2151,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IAnalyticsClient.shutdown",
+            "id": "def-server.IAnalyticsClient.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -2180,7 +2172,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.IShipper",
+        "id": "def-server.IShipper",
         "type": "Interface",
         "tags": [],
         "label": "IShipper",
@@ -2193,7 +2185,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.reportEvents",
+            "id": "def-server.IShipper.reportEvents",
             "type": "Function",
             "tags": [],
             "label": "reportEvents",
@@ -2217,7 +2209,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IShipper.reportEvents.$1",
+                "id": "def-server.IShipper.reportEvents.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "events",
@@ -2244,7 +2236,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.optIn",
+            "id": "def-server.IShipper.optIn",
             "type": "Function",
             "tags": [],
             "label": "optIn",
@@ -2260,7 +2252,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IShipper.optIn.$1",
+                "id": "def-server.IShipper.optIn.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
@@ -2280,7 +2272,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.extendContext",
+            "id": "def-server.IShipper.extendContext",
             "type": "Function",
             "tags": [],
             "label": "extendContext",
@@ -2304,7 +2296,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.IShipper.extendContext.$1",
+                "id": "def-server.IShipper.extendContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
@@ -2330,7 +2322,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.telemetryCounter$",
+            "id": "def-server.IShipper.telemetryCounter$",
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
@@ -2355,7 +2347,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.flush",
+            "id": "def-server.IShipper.flush",
             "type": "Function",
             "tags": [],
             "label": "flush",
@@ -2373,7 +2365,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.IShipper.shutdown",
+            "id": "def-server.IShipper.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -2394,7 +2386,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.OptInConfig",
+        "id": "def-server.OptInConfig",
         "type": "Interface",
         "tags": [],
         "label": "OptInConfig",
@@ -2407,7 +2399,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfig.global",
+            "id": "def-server.OptInConfig.global",
             "type": "Object",
             "tags": [],
             "label": "global",
@@ -2429,7 +2421,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfig.event_types",
+            "id": "def-server.OptInConfig.event_types",
             "type": "Object",
             "tags": [],
             "label": "event_types",
@@ -2456,7 +2448,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.OptInConfigPerType",
+        "id": "def-server.OptInConfigPerType",
         "type": "Interface",
         "tags": [],
         "label": "OptInConfigPerType",
@@ -2469,7 +2461,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfigPerType.enabled",
+            "id": "def-server.OptInConfigPerType.enabled",
             "type": "boolean",
             "tags": [],
             "label": "enabled",
@@ -2482,7 +2474,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.OptInConfigPerType.shippers",
+            "id": "def-server.OptInConfigPerType.shippers",
             "type": "Object",
             "tags": [],
             "label": "shippers",
@@ -2501,7 +2493,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.RegisterShipperOpts",
+        "id": "def-server.RegisterShipperOpts",
         "type": "Interface",
         "tags": [],
         "label": "RegisterShipperOpts",
@@ -2516,7 +2508,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaArray",
+        "id": "def-server.SchemaArray",
         "type": "Interface",
         "tags": [],
         "label": "SchemaArray",
@@ -2547,7 +2539,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaArray.type",
+            "id": "def-server.SchemaArray.type",
             "type": "string",
             "tags": [],
             "label": "type",
@@ -2563,7 +2555,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaArray.items",
+            "id": "def-server.SchemaArray.items",
             "type": "CompoundType",
             "tags": [],
             "label": "items",
@@ -2646,7 +2638,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaChildValue",
+        "id": "def-server.SchemaChildValue",
         "type": "Interface",
         "tags": [],
         "label": "SchemaChildValue",
@@ -2669,7 +2661,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaChildValue.type",
+            "id": "def-server.SchemaChildValue.type",
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
@@ -2708,7 +2700,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaChildValue._meta",
+            "id": "def-server.SchemaChildValue._meta",
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
@@ -2735,7 +2727,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaMeta",
+        "id": "def-server.SchemaMeta",
         "type": "Interface",
         "tags": [],
         "label": "SchemaMeta",
@@ -2758,7 +2750,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaMeta._meta",
+            "id": "def-server.SchemaMeta._meta",
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
@@ -2785,7 +2777,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaObject",
+        "id": "def-server.SchemaObject",
         "type": "Interface",
         "tags": [],
         "label": "SchemaObject",
@@ -2816,7 +2808,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.SchemaObject.properties",
+            "id": "def-server.SchemaObject.properties",
             "type": "Object",
             "tags": [],
             "label": "properties",
@@ -2843,7 +2835,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ShipperClassConstructor",
+        "id": "def-server.ShipperClassConstructor",
         "type": "Interface",
         "tags": [],
         "label": "ShipperClassConstructor",
@@ -2866,7 +2858,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ShipperClassConstructor.shipperName",
+            "id": "def-server.ShipperClassConstructor.shipperName",
             "type": "string",
             "tags": [],
             "label": "shipperName",
@@ -2879,7 +2871,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.ShipperClassConstructor.new",
+            "id": "def-server.ShipperClassConstructor.new",
             "type": "Function",
             "tags": [],
             "label": "new",
@@ -2895,7 +2887,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.ShipperClassConstructor.new.$1",
+                "id": "def-server.ShipperClassConstructor.new.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "config",
@@ -2912,7 +2904,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-analytics-server",
-                "id": "def-common.ShipperClassConstructor.new.$2",
+                "id": "def-server.ShipperClassConstructor.new.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
@@ -2941,7 +2933,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.TelemetryCounter",
+        "id": "def-server.TelemetryCounter",
         "type": "Interface",
         "tags": [],
         "label": "TelemetryCounter",
@@ -2954,7 +2946,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.type",
+            "id": "def-server.TelemetryCounter.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -2970,7 +2962,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.source",
+            "id": "def-server.TelemetryCounter.source",
             "type": "string",
             "tags": [],
             "label": "source",
@@ -2983,7 +2975,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.event_type",
+            "id": "def-server.TelemetryCounter.event_type",
             "type": "string",
             "tags": [],
             "label": "event_type",
@@ -2996,7 +2988,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.code",
+            "id": "def-server.TelemetryCounter.code",
             "type": "string",
             "tags": [],
             "label": "code",
@@ -3009,7 +3001,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-server",
-            "id": "def-common.TelemetryCounter.count",
+            "id": "def-server.TelemetryCounter.count",
             "type": "number",
             "tags": [],
             "label": "count",
@@ -3028,7 +3020,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaBooleanTypes",
+        "id": "def-server.AllowedSchemaBooleanTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaBooleanTypes",
@@ -3045,7 +3037,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaNumberTypes",
+        "id": "def-server.AllowedSchemaNumberTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaNumberTypes",
@@ -3062,7 +3054,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaStringTypes",
+        "id": "def-server.AllowedSchemaStringTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaStringTypes",
@@ -3079,7 +3071,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AllowedSchemaTypes",
+        "id": "def-server.AllowedSchemaTypes",
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaTypes",
@@ -3096,7 +3088,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsServicePreboot",
+        "id": "def-server.AnalyticsServicePreboot",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServicePreboot",
@@ -3171,7 +3163,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsServiceSetup",
+        "id": "def-server.AnalyticsServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServiceSetup",
@@ -3246,7 +3238,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.AnalyticsServiceStart",
+        "id": "def-server.AnalyticsServiceStart",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServiceStart",
@@ -3281,7 +3273,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ContextProviderName",
+        "id": "def-server.ContextProviderName",
         "type": "Type",
         "tags": [],
         "label": "ContextProviderName",
@@ -3298,7 +3290,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.EventType",
+        "id": "def-server.EventType",
         "type": "Type",
         "tags": [],
         "label": "EventType",
@@ -3315,7 +3307,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.PossibleSchemaTypes",
+        "id": "def-server.PossibleSchemaTypes",
         "type": "Type",
         "tags": [],
         "label": "PossibleSchemaTypes",
@@ -3355,7 +3347,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.RootSchema",
+        "id": "def-server.RootSchema",
         "type": "Type",
         "tags": [],
         "label": "RootSchema",
@@ -3380,7 +3372,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaMetaOptional",
+        "id": "def-server.SchemaMetaOptional",
         "type": "Type",
         "tags": [],
         "label": "SchemaMetaOptional",
@@ -3397,7 +3389,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.SchemaValue",
+        "id": "def-server.SchemaValue",
         "type": "Type",
         "tags": [],
         "label": "SchemaValue",
@@ -3478,7 +3470,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.ShipperName",
+        "id": "def-server.ShipperName",
         "type": "Type",
         "tags": [],
         "label": "ShipperName",
@@ -3495,7 +3487,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-common.TelemetryCounterType",
+        "id": "def-server.TelemetryCounterType",
         "type": "Type",
         "tags": [],
         "label": "TelemetryCounterType",
@@ -3511,6 +3503,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }
