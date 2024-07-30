@@ -13,9 +13,9 @@ import {
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
+import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
-import { BsearchService } from '../../../../../../../../test/common/services/bsearch';
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const INDEX_NAME = 'filebeat-7.0.0-iot-2019.06';
