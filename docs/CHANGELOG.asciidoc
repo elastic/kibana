@@ -107,7 +107,7 @@ Machine Learning::
 * Removes use of re2 library ({kibana-pull}186104[#186104]).
 
 Platform::
-* Fixes a race condition that could cause intermittent upgrade migration failures when Kibana connects to a single node Elasticsearch cluster ({kibana-pull}158182[#158182]).
+* Fixes a race condition that could cause intermittent upgrade migration failures when Kibana connects to a single-node Elasticsearch cluster ({kibana-pull}158182[#158182]).
 
 Security::
 * Updates node spawn process hardening ({kibana-pull}186786[#186786]).
