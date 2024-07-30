@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { useState, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
@@ -19,11 +19,16 @@ import {
   EuiText,
   useGeneratedHtmlId,
   EuiIcon,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import {
   type SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -35,6 +40,11 @@ import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 
 export const AutoDetectPanel: FunctionComponent = () => {
+  const [showCreateFirstAlertFlyout, setShowCreateFirstAlertFlyout] = useState(false);
+  const [isFirstAlertCreated, setIsFirstAlertCreated] = useState(false);
+  const {
+    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
+  } = useKibana<{ triggersActionsUi: TriggersAndActionsUIPublicPluginStart }>().services;
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
@@ -106,14 +116,90 @@ export const AutoDetectPanel: FunctionComponent = () => {
             children: (
               <>
                 {status === 'dataReceived' ? (
-                  <ProgressIndicator
-                    iconType="cheer"
-                    title={i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.yourDataIsReadyToExploreLabel',
-                      { defaultMessage: 'Your data is ready to explore!' }
+                  <>
+                    <ProgressIndicator
+                      iconType="cheer"
+                      title={i18n.translate(
+                        'xpack.observability_onboarding.autoDetectPanel.yourDataIsReadyToExploreLabel',
+                        { defaultMessage: 'Your data is ready to explore!' }
+                      )}
+                      isLoading={false}
+                    />
+                    <EuiSpacer size="s" />
+                    {isFirstAlertCreated ? (
+                      <EuiCallOut
+                        color="success"
+                        title={i18n.translate(
+                          'xpack.observability_onboarding.autoDetectPanel.firstAlertCreatedSuccessfullyMessage',
+                          {
+                            defaultMessage: 'You have created your first alert!',
+                          }
+                        )}
+                      />
+                    ) : (
+                      <EuiCallOut
+                        title={i18n.translate(
+                          'xpack.observability_onboarding.autoDetectPanel.createAlert',
+                          {
+                            defaultMessage:
+                              'Make sure you get notified when there are problems with your system',
+                          }
+                        )}
+                        iconType="check"
+                        color="warning"
+                      >
+                        <EuiButton
+                          color="warning"
+                          data-test-subj="create-first-alert"
+                          onClick={() => setShowCreateFirstAlertFlyout(true)}
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.autoDetectPanel.createAlertButton',
+                            {
+                              defaultMessage: 'Create alert',
+                            }
+                          )}
+                        </EuiButton>
+                      </EuiCallOut>
                     )}
-                    isLoading={false}
-                  />
+                    {showCreateFirstAlertFlyout && (
+                      <AddRuleFlyout
+                        ruleTypeId="metrics.alert.inventory.threshold"
+                        canChangeTrigger={false}
+                        consumer={'alerts'}
+                        initialSelectedConsumer={AlertConsumers.OBSERVABILITY}
+                        onClose={() => setShowCreateFirstAlertFlyout(false)}
+                        onSave={async () => {
+                          setIsFirstAlertCreated(true);
+                          setShowCreateFirstAlertFlyout(false);
+                        }}
+                        initialValues={{
+                          name: i18n.translate(
+                            'xpack.observability_onboarding.autoDetectPanel.createFirstAlert.rule.name',
+                            { defaultMessage: 'My First Alert' }
+                          ),
+                          schedule: {
+                            interval: '5m',
+                          },
+                          tags: ['observability'],
+                          params: {
+                            alertOnNoData: true,
+                            criteria: [
+                              {
+                                metric: 'memory',
+                                timeSize: 100,
+                                timeUnit: 'm',
+                                threshold: [90],
+                                comparator: '>',
+                              },
+                            ],
+                          },
+                        }}
+                        hideGrouping
+                        useRuleProducer
+                      />
+                    )}
+                  </>
                 ) : status === 'awaitingData' ? (
                   <ProgressIndicator
                     title={i18n.translate(
