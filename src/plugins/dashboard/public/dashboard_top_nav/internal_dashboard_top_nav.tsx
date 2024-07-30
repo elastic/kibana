@@ -62,8 +62,6 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -314,22 +312,16 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      const text = dashboardManagedBadge.getText();
       const renderCustomBadge = () => (
         <ManagedPopover
           key="managedDashboardDuplicatePopover"
-          text={text}
-          isPopoverOpen={isPopoverOpen}
-          setIsPopoverOpen={setIsPopoverOpen}
           dashboard={dashboard}
-          isLoading={isLoading}
-          setIsLoading={setIsLoading}
           redirectTo={redirectTo}
         />
       );
       allBadges.push({
         renderCustomBadge,
-        badgeText: text,
+        badgeText: dashboardManagedBadge.getText(),
       });
     }
     return allBadges;
@@ -339,10 +331,7 @@ export function InternalDashboardTopNav({
     hasRunMigrations,
     showWriteControls,
     managed,
-    isPopoverOpen,
     dashboard,
-    isLoading,
-    setIsLoading,
     redirectTo,
   ]);
 

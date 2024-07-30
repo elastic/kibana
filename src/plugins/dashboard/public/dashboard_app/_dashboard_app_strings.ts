@@ -28,7 +28,7 @@ export const dashboardReadonlyBadge = {
 export const dashboardManagedBadge = {
   getText: () =>
     i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
+      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
 };
 

@@ -17,35 +17,38 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import { DashboardAPI } from '../..';
 import { DashboardRedirect } from '../../dashboard_container/types';
+import { dashboardManagedBadge } from '../_dashboard_app_strings';
 
 interface ManagedPopoverProps {
-  text: string;
-  isPopoverOpen: boolean;
-  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
   dashboard: DashboardAPI;
-  isLoading: boolean;
-  setIsLoading: (isLoading: boolean) => void;
   redirectTo: DashboardRedirect;
 }
 
-export const ManagedPopover = ({
-  text,
-  setIsPopoverOpen,
-  isPopoverOpen,
-  dashboard,
-  isLoading,
-  setIsLoading,
-  redirectTo,
-}: ManagedPopoverProps) => {
+export const ManagedPopover = ({ dashboard, redirectTo }: ManagedPopoverProps) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const text = dashboardManagedBadge.getText();
+  const buttonText = i18n.translate('dashboard.managedContentPopoverFooterText', {
+    defaultMessage: 'Duplicate this dashboard',
+  });
+  const cancelButtonText = i18n.translate('dashboard.managedContentPopoverFooterCancelText', {
+    defaultMessage: 'Cancel',
+  });
+
   const button = (
     <EuiButton
       color="primary"
       iconType="glasses"
       fill
       size="s"
+      aria-label={i18n.translate('dashboard.managedContentBadge.text', {
+        defaultMessage: 'Managed',
+      })}
       onClick={() => {
         setIsPopoverOpen(!isPopoverOpen);
       }}
@@ -67,36 +70,41 @@ export const ManagedPopover = ({
       data-test-subj="managedContentPopover"
     >
       <EuiFlexItem>
-        <EuiText size="s">{text}</EuiText>
+        <EuiText
+          size="s"
+          aria-label={text}
+          css={css`
+            max-width: 300px;
+          `}
+        >
+          {text}
+        </EuiText>
       </EuiFlexItem>
       <EuiPopoverFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiButton
-            color="primary"
-            size="s"
-            disabled={isLoading}
-            fill
-            onClick={() => {
-              setIsLoading(true);
-              dashboard.duplicate(redirectTo);
-              setIsLoading(false);
-            }}
-            data-test-subj="managedContentPopoverDuplicateButton"
-          >
-            {isLoading && <EuiLoadingSpinner size="m" />}
-            <EuiText size="s">
-              {i18n.translate('dashboard.managedContentPopoverFooterText', {
-                defaultMessage: 'Duplicate this dashboard',
-              })}
-            </EuiText>
-          </EuiButton>
-          <EuiButtonEmpty onClick={() => setIsPopoverOpen(false)}>
-            <EuiText size="s">
-              {i18n.translate('dashboard.managedContentPopoverFooterCancelText', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiText>
-          </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              size="s"
+              disabled={isLoading}
+              fill
+              aria-label={buttonText}
+              onClick={() => {
+                setIsLoading(true);
+                dashboard.duplicate(redirectTo);
+                setIsLoading(false);
+              }}
+              data-test-subj="managedContentPopoverDuplicateButton"
+            >
+              {isLoading && <EuiLoadingSpinner size="m" />}
+              <EuiText size="s">{buttonText}</EuiText>
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty aria-label={cancelButtonText} onClick={() => setIsPopoverOpen(false)}>
+              <EuiText size="s">{cancelButtonText}</EuiText>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>
