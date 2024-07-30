@@ -35,10 +35,10 @@ export class RecommendationsClient implements IRecommendationsClient {
 
   async getRecommendations({ dataStream }: { dataStream: string }): Promise<Recommendation[]> {
     // This should be a SO lookup once recommendations are persisted.
-    // const storedRecommendation = recommendationsByDataStreamMap.get(dataStream);
-    // if (storedRecommendation) {
-    //   return storedRecommendation;
-    // }
+    const storedRecommendation = recommendationsByDataStreamMap.get(dataStream);
+    if (storedRecommendation) {
+      return storedRecommendation;
+    }
 
     const indexManager = this.indexManagerCreator.fromIndexPattern(dataStream);
 
@@ -141,7 +141,6 @@ export class RecommendationsClient implements IRecommendationsClient {
           );
 
           await indexManager.updateIndexTemplate(customTemplateName, customTemplateDraft);
-          await indexManager.rollover();
         }
 
         if (tasks.processors) {
