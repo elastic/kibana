@@ -90,7 +90,7 @@ const createIngestPipelineAPI = async (http: HttpSetup) =>
           set: {
             if: 'ctx?.labels?.identity_source == "azure-1"',
             field: 'data_source',
-            value: 'entity_analytics_okta',
+            value: 'entity_analytics_entra_id',
           },
         },
         {
