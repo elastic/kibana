@@ -198,7 +198,13 @@
               "(locationId: \"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionButton\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionButton\")[] | undefined, filters: ",
               "UserMessageFilters",
               " | undefined) => ",
-              "UserMessage",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.UserMessage",
+                "text": "UserMessage"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
@@ -6137,6 +6143,109 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.UserMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserMessage",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.uniqueId",
+            "type": "string",
+            "tags": [],
+            "label": "uniqueId",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.severity",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              "\"error\" | \"info\" | \"warning\""
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.hidePopoverIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePopoverIcon",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.shortMessage",
+            "type": "string",
+            "tags": [],
+            "label": "shortMessage",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.longMessage",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "longMessage",
+            "description": [],
+            "signature": [
+              "React.ReactNode | ((closePopover: () => void) => React.ReactNode)"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.fixableInEditor",
+            "type": "boolean",
+            "tags": [],
+            "label": "fixableInEditor",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.UserMessage.displayLocations",
+            "type": "Array",
+            "tags": [],
+            "label": "displayLocations",
+            "description": [],
+            "signature": [
+              "UserMessageDisplayLocation[]"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.Visualization",
         "type": "Interface",
         "tags": [],
@@ -8411,7 +8520,13 @@
               "((state: T, deps: { frame: ",
               "FramePublicAPI",
               "; }) => ",
-              "UserMessage",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.UserMessage",
+                "text": "UserMessage"
+              },
               "[]) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -11147,9 +11262,9 @@
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasType",
+            "section": "def-public.HasType",
             "text": "HasType"
           },
           "<\"lens\"> & { getSavedVis: () => Readonly<",
@@ -11173,33 +11288,33 @@
           " | undefined; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
+            "section": "def-public.PublishesPanelTitle",
             "text": "PublishesPanelTitle"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTimeRange",
+            "section": "def-public.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesFilters",
+            "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
           " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<",
@@ -11221,17 +11336,17 @@
           " | undefined>; } & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasParentApi",
+            "section": "def-public.HasParentApi",
             "text": "HasParentApi"
           },
           "<Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnifiedSearch",
+            "section": "def-public.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           ">>>"

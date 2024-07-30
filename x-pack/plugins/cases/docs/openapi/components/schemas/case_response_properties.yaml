@@ -26,15 +26,13 @@ properties:
   assignees:
     $ref: 'assignees.yaml'
   category:
-    type:
-      - 'string'
-      - 'null'
+    type: string
     description: The case category.
+    nullable: true
   closed_at:
-    type:
-      - 'string'
-      - 'null'
+    type: string
     format: date-time
+    nullable: true
   closed_by:
     $ref: 'case_response_closed_by_properties.yaml'
   comments:
@@ -74,8 +72,7 @@ properties:
   created_at:
     type: string
     format: date-time
-    examples:
-      - '2022-05-13T09:16:17.416Z'
+    example: '2022-05-13T09:16:17.416Z'
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
   customFields:
@@ -87,25 +84,21 @@ properties:
         $ref: 'case_customfields.yaml'
   description:
     type: string
-    examples:
-      - A case description.
+    example: A case description.
   duration:
-    type:
-      - 'integer'
-      - 'null'
+    type: integer
     description: >
       The elapsed time from the creation of the case to its closure (in seconds).
       If the case has not been closed, the duration is set to null. If the case
       was closed after less than half a second, the duration is rounded down to
       zero.
-    examples:
-      - 120
+    nullable: true
+    example: 120
   external_service:
     $ref: 'external_service.yaml'
   id:
     type: string
-    examples:
-      - 66b9aa00-94fa-11ea-9f74-e7e108796192
+    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
   owner:
     $ref: 'owners.yaml'
   settings:
@@ -118,28 +111,23 @@ properties:
     type: array
     items:
       type: string
-    examples:
-      - [tag-1]
+    example:
+      - tag-1
   title:
     type: string
-    examples:
-      - Case title 1
+    example: Case title 1
   totalAlerts:
     type: integer
-    examples:
-      - 0
+    example: 0
   totalComment:
     type: integer
-    examples:
-      - 0
+    example: 0
   updated_at:
-    type:
-      - 'string'
-      - 'null'
+    type: string
     format: date-time
+    nullable: true
   updated_by:
     $ref: 'case_response_updated_by_properties.yaml'
   version:
     type: string
-    examples:
-      - WzUzMiwxXQ==
+    example: WzUzMiwxXQ==
