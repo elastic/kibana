@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewLazy } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
@@ -19,12 +19,12 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
   const { dataViews, setBreadcrumbs, notifications } =
     useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();
-  const [indexPattern, setIndexPattern] = useState<DataView>();
+  const [indexPattern, setIndexPattern] = useState<DataViewLazy>();
 
   useEffect(() => {
     dataViews
-      .get(props.match.params.id)
-      .then((ip: DataView) => {
+      .getDataViewLazy(props.match.params.id)
+      .then((ip: DataViewLazy) => {
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));
       })

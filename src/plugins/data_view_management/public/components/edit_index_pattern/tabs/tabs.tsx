@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
-  DataView,
+  DataViewLazy,
   DataViewField,
   DataViewsPublicPluginStart,
   META_FIELDS,
@@ -54,7 +54,7 @@ import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
   fields: DataViewField[];
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   refreshFields: () => void;
@@ -278,6 +278,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
+    // todo field list
     indexPattern.fields.getAll().forEach((field) => {
       if (field.scripted) {
         if (field.lang) {

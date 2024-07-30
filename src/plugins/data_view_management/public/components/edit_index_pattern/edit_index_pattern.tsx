@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, DataViewField, DataViewType, RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewLazy, DataViewField, DataViewType, RuntimeField } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -45,7 +45,7 @@ const codeStyle: CSS.Properties = {
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
 }
 
 export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
@@ -68,8 +68,8 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
-const getCompositeRuntimeFields = (dataView: DataView) =>
-  pickBy(dataView.getAllRuntimeFields(), (fld) => fld.type === 'composite');
+const getCompositeRuntimeFields = (dataView: DataViewLazy) =>
+  pickBy(dataView.getRuntimeFields({ fieldName: ['*']}), (fld) => fld.type === 'composite') as Dictionary<RuntimeField>;
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
@@ -83,10 +83,12 @@ export const EditIndexPattern = withRouter(
       application,
       ...startServices
     } = useKibana<IndexPatternManagmentContext>().services;
+    // todo field list
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
       Record<string, RuntimeField>
     >(() => getCompositeRuntimeFields(indexPattern));
+    // todo get field conflicts
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
@@ -145,7 +147,7 @@ export const EditIndexPattern = withRouter(
     }, [savedObjectsManagement, indexPattern, allowedTypes]);
 
     useEffect(() => {
-      setFields(indexPattern.getNonScriptedFields());
+      refreshFields();
       setConflictedFields(
         indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
       );
@@ -172,13 +174,18 @@ export const EditIndexPattern = withRouter(
       startServices,
     });
 
+    const refreshFields = async () => {
+      const flds = (await indexPattern.getFields({ fieldName: ['*'], scripted: false })).getFieldMapSorted();
+      setFields(Object.values(flds));
+    }
+
     const isRollup =
       new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => {
-          setFields(indexPattern.getNonScriptedFields());
+        onSave={async () => {
+          await refreshFields();
           setShowEditDialog(false);
         }}
         onCancel={() => setShowEditDialog(false)}
@@ -338,8 +345,8 @@ export const EditIndexPattern = withRouter(
           history={history}
           location={location}
           compositeRuntimeFields={compositeRuntimeFields}
-          refreshFields={() => {
-            setFields(indexPattern.getNonScriptedFields());
+          refreshFields={async () => {
+            await refreshFields();
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
           refreshIndexPatternClick={async () => {

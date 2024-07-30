@@ -8,7 +8,7 @@
 
 import {
   DataViewsContract,
-  DataView,
+  AbstractDataView,
   DataViewField,
   DataViewListItem,
   DataViewType,
@@ -64,7 +64,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
 }
 
 export const getTags = (
-  indexPattern: DataViewListItem | DataView,
+  indexPattern: DataViewListItem | AbstractDataView,
   isDefault: boolean,
   rollupsEnabled: boolean
 ) => {
@@ -86,7 +86,7 @@ export const getTags = (
   return tags;
 };
 
-export const getFieldInfo = (indexPattern: DataViewListItem | DataView, field: DataViewField) => {
+export const getFieldInfo = (indexPattern: DataViewListItem | AbstractDataView, field: DataViewField) => {
   if (!isRollup(indexPattern.type)) {
     return [];
   }

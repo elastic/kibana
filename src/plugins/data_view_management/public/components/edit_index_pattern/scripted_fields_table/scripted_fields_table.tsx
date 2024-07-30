@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewLazy, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   getSupportedScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -18,7 +18,7 @@ import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from '.
 import { ScriptedFieldItem } from './types';
 
 interface ScriptedFieldsTableProps {
-  indexPattern: DataView;
+  indexPattern: DataViewLazy;
   fieldFilter?: string;
   scriptedFieldLanguageFilter: string[];
   helpers: {
@@ -58,7 +58,7 @@ export class ScriptedFieldsTable extends Component<
   }
 
   fetchFields = async () => {
-    const fields = await (this.props.indexPattern.getScriptedFields() as ScriptedFieldItem[]);
+    const fields = Object.values(this.props.indexPattern.getScriptedFields({ fieldName: ['*']})) as ScriptedFieldItem[];
 
     const deprecatedLangsInUse = [];
     const deprecatedLangs = getDeprecatedScriptingLanguages();

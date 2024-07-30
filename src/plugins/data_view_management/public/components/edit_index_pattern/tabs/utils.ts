@@ -8,7 +8,7 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { AbstractDataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   TAB_INDEXED_FIELDS,
   TAB_SCRIPTED_FIELDS,
@@ -74,7 +74,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
 }
 
 export function getTabs(
-  indexPattern: DataView,
+  indexPattern: AbstractDataView,
   fieldFilter: string,
   relationshipCount = 0,
   scriptedFieldsEnabled: boolean
@@ -120,7 +120,7 @@ export function getTabs(
   return tabs;
 }
 
-export function getPath(field: DataViewField, indexPattern: DataView) {
+export function getPath(field: DataViewField, indexPattern: AbstractDataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
