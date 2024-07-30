@@ -118,7 +118,7 @@ export const fetchFieldCandidates = async ({
     // all keyword field candidates
     keywordFieldCandidates: keywordFieldCandidates.sort(),
     // preselection:
-    // - if we identify an ECS schema, filter by custom ECS whitelist
+    // - if we identify an ECS schema, filter by custom ECS safe list
     // - if not, take the first 100 fields
     selectedKeywordFieldCandidates: isECS
       ? filterByECSFields(keywordFieldCandidates).sort()
