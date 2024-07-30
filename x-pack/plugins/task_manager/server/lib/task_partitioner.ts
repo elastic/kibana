@@ -17,16 +17,21 @@ function range(start: number, end: number) {
 }
 
 export const MAX_PARTITIONS = 256;
+const TEN_SECONDS = 10000;
 
 export class TaskPartitioner {
   private readonly allPartitions: number[];
   private readonly podName: string;
   private kibanaDiscoveryService: KibanaDiscoveryService;
+  private podPartitions: number[];
+  private podPartitionsLastUpdated: number;
 
   constructor(podName: string, kibanaDiscoveryService: KibanaDiscoveryService) {
     this.allPartitions = range(0, MAX_PARTITIONS);
     this.podName = podName;
     this.kibanaDiscoveryService = kibanaDiscoveryService;
+    this.podPartitions = [];
+    this.podPartitionsLastUpdated = Date.now() - TEN_SECONDS;
   }
 
   getAllPartitions(): number[] {
@@ -38,9 +43,16 @@ export class TaskPartitioner {
   }
 
   async getPartitions(): Promise<number[]> {
-    const allPodNames = await this.getAllPodNames();
-    const podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
-    return podPartitions;
+    const lastUpdated = new Date(this.podPartitionsLastUpdated).getTime();
+    const now = Date.now();
+
+    // update the pod partitions every 10 seconds
+    if (now - lastUpdated >= TEN_SECONDS) {
+      const allPodNames = await this.getAllPodNames();
+      this.podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
+      this.podPartitionsLastUpdated = now;
+    }
+    return this.podPartitions;
   }
 
   private async getAllPodNames(): Promise<string[]> {

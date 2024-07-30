@@ -47,11 +47,20 @@ describe('getPodName()', () => {
 describe('getPartitions()', () => {
   const lastSeen = '2024-08-10T10:00:00.000Z';
   const discoveryServiceMock = createDiscoveryServiceMock(POD_NAME);
-  discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
-    createFindSO(POD_NAME, lastSeen),
-    createFindSO('test-pod-2', lastSeen),
-    createFindSO('test-pod-3', lastSeen),
-  ]);
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
+      createFindSO(POD_NAME, lastSeen),
+      createFindSO('test-pod-2', lastSeen),
+      createFindSO('test-pod-3', lastSeen),
+    ]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+  });
 
   test('correctly gets the partitons for this pod', async () => {
     const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
@@ -66,5 +75,23 @@ describe('getPartitions()', () => {
       219, 220, 222, 223, 225, 226, 228, 229, 231, 232, 234, 235, 237, 238, 240, 241, 243, 244, 246,
       247, 249, 250, 252, 253, 255,
     ]);
+  });
+
+  test('correctly caches the partitions on 10 second interval ', async () => {
+    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    await taskPartitioner.getPartitions();
+    jest.advanceTimersByTime(3000);
+
+    await taskPartitioner.getPartitions();
+    jest.advanceTimersByTime(3000);
+
+    await taskPartitioner.getPartitions();
+    jest.advanceTimersByTime(3000);
+
+    await taskPartitioner.getPartitions();
+    jest.advanceTimersByTime(3000);
+
+    await taskPartitioner.getPartitions();
+    expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(2);
   });
 });
