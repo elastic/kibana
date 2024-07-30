@@ -889,6 +889,8 @@ export const UnifiedDataTable = ({
             enableComparisonMode={enableComparisonMode}
             setIsCompareActive={setIsCompareActive}
             fieldFormats={fieldFormats}
+            pageIndex={unifiedDataTableContextValue.pageIndex}
+            pageSize={unifiedDataTableContextValue.pageSize}
           />
         )}
         {externalAdditionalControls}
@@ -904,6 +906,8 @@ export const UnifiedDataTable = ({
     enableComparisonMode,
     rows,
     fieldFormats,
+    unifiedDataTableContextValue.pageIndex,
+    unifiedDataTableContextValue.pageSize,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(

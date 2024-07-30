@@ -191,7 +191,7 @@ describe('document selection', () => {
   });
 
   describe('DataTableDocumentToolbarBtn', () => {
-    test('it renders a button clickable button', () => {
+    test('it renders the button and its menu correctly', () => {
       const props = {
         isPlainRecord: false,
         isFilterActive: false,
@@ -201,6 +201,8 @@ describe('document selection', () => {
         enableComparisonMode: true,
         setIsCompareActive: jest.fn(),
         fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
       const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
@@ -223,6 +225,70 @@ describe('document selection', () => {
 
       expect(props.selectedDocsState.clearAllSelectedDocs).toHaveBeenCalled();
     });
+
+    test('it should not render "Select all X" button if less than pageSize is selected', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected1');
+
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
+    });
+
+    test('it should render "Select all X" button if all rows on the page are selected', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 0,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
+
+      const button = findTestSubject(component, 'dscGridSelectAllDocs');
+      expect(button.exists()).toBe(true);
+
+      act(() => {
+        button.simulate('click');
+      });
+
+      expect(props.selectedDocsState.selectAllDocs).toHaveBeenCalled();
+    });
+
+    test('it should not render "Select all X" button if on another page', () => {
+      const props = {
+        isPlainRecord: false,
+        isFilterActive: false,
+        rows: dataTableContextMock.rows,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsFilterActive: jest.fn(),
+        enableComparisonMode: true,
+        setIsCompareActive: jest.fn(),
+        fieldFormats: servicesMock.fieldFormats,
+        pageIndex: 1,
+        pageSize: 2,
+      };
+      const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
+      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
+
+      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
+    });
   });
 
   describe('DataTableCompareToolbarBtn', () => {
@@ -235,6 +301,8 @@ describe('document selection', () => {
       enableComparisonMode: true,
       setIsCompareActive: jest.fn(),
       fieldFormats: servicesMock.fieldFormats,
+      pageIndex: 0,
+      pageSize: 2,
     };
 
     const renderCompareBtn = ({

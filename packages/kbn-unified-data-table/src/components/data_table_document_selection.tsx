@@ -81,12 +81,7 @@ export const SelectAllButton = () => {
   const { getCountOfSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
-    if (typeof pageIndex === 'number' && typeof pageSize === 'number') {
-      const start = pageIndex * pageSize;
-      const end = start + pageSize;
-      return rows.slice(start, end).map((row) => row.id);
-    }
-    return undefined; // pagination is disabled
+    return getDocIdsForCurrentPage(rows, pageIndex, pageSize);
   }, [rows, pageIndex, pageSize]);
 
   const countOfSelectedDocs = useMemo(() => {
@@ -159,6 +154,8 @@ export function DataTableDocumentToolbarBtn({
   enableComparisonMode,
   setIsCompareActive,
   fieldFormats,
+  pageIndex,
+  pageSize,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
@@ -168,9 +165,25 @@ export function DataTableDocumentToolbarBtn({
   enableComparisonMode: boolean | undefined;
   setIsCompareActive: (value: boolean) => void;
   fieldFormats: FieldFormatsStart;
+  pageIndex: number | undefined;
+  pageSize: number | undefined;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
-  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
+  const {
+    selectAllDocs,
+    clearAllSelectedDocs,
+    isDocSelected,
+    selectedDocIds,
+    getCountOfSelectedDocs,
+  } = selectedDocsState;
+
+  const areAllDocsOnCurrentPageSelected = () => {
+    const docIdsFromCurrentPage = getDocIdsForCurrentPage(rows, pageIndex, pageSize);
+    if (!docIdsFromCurrentPage?.length) {
+      return false;
+    }
+    return getCountOfSelectedDocs(docIdsFromCurrentPage) === pageSize;
+  };
 
   const getMenuItems = useCallback(() => {
     return [
@@ -345,7 +358,10 @@ export function DataTableDocumentToolbarBtn({
       <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
         {selectedRowsMenuButton}
       </EuiFlexItem>
-      {!isFilterActive && selectedDocIds.length < rows.length && rows.length > 1 ? (
+      {!isFilterActive &&
+      selectedDocIds.length < rows.length &&
+      rows.length > 1 &&
+      areAllDocsOnCurrentPageSelected() ? (
         <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
           <EuiDataGridToolbarControl
             data-test-subj="dscGridSelectAllDocs"
@@ -410,3 +426,16 @@ export const DataTableCompareToolbarBtn = ({
     </EuiContextMenuItem>
   );
 };
+
+function getDocIdsForCurrentPage(
+  rows: DataTableRecord[],
+  pageIndex: number | undefined,
+  pageSize: number | undefined
+): string[] | undefined {
+  if (typeof pageIndex === 'number' && typeof pageSize === 'number') {
+    const start = pageIndex * pageSize;
+    const end = start + pageSize;
+    return rows.slice(start, end).map((row) => row.id);
+  }
+  return undefined; // pagination is disabled
+}
