@@ -6,24 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-
-export const directionRT = rt.keyof({
-  asc: null,
-  desc: null,
-});
-
-export const sortRT = rt.strict({
-  field: rt.string,
-  direction: directionRT,
-});
-
-export const tableRT = rt.exact(
-  rt.partial({
-    page: rt.number,
-    rowsPerPage: rt.number,
-    sort: sortRT,
-  })
-);
+import { degradedFieldRT, tableRT, timeRangeRT } from './common';
 
 const integrationRT = rt.strict({
   name: rt.string,
@@ -45,21 +28,6 @@ const datasetRT = rt.intersection([
     })
   ),
 ]);
-
-const timeRangeRT = rt.strict({
-  from: rt.string,
-  to: rt.string,
-  refresh: rt.strict({
-    pause: rt.boolean,
-    value: rt.number,
-  }),
-});
-
-const degradedFieldRT = rt.exact(
-  rt.partial({
-    table: tableRT,
-  })
-);
 
 export const flyoutRT = rt.exact(
   rt.partial({

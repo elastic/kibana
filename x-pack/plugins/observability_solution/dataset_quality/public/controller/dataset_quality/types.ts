@@ -12,7 +12,7 @@ import {
   WithFlyoutOptions,
   WithTableOptions,
   DegradedFields,
-} from '../state_machines/dataset_quality_controller';
+} from '../../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {
   state$: Observable<DatasetQualityPublicState>;

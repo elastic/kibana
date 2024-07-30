@@ -9,7 +9,12 @@ import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { DatasetQualityStartDeps } from '../../../types';
-import { Dashboard, DataStreamStat, DegradedFieldResponse } from '../../../../common/api_types';
+import {
+  Dashboard,
+  DataStreamStat,
+  DegradedFieldResponse,
+  NonAggregatableDatasets,
+} from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
@@ -18,7 +23,6 @@ import {
   GetDataStreamsStatsQuery,
   GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
-  GetNonAggregatableDataStreamsResponse,
   DataStreamStatServiceResponse,
 } from '../../../../common/data_streams_stats';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -35,10 +39,10 @@ import {
   fetchIntegrationDashboardsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   noDatasetSelected,
-  fetchNonAggregatableDatasetsFailedNotifier,
   fetchDataStreamIntegrationFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,
 } from './notifications';
+import { fetchNonAggregatableDatasetsFailedNotifier } from '../../common/notifications';
 import {
   DatasetQualityControllerContext,
   DatasetQualityControllerEvent,
@@ -628,7 +632,7 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeNonAggregatableDatasets: assign(
           (
             _context: DefaultDatasetQualityControllerState,
-            event: DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
+            event: DoneInvokeEvent<NonAggregatableDatasets>
           ) => {
             return 'data' in event
               ? {
@@ -660,7 +664,7 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDatasetIsNonAggregatable: assign(
           (
             context: DefaultDatasetQualityControllerState,
-            event: DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
+            event: DoneInvokeEvent<NonAggregatableDatasets>
           ) => {
             return 'data' in event
               ? {
@@ -930,9 +934,5 @@ export const createDatasetQualityControllerStateMachine = ({
   });
 
 export type DatasetQualityControllerStateService = InterpreterFrom<
-  typeof createDatasetQualityControllerStateMachine
->;
-
-export type DatasetQualityControllerStateMachine = ReturnType<
   typeof createDatasetQualityControllerStateMachine
 >;

@@ -6,39 +6,42 @@
  */
 
 import { IToasts } from '@kbn/core-notifications-browser';
-import { DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
+import { DatasetQualityDetailsPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
+import { DatasetQualityDetailsPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import * as rt from 'io-ts';
 import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';
 import * as urlSchemaV1 from './url_schema_v1';
 
-export const updateUrlFromDatasetQualityState = ({
+export const updateUrlFromDatasetQualityDetailsState = ({
   urlStateStorageContainer,
-  datasetQualityState,
+  datasetQualityDetailsState,
 }: {
   urlStateStorageContainer: IKbnUrlStateStorage;
-  datasetQualityState?: DatasetQualityPublicState;
+  datasetQualityDetailsState?: DatasetQualityDetailsPublicState;
 }) => {
-  if (!datasetQualityState) {
+  if (!datasetQualityDetailsState) {
     return;
   }
 
-  const encodedUrlStateValues = urlSchemaV1.stateFromUntrustedUrlRT.encode(datasetQualityState);
+  const encodedUrlStateValues = urlSchemaV1.stateFromUntrustedUrlRT.encode(
+    datasetQualityDetailsState
+  );
 
   urlStateStorageContainer.set(DATA_QUALITY_URL_STATE_KEY, encodedUrlStateValues, {
     replace: true,
   });
 };
 
-export const getDatasetQualityStateFromUrl = ({
+export const getDatasetQualityDetailsStateFromUrl = ({
   toastsService,
   urlStateStorageContainer,
 }: {
   toastsService: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
-}): Partial<DatasetQualityPublicState> | undefined => {
+}): DatasetQualityDetailsPublicStateUpdate | undefined => {
   const urlStateValues =
     urlStateStorageContainer.get<unknown>(DATA_QUALITY_URL_STATE_KEY) ?? undefined;
 

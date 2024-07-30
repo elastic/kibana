@@ -24,3 +24,12 @@ export interface BasicDataStream {
   namespace: string;
   integration?: Integration;
 }
+
+export interface TableCriteria<TSortField> {
+  page: number;
+  rowsPerPage: number;
+  sort: {
+    field: TSortField;
+    direction: SortDirection;
+  };
+}

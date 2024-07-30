@@ -6,16 +6,16 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import type { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
+import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_NAME } from '../../../common';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { DatasetQualityContextProvider, useDatasetQualityContext } from './context';
+import { DatasetQualityDetailsContextProvider, useDatasetQualityDetailsContext } from './context';
 
-export const DatasetQualityRoute = () => {
+export const DatasetQualityDetailsRoute = () => {
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const {
     services: { chrome, datasetQuality, notifications, appParams },
@@ -24,21 +24,21 @@ export const DatasetQualityRoute = () => {
   useBreadcrumbs(PLUGIN_NAME, appParams, chrome);
 
   return (
-    <DatasetQualityContextProvider
+    <DatasetQualityDetailsContextProvider
       datasetQuality={datasetQuality}
       urlStateStorageContainer={urlStateStorageContainer}
       toastsService={notifications.toasts}
     >
       <ConnectedContent />
-    </DatasetQualityContextProvider>
+    </DatasetQualityDetailsContextProvider>
   );
 };
 
 const ConnectedContent = React.memo(() => {
-  const { controller } = useDatasetQualityContext();
+  const { controller } = useDatasetQualityDetailsContext();
 
   return controller ? (
-    <InitializedContent datasetQualityController={controller} />
+    <InitializedContent datasetQualityDetailsController={controller} />
   ) : (
     <>
       <EuiEmptyPrompt
@@ -55,11 +55,15 @@ const ConnectedContent = React.memo(() => {
 });
 
 const InitializedContent = React.memo(
-  ({ datasetQualityController }: { datasetQualityController: DatasetQualityController }) => {
+  ({
+    datasetQualityDetailsController,
+  }: {
+    datasetQualityDetailsController: DatasetQualityDetailsController;
+  }) => {
     const {
       services: { datasetQuality },
     } = useKibanaContextForPlugin();
 
-    return <datasetQuality.DatasetQuality controller={datasetQualityController} />;
+    return <datasetQuality.DatasetQualityDetails controller={datasetQualityDetailsController} />;
   }
 );

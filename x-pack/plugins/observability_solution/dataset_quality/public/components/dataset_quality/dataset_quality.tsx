@@ -12,7 +12,7 @@ import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
-import { DatasetQualityController } from '../../controller';
+import { DatasetQualityController } from '../../controller/dataset_quality';
 import { ITelemetryClient } from '../../services/telemetry';
 
 export interface DatasetQualityProps {
