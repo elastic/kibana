@@ -103,7 +103,7 @@ The 7.17.23 release includes the following bug fixes.
 [[fixes-v7.17.23]]
 === Bug Fixes
 Machine Learning::
-* Fixes issue with empty object creation ({kibana-pull}186821[#186821]).
+* Fixes an issue with empty object creation ({kibana-pull}186821[#186821]).
 * Removes use of re2 library ({kibana-pull}186104[#186104]).
 
 Platform::
