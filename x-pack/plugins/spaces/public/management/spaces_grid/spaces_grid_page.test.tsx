@@ -80,6 +80,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1000}
+        allowSolutionVisibility={false}
       />
     );
 
@@ -139,7 +140,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1000}
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
       />
     );
 
@@ -174,6 +175,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1000}
+        allowSolutionVisibility
       />
     );
 
@@ -203,6 +205,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1}
+        allowSolutionVisibility
       />
     );
 
@@ -237,6 +240,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1000}
+        allowSolutionVisibility
       />
     );
 
@@ -272,6 +276,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1000}
+        allowSolutionVisibility
       />
     );
 

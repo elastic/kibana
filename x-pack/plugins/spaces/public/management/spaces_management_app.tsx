@@ -28,12 +28,11 @@ interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
-  solutionNavExperiment: Promise<boolean>;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, config, solutionNavExperiment }: CreateParams) {
+  create({ getStartServices, spacesManager, config }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -66,7 +65,7 @@ export const spacesManagementApp = Object.freeze({
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };
@@ -89,7 +88,7 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };
@@ -116,7 +115,7 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };

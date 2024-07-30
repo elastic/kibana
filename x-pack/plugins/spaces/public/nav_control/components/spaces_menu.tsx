@@ -47,7 +47,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   readonly activeSpace: Space | null;
-  isSolutionNavEnabled: boolean;
+  allowSolutionVisibility: boolean;
 }
 class SpacesMenuUI extends Component<Props> {
   public render() {
@@ -138,7 +138,7 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
-        ...(this.props.isSolutionNavEnabled && {
+        ...(this.props.allowSolutionVisibility && {
           append: <SpaceSolutionBadge solution={space.solution} />,
         }),
         checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,

@@ -54,7 +54,7 @@ interface Props {
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
-  solutionNavExperiment?: Promise<boolean>;
+  allowSolutionVisibility: boolean;
 }
 
 interface State {
@@ -63,7 +63,6 @@ interface State {
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
-  isSolutionNavEnabled: boolean;
 }
 
 export class SpacesGridPage extends Component<Props, State> {
@@ -75,7 +74,6 @@ export class SpacesGridPage extends Component<Props, State> {
       loading: true,
       showConfirmDeleteModal: false,
       selectedSpace: null,
-      isSolutionNavEnabled: false,
     };
   }
 
@@ -83,10 +81,6 @@ export class SpacesGridPage extends Component<Props, State> {
     if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
-
-    this.props.solutionNavExperiment?.then((isEnabled) => {
-      this.setState({ isSolutionNavEnabled: isEnabled });
-    });
   }
 
   public render() {
@@ -331,7 +325,7 @@ export class SpacesGridPage extends Component<Props, State> {
       },
     ];
 
-    if (this.state.isSolutionNavEnabled) {
+    if (this.props.allowSolutionVisibility) {
       config.push({
         field: 'solution',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.solutionColumnName', {

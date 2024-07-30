@@ -37,7 +37,7 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   theme: WithEuiThemeProps['theme'];
-  solutionNavExperiment: Promise<boolean>;
+  allowSolutionVisibility: boolean;
 }
 
 interface State {
@@ -45,7 +45,6 @@ interface State {
   loading: boolean;
   activeSpace: Space | null;
   spaces: Space[];
-  isSolutionNavEnabled: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
@@ -60,7 +59,6 @@ class NavControlPopoverUI extends Component<Props, State> {
       loading: false,
       activeSpace: null,
       spaces: [],
-      isSolutionNavEnabled: false,
     };
   }
 
@@ -71,10 +69,6 @@ class NavControlPopoverUI extends Component<Props, State> {
           activeSpace,
         });
       },
-    });
-
-    this.props.solutionNavExperiment.then((isEnabled) => {
-      this.setState({ isSolutionNavEnabled: isEnabled });
     });
   }
 
@@ -108,7 +102,7 @@ class NavControlPopoverUI extends Component<Props, State> {
           navigateToApp={this.props.navigateToApp}
           navigateToUrl={this.props.navigateToUrl}
           activeSpace={this.state.activeSpace}
-          isSolutionNavEnabled={this.state.isSolutionNavEnabled}
+          allowSolutionVisibility={this.props.allowSolutionVisibility}
         />
       );
     }

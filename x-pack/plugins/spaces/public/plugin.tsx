@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
@@ -15,7 +14,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
-import { isSolutionNavEnabled } from './experiments';
 import { ManagementService } from './management';
 import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
@@ -33,7 +31,6 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
-  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 /**
@@ -53,7 +50,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private managementService?: ManagementService;
   private readonly config: ConfigType;
   private readonly isServerless: boolean;
-  private solutionNavExperiment = Promise.resolve(false);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -72,15 +68,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
     };
-
-    this.solutionNavExperiment = core
-      .getStartServices()
-      .then(([, { cloud, cloudExperiments }]) => isSolutionNavEnabled(cloud, cloudExperiments))
-      .catch((err) => {
-        this.initializerContext.logger.get().error(`Failed to retrieve cloud experiment: ${err}`);
-
-        return false;
-      });
 
     // Only skip setup of space selector and management service if serverless and only one space is allowed
     if (!(this.isServerless && hasOnlyDefaultSpace)) {
@@ -108,7 +95,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           spacesManager: this.spacesManager,
           config: this.config,
           getRolesAPIClient,
-          solutionNavExperiment: this.solutionNavExperiment,
         });
       }
 
@@ -125,7 +111,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment);
+      initSpacesNavControl(this.spacesManager, core, this.config);
     }
 
     return this.spacesApi;
