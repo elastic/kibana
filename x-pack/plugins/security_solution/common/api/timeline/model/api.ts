@@ -517,7 +517,6 @@ export const pageInfoTimeline = runtimeTypes.type({
 
 export interface PageInfoTimeline {
   pageIndex: number;
-
   pageSize: number;
 }
 
@@ -609,14 +608,14 @@ export interface SerializedFilterQueryResult {
   filterQuery?: Maybe<SerializedKueryQueryResult>;
 }
 
-export interface SerializedKueryQueryResult {
-  kuery?: Maybe<KueryFilterQueryResult>;
-  serializedQuery?: Maybe<string>;
-}
-
 export interface KueryFilterQueryResult {
   kind?: Maybe<string>;
   expression?: Maybe<string>;
+}
+
+export interface SerializedKueryQueryResult {
+  kuery?: Maybe<KueryFilterQueryResult>;
+  serializedQuery?: Maybe<string>;
 }
 
 export interface TimelineResult {
@@ -663,11 +662,6 @@ export interface ResponseTimeline {
 export interface SortTimeline {
   sortField: SortFieldTimeline;
   sortOrder: Direction;
-}
-
-export interface ExportTimelineNotFoundError {
-  statusCode: number;
-  message: string;
 }
 
 export interface GetAllTimelineVariables {
