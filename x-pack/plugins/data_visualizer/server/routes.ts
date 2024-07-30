@@ -90,7 +90,6 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
           return response.ok({ body: endpoints });
         } catch (e) {
-          logger.warn(`Unable to test grok pattern ${e.message}`);
           return response.customError(wrapError(e));
         }
       }

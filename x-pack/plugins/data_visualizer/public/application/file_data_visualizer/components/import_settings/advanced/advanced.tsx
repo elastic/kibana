@@ -30,7 +30,7 @@ interface Props {
   index: string;
   dataView: string;
   initialized: boolean;
-  onIndexChange(index: string, skipValidation?: boolean): void;
+  onIndexChange(index: string): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   onDataViewChange(): void;

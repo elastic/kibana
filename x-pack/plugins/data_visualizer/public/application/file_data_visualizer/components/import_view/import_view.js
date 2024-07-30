@@ -58,7 +58,7 @@ const DEFAULT_STATE = {
   createDataView: true,
   dataView: '',
   dataViewId: '',
-  pipelineId: null,
+  pipelineId: '',
   errors: [],
   importFailures: [],
   docCount: 0,
@@ -75,20 +75,14 @@ const DEFAULT_STATE = {
   checkingValidIndex: false,
   combinedFields: [],
   importer: undefined,
-  createPipeline: true,
 };
 
 export class ImportView extends Component {
-  originalMappingsString = '';
-  originalPipelineString = '';
-
   constructor(props) {
     super(props);
 
     this.state = getDefaultState(DEFAULT_STATE, this.props.results, this.props.capabilities);
     this.dataViewsContract = props.dataViewsContract;
-    this.originalMappingsString = this.state.mappingsString;
-    this.originalPipelineString = this.state.pipelineString;
   }
 
   componentDidMount() {
@@ -112,7 +106,6 @@ export class ImportView extends Component {
       mappingsString,
       pipelineString,
       pipelineId,
-      createPipeline,
     } = this.state;
 
     importData(
@@ -123,10 +116,8 @@ export class ImportView extends Component {
         createDataView,
         indexSettingsString,
         mappingsString,
-        originalMappingsString: this.originalMappingsString,
         pipelineString,
         pipelineId,
-        createPipeline,
       },
       (state) => this.setState(state)
     );
@@ -138,14 +129,12 @@ export class ImportView extends Component {
     });
   };
 
-  onIndexChange = (index, skipValidation) => {
+  onIndexChange = (index) => {
     this.setState({
       index,
-      checkingValidIndex: !skipValidation,
+      checkingValidIndex: true,
     });
-    if (!skipValidation) {
-      this.debounceIndexCheck(index);
-    }
+    this.debounceIndexCheck(index);
   };
 
   debounceIndexCheck = debounce(async (index) => {
@@ -343,8 +332,6 @@ export class ImportView extends Component {
               results={this.props.results}
               pipelineId={pipelineId}
               setPipelineId={this.setPipelineId}
-              originalMappingsString={this.originalMappingsString}
-              originalPipelineString={this.originalPipelineString}
             />
 
             <EuiSpacer size="m" />
