@@ -21,10 +21,10 @@ import {
   type UnifiedFieldListSidebarContainerApi,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
+import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataDocuments$ } from '../../state_management/discover_data_state_container';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus, SidebarToggleState } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import {

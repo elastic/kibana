@@ -43,6 +43,7 @@ export {
   isNestedFieldParent,
   isLegacyTableEnabled,
   usePager,
+  calcFieldCounts,
   getLogLevelColor,
   getLogLevelCoalescedValue,
   getLogLevelCoalescedValueLabel,
