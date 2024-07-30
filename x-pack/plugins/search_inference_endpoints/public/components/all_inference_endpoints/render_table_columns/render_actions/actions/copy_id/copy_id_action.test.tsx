@@ -64,6 +64,6 @@ describe('CopyIDAction', () => {
     const { getByTestId } = render(<TestComponent />);
     const labelElement = getByTestId('inference-endpoints-action-copy-id-label');
 
-    expect(labelElement).toExist();
+    expect(labelElement).toBeVisible();
   });
 });

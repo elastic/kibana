@@ -62,11 +62,6 @@ const filterOptions = {
   type: ['sparse_embedding', 'text_embedding'],
 } as any;
 
-const deploymentStatus = {
-  '.elser_model_2': 'deployed',
-  lang_ident_model_1: 'not_deployed',
-} as any;
-
 const searchKey = 'my';
 
 describe('useTableData', () => {
