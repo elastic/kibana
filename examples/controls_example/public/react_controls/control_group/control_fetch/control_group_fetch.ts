@@ -37,9 +37,6 @@ export function controlGroupFetch$(
       }
       if (!parentIgnoreSettings?.ignoreTimerange && parentApi.timeRange$) {
         observables.push(parentApi.timeRange$);
-        if (parentApi.timeslice$) {
-          observables.push(parentApi.timeslice$);
-        }
       }
       if (apiPublishesReload(parentApi)) {
         observables.push(parentApi.reload$);
@@ -61,13 +58,7 @@ export function controlGroupFetch$(
         timeRange:
           parentIgnoreSettings?.ignoreTimerange || !parentApi.timeRange$
             ? undefined
-            : parentApi.timeslice$?.value
-            ? {
-                from: new Date(parentApi.timeslice$?.value[0]).toISOString(),
-                to: new Date(parentApi.timeslice$?.value[1]).toISOString(),
-                mode: 'absolute' as 'absolute',
-              }
-            : (parentApi as PublishesUnifiedSearch).timeRange$.value,
+            : parentApi.timeRange$.value,
       };
     })
   );
