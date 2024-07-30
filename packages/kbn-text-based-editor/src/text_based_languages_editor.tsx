@@ -12,8 +12,11 @@ import {
   EuiOutsideClickDetector,
   useEuiTheme,
   EuiDatePicker,
+  EuiToolTip,
+  EuiButton,
+  type EuiButtonColor,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
@@ -351,6 +354,34 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     fieldsMetadata,
   ]);
 
+  const queryRunButtonProperties = useMemo(() => {
+    if (allowQueryCancellation && isLoading) {
+      return {
+        label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.cancel', {
+          defaultMessage: 'Cancel',
+        }),
+        iconType: 'cross',
+        color: 'text',
+      };
+    }
+    if (code !== codeWhenSubmitted) {
+      return {
+        label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+          defaultMessage: 'Run query',
+        }),
+        iconType: 'play',
+        color: 'success',
+      };
+    }
+    return {
+      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.refreshLabel', {
+        defaultMessage: 'Refresh',
+      }),
+      iconType: 'refresh',
+      color: 'primary',
+    };
+  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
+
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
       return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
@@ -551,6 +582,38 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const editorPanel = (
     <>
+      {Boolean(editorIsInline) && (
+        <EuiFlexGroup
+          gutterSize="none"
+          responsive={false}
+          justifyContent="flexEnd"
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.runQuery', {
+                defaultMessage: 'Run query',
+              })}
+            >
+              <EuiButton
+                color={queryRunButtonProperties.color as EuiButtonColor}
+                onClick={onQuerySubmit}
+                iconType={queryRunButtonProperties.iconType}
+                size="s"
+                isLoading={isLoading && !allowQueryCancellation}
+                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                data-test-subj="TextBasedLangEditor-run-query-button"
+                aria-label={queryRunButtonProperties.label}
+              >
+                {queryRunButtonProperties.label}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
         <EuiOutsideClickDetector
           onOutsideClick={() => {
@@ -649,10 +712,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         detectedTimestamp={detectedTimestamp}
         hideRunQueryText={hideRunQueryText}
         editorIsInline={editorIsInline}
-        disableSubmitAction={disableSubmitAction}
         isSpaceReduced={isSpaceReduced}
-        isLoading={isQueryLoading}
-        allowQueryCancellation={allowQueryCancellation}
         hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
@@ -660,7 +720,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
         refetchHistoryItems={refetchHistoryItems}
-        queryHasChanged={code !== codeWhenSubmitted}
         isHelpMenuOpen={helpMenuPopoverProps.isHelpMenuOpen}
         setIsHelpMenuOpen={helpMenuPopoverProps.setIsHelpMenuOpen}
       />

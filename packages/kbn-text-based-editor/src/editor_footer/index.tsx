@@ -9,14 +9,7 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCode,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -52,16 +45,12 @@ interface EditorFooterProps {
   setIsHelpMenuOpen: (status: boolean) => void;
   measuredContainerWidth: number;
   hideRunQueryText?: boolean;
-  disableSubmitAction?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
-  isLoading?: boolean;
-  allowQueryCancellation?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
-  queryHasChanged?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -74,18 +63,14 @@ export const EditorFooter = memo(function EditorFooter({
   runQuery,
   updateQuery,
   hideRunQueryText,
-  disableSubmitAction,
   editorIsInline,
   isSpaceReduced,
-  isLoading,
-  allowQueryCancellation,
   hideTimeFilterInfo,
   isHistoryOpen,
   setIsHistoryOpen,
   hideQueryHistory,
   refetchHistoryItems,
   isInCompactMode,
-  queryHasChanged,
   measuredContainerWidth,
   code,
   isHelpMenuOpen,
@@ -300,49 +285,6 @@ export const EditorFooter = memo(function EditorFooter({
                       isSpaceReduced={true}
                     />
                   )}
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                        {
-                          defaultMessage: 'Run query',
-                        }
-                      )}
-                    >
-                      <EuiButtonIcon
-                        display="base"
-                        color={queryHasChanged ? 'success' : 'primary'}
-                        onClick={runQuery}
-                        iconType={
-                          allowQueryCancellation && isLoading
-                            ? 'cross'
-                            : queryHasChanged
-                            ? 'play'
-                            : 'refresh'
-                        }
-                        size="s"
-                        isLoading={isLoading && !allowQueryCancellation}
-                        isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                        data-test-subj="TextBasedLangEditor-run-query-button"
-                        aria-label={
-                          allowQueryCancellation && isLoading
-                            ? i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.cancel',
-                                {
-                                  defaultMessage: 'Cancel',
-                                }
-                              )
-                            : i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                                {
-                                  defaultMessage: 'Run query',
-                                }
-                              )
-                        }
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
                   {documentationSections && (
                     <EuiFlexItem grow={false}>
                       <LanguageDocumentationPopover
