@@ -97,7 +97,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/core-application-browser",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/slo-plugin"
   ],
   "exclude": ["target/**/*"]
 }

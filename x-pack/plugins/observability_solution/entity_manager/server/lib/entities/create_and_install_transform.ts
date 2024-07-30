@@ -27,6 +27,24 @@ export async function createAndInstallHistoryTransform(
   }
 }
 
+export async function createAndInstallHistoryBackfillTransform(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    const historyTransform = generateHistoryTransform(definition, true);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
+      logger,
+    });
+  } catch (e) {
+    logger.error(
+      `Cannot create entity history backfill transform for [${definition.id}] entity definition`
+    );
+    throw e;
+  }
+}
+
 export async function createAndInstallLatestTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
