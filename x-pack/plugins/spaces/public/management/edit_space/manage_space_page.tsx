@@ -30,6 +30,7 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
+import { SectionPanel } from './section_panel';
 import { SolutionView } from './solution_view';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
@@ -215,6 +216,11 @@ export class ManageSpacePage extends Component<Props, State> {
             />
           </>
         )}
+
+        <EuiSpacer />
+        <SectionPanel title="Assign roles">
+          <p>WIP</p>
+        </SectionPanel>
 
         {this.props.allowFeatureVisibility && (
           <>
