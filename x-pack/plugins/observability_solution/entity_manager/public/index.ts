@@ -26,3 +26,5 @@ export {
   ERROR_PARTIAL_BUILTIN_INSTALLATION,
   ERROR_DEFINITION_STOPPED,
 } from '../common/errors';
+
+export { EntityManagerUnauthorizedError } from './lib/errors';

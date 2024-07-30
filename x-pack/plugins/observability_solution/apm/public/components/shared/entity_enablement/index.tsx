@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { EntityManagerUnauthorizedError } from '@kbn/entityManager-plugin/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
@@ -80,13 +81,13 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
       }
     } catch (error) {
       setIsLoading(false);
-      const err = error as Error | IHttpFetchError<ResponseErrorBody>;
-      if ('response' in err) {
-        if (err.response?.status === 403) {
-          setsIsUnauthorizedModalVisible(true);
-          return;
-        }
+
+      if (error instanceof EntityManagerUnauthorizedError) {
+        setsIsUnauthorizedModalVisible(true);
+        return;
       }
+
+      const err = error as Error | IHttpFetchError<ResponseErrorBody>;
       notifications.toasts.danger({
         title: i18n.translate('xpack.apm.eemEnablement.errorTitle', {
           defaultMessage: 'Error while enabling the new experience',
