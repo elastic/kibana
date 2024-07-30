@@ -7,11 +7,12 @@
 
 import { UnmuteAlertParams } from '../../../../../../application/rule/methods/unmute_alert/types';
 import { RewriteRequestCase } from '../../../../../lib';
+import { UnmuteAlertRequestParamsV1 } from '../../../../../../../common/routes/rule/apis/unmute_alert';
 
 export const transformRequestParamsToApplication: RewriteRequestCase<UnmuteAlertParams> = ({
   rule_id: alertId,
   alert_id: alertInstanceId,
-}) => ({
+}: UnmuteAlertRequestParamsV1) => ({
   alertId,
   alertInstanceId,
 });
