@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export interface UseActionProps {
-  onActionSuccess: () => void;
-}
-
-export type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
+export { getConnectorType as getTheHiveConnectorType } from './thehive';
