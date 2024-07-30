@@ -16,8 +16,7 @@ import {
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
 
-// Temporary workaround to avoid UI changes in Discover for now
-const DEFAULT_SORTED_CONTROL_COLUMN_IDS = [SELECT_ROW, OPEN_DETAILS];
+const REORDERED_CONTROL_COLUMN_IDS = [SELECT_ROW, OPEN_DETAILS];
 
 /**
  * Customized version of the UnifiedDataTable
@@ -49,9 +48,11 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       // TODO: remove after controls are swapped permanently https://github.com/elastic/kibana/issues/186808
+      // By default we still render [expand, select] controls
+      // The following line would swap to [select, expand] controls only if some additional controls are provided
       controlColumnIds={
         !props.controlColumnIds && rowAdditionalLeadingControls
-          ? DEFAULT_SORTED_CONTROL_COLUMN_IDS
+          ? REORDERED_CONTROL_COLUMN_IDS
           : props.controlColumnIds
       }
       {...props}
