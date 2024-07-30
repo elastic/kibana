@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -61,6 +61,19 @@ export const RowMenuControlCell = ({
     [rowProps, setIsMoreActionsPopoverOpen]
   );
 
+  const popoverMenuItems = useMemo(
+    () =>
+      rowControlColumns.map((rowControlColumn) => {
+        const Control = getControlComponent(rowControlColumn.id);
+        return (
+          <Fragment key={rowControlColumn.id}>
+            {rowControlColumn.renderControl(Control, rowProps)}
+          </Fragment>
+        );
+      }),
+    [rowControlColumns, rowProps, getControlComponent]
+  );
+
   return (
     <EuiPopover
       id={`rowMenuActionsPopover_${props.rowIndex}`}
@@ -91,17 +104,7 @@ export const RowMenuControlCell = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel
-        size="s"
-        items={rowControlColumns.map((rowControlColumn) => {
-          const Control = getControlComponent(rowControlColumn.id);
-          return (
-            <Fragment key={rowControlColumn.id}>
-              {rowControlColumn.renderControl(Control, rowProps)}
-            </Fragment>
-          );
-        })}
-      />
+      <EuiContextMenuPanel size="s" items={popoverMenuItems} />
     </EuiPopover>
   );
 };
