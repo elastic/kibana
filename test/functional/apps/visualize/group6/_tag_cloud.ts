@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should show the tags and relative size', async function () {
+    it('should show the tags and relative size', function () {
       return PageObjects.tagCloud.getTextSizes().then(function (results) {
         log.debug('results here ' + results);
         expect(results).to.eql(['72px', '63px', '32px', '25px', '18px']);

@@ -463,7 +463,7 @@ export class VisualizeEmbeddable {
     this.warningDomNode = warningDiv;
 
     this.domNode = div;
-    this.renderComplete.setEl(domNode);
+    this.renderComplete.setEl(div);
     this.renderComplete.setTitle(this.output.title || '');
 
     const { core } = this.deps.start();
@@ -524,7 +524,6 @@ export class VisualizeEmbeddable {
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
     }
-
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
 
