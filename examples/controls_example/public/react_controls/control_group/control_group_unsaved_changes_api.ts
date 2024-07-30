@@ -21,9 +21,13 @@ import { combineLatest, map } from 'rxjs';
 import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
 import { ControlGroupRuntimeState, ControlPanelsState } from './types';
 
-type ControlGroupComparatorState = Pick<
+export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,
-  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
+  | 'autoApplySelections'
+  | 'chainingSystem'
+  | 'ignoreParentSettings'
+  | 'initialChildControlState'
+  | 'labelPosition'
 > & {
   controlsInOrder: ControlsInOrder;
 };
@@ -41,6 +45,7 @@ export function initializeControlGroupUnsavedChanges(
       chainingSystem: lastSavedRuntimeState.chainingSystem,
       controlsInOrder: getControlsInOrder(lastSavedRuntimeState.initialChildControlState),
       ignoreParentSettings: lastSavedRuntimeState.ignoreParentSettings,
+      initialChildControlState: lastSavedRuntimeState.initialChildControlState,
       labelPosition: lastSavedRuntimeState.labelPosition,
     },
     parentApi,

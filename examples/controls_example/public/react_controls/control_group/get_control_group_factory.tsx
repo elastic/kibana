@@ -33,7 +33,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
-import { ControlsInOrder, initControlsManager } from './init_controls_manager';
+import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
@@ -97,6 +97,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const unsavedChanges = initializeControlGroupUnsavedChanges(
         controlsManager.api.children$,
         {
+          ...controlsManager.comparators,
           autoApplySelections: [
             autoApplySelections$,
             (next: boolean) => autoApplySelections$.next(next),
@@ -104,11 +105,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           chainingSystem: [
             chainingSystem$,
             (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
-          ],
-          controlsInOrder: [
-            controlsManager.controlsInOrder$,
-            (next: ControlsInOrder) => controlsManager.controlsInOrder$.next(next),
-            fastIsEqual,
           ],
           ignoreParentSettings: [
             ignoreParentSettings$,

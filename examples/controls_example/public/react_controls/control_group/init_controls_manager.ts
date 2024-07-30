@@ -7,6 +7,7 @@
  */
 
 import { v4 as generateId } from 'uuid';
+import fastIsEqual from 'fast-deep-equal';
 import {
   HasSerializedChildState,
   PanelPackage,
@@ -14,11 +15,12 @@ import {
 } from '@kbn/presentation-containers';
 import { Reference } from '@kbn/content-management-utils';
 import { BehaviorSubject, first, merge } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
+import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;
 
@@ -34,9 +36,10 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
 }
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
+  const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-  const controlsPanelState: { [panelId: string]: DefaultControlState } = {
+  let controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
@@ -194,5 +197,28 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       },
     } as PresentationContainer &
       HasSerializedChildState<ControlPanelState> & { untilInitialized: () => Promise<void> },
+    comparators: {
+      controlsInOrder: [
+        controlsInOrder$,
+        (next: ControlsInOrder) => controlsInOrder$.next(next),
+        fastIsEqual,
+      ],
+      // Control state differences tracked by controlApi comparators
+      // Control ordering differences tracked by controlsInOrder comparator
+      // initialChildControlState comparatator exists to reset controls manager to last saved state
+      initialChildControlState: [
+        lastSavedControlsPanelState$,
+        (lastSavedControlPanelsState: ControlPanelsState) => {
+          lastSavedControlsPanelState$.next(lastSavedControlPanelsState);
+          controlsPanelState = {
+            ...lastSavedControlPanelsState,
+          };
+          controlsInOrder$.next(getControlsInOrder(lastSavedControlPanelsState));
+        },
+        () => true,
+      ],
+    } as StateComparators<
+      Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
+    >,
   };
 }
