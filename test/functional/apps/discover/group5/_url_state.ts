@@ -205,6 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 22, 2015 @ 18:50:22.335css1,841',
         'Sep 22, 2015 @ 18:40:32.329css1,945',
         'Sep 22, 2015 @ 18:13:35.361css1,752',
+        'Sep 22, 2015 @ 17:22:12.782css1,583',
       ];
 
       expect(await dataGrid.getRowsText()).to.eql(filteredRows);
