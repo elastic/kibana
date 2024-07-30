@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 
@@ -23,6 +14,7 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
+import { ViewSpaceTabFooter } from './footer';
 import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import { FeatureTable } from '../edit_space/enabled_features/feature_table';
@@ -45,6 +37,7 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
   const [spaceNavigation, setSpaceNavigation] = useState<Partial<Space>>(space); // space details as seen in the Solution View UI, possibly with unsaved changes
   const [spaceFeatures, setSpaceFeatures] = useState<Partial<Space>>(space); // space details as seen in the Feature Visibility UI, possibly with unsaved changes
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
+  const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
 
   const { capabilities, getUrlForApp, http, overlays, navigateToUrl, spacesManager } =
     useViewSpaceServices();
@@ -155,22 +148,13 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({
         </EuiFlexGroup>
       </SectionPanel>
 
-      {isDirty && (
-        <>
-          <EuiSpacer />
-          <p>
-            <EuiText>
-              Changes will impact all users in the Space. The page will be reloaded.
-            </EuiText>
-          </p>
-          <p>
-            <EuiButton color="primary" fill onClick={onUpdateSpace}>
-              Update Space
-            </EuiButton>
-            <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
-          </p>
-        </>
-      )}
+      <ViewSpaceTabFooter
+        isDirty={isDirty}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        onCancel={onCancel}
+        onUpdateSpace={onUpdateSpace}
+      />
     </>
   );
 };

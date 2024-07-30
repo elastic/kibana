@@ -115,7 +115,7 @@ export const getTabs = ({
     name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.general.heading', {
       defaultMessage: 'General settings',
     }),
-    content: <ViewSpaceSettings space={space} isReadOnly={true} />,
+    content: <ViewSpaceSettings space={space} history={history} />,
   });
 
   return tabsDefinition;

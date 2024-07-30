@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 
+import type { ScopedHistory } from '@kbn/core-application-browser';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+
+import { ViewSpaceTabFooter } from './footer';
 import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import { CustomizeSpace } from '../edit_space/customize_space';
@@ -15,14 +18,23 @@ import { SpaceValidator } from '../lib';
 
 interface Props {
   space: Space;
-  isReadOnly: boolean;
+  history: ScopedHistory;
 }
 
-export const ViewSpaceSettings: React.FC<Props> = ({ space }) => {
+export const ViewSpaceSettings: React.FC<Props> = ({ space, ...props }) => {
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
+  const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
 
-  const { spacesManager } = useViewSpaceServices();
+  const { http, overlays, navigateToUrl, spacesManager } = useViewSpaceServices();
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isDirty,
+    http,
+    openConfirm: overlays.openConfirm,
+    navigateToUrl,
+    history: props.history,
+  });
 
   const validator = new SpaceValidator();
 
@@ -65,22 +77,14 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space }) => {
         editingExistingSpace={true}
         validator={validator}
       />
-      {isDirty && (
-        <>
-          <EuiSpacer />
-          <p>
-            <EuiText>
-              Changes will impact all users in the Space. The page will be reloaded.
-            </EuiText>
-          </p>
-          <p>
-            <EuiButton color="primary" fill onClick={onUpdateSpace}>
-              Update Space
-            </EuiButton>
-            <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
-          </p>
-        </>
-      )}
+
+      <ViewSpaceTabFooter
+        isDirty={isDirty}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        onCancel={onCancel}
+        onUpdateSpace={onUpdateSpace}
+      />
     </>
   );
 };
