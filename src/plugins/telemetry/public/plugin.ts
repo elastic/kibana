@@ -24,9 +24,9 @@ import type {
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
 
-import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';

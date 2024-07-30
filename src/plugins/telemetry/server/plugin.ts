@@ -38,10 +38,10 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
+import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
