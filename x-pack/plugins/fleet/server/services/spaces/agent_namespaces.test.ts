@@ -9,7 +9,7 @@ import { appContextService } from '../app_context';
 
 import type { Agent } from '../../types';
 
-import { agentsKueryNamespaceFilter, isAgentInNamespace } from './namespace';
+import { agentsKueryNamespaceFilter, isAgentInNamespace } from './agent_namespaces';
 
 jest.mock('../app_context');
 
