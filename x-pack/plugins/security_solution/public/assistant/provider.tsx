@@ -21,7 +21,7 @@ import {
 
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Message, PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { useObservable } from 'react-use';
 import { APP_ID } from '../../common';
@@ -175,8 +175,8 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
     storage,
   ]);
-  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
-  const [promptError, setPromptError] = useState<unknown | null>(null);
+
+  const [basePromptsLoaded, setBasePromptsLoaded] = useState(false);
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
@@ -192,17 +192,12 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
           });
 
           if (res.total === 0) {
-            const createResults = await createBasePrompts(notifications, http);
-            if (createResults) {
-              setPrompts(createResults);
-            }
-          } else {
-            setPrompts(res.data);
+            await createBasePrompts(notifications, http);
           }
-        } catch (e) {
-          setPromptError(e);
-        }
+        } catch (_) {}
       }
+
+      setBasePromptsLoaded(true)
     });
     createSecurityPrompts();
   }, [
@@ -219,7 +214,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   // Because our conversations need an assigned system prompt at create time,
   // we want to make sure the prompts are there before creating the first conversation
   // however if there is an error fetching the prompts, we don't want to block the app
-  if (prompts.length === 0 && promptError === null) return null;
+
   return (
     <ElasticAssistantProvider
       actionTypeRegistry={actionTypeRegistry}
@@ -238,7 +233,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
     >
-      {children}
+      {basePromptsLoaded ? children : null}
     </ElasticAssistantProvider>
   );
 };
