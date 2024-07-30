@@ -1592,7 +1592,7 @@ async function getOptionArgsSuggestions(
   if (command.name === 'stats') {
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        ['any'],
+        ['column'],
         command.name,
         option.name,
         getFieldsByType,
@@ -1602,6 +1602,7 @@ async function getOptionArgsSuggestions(
         }
       ))
     );
+
     const argDef = optionDef?.signature.params[argIndex];
 
     const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
@@ -1624,52 +1625,42 @@ async function getOptionArgsSuggestions(
         );
       }
     }
-
-    if (option.name === 'by' && !option.incomplete) {
-      suggestions.push(
-        ...getFinalSuggestions({
-          comma: optionDef?.signature.multipleParams,
-        })
-      );
-    }
   }
 
   if (optionDef) {
-    if (!suggestions.length) {
-      const argDefIndex = optionDef.signature.multipleParams
-        ? 0
-        : Math.max(option.args.length - 1, 0);
-      const types = [optionDef.signature.params[argDefIndex].type].filter(nonNullable);
-      // If it's a complete expression then proposed some final suggestions
-      // A complete expression is either a function or a column: <COMMAND> <OPTION> field <here>
-      // Or an assignment complete: <COMMAND> <OPTION> field = ... <here>
-      if (
-        (option.args.length && !isNewExpression && !isAssignment(lastArg)) ||
-        (isAssignment(lastArg) && isAssignmentComplete(lastArg))
-      ) {
-        suggestions.push(
-          ...getFinalSuggestions({
-            comma: optionDef.signature.multipleParams,
-          })
-        );
-      } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
-        // Otherwise try to complete the expression suggesting some columns
-        suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            types[0] === 'column' ? ['any'] : types,
-            command.name,
-            option.name,
-            getFieldsByType,
-            {
-              functions: option.name === 'by',
-              fields: true,
-            }
-          ))
-        );
+    const argDefIndex = optionDef.signature.multipleParams
+      ? 0
+      : Math.max(option.args.length - 1, 0);
+    const types = [optionDef.signature.params[argDefIndex].type].filter(nonNullable);
+    // If it's a complete expression then proposed some final suggestions
+    // A complete expression is either a function or a column: <COMMAND> <OPTION> field <here>
+    // Or an assignment complete: <COMMAND> <OPTION> field = ... <here>
+    if (
+      (!suggestions.length && option.args.length && !isNewExpression && !isAssignment(lastArg)) ||
+      (isAssignment(lastArg) && isAssignmentComplete(lastArg))
+    ) {
+      suggestions.push(
+        ...getFinalSuggestions({
+          comma: optionDef.signature.multipleParams,
+        })
+      );
+    } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
+      // Otherwise try to complete the expression suggesting some columns
+      suggestions.push(
+        ...(await getFieldsOrFunctionsSuggestions(
+          types[0] === 'column' ? ['any'] : types,
+          command.name,
+          option.name,
+          getFieldsByType,
+          {
+            functions: option.name === 'by',
+            fields: true,
+          }
+        ))
+      );
 
-        if (command.name === 'stats' && isNewExpression) {
-          suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
-        }
+      if (command.name === 'stats' && isNewExpression) {
+        suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));
       }
     }
   }
