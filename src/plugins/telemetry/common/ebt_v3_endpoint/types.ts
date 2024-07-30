@@ -10,4 +10,4 @@ export type {
   BuildShipperHeaders,
   BuildShipperUrl,
   BuildShipperUrlOptions,
-} from '@elastic/ebt/shippers/elastic_v3/server';
+} from '@elastic/ebt/shippers/elastic_v3/common';
