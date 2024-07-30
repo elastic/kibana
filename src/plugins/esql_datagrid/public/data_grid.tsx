@@ -174,6 +174,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
               <EuiIcon
                 type="discoverApp"
                 size="s"
+                color="primary"
                 css={css`
                   margin-right: 4px;
                 `}
