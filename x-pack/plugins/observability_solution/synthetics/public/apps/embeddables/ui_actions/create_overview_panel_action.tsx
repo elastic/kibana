@@ -33,12 +33,12 @@ export function createStatusOverviewPanelAction(): UiActionsActionDefinition<Emb
     order: 30,
     getIconType: () => 'online',
     isCompatible: async ({ embeddable }) => {
-      const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
-      return apiIsPresentationContainer(embeddable);
+      const { compatibilityCheck } = await import('./compatibility_check');
+      return compatibilityCheck(embeddable);
     },
     execute: async ({ embeddable }) => {
-      const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      const { compatibilityCheck } = await import('./compatibility_check');
+      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       try {
         embeddable.addNewPanel({
           panelType: SYNTHETICS_OVERVIEW_EMBEDDABLE,
