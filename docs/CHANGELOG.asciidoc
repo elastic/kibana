@@ -97,7 +97,35 @@ The Uptime app is already hidden from Kibana when there is no recent Heartbeat d
 [[release-notes-8.14.3]]
 == {kib} 8.14.3
 
-The 8.14.3 release includes the following bug fixes.
+The 8.14.3 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
+
+[discrete]
+[[known-185691]]
+.When using the Observability AI Assistant with the OpenAI connector, function calling will result in an error
+[%collapsible]
+====
+*Details* +
+In 8.14.3, if you are using the Observability AI Assistant with the OpenAI connector, function calling will result in an error.
+The error message will look similar to this:
+
+[source]
+----
+Error: an error occurred while running the action - Status code: 400. Message: API Error: model_error - Missing required parameter: 'messages[4].function_call.arguments'.
+----
+
+A fix will be available in 8.15. Users on 8.14.3 can get around this error by turning on synthetic function calling in _AI Assistant Settings_:
+
+. In {kib}, go to *Stack Management* → *AI Assistant* → *Observability*
+. Toggle the _Simulate function calling_ option to *On*.
+
+For more information, refer to {kibana-pull}185691[#185691].
+====
 
 [float]
 [[fixes-v8.14.3]]
@@ -110,7 +138,13 @@ For the Elastic Security 8.14.3 release information, refer to {security-guide}/r
 [[release-notes-8.14.2]]
 == {kib} 8.14.2
 
-The 8.14.2 release includes the following bug fixes.
+The 8.14.2 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
 [float]
 [[fixes-v8.14.2]]
@@ -128,7 +162,13 @@ Presentation::
 [[release-notes-8.14.1]]
 == {kib} 8.14.1
 
-The 8.14.1 release includes the following bug fixes.
+The 8.14.1 release includes the following bug fixes and known issues.
+
+[float]
+[[known-issues-8.14.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-186969]
 
 [float]
 [[fixes-v8.14.1]]
@@ -150,6 +190,28 @@ Observability::
 For information about the {kib} 8.14.0 release, review the following information.
 
 [float]
+[[known-issues-8.14.0]]
+=== Known issues
+
+// tag::known-issue-186969[]
+[discrete]
+.Creating or editing APM, {observability} and {stack-monitor-app} rules fails
+[%collapsible]
+====
+*Details* +
+When you attempt to create or edit some rule types in **{stack-manage-app}** > **{rules-ui}**, the request will fail with errors similar to `Cannot read properties of undefined (reading 'eui')` or `e.theme.eui is undefined`.
+Refer to https://github.com/elastic/kibana/issues/186969[#186969]
+
+*Impact* +
+This known issue impacts only {observability}, {stack-monitor-app}, and APM and {user-experience} rules.
+
+*Workaround* +
+To work around this issue for {observability} and APM and {user-experience} rules, create them from the {observability} *Alerts* page.
+Refer to <<apm-alerts>> and {observability-guide}/create-alerts-rules.html[Create and manage {observability} rules].
+====
+// end::known-issue-186969[]
+
+[float]
 [[breaking-changes-8.14.0]]
 === Breaking changes
 
@@ -164,7 +226,7 @@ Before you upgrade to 8.14.0, review the breaking changes, then mitigate the imp
 *Details* +
 The advanced setting which hides {esql} from the UI has been renamed from `discover:enableESQL` to `enableESQL`. It is enabled by default and must be switched off to disable {esql} features from your {kib} applications. For more information, refer to ({kibana-pull}182074[#182074]).
 ====
-      
+
 [discrete]
 [[breaking-178879]]
 .The unified search filter builder is Generally Available.
@@ -173,7 +235,7 @@ The advanced setting which hides {esql} from the UI has been renamed from `disco
 *Details* +
 The unified search filter builder (OR / AND) is out of technical preview. For more information, refer to ({kibana-pull}178879[#178879]).
 ====
-      
+
 [discrete]
 [[breaking-178860]]
 .{esql} is Generally Available.
@@ -182,7 +244,7 @@ The unified search filter builder (OR / AND) is out of technical preview. For mo
 *Details* +
 {esql} comes out of technical preview and is generally available. For more information, refer to ({kibana-pull}178860[#178860]).
 ====
-      
+
 [discrete]
 [[breaking-177549]]
 .The region map visualization type is Generally Available in Lens.
@@ -191,7 +253,7 @@ The unified search filter builder (OR / AND) is out of technical preview. For mo
 *Details* +
 The visualization type, region map, comes out of technical preview and is generally available. For more information, refer to ({kibana-pull}177549[#177549]).
 ====
-      
+
 [discrete]
 [[breaking-177089]]
 .UI enhancements to managed tags.
@@ -200,7 +262,7 @@ The visualization type, region map, comes out of technical preview and is genera
 *Details* +
 UI improvements for managed tags. For more information, refer to ({kibana-pull}177089[#177089]).
 ====
-      
+
 [float]
 [[features-8.14.0]]
 === Features
@@ -603,23 +665,23 @@ Before you upgrade to 8.13.0, review the breaking changes, then mitigate the imp
 *Details* +
 The Kafka output no longer supports conditional topics. For more information, refer to ({kibana-pull}176879[#176879]).
 ====
-      
+
 [discrete]
 [[breaking-176443]]
-.Most Fleet installed integrations are now read-only and labelled with a *Managed* tag in the Kibana UI 
+.Most Fleet installed integrations are now read-only and labelled with a *Managed* tag in the Kibana UI
 [%collapsible]
 ====
 *Details* +
 
 Integration content installed by {fleet} is no longer editable. This content is tagged with *Managed* in the {kib} UI, and is Elastic managed. This content cannot be edited or deleted, however managed visualizations, dashboards, and saved searches can be cloned. The clones can be customized.
 
-When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies. 
+When cloning a dashboard the cloned panels become entirely independent copies that are unlinked from the original configurations and dependencies.
 
 Managed content relating to specific visualization editors such as Lens, TSVB, and Maps, the clones retain the original reference configurations. The same applies to editing any saved searches in a managed visualization.
 
 For more information, refer to ({kibana-pull}172393[#172393]).
 ====
-  
+
 [discrete]
 [[breaking-174674]]
 .Removes `is_nan`, `is_finite`, and `is_infinite` functions from {esql}
@@ -628,7 +690,7 @@ For more information, refer to ({kibana-pull}172393[#172393]).
 *Details* +
 These functions have been removed from {esql} queries as they are not supported. Errors would be thrown when trying to use them. For more information, refer to ({kibana-pull}174674[#174674]).
 ====
-      
+
 [float]
 [[features-8.13.0]]
 === Features
@@ -936,7 +998,7 @@ The 8.12.1 release includes the following enhancements and bug fixes.
 === Enhancements
 
 Elastic Security::
-For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_]. 
+For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Observability::
 * Adds `defer_validation: true` to transforms on creation to stop errors when the destination index doesn't exist yet ({kibana-pull}174463[#174463]).
 
@@ -1019,7 +1081,7 @@ The previous summary transforms summarizing every SLOs won't be used anymore and
 
 Be aware that when installing a new SLO (or after resetting an SLO), we install two transforms (one for the rollup data and one that summarize the rollup data). Do not delete the new `slo-summary-{slo_id}-{slo_revision}` transforms. For more information, refer to ({kibana-pull}172224[#172224]).
 ====
-      
+
 [discrete]
 [[breaking-170635]]
 .A new sub-feature privilege to control user access to the cases settings
@@ -1028,7 +1090,7 @@ Be aware that when installing a new SLO (or after resetting an SLO), we install 
 *Details* +
 Roles with at least a sub-feature privilege configured will not have access to the cases setting like they had previously. All roles without a sub-feature privilege configured will not be affected. For more information, refer to ({kibana-pull}170635[#170635]).
 ====
-      
+
 [float]
 [[features-8.12.0]]
 === Features
@@ -1057,11 +1119,11 @@ Machine Learning::
 * Adds E5 model configurations ({kibana-pull}172053[#172053]).
 * Adds the ability to create a categorization anomaly detection job from pattern analysis ({kibana-pull}170567[#170567]).
 * Adds and displays alerts data in the Anomaly Explorer ({kibana-pull}167998[#167998]).
-Observability:: 
+Observability::
 * Adds logic to update flyout highlights ({kibana-pull}172193[#172193]).
 * Adds logic to display highlights in the flyout ({kibana-pull}170650[#170650]).
 * Changes the Custom threshold title to Beta ({kibana-pull}172360[#172360]).
-Security:: 
+Security::
 * Disables the connector parameters field ({kibana-pull}173610[#173610]).
 * Adds a risk engine missing privileges callout ({kibana-pull}171250[#171250]).
 * Asset criticality privileges API ({kibana-pull}172441[#172441]).
@@ -1764,7 +1826,7 @@ If some SLOs have been installed in a prior version at 8.10, they won't work aft
 
 *Removing SLOs before migrating to 8.10*
 
-Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1. 
+Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1.
 
 *Removing SLOs after migrating to 8.10*
 
