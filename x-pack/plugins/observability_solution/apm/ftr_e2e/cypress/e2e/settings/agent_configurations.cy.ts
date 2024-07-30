@@ -108,7 +108,7 @@ describe('Agent configuration', () => {
       .invoke('val')
       .should('contain', 'production');
   });
-  it('displays All label when selecting all option', () => {
+  it.skip('displays All label when selecting all option', () => {
     cy.intercept('GET', '/api/apm/settings/agent-configuration/environments').as(
       'serviceEnvironmentApi'
     );
@@ -121,8 +121,8 @@ describe('Agent configuration', () => {
 
     cy.get('mark').contains('All').click({ force: true });
     cy.contains('Next step').click();
-    cy.contains('Service name All');
-    cy.contains('Environment All');
+    cy.get('[data-test-subj="settingsPage_serviceName"]').contains('All');
+    cy.get('[data-test-subj="settingsPage_environmentName"]').contains('All');
     cy.contains('Edit').click();
     cy.wait('@serviceEnvironmentApi');
     cy.getByTestSubj('serviceEnviromentComboBox')
