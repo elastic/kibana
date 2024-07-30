@@ -10,7 +10,7 @@ import { v4 } from 'uuid';
 import { omit } from 'lodash';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import { DashboardPanelMap, DashboardPanelState } from '..';
 import { SavedDashboardPanel } from '../content_management';
 import {

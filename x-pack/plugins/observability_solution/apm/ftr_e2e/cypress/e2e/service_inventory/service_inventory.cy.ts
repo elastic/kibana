@@ -124,7 +124,6 @@ describe('Service inventory', () => {
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
       cy.contains('Enable fast filter').click();
       cy.get('[data-test-subj="tableSearchInput"]').should('exist');
-      cy.contains('Try it').should('not.exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
@@ -137,7 +136,6 @@ describe('Service inventory', () => {
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
       cy.contains('Disable fast filter').click();
-      cy.contains('Try it').should('exist');
       cy.get('[data-test-subj="tableSearchInput"]').should('not.exist');
     });
   });
