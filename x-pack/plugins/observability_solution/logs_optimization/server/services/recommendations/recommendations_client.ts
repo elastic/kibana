@@ -99,7 +99,6 @@ export class RecommendationsClient implements IRecommendationsClient {
       const dataStreamWildcard = indexManager.getDataStreamWildcard(dataStream);
 
       const customTemplate = await indexManager.getIndexTemplate(customTemplateName);
-      console.log(customTemplate);
 
       if (customTemplate) {
         // A custom template has been already created, update only mappings and pipeline
@@ -142,6 +141,7 @@ export class RecommendationsClient implements IRecommendationsClient {
           );
 
           await indexManager.updateIndexTemplate(customTemplateName, customTemplateDraft);
+          await indexManager.rollover();
         }
 
         if (tasks.processors) {

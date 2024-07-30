@@ -93,7 +93,11 @@ export class IndexManager {
 
     const pipelineDraft = deepmerge(pipeline, pipelineUpdates);
 
-    return await this.esClient.ingest.putPipeline({ id, ...pipelineDraft });
+    return this.esClient.ingest.putPipeline({ id, ...pipelineDraft });
+  }
+
+  rollover() {
+    return this.esClient.indices.rollover({ alias: this.indexPattern });
   }
 
   async getNewestDataStreamIndex(): Promise<NewestIndex | null> {
