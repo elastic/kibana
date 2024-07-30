@@ -140,7 +140,7 @@ const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProp
     const wrappingClassname = useMemo(() => {
       return css({
         '.accordion-host-name-button-content': {
-          'font-size': 'inherit',
+          fontSize: 'inherit',
         },
       });
     }, []);
