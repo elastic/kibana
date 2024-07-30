@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IBasePath } from '@kbn/core-http-server';
+import type { IBasePath } from '@kbn/core-http-server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import moment from 'moment';
