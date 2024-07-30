@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export type { BrowserFields, BrowserField } from '@kbn/alerting-types';
 export { parseTechnicalFields, type ParsedTechnicalFields } from './parse_technical_fields';
 export type {
   RuleRegistrySearchRequest,
@@ -12,4 +13,3 @@ export type {
   Alert as EcsFieldsResponse,
 } from '@kbn/alerting-types';
 export { BASE_RAC_ALERTS_API_PATH } from './constants';
-export type { BrowserFields, BrowserField } from './types';

@@ -21,7 +21,7 @@ import { EntityInventoryAddDataParams } from '../../../../services/telemetry';
 import {
   associateServiceLogs,
   collectServiceLogs,
-  addApmAgent,
+  addApmData,
 } from '../../../shared/add_data_buttons/buttons';
 import { ServiceEcoTour } from '../../../shared/entity_enablement/service_eco_tour';
 
@@ -76,14 +76,13 @@ export function AddDataContextMenu() {
           name: collectServiceLogs.name,
           href: basePath.prepend(collectServiceLogs.link),
           'data-test-subj': 'apmAddDataCollectServiceLogs',
-          target: '_blank',
           onClick: () => {
             reportButtonClick('collect_new_service_logs');
           },
         },
         {
-          name: addApmAgent.name,
-          href: basePath.prepend(addApmAgent.link),
+          name: addApmData.name,
+          href: basePath.prepend(addApmData.link),
           icon: 'plusInCircle',
           'data-test-subj': 'apmAddDataApmAgent',
           onClick: () => {
