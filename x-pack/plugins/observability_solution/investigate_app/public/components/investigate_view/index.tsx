@@ -6,41 +6,19 @@
  */
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/css';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, omit, pick } from 'lodash';
-import { rgba } from 'polished';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
-import { useTheme } from '../../hooks/use_theme';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
 import { AddNoteUI } from '../add_note_ui';
 import { AddObservationUI } from '../add_observation_ui';
 import { InvestigateSearchBar } from '../investigate_search_bar';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
-
-const containerClassName = css`
-  overflow: auto;
-  padding: 24px 24px 24px 24px;
-`;
-
-const scrollContainerClassName = css`
-  min-width: 1px;
-`;
-
-const gridContainerClassName = css`
-  position: relative;
-`;
-
-const sideBarClassName = css`
-  width: 240px;
-  max-width: 240px;
-  padding: 0px 12px 32px 12px;
-`;
 
 function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const {
@@ -49,7 +27,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       start: { investigate },
     },
   } = useKibana();
-  const theme = useTheme();
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
   const [range, setRange] = useDateRange();
   const [searchBarFocused, setSearchBarFocused] = useState(false);
@@ -139,23 +116,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       );
     });
   }, [revision, widgetDefinitions, uiSettings]);
-
-  const backgroundColorOpaque = rgba(theme.colors.emptyShade, 1);
-  const backgroundColorTransparent = rgba(theme.colors.emptyShade, 0);
-  const searchBarContainerClassName = css`
-    position: sticky;
-    top: -8px;
-    padding: 8px 0px;
-    margin: -8px 0px;
-    background: linear-gradient(
-      to bottom,
-      ${backgroundColorTransparent} 0%,
-      ${backgroundColorOpaque} 8px,
-      ${backgroundColorOpaque} calc(100% - 8px),
-      ${backgroundColorTransparent} 100%
-    );
-    z-index: 100;
-  `;
 
   if (!investigation || !revision || !gridItems) {
     return <EuiLoadingSpinner />;
