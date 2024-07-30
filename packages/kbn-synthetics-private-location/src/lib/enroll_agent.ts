@@ -66,7 +66,7 @@ export async function enrollAgent(
       '-e',
       'FLEET_ENROLL=1',
       '-e',
-      `FLEET_ENROLLMENT_TOKEN=WHMwVUJKRUJ2X2p2NDFuNjFIamQ6TlZ4Rl94dFVUeGE5OFNLdmhkeWcwZw==`,
+      `FLEET_ENROLLMENT_TOKEN=${enrollmentToken}`,
       '-e',
       'FLEET_INSECURE=1',
       '--rm',
