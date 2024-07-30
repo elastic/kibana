@@ -57,9 +57,11 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         return response.forbidden();
       }
 
+      const type = request.params.type;
+
       const currentNamespace = coreRequestHandlerContext.savedObjects.client.getCurrentNamespace();
 
-      const favorites = new FavoritesService(userId, currentNamespace, {
+      const favorites = new FavoritesService(currentNamespace, type, userId, {
         savedObjectClient: await getSavedObjectClient(),
         logger,
       });
@@ -67,7 +69,6 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
       try {
         const favoriteIds: GetFavoritesResponse = await favorites.addFavorite({
           id: request.params.id,
-          type: request.params.type,
         });
         return response.ok({ body: favoriteIds });
       } catch (e) {
@@ -100,9 +101,11 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         return response.forbidden();
       }
 
+      const type = request.params.type;
+
       const currentNamespace = coreRequestHandlerContext.savedObjects.client.getCurrentNamespace();
 
-      const favorites = new FavoritesService(userId, currentNamespace, {
+      const favorites = new FavoritesService(currentNamespace, type, userId, {
         savedObjectClient: await getSavedObjectClient(),
         logger,
       });
@@ -110,7 +113,6 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
       try {
         const favoriteIds: GetFavoritesResponse = await favorites.removeFavorite({
           id: request.params.id,
-          type: request.params.type,
         });
         return response.ok({ body: favoriteIds });
       } catch (e) {
@@ -144,15 +146,15 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
 
       const currentNamespace = coreRequestHandlerContext.savedObjects.client.getCurrentNamespace();
 
-      const favorites = new FavoritesService(userId, currentNamespace, {
+      const type = request.params.type;
+
+      const favorites = new FavoritesService(currentNamespace, type, userId, {
         savedObjectClient: await getSavedObjectClient(),
         logger,
       });
 
       try {
-        const getFavoritesResponse: GetFavoritesResponse = await favorites.getFavorites({
-          type: request.params.type,
-        });
+        const getFavoritesResponse: GetFavoritesResponse = await favorites.getFavorites();
 
         return response.ok({
           body: getFavoritesResponse,

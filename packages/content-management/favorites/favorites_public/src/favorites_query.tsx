@@ -50,8 +50,8 @@ export const useAddFavorite = () => {
       return favoritesClient!.addFavorite({ id });
     },
     {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(favoritesKeys.byType(favoritesClient!.getFavoriteType()));
+      onSuccess: (data) => {
+        queryClient.setQueryData(favoritesKeys.byType(favoritesClient!.getFavoriteType()), data);
       },
       onError: (error: Error) => {
         notifyError?.(
@@ -84,8 +84,8 @@ export const useRemoveFavorite = () => {
       return favoritesClient!.removeFavorite({ id });
     },
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(favoritesKeys.byType(favoritesClient!.getFavoriteType()));
+      onSuccess: (data) => {
+        queryClient.setQueryData(favoritesKeys.byType(favoritesClient!.getFavoriteType()), data);
       },
       onError: (error: Error) => {
         notifyError?.(

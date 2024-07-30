@@ -11,8 +11,8 @@ import type { GetFavoritesResponse } from '@kbn/content-management-favorites-ser
 
 export interface FavoritesClientPublic {
   getFavorites(): Promise<GetFavoritesResponse>;
-  addFavorite({ id }: { id: string }): Promise<void>;
-  removeFavorite({ id }: { id: string }): Promise<void>;
+  addFavorite({ id }: { id: string }): Promise<GetFavoritesResponse>;
+  removeFavorite({ id }: { id: string }): Promise<GetFavoritesResponse>;
 
   getFavoriteType(): string;
 }
@@ -24,14 +24,14 @@ export class FavoritesClient implements FavoritesClientPublic {
     return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
   }
 
-  public async addFavorite({ id }: { id: string }) {
-    await this.deps.http.post<{ favoriteIds: string[] }>(
+  public async addFavorite({ id }: { id: string }): Promise<GetFavoritesResponse> {
+    return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/favorite`
     );
   }
 
-  public async removeFavorite({ id }: { id: string }) {
-    await this.deps.http.post(
+  public async removeFavorite({ id }: { id: string }): Promise<GetFavoritesResponse> {
+    return this.deps.http.post(
       `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/unfavorite`
     );
   }

@@ -12,31 +12,24 @@ import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favo
 
 export class FavoritesService {
   constructor(
-    private userId: string,
     private namespace: string | undefined,
+    private type: string,
+    private userId: string,
     private deps: {
       savedObjectClient: SavedObjectsClientContract;
       logger: Logger;
     }
   ) {}
 
-  public async getFavorites({ type }: { type: string }): Promise<{ favoriteIds: string[] }> {
+  public async getFavorites(): Promise<{ favoriteIds: string[] }> {
     const favoritesSavedObject = await this.getFavoritesSavedObject();
 
-    const favoriteIds = (favoritesSavedObject?.attributes?.favorites ?? [])
-      .filter((favorite) => favorite.type === type)
-      .map((favorite) => favorite.id);
+    const favoriteIds = favoritesSavedObject?.attributes?.favoriteIds ?? [];
 
     return { favoriteIds };
   }
 
-  public async addFavorite({
-    id,
-    type,
-  }: {
-    id: string;
-    type: string;
-  }): Promise<{ favoriteIds: string[] }> {
+  public async addFavorite({ id }: { id: string }): Promise<{ favoriteIds: string[] }> {
     let favoritesSavedObject = await this.getFavoritesSavedObject();
 
     if (!favoritesSavedObject) {
@@ -44,25 +37,23 @@ export class FavoritesService {
         favoritesSavedObjectType.name,
         {
           userId: this.userId,
-          favorites: [],
+          type: this.type,
+          favoriteIds: [],
         },
         {
-          id: this.userId,
+          id: this.getFavoriteSavedObjectId(),
           namespace: this.namespace,
         }
       );
     }
 
-    const newFavoritesState = [
-      ...(favoritesSavedObject.attributes.favorites ?? []).filter((favorite) => favorite.id !== id),
-      { id, type },
-    ];
+    const newFavoriteIds = [...(favoritesSavedObject.attributes.favoriteIds ?? []), id];
 
     await this.deps.savedObjectClient.update(
       favoritesSavedObjectType.name,
       favoritesSavedObject.id,
       {
-        favorites: newFavoritesState,
+        favoriteIds: newFavoriteIds,
       },
       {
         version: favoritesSavedObject.version,
@@ -70,31 +61,25 @@ export class FavoritesService {
       }
     );
 
-    return { favoriteIds: newFavoritesState.map((favorite) => favorite.id) };
+    return { favoriteIds: newFavoriteIds };
   }
 
-  public async removeFavorite({
-    id,
-    type,
-  }: {
-    id: string;
-    type: string;
-  }): Promise<{ favoriteIds: string[] }> {
+  public async removeFavorite({ id }: { id: string }): Promise<{ favoriteIds: string[] }> {
     const favoritesSavedObject = await this.getFavoritesSavedObject();
 
     if (!favoritesSavedObject) {
       return { favoriteIds: [] };
     }
 
-    const newFavoritesState = (favoritesSavedObject.attributes.favorites ?? []).filter(
-      (favorite) => favorite.id !== id
+    const newFavoriteIds = (favoritesSavedObject.attributes.favoriteIds ?? []).filter(
+      (favoriteId) => favoriteId !== id
     );
 
     await this.deps.savedObjectClient.update(
       favoritesSavedObjectType.name,
       favoritesSavedObject.id,
       {
-        favorites: newFavoritesState,
+        favoriteIds: newFavoriteIds,
       },
       {
         version: favoritesSavedObject.version,
@@ -103,7 +88,7 @@ export class FavoritesService {
     );
 
     return {
-      favoriteIds: newFavoritesState.map((favorite) => favorite.id),
+      favoriteIds: newFavoriteIds,
     };
   }
 
@@ -112,7 +97,7 @@ export class FavoritesService {
       const favoritesSavedObject =
         await this.deps.savedObjectClient.get<FavoritesSavedObjectAttributes>(
           favoritesSavedObjectType.name,
-          this.userId,
+          this.getFavoriteSavedObjectId(),
           { namespace: this.namespace }
         );
 
@@ -124,5 +109,19 @@ export class FavoritesService {
 
       throw e;
     }
+  }
+
+  private getFavoriteSavedObjectId() {
+    if (!this.userId) {
+      // This should never happen, but it's better to throw an error than to create a saved object with an invalid ID
+      throw new Error('userId is required to create a favorite saved object');
+    }
+
+    if (!this.type) {
+      // This should never happen, but it's better to throw an error than to create a saved object with an invalid ID
+      throw new Error('type is required to create a favorite saved object');
+    }
+
+    return `${this.type}:${this.userId}`;
   }
 }

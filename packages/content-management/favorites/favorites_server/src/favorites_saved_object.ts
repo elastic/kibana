@@ -11,24 +11,18 @@ import type { SavedObjectsType } from '@kbn/core/server';
 
 export interface FavoritesSavedObjectAttributes {
   userId: string;
-  favorites: Array<{
-    id: string;
-    type: string;
-  }>;
+  type: string;
+  favoriteIds: string[];
 }
 
 const schemaV1 = schema.object({
   userId: schema.string(),
-  favorites: schema.arrayOf(
-    schema.object({
-      id: schema.string(),
-      type: schema.string(),
-    })
-  ),
+  type: schema.string(), // object type, e.g. dashboard
+  favoriteIds: schema.arrayOf(schema.string()),
 });
 
 export const favoritesSavedObjectType: SavedObjectsType = {
-  name: 'favorite',
+  name: 'favorites',
   hidden: true,
   namespaceType: 'single',
   mappings: {

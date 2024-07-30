@@ -51,28 +51,19 @@ const App = () => {
 
 ## Implementation Details
 
-Internally the favorites list is backed by a saved object. A saved object of type "favorite" is created for each user (user profile id) and space (space id) combination when a user for the first time favorites an object. The saved object contains a list of favorite objects.
+Internally the favorites list is backed by a saved object. A saved object of type "favorites" is created for each user (user profile id) and space (space id) and object type (e.g. dashboard) combination when a user for the first time favorites an object. The saved object contains a list of favorite objects of the type.
 
 ```
 {
   "_index": ".kibana_8.16.0_001",
-  "_id": "spaceid:favorite:u_profile_id",
+  "_id": "spaceid:favorites:object_type:u_profile_id",
   "_source": {
-    "favorite": {
+    "favorites": {
       "userId": "u_profile_id",
-      "favorites": [
-        {
-          "id": "object_id_1",
-          "type": "dashboard"
-        },
-        {
-          "id": "object_id_2",
-          "type": "dashboard"
-        },
-        {
-          "id": "object_id_3",
-          "type": "visualization"
-        }
+      "type: "dashboard",
+      "favoriteIds": [
+        "dashboard_id_1",
+        "dashboard_id_2",
       ]
     },
     "type": "favorite",
