@@ -13,7 +13,7 @@ import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
+import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
 import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';
 

@@ -10,7 +10,7 @@ import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server'
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
-import { buildShipperHeaders, buildShipperUrl } from '@kbn/elastic-analytics-utils';
+import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
 import { TelemetryPlugin } from './plugin';
 import type { NodeRoles } from '@kbn/core-node-server';
 

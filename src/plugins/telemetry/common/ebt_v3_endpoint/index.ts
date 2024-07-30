@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { buildShipperHeaders } from './src/build_headers';
-export { buildShipperUrl } from './src/build_url';
-export type { BuildShipperUrlOptions } from './src/types';
+export { buildShipperHeaders } from './build_headers';
+export { buildShipperUrl } from './build_url';

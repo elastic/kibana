@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-plugins-browser-mocks",
-        "id": "def-common.pluginsServiceMock",
+        "id": "def-public.pluginsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "pluginsServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-browser-mocks",
-            "id": "def-common.pluginsServiceMock.create",
+            "id": "def-public.pluginsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,7 +36,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser-mocks",
-            "id": "def-common.pluginsServiceMock.createInternalSetupContract",
+            "id": "def-public.pluginsServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -69,7 +53,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser-mocks",
-            "id": "def-common.pluginsServiceMock.createInternalStartContract",
+            "id": "def-public.pluginsServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -86,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser-mocks",
-            "id": "def-common.pluginsServiceMock.createPluginInitializerContext",
+            "id": "def-public.pluginsServiceMock.createPluginInitializerContext",
             "type": "Function",
             "tags": [],
             "label": "createPluginInitializerContext",
@@ -103,9 +87,9 @@
               " | undefined; }) => ",
               {
                 "pluginId": "@kbn/core-plugins-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsBrowserPluginApi",
-                "section": "def-common.PluginInitializerContext",
+                "section": "def-public.PluginInitializerContext",
                 "text": "PluginInitializerContext"
               },
               "<object>"
@@ -117,7 +101,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-browser-mocks",
-                "id": "def-common.pluginsServiceMock.createPluginInitializerContext.$1",
+                "id": "def-public.pluginsServiceMock.createPluginInitializerContext.$1",
                 "type": "Unknown",
                 "tags": [],
                 "label": "config",
@@ -131,7 +115,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-browser-mocks",
-                "id": "def-common.pluginsServiceMock.createPluginInitializerContext.$2",
+                "id": "def-public.pluginsServiceMock.createPluginInitializerContext.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "__1",
@@ -157,5 +141,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }
