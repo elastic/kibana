@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { SearchEmbeddableSerializedState } from '@kbn/discover-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
-import { Filter } from '@kbn/es-query';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { Filter } from '@kbn/es-query';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,

@@ -2257,9 +2257,9 @@
             "<",
             {
               "pluginId": "@kbn/core-theme-browser",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnCoreThemeBrowserPluginApi",
-              "section": "def-common.CoreTheme",
+              "section": "def-public.CoreTheme",
               "text": "CoreTheme"
             },
             ">; useDarkMode: () => boolean; useChartsTheme: () => ",
