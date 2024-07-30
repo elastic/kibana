@@ -23,6 +23,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
+        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -80,6 +81,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
+        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
@@ -135,6 +137,7 @@ describe('config validation', () => {
           "warn_threshold": 5000,
         },
         "max_attempts": 3,
+        "max_workers": 10,
         "metrics_reset_interval": 30000,
         "monitored_aggregated_stats_refresh_rate": 60000,
         "monitored_stats_health_verbose_log": Object {
