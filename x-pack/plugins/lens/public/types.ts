@@ -300,6 +300,7 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 export interface UserMessage {
   uniqueId: string;
   severity: 'error' | 'warning' | 'info';
+  hidePopoverIcon?: boolean;
   shortMessage: string;
   longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;

@@ -180,6 +180,7 @@ describe('taskTypeDictionary', () => {
         const taskDefinitions: TaskDefinitionRegistry = {
           some_kind_of_task: {
             title: 'Test XYZ',
+            // @ts-expect-error upgrade typescript v5.1.6
             priority: 23,
             description: `Actually this won't work`,
             createTaskRunner() {
@@ -240,6 +241,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
+          // @ts-expect-error upgrade typescript v5.1.6
           priority: 23,
           createTaskRunner: jest.fn(),
         },
@@ -278,6 +280,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
+          // @ts-expect-error upgrade typescript v5.1.6
           cost: 23,
           createTaskRunner: jest.fn(),
         },
