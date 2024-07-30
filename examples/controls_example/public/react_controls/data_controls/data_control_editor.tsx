@@ -82,7 +82,8 @@ const CompatibleControlTypesComponent = ({
       .map((type) => getControlFactory(type))
       .filter((factory) => {
         return isDataControlFactory(factory);
-      });
+      })
+      .sort(({ order: orderA = -1 }, { order: orderB = -1 }) => orderB - orderA);
   }, []);
 
   return (
