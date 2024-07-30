@@ -102,6 +102,7 @@ export const useUnifiedSearch = () => {
   const onQueryChange = useCallback(
     (query: Query) => {
       try {
+        setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
       } catch (err) {
