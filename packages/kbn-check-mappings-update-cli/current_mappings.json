@@ -1478,7 +1478,7 @@
       }
     }
   },
-  "favorite": {
+  "favorites": {
     "dynamic": false,
     "properties": {
       "userId": {

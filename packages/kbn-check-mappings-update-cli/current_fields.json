@@ -435,7 +435,7 @@
     "updated_by",
     "version"
   ],
-  "favorite": [
+  "favorites": [
     "userId"
   ],
   "file": [
