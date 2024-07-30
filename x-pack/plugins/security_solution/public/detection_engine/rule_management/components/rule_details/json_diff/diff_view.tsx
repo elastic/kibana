@@ -25,8 +25,7 @@ import type {
   HunkTokens,
 } from 'react-diff-view';
 import unidiff from 'unidiff';
-import * as unidiffHunk from 'unidiff/hunk';
-import * as jsdiff from 'diff';
+import type { Change } from 'diff';
 import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 import { Hunks } from './hunks';
 import { markEdits, DiffMethod } from './mark_edits';
@@ -117,46 +116,11 @@ const renderGutter: RenderGutter = ({ change }) => {
  * Converts an array of Change objects into a "unified diff" string.
  *
  * Takes an array of changes (as provided by the jsdiff library) and converts it into a "unified diff" string.
- * If there are no changes, the changes array should contain only one element which is neither added nor removed.
  *
- * @param {jsdiff.Change[]} changes - An array of changes between two strings.
+ * @param {Change[]} changes - An array of changes between two strings.
  * @returns {string} A unified diff string representing the changes.
  */
-const convertChangesToUnifiedDiffString = (changes: jsdiff.Change[]) => {
-  /* If changes array contains only one element and it's not added or removed, it means there are no changes */
-  const hasNoChanges = changes.length === 1 && !changes[0].added && !changes[0].removed;
-
-  if (hasNoChanges) {
-    /*
-      This is a special case when there are no changes. But we still need to return a
-      unified diff string that represents "no changes".
-    */
-    const unchanged: jsdiff.Change = changes[0];
-
-    /* Add a "type" property to the unchanged object to make it compatible with "lineChanges" */
-    const unchangedWithType: unidiffHunk.ChangeWithType = {
-      ...unchanged,
-      type: unidiffHunk.UNMODIFIED,
-    };
-
-    /* Convert the unchanged object into an array of LineChange objects */
-    const lineChanges: unidiffHunk.LineChange[] = unidiffHunk.lineChanges(unchangedWithType);
-
-    /*
-      Convert the array of LineChange objects into a unified diff string.
-      The two 0s in "hunk(0, 0, lineChanges)" are line offsets for the "old" and "new" sides of the diff.
-      Since strings are the same, there are no offsets, so we set them to 0.
-    */
-    const unifiedDiffBody = unidiffHunk.hunk(0, 0, lineChanges).unified();
-
-    /*
-      Add "---" and "+++" lines to the beginning of the unified diff string to make it
-      conform with the Unified format: https://en.wikipedia.org/wiki/Diff#Unified_format
-    */
-    const unifiedDiff = `---\n+++\n${unifiedDiffBody}`;
-    return unifiedDiff;
-  }
-
+const convertChangesToUnifiedDiffString = (changes: Change[]) => {
   const unifiedDiff: string = unidiff.formatLines(changes, {
     context: 3,
   });
@@ -168,7 +132,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   /*
     "diffLines" call converts two strings of text into an array of Change objects.
   */
-  const changes = jsdiff.diffLines(oldSource, newSource);
+  const changes: Change[] = unidiff.diffLines(oldSource, newSource);
 
   /*
     "convertChangesToUnifiedDiffString" converts an array of Change objects into a single "unified diff" string.

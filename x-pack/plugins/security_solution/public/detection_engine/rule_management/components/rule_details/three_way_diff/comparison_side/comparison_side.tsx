@@ -16,7 +16,6 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
 import { getSubfieldChanges } from './get_subfield_changes';
-import { NoChanges } from './no_changes';
 import { SubfieldChanges } from './subfield_changes';
 
 interface ComparisonSideProps<FieldName extends keyof DiffableAllFields> {
@@ -49,11 +48,7 @@ export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
         onChange={setSelectedVersions}
       />
       <EuiSpacer size="m" />
-      {subfieldChanges.length === 0 ? (
-        <NoChanges />
-      ) : (
-        <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
-      )}
+      <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
     </>
   );
 }

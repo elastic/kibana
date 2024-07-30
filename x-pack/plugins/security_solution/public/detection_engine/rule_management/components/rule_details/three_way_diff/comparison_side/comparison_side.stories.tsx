@@ -117,6 +117,41 @@ OptionalFieldBecomesDefined.args = {
   },
 };
 
+export const SubfieldsWithLabels = Template.bind({});
+
+const subfieldsWithLabelsThreeWayDiff: ThreeWayDiff<RuleKqlQuery> = {
+  has_base_version: true,
+  base_version: {
+    type: KqlQueryType.inline_query,
+    query: 'event.agent_id_status: *',
+    language: 'kuery',
+    filters: [],
+  },
+  current_version: {
+    type: KqlQueryType.inline_query,
+    query: 'event.agent_id_status: *',
+    language: 'kuery',
+    filters: [],
+  },
+  target_version: {
+    type: KqlQueryType.saved_query,
+    saved_query_id: 'e355ef26-45f5-40f1-bbb7-5176ecf07d5c',
+  },
+  merged_version: {
+    type: KqlQueryType.saved_query,
+    saved_query_id: 'e355ef26-45f5-40f1-bbb7-5176ecf07d5c',
+  },
+  diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+  merge_outcome: ThreeWayMergeOutcome.Target,
+  has_update: true,
+  conflict: ThreeWayDiffConflict.NONE,
+};
+
+SubfieldsWithLabels.args = {
+  fieldName: 'kql_query',
+  fieldThreeWayDiff: subfieldsWithLabelsThreeWayDiff,
+};
+
 /* Field type changes - in this example "kql_query" field was "inline" in base version, but became "saved" in the current version */
 export const FieldTypeChanges = Template.bind({});
 
