@@ -136,6 +136,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getAttribute('selectAllDocsOnPageToggle', 'title')).to.be(
           'Select all visible rows'
         );
+        await testSubjects.existOrFail('dscGridSelectAllDocs');
+      });
+
+      await dataGrid.openSelectedRowsMenu();
+      await testSubjects.click('dscGridClearSelectedDocuments');
+
+      await retry.try(async () => {
+        expect(await dataGrid.isSelectedRowsMenuVisible()).to.be(false);
+        expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(0);
+        expect(await testSubjects.getAttribute('selectAllDocsOnPageToggle', 'title')).to.be(
+          'Select all visible rows'
+        );
         await testSubjects.missingOrFail('dscGridSelectAllDocs');
       });
     });
