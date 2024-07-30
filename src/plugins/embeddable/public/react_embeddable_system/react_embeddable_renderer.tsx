@@ -162,8 +162,8 @@ export const ReactEmbeddableRenderer = <
                         : Promise.resolve(apiRegistration.serializeState());
                     })
                   )
-                  .subscribe((serializedState) => {
-                    onAnyStateChange(serializedState);
+                  .subscribe((nextSerializedState) => {
+                    onAnyStateChange(nextSerializedState);
                   })
               );
             }
