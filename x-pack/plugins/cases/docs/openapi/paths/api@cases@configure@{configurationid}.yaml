@@ -1,8 +1,8 @@
 patch:
-  summary: Update case settings in the default space
+  summary: Update case settings
   operationId: updateCaseConfigurationDefaultSpace
   description: >
-    Updates setting details such as the closure type, custom fields, templates, and the default connector for cases in the default space.
+    Updates setting details such as the closure type, custom fields, templates, and the default connector for cases.
     Connectors are used to interface with external systems.
     You must create a connector before you can use it in your cases.
     You must have `all` privileges for the **Cases** feature in the
