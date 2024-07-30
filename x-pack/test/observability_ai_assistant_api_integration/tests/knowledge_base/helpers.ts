@@ -8,7 +8,7 @@
 import { MachineLearningProvider } from '../../../api_integration/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
 
-const TINY_ELSER = {
+export const TINY_ELSER = {
   ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
   id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
 };

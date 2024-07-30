@@ -7,21 +7,16 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SUPPORTED_TRAINED_MODELS } from '../../../functional/services/ml/api';
+import { createKnowledgeBaseModel, deleteKnowledgeBaseModel, TINY_ELSER } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const ml = getService('ml');
-  const TINY_ELSER = {
-    ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
-    id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-  };
   const KNOWLEDGE_BASE_API_URL = `/internal/observability_ai_assistant/kb`;
 
   describe(`${KNOWLEDGE_BASE_API_URL}/status`, () => {
     before(async () => {
-      await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id);
-      await ml.api.assureMlStatsIndexExists();
+      await createKnowledgeBaseModel(ml);
 
       await supertest
         .post(`${KNOWLEDGE_BASE_API_URL}/setup`)
@@ -33,10 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-      await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-      await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
+      await deleteKnowledgeBaseModel(ml);
     });
 
     it('returns correct status after knowledge base is setup', async () => {
@@ -59,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .then((response) => {
           expect(response.body).to.eql({
             ready: false,
-            model_name: 'pt_tiny_elser',
+            model_name: TINY_ELSER.id,
           });
         });
     });
