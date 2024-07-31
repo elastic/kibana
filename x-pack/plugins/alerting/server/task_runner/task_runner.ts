@@ -610,7 +610,7 @@ export class TaskRunner<
           executionStatus.error?.reason &&
           executionStatus.error.reason === RuleExecutionStatusErrorReasons.Disabled
         ) {
-          this.context.taskManager.bulkDisable([ruleId]);
+          await this.context.taskManager.bulkDisable([ruleId]);
         }
 
         if (apm.currentTransaction) {
