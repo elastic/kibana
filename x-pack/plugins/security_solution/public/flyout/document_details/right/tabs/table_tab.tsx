@@ -8,8 +8,8 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { getOr, sortBy } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import styled from 'styled-components';
-import { type EuiBasicTableColumn, EuiText, EuiInMemoryTable } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { type EuiBasicTableColumn, EuiText, EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
@@ -29,17 +29,6 @@ import type { EventFieldsData } from '../../../../common/components/event_detail
 import { CellActions } from '../components/cell_actions';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { isInTableScope, isTimelineScope } from '../../../../helpers';
-
-/**
- * As the flyout is quite narrow, we reduce the font size to fit more content
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const StyledEuiMemoryTable = styled(EuiInMemoryTable as any)`
-  .flyout-table-row-small-font {
-    font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-    font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  }
-`;
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
@@ -139,6 +128,8 @@ export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, g
  * Table view displayed in the document details expandable flyout right section Table tab
  */
 export const TableTab = memo(() => {
+  const smallFontSize = useEuiFontSize('xs').fontSize;
+
   const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
     useDocumentDetailsContext();
 
@@ -216,7 +207,7 @@ export const TableTab = memo(() => {
   );
 
   return (
-    <StyledEuiMemoryTable
+    <EuiInMemoryTable
       items={items}
       itemId="field"
       columns={columns}
@@ -229,6 +220,11 @@ export const TableTab = memo(() => {
       search={search}
       sorting={false}
       data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+      css={css`
+        .euiTableRow {
+          font-size: ${smallFontSize};
+        }
+      `}
     />
   );
 });
