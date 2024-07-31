@@ -28,7 +28,6 @@ import { useEntityManagerEnablementContext } from '../../../context/entity_manag
 import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
-import { useServiceEcoTour } from '../../../hooks/use_eco_tour';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
@@ -38,7 +37,6 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
   );
 
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
-  const { tourState, showModal } = useServiceEcoTour();
 
   const {
     services: { entityManager },
@@ -51,6 +49,8 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
     refetch,
     setServiceInventoryViewLocalStorageSetting,
     isEntityCentricExperienceViewEnabled,
+    tourState,
+    updateTourState,
   } = useEntityManagerEnablementContext();
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
@@ -67,7 +67,7 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
     if (isEntityManagerEnabled) {
       setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
       if (tourState.isModalVisible === undefined) {
-        showModal();
+        updateTourState({ isModalVisible: true });
       }
       return;
     }
@@ -80,7 +80,7 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
 
         if (tourState.isModalVisible === undefined) {
-          showModal();
+          updateTourState({ isModalVisible: true });
         }
         refetch();
       } else {

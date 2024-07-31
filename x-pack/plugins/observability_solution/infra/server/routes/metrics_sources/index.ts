@@ -8,6 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import { termsQuery } from '@kbn/observability-plugin/server';
+import { castArray } from 'lodash';
+import { EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
+import {
+  getHasDataQueryParamsRT,
+  getHasDataResponseRT,
+} from '../../../common/metrics_sources/get_has_data';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
@@ -19,12 +26,15 @@ import {
 } from '../../../common/metrics_sources';
 import { InfraSource, InfraSourceIndexField } from '../../lib/sources';
 import { InfraPluginRequestHandlerContext } from '../../types';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 const defaultStatus = {
   indexFields: [],
   metricIndicesExist: false,
   remoteClustersExist: false,
 };
+
+const MAX_MODULES = 5;
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework, logger } = libs;
@@ -202,6 +212,75 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       return response.ok({
         body: { hasData: results, configuration: source.configuration },
       });
+    }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'get',
+      path: '/api/metrics/source/hasData',
+      validate: {
+        query: createRouteValidationFunction(getHasDataQueryParamsRT),
+      },
+    },
+    async (requestContext, request, response) => {
+      try {
+        const modules = castArray(request.query.modules);
+
+        if (modules.length > MAX_MODULES) {
+          throw Boom.badRequest(
+            `'modules' size is greater than maximum of ${MAX_MODULES} allowed.`
+          );
+        }
+
+        const infraMetricsClient = await getInfraMetricsClient({
+          framework,
+          request,
+          metricsDataAccess: libs.metricsClient,
+          requestContext,
+        });
+
+        const results = await infraMetricsClient.search({
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          body: {
+            track_total_hits: true,
+            terminate_after: 1,
+            size: 0,
+            ...(modules.length > 0
+              ? {
+                  query: {
+                    bool: {
+                      should: [
+                        ...termsQuery(EVENT_MODULE, ...modules),
+                        ...termsQuery(METRICSET_MODULE, ...modules),
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                }
+              : {}),
+          },
+        });
+
+        return response.ok({
+          body: getHasDataResponseRT.encode({ hasData: results.hits.total.value !== 0 }),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 };
