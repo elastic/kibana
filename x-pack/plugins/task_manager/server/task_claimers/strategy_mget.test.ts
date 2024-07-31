@@ -8,6 +8,8 @@
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { filter, take, toArray } from 'rxjs';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import { CLAIM_STRATEGY_MGET } from '../config';
 
 import {
@@ -15,11 +17,10 @@ import {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   TaskPriority,
-  TaskCost,
 } from '../task';
 import { SearchOpts, StoreOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
-import { asOk, asErr, isOk, unwrap } from '../lib/result_type';
+import { asOk, isOk, unwrap } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import {
@@ -34,7 +35,6 @@ import apm from 'elastic-apm-node';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import type { MustNotCondition } from '../queries/query_clauses';
 import {
@@ -54,7 +54,6 @@ jest.mock('../constants', () => ({
     'anotherLimitedToOne',
     'limitedToTwo',
     'limitedToFive',
-    'yawn',
   ],
 }));
 
@@ -77,18 +76,14 @@ const taskDefinitions = new TaskTypeDictionary(taskManagerLogger);
 taskDefinitions.registerTaskDefinitions({
   report: {
     title: 'report',
-    cost: TaskCost.Normal,
     createTaskRunner: jest.fn(),
   },
   dernstraight: {
     title: 'dernstraight',
-    cost: TaskCost.ExtraLarge,
     createTaskRunner: jest.fn(),
   },
   yawn: {
     title: 'yawn',
-    cost: TaskCost.Tiny,
-    maxConcurrency: 1,
     createTaskRunner: jest.fn(),
   },
 });
@@ -148,19 +143,14 @@ describe('TaskClaiming', () => {
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
       if (hits == null) hits = [generateFakeTasks(1)];
-
-      const docVersion = [];
       if (versionMaps == null) {
-        versionMaps = [];
+        versionMaps = [new Map<string, ConcreteTaskInstanceVersion>()];
         for (const oneHit of hits) {
           const map = new Map<string, ConcreteTaskInstanceVersion>();
-          const mapWithTaskPrefix = new Map<string, ConcreteTaskInstanceVersion>();
+          versionMaps.push(map);
           for (const task of oneHit) {
             map.set(task.id, { esId: task.id, seqNo: 32, primaryTerm: 32 });
-            mapWithTaskPrefix.set(`task:${task.id}`, { esId: task.id, seqNo: 32, primaryTerm: 32 });
           }
-          versionMaps.push(map);
-          docVersion.push(mapWithTaskPrefix);
         }
       }
 
@@ -179,7 +169,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes,
         unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
-        getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 10),
+        getCapacity: taskClaimingOpts.getCapacity ?? (() => 10),
         taskPartitioner,
         ...taskClaimingOpts,
       });
@@ -352,7 +342,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -450,7 +440,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: ['report'],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -552,7 +542,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: ['report'],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -650,7 +640,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: ['report'],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -739,7 +729,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -803,7 +793,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -888,7 +878,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -973,7 +963,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -1064,7 +1054,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -1179,7 +1169,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -1286,7 +1276,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -1405,7 +1395,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -1510,7 +1500,7 @@ describe('TaskClaiming', () => {
         excludedTaskTypes: [],
         unusedTypes: [],
         maxAttempts: 2,
-        getAvailableCapacity: () => 10,
+        getCapacity: () => 10,
         taskPartitioner,
       });
 
@@ -1606,7 +1596,6 @@ describe('TaskClaiming', () => {
       const claimedResults = await testClaimAvailableTasks({
         storeOpts: {
           taskManagerId,
-          definitions,
         },
         taskClaimingOpts: {},
         claimingOpts: {
@@ -1669,8 +1658,9 @@ describe('TaskClaiming', () => {
                     Object {
                       "terms": Object {
                         "task.taskType": Array [
-                          "foo",
-                          "bar",
+                          "report",
+                          "dernstraight",
+                          "yawn",
                         ],
                       },
                     },
@@ -1811,9 +1801,9 @@ describe('TaskClaiming', () => {
     function instantiateStoreWithMockedApiResponses({
       taskManagerId = uuidv4(),
       definitions = taskDefinitions,
-      getAvailableCapacity = () => 10,
+      getCapacity = () => 10,
       tasksClaimed,
-    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getAvailableCapacity'>> & {
+    }: Partial<Pick<TaskClaimingOpts, 'definitions' | 'getCapacity'>> & {
       taskManagerId?: string;
       tasksClaimed?: ConcreteTaskInstance[][];
     } = {}) {
@@ -1853,7 +1843,7 @@ describe('TaskClaiming', () => {
         unusedTypes: [],
         taskStore,
         maxAttempts: 2,
-        getAvailableCapacity,
+        getCapacity,
         taskPartitioner,
       });
 

@@ -6,41 +6,27 @@
  */
 
 import expect from '@kbn/expect';
-import { ERROR_USER_NOT_AUTHORIZED } from '@kbn/entityManager-plugin/common/errors';
 import { builtInDefinitions } from '@kbn/entityManager-plugin/server/lib/entities/built_in';
 import { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createAdmin, createRuntimeUser } from './helpers/user';
-
-interface Auth {
-  username: string;
-  password: string;
-}
+import { Auth, getInstalledDefinitions } from './helpers/request';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertestWithoutAuth');
 
   const enablementRequest =
-    (method: 'get' | 'put' | 'delete') => async (auth: Auth, query?: { [key: string]: any }) => {
+    (method: 'get' | 'put' | 'delete') =>
+    async (auth: Auth, expectedCode: number, query: { [key: string]: any } = {}) => {
       const response = await supertest[method]('/internal/entities/managed/enablement')
         .auth(auth.username, auth.password)
         .query(query)
         .set('kbn-xsrf', 'xxx')
         .send()
-        .expect(200);
+        .expect(expectedCode);
       return response.body;
     };
-
-  const getInstalledDefinitions = async (auth: Auth) => {
-    const response = await supertest
-      .get('/internal/entities/definition')
-      .auth(auth.username, auth.password)
-      .set('kbn-xsrf', 'xxx')
-      .send()
-      .expect(200);
-    return response.body;
-  };
 
   const entityDiscoveryState = enablementRequest('get');
   const enableEntityDiscovery = enablementRequest('put');
@@ -59,10 +45,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with authorized user', () => {
       it('should enable and disable entity discovery', async () => {
-        const enableResponse = await enableEntityDiscovery(authorizedUser);
+        const enableResponse = await enableEntityDiscovery(authorizedUser, 200);
         expect(enableResponse.success).to.eql(true, "authorized user can't enable EEM");
 
-        let definitionsResponse = await getInstalledDefinitions(authorizedUser);
+        let definitionsResponse = await getInstalledDefinitions(supertest, authorizedUser);
         expect(definitionsResponse.definitions.length).to.eql(builtInDefinitions.length);
         expect(
           builtInDefinitions.every((builtin) => {
@@ -78,48 +64,46 @@ export default function ({ getService }: FtrProviderContext) {
           })
         ).to.eql(true, 'all builtin definitions are not installed/running');
 
-        let stateResponse = await entityDiscoveryState(authorizedUser);
+        let stateResponse = await entityDiscoveryState(authorizedUser, 200);
         expect(stateResponse.enabled).to.eql(
           true,
           `EEM is not enabled; response: ${JSON.stringify(stateResponse)}`
         );
 
-        const disableResponse = await disableEntityDiscovery(authorizedUser, { deleteData: false });
+        const disableResponse = await disableEntityDiscovery(authorizedUser, 200, {
+          deleteData: false,
+        });
         expect(disableResponse.success).to.eql(
           true,
           `authorized user failed to disable EEM; response: ${JSON.stringify(disableResponse)}`
         );
 
-        stateResponse = await entityDiscoveryState(authorizedUser);
+        stateResponse = await entityDiscoveryState(authorizedUser, 200);
         expect(stateResponse.enabled).to.eql(false, 'EEM is not disabled');
 
-        definitionsResponse = await getInstalledDefinitions(authorizedUser);
+        definitionsResponse = await getInstalledDefinitions(supertest, authorizedUser);
         expect(definitionsResponse.definitions).to.eql([]);
       });
     });
 
     describe('with unauthorized user', () => {
       it('should fail to enable entity discovery', async () => {
-        const enableResponse = await enableEntityDiscovery(unauthorizedUser);
-        expect(enableResponse.success).to.eql(false, 'unauthorized user can enable EEM');
-        expect(enableResponse.reason).to.eql(ERROR_USER_NOT_AUTHORIZED);
+        await enableEntityDiscovery(unauthorizedUser, 403);
 
-        const stateResponse = await entityDiscoveryState(unauthorizedUser);
+        const stateResponse = await entityDiscoveryState(unauthorizedUser, 200);
         expect(stateResponse.enabled).to.eql(false, 'EEM is enabled');
 
-        const definitionsResponse = await getInstalledDefinitions(unauthorizedUser);
+        const definitionsResponse = await getInstalledDefinitions(supertest, unauthorizedUser);
         expect(definitionsResponse.definitions).to.eql([]);
       });
 
       it('should fail to disable entity discovery', async () => {
-        const enableResponse = await enableEntityDiscovery(authorizedUser);
+        const enableResponse = await enableEntityDiscovery(authorizedUser, 200);
         expect(enableResponse.success).to.eql(true, "authorized user can't enable EEM");
 
-        let disableResponse = await enableEntityDiscovery(unauthorizedUser);
-        expect(disableResponse.success).to.eql(false, 'unauthorized user can disable EEM');
-        expect(disableResponse.reason).to.eql(ERROR_USER_NOT_AUTHORIZED);
+        let disableResponse = await disableEntityDiscovery(unauthorizedUser, 403);
 
-        disableResponse = await enableEntityDiscovery(authorizedUser);
+        disableResponse = await disableEntityDiscovery(authorizedUser, 200);
         expect(disableResponse.success).to.eql(true, "authorized user can't disable EEM");
       });
     });

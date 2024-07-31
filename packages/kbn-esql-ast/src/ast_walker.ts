@@ -194,7 +194,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
           }
         }
         if (args.length) {
-          const fn = createFunction('=', clause);
+          const fn = createFunction('=', clause, undefined, 'binary-expression');
           fn.args.push(args[0], args[1] ? [args[1]] : []);
           option.args.push(fn);
         }
@@ -207,7 +207,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
 }
 
 function visitLogicalNot(ctx: LogicalNotContext) {
-  const fn = createFunction('not', ctx);
+  const fn = createFunction('not', ctx, undefined, 'unary-expression');
   fn.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   // update the location of the assign based on arguments
   const argsLocationExtends = computeLocationExtends(fn);
@@ -216,7 +216,7 @@ function visitLogicalNot(ctx: LogicalNotContext) {
 }
 
 function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
-  const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx);
+  const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx, undefined, 'binary-expression');
   fn.args.push(...collectBooleanExpression(ctx._left), ...collectBooleanExpression(ctx._right));
   // update the location of the assign based on arguments
   const argsLocationExtends = computeLocationExtends(fn);
@@ -225,7 +225,7 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 }
 
 function visitLogicalIns(ctx: LogicalInContext) {
-  const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
+  const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx, undefined, 'binary-expression');
   const [left, ...list] = ctx.valueExpression_list();
   const leftArg = visitValueExpression(left);
   if (leftArg) {
@@ -264,7 +264,12 @@ function visitValueExpression(ctx: ValueExpressionContext) {
   }
   if (ctx instanceof ComparisonContext) {
     const comparisonNode = ctx.comparisonOperator();
-    const comparisonFn = createFunction(getComparisonName(comparisonNode), comparisonNode);
+    const comparisonFn = createFunction(
+      getComparisonName(comparisonNode),
+      comparisonNode,
+      undefined,
+      'binary-expression'
+    );
     comparisonFn.args.push(
       visitOperatorExpression(ctx._left)!,
       visitOperatorExpression(ctx._right)!
@@ -283,7 +288,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('*', ctx);
+    const fn = createFunction('*', ctx, undefined, 'binary-expression');
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -291,7 +296,7 @@ function visitOperatorExpression(
     return fn;
   }
   if (ctx instanceof ArithmeticBinaryContext) {
-    const fn = createFunction(getMathOperation(ctx), ctx);
+    const fn = createFunction(getMathOperation(ctx), ctx, undefined, 'binary-expression');
     const args = [visitOperatorExpression(ctx._left), visitOperatorExpression(ctx._right)];
     for (const arg of args) {
       if (arg) {
@@ -443,7 +448,12 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
   }
   if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
-    const fn = createFunction(functionExpressionCtx.identifier().getText().toLowerCase(), ctx);
+    const fn = createFunction(
+      functionExpressionCtx.identifier().getText().toLowerCase(),
+      ctx,
+      undefined,
+      'variadic-call'
+    );
     const asteriskArg = functionExpressionCtx.ASTERISK()
       ? createColumnStar(functionExpressionCtx.ASTERISK()!)
       : undefined;
@@ -494,7 +504,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
       const negate = regex.NOT();
       const likeType = regex._kind.text?.toLowerCase() || '';
       const fnName = `${negate ? 'not_' : ''}${likeType}`;
-      const fn = createFunction(fnName, regex);
+      const fn = createFunction(fnName, regex, undefined, 'binary-expression');
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
         fn.args.push(arg);
@@ -514,7 +524,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
   }
   const negate = ctx.NOT();
   const fnName = `is${negate ? ' not ' : ' '}null`;
-  const fn = createFunction(fnName, ctx);
+  const fn = createFunction(fnName, ctx, undefined, 'postfix-unary-expression');
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {
     fn.args.push(arg);
@@ -547,7 +557,7 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
 
 export function visitField(ctx: FieldContext) {
   if (ctx.qualifiedName() && ctx.ASSIGN()) {
-    const fn = createFunction(ctx.ASSIGN()!.getText(), ctx);
+    const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
     fn.args.push(
       createColumn(ctx.qualifiedName()!),
       collectBooleanExpression(ctx.booleanExpression())

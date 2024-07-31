@@ -7,11 +7,9 @@
 
 // Basic operation of this task claimer:
 // - search for candidate tasks to run, more than we actually can run
-// - initial search returns a slimmer task document for I/O efficiency (no params or state)
 // - for each task found, do an mget to get the current seq_no and primary_term
 // - if the mget result doesn't match the search result, the task is stale
-// - from the non-stale search results, return as many as we can run based on available
-//   capacity and the cost of each task type to run
+// - from the non-stale search results, return as many as we can run
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -20,7 +18,7 @@ import { Subject, Observable } from 'rxjs';
 
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
-import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion, TaskCost } from '../task';
+import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
@@ -113,10 +111,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     events$,
     claimOwnershipUntil,
     getCapacity,
-    // set size to accommodate the possibility of retrieving all
-    // tasks with the smallest cost, with a size multipler to account
-    // for possible conflicts
-    size: initialCapacity * TaskCost.Tiny * SIZE_MULTIPLIER_FOR_TASK_FETCH,
+    size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
     taskPartitioner,
   });
@@ -160,54 +155,35 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       continue;
     }
   }
-
   // apply limited concurrency limits (TODO: can currently starve other tasks)
   const candidateTasks = selectTasksByCapacity(currentTasks, batches);
 
-  // apply capacity constraint to candidate tasks
-  const tasksToRun: ConcreteTaskInstance[] = [];
-  const leftOverTasks: ConcreteTaskInstance[] = [];
-
-  let capacityAccumulator = 0;
-  for (const task of candidateTasks) {
-    const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
-    if (capacityAccumulator + taskCost <= initialCapacity) {
-      tasksToRun.push(task);
-      capacityAccumulator += taskCost;
-    } else {
-      leftOverTasks.push(task);
-      capacityAccumulator = initialCapacity;
-    }
-  }
-
   // build the updated task objects we'll claim
-  const taskUpdates: ConcreteTaskInstance[] = [];
-  for (const task of tasksToRun) {
-    taskUpdates.push({
-      ...task,
-      scheduledAt:
-        task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
-          ? task.retryAt
-          : task.runAt,
-      status: TaskStatus.Claiming,
-      retryAt: claimOwnershipUntil,
-      ownerId: taskStore.taskManagerId,
+  const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
+    .slice(0, initialCapacity)
+    .map((task) => {
+      if (task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()) {
+        task.scheduledAt = task.retryAt;
+      } else {
+        task.scheduledAt = task.runAt;
+      }
+      task.retryAt = claimOwnershipUntil;
+      task.ownerId = taskStore.taskManagerId;
+      task.status = TaskStatus.Claiming;
+
+      return task;
     });
-  }
 
   // perform the task object updates, deal with errors
-  const updatedTasks: ConcreteTaskInstance[] = [];
+  const finalResults: ConcreteTaskInstance[] = [];
   let conflicts = staleTasks.length;
   let bulkErrors = 0;
 
   try {
-    const updateResults = await taskStore.bulkUpdate(taskUpdates, {
-      validate: false,
-      excludeLargeFields: true,
-    });
+    const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: false });
     for (const updateResult of updateResults) {
       if (isOk(updateResult)) {
-        updatedTasks.push(updateResult.value);
+        finalResults.push(updateResult.value);
       } else {
         const { id, type, error } = updateResult.error;
 
@@ -232,27 +208,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     logger.warn(`Error updating tasks during claim: ${err}`, logMeta);
   }
 
-  // perform an mget to get the full task instance for claiming
-  let fullTasksToRun: ConcreteTaskInstance[] = [];
-  try {
-    fullTasksToRun = (await taskStore.bulkGet(updatedTasks.map((task) => task.id))).reduce<
-      ConcreteTaskInstance[]
-    >((acc, task) => {
-      if (isOk(task)) {
-        acc.push(task.value);
-      } else {
-        const { id, type, error } = task.error;
-        logger.warn(
-          `Error getting full task ${id}:${type} during claim: ${error.message}`,
-          logMeta
-        );
-      }
-      return acc;
-    }, []);
-  } catch (err) {
-    logger.warn(`Error getting full task documents during claim: ${err}`, logMeta);
-  }
-
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
   let removedCount = 0;
@@ -264,10 +219,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
     // don't worry too much about errors, we'll get them next time
     try {
-      const removeResults = await taskStore.bulkUpdate(tasksToRemove, {
-        validate: false,
-        excludeLargeFields: true,
-      });
+      const removeResults = await taskStore.bulkUpdate(tasksToRemove, { validate: false });
       for (const removeResult of removeResults) {
         if (isOk(removeResult)) {
           removedCount++;
@@ -285,22 +237,21 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // TODO: need a better way to generate stats
-  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
+  const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
   logger.debug(message, logMeta);
 
   // build results
   const finalResult = {
     stats: {
-      tasksUpdated: fullTasksToRun.length,
+      tasksUpdated: finalResults.length,
       tasksConflicted: conflicts,
-      tasksClaimed: fullTasksToRun.length,
-      tasksLeftUnclaimed: leftOverTasks.length,
+      tasksClaimed: finalResults.length,
     },
-    docs: fullTasksToRun,
+    docs: finalResults,
     timing: stopTaskTimer(),
   };
 
-  for (const doc of fullTasksToRun) {
+  for (const doc of finalResults) {
     events$.next(asTaskClaimEvent(doc.id, asOk(doc), finalResult.timing));
   }
 

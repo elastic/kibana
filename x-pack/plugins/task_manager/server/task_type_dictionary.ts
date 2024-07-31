@@ -7,13 +7,7 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import {
-  TaskDefinition,
-  taskDefinitionSchema,
-  TaskRunCreatorFunction,
-  TaskPriority,
-  TaskCost,
-} from './task';
+import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction, TaskPriority } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -56,10 +50,6 @@ export interface TaskRegisterDefinition {
    * claimed before low priority
    */
   priority?: TaskPriority;
-  /**
-   * An optional definition of the cost associated with running the task.
-   */
-  cost?: TaskCost;
   /**
    * An optional more detailed description of what this task does.
    */
