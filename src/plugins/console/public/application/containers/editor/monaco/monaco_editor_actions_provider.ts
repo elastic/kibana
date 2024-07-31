@@ -371,8 +371,13 @@ export class MonacoEditorActionsProvider {
       return null;
     }
 
-    // if not on the 1st line of the request, suggest request body
+    // if the current request doesn't have a method, the request is not valid
+    // and shouldn't have an autocomplete type
+    if (!currentRequest.method) {
+      return null;
+    }
 
+    // if not on the 1st line of the request, suggest request body
     return AutocompleteType.BODY;
   }
 

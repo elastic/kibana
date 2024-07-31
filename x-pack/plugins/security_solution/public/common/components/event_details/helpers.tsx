@@ -166,7 +166,7 @@ export function getEnrichedFieldInfo({
     ...fieldInfo,
     data: {
       field: overrideField ?? fieldName,
-      format: browserField?.format ?? '',
+      format: browserField?.format?.id ?? '',
       type: browserField?.type ?? '',
       isObjectArray: item.isObjectArray,
     },

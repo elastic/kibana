@@ -11,7 +11,7 @@ import type {
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { ObservabilityAIAssistantServerRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {

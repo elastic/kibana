@@ -290,7 +290,12 @@ export class HttpServer {
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T extends object>(
         cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+      ) =>
+        this.createCookieSessionStorageFactory(
+          cookieOptions,
+          config.csp.disableEmbedding,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       auth: {
@@ -553,6 +558,7 @@ export class HttpServer {
 
   private async createCookieSessionStorageFactory<T extends object>(
     cookieOptions: SessionStorageCookieOptions<T>,
+    disableEmbedding: boolean,
     basePath?: string
   ) {
     if (this.server === undefined) {
@@ -569,6 +575,7 @@ export class HttpServer {
       this.logger.get('http', 'server', this.name, 'cookie-session-storage'),
       this.server,
       cookieOptions,
+      disableEmbedding,
       basePath
     );
     return sessionStorageFactory;

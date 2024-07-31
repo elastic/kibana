@@ -13,7 +13,7 @@ import {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 
-type DefaultFnResultType = typeof typeSpecs[number] &
+type DefaultFnResultType = (typeof typeSpecs)[number] &
   ExpressionFunctionDefinition<
     string,
     any,

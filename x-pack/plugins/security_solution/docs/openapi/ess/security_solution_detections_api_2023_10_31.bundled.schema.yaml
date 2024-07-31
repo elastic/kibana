@@ -91,6 +91,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+          description: Not found
         '500':
           content:
             application/json:
@@ -131,6 +132,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+          description: Not found
         '500':
           content:
             application/json:
@@ -1701,7 +1703,6 @@ components:
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
-        - INVESTIGATION_FIELDS_FEATURE
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
       type: string
@@ -4103,7 +4104,6 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
       required:
-        - group
         - id
         - params
     NormalizedRuleError:
@@ -4901,7 +4901,6 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
       required:
         - action_type_id
-        - group
         - id
         - params
     RuleActionAlertsFilter:
@@ -6927,4 +6926,3 @@ components:
       type: http
 security:
   - BasicAuth: []
-tags: !<tag:yaml.org,2002:js/undefined> ''

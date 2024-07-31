@@ -11,7 +11,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "agent.ephemeral_id",
             "searchable": true,
             "type": "string",
@@ -21,7 +20,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "agent.hostname",
             "searchable": true,
             "type": "string",
@@ -31,7 +29,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "agent.id",
             "searchable": true,
             "type": "string",
@@ -41,7 +38,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "agent.name",
             "searchable": true,
             "type": "string",
@@ -55,7 +51,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "auditd.data.a0",
             "searchable": true,
             "type": "string",
@@ -65,7 +60,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "auditd.data.a1",
             "searchable": true,
             "type": "string",
@@ -75,7 +69,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "auditd.data.a2",
             "searchable": true,
             "type": "string",
@@ -89,7 +82,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "date",
             ],
-            "format": "",
             "name": "@timestamp",
             "readFromDocValues": true,
             "searchable": true,
@@ -107,7 +99,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "text",
             ],
-            "format": "string",
+            "format": Object {
+              "id": "string",
+            },
             "name": "message",
             "searchable": true,
             "type": "string",
@@ -121,7 +115,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "client.address",
             "searchable": true,
             "type": "string",
@@ -131,7 +124,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "long",
             ],
-            "format": "",
             "name": "client.bytes",
             "searchable": true,
             "type": "number",
@@ -141,7 +133,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "client.domain",
             "searchable": true,
             "type": "string",
@@ -151,7 +142,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "client.geo.country_iso_code",
             "searchable": true,
             "type": "string",
@@ -165,7 +155,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "cloud.account.id",
             "searchable": true,
             "type": "string",
@@ -175,7 +164,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "cloud.availability_zone",
             "searchable": true,
             "type": "string",
@@ -189,7 +177,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "container.id",
             "searchable": true,
             "type": "string",
@@ -199,7 +186,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "container.image.name",
             "searchable": true,
             "type": "string",
@@ -209,7 +195,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "container.image.tag",
             "searchable": true,
             "type": "string",
@@ -223,7 +208,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "destination.address",
             "searchable": true,
             "type": "string",
@@ -233,7 +217,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "long",
             ],
-            "format": "",
             "name": "destination.bytes",
             "searchable": true,
             "type": "number",
@@ -243,7 +226,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "destination.domain",
             "searchable": true,
             "type": "string",
@@ -253,7 +235,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "ip",
             ],
-            "format": "",
             "name": "destination.ip",
             "searchable": true,
             "type": "ip",
@@ -263,7 +244,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "long",
             ],
-            "format": "",
             "name": "destination.port",
             "searchable": true,
             "type": "number",
@@ -277,7 +257,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
+            "format": Object {
+              "id": "string",
+            },
             "name": "event.action",
             "searchable": true,
             "type": "string",
@@ -287,7 +269,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
+            "format": Object {
+              "id": "string",
+            },
             "name": "event.category",
             "searchable": true,
             "type": "string",
@@ -297,7 +281,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "date",
             ],
-            "format": "",
             "name": "event.end",
             "searchable": true,
             "type": "date",
@@ -307,7 +290,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
+            "format": Object {
+              "id": "string",
+            },
             "name": "event.kind",
             "searchable": true,
             "type": "string",
@@ -317,7 +302,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "long",
             ],
-            "format": "number",
+            "format": Object {
+              "id": "number",
+            },
             "name": "event.severity",
             "searchable": true,
             "type": "number",
@@ -331,7 +318,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
+            "format": Object {
+              "id": "string",
+            },
             "name": "host.name",
             "searchable": true,
             "type": "string",
@@ -342,7 +331,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
         "fields": Object {
           "nestedField.firstAttributes": Object {
             "aggregatable": false,
-            "format": "",
             "name": "nestedField.firstAttributes",
             "searchable": true,
             "subType": Object {
@@ -354,7 +342,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
           },
           "nestedField.secondAttributes": Object {
             "aggregatable": false,
-            "format": "",
             "name": "nestedField.secondAttributes",
             "searchable": true,
             "subType": Object {
@@ -366,7 +353,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
           },
           "nestedField.thirdAttributes": Object {
             "aggregatable": false,
-            "format": "",
             "name": "nestedField.thirdAttributes",
             "searchable": true,
             "subType": Object {
@@ -385,7 +371,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "process.args",
             "readFromDocValues": true,
             "searchable": true,
@@ -400,7 +385,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "ip",
             ],
-            "format": "",
             "name": "source.ip",
             "searchable": true,
             "type": "ip",
@@ -410,7 +394,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "long",
             ],
-            "format": "",
             "name": "source.port",
             "searchable": true,
             "type": "number",
@@ -424,7 +407,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
+            "format": Object {
+              "id": "string",
+            },
             "name": "user.name",
             "searchable": true,
             "type": "string",

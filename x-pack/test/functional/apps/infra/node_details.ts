@@ -47,6 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const infraSynthtraceKibanaClient = getService('infraSynthtraceKibanaClient');
+  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const esClient = getService('es');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -102,6 +103,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Node Details', () => {
+    describe('#Missing fields', function () {
+      before(async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
+
+        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
+        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
+        await metricIndicesInput.type('metrics-apm*');
+
+        await infraSourceConfigurationForm.saveInfraSettings();
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.infraHome.getInfraMissingMetricsIndicesCallout();
+
+        await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', 'host');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
+
+        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
+        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
+        await metricIndicesInput.type('metrics-*,metricbeat-*');
+
+        await infraSourceConfigurationForm.saveInfraSettings();
+
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.infraHome.getInfraMissingRemoteClusterIndicesCallout();
+      });
+
+      describe('KPIs', () => {
+        it('should render custom badge message', async () => {
+          await pageObjects.assetDetails.getAssetDetailsKPIMissingFieldMessageExists('cpuUsage');
+        });
+      });
+    });
+
     describe('#With Asset Details', () => {
       before(async () => {
         await Promise.all([

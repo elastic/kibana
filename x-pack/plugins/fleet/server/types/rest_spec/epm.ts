@@ -86,6 +86,7 @@ export const GetInfoRequestSchema = {
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    withMetadata: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -103,6 +104,7 @@ export const GetInfoRequestSchemaDeprecated = {
     ignoreUnverified: schema.maybe(schema.boolean()),
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
+    withMetadata: schema.boolean({ defaultValue: false }),
   }),
 };
 

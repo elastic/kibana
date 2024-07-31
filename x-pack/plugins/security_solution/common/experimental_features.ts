@@ -114,9 +114,9 @@ export const allowedExperimentalValues = Object.freeze({
   securitySolutionNotesEnabled: false,
 
   /**
-   * Enables entity and alert previews
+   * Disables entity and alert previews
    */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -127,6 +127,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
+
+  /**
+   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
+   */
+  assistantBedrockChat: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -154,31 +159,16 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables AI assistant on rule creation form when query has error
-   */
-  AIAssistantOnRuleCreationFormEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
 
   /**
-   * Enables alerts suppression for ES|QL rules
-   */
-  alertSuppressionForEsqlRuleEnabled: false,
-
-  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for machine learning rules
-   */
-  alertSuppressionForMachineLearningRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -243,11 +233,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
 
   /**
    * Enables the manual rule run

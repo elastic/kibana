@@ -52,6 +52,7 @@ import {
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
   HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
 } from './test_ids';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
@@ -87,6 +88,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();
+  const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
   const hostDetailsQueryId = useMemo(() => `${HOST_DETAILS_ID}-${uuid()}`, []);
   const relatedUsersQueryId = useMemo(() => `${RELATED_USERS_ID}-${uuid()}`, []);
@@ -95,7 +97,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -120,7 +122,11 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         banner: HOST_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, hostName, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, hostName, scopeId, telemetry]);
 
   const openUserPreview = useCallback(
     (userName: string) => {
@@ -132,8 +138,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           banner: USER_PREVIEW_BANNER,
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: scopeId,
+        panel: 'preview',
+      });
     },
-    [openPreviewPanel, scopeId]
+    [openPreviewPanel, scopeId, telemetry]
   );
 
   const [isHostLoading, { inspect, hostDetails, refetch }] = useHostDetails({

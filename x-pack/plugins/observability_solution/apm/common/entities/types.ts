@@ -16,8 +16,8 @@ export enum SignalTypes {
 export interface EntityMetrics {
   latency: number | null;
   throughput: number | null;
-  failedTransactionRate: number;
-  logRatePerMinute: number;
+  failedTransactionRate: number | null;
+  logRate: number | null;
   logErrorRate: number | null;
 }
 

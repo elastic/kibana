@@ -160,9 +160,11 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly e5Model: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
+    readonly inferenceApiCreate: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
@@ -180,6 +182,7 @@ export interface DocLinks {
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
     readonly searchTemplates: string;
+    readonly semanticTextField: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
