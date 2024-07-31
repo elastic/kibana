@@ -26,7 +26,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     const previousPackageVersion = '1.9.0';
-    const testSubjects = getService('testSubjects');
 
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
