@@ -41,8 +41,8 @@ export function Modal(props) {
   useEffect(
     function prepMlNodeCheck() {
       getMlNodeCount(mlApiServices)
-        .then(({ count, lazyNodeCount }) => {
-          setMlNodesAvailable(count !== 0 || lazyNodeCount !== 0);
+        .then(({ count }) => {
+          setMlNodesAvailable(count !== 0);
         })
         .catch(console.error);
     },
