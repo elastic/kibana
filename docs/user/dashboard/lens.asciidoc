@@ -373,6 +373,8 @@ When creating or editing a visualization, you can customize the way the legend g
 
 image::images/legend-popover.png[Menu with options to customize the legend of a visualization, width=40%]
 
+NOTE: The options available can vary based on the type of chart you're setting up. For example, showing additional statistics is only possible for time series charts.
+
 **Change the legend's display**
 
 With the **Visibility**, **Position**, and **Width** options, you can adjust the way the legend appears in or next to the visualization.
@@ -381,9 +383,9 @@ With the **Visibility**, **Position**, and **Width** options, you can adjust the
 
 With the **Label truncation** option, you can keep your legend minimal in case of long labels that span over multiple lines.
 
-**Show additional statistics**
+**Show additional statistics for time series charts**
 
-To make your legend as informative as possible, you can show some additional **Statistics** for each element of the visualization and add a **Series header**.
+To make your legends as informative as possible, you can show some additional **Statistics** for charts with a timestamp on one of the axes, and add a **Series header**.
 
 **Bar**, **Line** and **Area** charts can show the following values:
 
