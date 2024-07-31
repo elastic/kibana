@@ -145,8 +145,8 @@ export type SentinelOneFetchAgentFilesResponse = TypeOf<
   typeof SentinelOneFetchAgentFilesResponseSchema
 >;
 
-export type SentinelOneDownloadAgentFileParams = TypeOf<
-  typeof SentinelOneDownloadAgentFileParamsSchema
+export type SentinelOneDownloadAgentFileParams = Mutable<
+  TypeOf<typeof SentinelOneDownloadAgentFileParamsSchema>
 >;
 
 export type SentinelOneActivityRecord<TData = unknown> = Omit<
