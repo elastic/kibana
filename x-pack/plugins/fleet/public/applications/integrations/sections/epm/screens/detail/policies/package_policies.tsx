@@ -66,13 +66,22 @@ const IntegrationDetailsLink = memo<{
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
-      title={packagePolicy.name}
       {...(policySupportsAgentless
-        ? { disabled: true }
+        ? {
+            disabled: true,
+            title: i18n.translate(
+              'xpack.fleet.epm.packageDetails.integrationList.disabledEditTitle',
+              {
+                defaultMessage:
+                  'It is not allowed to edit an agentless integration. Please add a new integration if needed.',
+              }
+            ),
+          }
         : {
             href: getHref('integration_policy_edit', {
               packagePolicyId: packagePolicy.id,
             }),
+            title: packagePolicy.name,
           })}
     >
       {packagePolicy.name}
