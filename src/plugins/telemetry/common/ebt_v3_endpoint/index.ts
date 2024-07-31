@@ -7,4 +7,4 @@
  */
 
 export { buildShipperHeaders } from './build_headers';
-export { buildShipperUrl } from './build_url';
+export { createBuildShipperUrl } from './build_url';

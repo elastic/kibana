@@ -13,7 +13,7 @@ import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';
 
@@ -65,16 +65,20 @@ describe('TelemetryPlugin', () => {
       it('registers the UI telemetry shipper', () => {
         const initializerContext = coreMock.createPluginInitializerContext();
         const coreSetupMock = coreMock.createSetup();
+        const telemetryPlugin = new TelemetryPlugin(initializerContext);
 
-        new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+        telemetryPlugin['getSendToEnv'] = jest.fn();
+        telemetryPlugin.setup(coreSetupMock, { screenshotMode, home });
+
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledWith(undefined);
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,
           {
             channelName: 'kibana-browser',
             version: 'version',
-            sendTo: 'staging',
-            buildShipperUrl,
+            buildShipperUrl: expect.any(Function),
             buildShipperHeaders,
           }
         );
@@ -83,16 +87,20 @@ describe('TelemetryPlugin', () => {
       it('registers the UI telemetry shipper (pointing to prod)', () => {
         const initializerContext = coreMock.createPluginInitializerContext({ sendUsageTo: 'prod' });
         const coreSetupMock = coreMock.createSetup();
+        const telemetryPlugin = new TelemetryPlugin(initializerContext);
 
-        new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+        telemetryPlugin['getSendToEnv'] = jest.fn();
+        telemetryPlugin.setup(coreSetupMock, { screenshotMode, home });
+
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledWith('prod');
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,
           {
             channelName: 'kibana-browser',
             version: 'version',
-            sendTo: 'production',
-            buildShipperUrl,
+            buildShipperUrl: expect.any(Function),
             buildShipperHeaders,
           }
         );

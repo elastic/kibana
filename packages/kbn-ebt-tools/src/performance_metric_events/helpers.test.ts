@@ -18,7 +18,6 @@ describe('performance metric event helpers', () => {
     beforeEach(() => {
       analyticsClient = createAnalytics({
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
-        sendTo: 'staging',
         logger: loggerMock.create(),
       });
     });
@@ -39,7 +38,6 @@ describe('performance metric event helpers', () => {
     beforeEach(() => {
       analyticsClient = createAnalytics({
         isDev: true, // Explicitly setting `true` to ensure we have event validation to make sure the events sent pass our validation.
-        sendTo: 'staging',
         logger: loggerMock.create(),
       });
       registerPerformanceMetricEventType(analyticsClient);

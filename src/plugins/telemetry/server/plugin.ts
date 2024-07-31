@@ -41,7 +41,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import apm from 'elastic-apm-node';
-import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import {
   type TelemetrySavedObject,
   getTelemetrySavedObject,
@@ -172,12 +172,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     const currentKibanaVersion = this.currentKibanaVersion;
 
+    const sendTo = this.getSendToEnv(this.initialConfig.sendUsageTo);
     analytics.registerShipper(ElasticV3ServerShipper, {
       channelName: 'kibana-server',
       version: currentKibanaVersion,
-      sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
       buildShipperHeaders,
-      buildShipperUrl,
+      buildShipperUrl: createBuildShipperUrl(sendTo),
     });
 
     analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
@@ -263,6 +263,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.pluginStop$.complete();
     this.savedObjectsInternalClient$.complete();
     this.fetcherTask.stop();
+  }
+
+  private getSendToEnv(sendUsageTo: string): 'production' | 'staging' {
+    return sendUsageTo === 'prod' ? 'production' : 'staging';
   }
 
   private async getOptInStatus(): Promise<boolean | undefined> {

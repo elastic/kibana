@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { BuildShipperUrlOptions, BuildShipperUrl } from './types';
+import type { BuildShipperUrlOptions, BuildShipperUrl } from '@elastic/ebt/shippers/elastic_v3/common';
+
 /**
  * Builds the URL for the V3 API.
- * @param urlOptions The options to build the URL of the V3 API.
  */
-export const buildShipperUrl: BuildShipperUrl = (urlOptions: BuildShipperUrlOptions): string => {
-  const { sendTo, channelName } = urlOptions;
+export const createBuildShipperUrl = (sendTo: 'production' | 'staging' ): BuildShipperUrl => (urlOptions: BuildShipperUrlOptions): string => {
+  const { channelName } = urlOptions;
   const baseUrl =
     sendTo === 'production'
       ? 'https://telemetry.elastic.co'

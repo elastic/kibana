@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { buildShipperUrl } from './build_url';
+import { createBuildShipperUrl } from './build_url';
 
 describe('buildUrl', () => {
   test('returns production URL', () => {
-    expect(buildShipperUrl({ sendTo: 'production', channelName: 'test-channel' })).toBe(
+    const buildShipperUrl = createBuildShipperUrl('production');
+    expect(buildShipperUrl({ channelName: 'test-channel' })).toBe(
       'https://telemetry.elastic.co/v3/send/test-channel'
     );
   });
 
   test('returns staging URL', () => {
-    expect(buildShipperUrl({ sendTo: 'staging', channelName: 'test-channel' })).toBe(
+    const buildShipperUrl = createBuildShipperUrl('staging');
+    expect(buildShipperUrl({channelName: 'test-channel' })).toBe(
       'https://telemetry-staging.elastic.co/v3/send/test-channel'
     );
   });

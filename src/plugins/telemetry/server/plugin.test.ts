@@ -10,7 +10,7 @@ import { ElasticV3ServerShipper } from '@elastic/ebt/shippers/elastic_v3/server'
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
-import { buildShipperHeaders, buildShipperUrl } from '../common/ebt_v3_endpoint';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import { TelemetryPlugin } from './plugin';
 import type { NodeRoles } from '@kbn/core-node-server';
 
@@ -41,18 +41,23 @@ describe('TelemetryPlugin', () => {
         const initializerContext = coreMock.createPluginInitializerContext();
         const coreSetupMock = coreMock.createSetup();
 
-        new TelemetryPlugin(initializerContext).setup(coreSetupMock, {
+        const telemetryPlugin = new TelemetryPlugin(initializerContext);
+        telemetryPlugin['getSendToEnv'] = jest.fn();
+
+        telemetryPlugin.setup(coreSetupMock, {
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
         });
 
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledWith(undefined);
+        
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3ServerShipper,
           {
             channelName: 'kibana-server',
             version: 'version',
-            sendTo: 'staging',
-            buildShipperUrl,
+            buildShipperUrl: expect.any(Function),
             buildShipperHeaders,
           }
         );
@@ -62,18 +67,23 @@ describe('TelemetryPlugin', () => {
         const initializerContext = coreMock.createPluginInitializerContext({ sendUsageTo: 'prod' });
         const coreSetupMock = coreMock.createSetup();
 
-        new TelemetryPlugin(initializerContext).setup(coreSetupMock, {
+        const telemetryPlugin = new TelemetryPlugin(initializerContext);
+        telemetryPlugin['getSendToEnv'] = jest.fn();
+
+        telemetryPlugin.setup(coreSetupMock, {
           usageCollection: usageCollectionPluginMock.createSetupContract(),
           telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
         });
+
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
+        expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledWith('prod');
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3ServerShipper,
           {
             channelName: 'kibana-server',
             version: 'version',
-            sendTo: 'production',
-            buildShipperUrl,
+            buildShipperUrl: expect.any(Function),
             buildShipperHeaders,
           }
         );
