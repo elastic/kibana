@@ -25,5 +25,5 @@ image::images/dashboard-filter-by-creator.png[Option to filter the list of dashb
 
 **Sort by name or last update date**
 
-You can sort the dashboard list based on their name or their last last update date. 
+You can sort the dashboard list based on their name or their last update date. 
 
