@@ -3,15 +3,13 @@ title: Unsuccessful rule API response
 properties:
   error:
     type: string
-    examples:
-      - Unauthorized
+    example: Unauthorized
     enum:
       - Unauthorized
   message:
     type: string 
   statusCode:
     type: integer
-    examples:
-      - 401
+    example: 401
     enum:
       - 401
