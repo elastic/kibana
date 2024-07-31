@@ -1,5 +1,6 @@
 @mixin mapOverlayIsTextOnly {
-  text-shadow:
-    -1px -1px 1px $euiColorEmptyShade,
-    -1px -1px 1px $euiColorEmptyShade;
+  background-color: rgba(255,255,255,.4);
+
+  padding-left: $euiSizeXS;
+  padding-right: $euiSizeXS;
 }
