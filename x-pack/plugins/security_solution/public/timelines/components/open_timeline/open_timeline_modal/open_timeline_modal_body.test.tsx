@@ -74,7 +74,9 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="title-row"]').first().exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="open-timeline-modal-title"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it renders the search row', () => {

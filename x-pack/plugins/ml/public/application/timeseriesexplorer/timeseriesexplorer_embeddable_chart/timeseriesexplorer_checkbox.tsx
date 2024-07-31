@@ -17,7 +17,7 @@ interface Props {
 }
 
 export const TimeseriesExplorerCheckbox: FC<Props> = ({ id, label, checked, onChange }) => {
-  const checkboxId = useMemo(() => `id-${htmlIdGenerator()()}`, []);
+  const checkboxId = useMemo(() => `${id}-${htmlIdGenerator()()}`, [id]);
   return (
     <EuiFlexItem grow={false}>
       <EuiCheckbox id={checkboxId} label={label} checked={checked} onChange={onChange} />

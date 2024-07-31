@@ -11,7 +11,7 @@ import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
-import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
+import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v3';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -37,13 +37,24 @@ export default ({ getService }: FtrProviderContext) => {
       getLogRateAnalysisTestData<typeof apiVersion>().forEach((testData) => {
         let overrides: AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'] = {};
 
-        overrides = {
-          loaded: 0,
-          remainingFieldCandidates: [],
-          significantItems: testData.expected
-            .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
-          regroupOnly: true,
-        } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
+        if (apiVersion === '2') {
+          overrides = {
+            loaded: 0,
+            remainingFieldCandidates: [],
+            significantItems: testData.expected
+              .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+            regroupOnly: true,
+          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
+        } else if (apiVersion === '3') {
+          overrides = {
+            loaded: 0,
+            remainingKeywordFieldCandidates: [],
+            remainingTextFieldCandidates: [],
+            significantItems: testData.expected
+              .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+            regroupOnly: true,
+          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
+        }
 
         describe(`with v${apiVersion} - ${testData.testName}`, () => {
           before(async () => {

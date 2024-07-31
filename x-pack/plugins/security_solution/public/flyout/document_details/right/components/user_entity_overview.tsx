@@ -82,7 +82,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({

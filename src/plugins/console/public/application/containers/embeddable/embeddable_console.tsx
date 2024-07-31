@@ -70,6 +70,7 @@ export const EmbeddableConsole = ({
   setDispatch,
   alternateView,
   isMonacoEnabled,
+  isDevMode,
   getConsoleHeight,
   setConsoleHeight,
 }: EmbeddableConsoleDependencies) => {
@@ -198,6 +199,7 @@ export const EmbeddableConsole = ({
               usageCollection={usageCollection}
               onKeyDown={onKeyDown}
               isMonacoEnabled={isMonacoEnabled}
+              isDevMode={isDevMode}
             />
           ) : null}
           {showAlternateView ? (

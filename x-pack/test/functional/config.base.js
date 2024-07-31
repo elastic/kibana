@@ -20,10 +20,10 @@ export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.base.js')
+    require.resolve('@kbn/test-suites-src/functional/config.base')
   );
 
   return {

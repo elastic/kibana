@@ -171,7 +171,7 @@ describe('When calling package policy', () => {
     appContextService.stop();
   });
 
-  describe('create api handler', () => {
+  describe('Create api handler', () => {
     const getCreateKibanaRequest = (
       newData?: typeof CreatePackagePolicyRequestSchema.body
     ): KibanaRequest<
@@ -246,7 +246,7 @@ describe('When calling package policy', () => {
     });
   });
 
-  describe('update api handler', () => {
+  describe('Update api handler', () => {
     const getUpdateKibanaRequest = (
       newData?: typeof UpdatePackagePolicyRequestSchema.body
     ): KibanaRequest<
@@ -526,6 +526,60 @@ describe('When calling package policy', () => {
       await routeHandler(context, request, response);
 
       expect(mockedAgentPolicyService.update).not.toHaveBeenCalled();
+    });
+
+    it('should disable an input if is enabled and has all its stream disabled', async () => {
+      const inputs = [
+        {
+          type: 'input-logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: false,
+              data_stream: {
+                type: 'logs',
+                dataset: 'test.some_logs',
+              },
+            },
+          ],
+        },
+      ];
+      const request = getUpdateKibanaRequest({
+        inputs,
+      } as any);
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          item: {
+            description: 'desc',
+            enabled: true,
+            inputs: [
+              {
+                type: 'input-logs',
+                enabled: false,
+                streams: [
+                  {
+                    enabled: false,
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'test.some_logs',
+                    },
+                  },
+                ],
+              },
+            ],
+            name: 'endpoint-1',
+            namespace: 'default',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.5.0',
+            },
+            vars: expect.any(Object),
+            policy_id: '2',
+          },
+        },
+      });
     });
   });
 

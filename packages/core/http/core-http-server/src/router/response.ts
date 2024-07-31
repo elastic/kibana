@@ -39,6 +39,8 @@ export type ResponseErrorAttributes = Record<string, any>;
  */
 export type ResponseError =
   | string
+  | Buffer
+  | Stream
   | Error
   | {
       message: string | Error;

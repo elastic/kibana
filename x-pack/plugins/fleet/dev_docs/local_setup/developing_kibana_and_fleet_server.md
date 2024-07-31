@@ -243,6 +243,14 @@ xpack.fleet.agentPolicies:
                 frozen: true
 ```
 
+Some packages are bundled with kibana e.g. apm, elastic_agent (see [bundled packages doc](https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/README.md#bundled-packages)). To use the latest versions, download the latest kibana distributable from [here](https://artifacts-api.elastic.co/v1/versions/latest), extract, and set the `bundledPackageLocation` in kibana config.
+
+Alternatively, turn on beta integrations on the UI, to use the newest prerelease versions from the registry.
+
+```yaml
+xpack.fleet.developer.bundledPackageLocation: /path/to/downloaded/kibana/kibana-8.16.0-SNAPSHOT/node_modules/@kbn/fleet-plugin/target/bundled_packages
+```
+
 3. Update your `fleet-server.dev.yml` to look as follows
 
 ```yaml

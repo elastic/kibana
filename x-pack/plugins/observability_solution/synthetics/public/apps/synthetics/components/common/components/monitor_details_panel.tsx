@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { TagsBadges } from './tag_badges';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
@@ -102,7 +102,11 @@ export const MonitorDetailsPanel = ({
           {latestPing?.timestamp ? (
             <Time timestamp={latestPing?.timestamp} />
           ) : (
-            <EuiText color="subdued">--</EuiText>
+            <EuiText color="subdued">
+              {i18n.translate('xpack.synthetics.monitorDetailsPanel.TextLabel', {
+                defaultMessage: '--',
+              })}
+            </EuiText>
           )}
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{LAST_MODIFIED_LABEL}</EuiDescriptionListTitle>
@@ -121,7 +125,7 @@ export const MonitorDetailsPanel = ({
         <EuiDescriptionListDescription>{monitor.id}</EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{MONITOR_TYPE_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <MonitorTypeBadge monitor={monitor} />
+          <MonitorTypeBadge monitorType={monitor.type} />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{FREQUENCY_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
@@ -139,7 +143,7 @@ export const MonitorDetailsPanel = ({
 
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <TagsBadges tags={monitor[ConfigKey.TAGS]} />
+          <TagsList tags={monitor[ConfigKey.TAGS]} />
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
     </PanelWithTitle>
