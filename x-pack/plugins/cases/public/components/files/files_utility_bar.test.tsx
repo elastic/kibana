@@ -18,7 +18,8 @@ const defaultProps = {
   onSearch: jest.fn(),
 };
 
-describe('FilesUtilityBar', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174571
+describe.skip('FilesUtilityBar', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

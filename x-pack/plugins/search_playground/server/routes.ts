@@ -31,7 +31,7 @@ export function createRetriever(esQuery: string) {
       const query = JSON.parse(replacedQuery);
       return query;
     } catch (e) {
-      throw Error(e);
+      throw Error("Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.");
     }
   };
 }

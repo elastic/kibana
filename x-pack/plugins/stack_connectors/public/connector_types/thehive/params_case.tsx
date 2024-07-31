@@ -92,7 +92,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           helpText: '',
           isInvalid:
             errors['pushToServiceParam.incident.title'] !== undefined &&
-            errors['pushToServiceParam.incident.title'].length > 0 &&
+            Number(errors['pushToServiceParam.incident.title'].length) > 0 &&
             incident.title !== undefined,
           error: errors['pushToServiceParam.incident.title'] as string,
         }}
