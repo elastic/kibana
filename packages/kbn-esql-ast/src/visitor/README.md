@@ -41,30 +41,9 @@ arguments can be represented as:
 }
 ```
 
-#### Command list
-
-Below is a list of know commands as of this writing:
-
-- `EXPLAIN`
-- `FROM <sources> [ METADATA <columns> ]`
-- `ROW <columns>`
-- `METRICS <sources> [ <columns> [ BY <columns> ]]`
-- `SHOW <identifier>`
-- `META <identifier>`
-- `EVAL <columns>`
-- `STATS <columns> [ BY <columns> ]`
-- `INLINESTATS <columns> [ BY <columns> ]`
-- `LIMIT <literal>`
-- `LOOKUP <source> ON <column>`
-- `KEEP <columns>`
-- `SORT <columns>`
-- `WHERE <expression>`
-- `DROP <columns>`
-- `RENAME <column> AS <column>`
-- `DISSECT <column> <string> [ APPEND_SEPARATOR = <string> ]`
-- `GROK <column> <string>`
-- `ENRICH <column> [ ON <column> ] [ WITH <columns> ]`
-- `MV_EXPAND <column>`
+Each command has a command specific `visitCommandX` callback, where `X` is the
+name of the command. If a command-specific callback is not found, the generic
+`visitCommand` callback is called.
 
 
 ### Expressions
@@ -84,3 +63,7 @@ As of this writing, the following expressions are defined:
 - Time interval expression, `{type: "interval"}`, like `1h`, `1d`, `1w`
 - Inline cast expression, `{type: "cast"}`, like `abc::int`, `def::string`
 - Unknown node, `{type: "unknown"}`
+
+Each expression has a `visitExpressionX` callback, where `X` is the type of the
+expression. If a expression-specific callback is not found, the generic
+`visitExpression` callback is called.
