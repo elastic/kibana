@@ -134,7 +134,7 @@ export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionMissingFields: boolean;
   suppressionRuleId: string;
 }> = {
-  eventType: 'Alert suppression event',
+  eventType: 'alert_suppression_on_rule_execution',
   schema: {
     suppressionAlertsCreated: {
       type: 'long',
