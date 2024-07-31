@@ -25,7 +25,7 @@ interface DeleteTests {
 }
 
 interface DeleteTestDefinition {
-  user: TestDefinitionAuthentication;
+  user?: TestDefinitionAuthentication;
   spaceId: string;
   tests: DeleteTests;
 }
@@ -152,6 +152,7 @@ export function deleteTestSuiteFactory(
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
+      const testAgent = user ? supertest.auth(user.username, user.password) : supertest;
       describeFn(description, () => {
         beforeEach(async () => {
           await esArchiver.load(
@@ -166,18 +167,16 @@ export function deleteTestSuiteFactory(
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-            return supertest
+            return testAgent
               .delete(`${urlPrefix}/api/spaces/space/space_2`)
-              .auth(user.username, user.password)
               .expect(tests.exists.statusCode)
               .then(tests.exists.response);
           });
 
           describe(`when the space is reserved`, () => {
             it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
-              return supertest
+              return testAgent
                 .delete(`${urlPrefix}/api/spaces/space/default`)
-                .auth(user.username, user.password)
                 .expect(tests.reservedSpace.statusCode)
                 .then(tests.reservedSpace.response);
             });
@@ -185,9 +184,8 @@ export function deleteTestSuiteFactory(
 
           describe(`when the space doesn't exist`, () => {
             it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
-              return supertest
+              return testAgent
                 .delete(`${urlPrefix}/api/spaces/space/space_3`)
-                .auth(user.username, user.password)
                 .expect(tests.doesntExist.statusCode)
                 .then(tests.doesntExist.response);
             });
