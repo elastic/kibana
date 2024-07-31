@@ -76,6 +76,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideTimeFilterInfo,
   hideQueryHistory,
   isHelpMenuOpen,
+  hasOutline,
   setIsHelpMenuOpen,
 }: TextBasedLanguagesEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -228,7 +229,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
-    Boolean(editorIsInline)
+    Boolean(editorIsInline),
+    Boolean(hasOutline)
   );
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();

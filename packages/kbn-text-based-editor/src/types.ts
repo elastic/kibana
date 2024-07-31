@@ -60,6 +60,9 @@ export interface TextBasedLanguagesEditorProps {
 
   /** hide query history **/
   hideQueryHistory?: boolean;
+
+  /** adds border in the editor **/
+  hasOutline?: boolean;
 }
 
 export interface TextBasedEditorDeps {

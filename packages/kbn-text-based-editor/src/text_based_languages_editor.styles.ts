@@ -18,7 +18,8 @@ export const textBasedLanguageEditorStyles = (
   hasErrors: boolean,
   hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
-  editorIsInline: boolean
+  editorIsInline: boolean,
+  hasOutline: boolean
 ) => {
   const bottomContainerBorderColor = hasErrors ? euiTheme.colors.danger : euiTheme.colors.primary;
 
@@ -29,6 +30,9 @@ export const textBasedLanguageEditorStyles = (
       right: 0,
       zIndex: 4,
       height: `${editorHeight}px`,
+      border: hasOutline ? euiTheme.border.thin : 'none',
+      borderRadius: euiTheme.border.radius.small,
+      borderBottom: 'none',
     },
     resizableContainer: {
       display: 'flex',

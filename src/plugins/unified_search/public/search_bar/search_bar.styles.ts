@@ -23,7 +23,7 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
     `,
     withBorders: css`
       border: ${euiTheme.border.thin};
-      border-radius: ${euiTheme.border.radius};
+      border-radius: ${euiTheme.border.radius.small};
       border-bottom: none;
     `,
     hidden: css`
