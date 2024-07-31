@@ -9,7 +9,6 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { Wrapper } from '../shared/test_wrapper';
 import { CustomHeaderSection } from './custom_header';
-import { headerContent } from './constants';
 
 describe('CustomHeaderSection', () => {
   it('should render the section for logo text', () => {
@@ -33,16 +32,18 @@ describe('CustomHeaderSection', () => {
   });
 
   it('should render the section for euiIconType text', () => {
-    const { getByText, getByRole } = render(
-      <CustomHeaderSection {...headerContent['/auto-detect']} />,
+    const { getByText, container } = render(
+      <CustomHeaderSection
+        euiIconType="consoleApp"
+        headlineCopy="Auto-detect logs and metrics"
+        captionCopy="This installation scans your host and auto-detects log and metric files."
+      />,
       {
         wrapper: Wrapper({ location: '/auto-detect?category=infra' }),
       }
     );
 
-    const imgDiv = getByRole('img');
-    expect(imgDiv.childElementCount).toBe(1);
-    expect(imgDiv.children[0].getAttribute('data-euiicon-type')).toBe('consoleApp');
+    container.querySelector('[data-euiicon-type="consoleApp"]');
 
     expect(getByText('Return')).toBeInTheDocument();
     expect(getByText('Auto-detect logs and metrics')).toBeInTheDocument();

@@ -74,7 +74,7 @@ export interface LogoIconProps {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;
   isAvatar?: boolean;
-  size: LogoIconSizeProp;
+  size?: LogoIconSizeProp;
   className?: string;
 }
 
