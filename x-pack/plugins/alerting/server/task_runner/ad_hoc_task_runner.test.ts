@@ -25,7 +25,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunnerContext } from './types';
@@ -94,6 +98,7 @@ import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
@@ -118,6 +123,7 @@ const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemM
 let fakeTimer: sinon.SinonFakeTimers;
 type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
   actionsPlugin: jest.Mocked<ActionsPluginStart>;
+  taskManager: jest.Mocked<TaskManagerStartContract>;
   eventLogger: jest.Mocked<IEventLogger>;
   executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
 };
@@ -155,6 +161,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
     },
   },
   actionsPlugin: actionsMock.createStart(),
+  taskManager: taskManagerMock.createStart(),
   alertsService,
   backfillClient,
   basePathService: httpServiceMock.createBasePath(),

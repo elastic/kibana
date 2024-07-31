@@ -16,7 +16,7 @@ import {
   Rule,
   RuleAlertData,
 } from '../types';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -103,6 +103,7 @@ import {
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { createTaskRunnerLogger } from './lib';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -183,6 +184,7 @@ describe('Task Runner', () => {
 
     type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
       actionsPlugin: jest.Mocked<ActionsPluginStart>;
+      taskManager: jest.Mocked<TaskManagerStartContract>;
       eventLogger: jest.Mocked<IEventLogger>;
       executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
     };
@@ -195,6 +197,7 @@ describe('Task Runner', () => {
       uiSettings: uiSettingsService,
       elasticsearch: elasticsearchService,
       actionsPlugin: actionsMock.createStart(),
+      taskManager: taskManagerMock.createStart(),
       getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
       encryptedSavedObjectsClient,
       logger,

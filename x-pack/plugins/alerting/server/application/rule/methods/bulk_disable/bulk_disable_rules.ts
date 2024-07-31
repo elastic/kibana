@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import {
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
@@ -155,7 +151,6 @@ const bulkDisableRulesWithOCC = async (
       )
   );
 
-  const rulesFinderRules: Array<SavedObjectsFindResult<RuleAttributes>> = [];
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RuleAttributes>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -165,9 +160,7 @@ const bulkDisableRulesWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        rulesFinderRules.push(...response.saved_objects);
-
-        await pMap(rulesFinderRules, async (rule) => {
+        await pMap(response.saved_objects, async (rule) => {
           try {
             if (untrack) {
               await untrackRuleAlerts(context, rule.id, rule.attributes);

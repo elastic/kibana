@@ -35,6 +35,7 @@ import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const backfillClient = backfillClientMock.create();
@@ -112,6 +113,7 @@ describe('Task Runner Factory', () => {
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
+    taskManager: taskManagerMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),

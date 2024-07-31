@@ -361,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-edit'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-edit-with-ids'] }))
                 .expect(200)
             )
           );
@@ -405,7 +405,7 @@ export default ({ getService }: FtrProviderContext) => {
                     notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
-                    tags: ['multiple-rules-edit'],
+                    tags: ['multiple-rules-edit-with-ids'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     rule_type_id: 'test.noop',
@@ -437,7 +437,7 @@ export default ({ getService }: FtrProviderContext) => {
                     notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
-                    tags: ['multiple-rules-edit'],
+                    tags: ['multiple-rules-edit-with-ids'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     rule_type_id: 'test.noop',
@@ -469,7 +469,7 @@ export default ({ getService }: FtrProviderContext) => {
                     notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
-                    tags: ['multiple-rules-edit'],
+                    tags: ['multiple-rules-edit-with-ids'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     rule_type_id: 'test.noop',
@@ -512,7 +512,7 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-enable'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-edit-with-filter'] }))
                 .expect(200)
             )
           );
@@ -523,7 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
             .set('kbn-xsrf', 'foo')
-            .send({ filter: `alert.attributes.tags: "multiple-rules-enable"` })
+            .send({ filter: `alert.attributes.tags: "multiple-rules-edit-with-filter"` })
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -557,7 +557,7 @@ export default ({ getService }: FtrProviderContext) => {
                     notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
-                    tags: ['multiple-rules-enable'],
+                    tags: ['multiple-rules-edit-with-filter'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     rule_type_id: 'test.noop',
@@ -589,7 +589,7 @@ export default ({ getService }: FtrProviderContext) => {
                     notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
-                    tags: ['multiple-rules-enable'],
+                    tags: ['multiple-rules-edit-with-filter'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     rule_type_id: 'test.noop',
@@ -621,7 +621,7 @@ export default ({ getService }: FtrProviderContext) => {
                     notify_when: 'onThrottleInterval',
                     enabled: true,
                     name: 'abc',
-                    tags: ['multiple-rules-enable'],
+                    tags: ['multiple-rules-edit-with-filter'],
                     consumer: 'alertsFixture',
                     throttle: '1m',
                     rule_type_id: 'test.noop',
