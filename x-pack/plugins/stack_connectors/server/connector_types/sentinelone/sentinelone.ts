@@ -159,7 +159,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
   public async fetchAgentFiles({ files, agentId, zipPassCode }: SentinelOneFetchAgentFilesParams) {
     if (!agentId) {
-      throw new Error(`'agentId' param is required [${agentId}]`);
+      throw new Error(`'agentId' parameter is required`);
     }
 
     return this.sentinelOneApiRequest({
@@ -177,7 +177,7 @@ export class SentinelOneConnector extends SubActionConnector<
 
   public async downloadAgentFile({ agentId, activityId }: SentinelOneDownloadAgentFileParams) {
     if (!agentId) {
-      throw new Error(`'agentId' parameter is required [${agentId}]`);
+      throw new Error(`'agentId' parameter is required`);
     }
 
     return this.sentinelOneApiRequest({

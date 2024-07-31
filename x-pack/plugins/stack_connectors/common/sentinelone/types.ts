@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Mutable } from 'utility-types';
 import {
   SentinelOneBaseApiResponseSchema,
   SentinelOneConfigSchema,
@@ -137,8 +138,8 @@ export type SentinelOneGetRemoteScriptsResponse = TypeOf<
   typeof SentinelOneGetRemoteScriptsResponseSchema
 >;
 
-export type SentinelOneFetchAgentFilesParams = TypeOf<
-  typeof SentinelOneFetchAgentFilesParamsSchema
+export type SentinelOneFetchAgentFilesParams = Mutable<
+  TypeOf<typeof SentinelOneFetchAgentFilesParamsSchema>
 >;
 export type SentinelOneFetchAgentFilesResponse = TypeOf<
   typeof SentinelOneFetchAgentFilesResponseSchema
