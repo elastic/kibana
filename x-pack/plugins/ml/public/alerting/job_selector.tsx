@@ -44,6 +44,9 @@ export interface JobSelectorControlProps {
    * Available options to select. By default suggest all existing jobs.
    */
   options?: Array<EuiComboBoxOptionOption<string>>;
+  /**
+   * Flag to indicate wheter to use the job creation button in the empty prompt or the dropdown when no jobs are available.
+   */
   shouldUseDropdownJobCreate?: boolean;
 }
 
@@ -69,7 +72,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   const isMounted = useMountedState();
 
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [jobsLoaded, setJobsLoaded] = useState<boolean>(false);
+  const [areJobsLoading, setAreJobsLoading] = useState<boolean>(false);
   const jobIds = useMemo(() => new Set(), []);
   const groupIds = useMemo(() => new Set(), []);
 
@@ -82,6 +85,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   );
 
   const fetchOptions = useCallback(async () => {
+    setAreJobsLoading(true);
     try {
       const { jobIds: jobIdOptions, groupIds: groupIdOptions } =
         await adJobsApiService.getAllJobAndGroupIds();
@@ -151,7 +155,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         }),
       });
     }
-    setJobsLoaded(true);
+    setAreJobsLoading(false);
   }, [
     adJobsApiService,
     allowSelectAll,
@@ -205,7 +209,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createJobUrl]);
 
-  if (jobsLoaded === false) return <LoadingIndicator />;
+  if (areJobsLoading === true) return <LoadingIndicator />;
 
   return jobIds.size || shouldUseDropdownJobCreate ? (
     <EuiFormRow
@@ -249,7 +253,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
         <EuiButton
           fill
           color="primary"
-          onClick={async () => await navigateToUrl(createJobUrl!)}
+          onClick={() => navigateToUrl(createJobUrl!)}
           disabled={createJobUrl === undefined}
         >
           <FormattedMessage
