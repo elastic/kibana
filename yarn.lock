@@ -1700,6 +1700,21 @@
   dependencies:
     tslib "^1.9.3"
 
+"@elastic/ebt@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ebt/-/ebt-1.0.0.tgz#49a3772363c0e6e180e451a4aa24e219add4a6f3"
+  integrity sha512-/M3/bW8Kk4osYWM7xx5R0ePH1xr1fLER36bkw/HY8vHlHv+WCHnyLhL1yqQdCrq+eVunAPcoGawHXgi52SV05A==
+  dependencies:
+    "@babel/runtime" "^7.24.7"
+    fp-ts "^2.3.1"
+    io-ts "^2.0.5"
+    lodash.get "^4.4.2"
+    lodash.has "^4.5.2"
+    moment "^2.29.4"
+    node-fetch "^2.6.7"
+    rxjs "^7.5.5"
+    typescript "^5.5.4"
+
 "@elastic/ecs-helpers@^2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@elastic/ecs-helpers/-/ecs-helpers-2.1.1.tgz#8a375b307c33a959938d9ae8f9abb466eb9fb3bf"
@@ -4758,10 +4773,6 @@
   uid ""
 
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ebt@link:packages/analytics/ebt":
   version "0.0.0"
   uid ""
 
@@ -22280,6 +22291,11 @@ lodash.get@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
   integrity sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=
 
+lodash.has@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/lodash.has/-/lodash.has-4.5.2.tgz#d19f4dc1095058cccbe2b0cdf4ee0fe4aa37c862"
+  integrity sha512-rnYUdIo6xRCJnQmbVFEwcxF144erlD+M3YcJUVesflU9paQaE8p+fJDcIQrlMYbxoANFL+AB9hZrzSBBk5PL+g==
+
 lodash.includes@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/lodash.includes/-/lodash.includes-4.3.0.tgz#60bb98a87cb923c68ca1e51325483314849f553f"
@@ -30114,7 +30130,7 @@ terser@^4.1.2, terser@^4.6.3:
     source-map "~0.6.1"
     source-map-support "~0.5.12"
 
-terser@^5.26.0, terser@^5.3.4, terser@^5.31.2, terser@^5.9.0:
+terser@^5.26.0, terser@^5.3.4, terser@^5.31.3, terser@^5.9.0:
   version "5.31.3"
   resolved "https://registry.yarnpkg.com/terser/-/terser-5.31.3.tgz#b24b7beb46062f4653f049eea4f0cd165d0f0c38"
   integrity sha512-pAfYn3NIZLyZpa83ZKigvj6Rn9c/vd5KfYGX7cN1mnzqgDcxWvrU5ZtAfIKhEXz9nRecw4z3LXkjaq96/qZqAA==
@@ -30758,7 +30774,7 @@ typescript-tuple@^2.2.1:
   dependencies:
     typescript-compare "^0.0.2"
 
-typescript@5, typescript@5.1.6, typescript@^3.3.3333, typescript@^5.0.4:
+typescript@5, typescript@5.1.6, typescript@^3.3.3333, typescript@^5.0.4, typescript@^5.5.4:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.6.tgz#02f8ac202b6dad2c0dd5e0913745b47a37998274"
   integrity sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==
