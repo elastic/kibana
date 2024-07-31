@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ERROR_USER_NOT_AUTHORIZED } from '@kbn/entityManager-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
 import {
   EuiButtonIcon,
@@ -21,19 +20,27 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { EntityManagerUnauthorizedError } from '@kbn/entityManager-plugin/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
-  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
+  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useLocalStorage<boolean | undefined>(
+    'apm.isFeedbackModalVisible',
+    undefined
+  );
+
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
 
   const {
     services: { entityManager },
+    notifications,
   } = useKibana<ApmPluginStartDeps>();
 
   const {
@@ -42,6 +49,8 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
     refetch,
     setServiceInventoryViewLocalStorageSetting,
     isEntityCentricExperienceViewEnabled,
+    tourState,
+    updateTourState,
   } = useEntityManagerEnablementContext();
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
@@ -49,12 +58,17 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
 
   const handleRestoreView = async () => {
     setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.classic);
-    setsIsFeedbackModalVisible(true);
+    if (isFeedbackModalVisible === undefined) {
+      setsIsFeedbackModalVisible(true);
+    }
   };
 
   const handleEnablement = async () => {
     if (isEntityManagerEnabled) {
       setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
+      if (tourState.isModalVisible === undefined) {
+        updateTourState({ isModalVisible: true });
+      }
       return;
     }
 
@@ -64,16 +78,29 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
       if (response.success) {
         setIsLoading(false);
         setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.entity);
-        refetch();
-      }
 
-      if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
-        setIsLoading(false);
-        setsIsUnauthorizedModalVisible(true);
+        if (tourState.isModalVisible === undefined) {
+          updateTourState({ isModalVisible: true });
+        }
+        refetch();
+      } else {
+        throw new Error(response.message);
       }
     } catch (error) {
       setIsLoading(false);
-      console.error(error);
+
+      if (error instanceof EntityManagerUnauthorizedError) {
+        setsIsUnauthorizedModalVisible(true);
+        return;
+      }
+
+      const err = error as Error | IHttpFetchError<ResponseErrorBody>;
+      notifications.toasts.danger({
+        title: i18n.translate('xpack.apm.eemEnablement.errorTitle', {
+          defaultMessage: 'Error while enabling the new experience',
+        }),
+        body: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
+      });
     }
   };
 

@@ -30,6 +30,7 @@ export async function saveEntityDefinition(
 
   await soClient.create<EntityDefinition>(SO_ENTITY_DEFINITION_TYPE, definition, {
     id: definition.id,
+    managed: definition.managed,
     overwrite: true,
   });
 

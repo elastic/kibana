@@ -12,11 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Console Notebooks', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     it('has notebooks view available', async () => {

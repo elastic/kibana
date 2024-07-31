@@ -55,7 +55,7 @@ export const LensFieldFormat = {
 
 export const lensFieldFormatter = (
   metrics: GenericMetric[]
-): typeof LensFieldFormat[keyof typeof LensFieldFormat] => {
+): (typeof LensFieldFormat)[keyof typeof LensFieldFormat] => {
   if (metrics.length < 1 || !metrics[0].field) return LensFieldFormat.NUMBER;
   const firstMetricField = metrics[0].field;
   if (firstMetricField.endsWith('.pct')) return LensFieldFormat.PERCENT;

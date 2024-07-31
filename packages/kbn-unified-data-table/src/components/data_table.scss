@@ -60,6 +60,11 @@
     padding-right: 0;
   }
 
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: $euiSizeXS;
+    padding-right: 0;
+  }
+
   .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='colorIndicator'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] {
     padding: 0;

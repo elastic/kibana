@@ -8,7 +8,7 @@
 
 import React, { useEffect } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -80,7 +80,7 @@ export const getSearchControlFactory = ({
         </EuiFormRow>
       );
     },
-    buildControl: (initialState, buildApi, uuid, parentApi) => {
+    buildControl: async (initialState, buildApi, uuid, parentApi) => {
       const searchString = new BehaviorSubject<string | undefined>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
@@ -178,10 +178,14 @@ export const getSearchControlFactory = ({
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(distinctUntilChanged(deepEqual))
+        .pipe(skip(1))
         .subscribe(() => {
           searchString.next(undefined);
         });
+
+      if (initialState.searchString?.length) {
+        await dataControl.untilFiltersInitialized();
+      }
 
       return {
         api,

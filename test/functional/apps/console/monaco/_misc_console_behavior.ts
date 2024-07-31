@@ -109,6 +109,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('can toggle keyboard shortcuts', async () => {
+      // Enter a sample command
+      await PageObjects.console.monaco.enterText('GET _search');
+
+      // Disable keyboard shorcuts
+      await PageObjects.console.toggleKeyboardShortcuts(false);
+
+      // Upon clicking ctrl enter a newline character should be added to the editor
+      await PageObjects.console.monaco.pressCtrlEnter();
+      await retry.waitFor('shortcut shouldnt have generated any request', async () => {
+        const response = await PageObjects.console.monaco.getOutputText();
+        return response === '';
+      });
+
+      // Restore setting
+      await PageObjects.console.toggleKeyboardShortcuts(true);
+    });
+
     describe('customizable font size', () => {
       // flaky
       it.skip('should allow the font size to be customized', async () => {

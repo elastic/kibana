@@ -30,6 +30,7 @@ enabled:
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/slos/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
+  - x-pack/test/api_integration/apis/entity_manager/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
   - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
@@ -48,4 +49,3 @@ enabled:
   - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
-  
