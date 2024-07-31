@@ -8,6 +8,7 @@
   border-left: 2px solid $euiTextColor;
   border-bottom: 2px solid $euiTextColor;
   text-align: right;
+  @include mapOverlayIsTextOnly;
 }
 
 .mapScaleControlFullScreen {
