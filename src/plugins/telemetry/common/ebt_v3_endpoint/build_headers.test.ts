@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { buildHeaders } from './build_headers';
+import { buildShipperHeaders } from './build_headers';
 
-describe('buildHeaders', () => {
+describe('buildShipperHeaders', () => {
   test('builds the headers as expected in the V3 endpoints', () => {
-    expect(buildHeaders('test-cluster', '1.2.3', 'test-license')).toMatchInlineSnapshot(`
+    expect(buildShipperHeaders('test-cluster', '1.2.3', 'test-license')).toMatchInlineSnapshot(`
       Object {
         "content-type": "application/x-ndjson",
         "x-elastic-cluster-id": "test-cluster",
@@ -21,7 +21,7 @@ describe('buildHeaders', () => {
   });
 
   test('if license is not provided, it skips the license header', () => {
-    expect(buildHeaders('test-cluster', '1.2.3')).toMatchInlineSnapshot(`
+    expect(buildShipperHeaders('test-cluster', '1.2.3')).toMatchInlineSnapshot(`
       Object {
         "content-type": "application/x-ndjson",
         "x-elastic-cluster-id": "test-cluster",

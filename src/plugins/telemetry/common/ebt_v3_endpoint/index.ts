@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { ElasticV3ShipperOptions } from '../common';
-export { ElasticV3BrowserShipper } from './src/browser_shipper';
+export { buildShipperHeaders } from './build_headers';
+export { createBuildShipperUrl } from './build_url';
