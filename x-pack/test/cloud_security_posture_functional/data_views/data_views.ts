@@ -45,8 +45,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   describe('Data Views', async function () {
     this.tags(['cloud_security_posture_data_views', 'cloud_security_posture_spaces']);
+    let cspSecurity = pageObjects.cspSecurity;
+    let findings: typeof pageObjects.findings;
 
     before(async () => {
+      cspSecurity = pageObjects.cspSecurity;
+      findings = pageObjects.findings;
       await cspSecurity.createRoles();
       await cspSecurity.createUsers();
     });
