@@ -265,7 +265,16 @@ describe('autocomplete.suggest', () => {
       test('on space after expression right hand side operand', async () => {
         const { assertSuggestions } = await setup();
 
+<<<<<<< HEAD
         await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '|']);
+=======
+        await assertSuggestions('from a | stats avg(b) by numberField % 2 /', [',', '|']);
+
+        await assertSuggestions(
+          'from a | stats var0 = AVG(products.base_price) BY var1 = BUCKET(order_date, 1 day)/',
+          [',', '|', '+ $0', '- $0']
+        );
+>>>>>>> upstream/main
       });
     });
   });

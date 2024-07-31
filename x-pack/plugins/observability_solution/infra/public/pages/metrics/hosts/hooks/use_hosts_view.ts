@@ -17,7 +17,6 @@ import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSourceContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
 import {
   GetInfraMetricsRequestBodyPayload,
@@ -39,21 +38,21 @@ const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 
 export const useHostsView = () => {
-  const { sourceId } = useSourceContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
 
-  const baseRequest = useMemo(
+  const payload = useMemo(
     () =>
-      createInfraMetricsRequest({
-        dateRange: parsedDateRange,
-        esQuery: buildQuery(),
-        sourceId,
-        limit: searchCriteria.limit,
-      }),
-    [buildQuery, parsedDateRange, sourceId, searchCriteria.limit]
+      JSON.stringify(
+        createInfraMetricsRequest({
+          dateRange: parsedDateRange,
+          esQuery: buildQuery(),
+          limit: searchCriteria.limit,
+        })
+      ),
+    [buildQuery, parsedDateRange, searchCriteria.limit]
   );
 
   const { data, error, status } = useFetcher(
@@ -63,7 +62,7 @@ export const useHostsView = () => {
         BASE_INFRA_METRICS_PATH,
         {
           method: 'POST',
-          body: JSON.stringify(baseRequest),
+          body: payload,
         }
       );
       const duration = performance.now() - start;
@@ -75,7 +74,7 @@ export const useHostsView = () => {
       );
       return metricsResponse;
     },
-    [baseRequest, searchCriteria.limit, telemetry]
+    [payload, searchCriteria.limit, telemetry]
   );
 
   return {
@@ -94,12 +93,10 @@ export const [HostsViewProvider, useHostsViewContext] = HostsView;
 
 const createInfraMetricsRequest = ({
   esQuery,
-  sourceId,
   dateRange,
   limit,
 }: {
   esQuery: { bool: BoolQuery };
-  sourceId: string;
   dateRange: StringDateRange;
   limit: number;
 }): GetInfraMetricsRequestBodyPayload => ({
@@ -111,5 +108,4 @@ const createInfraMetricsRequest = ({
   },
   metrics: HOST_TABLE_METRICS,
   limit,
-  sourceId,
 });

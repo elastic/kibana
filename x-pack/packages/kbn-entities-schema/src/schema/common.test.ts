@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { SafeParseSuccess } from 'zod';
-import { durationSchema, metadataSchema, semVerSchema } from './common';
-import moment from 'moment';
+import { durationSchema, metadataSchema, semVerSchema, historySettingsSchema } from './common';
 
 describe('schemas', () => {
   describe('metadataSchema', () => {
@@ -60,38 +58,46 @@ describe('schemas', () => {
       expect(result).toMatchSnapshot();
     });
   });
+
   describe('durationSchema', () => {
     it('should work with 1m', () => {
       const result = durationSchema.safeParse('1m');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('1m');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(60);
+      expect(result.data).toBe('1m');
     });
     it('should work with 10s', () => {
       const result = durationSchema.safeParse('10s');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('10s');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(10);
+      expect(result.data).toBe('10s');
     });
     it('should work with 999h', () => {
       const result = durationSchema.safeParse('999h');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('999h');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(999 * 60 * 60);
+      expect(result.data).toBe('999h');
     });
     it('should work with 90d', () => {
       const result = durationSchema.safeParse('90d');
       expect(result.success).toBeTruthy();
-      expect((result as SafeParseSuccess<moment.Duration>).data.toJSON()).toBe('90d');
-      expect((result as SafeParseSuccess<moment.Duration>).data.asSeconds()).toEqual(
-        90 * 24 * 60 * 60
-      );
+      expect(result.data).toBe('90d');
     });
     it('should not work with 1ms', () => {
       const result = durationSchema.safeParse('1ms');
       expect(result.success).toBeFalsy();
     });
+    it('should not work with invalid values', () => {
+      let result = durationSchema.safeParse('PT1H');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse('1H');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse('1f');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse('foo');
+      expect(result.success).toBeFalsy();
+      result = durationSchema.safeParse(' 1h ');
+      expect(result.success).toBeFalsy();
+    });
   });
+
   describe('semVerSchema', () => {
     it('should validate with 999.999.999', () => {
       const result = semVerSchema.safeParse('999.999.999');
@@ -101,6 +107,32 @@ describe('schemas', () => {
       const result = semVerSchema.safeParse('0.9');
       expect(result.success).toBeFalsy();
       expect(result).toMatchSnapshot();
+    });
+  });
+
+  describe('historySettingsSchema', () => {
+    it('should return default values when not defined', () => {
+      let result = historySettingsSchema.safeParse(undefined);
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({ lookbackPeriod: '1h' });
+
+      result = historySettingsSchema.safeParse({ syncDelay: '1m' });
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({ syncDelay: '1m', lookbackPeriod: '1h' });
+    });
+
+    it('should return user defined values when defined', () => {
+      const result = historySettingsSchema.safeParse({
+        lookbackPeriod: '30m',
+        syncField: 'event.ingested',
+        syncDelay: '5m',
+      });
+      expect(result.success).toBeTruthy();
+      expect(result.data).toEqual({
+        lookbackPeriod: '30m',
+        syncField: 'event.ingested',
+        syncDelay: '5m',
+      });
     });
   });
 });

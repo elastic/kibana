@@ -20,7 +20,7 @@ import {
 import {
   parseChartCollapseData,
   getIsChartCollapseAgg,
-} from '../../../pages/detection_engine/chart_panels/chart_collapse/helpers';
+} from '../chart_panels/chart_collapse/helpers';
 
 export const parseData = (data: AlertSearchResponse<{}, SummaryChartsAgg>) => {
   if (getIsAlertsBySeverityAgg(data)) {

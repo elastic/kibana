@@ -162,6 +162,62 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.formatESQLColumns",
+        "type": "Function",
+        "tags": [],
+        "label": "formatESQLColumns",
+        "description": [],
+        "signature": [
+          "(columns: ",
+          {
+            "pluginId": "@kbn/es-types",
+            "scope": "common",
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-common.ESQLColumn",
+            "text": "ESQLColumn"
+          },
+          "[]) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumn",
+            "text": "DatatableColumn"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/run_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.formatESQLColumns.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/run_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLAdHocDataview",
         "type": "Function",
         "tags": [],
