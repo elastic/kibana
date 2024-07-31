@@ -12,7 +12,7 @@ import type { ResponseActionAgentType } from '../../../../common/endpoint/servic
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
-  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD,
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { AlertResponseActionsSupport } from './use_alert_response_actions_support';
 import {
@@ -45,7 +45,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         unsupportedReason: undefined,
         details: {
           agentId: 'abfe4a35-d5b4-42a0-a539-bd054c791769',
-          agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD[agentType],
+          agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0],
           agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce((acc, commandName) => {
             acc[commandName] = options.noAgentSupport
               ? false
@@ -121,7 +121,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         unsupportedReason: RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
         details: {
           agentType: 'sentinel_one',
-          agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
+          agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0],
         },
       })
     );
@@ -129,7 +129,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
 
   it('should set `isSupported` to `false` if unable to get agent id', () => {
     alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData({
-      [RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.endpoint]: undefined,
+      [RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.endpoint[0]]: undefined,
     });
 
     expect(renderHook().result.current).toEqual(

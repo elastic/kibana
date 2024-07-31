@@ -6,8 +6,9 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { parseEcsFieldPath } from '../../lib/endpoint';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * Provide overrides for data `fields`. If a field is set to `undefined`, then it will be removed
@@ -89,8 +90,8 @@ const generateEndpointAlertDetailsItemDataMock = (
       isObjectArray: false,
     },
     {
-      category: 'agent',
-      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.endpoint,
+      category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.endpoint[0]).category,
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.endpoint[0],
       values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       isObjectArray: false,
@@ -158,8 +159,8 @@ const generateSentinelOneAlertDetailsItemDataMock = (
   });
 
   data.push({
-    category: 'observer',
-    field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
+    category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0]).category,
+    field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0],
     values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
     originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
     isObjectArray: false,
@@ -192,8 +193,8 @@ const generateCrowdStrikeAlertDetailsItemDataMock = (
 
   data.push(
     {
-      category: 'device',
-      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
+      category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.crowdstrike[0]).category,
+      field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.crowdstrike[0],
       values: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       originalValue: ['abfe4a35-d5b4-42a0-a539-bd054c791769'],
       isObjectArray: false,
