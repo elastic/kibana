@@ -35,6 +35,7 @@ import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { EntityRelationsDataClient } from './lib/entity_analytics/entity_store/entity_relations/entity_relations_data_client';
+import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entities/entities_data_client';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -57,6 +58,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityRelationsDataClient: () => EntityRelationsDataClient;
+  getEntityStoreDataClient: () => EntityStoreDataClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

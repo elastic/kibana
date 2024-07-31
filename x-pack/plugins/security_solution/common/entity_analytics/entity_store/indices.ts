@@ -6,5 +6,7 @@
  */
 
 const indexBase = '.entity-store.relations';
-
 export const getEntityRelationsIndex = (namespace: string) => `${indexBase}-${namespace}`;
+
+const storeIndex = '.entities.v1.latest.secsol-ea-entity-store';
+export const getEntityStoreIndex = (namespace: string) => `${storeIndex}`;

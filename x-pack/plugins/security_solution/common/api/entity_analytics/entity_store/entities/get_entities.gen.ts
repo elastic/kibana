@@ -15,13 +15,14 @@
  */
 
 import { z } from 'zod';
+import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { EntityType, EntityRecord } from './common.gen';
 
 export type GetEntitiesRequestQuery = z.infer<typeof GetEntitiesRequestQuery>;
 export const GetEntitiesRequestQuery = z.object({
-  entity_type: EntityType,
-  entity_id: z.coerce.number(),
+  entity_type: EntityType.optional(),
+  entity_id: ArrayFromString(z.string()),
 });
 export type GetEntitiesRequestQueryInput = z.input<typeof GetEntitiesRequestQuery>;
 

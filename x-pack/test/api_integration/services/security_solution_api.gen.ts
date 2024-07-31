@@ -317,7 +317,7 @@ finalize it.
     },
     getEntities(props: GetEntitiesProps) {
       return supertest
-        .get('/store/entities')
+        .get('/entity_store/entities')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
