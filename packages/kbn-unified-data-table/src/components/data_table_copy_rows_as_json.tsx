@@ -9,7 +9,7 @@
 import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ToastsStart } from '@kbn/core/public';
 import { copyRowsAsJsonToClipboard } from '../utils/copy_value_to_clipboard';
 import { UnifiedDataTableContext } from '../table_context';
 

@@ -10,7 +10,7 @@ import React, { useContext, useState } from 'react';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ToastsStart } from '@kbn/core/public';
 import { calcFieldCounts } from '@kbn/discover-utils';
 import { copyRowsAsTextToClipboard } from '../utils/copy_value_to_clipboard';
 import { UnifiedDataTableContext } from '../table_context';
