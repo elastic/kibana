@@ -120,7 +120,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             <EuiFlexItem data-test-subj="PackagePoliciesTableName" grow={false}>
               <EuiLink
                 title={value}
-                {...(canReadIntegrationPolicies
+                {...(canReadIntegrationPolicies && !agentPolicy.supports_agentless
                   ? {
                       href: getHref('edit_integration', {
                         policyId: agentPolicy.id,
