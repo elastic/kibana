@@ -26,7 +26,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Configure Case', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginAsAdmin();
       await navigateToCasesApp(getPageObject, getService, owner);
 
       await retry.waitFor('configure-case-button exist', async () => {
@@ -43,7 +43,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await svlCommonPage.forceLogout();
     });
 
     describe('Closure options', function () {

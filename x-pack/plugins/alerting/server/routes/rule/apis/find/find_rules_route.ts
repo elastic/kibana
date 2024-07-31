@@ -14,7 +14,7 @@ import type {
   FindRulesRequestQueryV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
@@ -43,10 +43,19 @@ const buildFindRulesRoute = ({
       path,
       options: {
         access: 'public',
-        summary: `Get rules`,
+        summary: 'Get information about rules',
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        query: findRulesRequestQuerySchemaV1,
+        request: {
+          query: findRulesRequestQuerySchemaV1,
+        },
+        response: {
+          200: {
+            body: () => ruleResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

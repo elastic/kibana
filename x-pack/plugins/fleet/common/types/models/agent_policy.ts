@@ -194,6 +194,10 @@ export interface FleetServerPolicy {
    */
   coordinator_idx: number;
   /**
+   * The namespaces of the policy
+   */
+  namespaces?: string[];
+  /**
    * The opaque payload.
    */
   data: {

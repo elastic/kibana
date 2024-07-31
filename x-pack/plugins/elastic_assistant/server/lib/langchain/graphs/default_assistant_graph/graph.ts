@@ -33,6 +33,7 @@ import {
   PERSIST_CONVERSATION_CHANGES_NODE,
   persistConversationChanges,
 } from './nodes/persist_conversation_changes';
+import { RESPOND_NODE, respond } from './nodes/respond';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -40,11 +41,15 @@ interface GetDefaultAssistantGraphParams {
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
   conversationId?: string;
+  getLlmInstance: () => BaseChatModel;
   llm: BaseChatModel;
   logger: Logger;
   tools: StructuredTool[];
   responseLanguage: string;
   replacements: Replacements;
+  llmType: string | undefined;
+  bedrockChatEnabled?: boolean;
+  isStreaming: boolean;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -56,11 +61,15 @@ export const getDefaultAssistantGraph = ({
   agentRunnable,
   conversationId,
   dataClients,
+  getLlmInstance,
   llm,
   logger,
   responseLanguage,
   tools,
   replacements,
+  llmType,
+  bedrockChatEnabled,
+  isStreaming,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -142,6 +151,12 @@ export const getDefaultAssistantGraph = ({
         conversationId,
         replacements,
       });
+    const respondNode = (state: AgentState) =>
+      respond({
+        ...nodeParams,
+        llm: getLlmInstance(),
+        state,
+      });
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
     const shouldContinueGenerateTitleEdge = (state: AgentState) =>
       shouldContinueGenerateTitle({ ...nodeParams, state });
@@ -158,6 +173,7 @@ export const getDefaultAssistantGraph = ({
       | 'generateChatTitle'
       | 'getPersistedConversation'
       | 'persistConversationChanges'
+      | 'respond'
     >({
       channels: graphState,
     });
@@ -167,6 +183,13 @@ export const getDefaultAssistantGraph = ({
     graph.addNode(PERSIST_CONVERSATION_CHANGES_NODE, persistConversationChangesNode);
     graph.addNode(AGENT_NODE, runAgentNode);
     graph.addNode(TOOLS_NODE, executeToolsNode);
+
+    const hasRespondStep = isStreaming && bedrockChatEnabled && llmType === 'bedrock';
+
+    if (hasRespondStep) {
+      graph.addNode(RESPOND_NODE, respondNode);
+      graph.addEdge(RESPOND_NODE, END);
+    }
 
     // Add edges, alternating between agent and action until finished
     graph.addConditionalEdges(START, shouldContinueGetConversationEdge, {
@@ -180,7 +203,10 @@ export const getDefaultAssistantGraph = ({
     graph.addEdge(GENERATE_CHAT_TITLE_NODE, PERSIST_CONVERSATION_CHANGES_NODE);
     graph.addEdge(PERSIST_CONVERSATION_CHANGES_NODE, AGENT_NODE);
     // Add conditional edge for basic routing
-    graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, { continue: TOOLS_NODE, end: END });
+    graph.addConditionalEdges(AGENT_NODE, shouldContinueEdge, {
+      continue: TOOLS_NODE,
+      end: hasRespondStep ? RESPOND_NODE : END,
+    });
     graph.addEdge(TOOLS_NODE, AGENT_NODE);
     // Compile the graph
     return graph.compile();

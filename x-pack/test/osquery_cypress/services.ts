@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../../../test/common/services';
+export * from '@kbn/test-suites-src/common/services';

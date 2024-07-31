@@ -35,6 +35,7 @@ import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
+import { convertToAbsoluteTimeRange } from '../../../visualizations/actions/convert_to_absolute_time_range';
 
 const DEFAULT_TIMERANGE = {
   from: 'now-7d',
@@ -86,10 +87,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [clearDraftComment, currentAppId, embeddable, onCancel]);
 
   const handleAdd = useCallback(
-    (attributes, timerange) => {
+    (attributes, timeRange) => {
       onSave(
         `!{${ID}${JSON.stringify({
-          timeRange: timerange,
+          timeRange: convertToAbsoluteTimeRange(timeRange),
           attributes,
         })}}`,
         {
@@ -103,11 +104,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const handleUpdate = useCallback(
-    (attributes, timerange, position) => {
+    (attributes, timeRange, position) => {
       markdownContext.replaceNode(
         position,
         `!{${ID}${JSON.stringify({
-          timeRange: timerange,
+          timeRange: convertToAbsoluteTimeRange(timeRange),
           attributes,
         })}}`
       );
