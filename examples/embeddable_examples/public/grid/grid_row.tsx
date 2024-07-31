@@ -13,23 +13,24 @@ import React, { forwardRef } from 'react';
 import { useMemo } from 'react';
 import { KibanaGridElement } from './grid_layout_element';
 import { getGridBackgroundCSS } from './grid_layout_utils';
-import { GridRow, InteractionData, RuntimeGridSettings } from './types';
+import { GridRow, PanelInteractionEvent, RuntimeGridSettings } from './types';
 
 interface KibanaGridRowProps {
   rowIndex: number;
   gridRow: GridRow;
-  updateShift: (pos: { x: number; y: number }) => void;
-  interactionData?: InteractionData;
+  activePanelId: string | undefined;
+  targetedGridIndex: number | undefined;
   runtimeSettings: RuntimeGridSettings;
-  updateInteractionData: (interactionData?: InteractionData) => void;
+  setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
 }
 
 export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
   (
-    { rowIndex, gridRow, runtimeSettings, interactionData, updateShift, updateInteractionData },
+    { rowIndex, gridRow, setInteractionEvent, activePanelId, runtimeSettings, targetedGridIndex },
     gridRef
   ) => {
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
+    const isGridTargeted = activePanelId && targetedGridIndex === rowIndex;
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
@@ -59,35 +60,34 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
             );
             grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
             justify-items: stretch;
-            background-color: ${interactionData?.targetedRow === rowIndex
+            background-color: ${isGridTargeted
               ? transparentize(euiThemeVars.euiColorSuccess, 0.05)
               : 'transparent'};
             transition: background-color 300ms linear;
-            ${interactionData?.targetedRow === rowIndex && getGridBackgroundCSS(runtimeSettings)}
+            ${isGridTargeted && getGridBackgroundCSS(runtimeSettings)}
           `}
         >
           {Object.values(gridRow).map((gridData) => (
             <KibanaGridElement
-              isBeingDragged={interactionData?.panelData.id === gridData.id}
-              anyDragActive={Boolean(interactionData)}
-              setResizingId={(id) => {
-                updateInteractionData({
+              activePanelId={activePanelId}
+              onResizeStart={(id, shift) => {
+                setInteractionEvent({
+                  mouseToOriginOffset: shift,
+                  originRowIndex: rowIndex,
                   type: 'resize',
-                  panelData: { ...gridRow[id] },
-                  targetedRow: rowIndex,
+                  id,
                 });
               }}
-              setDraggingId={(id) => {
-                updateInteractionData({
+              onDragStart={(id, shift) => {
+                setInteractionEvent({
+                  mouseToOriginOffset: shift,
+                  originRowIndex: rowIndex,
                   type: 'drag',
-                  panelData: { ...gridRow[id] },
-                  targetedRow: rowIndex,
+                  id,
                 });
               }}
-              updateShift={updateShift}
               gridData={gridData}
               key={gridData.id}
-              id={gridData.id}
             />
           ))}
         </div>

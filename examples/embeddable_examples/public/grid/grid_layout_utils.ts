@@ -9,15 +9,51 @@
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { debounce } from 'lodash';
+import { useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 import {
   GridCoordinate,
   GridData,
-  InteractionData,
+  GridSettings,
   PixelCoordinate,
+  PixelRect,
   RuntimeGridSettings,
 } from './types';
 
 const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
+
+/**
+ * Listens to the width of any element passed the returned ref and calculates the column width on
+ * the fly when the element is resized.
+ */
+export const useRuntimeGridSettings = ({ gridSettings }: { gridSettings: GridSettings }) => {
+  const { runtimeSettings$, onWidthChange } = useMemo(() => {
+    const settings = new BehaviorSubject<RuntimeGridSettings>({
+      ...gridSettings,
+      columnPixelWidth: 0,
+    });
+    const onChange = debounce((elementWidth: number) => {
+      const columnPixelWidth =
+        (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
+        gridSettings.columnCount;
+      settings.next({ ...gridSettings, columnPixelWidth });
+    }, 250);
+    return { runtimeSettings$: settings, onWidthChange: onChange };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const { ref: gridSizeRef } = useResizeObserver<HTMLDivElement>({
+    onResize: (dimensions) => {
+      if (dimensions.width) {
+        onWidthChange(dimensions.width);
+      }
+    },
+  });
+
+  return { runtimeSettings$, gridSizeRef };
+};
 
 export const getClosestGridRowIndex = ({
   panelTopLeft,
@@ -131,7 +167,7 @@ export const isGridDataEqual = (a?: GridData, b?: GridData) => {
   );
 };
 
-const getScrollAmount = () => ({
+export const getScrollAmount = () => ({
   scrollLeft:
     window.pageXOffset !== undefined
       ? window.pageXOffset
@@ -142,42 +178,22 @@ const getScrollAmount = () => ({
       : (document.documentElement || document.body.parentNode || document.body).scrollTop,
 });
 
-export const updateDragPreview = ({
-  mousePoint,
-  interactionData,
-  runtimeSettings,
+export const updateDragPreviewRect = ({
+  pixelRect,
   dragPreview,
-  gridOrigin,
 }: {
-  gridOrigin: PixelCoordinate;
-  mousePoint: PixelCoordinate;
-  interactionData: InteractionData;
-  runtimeSettings: RuntimeGridSettings;
-  dragPreview: HTMLDivElement;
+  pixelRect: PixelRect;
+  dragPreview: HTMLDivElement | null;
 }) => {
-  const { scrollLeft, scrollTop } = getScrollAmount();
-  if (interactionData.type === 'drag') {
-    const pixelSize = gridSizeToPixelSize({
-      runtimeSettings,
-      height: interactionData.panelData.height,
-      width: interactionData.panelData.width,
-    });
-    dragPreview.style.left = `${mousePoint.x + scrollLeft}px`;
-    dragPreview.style.top = `${mousePoint.y + scrollTop}px`;
-    dragPreview.style.width = `${pixelSize.width}px`;
-    dragPreview.style.height = `${pixelSize.height}px`;
-  } else if (interactionData.type === 'resize') {
-    const topLeft = gridToPixelCoordinate({
-      gridLocation: {
-        row: interactionData.panelData.row,
-        column: interactionData.panelData.column,
-      },
-      gridOrigin,
-      runtimeSettings,
-    });
-    dragPreview.style.left = `${topLeft.x + scrollLeft}px`;
-    dragPreview.style.top = `${topLeft.y + scrollTop}px`;
-    dragPreview.style.width = `${mousePoint.x - topLeft.x}px`;
-    dragPreview.style.height = `${mousePoint.y - topLeft.y}px`;
-  }
+  if (!dragPreview) return;
+  dragPreview.style.opacity = '1';
+  dragPreview.style.left = `${pixelRect.pixelOrigin.x}px`;
+  dragPreview.style.top = `${pixelRect.pixelOrigin.y}px`;
+  dragPreview.style.width = `${pixelRect.pixelWidth}px`;
+  dragPreview.style.height = `${pixelRect.pixelHeight}px`;
+};
+
+export const hideDragPreviewRect = (dragPreview: HTMLDivElement | null) => {
+  if (!dragPreview) return;
+  dragPreview.style.opacity = '0';
 };

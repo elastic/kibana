@@ -8,187 +8,134 @@
 
 import { EuiPortal, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
-import { resolveGrid } from './grid_layout_resolver';
+import { BehaviorSubject } from 'rxjs';
 import {
-  getClosestGridRowIndex,
-  pixelCoordinateToGrid,
-  updateDragPreview,
+  hideDragPreviewRect,
+  updateDragPreviewRect,
+  useRuntimeGridSettings,
 } from './grid_layout_utils';
 import { KibanaGridRow } from './grid_row';
-import { GridLayout, GridSettings, InteractionData, PixelCoordinate } from './types';
+import { interactionEventToPixelRect } from './interaction_event_to_pixel_rect';
+import { GridLayout, GridSettings, PanelInteractionEvent } from './types';
 
-const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
-  const [width, setWidth] = useState<number>(0);
-  const onWidthChange = useMemo(() => debounce(setWidth, wait), [wait]);
-  const { ref } = useResizeObserver<HTMLDivElement>({
-    onResize: (dimensions) => {
-      if (dimensions.width) {
-        if (width === 0 || skipDebounce) setWidth(dimensions.width);
-        if (dimensions.width !== width) onWidthChange(dimensions.width);
-      }
-    },
-  });
-  return { ref, width };
-};
+/**
+ * mouse position
+ * offset
+ * drag vs resize event type
+ *
+ * requested posistion (x, y, width, height) in pixels
+ *   Set preview panel to this position
+ * Calculate which grid the preview is over (if drag - if resize, use the targeted grid)
+ * requested grid position (row, column, width, height) in grid units + target grid row
+ * when requested grid position changes
+ *   resolve grid + set grid layout to resolved grid
+ */
+
+// const updateInteractionData = useCallback(
+//   (nextInteractionData?: InteractionData) => {
+//     // if (isGridDataEqual(nextInteractionData?.panelData, lastInteractionData.current?.panelData)) {
+//     //   return;
+//     // }
+//     setGridLayout((currentRows) => {
+//       const interactingId = nextInteractionData?.panelData?.id;
+//       if (!nextInteractionData || !interactingId) return currentRows;
+
+//       // remove the panel from the row it's currently in.
+//       let originalRow: number | undefined;
+//       const nextRows = currentRows.map((row, rowIndex) => {
+//         const { [interactingId]: interactingPanel, ...rest } = row;
+//         if (interactingPanel) originalRow = rowIndex;
+//         return { ...rest };
+//       });
+
+//       // resolve destination grid
+//       const destinationGrid = nextRows[nextInteractionData.targetedRow];
+//       const resolvedDestinationGrid = resolveGrid(destinationGrid, {
+//         ...nextInteractionData?.panelData,
+//       });
+//       nextRows[nextInteractionData.targetedRow] = resolvedDestinationGrid;
+
+//       // resolve origin grid
+//       if (originalRow && originalRow !== nextInteractionData.targetedRow) {
+//         const originGrid = nextRows[originalRow];
+//         const resolvedOriginGrid = resolveGrid(originGrid);
+//         nextRows[originalRow] = resolvedOriginGrid;
+//       }
+
+//       return nextRows;
+//     });
+//     setInteractionData(nextInteractionData);
+//   },
+//   [setGridLayout]
+// );
 
 export const KibanaGridLayout = ({
-  settings,
-  gridLayout,
-  setGridLayout,
+  getCreationOptions,
 }: {
-  settings: GridSettings;
-  gridLayout: GridLayout;
-  setGridLayout: React.Dispatch<React.SetStateAction<GridLayout>>;
+  getCreationOptions: () => { initialLayout: GridLayout; gridSettings: GridSettings };
 }) => {
-  /**
-   * mouse position
-   * offset
-   * drag vs resize event type
-   *
-   * requested posistion (x, y, width, height) in pixels
-   *   Set preview panel to this position
-   * Calculate which grid the preview is over (if drag - if resize, use the targeted grid)
-   * requested grid position (row, column, width, height) in grid units + target grid row
-   * when requested grid position changes
-   *   resolve grid + set grid layout to resolved grid
-   */
-
-  const [interactionData, setInteractionData] = useState<InteractionData | undefined>();
-
-  // track the width of containing element to calculate column width
-  const { width, ref: parentResizeRef } = useDebouncedWidthObserver();
-  const runtimeSettings = useMemo(() => {
-    const columnPixelWidth =
-      (width - settings.gutterSize * (settings.columnCount - 1)) / settings.columnCount;
-    return { ...settings, columnPixelWidth };
-  }, [settings, width]);
-
-  // store a ref for each grid row
-  const gridRefs = useRef<Array<HTMLDivElement | null>>([]);
   const dragEnterCount = useRef(0);
-
-  // store a pixel shift for the offset between the mouse at the start of a drag, and the panel's top left corner
-  const shiftRef = useRef<PixelCoordinate>({ x: 0, y: 0 });
-  const updateShift = ({ x, y }: { x: number; y: number }) => (shiftRef.current = { x, y });
-
+  const rows = useRef<Array<HTMLDivElement | null>>([]);
   const dragPreview = useRef<HTMLDivElement | null>(null);
+  const interactionEvent = useRef<PanelInteractionEvent | null>(null);
 
-  const updateInteractionData = useCallback(
-    (nextInteractionData?: InteractionData) => {
-      // if (isGridDataEqual(nextInteractionData?.panelData, lastInteractionData.current?.panelData)) {
-      //   return;
-      // }
-      setGridLayout((currentRows) => {
-        const interactingId = nextInteractionData?.panelData?.id;
-        if (!nextInteractionData || !interactingId) return currentRows;
+  const [activePanelId, setActivePanelId] = useState<string | undefined>();
+  const [targetedGridIndex, setTargetedGridIndex] = useState<number | undefined>();
 
-        // remove the panel from the row it's currently in.
-        let originalRow: number | undefined;
-        const nextRows = currentRows.map((row, rowIndex) => {
-          const { [interactingId]: interactingPanel, ...rest } = row;
-          if (interactingPanel) originalRow = rowIndex;
-          return { ...rest };
-        });
+  const setInteractionEvent = useCallback((nextInteraction?: PanelInteractionEvent) => {
+    interactionEvent.current = nextInteraction ?? null;
+    setTargetedGridIndex(nextInteraction?.originRowIndex);
+    setActivePanelId(nextInteraction?.id);
+    if (!nextInteraction) hideDragPreviewRect(dragPreview.current);
+  }, []);
 
-        // resolve destination grid
-        const destinationGrid = nextRows[nextInteractionData.targetedRow];
-        const resolvedDestinationGrid = resolveGrid(destinationGrid, {
-          ...nextInteractionData?.panelData,
-        });
-        nextRows[nextInteractionData.targetedRow] = resolvedDestinationGrid;
-
-        // resolve origin grid
-        if (originalRow && originalRow !== nextInteractionData.targetedRow) {
-          const originGrid = nextRows[originalRow];
-          const resolvedOriginGrid = resolveGrid(originGrid);
-          nextRows[originalRow] = resolvedOriginGrid;
-        }
-
-        return nextRows;
-      });
-      setInteractionData(nextInteractionData);
+  const { grid$: gridLayout$, settings: gridSettings } = useMemo(
+    () => {
+      const { initialLayout, gridSettings: settings } = getCreationOptions();
+      const grid$ = new BehaviorSubject<GridLayout>(initialLayout);
+      return { grid$, settings };
     },
-    [setGridLayout]
+    // disabling exhaustive deps because the grid settings are not meant to change at runtime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
+  const { runtimeSettings$, gridSizeRef } = useRuntimeGridSettings({ gridSettings });
 
-  const onDragOver = useCallback(
-    (mouseCoordinate: PixelCoordinate) => {
-      if (!interactionData) return;
-      const mousePoint: PixelCoordinate = {
-        x: mouseCoordinate.x - shiftRef.current.x,
-        y: mouseCoordinate.y - shiftRef.current.y,
-      };
-      const rowIndex =
-        interactionData.type === 'drag'
-          ? getClosestGridRowIndex({
-              panelTopLeft: mousePoint,
-              gridDivs: gridRefs.current,
-            })
-          : interactionData.targetedRow;
-      const rowDiv = gridRefs.current[rowIndex];
-      if (!rowDiv) return;
-
-      const gridOrigin: PixelCoordinate = {
-        x: rowDiv.getBoundingClientRect().left,
-        y: rowDiv.getBoundingClientRect().top,
-      };
-
-      updateDragPreview({
-        gridOrigin,
-        mousePoint,
-        interactionData,
-        runtimeSettings,
-        dragPreview: dragPreview.current!,
-      });
-
-      const { row, column } = pixelCoordinateToGrid({
-        panelTopLeft: mousePoint,
-        gridOrigin,
-        isResize: interactionData.type === 'resize',
-        panel: interactionData.panelData,
-        runtimeSettings,
-      });
-      const nextInteractionData = { ...interactionData, targetedRow: rowIndex };
-      if (nextInteractionData.type === 'drag') {
-        nextInteractionData.panelData.row = row;
-        nextInteractionData.panelData.column = column;
-      } else if (nextInteractionData.type === 'resize') {
-        nextInteractionData.panelData.height = Math.max(row - interactionData.panelData.row, 1);
-        nextInteractionData.panelData.width = Math.max(
-          column - interactionData.panelData.column,
-          1
-        );
-      }
-      updateInteractionData(nextInteractionData);
-    },
-    [interactionData, runtimeSettings, updateInteractionData]
-  );
-
+  // -----------------------------------------------------------------------------------------
+  // Set up drag events
+  // -----------------------------------------------------------------------------------------
   useEffect(() => {
     const dragOver = (e: MouseEvent) => {
-      if (!interactionData) return;
+      if (!runtimeSettings$.value || !interactionEvent.current) return;
       e.preventDefault();
       e.stopPropagation();
       const mouseTargetPixel = { x: e.clientX, y: e.clientY };
-      onDragOver(mouseTargetPixel);
+
+      const pixelRect = interactionEventToPixelRect({
+        gridLayout: gridLayout$.value,
+        mousePoint: mouseTargetPixel,
+        rows: rows.current,
+        runtimeSettings: runtimeSettings$.value,
+        interactionEvent: interactionEvent.current,
+      });
+
+      updateDragPreviewRect({ pixelRect, dragPreview: dragPreview.current });
     };
 
     const onDrop = (e: MouseEvent) => {
-      if (!interactionData) return;
+      if (!interactionEvent.current) return;
       e.preventDefault();
       e.stopPropagation();
 
-      setInteractionData(undefined);
-
+      setInteractionEvent();
       dragEnterCount.current = 0;
     };
 
     const onDragEnter = (e: MouseEvent) => {
-      if (!interactionData) return;
+      if (!interactionEvent.current) return;
       e.preventDefault();
       e.stopPropagation();
 
@@ -196,13 +143,13 @@ export const KibanaGridLayout = ({
     };
 
     const onDragLeave = (e: MouseEvent) => {
-      if (!interactionData) return;
+      if (!interactionEvent.current) return;
       e.preventDefault();
       e.stopPropagation();
 
       dragEnterCount.current--;
       if (dragEnterCount.current === 0) {
-        setInteractionData(undefined);
+        setInteractionEvent();
         dragEnterCount.current = 0;
       }
     };
@@ -217,21 +164,24 @@ export const KibanaGridLayout = ({
       window.removeEventListener('dragenter', onDragEnter);
       window.removeEventListener('dragleave', onDragLeave);
     };
-  }, [interactionData, onDragOver]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [gridLayout, runtimeSettings] = useBatchedPublishingSubjects(gridLayout$, runtimeSettings$);
 
   return (
-    <div ref={parentResizeRef}>
+    <div ref={gridSizeRef}>
       {gridLayout.map((gridRow, rowIndex) => {
         return (
           <KibanaGridRow
             key={rowIndex}
             gridRow={gridRow}
             rowIndex={rowIndex}
-            updateShift={updateShift}
-            interactionData={interactionData}
+            activePanelId={activePanelId}
             runtimeSettings={runtimeSettings}
-            updateInteractionData={updateInteractionData}
-            ref={(el) => (gridRefs.current[rowIndex] = el)}
+            targetedGridIndex={targetedGridIndex}
+            setInteractionEvent={setInteractionEvent}
+            ref={(element) => (rows.current[rowIndex] = element)}
           />
         );
       })}
@@ -241,10 +191,8 @@ export const KibanaGridLayout = ({
           css={css`
             pointer-events: none;
             border-radius: ${euiThemeVars.euiBorderRadius};
-            background-color: ${interactionData
-              ? transparentize(euiThemeVars.euiColorSuccess, 0.2)
-              : 'transparent'};
-            transition: background-color 50ms linear;
+            background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+            transition: opacity 100ms linear;
             position: absolute;
           `}
         />

@@ -10,27 +10,22 @@ import { EuiIcon, EuiPanel, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useRef } from 'react';
-import { GridData } from './types';
+import { GridData, PixelCoordinate } from './types';
 
 export const KibanaGridElement = ({
-  id,
-  isBeingDragged,
-  anyDragActive,
   gridData,
-  updateShift,
-  setDraggingId,
-  setResizingId,
+  onDragStart,
+  activePanelId,
+  onResizeStart,
 }: {
-  id: string;
   gridData: GridData;
-  isBeingDragged: boolean;
-  anyDragActive: boolean;
-  setDraggingId: (id: string) => void;
-  setResizingId: (id: string) => void;
-  updateShift: (pos: { x: number; y: number }) => void;
+  activePanelId: string | undefined;
+  onDragStart: (id: string, shift: PixelCoordinate) => void;
+  onResizeStart: (id: string, shift: PixelCoordinate) => void;
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
+  const thisPanelActive = activePanelId === gridData.id;
 
   return (
     <div
@@ -48,14 +43,14 @@ export const KibanaGridElement = ({
         css={css`
           position: relative;
           height: 100%;
-          border: ${isBeingDragged
+          border: ${thisPanelActive
             ? `${euiThemeVars.euiBorderWidthThin} dashed ${euiThemeVars.euiColorSuccess}`
             : 'auto'};
           :hover .resizeHandle {
-            opacity: ${anyDragActive ? 0 : 1};
+            opacity: ${Boolean(activePanelId) ? 0 : 1};
           }
           :hover .dragHandle {
-            opacity: ${anyDragActive ? 0 : 1};
+            opacity: ${Boolean(activePanelId) ? 0 : 1};
           }
         `}
       >
@@ -97,8 +92,7 @@ export const KibanaGridElement = ({
             e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
             const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().left;
             const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().top;
-            updateShift({ x: shiftX, y: shiftY });
-            setDraggingId(id);
+            onDragStart(gridData.id, { x: shiftX, y: shiftY });
           }}
         >
           <EuiIcon type="grabOmnidirectional" />
@@ -113,8 +107,7 @@ export const KibanaGridElement = ({
             e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
             const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().right;
             const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().bottom;
-            updateShift({ x: shiftX, y: shiftY });
-            setResizingId(id);
+            onResizeStart(gridData.id, { x: shiftX, y: shiftY });
           }}
           css={css`
             right: 0;
