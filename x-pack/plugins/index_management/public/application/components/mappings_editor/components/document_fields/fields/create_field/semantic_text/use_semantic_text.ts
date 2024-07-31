@@ -119,7 +119,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
     dispatch({ type: 'field.add', value: data });
     const inferenceEndpoints = await getInferenceEndpoints();
     const hasInferenceEndpoint = inferenceEndpoints.data?.some(
-      (inference) => inference.model_id === inferenceId
+      (inference) => inference.inference_id === inferenceId
     );
     // if inference endpoint exists already, do not create new inference endpoint
     if (hasInferenceEndpoint) {
