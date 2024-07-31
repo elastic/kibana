@@ -258,7 +258,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('endpoint-diagnostics', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189192
+  describe.skip('endpoint-diagnostics', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleEndpointDiagnosticsTask();
 
@@ -297,7 +298,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('endpoint-meta-telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189330
+  describe.skip('endpoint-meta-telemetry', () => {
     beforeEach(async () => {
       await initEndpointIndices(esClient);
     });
