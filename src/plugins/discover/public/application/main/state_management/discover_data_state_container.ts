@@ -17,7 +17,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+} from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -281,11 +285,13 @@ export function getDataStateContainer({
 
           const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
           const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+          const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
 
           if (dataView) {
             const stateUpdate = getDefaultProfileState({
               profilesManager,
               resetDefaultProfileState,
+              defaultColumns,
               dataView,
               esqlQueryColumns,
             });

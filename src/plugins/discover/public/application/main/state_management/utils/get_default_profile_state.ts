@@ -8,6 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { uniqBy } from 'lodash';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import {
   DefaultAppStateColumn,
@@ -20,11 +21,13 @@ import type { DataDocumentsMsg } from '../discover_data_state_container';
 export const getDefaultProfileState = ({
   profilesManager,
   resetDefaultProfileState,
+  defaultColumns,
   dataView,
   esqlQueryColumns,
 }: {
   profilesManager: ProfilesManager;
   resetDefaultProfileState: InternalState['resetDefaultProfileState'];
+  defaultColumns: string[];
   dataView: DataView;
   esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
 }) => {
@@ -32,8 +35,12 @@ export const getDefaultProfileState = ({
   const defaultState = getDefaultState(profilesManager, dataView);
 
   if (resetDefaultProfileState.columns) {
+    const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
     const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
-    const validColumns = defaultState.columns?.filter(isValidColumn);
+    const validColumns = uniqBy(
+      defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
+      'name'
+    );
 
     if (validColumns?.length) {
       const columns = validColumns.reduce<DiscoverGridSettings['columns']>(

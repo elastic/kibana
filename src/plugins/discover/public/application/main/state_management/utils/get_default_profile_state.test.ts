@@ -21,18 +21,19 @@ const { profilesManagerMock } = createContextAwarenessMocks();
 profilesManagerMock.resolveDataSourceProfile({});
 
 describe('getDefaultProfileState', () => {
-  it('should return columns', () => {
+  it('should return expected columns', () => {
     let appState = getDefaultProfileState({
       profilesManager: profilesManagerMock,
       resetDefaultProfileState: {
         columns: true,
         rowHeight: false,
       },
+      defaultColumns: ['messsage', 'bytes'],
       dataView: dataViewWithTimefieldMock,
       esqlQueryColumns: undefined,
     });
     expect(appState).toEqual({
-      columns: ['message', 'extension'],
+      columns: ['message', 'extension', 'bytes'],
       grid: {
         columns: {
           extension: {
@@ -50,6 +51,7 @@ describe('getDefaultProfileState', () => {
         columns: true,
         rowHeight: false,
       },
+      defaultColumns: ['messsage', 'bytes'],
       dataView: emptyDataView,
       esqlQueryColumns: [{ id: '1', name: 'foo', meta: { type: 'string' } }],
     });
@@ -65,13 +67,14 @@ describe('getDefaultProfileState', () => {
     });
   });
 
-  it('should return rowHeight', () => {
+  it('should return expected rowHeight', () => {
     const appState = getDefaultProfileState({
       profilesManager: profilesManagerMock,
       resetDefaultProfileState: {
         columns: false,
         rowHeight: true,
       },
+      defaultColumns: [],
       dataView: dataViewWithTimefieldMock,
       esqlQueryColumns: undefined,
     });
@@ -87,6 +90,7 @@ describe('getDefaultProfileState', () => {
         columns: false,
         rowHeight: false,
       },
+      defaultColumns: [],
       dataView: dataViewWithTimefieldMock,
       esqlQueryColumns: undefined,
     });
