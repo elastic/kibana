@@ -11,9 +11,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingElastic,
   EuiLoadingSpinner,
   EuiPanel,
@@ -27,10 +27,13 @@ import type { EntityResolutionSuggestion } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/css';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { noop } from 'lodash/fp';
+import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import type { EntityRelationRecord } from '../../../../../../common/api/entity_analytics/entity_store/relations/common.gen';
 import { USER_PREVIEW_BANNER } from '../../../../../flyout/document_details/right/components/user_entity_overview';
 import { UserPreviewPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useEntityResolutions } from '../../../../api/hooks/use_entity_resolutions';
+import OktaLogo from './icons/okta.svg';
+import EntraIdLogo from './icons/entra_id.svg';
 
 interface Props {
   username: string;
@@ -143,6 +146,22 @@ type CandidateProps = EntityResolutionSuggestion & {
   openPreviewPanel: (id: string) => void;
 };
 
+const EntityLogo: React.FC<{ document: {} | undefined }> = ({ document }) => {
+  if (document?.data_source === 'observed_data') {
+    return <EuiIcon type="logoSecurity" size="l" />;
+  }
+
+  if (document?.data_source === 'entity_analytics_okta') {
+    return <EuiIcon size="l" type={OktaLogo} />;
+  }
+
+  if (document?.data_source === 'entity_analytics_entra_id') {
+    return <EuiIcon type={EntraIdLogo} size="l" />;
+  }
+
+  return <EuiIcon type="questionInCircle" size="l" />;
+};
+
 const Candidate: React.FC<CandidateProps> = ({
   entity,
   confidence,
@@ -157,6 +176,7 @@ const Candidate: React.FC<CandidateProps> = ({
 
   const entityDataContent = (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+      <EntityLogo document={document} />
       <EuiFlexItem
         css={css`
           max-width: 150px;
@@ -198,7 +218,7 @@ const Candidate: React.FC<CandidateProps> = ({
       <EuiPanel hasBorder>
         <EuiAccordion id={id} buttonContent={entityDataContent} extraAction={entityActions}>
           <EuiSpacer size="m" />
-          <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>
+          <JsonCodeEditor json={document as unknown as Record<string, unknown>} height={300} />
         </EuiAccordion>
       </EuiPanel>
       <EuiSpacer size="xs" />
@@ -213,6 +233,7 @@ type RelatedEntityProps = EntityRelationRecord['related_entity'] & {
 const RelatedEntity: React.FC<RelatedEntityProps> = ({ id, name, openPreviewPanel = noop }) => {
   const entityDataContent = (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+      <EntityLogo document={document} />
       <EuiFlexItem
         css={css`
           max-width: 150px;
@@ -233,7 +254,7 @@ const RelatedEntity: React.FC<RelatedEntityProps> = ({ id, name, openPreviewPane
       <EuiPanel hasBorder>
         <EuiAccordion id={id} buttonContent={entityDataContent} extraAction={entityActions}>
           <EuiSpacer size="m" />
-          <EuiCodeBlock language="json">{JSON.stringify(document)}</EuiCodeBlock>
+          <JsonCodeEditor json={document as unknown as Record<string, unknown>} height={300} />
         </EuiAccordion>
       </EuiPanel>
       <EuiSpacer size="xs" />
