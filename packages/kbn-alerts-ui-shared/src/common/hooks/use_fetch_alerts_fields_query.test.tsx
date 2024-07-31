@@ -8,7 +8,6 @@
 
 import React, { FunctionComponent } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
@@ -45,9 +44,9 @@ describe('useFetchAlertsFieldsQuery', () => {
     queryClient.clear();
   });
 
-  it('should not fetch for siem', () => {
+  it('should not fetch for siem rule types', () => {
     const { result } = renderHook(
-      () => useFetchAlertsFieldsQuery({ http: mockHttpClient, featureIds: ['siem'] }),
+      () => useFetchAlertsFieldsQuery({ http: mockHttpClient, ruleTypeIds: ['siem.esqlRule'] }),
       {
         wrapper,
       }
@@ -59,7 +58,7 @@ describe('useFetchAlertsFieldsQuery', () => {
 
   it('should call the api only once', async () => {
     const { result, rerender, waitForValueToChange } = renderHook(
-      () => useFetchAlertsFieldsQuery({ http: mockHttpClient, featureIds: ['apm'] }),
+      () => useFetchAlertsFieldsQuery({ http: mockHttpClient, ruleTypeIds: ['apm'] }),
       {
         wrapper,
       }
@@ -90,28 +89,12 @@ describe('useFetchAlertsFieldsQuery', () => {
     });
   });
 
-  it('should not fetch if the only featureId is not valid', async () => {
+  it('should not fetch if all rule types are siem', async () => {
     const { result } = renderHook(
       () =>
         useFetchAlertsFieldsQuery({
           http: mockHttpClient,
-          featureIds: ['alerts'] as unknown as AlertConsumers[],
-        }),
-      {
-        wrapper,
-      }
-    );
-
-    expect(mockHttpGet).toHaveBeenCalledTimes(0);
-    expect(result.current.data).toEqual(emptyData);
-  });
-
-  it('should not fetch if all featureId are not valid', async () => {
-    const { result } = renderHook(
-      () =>
-        useFetchAlertsFieldsQuery({
-          http: mockHttpClient,
-          featureIds: ['alerts', 'tomato'] as unknown as AlertConsumers[],
+          ruleTypeIds: ['siem.esqlRule', 'siem.eqlRule'],
         }),
       {
         wrapper,
@@ -127,7 +110,7 @@ describe('useFetchAlertsFieldsQuery', () => {
       () =>
         useFetchAlertsFieldsQuery({
           http: mockHttpClient,
-          featureIds: ['alerts', 'apm', 'logs'] as AlertConsumers[],
+          ruleTypeIds: ['siem.esqlRule', 'apm', 'logs'],
         }),
       {
         wrapper,
@@ -136,7 +119,7 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     expect(mockHttpGet).toHaveBeenCalledTimes(1);
     expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/browser_fields', {
-      query: { featureIds: ['apm', 'logs'] },
+      query: { ruleTypeIds: ['apm', 'logs'] },
     });
   });
 });

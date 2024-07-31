@@ -8,12 +8,12 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchAlertsFields } from '.';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 describe('fetchAlertsFields', () => {
   const http = httpServiceMock.createStartContract();
   test('should call the browser_fields API with the correct parameters', async () => {
-    const featureIds = [AlertConsumers.STACK_ALERTS];
+    const ruleTypeIds = ['.es-query'];
+
     http.get.mockResolvedValueOnce({
       browserFields: { fakeCategory: {} },
       fields: [
@@ -22,7 +22,7 @@ describe('fetchAlertsFields', () => {
         },
       ],
     });
-    const result = await fetchAlertsFields({ http, featureIds });
+    const result = await fetchAlertsFields({ http, ruleTypeIds });
     expect(result).toEqual({
       browserFields: { fakeCategory: {} },
       fields: [
@@ -32,7 +32,7 @@ describe('fetchAlertsFields', () => {
       ],
     });
     expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/browser_fields', {
-      query: { featureIds },
+      query: { ruleTypeIds },
     });
   });
 });
