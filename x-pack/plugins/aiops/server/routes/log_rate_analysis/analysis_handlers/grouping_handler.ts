@@ -53,7 +53,7 @@ export const groupingHandlerFactory =
   async (
     significantCategories: SignificantItem[],
     significantTerms: SignificantItem[],
-    overallTimeSeries?: NumericChartData
+    overallTimeSeries?: NumericChartData['data']
   ) => {
     logDebugMessage('Group results.');
 

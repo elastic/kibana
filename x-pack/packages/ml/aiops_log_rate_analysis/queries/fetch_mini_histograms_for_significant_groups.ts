@@ -33,7 +33,7 @@ export const fetchMiniHistogramsForSignificantGroups = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   significantGroups: SignificantItemGroup[],
-  overallTimeSeries: NumericChartData,
+  overallTimeSeries: NumericChartData['data'],
   logger: Logger,
   // The default value of 1 means no sampling will be used
   randomSamplerProbability: number = 1,
@@ -49,7 +49,7 @@ export const fetchMiniHistogramsForSignificantGroups = async (
       filter: {
         bool: { filter: getGroupFilter(significantGroup) },
       },
-      aggs: getMiniHistogramAgg(params, overallTimeSeries.interval),
+      aggs: getMiniHistogramAgg(params),
     };
 
     return aggs;

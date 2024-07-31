@@ -31,6 +31,11 @@ interface AggHistogram {
   histogram: {
     field: string;
     interval: number;
+    min_doc_count?: number;
+    extended_bounds?: {
+      min: number;
+      max: number;
+    };
   };
 }
 

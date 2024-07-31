@@ -22,12 +22,12 @@ export interface MiniHistogramAgg extends estypes.AggregationsSingleBucketAggreg
 
 export const HISTOGRAM_AGG_PREFIX = 'histogram_';
 
-export const getMiniHistogramAgg = (params: AiopsLogRateAnalysisSchema, interval: number) => {
+export const getMiniHistogramAgg = (params: AiopsLogRateAnalysisSchema) => {
   return {
     mini_histogram: {
       histogram: {
         field: params.timeFieldName,
-        interval,
+        interval: (params.end - params.start) / 19,
         min_doc_count: 0,
         extended_bounds: {
           min: params.start,
@@ -39,11 +39,11 @@ export const getMiniHistogramAgg = (params: AiopsLogRateAnalysisSchema, interval
 };
 
 export const getMiniHistogramDataFromAggResponse = (
-  overallTimeSeries: NumericChartData,
+  overallTimeSeries: NumericChartData['data'],
   aggReponse: Record<string, MiniHistogramAgg>,
   index: number
 ): SignificantItemHistogramItem[] =>
-  overallTimeSeries.data.map((o) => {
+  overallTimeSeries.map((o) => {
     const current = aggReponse[`${HISTOGRAM_AGG_PREFIX}${index}`].mini_histogram.buckets.find(
       (d1) => d1.key_as_string === o.key_as_string
     ) ?? {

@@ -42,7 +42,7 @@ export const histogramHandlerFactory =
     fieldValuePairsCount: number,
     significantCategories: SignificantItem[],
     significantTerms: SignificantItem[],
-    overallTimeSeries?: NumericChartData
+    overallTimeSeries?: NumericChartData['data']
   ) => {
     function pushHistogramDataLoadingState() {
       responseStream.push(
