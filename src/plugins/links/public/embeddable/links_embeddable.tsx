@@ -71,7 +71,7 @@ export const getLinksEmbeddableFactory = () => {
     deserializeState: async (serializedState) => {
       // Clone the state to avoid an object not extensible error when injecting references
       const state = cloneDeep(serializedState.rawState);
-      const { title, description } = serializedState.rawState;
+      const { title, description, hidePanelTitles } = serializedState.rawState;
 
       if (linksSerializeStateIsByReference(state)) {
         const linksSavedObject = await linksClient.get(state.savedObjectId);
@@ -80,6 +80,7 @@ export const getLinksEmbeddableFactory = () => {
           ...runtimeState,
           title,
           description,
+          hidePanelTitles,
         };
       }
 
@@ -128,6 +129,7 @@ export const getLinksEmbeddableFactory = () => {
           },
           serializeState: async (): Promise<SerializedPanelState<LinksSerializedState>> => {
             if (savedObjectId$.value !== undefined) {
+              console.log(serializeTitles());
               const linksByReferenceState: LinksByReferenceSerializedState = {
                 savedObjectId: savedObjectId$.value,
                 ...serializeTitles(),
