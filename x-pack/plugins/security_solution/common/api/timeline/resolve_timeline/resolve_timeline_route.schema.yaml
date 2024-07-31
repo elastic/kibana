@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Resolve Timeline API
-  version: 8.9.0
+  version: '2023-10-31'
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -10,9 +10,11 @@ servers:
       port:
         default: '5601'
 paths:
-  /api/timeline:
+  /api/timeline/resolve:
     get:
-      operationId: resolveTimeline
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: ResolveTimeline
       summary: Get an existing saved timeline or timeline template.
       tags:
         - access:securitySolution
@@ -34,16 +36,15 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [data]
                 properties:
                   data:
                     type: object
+                    required: [getOneTimeline]
                     properties:
                       getOneTimeline:
-                        oneOf:
-                          - $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
-                          - nullable: true
-                required:
-                  - data
+                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                        nullable: true
         '400':
           description: The request is missing parameters
         '404':
