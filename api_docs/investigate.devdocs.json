@@ -145,7 +145,7 @@
         "label": "getEsFilterFromGlobalParameters",
         "description": [],
         "signature": [
-          "({\n  query,\n  filters,\n  timeRange,\n}: Partial<",
+          "({\n  filters,\n  timeRange,\n}: Partial<",
           "GlobalWidgetParameters",
           ">) => { bool: ",
           {
@@ -166,7 +166,7 @@
             "id": "def-public.getEsFilterFromGlobalParameters.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  query,\n  filters,\n  timeRange,\n}",
+            "label": "{\n  filters,\n  timeRange,\n}",
             "description": [],
             "signature": [
               "Partial<",
@@ -483,20 +483,6 @@
             "description": [],
             "signature": [
               "{ from: string; to: string; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.GlobalWidgetParameters.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "{ query: string; language: \"kuery\"; }"
             ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
