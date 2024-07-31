@@ -30,15 +30,9 @@ export class MappingGapsDetectionRule {
 
   async process(index: NewestIndex): Promise<MappingGapsDetection | null> {
     try {
-      const mappings = index.mappings?.properties;
       const { integration, dataset } = index.info;
 
-      if (!mappings) {
-        return null;
-      }
-
-      const flattenedMappings = flatMappings(mappings);
-      const mappingsKeys = Object.keys(flattenedMappings);
+      const mappingsKeys = Object.keys(index.flattenedMappings);
 
       const fieldsMetadataIntegrationParams = integration ? { integration, dataset } : {};
       const fieldsMetadata = await this.fieldsMetadataClient
@@ -48,7 +42,7 @@ export class MappingGapsDetectionRule {
       const unmatchingFields = mappingsKeys.filter(
         (fieldMapping) =>
           !fieldsMetadata[fieldMapping] ||
-          fieldsMetadata[fieldMapping].type !== flattenedMappings[fieldMapping].type
+          fieldsMetadata[fieldMapping].type !== index.flattenedMappings[fieldMapping].type
       );
 
       if (unmatchingFields.length > 0) {

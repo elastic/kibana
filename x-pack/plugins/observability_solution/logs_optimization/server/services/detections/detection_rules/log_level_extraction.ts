@@ -49,7 +49,7 @@ export class LogLevelExtractionDetectionRule {
   }
 
   private buildQuery(index: NewestIndex) {
-    const hasLogLevelMapping = LOG_LEVEL_FIELD in (index.mappings?.properties ?? {});
+    const hasLogLevelMapping = LOG_LEVEL_FIELD in index.flattenedMappings;
 
     const filterIfExists = hasLogLevelMapping ? `| WHERE ${LOG_LEVEL_FIELD} IS NULL` : '';
 

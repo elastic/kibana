@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  IndicesIndexState,
+  MappingProperty,
+  PropertyName,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface NewestIndex extends IndicesIndexState {
   name: string;
   info: DataStreamInfo;
+  flattenedMappings: Record<PropertyName, MappingProperty>;
 }
 
 export interface DataStreamInfo {

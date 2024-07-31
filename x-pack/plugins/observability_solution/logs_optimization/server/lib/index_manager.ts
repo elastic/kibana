@@ -9,6 +9,9 @@ import {
   IndicesDataStream,
   IndicesPutIndexTemplateRequest,
   IngestPipeline,
+  MappingProperty,
+  MappingPropertyBase,
+  PropertyName,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import deepmerge from 'deepmerge';
@@ -102,17 +105,22 @@ export class IndexManager {
       return null;
     }
 
-    const lastIndex = dataStream.indices.pop();
-    if (!lastIndex) {
+    const lastIndexSummary = dataStream.indices.pop();
+    if (!lastIndexSummary) {
       return null;
     }
 
-    const indices = await this.esClient.indices.get({ index: lastIndex.index_name });
+    const indices = await this.esClient.indices.get({ index: lastIndexSummary.index_name });
+
+    const lastIndex = indices[lastIndexSummary.index_name];
 
     return {
-      ...indices[lastIndex.index_name],
-      name: lastIndex.index_name,
+      ...lastIndex,
+      name: lastIndexSummary.index_name,
       info: this.getDataStreamInfo(dataStream),
+      flattenedMappings: lastIndex.mappings?.properties
+        ? IndexManager.getFlattenedMappings(lastIndex.mappings.properties)
+        : {},
     };
   }
 
@@ -138,6 +146,25 @@ export class IndexManager {
     const regex = /^(?<type>[^-]+)-(?<dataset>[\S]+)-(?<namespace>[^-]+)$/;
     const match = dataStreamName.match(regex);
     return match?.groups ?? {};
+  }
+
+  static getFlattenedMappings(
+    properties: Record<PropertyName, MappingPropertyBase>,
+    prefix = ''
+  ): Record<PropertyName, MappingProperty> {
+    return Object.entries(properties).reduce((props, [propertyName, propertyObj]) => {
+      const joinedPropertyName = [prefix, propertyName].filter(Boolean).join('.');
+
+      if (propertyObj.properties) {
+        return Object.assign(
+          props,
+          IndexManager.getFlattenedMappings(propertyObj.properties, joinedPropertyName)
+        );
+      }
+
+      props[joinedPropertyName] = propertyObj;
+      return props;
+    }, {} as Record<PropertyName, MappingProperty>);
   }
 
   static create(esClient: ElasticsearchClient): IndexManagerCreator {
