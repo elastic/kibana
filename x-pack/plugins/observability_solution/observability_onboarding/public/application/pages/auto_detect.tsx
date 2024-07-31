@@ -11,7 +11,7 @@ import { PageTemplate } from './template';
 import { CustomHeaderSection } from '../header/custom_header';
 import { AutoDetectPanel } from '../quickstart_flows/auto_detect';
 
-export const AutoDetectPage: React.FC = () => (
+export const AutoDetectPage = () => (
   <PageTemplate
     customHeader={
       <CustomHeaderSection

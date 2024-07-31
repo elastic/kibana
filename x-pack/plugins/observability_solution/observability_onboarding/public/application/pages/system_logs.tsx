@@ -10,7 +10,7 @@ import { PageTemplate } from './template';
 import { SystemLogsPanel } from '../quickstart_flows/system_logs';
 import { BackButton } from '../shared/back_button';
 
-export const SystemLogsPage: React.FC = () => (
+export const SystemLogsPage = () => (
   <PageTemplate>
     <BackButton />
     <SystemLogsPanel />

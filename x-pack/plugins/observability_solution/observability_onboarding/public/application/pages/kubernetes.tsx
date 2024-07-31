@@ -11,7 +11,7 @@ import { KubernetesPanel } from '../quickstart_flows/kubernetes';
 import { PageTemplate } from './template';
 import { CustomHeaderSection } from '../header/custom_header';
 
-export const KubernetesPage: React.FC = () => (
+export const KubernetesPage = () => (
   <PageTemplate
     customHeader={
       <CustomHeaderSection

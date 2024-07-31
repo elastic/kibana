@@ -9,7 +9,7 @@ import React from 'react';
 import { PageTemplate } from './template';
 import { OnboardingFlowForm } from '../onboarding_flow_form/onboarding_flow_form';
 
-export const LandingPage: React.FC = () => (
+export const LandingPage = () => (
   <PageTemplate>
     <OnboardingFlowForm />
   </PageTemplate>

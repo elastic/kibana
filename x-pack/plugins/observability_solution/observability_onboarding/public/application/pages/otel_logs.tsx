@@ -11,7 +11,7 @@ import { PageTemplate } from './template';
 import { CustomHeaderSection } from '../header/custom_header';
 import { OtelLogsPanel } from '../quickstart_flows/otel_logs';
 
-export const OtelLogsPage: React.FC = () => (
+export const OtelLogsPage = () => (
   <PageTemplate
     customHeader={
       <CustomHeaderSection
