@@ -85,11 +85,7 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import {
-  createVisEmbeddableFromObject,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-} from './embeddable';
+import { createVisEmbeddableFromObject, VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
 import {
   setUISettings,
   setTypes,
