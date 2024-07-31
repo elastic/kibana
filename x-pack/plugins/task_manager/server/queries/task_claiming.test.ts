@@ -80,7 +80,7 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getAvailableCapacity: () => 10,
+      getCapacity: () => 10,
       taskPartitioner,
     });
 
@@ -130,7 +130,7 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getAvailableCapacity: () => 10,
+      getCapacity: () => 10,
       taskPartitioner,
     });
 
