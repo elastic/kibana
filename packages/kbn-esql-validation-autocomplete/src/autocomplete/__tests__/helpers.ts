@@ -41,7 +41,7 @@ export const triggerCharacters = [',', '(', '=', ' '];
 export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...[
     'string',
-    'double',
+    'number',
     'date',
     'boolean',
     'ip',
@@ -53,8 +53,8 @@ export const fields: Array<{ name: string; type: string; suggestedAs?: string }>
     name: `${camelCase(type)}Field`,
     type,
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
+  { name: 'kubernetes.something.something', type: 'number' },
 ];
 
 export const indexes = (
