@@ -376,6 +376,7 @@ packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
+examples/ebt_local_shipper @elastic/kibana-core
 packages/kbn-ebt-tools @elastic/kibana-core
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
