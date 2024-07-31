@@ -227,10 +227,9 @@ export const JobSetupScreen = (props: Props) => {
                 <EuiCallOut key={i} color="danger" iconType="warning" title={errorCalloutTitle}>
                   <EuiCode transparentBackground>{errorMessage}</EuiCode>
                 </EuiCallOut>
-                <EuiSpacer size="m" />
+                <EuiSpacer />
               </>
             ))}
-            <EuiSpacer />
             <EuiButton data-test-subj="infraJobSetupScreenTryAgainButton" fill onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.tryAgainButton"
