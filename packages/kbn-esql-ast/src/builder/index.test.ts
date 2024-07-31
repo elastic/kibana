@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Builder } from './Builder';
+import { Builder } from '.';
 
 test('can mint a numeric literal', () => {
   const node = Builder.numericLiteral({ value: 42 });

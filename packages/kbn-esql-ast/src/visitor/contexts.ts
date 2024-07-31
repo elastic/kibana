@@ -35,7 +35,7 @@ import type {
   VisitorAstNode,
   VisitorMethods,
 } from './types';
-import { Builder } from '../builder/Builder';
+import { Builder } from '../builder';
 
 const isNodeWithArgs = (x: unknown): x is ESQLAstNodeWithArgs =>
   !!x && typeof x === 'object' && Array.isArray((x as any).args);
