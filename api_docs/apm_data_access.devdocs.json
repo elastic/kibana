@@ -82,9 +82,9 @@
             "(soClient: ",
             {
               "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-common.SavedObjectsClientContract",
+              "section": "def-server.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
             ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
@@ -103,9 +103,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-common.SavedObjectsClientContract",
+                  "section": "def-server.SavedObjectsClientContract",
                   "text": "SavedObjectsClientContract"
                 }
               ],
