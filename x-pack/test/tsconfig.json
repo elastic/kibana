@@ -27,9 +27,7 @@
     "security_solution_api_integration/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "../../test/tsconfig.json"
-    },
+    "@kbn/test-suites-src",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/kibana-usage-collection-plugin",
@@ -127,7 +125,6 @@
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
     "@kbn/lens-plugin",
-    "@kbn/notifications-plugin",
     "@kbn/logs-shared-plugin",
     "@kbn/telemetry-tools",
     "@kbn/profiling-plugin",
@@ -174,8 +171,11 @@
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/entityManager-plugin",
     "@kbn/osquery-plugin",
-    "@kbn/entities-schema"
+    "@kbn/entities-schema",
+    "@kbn/actions-simulators-plugin",
+    "@kbn/cases-api-integration-test-plugin"
   ]
 }

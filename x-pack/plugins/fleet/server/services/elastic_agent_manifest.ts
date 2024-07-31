@@ -70,7 +70,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
@@ -131,7 +131,7 @@ spec:
       volumes:
         - name: datastreams
           configMap:
-            defaultMode: 0640
+            defaultMode: 0644
             name: agent-node-datastreams
         - name: proc
           hostPath:
