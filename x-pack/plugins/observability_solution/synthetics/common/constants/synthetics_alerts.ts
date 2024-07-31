@@ -35,3 +35,5 @@ export const ACTION_GROUP_DEFINITIONS: {
 };
 
 export const SYNTHETICS_RULE_TYPES_ALERT_CONTEXT = 'observability.uptime';
+
+export { SYNTHETICS_RULE_TYPE_IDS as SYNTHETICS_RULE_TYPES } from '@kbn/rule-data-utils';

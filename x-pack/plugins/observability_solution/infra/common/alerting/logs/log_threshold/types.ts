@@ -10,6 +10,8 @@ import * as rt from 'io-ts';
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
+export { LOG_THRESHOLD_ALERT_TYPE_ID as LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+
 const ThresholdTypeRT = rt.keyof({
   count: null,
   ratio: null,

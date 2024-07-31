@@ -12,8 +12,8 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { ObservabilityAlertSearchBarProps, Services } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '../../../common/constants';
 import { render } from '../../utils/test_helper';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';

@@ -16,10 +16,13 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  OBSERVABILITY_RULE_TYPE_IDS,
+} from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '../../../../common/constants';
 import { convertTo } from '../../../../common/utils/formatters';
 import { useKibana } from '../../../utils/kibana_react';
 import { TopAlert } from '../../..';

@@ -18,6 +18,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
@@ -28,10 +29,7 @@ import {
 import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema, StatusRuleParams } from '../../../common/rules/status_rule';
-import {
-  MONITOR_STATUS,
-  SYNTHETICS_ALERT_RULE_TYPES,
-} from '../../../common/constants/synthetics_alerts';
+import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 import {
   setRecoveredAlertsContext,
   updateState,

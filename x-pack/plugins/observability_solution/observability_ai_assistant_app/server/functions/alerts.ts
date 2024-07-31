@@ -10,8 +10,8 @@ import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
-import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/observability-plugin/common/constants';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
