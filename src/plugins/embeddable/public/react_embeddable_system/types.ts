@@ -126,6 +126,6 @@ export interface ReactEmbeddableFactory<
      * Last saved runtime state. Different from initialRuntimeState in that it does not contain previous sessions's unsaved changes
      * Compare with initialRuntimeState to flag unsaved changes on load
      */
-    lastSavedRuntimeState: RuntimeState,
+    lastSavedRuntimeState: RuntimeState
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }
