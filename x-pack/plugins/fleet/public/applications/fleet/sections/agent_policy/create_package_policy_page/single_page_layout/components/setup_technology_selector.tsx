@@ -29,7 +29,7 @@ export const SetupTechnologySelector = ({
       inputDisplay: (
         <>
           <FormattedMessage
-            id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
+            id="xpack.fleet.setupTechnology.agentlessInputDisplay"
             defaultMessage="Agentless"
           />
           &nbsp;
@@ -44,7 +44,7 @@ export const SetupTechnologySelector = ({
         <>
           <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
+              id="xpack.fleet.setupTechnology.agentlessDrowpownDisplay"
               defaultMessage="Agentless"
             />
           </strong>
@@ -57,7 +57,7 @@ export const SetupTechnologySelector = ({
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription"
+                id="xpack.fleet.setupTechnology.agentlessDrowpownDescription"
                 defaultMessage="Set up the integration without an agent"
               />
             </p>
@@ -69,7 +69,7 @@ export const SetupTechnologySelector = ({
       value: SetupTechnology.AGENT_BASED,
       inputDisplay: (
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentbasedInputDisplay"
+          id="xpack.fleet.setupTechnology.agentbasedInputDisplay"
           defaultMessage="Agent-based"
         />
       ),
@@ -77,14 +77,14 @@ export const SetupTechnologySelector = ({
         <>
           <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDisplay"
+              id="xpack.fleet.setupTechnology.agentbasedDrowpownDisplay"
               defaultMessage="Agent-based"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDescription"
+                id="xpack.fleet.setupTechnology.agentbasedDrowpownDescription"
                 defaultMessage="Set up the integration with an agent"
               />
             </p>
@@ -101,7 +101,7 @@ export const SetupTechnologySelector = ({
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyLabel"
+            id="xpack.fleet.setupTechnology.setupTechnologyLabel"
             defaultMessage="Setup technology"
           />
         }
@@ -112,7 +112,7 @@ export const SetupTechnologySelector = ({
           valueOfSelected={setupTechnology}
           placeholder={
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyPlaceholder"
+              id="xpack.fleet.setupTechnology.setupTechnologyPlaceholder"
               defaultMessage="Select the setup technology"
             />
           }
