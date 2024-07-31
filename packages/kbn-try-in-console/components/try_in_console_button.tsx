@@ -69,12 +69,12 @@ export const TryInConsoleButton = ({
       consolePlugin?.openEmbeddedConsole !== undefined &&
       consolePlugin?.isEmbeddedConsoleAvailable?.()
     ) {
-      return i18n.translate('tryInConsole.embeddedConsoleButton', {
-        defaultMessage: 'Try the snipped in the Console - opens in embedded console',
+      return i18n.translate('tryInConsole.embeddedConsoleButton.ariaLabel', {
+        defaultMessage: 'Try in Console  - opens in embedded console',
       });
     }
-    return i18n.translate('tryInConsole.inNewTab.button', {
-      defaultMessage: 'Try the below snippet in Console - opens in a new tab',
+    return i18n.translate('tryInConsole.inNewTab.button.ariaLabel', {
+      defaultMessage: 'Try in Console  - opens in a new tab',
     });
   };
 
