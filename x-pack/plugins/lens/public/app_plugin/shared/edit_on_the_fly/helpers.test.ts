@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getESQLResults } from '@kbn/esql-utils';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -18,7 +18,7 @@ import { suggestionsApi } from '../../../lens_suggestions_api';
 import { getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
-const mockFetchData = getESQLQueryColumns as jest.Mock;
+const mockFetchData = getESQLResults as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
@@ -26,7 +26,37 @@ jest.mock('../../../lens_suggestions_api', () => ({
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getESQLQueryColumns: jest.fn().mockResolvedValue(() => [
+    getESQLResults: jest.fn().mockResolvedValue({
+      response: {
+        columns: [
+          {
+            name: '@timestamp',
+            id: '@timestamp',
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            name: 'bytes',
+            id: 'bytes',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'memory',
+            id: 'memory',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        values: [],
+      },
+    }),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
+    getESQLAdHocDataview: jest.fn().mockResolvedValue({}),
+    formatESQLColumns: jest.fn().mockReturnValue([
       {
         name: '@timestamp',
         id: '@timestamp',
@@ -49,7 +79,6 @@ jest.mock('@kbn/esql-utils', () => {
         },
       },
     ]),
-    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
   };
 });
 
