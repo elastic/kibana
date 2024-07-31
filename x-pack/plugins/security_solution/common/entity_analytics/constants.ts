@@ -8,3 +8,12 @@
 export * from './asset_criticality/constants';
 export * from './risk_engine/constants';
 export * from './risk_score/constants';
+
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};

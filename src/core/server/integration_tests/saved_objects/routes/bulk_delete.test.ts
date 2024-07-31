@@ -60,8 +60,9 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
+    const access = 'public';
 
-    registerBulkDeleteRoute(router, { config, coreUsageData, logger });
+    registerBulkDeleteRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

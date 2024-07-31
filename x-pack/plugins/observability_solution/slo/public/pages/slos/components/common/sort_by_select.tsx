@@ -97,6 +97,51 @@ export function SLOSortBy({ state, onStateChange, loading }: Props) {
         });
       },
     },
+    {
+      label: i18n.translate('xpack.slo.list.sortBy.fiveMinuteBurnRate', {
+        defaultMessage: '5m burn rate',
+      }),
+      checked: sortBy === 'burn_rate_5m',
+      value: 'burn_rate_5m',
+      onClick: () => {
+        handleChangeSortBy({
+          value: 'burn_rate_5m',
+          label: i18n.translate('xpack.slo.list.sortBy.fiveMinuteBurnRate', {
+            defaultMessage: '5m burn rate',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.sortBy.oneHourBurnRate', {
+        defaultMessage: '1h burn rate',
+      }),
+      checked: sortBy === 'burn_rate_1h',
+      value: 'burn_rate_1h',
+      onClick: () => {
+        handleChangeSortBy({
+          value: 'burn_rate_1h',
+          label: i18n.translate('xpack.slo.list.sortBy.oneHourBurnRate', {
+            defaultMessage: '1h burn rate',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.slo.list.sortBy.oneDayBurnRate', {
+        defaultMessage: '1d burn rate',
+      }),
+      checked: sortBy === 'burn_rate_1d',
+      value: 'burn_rate_1d',
+      onClick: () => {
+        handleChangeSortBy({
+          value: 'burn_rate_1d',
+          label: i18n.translate('xpack.slo.list.sortBy.oneDayBurnRate', {
+            defaultMessage: '1d burn rate',
+          }),
+        });
+      },
+    },
   ];
 
   const groupLabel = sortByOptions.find((option) => option.value === sortBy)?.label || 'Default';

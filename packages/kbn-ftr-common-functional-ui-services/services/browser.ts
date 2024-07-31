@@ -53,7 +53,10 @@ class BrowserService extends FtrService {
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
    */
   public getActions() {
-    return this.driver.actions();
+    return this.driver.actions({
+      async: undefined,
+      bridge: undefined,
+    });
   }
 
   /**

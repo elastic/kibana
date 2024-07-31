@@ -76,7 +76,7 @@ function validateSettings(slo: SLODefinition) {
 
 function isValidId(id: string): boolean {
   const MIN_ID_LENGTH = 8;
-  const MAX_ID_LENGTH = 36;
+  const MAX_ID_LENGTH = 48;
   return MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
 }
 

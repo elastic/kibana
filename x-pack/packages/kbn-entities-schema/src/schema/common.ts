@@ -8,22 +8,14 @@
 import { z } from 'zod';
 import moment from 'moment';
 
-export enum EntityType {
-  service = 'service',
-  host = 'host',
-  pod = 'pod',
-  node = 'node',
-}
-
 export const arrayOfStringsSchema = z.array(z.string());
-
-export const entityTypeSchema = z.nativeEnum(EntityType);
 
 export enum BasicAggregations {
   avg = 'avg',
   max = 'max',
   min = 'min',
   sum = 'sum',
+  value_count = 'value_count',
   cardinality = 'cardinality',
   last_value = 'last_value',
   std_deviation = 'std_deviation',
@@ -54,7 +46,7 @@ export const docCountMetricSchema = z.object({
 
 export const durationSchema = z
   .string()
-  .regex(/\d+[m|d|s|h]/)
+  .regex(/^\d+[m|d|s|h]$/)
   .transform((val: string) => {
     const parts = val.match(/(\d+)([m|s|h|d])/);
     if (parts === null) {
@@ -97,7 +89,35 @@ export const metadataSchema = z
     destination: z.optional(z.string()),
     limit: z.optional(z.number().default(1000)),
   })
-  .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })));
+  .transform((metadata) => ({
+    ...metadata,
+    destination: metadata.destination ?? metadata.source,
+    limit: metadata.limit ?? 1000,
+  }))
+  .or(z.string().transform((value) => ({ source: value, destination: value, limit: 1000 })))
+  .superRefine((value, ctx) => {
+    if (value.limit < 1) {
+      ctx.addIssue({
+        path: ['limit'],
+        code: z.ZodIssueCode.custom,
+        message: 'limit should be greater than 1',
+      });
+    }
+    if (value.source.length === 0) {
+      ctx.addIssue({
+        path: ['source'],
+        code: z.ZodIssueCode.custom,
+        message: 'source should not be empty',
+      });
+    }
+    if (value.destination.length === 0) {
+      ctx.addIssue({
+        path: ['destination'],
+        code: z.ZodIssueCode.custom,
+        message: 'destination should not be empty',
+      });
+    }
+  });
 
 export const identityFieldsSchema = z
   .object({
@@ -105,3 +125,9 @@ export const identityFieldsSchema = z
     optional: z.boolean(),
   })
   .or(z.string().transform((value) => ({ field: value, optional: false })));
+
+const semVerRegex = new RegExp(/^[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}$/);
+export const semVerSchema = z.string().refine((maybeSemVer) => semVerRegex.test(maybeSemVer), {
+  message:
+    'The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.',
+});

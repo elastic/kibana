@@ -12,14 +12,12 @@ properties:
   connector_type_id:
     description: The type of connector.
     type: string
-    examples:
-      - .resilient
+    example: .resilient
     enum:
       - .resilient
   name:
     type: string
     description: The display name for the connector.
-    examples:
-      - my-connector
+    example: my-connector
   secrets:
     $ref: 'secrets_properties_resilient.yaml'

@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async function () {
         await dataGrid.clickRowToggle({ isAnchorRow: false, rowIndex: 0 });
         const detailsEl = await dataGrid.getDetailsRows();
-        const defaultMessageEl = await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+        const defaultMessageEl = await detailsEl[0].findByTestSubject('docViewerRowDetailsTitle');
         expect(defaultMessageEl).to.be.ok();
         await dataGrid.closeFlyout();
       });

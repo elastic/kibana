@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { alertWithTags } from './alert';
+import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
+import { alertWithGroupsAndTags } from './alert';
 import type { AlertSummaryField } from '../components/alert_summary';
 
 export const alertSummaryFieldsMock: AlertSummaryField[] = [
   {
     label: 'Actual value',
-    value: alertWithTags.fields['kibana.alert.evaluation.value']!,
+    value: alertWithGroupsAndTags.fields[ALERT_EVALUATION_VALUE]!,
   },
   {
     label: 'Expected value',
-    value: alertWithTags.fields['kibana.alert.evaluation.threshold']!,
-  },
-  {
-    label: 'Source',
-    value: '-',
+    value: alertWithGroupsAndTags.fields[ALERT_EVALUATION_THRESHOLD]!,
   },
 ];

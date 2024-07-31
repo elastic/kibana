@@ -22,6 +22,119 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKeyAggregations",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyAggregations",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.usernames",
+            "type": "Object",
+            "tags": [],
+            "label": "usernames",
+            "description": [],
+            "signature": [
+              "AggregationsStringTermsAggregate",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.types",
+            "type": "Object",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              "AggregationsStringTermsAggregate",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.expired",
+            "type": "Object",
+            "tags": [],
+            "label": "expired",
+            "description": [],
+            "signature": [
+              "AggregationsFilterAggregateKeys",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyAggregations.managed",
+            "type": "Object",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "{ buckets: { metadataBased: ",
+              "AggregationsFilterAggregateKeys",
+              "; namePrefixBased: ",
+              "AggregationsFilterAggregateKeys",
+              "; }; } | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKeyToInvalidate",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKeyToInvalidate",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyToInvalidate.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ApiKeyToInvalidate.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
         "id": "def-common.AuthenticatedUser",
         "type": "Interface",
         "tags": [],
@@ -205,6 +318,211 @@
       },
       {
         "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.BaseApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseApiKey",
+        "description": [
+          "\nFixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          },
+          " extends ",
+          "SecurityApiKey"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.realm",
+            "type": "string",
+            "tags": [],
+            "label": "realm",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.creation",
+            "type": "number",
+            "tags": [],
+            "label": "creation",
+            "description": [],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.BaseApiKey.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "SecurityRoleDescriptor",
+              "; }"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.CrossClusterApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "CrossClusterApiKey",
+        "description": [
+          "\nInterface representing a cross-cluster API key the way it is returned by Elasticsearch GET endpoint.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.CrossClusterApiKey",
+            "text": "CrossClusterApiKey"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKey.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"cross_cluster\""
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKey.access",
+            "type": "Object",
+            "tags": [],
+            "label": "access",
+            "description": [
+              "\nThe access to be granted to this API key. The access is composed of permissions for cross-cluster\nsearch and cross-cluster replication. At least one of them must be specified."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.CrossClusterApiKeyAccess",
+                "text": "CrossClusterApiKeyAccess"
+              }
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.CrossClusterApiKeyAccess",
+        "type": "Interface",
+        "tags": [],
+        "label": "CrossClusterApiKeyAccess",
+        "description": [],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKeyAccess.search",
+            "type": "Array",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "\nA list of indices permission entries for cross-cluster search."
+            ],
+            "signature": [
+              "CrossClusterApiKeySearch[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.CrossClusterApiKeyAccess.replication",
+            "type": "Array",
+            "tags": [],
+            "label": "replication",
+            "description": [
+              "\nA list of indices permission entries for cross-cluster replication."
+            ],
+            "signature": [
+              "CrossClusterApiKeyReplication[] | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
         "id": "def-common.FeaturesPrivileges",
         "type": "Interface",
         "tags": [],
@@ -225,6 +543,100 @@
               "[featureId: string]:  string[]"
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/authorization/features_privileges.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ManagedApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "ManagedApiKey",
+        "description": [
+          "\nInterface representing a REST API key that is managed by Kibana."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.ManagedApiKey",
+            "text": "ManagedApiKey"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.ManagedApiKey.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"managed\""
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.RestApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "RestApiKey",
+        "description": [
+          "\nInterface representing a REST API key the way it is returned by Elasticsearch GET endpoint.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RestApiKey",
+            "text": "RestApiKey"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.BaseApiKey",
+            "text": "BaseApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.RestApiKey.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"rest\""
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -647,6 +1059,22 @@
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicense.getLicenseType",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicenseType",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
             "id": "def-common.SecurityLicense.getUnavailableReason",
             "type": "Function",
             "tags": [],
@@ -958,6 +1386,19 @@
                 "text": "LoginLayout"
               },
               " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-common",
+            "id": "def-common.SecurityLicenseFeatures.allowFips",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowFips",
+            "description": [
+              "\nIndicates whether we allow FIPS mode"
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
@@ -1408,6 +1849,87 @@
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKey",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKey",
+        "description": [
+          "\nInterface representing an API key the way it is returned by Elasticsearch GET endpoint."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.RestApiKey",
+            "text": "RestApiKey"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.CrossClusterApiKey",
+            "text": "CrossClusterApiKey"
+          }
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.ApiKeyRoleDescriptors",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiKeyRoleDescriptors",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          "SecurityRoleDescriptor",
+          "; }"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.CategorizedApiKey",
+        "type": "Type",
+        "tags": [],
+        "label": "CategorizedApiKey",
+        "description": [
+          "\nInterface representing an API key the way it is presented in the Kibana UI  (with Kibana system\nAPI keys given its own dedicated `managed` type)."
+        ],
+        "signature": [
+          "(",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.ApiKey",
+            "text": "ApiKey"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.ManagedApiKey",
+            "text": "ManagedApiKey"
+          },
+          ") & { expired: boolean; }"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
         "id": "def-common.LoginLayout",
         "type": "Type",
         "tags": [],
@@ -1419,6 +1941,23 @@
           "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
         ],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-common",
+        "id": "def-common.QueryApiKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryApiKeyResult",
+        "description": [
+          "\nResponse of Kibana Query API keys endpoint."
+        ],
+        "signature": [
+          "SuccessQueryApiKeyResult | ErrorQueryApiKeyResult"
+        ],
+        "path": "x-pack/packages/security/plugin_types_common/src/api_keys/api_key.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

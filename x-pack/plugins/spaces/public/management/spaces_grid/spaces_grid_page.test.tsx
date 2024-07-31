@@ -88,6 +88,72 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spaces);
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).not.toContainEqual({
+      field: 'solution',
+      name: 'Solution View',
+      sortable: true,
+      render: expect.any(Function),
+    });
+  });
+
+  it('renders the list of spaces with solution column', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+    const spacesWithSolution = [
+      {
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+        _reserved: true,
+      },
+      {
+        id: 'custom-1',
+        name: 'Custom 1',
+        disabledFeatures: [],
+        solution: 'es',
+      },
+      {
+        id: 'custom-2',
+        name: 'Custom 2',
+        initials: 'LG',
+        color: '#ABCDEF',
+        description: 'my description here',
+        disabledFeatures: [],
+        solution: 'security',
+      },
+    ];
+
+    spacesManager.getSpaces = jest.fn().mockResolvedValue(spacesWithSolution);
+
+    const wrapper = shallowWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        maxSpaces={1000}
+        solutionNavExperiment={Promise.resolve(true)}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
+      field: 'solution',
+      name: 'Solution View',
+      sortable: true,
+      render: expect.any(Function),
+    });
   });
 
   it('renders a create spaces button', async () => {

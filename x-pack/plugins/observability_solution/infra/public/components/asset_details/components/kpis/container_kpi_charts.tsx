@@ -44,24 +44,30 @@ export const ContainerKpiCharts = ({
   if (!isDockerContainer && !isKubernetesContainer) {
     return null;
   }
-  return isKubernetesContainer ? (
-    <KubernetesKpiCharts
-      dateRange={dateRange}
-      dataView={dataView}
-      filters={filters}
-      query={query}
-      searchSessionId={searchSessionId}
-      loading={loading}
-    />
-  ) : (
-    <DockerKpiCharts
-      dateRange={dateRange}
-      dataView={dataView}
-      filters={filters}
-      query={query}
-      searchSessionId={searchSessionId}
-      loading={loading}
-    />
+
+  return (
+    <>
+      {isDockerContainer && (
+        <DockerKpiCharts
+          dateRange={dateRange}
+          dataView={dataView}
+          filters={filters}
+          query={query}
+          searchSessionId={searchSessionId}
+          loading={loading}
+        />
+      )}
+      {!isDockerContainer && isKubernetesContainer && (
+        <KubernetesKpiCharts
+          dateRange={dateRange}
+          dataView={dataView}
+          filters={filters}
+          query={query}
+          searchSessionId={searchSessionId}
+          loading={loading}
+        />
+      )}
+    </>
   );
 };
 

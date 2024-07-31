@@ -47,6 +47,7 @@ import {
 import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
 
 type SignalDoc = SignalSourceHit & {
+  _id: Required<SignalSourceHit>['_id'];
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };
 };
 
@@ -161,6 +162,9 @@ describe('buildAlert', () => {
           },
         ],
         immutable: false,
+        rule_source: {
+          type: 'internal',
+        },
         type: 'query',
         language: 'kuery',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -356,6 +360,9 @@ describe('buildAlert', () => {
           },
         ],
         immutable: false,
+        rule_source: {
+          type: 'internal',
+        },
         type: 'query',
         language: 'kuery',
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],

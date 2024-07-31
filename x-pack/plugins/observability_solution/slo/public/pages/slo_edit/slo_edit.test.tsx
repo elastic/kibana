@@ -8,6 +8,8 @@
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { useFetchDataViews } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
@@ -15,20 +17,19 @@ import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
-import { useCapabilities } from '../../hooks/use_capabilities';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
-import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { useUpdateSlo } from '../../hooks/use_update_slo';
-import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
-import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
+import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { usePermissions } from '../../hooks/use_permissions';
+import { useCreateRule } from '../../hooks/use_create_rule';
+import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,14 +37,15 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
-jest.mock('@kbn/observability-plugin/public');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
-jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_permissions');
+jest.mock('../../hooks/use_create_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -54,13 +56,13 @@ jest.mock('../../utils/kibana_react', () => ({
 const useKibanaMock = useKibana as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
-const useCreateDataViewsMock = useCreateDataView as jest.Mock;
+const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useCreateRuleMock = useCreateRule as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
@@ -77,12 +79,14 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       theme: {},
       application: {
         navigateToUrl: mockNavigate,
+        capabilities: {},
       },
       charts: {
         theme: {
           useChartsBaseTheme: () => {},
         },
       },
+      dataViewEditor: {},
       data: {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
@@ -164,18 +168,20 @@ describe('SLO Edit Page', () => {
       data: [
         {
           getName: () => 'dataview',
-          getIndexPattern: () => '.dataview-index',
+          getIndexPattern: () => 'some-index',
           getRuntimeMappings: jest.fn().mockReturnValue({}),
         },
       ],
     });
 
-    useCreateDataViewsMock.mockReturnValue({
+    useCreateDataViewMock.mockReturnValue({
       dataView: {
         getName: () => 'dataview',
-        getIndexPattern: () => '.dataview-index',
+        getIndexPattern: () => 'some-index',
         getRuntimeMappings: jest.fn().mockReturnValue({}),
+        fields: [{ name: 'custom_timestamp', type: 'date' }],
       },
+      loading: false,
     });
 
     useFetchIndicesMock.mockReturnValue({
@@ -203,16 +209,21 @@ describe('SLO Edit Page', () => {
       isError: false,
       mutateAsync: mockUpdate,
     });
+
+    usePermissionsMock.mockReturnValue({
+      isLoading: false,
+      data: {
+        hasAllWriteRequested: true,
+        hasAllReadRequested: true,
+      },
+    });
+    licenseMock.hasAtLeast.mockReturnValue(true);
   });
 
   afterEach(cleanup);
 
   describe('when the incorrect license is found', () => {
     beforeEach(() => {
-      useCapabilitiesMock.mockReturnValue({
-        hasWriteCapabilities: true,
-        hasReadCapabilities: true,
-      });
       licenseMock.hasAtLeast.mockReturnValue(false);
     });
 
@@ -232,10 +243,6 @@ describe('SLO Edit Page', () => {
 
   describe('when the license is null', () => {
     beforeEach(() => {
-      useCapabilitiesMock.mockReturnValue({
-        hasWriteCapabilities: true,
-        hasReadCapabilities: true,
-      });
       mockKibana(null);
     });
 
@@ -255,18 +262,17 @@ describe('SLO Edit Page', () => {
 
   describe('when the correct license is found', () => {
     beforeEach(() => {
-      useCapabilitiesMock.mockReturnValue({
-        hasWriteCapabilities: true,
-        hasReadCapabilities: true,
-      });
       licenseMock.hasAtLeast.mockReturnValue(true);
     });
 
     describe('with no write permission', () => {
       beforeEach(() => {
-        useCapabilitiesMock.mockReturnValue({
-          hasWriteCapabilities: false,
-          hasReadCapabilities: true,
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: false,
+            hasAllReadRequested: true,
+          },
         });
       });
 
@@ -281,6 +287,31 @@ describe('SLO Edit Page', () => {
         render(<SloEditPage />);
 
         expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      });
+    });
+
+    describe('with no read permission', () => {
+      beforeEach(() => {
+        usePermissionsMock.mockReturnValue({
+          isLoading: false,
+          data: {
+            hasAllWriteRequested: false,
+            hasAllReadRequested: false,
+          },
+        });
+      });
+
+      it('redirects to the slo welcome page', async () => {
+        jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+        jest
+          .spyOn(Router, 'useLocation')
+          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
+
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
+
+        render(<SloEditPage />);
+
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
       });
     });
 
@@ -345,7 +376,7 @@ describe('SLO Edit Page', () => {
     describe('when a sloId route param is provided', () => {
       it('prefills the form with the SLO values', async () => {
         const slo = buildSlo({ id: '123Foo' });
-        useFetchSloMock.mockReturnValue({ isLoading: false, isInitialLoading: false, data: slo });
+        useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123Foo' });
 
         jest
@@ -429,7 +460,6 @@ describe('SLO Edit Page', () => {
     describe('when submitting has completed successfully', () => {
       it('navigates to the SLO List page', async () => {
         const slo = buildSlo();
-
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
@@ -444,9 +474,8 @@ describe('SLO Edit Page', () => {
         await waitFor(() => {
           fireEvent.click(getByTestId('sloFormSubmitButton'));
         });
-        await waitFor(() => {
-          expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
-        });
+
+        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
       });
     });
   });

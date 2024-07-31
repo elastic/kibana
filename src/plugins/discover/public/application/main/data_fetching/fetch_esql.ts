@@ -8,14 +8,14 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ProfilesManager } from '../../../context_awareness';
 
@@ -30,6 +30,7 @@ export function fetchEsql({
   query,
   inputQuery,
   filters,
+  inputTimeRange,
   dataView,
   abortSignal,
   inspectorAdapters,
@@ -40,6 +41,7 @@ export function fetchEsql({
   query: Query | AggregateQuery;
   inputQuery?: Query;
   filters?: Filter[];
+  inputTimeRange?: TimeRange;
   dataView: DataView;
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
@@ -47,7 +49,7 @@ export function fetchEsql({
   expressions: ExpressionsStart;
   profilesManager: ProfilesManager;
 }): Promise<RecordsFetchResponse> {
-  const timeRange = data.query.timefilter.timefilter.getTime();
+  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
     query,
@@ -84,7 +86,7 @@ export function fetchEsql({
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
                 id: String(idx),
-                raw: row as EsHitRecord,
+                raw: row,
                 flattened: row,
               };
 

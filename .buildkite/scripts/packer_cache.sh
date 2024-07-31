@@ -17,6 +17,3 @@ done
 for version in $(cat versions.json | jq -r '.versions[].version'); do
   node x-pack/plugins/security_solution/scripts/endpoint/agent_downloader --version "$version"
 done
-
-echo "--- Cloning repos for docs build"
-node scripts/validate_next_docs --clone-only

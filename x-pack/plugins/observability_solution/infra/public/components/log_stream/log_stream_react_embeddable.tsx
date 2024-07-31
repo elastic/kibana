@@ -24,7 +24,11 @@ import { useKibanaContextForPluginProvider } from '../../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 
 export function getLogStreamEmbeddableFactory(services: Services) {
-  const factory: ReactEmbeddableFactory<LogStreamSerializedState, LogStreamApi> = {
+  const factory: ReactEmbeddableFactory<
+    LogStreamSerializedState,
+    LogStreamSerializedState,
+    LogStreamApi
+  > = {
     type: LOG_STREAM_EMBEDDABLE,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi) => {

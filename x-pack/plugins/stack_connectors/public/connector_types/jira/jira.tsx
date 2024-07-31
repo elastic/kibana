@@ -13,6 +13,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
+import { validateJSON } from '../lib/validate_json';
 
 export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {
   defaultMessage: 'Create an incident in Jira.',
@@ -58,19 +59,15 @@ export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, 
           errors['subActionParams.incident.labels'].push(translations.LABELS_WHITE_SPACES);
       }
 
-      try {
-        const otherFields = actionParams.subActionParams?.incident?.otherFields;
-        if (otherFields) {
-          const parsedOtherFields = JSON.parse(otherFields);
-          if (Object.keys(parsedOtherFields).length > MAX_OTHER_FIELDS_LENGTH) {
-            errors['subActionParams.incident.otherFields'] = [
-              translations.OTHER_FIELDS_LENGTH_ERROR(MAX_OTHER_FIELDS_LENGTH),
-            ];
-          }
-        }
-      } catch (error) {
-        errors['subActionParams.incident.otherFields'] = [translations.INVALID_JSON_FORMAT];
+      const jsonErrors = validateJSON({
+        value: actionParams.subActionParams?.incident?.otherFields,
+        maxProperties: MAX_OTHER_FIELDS_LENGTH,
+      });
+
+      if (jsonErrors) {
+        errors['subActionParams.incident.otherFields'] = [jsonErrors];
       }
+
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./jira_params')),

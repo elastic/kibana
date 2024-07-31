@@ -6,13 +6,13 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createAssist as Assist } from '../utils/assist';
-import { clipContext, ConversationalChain } from './conversational_chain';
-import { FakeListChatModel } from '@langchain/core/utils/testing';
-import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { experimental_StreamData, Message } from 'ai';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
+import { experimental_StreamData } from 'ai';
+import { createAssist as Assist } from '../utils/assist';
+import { ConversationalChain, clipContext } from './conversational_chain';
+import { ChatMessage, MessageRole } from '../types';
 
 describe('conversational chain', () => {
   const createTestChain = async ({
@@ -29,7 +29,7 @@ describe('conversational chain', () => {
     modelLimit,
   }: {
     responses: string[];
-    chat: Message[];
+    chat: ChatMessage[];
     expectedFinalAnswer: string;
     expectedDocs: any;
     expectedTokens: any;
@@ -76,7 +76,7 @@ describe('conversational chain', () => {
       ? new FakeListChatModel({
           responses,
         })
-      : new FakeListLLM({ responses });
+      : new FakeStreamingLLM({ responses });
 
     const aiClient = Assist({
       es_client: mockElasticsearchClient as unknown as Client,
@@ -97,7 +97,8 @@ describe('conversational chain', () => {
         size: 3,
         inputTokensLimit: modelLimit,
       },
-      prompt: 'you are a QA bot {question} {chat_history} {context}',
+      prompt: 'you are a QA bot {context}',
+      questionRewritePrompt: 'rewrite question {question} using {context}"',
     });
 
     const stream = await conversationalChain.stream(aiClient, chat);
@@ -146,7 +147,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -180,7 +181,7 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -209,23 +210,74 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
+  it('should be able to create a conversational chain with inner hit field', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: MessageRole.user,
+          content: 'what is the work from home policy?',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      docs: [
+        {
+          _index: 'index',
+          _id: '1',
+          inner_hits: {
+            'index.field': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      text: 'value',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      expectedDocs: [
+        {
+          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'value' }],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 7 },
+        { type: 'prompt_token_count', count: 20 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+      contentField: { index: 'field' },
+    });
+  }, 10000);
+
   it('asking with chat history should re-write the question', async () => {
     await createTestChain({
       responses: ['rewrite the question', 'the final answer'],
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -241,7 +293,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 38 },
+        { type: 'prompt_token_count', count: 39 },
       ],
       expectedSearchRequest: [
         {
@@ -253,23 +305,62 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
+  it('should omit the system messages in chat', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: MessageRole.user,
+          content: 'what is the work from home policy?',
+        },
+        {
+          id: '2',
+          role: MessageRole.system,
+          content: 'Error occurred. Please try again.',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 15 },
+        { type: 'prompt_token_count', count: 28 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+    });
+  }, 10000);
+
   it('should cope with quotes in the query', async () => {
     await createTestChain({
       responses: ['rewrite "the" question', 'the final answer'],
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -285,7 +376,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 40 },
+        { type: 'prompt_token_count', count: 39 },
       ],
       expectedSearchRequest: [
         {
@@ -303,17 +394,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -329,7 +420,7 @@ describe('conversational chain', () => {
       ],
       expectedTokens: [
         { type: 'context_token_count', count: 15 },
-        { type: 'prompt_token_count', count: 42 },
+        { type: 'prompt_token_count', count: 49 },
       ],
       expectedSearchRequest: [
         {
@@ -348,17 +439,17 @@ describe('conversational chain', () => {
       chat: [
         {
           id: '1',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
         {
           id: '2',
-          role: 'assistant',
+          role: MessageRole.assistant,
           content: 'the final answer',
         },
         {
           id: '3',
-          role: 'user',
+          role: MessageRole.user,
           content: 'what is the work from home policy?',
         },
       ],
@@ -383,7 +474,10 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' } },
+            {
+              metadata: { _id: '1', _index: 'index' },
+              pageContent: expect.any(String),
+            },
             {
               metadata: { _id: '1', _index: 'website' },
               pageContent: expect.any(String),
@@ -392,9 +486,9 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      // Even with body_content of 1000, the token count should be below the model limit of 100
+      // Even with body_content of 1000, the token count should be below or equal to model limit of 100
       expectedTokens: [
-        { type: 'context_token_count', count: 70 },
+        { type: 'context_token_count', count: 63 },
         { type: 'prompt_token_count', count: 97 },
       ],
       expectedHasClipped: true,

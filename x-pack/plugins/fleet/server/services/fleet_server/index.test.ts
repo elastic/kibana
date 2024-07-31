@@ -115,6 +115,13 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
       version
     );
     expect(result).toBe(true);
+    expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+      esClientMock,
+      soClientMock,
+      expect.objectContaining({
+        kuery: 'policy_id:("1" or "2")',
+      })
+    );
   });
 });
 
@@ -130,6 +137,7 @@ describe('getFleetServerPolicies', () => {
         version: '1.0.0',
       },
       policy_id: 'fs-policy-1',
+      policy_ids: ['fs-policy-1'],
     },
     {
       id: 'package-policy-2',
@@ -140,6 +148,7 @@ describe('getFleetServerPolicies', () => {
         version: '1.0.0',
       },
       policy_id: 'fs-policy-2',
+      policy_ids: ['fs-policy-2'],
     },
     {
       id: 'package-policy-3',
@@ -150,6 +159,7 @@ describe('getFleetServerPolicies', () => {
         version: '1.0.0',
       },
       policy_id: 'agent-policy-2',
+      policy_ids: ['agent-policy-2'],
     },
   ];
   const mockFleetServerPolicies = [
@@ -218,7 +228,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       const hasFs = await hasFleetServersForPolicies(
         mockEsClient,
         mockSoClient,
-        ['policy-1'],
+        [{ id: 'policy-1' }],
         true
       );
       expect(hasFs).toBe(true);
@@ -241,7 +251,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       const hasFs = await hasFleetServersForPolicies(
         mockEsClient,
         mockSoClient,
-        ['policy-1'],
+        [{ id: 'policy-1' }],
         true
       );
       expect(hasFs).toBe(true);
@@ -264,7 +274,7 @@ describe('hasActiveFleetServersForPolicies', () => {
       const hasFs = await hasFleetServersForPolicies(
         mockEsClient,
         mockSoClient,
-        ['policy-1'],
+        [{ id: 'policy-1' }],
         true
       );
       expect(hasFs).toBe(false);
@@ -286,7 +296,9 @@ describe('hasActiveFleetServersForPolicies', () => {
         online: 0,
         error: 0,
       });
-      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, ['policy-1']);
+      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, [
+        { id: 'policy-1' },
+      ]);
       expect(hasFs).toBe(true);
     });
   });

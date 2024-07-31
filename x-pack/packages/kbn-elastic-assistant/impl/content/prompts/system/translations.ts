@@ -39,6 +39,13 @@ export const DEFAULT_SYSTEM_PROMPT_NAME = i18n.translate(
   }
 );
 
+export const DEFAULT_SYSTEM_PROMPT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.content.prompts.system.defaultSystemPromptLabel',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
 export const SUPERHERO_SYSTEM_PROMPT_NON_I18N = `${YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT} ${IF_YOU_DONT_KNOW_THE_ANSWER}
 ${SUPERHERO_PERSONALITY}`;
 
@@ -46,6 +53,13 @@ export const SUPERHERO_SYSTEM_PROMPT_NAME = i18n.translate(
   'xpack.elasticAssistant.assistant.content.prompts.system.superheroSystemPromptName',
   {
     defaultMessage: 'Enhanced system prompt',
+  }
+);
+
+export const SUPERHERO_SYSTEM_PROMPT_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.content.prompts.system.superheroSystemPromptLabel',
+  {
+    defaultMessage: 'Enhanced',
   }
 );
 

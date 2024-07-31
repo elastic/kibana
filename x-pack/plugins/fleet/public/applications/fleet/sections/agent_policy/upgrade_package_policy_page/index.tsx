@@ -14,7 +14,7 @@ import { EditPackagePolicyForm } from '../edit_package_policy_page';
 
 export const UpgradePackagePolicyPage = memo(() => {
   const {
-    params: { packagePolicyId },
+    params: { packagePolicyId, policyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
   const { search } = useLocation();
 
@@ -30,5 +30,12 @@ export const UpgradePackagePolicyPage = memo(() => {
     from = 'upgrade-from-integrations-policy-list';
   }
 
-  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} from={from} forceUpgrade />;
+  return (
+    <EditPackagePolicyForm
+      packagePolicyId={packagePolicyId}
+      policyId={policyId}
+      from={from}
+      forceUpgrade
+    />
+  );
 });

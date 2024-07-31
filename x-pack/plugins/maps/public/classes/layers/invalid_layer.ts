@@ -42,6 +42,10 @@ export class InvalidLayer extends AbstractLayer {
     };
   }
 
+  isLayerLoading() {
+    return false;
+  }
+
   hasErrors() {
     return true;
   }

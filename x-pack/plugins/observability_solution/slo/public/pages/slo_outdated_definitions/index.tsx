@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useKibana } from '../../utils/kibana_react';
-import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import React, { useState } from 'react';
 import { paths } from '../../../common/locators/paths';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 import { SloListEmpty } from '../slos/components/slo_list_empty';
 import { OutdatedSlo } from './outdated_slo';
 import { OutdatedSloSearchBar } from './outdated_slo_search_bar';
@@ -26,9 +24,10 @@ export function SlosOutdatedDefinitions() {
   const {
     http: { basePath },
   } = useKibana().services;
-  const { hasWriteCapabilities } = useCapabilities();
-  const { data: globalDiagnosis } = useFetchSloGlobalDiagnosis();
+
+  const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
+  const { hasAtLeast } = useLicense();
 
   useBreadcrumbs([
     {
@@ -54,8 +53,6 @@ export function SlosOutdatedDefinitions() {
     setActivePage(0);
   };
 
-  const { hasAtLeast } = useLicense();
-
   const { isLoading, data, refetch } = useFetchSloDefinitions({
     name: search,
     includeOutdatedOnly: true,
@@ -64,12 +61,8 @@ export function SlosOutdatedDefinitions() {
   });
   const { total } = data ?? { total: 0 };
 
-  const hasRequiredWritePrivileges =
-    !!globalDiagnosis?.userPrivileges.write.has_all_requested && hasWriteCapabilities;
-
+  const hasRequiredWritePrivileges = permissions?.hasAllWriteRequested === true;
   const hasPlatinumLicense = hasAtLeast('platinum') === true;
-
-  const hasSlosAndHasPermissions = hasPlatinumLicense && hasRequiredWritePrivileges;
 
   const errors = !hasRequiredWritePrivileges ? (
     <EuiText>
@@ -96,7 +89,7 @@ export function SlosOutdatedDefinitions() {
     >
       <HeaderMenu />
 
-      {!hasSlosAndHasPermissions ? (
+      {!!errors ? (
         errors
       ) : (
         <>

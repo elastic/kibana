@@ -24,7 +24,7 @@ export const supportedFieldTypes = [
 export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
   supportedFieldTypes.includes(type as SupportedFieldType);
 
-export type SupportedFieldType = typeof supportedFieldTypes[number];
+export type SupportedFieldType = (typeof supportedFieldTypes)[number];
 
 export type FunctionParameterType =
   | SupportedFieldType
@@ -158,4 +158,4 @@ export type SignatureType =
   | CommandOptionsDefinition['signature'];
 export type SignatureArgType = SignatureType['params'][number];
 
-export type FunctionArgSignature = FunctionDefinition['signatures'][number]['params'][number];
+export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];

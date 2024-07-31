@@ -17,7 +17,7 @@ import {
   EuiButton,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { ApiKey } from '@kbn/security-plugin/common/model';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { PermissionDenied } from './prompts/permission_denied';
 import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';

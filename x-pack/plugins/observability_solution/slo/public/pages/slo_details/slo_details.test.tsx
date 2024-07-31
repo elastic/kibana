@@ -8,6 +8,7 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core/public';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
@@ -21,18 +22,18 @@ import {
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 import { buildSlo } from '../../data/slo/slo';
 import { ActiveAlerts } from '../../hooks/active_alerts';
-import { useCapabilities } from '../../hooks/use_capabilities';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
-import { TagsList, HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { useCreateDataView } from '../../hooks/use_create_data_view';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -42,18 +43,18 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_capabilities');
+jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_fetch_active_alerts');
 jest.mock('../../hooks/use_fetch_slo_details');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_delete_slo_instance');
+jest.mock('@kbn/ebt-tools');
 
 const useKibanaMock = useKibana as jest.Mock;
-
 const useLicenseMock = useLicense as jest.Mock;
-const useCapabilitiesMock = useCapabilities as jest.Mock;
+const usePermissionsMock = usePermissions as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
@@ -61,8 +62,10 @@ const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useCreateDataViewsMock = useCreateDataView as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
-TagsListMock.mockReturnValue(<div>Tags list</div>);
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+TagsListMock.mockReturnValue(<div>Tags list</div>);
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
@@ -134,7 +137,10 @@ describe('SLO Details Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
-    useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    usePermissionsMock.mockReturnValue({
+      isLoading: false,
+      data: { hasAllReadRequested: true, hasAllWriteRequested: true },
+    });
     useCreateDataViewsMock.mockReturnValue({
       dataView: { getName: () => 'dataview', getIndexPattern: () => '.dataview-index' },
     });
@@ -151,7 +157,7 @@ describe('SLO Details Page', () => {
   });
 
   describe('when the incorrect license is found', () => {
-    it('navigates to the SLO List page', async () => {
+    it('navigates to the SLO welcome page', async () => {
       const slo = buildSlo();
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
       useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
@@ -159,7 +165,24 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+    });
+  });
+
+  describe('when the user has not the requested read permissions ', () => {
+    it('navigates to the slos welcome page', async () => {
+      const slo = buildSlo();
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: slo.id });
+      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, data: slo });
+      useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+      usePermissionsMock.mockReturnValue({
+        isLoading: false,
+        data: { hasAllReadRequested: false, hasAllWriteRequested: false },
+      });
+
+      render(<SloDetailsPage />);
+
+      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
     });
   });
 

@@ -16,16 +16,26 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
   router.get(
     {
       path: '/internal/search_notebooks/notebooks',
-      validate: {},
+      validate: {
+        query: schema.object({
+          list: schema.maybe(schema.string()),
+        }),
+      },
       options: {
         access: 'internal',
       },
     },
-    async (_context, _request, response) => {
-      const notebooks = await getNotebookCatalog({ cache: notebooksCache, config, logger });
+    async (_context, request, response) => {
+      const { list } = request.query;
+      const resp = await getNotebookCatalog({
+        cache: notebooksCache,
+        config,
+        logger,
+        notebookList: list,
+      });
 
       return response.ok({
-        body: notebooks,
+        body: resp,
         headers: { 'content-type': 'application/json' },
       });
     }

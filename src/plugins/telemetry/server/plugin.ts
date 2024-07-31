@@ -22,7 +22,7 @@ import {
   map,
 } from 'rxjs';
 
-import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
+import { ElasticV3ServerShipper } from '@kbn/ebt/shippers/elastic_v3/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {

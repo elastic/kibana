@@ -13,7 +13,7 @@ import JSON5 from 'json5';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getMigrationDocLink, delay } from '../test_utils';
+import { getMigrationDocLink } from '../test_utils';
 import {
   clearLog,
   currentVersion,
@@ -71,7 +71,6 @@ describe('migration v2', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 });
 

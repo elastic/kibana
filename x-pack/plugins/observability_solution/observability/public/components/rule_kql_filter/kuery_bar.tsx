@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 
+import { useEuiTheme } from '@elastic/eui';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 import { AutocompleteField } from './autocomplete_field';
 
@@ -21,7 +22,7 @@ type LoadSuggestionsFn = (
 ) => void;
 export type CurryLoadSuggestionsType = (loadSuggestions: LoadSuggestionsFn) => LoadSuggestionsFn;
 
-interface Props {
+export interface RuleFlyoutKueryBarProps {
   derivedIndexPattern: DataViewBase;
   onSubmit: (query: string) => void;
   onChange?: (query: string) => void;
@@ -48,7 +49,7 @@ export function RuleFlyoutKueryBar({
   placeholder,
   curryLoadSuggestions = defaultCurryLoadSuggestions,
   compressed,
-}: Props) {
+}: RuleFlyoutKueryBarProps) {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
 
@@ -58,6 +59,8 @@ export function RuleFlyoutKueryBar({
       setDraftQuery(value);
     }
   }, [value]);
+
+  const { euiTheme } = useEuiTheme();
 
   const handleChange = (query: string) => {
     setValidation(validateQuery(query));
@@ -86,6 +89,7 @@ export function RuleFlyoutKueryBar({
           placeholder={placeholder}
           suggestions={suggestions}
           value={draftQuery}
+          theme={euiTheme}
         />
       )}
     </WithKueryAutocompletion>
@@ -96,3 +100,6 @@ const defaultCurryLoadSuggestions: CurryLoadSuggestionsType =
   (loadSuggestions) =>
   (...args) =>
     loadSuggestions(...args);
+
+// eslint-disable-next-line import/no-default-export
+export default RuleFlyoutKueryBar;

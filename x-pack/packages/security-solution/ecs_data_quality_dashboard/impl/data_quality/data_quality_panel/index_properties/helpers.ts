@@ -10,6 +10,7 @@ import type {
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { sortBy } from 'lodash/fp';
+import { EcsFlatTyped } from '../../constants';
 
 import {
   getEnrichedFieldMetadata,
@@ -17,7 +18,7 @@ import {
   getMissingTimestampFieldMetadata,
   getPartitionedFieldMetadata,
 } from '../../helpers';
-import type { EcsMetadata, PartitionedFieldMetadata, UnallowedValueCount } from '../../types';
+import type { PartitionedFieldMetadata, UnallowedValueCount } from '../../types';
 
 export const ALL_TAB_ID = 'allTab';
 export const ECS_COMPLIANT_TAB_ID = 'ecsCompliantTab';
@@ -40,19 +41,26 @@ export const getSortedPartitionedFieldMetadata = ({
   mappingsProperties,
   unallowedValues,
 }: {
-  ecsMetadata: Record<string, EcsMetadata> | null;
+  ecsMetadata: EcsFlatTyped;
   loadingMappings: boolean;
   mappingsProperties: Record<string, MappingProperty> | null | undefined;
   unallowedValues: Record<string, UnallowedValueCount[]> | null;
 }): PartitionedFieldMetadata | null => {
-  if (loadingMappings || ecsMetadata == null || unallowedValues == null) {
+  if (loadingMappings || unallowedValues == null) {
     return null;
   }
 
+  // this covers scenario when we try to check an empty index
+  // or index without required @timestamp field in the mapping
+  //
+  // we create an artifical incompatible timestamp field metadata
+  // so that we can signal to user that the incompatibility is due to missing timestamp
   if (mappingsProperties == null) {
+    const missingTimestampFieldMetadata = getMissingTimestampFieldMetadata();
     return {
       ...EMPTY_METADATA,
-      incompatible: [getMissingTimestampFieldMetadata()],
+      all: [missingTimestampFieldMetadata],
+      incompatible: [missingTimestampFieldMetadata],
     };
   }
 

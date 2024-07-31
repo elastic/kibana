@@ -42,7 +42,9 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
     type: 'dashboard',
     id: hit.id,
     updatedAt: hit.updatedAt!,
+    createdAt: hit.createdAt,
     createdBy: hit.createdBy,
+    updatedBy: hit.updatedBy,
     references: hit.references,
     managed: hit.managed,
     attributes: {
@@ -98,6 +100,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
+    dashboardRecentlyAccessed,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -280,6 +283,7 @@ export const useDashboardListingTable = ({
         isReadonly: !showWriteControls,
         onSave: updateItemMeta,
         customValidators: contentEditorValidators,
+        showActivityView: true,
       },
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
@@ -299,6 +303,7 @@ export const useDashboardListingTable = ({
       title,
       urlStateEnabled,
       createdByEnabled: true,
+      recentlyAccessed: dashboardRecentlyAccessed,
     }),
     [
       contentEditorValidators,
@@ -321,6 +326,7 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
+      dashboardRecentlyAccessed,
     ]
   );
 

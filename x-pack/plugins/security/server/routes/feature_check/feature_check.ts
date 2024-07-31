@@ -88,7 +88,10 @@ async function getEnabledSecurityFeatures(esClient: ElasticsearchClient, logger:
   // `transport.request` is potentially unsafe when combined with untrusted user input.
   // Do not augment with such input.
   const xpackUsagePromise = esClient.transport
-    .request({ method: 'GET', path: '/_xpack/usage' })
+    .request({
+      method: 'GET',
+      path: '/_xpack/usage?filter_path=remote_clusters.*,security.realms.*',
+    })
     .then((body) => body as XPackUsageResponse)
     .catch((error) => {
       // fall back to no external realms configured.

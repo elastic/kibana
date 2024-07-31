@@ -11,11 +11,11 @@ import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
 import { ALERT_STATUS_ALL, infraAlertFeatureIds } from './constants';
-import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
@@ -23,7 +23,8 @@ interface AlertsOverviewProps {
   assetId: string;
   dateRange: TimeRange;
   onLoaded: (alertsCount?: AlertsCount) => void;
-  onRangeSelection?: HostsStateUpdater;
+  onRangeSelection?: (dateRange: TimeRange) => void;
+  assetType?: InventoryItemType;
 }
 
 const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
@@ -33,6 +34,7 @@ export const AlertsOverview = ({
   dateRange,
   onLoaded,
   onRangeSelection,
+  assetType,
 }: AlertsOverviewProps) => {
   const { services } = useKibanaContextForPlugin();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
@@ -56,8 +58,9 @@ export const AlertsOverview = ({
         dateRange,
         assetIds: [assetId],
         status: alertStatus,
+        assetType,
       }),
-    [assetId, dateRange, alertStatus]
+    [dateRange, assetId, alertStatus, assetType]
   );
 
   const alertsEsQuery = useMemo(
@@ -66,8 +69,9 @@ export const AlertsOverview = ({
         dateRange,
         assetIds: [assetId],
         status: ALERT_STATUS_ALL,
+        assetType,
       }),
-    [assetId, dateRange]
+    [assetId, assetType, dateRange]
   );
 
   const summaryTimeRange = useSummaryTimeRange(dateRange);
@@ -81,7 +85,7 @@ export const AlertsOverview = ({
         const from = new Date(start).toISOString();
         const to = new Date(end).toISOString();
 
-        onRangeSelection({ dateRange: { from, to } });
+        onRangeSelection({ from, to });
       }
     },
     [onRangeSelection]
@@ -126,7 +130,7 @@ export const AlertsOverview = ({
           featureIds={alertFeatureIds}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
-          pageSize={5}
+          initialPageSize={5}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

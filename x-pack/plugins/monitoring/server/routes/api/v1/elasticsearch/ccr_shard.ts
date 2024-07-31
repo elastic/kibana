@@ -95,6 +95,9 @@ export function ccrShardRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       const index = req.params.index;
       const shardId = req.params.shardId;

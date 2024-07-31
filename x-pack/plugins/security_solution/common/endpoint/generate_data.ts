@@ -240,6 +240,7 @@ export interface Tree {
   allEvents: Event[];
   startTime: Date;
   endTime: Date;
+  agentId: string;
 }
 
 export interface TreeOptions {
@@ -381,6 +382,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   protected get commonInfo() {
     return clone(this._commonInfo);
   }
+
   protected set commonInfo(newInfo) {
     this._commonInfo = newInfo;
   }
@@ -1184,6 +1186,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       childrenLevels: levels,
       startTime,
       endTime,
+      agentId: this.commonInfo.agent.id,
     };
   }
 
@@ -1618,7 +1621,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       path: '/package/endpoint/0.5.0',
       icons: [
         {
-          // @ts-expect-error upgrade typescript v4.9.5
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',
@@ -1703,7 +1705,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       assets: {} as AssetsGroupedByServiceByType,
       icons: [
         {
-          // @ts-expect-error upgrade typescript v4.9.5
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',

@@ -34,10 +34,13 @@ NODE="${DIR}/node/default/bin/node"
 {{#linux}}
 NODE="${DIR}/node/glibc-217/bin/node"
 {{#serverless}}
-if [ "$KBN_DISABLE_POINTER_COMPRESSION" != 'true' ]; then
+if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
 fi
 {{/serverless}}
+{{#forcePointerCompression}}
+NODE="${DIR}/node/pointer-compression/bin/node"
+{{/forcePointerCompression}}
 {{/linux}}
 test_node
 

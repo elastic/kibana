@@ -22,7 +22,7 @@ export interface MetadataSearchUrlState {
 
 export const Metadata = () => {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { overrides } = useAssetDetailsRenderPropsContext();
+  const { overrides, asset } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -45,7 +45,7 @@ export const Metadata = () => {
 
   return (
     <>
-      <MetadataExplanationMessage />
+      <MetadataExplanationMessage assetType={asset.type} />
       <EuiHorizontalRule margin="m" />
       <Table
         search={urlState?.metadataSearch}

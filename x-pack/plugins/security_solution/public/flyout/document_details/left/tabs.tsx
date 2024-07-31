@@ -8,6 +8,7 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NotesTab } from './tabs/notes_tab';
 import { VisualizeTab } from './tabs/visualize_tab';
 import { InvestigationTab } from './tabs/investigation_tab';
 import { InsightsTab } from './tabs/insights_tab';
@@ -15,6 +16,7 @@ import type { LeftPanelPaths } from '.';
 import {
   INSIGHTS_TAB_TEST_ID,
   INVESTIGATION_TAB_TEST_ID,
+  NOTES_TAB_TEST_ID,
   RESPONSE_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
 } from './test_ids';
@@ -73,4 +75,16 @@ export const responseTab: LeftPanelTabType = {
     />
   ),
   content: <ResponseTab />,
+};
+
+export const notesTab: LeftPanelTabType = {
+  id: 'notes',
+  'data-test-subj': NOTES_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.left.notes.tabLabel"
+      defaultMessage="Notes"
+    />
+  ),
+  content: <NotesTab />,
 };

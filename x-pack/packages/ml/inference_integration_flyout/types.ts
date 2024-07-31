@@ -54,7 +54,7 @@ export interface ElasticsearchService {
 export enum Service {
   cohere = 'cohere',
   elser = 'elser',
-  huggingFace = 'huggingFace',
+  huggingFace = 'hugging_face',
   openai = 'openai',
   elasticsearch = 'elasticsearch',
 }

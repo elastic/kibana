@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 import {
@@ -24,18 +24,8 @@ describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let mockCore: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {
-    mockCore = coreMock.createSetup({
-      pluginStartDeps: {
-        security: {
-          authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
-          },
-        },
-      },
-    });
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
@@ -44,7 +34,7 @@ describe('set signal status', () => {
       getSuccessfulSignalUpdateResponse()
     );
     const telemetrySenderMock = createMockTelemetryEventsSender();
-    setSignalsStatusRoute(server.router, logger, telemetrySenderMock, mockCore.getStartServices);
+    setSignalsStatusRoute(server.router, logger, telemetrySenderMock);
   });
 
   describe('status on signal', () => {
@@ -150,12 +140,10 @@ describe('set signal status', () => {
         path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         body: setStatusSignalMissingIdsAndQueryPayload(),
       });
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        message: ['either "signal_ids" or "query" must be set'],
-        status_code: 400,
-      });
+
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if signal_ids but no status', async () => {
@@ -167,9 +155,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if query but no status', async () => {
@@ -181,9 +167,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('rejects if query and signal_ids but no status', async () => {
@@ -199,9 +183,7 @@ describe('set signal status', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "status"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
   });
 });

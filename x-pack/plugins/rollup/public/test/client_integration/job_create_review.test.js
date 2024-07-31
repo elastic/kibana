@@ -70,6 +70,10 @@ describe('Create Rollup Job, step 6: Review', () => {
       expect(exists('rollupJobCreateReviewTitle')).toBe(true);
     });
 
+    test('should have a deprecation callout', () => {
+      expect(exists('rollupDeprecationCallout')).toBe(true);
+    });
+
     it('should have the "next" and "save" button visible', () => {
       expect(exists('rollupJobBackButton')).toBe(true);
       expect(exists('rollupJobNextButton')).toBe(false);

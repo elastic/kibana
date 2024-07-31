@@ -39,7 +39,7 @@ describe('AxesSettingsPopover', () => {
       axis: 'x',
       areTickLabelsVisible: true,
       areGridlinesVisible: true,
-      isAxisTitleVisible: true,
+      isTitleVisible: true,
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
       hasBarOrAreaOnAxis: false,

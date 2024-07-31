@@ -13,7 +13,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../../plugin';
 import type { ConfigType } from '../../../../../config';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
@@ -24,11 +23,7 @@ import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';
 
-export const importTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
     .post({
       path: `${TIMELINE_IMPORT_URL}`,
@@ -66,7 +61,7 @@ export const importTimelinesRoute = (
               body: `Invalid file extension ${fileExtension}`,
             });
           }
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
 
           const res = await importTimelines(
             file as unknown as Readable,

@@ -18,6 +18,7 @@ import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { EventFiltersProcessDescendantIndicator } from '../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
   defaultMessage:
@@ -155,6 +156,7 @@ export const EventFiltersList = memo(() => {
       allowCardCreateAction={canWriteEventFilters}
       allowCardEditAction={canWriteEventFilters}
       allowCardDeleteAction={canWriteEventFilters}
+      CardDecorator={EventFiltersProcessDescendantIndicator}
     />
   );
 });

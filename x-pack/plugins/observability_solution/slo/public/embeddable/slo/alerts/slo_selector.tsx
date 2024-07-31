@@ -68,7 +68,14 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
   );
 
   return (
-    <EuiFormRow fullWidth isInvalid={hasError} error={hasError ? SLO_REQUIRED : undefined}>
+    <EuiFormRow
+      fullWidth
+      isInvalid={hasError}
+      error={hasError ? SLO_REQUIRED : undefined}
+      label={i18n.translate('xpack.slo.embeddable.sloSelectorLabel', {
+        defaultMessage: 'SLO',
+      })}
+    >
       <EuiComboBox
         aria-label={i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.ariaLabel', {
           defaultMessage: 'SLO',

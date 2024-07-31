@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
@@ -163,6 +164,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       showPipelinesAndMappings,
     ]);
 
+    const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
+    const flexWidth = isBiggerScreen ? 7 : 5;
+
     return (
       <>
         <EuiFlexGrid columns={2} data-test-subj="streamOptions.inputStreams">
@@ -170,7 +174,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
               <EuiFlexItem grow={1} />
-              <EuiFlexItem grow={5}>
+              <EuiFlexItem grow={flexWidth}>
                 <EuiFlexGroup
                   gutterSize="none"
                   alignItems="flexStart"

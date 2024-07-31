@@ -72,7 +72,7 @@ describe('SyntheticsService', () => {
 
   const serverMock: SyntheticsServerSetup = {
     logger,
-    uptimeEsClient: mockEsClient,
+    syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
     },

@@ -212,6 +212,43 @@ describe('react embeddable renderer', () => {
       )
     );
   });
+
+  it('catches error when thrown in deserialize', async () => {
+    const buildEmbeddable = jest.fn();
+    const errorInInitializeFactory: ReactEmbeddableFactory<{ name: string; bork: string }> = {
+      ...testEmbeddableFactory,
+      type: 'errorInDeserialize',
+      buildEmbeddable,
+      deserializeState: (state) => {
+        throw new Error('error in deserialize');
+      },
+    };
+    registerReactEmbeddableFactory('errorInDeserialize', () =>
+      Promise.resolve(errorInInitializeFactory)
+    );
+    setupPresentationPanelServices();
+
+    const onApiAvailable = jest.fn();
+    const embeddable = render(
+      <ReactEmbeddableRenderer
+        type={'errorInDeserialize'}
+        maybeId={'12345'}
+        onApiAvailable={onApiAvailable}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: {},
+          }),
+        })}
+      />
+    );
+
+    await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
+    expect(onApiAvailable).not.toBeCalled();
+    expect(buildEmbeddable).not.toBeCalled();
+    expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
+      'error in deserialize'
+    );
+  });
 });
 
 describe('reactEmbeddable phase events', () => {

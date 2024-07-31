@@ -93,7 +93,7 @@ function buildCharCompleteItem(
   return {
     label,
     text: quoted ? `"${label}"` : label,
-    kind: 'Operator',
+    kind: 'Keyword',
     detail,
     sortText,
   };

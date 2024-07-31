@@ -55,7 +55,7 @@ describe('Jira schema', () => {
               otherFields,
             },
           })
-        ).toThrow('A maximum of 20 otherFields can be defined at a time.');
+        ).toThrow('A maximum of 20 fields in otherFields can be defined at a time.');
       });
 
       it.each(incidentSchemaObjectProperties)(

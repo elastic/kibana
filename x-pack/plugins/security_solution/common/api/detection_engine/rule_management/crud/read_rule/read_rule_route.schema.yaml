@@ -5,9 +5,11 @@ info:
 paths:
   /api/detection_engine/rules:
     get:
-      operationId: ReadRule
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
-      description: Read a single rule
+      operationId: ReadRule
+      summary: Retrieve a detection rule
+      description: Retrieve a detection rule using the `rule_id` or `id` field.
       tags:
         - Rules API
       parameters:

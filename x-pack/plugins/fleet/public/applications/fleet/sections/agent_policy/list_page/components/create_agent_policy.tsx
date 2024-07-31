@@ -24,7 +24,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../components';
@@ -47,12 +49,17 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
+  const spaceSettings = useSpaceSettingsContext();
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults()
+    generateNewAgentPolicyWithDefaults({
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(agentPolicy);
+  const validation = agentPolicyFormValidation(agentPolicy, {
+    allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+  });
   const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
   const updateAgentPolicy = (updatedFields: Partial<NewAgentPolicy>) => {
@@ -191,7 +198,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} size="l" maxWidth={400} {...restOfProps}>
+    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH}>
       {header}
       {body}
       {footer}

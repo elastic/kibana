@@ -31,6 +31,7 @@ export const ReactRouter = require('react-router');
 export const ReactRouterDom = require('react-router-dom');
 export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 export const StyledComponents = require('styled-components');
+export const FastestLevenshtein = require('fastest-levenshtein');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 
@@ -42,7 +43,6 @@ export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibComponentsUseIsNestedEuiProvider = require('@elastic/eui/optimize/es/components/provider/nested');
 export const ElasticEuiLibServices = require('@elastic/eui/optimize/es/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/optimize/es/services/format');
-export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
 export const KbnDatemath = require('@kbn/datemath');
 export const HelloPangeaDnd = require('@hello-pangea/dnd/dist/dnd');
 export const ReduxjsToolkit = require('@reduxjs/toolkit');
@@ -61,6 +61,7 @@ export const Fflate = { unzlibSync, strFromU8 };
 export const TsLib = require('tslib');
 export const Uuid = require('uuid');
 export const KbnAnalytics = require('@kbn/analytics');
+export const KbnCryptoBrowser = require('@kbn/crypto-browser');
 export const KbnEsQuery = require('@kbn/es-query');
 export const KbnSearchErrors = require('@kbn/search-errors');
 export const KbnStd = require('@kbn/std');

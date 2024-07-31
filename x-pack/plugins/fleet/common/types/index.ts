@@ -30,6 +30,20 @@ export interface FleetConfigType {
       hosts?: string[];
     };
   };
+  agentless?: {
+    api: {
+      url: string;
+      tls: {
+        certificate: string;
+        key: string;
+        ca: string;
+      };
+    };
+  };
+  spaceSettings?: Array<{
+    space_id: string;
+    allowed_namespace_prefixes: string[] | null;
+  }>;
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];

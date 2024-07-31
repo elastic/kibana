@@ -17,16 +17,20 @@ import * as i18n from './translations';
 import type {
   DataQualityCheckResult,
   DataQualityIndexCheckedParams,
-  EcsMetadata,
+  EcsBasedFieldMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
   IlmPhase,
+  IncompatibleFieldMappingItem,
+  IncompatibleFieldValueItem,
   MeteringStatsIndex,
   PartitionedFieldMetadata,
   PartitionedFieldMetadataStats,
   PatternRollup,
+  SameFamilyFieldItem,
   UnallowedValueCount,
 } from './types';
+import { EcsFlatTyped } from './constants';
 
 const EMPTY_INDEX_NAMES: string[] = [];
 export const INTERNAL_API_VERSION = '1';
@@ -172,7 +176,7 @@ export const getEnrichedFieldMetadata = ({
   fieldMetadata,
   unallowedValues,
 }: {
-  ecsMetadata: Record<string, EcsMetadata>;
+  ecsMetadata: EcsFlatTyped;
   fieldMetadata: FieldType;
   unallowedValues: Record<string, UnallowedValueCount[]>;
 }): EnrichedFieldMetadata => {
@@ -202,7 +206,7 @@ export const getEnrichedFieldMetadata = ({
     return {
       indexFieldName: field,
       indexFieldType: type,
-      indexInvalidValues,
+      indexInvalidValues: [],
       hasEcsMetadata: false,
       isEcsCompliant: false,
       isInSameFamily: false, // custom fields are never in the same family
@@ -210,15 +214,14 @@ export const getEnrichedFieldMetadata = ({
   }
 };
 
-export const getMissingTimestampFieldMetadata = (): EnrichedFieldMetadata => ({
-  description: i18n.TIMESTAMP_DESCRIPTION,
+export const getMissingTimestampFieldMetadata = (): EcsBasedFieldMetadata => ({
+  ...EcsFlatTyped['@timestamp'],
   hasEcsMetadata: true,
   indexFieldName: '@timestamp',
   indexFieldType: '-',
   indexInvalidValues: [],
   isEcsCompliant: false,
   isInSameFamily: false, // `date` is not a member of any families
-  type: 'date',
 });
 
 export const getPartitionedFieldMetadata = (
@@ -257,11 +260,6 @@ export const getPartitionedFieldMetadataStats = (
     sameFamily: sameFamily.length,
   };
 };
-
-export const hasValidTimestampMapping = (enrichedFieldMetadata: EnrichedFieldMetadata[]): boolean =>
-  enrichedFieldMetadata.some(
-    (x) => x.indexFieldName === '@timestamp' && x.indexFieldType === 'date'
-  );
 
 export const getDocsCount = ({
   indexName,
@@ -471,8 +469,11 @@ export interface StorageResult {
   ecsFieldCount: number;
   customFieldCount: number;
   incompatibleFieldCount: number;
+  incompatibleFieldMappingItems: IncompatibleFieldMappingItem[];
+  incompatibleFieldValueItems: IncompatibleFieldValueItem[];
   sameFamilyFieldCount: number;
   sameFamilyFields: string[];
+  sameFamilyFieldItems: SameFamilyFieldItem[];
   unallowedMappingFields: string[];
   unallowedValueFields: string[];
   sizeInBytes: number;
@@ -491,28 +492,66 @@ export const formatStorageResult = ({
   result: DataQualityCheckResult;
   report: DataQualityIndexCheckedParams;
   partitionedFieldMetadata: PartitionedFieldMetadata;
-}): StorageResult => ({
-  batchId: report.batchId,
-  indexName: result.indexName,
-  indexPattern: result.pattern,
-  isCheckAll: report.isCheckAll,
-  checkedAt: result.checkedAt ?? Date.now(),
-  docsCount: result.docsCount ?? 0,
-  totalFieldCount: partitionedFieldMetadata.all.length,
-  ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
-  customFieldCount: partitionedFieldMetadata.custom.length,
-  incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
-  sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
-  sameFamilyFields: report.sameFamilyFields ?? [],
-  unallowedMappingFields: report.unallowedMappingFields ?? [],
-  unallowedValueFields: report.unallowedValueFields ?? [],
-  sizeInBytes: report.sizeInBytes ?? 0,
-  ilmPhase: result.ilmPhase,
-  markdownComments: result.markdownComments,
-  ecsVersion: report.ecsVersion,
-  indexId: report.indexId ?? '', // ---> we don't have this field when isILMAvailable is false
-  error: result.error,
-});
+}): StorageResult => {
+  const incompatibleFieldMappingItems: IncompatibleFieldMappingItem[] = [];
+  const incompatibleFieldValueItems: IncompatibleFieldValueItem[] = [];
+  const sameFamilyFieldItems: SameFamilyFieldItem[] = [];
+
+  partitionedFieldMetadata.incompatible.forEach((field) => {
+    if (field.type !== field.indexFieldType) {
+      incompatibleFieldMappingItems.push({
+        fieldName: field.indexFieldName,
+        expectedValue: field.type,
+        actualValue: field.indexFieldType,
+        description: field.description,
+      });
+    }
+
+    if (field.indexInvalidValues.length > 0) {
+      incompatibleFieldValueItems.push({
+        fieldName: field.indexFieldName,
+        expectedValues: field.allowed_values?.map((x) => x.name) ?? [],
+        actualValues: field.indexInvalidValues.map((v) => ({ name: v.fieldName, count: v.count })),
+        description: field.description,
+      });
+    }
+  });
+
+  partitionedFieldMetadata.sameFamily.forEach((field) => {
+    sameFamilyFieldItems.push({
+      fieldName: field.indexFieldName,
+      expectedValue: field.type,
+      actualValue: field.indexFieldType,
+      description: field.description,
+    });
+  });
+
+  return {
+    batchId: report.batchId,
+    indexName: result.indexName,
+    indexPattern: result.pattern,
+    isCheckAll: report.isCheckAll,
+    checkedAt: result.checkedAt ?? Date.now(),
+    docsCount: result.docsCount ?? 0,
+    totalFieldCount: partitionedFieldMetadata.all.length,
+    ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
+    customFieldCount: partitionedFieldMetadata.custom.length,
+    incompatibleFieldCount: partitionedFieldMetadata.incompatible.length,
+    incompatibleFieldMappingItems,
+    incompatibleFieldValueItems,
+    sameFamilyFieldCount: partitionedFieldMetadata.sameFamily.length,
+    sameFamilyFields: report.sameFamilyFields ?? [],
+    sameFamilyFieldItems,
+    unallowedMappingFields: report.unallowedMappingFields ?? [],
+    unallowedValueFields: report.unallowedValueFields ?? [],
+    sizeInBytes: report.sizeInBytes ?? 0,
+    ilmPhase: result.ilmPhase,
+    markdownComments: result.markdownComments,
+    ecsVersion: report.ecsVersion,
+    indexId: report.indexId ?? '',
+    error: result.error,
+  };
+};
 
 export const formatResultFromStorage = ({
   storageResult,

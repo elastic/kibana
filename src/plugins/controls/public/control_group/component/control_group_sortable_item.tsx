@@ -70,12 +70,13 @@ const SortableControlInner = forwardRef<
   ) => {
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
     const panels = controlGroupSelector((state) => state.explicitInput.panels);
+    const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
 
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
     const title = panels[embeddableId].explicitInput.title;
 
-    const dragHandle = (
+    const dragHandle = isEditable ? (
       <button
         ref={dragHandleRef}
         {...dragHandleProps}
@@ -84,7 +85,9 @@ const SortableControlInner = forwardRef<
       >
         <EuiIcon type="grabHorizontal" />
       </button>
-    );
+    ) : controlStyle === 'oneLine' ? (
+      <EuiIcon type="empty" size="s" />
+    ) : undefined;
 
     return (
       <EuiFlexItem
@@ -108,7 +111,7 @@ const SortableControlInner = forwardRef<
           enableActions={draggingIndex === -1}
           embeddableId={embeddableId}
           embeddableType={embeddableType}
-          customPrepend={isEditable ? dragHandle : undefined}
+          customPrepend={dragHandle}
         />
       </EuiFlexItem>
     );

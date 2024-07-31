@@ -6,7 +6,7 @@
  */
 
 import { first } from 'lodash';
-import { TIMESTAMP_FIELD, CMDLINE_FIELD } from '../../../common/constants';
+import { TIMESTAMP_FIELD, SYSTEM_PROCESS_CMDLINE_FIELD } from '../../../common/constants';
 import {
   ProcessListAPIChartRequest,
   ProcessListAPIChartQueryAggregation,
@@ -19,6 +19,8 @@ export const getProcessListChart = async (
   search: ESSearchClient,
   { hostTerm, indexPattern, to, command }: ProcessListAPIChartRequest
 ) => {
+  const from = to - 60 * 15 * 1000; // 15 minutes
+
   const body = {
     size: 0,
     query: {
@@ -27,7 +29,7 @@ export const getProcessListChart = async (
           {
             range: {
               [TIMESTAMP_FIELD]: {
-                gte: to - 60 * 1000, // 1 minute
+                gte: from,
                 lte: to,
                 format: 'epoch_millis',
               },
@@ -46,7 +48,7 @@ export const getProcessListChart = async (
             must: [
               {
                 match: {
-                  [CMDLINE_FIELD]: command,
+                  [SYSTEM_PROCESS_CMDLINE_FIELD]: command,
                 },
               },
             ],
@@ -55,7 +57,7 @@ export const getProcessListChart = async (
         aggs: {
           filteredProc: {
             terms: {
-              field: CMDLINE_FIELD,
+              field: SYSTEM_PROCESS_CMDLINE_FIELD,
               size: 1,
             },
             aggs: {
@@ -64,7 +66,7 @@ export const getProcessListChart = async (
                   field: TIMESTAMP_FIELD,
                   fixed_interval: '1m',
                   extended_bounds: {
-                    min: to - 60 * 15 * 1000, // 15 minutes,
+                    min: from,
                     max: to,
                   },
                 },

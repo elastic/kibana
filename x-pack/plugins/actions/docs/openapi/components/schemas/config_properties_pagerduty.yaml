@@ -4,8 +4,6 @@ type: object
 properties:
   apiUrl:
     description: The PagerDuty event URL.
-    type:
-      - "string"
-      - "null"
-    examples:
-      - https://events.pagerduty.com/v2/enqueue
+    type: string
+    nullable: true
+    example: https://events.pagerduty.com/v2/enqueue

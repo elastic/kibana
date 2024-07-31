@@ -69,8 +69,9 @@ describe('GET /api/saved_objects/_find with allowApiAccess true', () => {
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
+    const access = 'public';
 
-    registerFindRoute(router, { config, coreUsageData, logger });
+    registerFindRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

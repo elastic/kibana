@@ -24,6 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { MAX_FLYOUT_WIDTH } from '../../../constants';
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
@@ -71,7 +72,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       `?apiVersion=${API_VERSIONS.public.v1}`;
 
     return (
-      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerAgentPolicyYamlFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">

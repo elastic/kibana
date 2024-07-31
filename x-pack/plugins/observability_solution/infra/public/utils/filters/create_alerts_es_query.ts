@@ -8,7 +8,10 @@ import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { BoolQuery, buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryFields,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
 import { buildCombinedAssetFilter } from './build';
 import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
 
@@ -20,16 +23,18 @@ export const createAlertsEsQuery = ({
   dateRange,
   assetIds,
   status,
+  assetType,
 }: {
   dateRange: TimeRange;
   assetIds: string[];
   status?: AlertStatus;
+  assetType?: InventoryItemType;
 }): AlertsEsQuery => {
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
   const hostsFilter = buildCombinedAssetFilter({
-    field: findInventoryFields('host').id,
+    field: findInventoryFields(assetType ?? 'host').id,
     values: assetIds,
   });
 

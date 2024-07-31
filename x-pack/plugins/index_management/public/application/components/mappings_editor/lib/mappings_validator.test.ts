@@ -40,6 +40,7 @@ describe('Mappings configuration validator', () => {
       _size: {
         enabled: true,
       },
+      subobjects: true,
     };
 
     const { errors } = validateMappings(mappings, [MapperSizePluginId]);
@@ -59,6 +60,7 @@ describe('Mappings configuration validator', () => {
       },
       properties: { title: { type: 'text' } },
       dynamic_templates: [],
+      subobjects: true,
       unknown: 123,
     };
 
@@ -85,6 +87,7 @@ describe('Mappings configuration validator', () => {
       _size: {
         enabled: true,
       },
+      subobjects: true,
     };
 
     const { value, errors } = validateMappings(mappings, []);
@@ -93,6 +96,7 @@ describe('Mappings configuration validator', () => {
       dynamic: true,
       properties: {},
       dynamic_templates: [],
+      subobjects: true,
     });
 
     expect(errors).not.toBe(undefined);
@@ -309,6 +313,7 @@ describe('Properties validator', () => {
         depth_limit: true,
         dims: false,
         max_shingle_size: 'string_not_allowed',
+        subobjects: 'abc',
       },
       // All the parameters in "goodField" have the correct format
       // and should still be there after the validation ran.
@@ -361,6 +366,7 @@ describe('Properties validator', () => {
         depth_limit: 20,
         dims: 'abc',
         max_shingle_size: 2,
+        subobjects: true,
       },
       goodField2: {
         type: 'object',

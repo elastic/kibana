@@ -14,8 +14,8 @@ import { NotebookDefinition } from '@kbn/ipynb';
 
 import {
   NotebookCatalog,
+  NotebookCatalogResponse,
   NotebookInformation,
-  NotebookCatalogSchema,
   NotebookSchema,
 } from '../../common/types';
 
@@ -23,9 +23,10 @@ import type { SearchNotebooksConfig } from '../config';
 import type { NotebooksCache, RemoteNotebookCatalog } from '../types';
 import {
   cleanCachedNotebook,
-  cleanCachedNotebookCatalog,
   cleanNotebookMetadata,
   dateWithinTTL,
+  notebookCatalogResponse,
+  validateRemoteNotebookCatalog,
 } from '../utils';
 
 const NOTEBOOKS_DATA_DIR = '../data';
@@ -38,8 +39,10 @@ export interface NotebookCatalogFetchOptions {
   cache: NotebooksCache;
   config: SearchNotebooksConfig;
   logger: Logger;
+  notebookList?: string;
 }
 
+// Notebook catalog v1, leaving to ensure backward-compatibility
 export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
   notebooks: [
     {
@@ -102,26 +105,40 @@ export const DEFAULT_NOTEBOOKS: NotebookCatalog = {
     },
   ],
 };
+// Notebook catalog v1.1 with lists for contextual notebooks
+export const DEFAULT_NOTEBOOK_CATALOG: NotebookCatalog = {
+  notebooks: [...DEFAULT_NOTEBOOKS.notebooks],
+  lists: {
+    default: [
+      '00_quick_start',
+      '01_keyword_querying_filtering',
+      '02_hybrid_search',
+      '03_elser',
+      '04_multilingual',
+    ],
+  },
+};
 export const NOTEBOOKS_MAP: Record<string, NotebookInformation> =
-  DEFAULT_NOTEBOOKS.notebooks.reduce((nbMap, nb) => {
+  DEFAULT_NOTEBOOK_CATALOG.notebooks.reduce((nbMap, nb) => {
     nbMap[nb.id] = nb;
     return nbMap;
   }, {} as Record<string, NotebookInformation>);
 
-const NOTEBOOK_IDS = DEFAULT_NOTEBOOKS.notebooks.map(({ id }) => id);
+const NOTEBOOK_IDS = DEFAULT_NOTEBOOK_CATALOG.notebooks.map(({ id }) => id);
 
 export const getNotebookCatalog = async ({
   config,
   cache,
   logger,
-}: NotebookCatalogFetchOptions) => {
+  notebookList,
+}: NotebookCatalogFetchOptions): Promise<NotebookCatalogResponse> => {
   if (config.catalog && config.catalog.url) {
-    const catalog = await fetchNotebookCatalog(config.catalog, cache, logger);
+    const catalog = await fetchNotebookCatalog(config.catalog, cache, logger, notebookList);
     if (catalog) {
       return catalog;
     }
   }
-  return DEFAULT_NOTEBOOKS;
+  return notebookCatalogResponse(DEFAULT_NOTEBOOK_CATALOG, notebookList);
 };
 
 export const getNotebook = async (
@@ -179,19 +196,20 @@ type CatalogConfig = Readonly<{
 export const fetchNotebookCatalog = async (
   catalogConfig: CatalogConfig,
   cache: NotebooksCache,
-  logger: Logger
-): Promise<NotebookCatalog | null> => {
+  logger: Logger,
+  notebookList?: string
+): Promise<NotebookCatalogResponse | null> => {
   if (cache.catalog && dateWithinTTL(cache.catalog.timestamp, catalogConfig.ttl)) {
-    return cleanCachedNotebookCatalog(cache.catalog);
+    return notebookCatalogResponse(cache.catalog, notebookList);
   }
 
   try {
     const resp = await fetch(catalogConfig.url, FETCH_OPTIONS);
     if (resp.ok) {
       const respJson = await resp.json();
-      const catalog: RemoteNotebookCatalog = NotebookCatalogSchema.validate(respJson);
+      const catalog: RemoteNotebookCatalog = validateRemoteNotebookCatalog(respJson);
       cache.catalog = { ...catalog, timestamp: new Date() };
-      return cleanCachedNotebookCatalog(cache.catalog);
+      return notebookCatalogResponse(cache.catalog, notebookList);
     } else {
       throw new Error(`Failed to fetch notebook ${resp.status} ${resp.statusText}`);
     }
@@ -203,7 +221,7 @@ export const fetchNotebookCatalog = async (
     if (cache.catalog && dateWithinTTL(cache.catalog.timestamp, catalogConfig.errorTTL)) {
       // If we can't fetch the catalog but we have it cached and it's within the error TTL,
       // returned the cached value.
-      return cleanCachedNotebookCatalog(cache.catalog);
+      return notebookCatalogResponse(cache.catalog, notebookList);
     }
   }
 

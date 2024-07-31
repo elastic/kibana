@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
 import type {
+  AuthenticatedUser,
   KibanaRequest,
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -24,8 +25,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
@@ -133,6 +132,7 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -242,6 +242,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       await requireUniqueName(soClient, enrichedPackagePolicy);
+    }
+    if (enrichedPackagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: enrichedPackagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -726,7 +732,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
@@ -737,6 +743,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      namespaces: options.spaceId ? [options.spaceId] : undefined,
     });
 
     for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
@@ -752,6 +759,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
+        spaceId: packagePolicySO.namespaces?.[0],
       })),
       total: packagePolicies?.total,
       page,
@@ -844,6 +852,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       !options?.skipUniqueNameVerification
     ) {
       await requireUniqueName(soClient, enrichedPackagePolicy, id);
+    }
+
+    if (packagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: packagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     // eslint-disable-next-line prefer-const
@@ -1526,7 +1541,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ) {
     const updatePackagePolicy = updatePackageInputs(
       {
-        ...omit(packagePolicy, 'id'),
+        ...omit(packagePolicy, 'id', 'spaceId'),
         inputs: packagePolicy.inputs,
         package: {
           ...packagePolicy.package!,
@@ -1611,7 +1626,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     const updatedPackagePolicy = updatePackageInputs(
       {
-        ...omit(packagePolicy, 'id'),
+        ...omit(packagePolicy, 'id', 'spaceId'),
         inputs: packagePolicy.inputs,
         package: {
           ...packagePolicy.package!,
@@ -1677,7 +1692,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         .info(
           `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'}`
         );
-      appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
     }
   }
 
@@ -1866,6 +1881,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 const omitted = {
                   ...omit(result, [
                     'id',
+                    'spaceId',
                     'version',
                     'revision',
                     'updated_at',
@@ -2715,9 +2731,10 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             appContextService
               .getLogger()
               .debug(
-                `Rejecting package policy update due to dataset change, old val '${
-                  oldStream?.vars[DATASET_VAR_NAME]?.value
-                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
+                () =>
+                  `Rejecting package policy update due to dataset change, old val '${
+                    oldStream.vars![DATASET_VAR_NAME].value
+                  }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
@@ -2744,7 +2761,10 @@ async function validateIsNotHostedPolicy(
     throw new AgentPolicyNotFoundError('Agent policy not found');
   }
 
-  if (agentPolicy.is_managed && !force) {
+  const isManagedPolicyWithoutServerlessSupport =
+    agentPolicy.is_managed && !agentPolicy.supports_agentless && !force;
+
+  if (isManagedPolicyWithoutServerlessSupport) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
     );
@@ -2777,7 +2797,7 @@ export function sendUpdatePackagePolicyTelemetryEvent(
           upgradeTelemetry
         );
         appContextService.getLogger().info(`Package policy upgraded successfully`);
-        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+        appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
       }
     }
   });

@@ -279,7 +279,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                             >
                               <input
                                 aria-describedby="generated-id-help-0"
-                                class="euiFieldText euiFieldText--compressed"
+                                class="euiFieldText emotion-euiFieldText-compressed"
                                 id="generated-id"
                                 type="text"
                                 value="5s"

@@ -137,7 +137,7 @@ export const useCloudPostureDataTable = ({
   return {
     setUrlQuery,
     sort: urlQuery.sort,
-    filters: urlQuery.filters,
+    filters: urlQuery.filters || [],
     query: baseEsQuery.query
       ? baseEsQuery.query
       : {

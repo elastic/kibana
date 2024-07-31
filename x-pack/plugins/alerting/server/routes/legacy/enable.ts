@@ -30,6 +30,11 @@ export const enableAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Enable an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
@@ -41,7 +46,7 @@ export const enableAlertRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         try {
-          await rulesClient.enable({ id });
+          await rulesClient.enableRule({ id });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

@@ -68,8 +68,8 @@ export const getChangePointChartEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     ChangePointEmbeddableState,
-    ChangePointEmbeddableApi,
-    ChangePointEmbeddableRuntimeState
+    ChangePointEmbeddableRuntimeState,
+    ChangePointEmbeddableApi
   > = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
     deserializeState: (state) => {

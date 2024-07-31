@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useMemo } from 'react';
 import createContainer from 'constate';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
@@ -22,17 +22,15 @@ export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderP
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const { sourceId } = useSourceContext();
 
+  const timeRange = useMemo(() => getDateRangeInTimestamp(), [getDateRangeInTimestamp]);
+
   const { loading, error, metadata, reload } = useMetadata({
     assetId,
     assetType,
     sourceId,
-    timeRange: getDateRangeInTimestamp(),
+    timeRange,
     request$,
   });
-
-  const refresh = useCallback(() => {
-    reload();
-  }, [reload]);
 
   useEffect(() => {
     if (metadata?.name) {
@@ -44,7 +42,7 @@ export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderP
     loading,
     error,
     metadata,
-    refresh,
+    refresh: reload,
   };
 }
 

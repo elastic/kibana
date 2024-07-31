@@ -335,7 +335,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         {packagePolicyCount > 0 && (
           <EuiFlexItem grow={false}>
             <EuiCheckbox
-              compressed
               labelProps={{
                 style: {
                   display: 'flex',

@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
-import { useRightPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
 
 const ContainerDiv = styled('div')`
@@ -40,7 +40,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
     dataAsNestedObject,
     refetchFlyoutData,
     scopeId,
-  } = useRightPanelContext();
+  } = useDocumentDetailsContext();
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
   const showHostIsolationPanelCallback = useCallback(

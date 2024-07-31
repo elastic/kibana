@@ -6,48 +6,55 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import React, { useState } from 'react';
+import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
 
 describe('UnifiedFieldList <FieldNameSearch />', () => {
-  it('should render correctly', async () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('should render correctly', () => {
     const props: FieldNameSearchProps = {
       nameFilter: '',
       onChange: jest.fn(),
       screenReaderDescriptionId: 'htmlId',
       'data-test-subj': 'searchInput',
     };
-    const wrapper = mountWithIntl(<FieldNameSearch {...props} />);
-    expect(wrapper.find('input').prop('aria-describedby')).toBe('htmlId');
-
-    act(() => {
-      wrapper.find('input').simulate('change', {
-        target: { value: 'hi' },
-      });
-    });
-
-    expect(props.onChange).toBeCalledWith('hi');
+    render(<FieldNameSearch {...props} />);
+    const input = screen.getByRole('searchbox', { name: 'Search field names' });
+    expect(input).toHaveAttribute('aria-describedby', 'htmlId');
+    userEvent.type(input, 'hey');
+    jest.advanceTimersByTime(256);
+    expect(props.onChange).toHaveBeenCalledWith('hey');
+    expect(props.onChange).toBeCalledTimes(1);
   });
 
-  it('should update correctly', async () => {
-    const props: FieldNameSearchProps = {
-      nameFilter: 'this',
-      onChange: jest.fn(),
-      screenReaderDescriptionId: 'htmlId',
-      'data-test-subj': 'searchInput',
+  it('should accept the updates from the top', () => {
+    const FieldNameSearchWithWrapper = ({ defaultNameFilter = '' }) => {
+      const [nameFilter, setNameFilter] = useState(defaultNameFilter);
+      const props: FieldNameSearchProps = {
+        nameFilter,
+        onChange: jest.fn(),
+        screenReaderDescriptionId: 'htmlId',
+        'data-test-subj': 'searchInput',
+      };
+      return (
+        <div>
+          <button onClick={() => setNameFilter('that')}>update nameFilter</button>
+          <FieldNameSearch {...props} />
+        </div>
+      );
     };
-    const wrapper = mountWithIntl(<FieldNameSearch {...props} />);
-
-    expect(wrapper.find('input').prop('value')).toBe('this');
-
-    wrapper.setProps({
-      nameFilter: 'that',
-    });
-
-    expect(wrapper.find('input').prop('value')).toBe('that');
-
-    expect(props.onChange).not.toBeCalled();
+    render(<FieldNameSearchWithWrapper defaultNameFilter="this" />);
+    expect(screen.getByRole('searchbox')).toHaveValue('this');
+    const button = screen.getByRole('button', { name: 'update nameFilter' });
+    userEvent.click(button);
+    expect(screen.getByRole('searchbox')).toHaveValue('that');
   });
 });

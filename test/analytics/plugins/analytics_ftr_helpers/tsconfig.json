@@ -15,8 +15,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/analytics-client",
     "@kbn/std",
     "@kbn/config-schema",
+    "@kbn/ebt",
   ]
 }

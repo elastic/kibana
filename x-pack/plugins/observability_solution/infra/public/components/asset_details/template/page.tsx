@@ -8,11 +8,10 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
@@ -28,7 +27,6 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { actionMenuHeight } = useKibanaHeader();
   const trackOnlyOnce = React.useRef(false);
 
   const { activeTabId } = useTabSwitcherContext();
@@ -80,11 +78,6 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     }
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
-  const heightWithOffset = useMemo(
-    () => `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
-    [actionMenuHeight]
-  );
-
   return (
     <PageTemplate
       pageHeader={{
@@ -100,7 +93,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         <EuiFlexGroup
           direction="column"
           css={css`
-            height: ${heightWithOffset};
+            height: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
           `}
         >
           <InfraLoadingPanel

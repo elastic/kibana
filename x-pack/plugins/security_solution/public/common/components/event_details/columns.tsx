@@ -6,10 +6,10 @@
  */
 
 import { EuiPanel, EuiText } from '@elastic/eui';
-import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import type { BrowserFields } from '../../containers/source';
 import * as i18n from './translations';
@@ -35,9 +35,12 @@ const HoverActionsContainer = styled(EuiPanel)`
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 export const getFieldFromBrowserField = memoizeOne(
-  (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>
-    get(browserFields, keys),
-  (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
+  (field: string, browserFields: BrowserFields): BrowserField | undefined => {
+    const category = getCategory(field);
+
+    return browserFields[category]?.fields?.[field] as BrowserField;
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
 export const getColumns: ColumnsProvider = ({
@@ -106,10 +109,7 @@ export const getColumns: ColumnsProvider = ({
     sortable: true,
     truncateText: false,
     render: (values, data) => {
-      const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category as string, 'fields', data.field],
-        browserFields
-      );
+      const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
       return (
         <FieldValueCell
           contextId={contextId}

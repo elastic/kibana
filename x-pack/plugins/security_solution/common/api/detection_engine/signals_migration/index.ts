@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './create_signals_migration/create_signals_migration_route';
-export * from './delete_signals_migration/delete_signals_migration_route';
-export * from './finalize_signals_migration/finalize_signals_migration_route';
-export * from './get_signals_migration_status/get_signals_migration_status_route';
+export * from './create_signals_migration/create_signals_migration.gen';
+export * from './delete_signals_migration/delete_signals_migration.gen';
+export * from './finalize_signals_migration/finalize_signals_migration.gen';
+export * from './get_signals_migration_status/get_signals_migration_status.gen';

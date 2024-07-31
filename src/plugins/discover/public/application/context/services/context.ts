@@ -58,7 +58,7 @@ export async function fetchSurroundingDocs(
   rows: DataTableRecord[];
   interceptedWarnings: SearchResponseWarning[] | undefined;
 }> {
-  if (typeof anchor !== 'object' || anchor === null || !size) {
+  if (typeof anchor !== 'object' || anchor === null || !anchor.raw._id || !size) {
     return {
       rows: [],
       interceptedWarnings: undefined,
@@ -71,10 +71,11 @@ export async function fetchSurroundingDocs(
   const anchorRaw = anchor.raw!;
 
   const nanos = dataView.isTimeNanosBased() ? extractNanos(anchorRaw.fields?.[timeField][0]) : '';
-  const timeValueMillis =
-    nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
+  const timeValueMillis = convertIsoToMillis(
+    nanos !== '' ? anchorRaw.fields?.[timeField][0] : anchorRaw.sort?.[0]
+  );
 
-  const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
+  const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis, type, sortDir);
   let rows: DataTableRecord[] = [];
   let interceptedWarnings: SearchResponseWarning[] = [];
 

@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     const {
       body: { saved_objects: savedObjects },
     } = await supertest
-      .get('/api/saved_objects/_find?type=usage-counters')
+      .get('/api/saved_objects/_find?type=usage-counter')
       .set('kbn-xsrf', 'kibana')
       .expect(200);
 
@@ -51,7 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
     counterType: UiCounterMetricType
   ): UsageCountersSavedObject[] => {
     const matchingEventName = savedObjects.filter(
-      ({ attributes }) => attributes.counterName === `${APP_NAME}:${eventName}`
+      ({ attributes: { domainId, counterName } }) =>
+        domainId === APP_NAME && counterName === eventName
     );
     if (!matchingEventName.length) {
       throw new Error(

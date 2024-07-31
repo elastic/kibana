@@ -8,7 +8,7 @@ Retrieves information about <<action-types,connectors>>.
 
 In particular, only the connectors that are supported for use in cases are
 returned. Refer to the list of supported external incident management systems in
-<<add-case-connectors>>.
+<<case-connectors>>.
 
 [NOTE]
 ====

@@ -369,6 +369,20 @@ describe('fleet usage telemetry', () => {
       ],
     });
 
+    await soClient.create('ingest-package-policies', {
+      name: 'nginx-1',
+      namespace: 'default',
+      package: {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.0.0',
+      },
+      enabled: true,
+      policy_id: 'policy2',
+      policy_ids: ['policy2', 'policy3'],
+      inputs: [],
+    });
+
     await soClient.create(
       'ingest-outputs',
       {
@@ -428,6 +442,10 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output2',
         monitoring_output_id: 'output3',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy2' }
     );
@@ -446,6 +464,10 @@ describe('fleet usage telemetry', () => {
         schema_version: '1.0.0',
         data_output_id: 'output4',
         monitoring_output_id: 'output4',
+        global_data_tags: [
+          { name: 'test', value: 'test1' },
+          { name: 'test2', value: 'test2' },
+        ],
       },
       { id: 'policy3' }
     );
@@ -566,6 +588,8 @@ describe('fleet usage telemetry', () => {
         agent_policies: {
           count: 3,
           output_types: expect.arrayContaining(['elasticsearch', 'logstash', 'third_type']),
+          count_with_global_data_tags: 2,
+          avg_number_global_data_tags_per_policy: 2,
         },
         agent_logs_panics_last_hour: [
           {
@@ -583,6 +607,19 @@ describe('fleet usage telemetry', () => {
           'this should not be included in metrics',
         ],
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        integrations_details: [
+          {
+            total_integration_policies: 2,
+            shared_integration_policies: 1,
+            shared_integrations: {
+              agents: undefined,
+              name: 'nginx-1',
+              pkg_name: 'nginx',
+              pkg_version: '1.0.0',
+              shared_by_agent_policies: 2,
+            },
+          },
+        ],
       })
     );
     expect(usage?.upgrade_details.length).toBe(3);

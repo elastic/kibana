@@ -31,6 +31,7 @@ export const getImageEmbeddableFactory = ({
 }) => {
   const imageEmbeddableFactory: ReactEmbeddableFactory<
     ImageEmbeddableSerializedState,
+    ImageEmbeddableSerializedState,
     ImageEmbeddableApi
   > = {
     type: IMAGE_EMBEDDABLE_TYPE,

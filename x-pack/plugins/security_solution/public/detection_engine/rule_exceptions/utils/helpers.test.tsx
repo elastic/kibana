@@ -49,6 +49,8 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
 import { AGENT_ID } from './highlighted_fields_config';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
+
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
@@ -1796,17 +1798,17 @@ describe('Exception helpers', () => {
           id: 'host.name',
         },
         {
-          id: 'agent.id',
+          id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.endpoint,
           label: 'Agent status',
           overrideField: 'agent.status',
         },
         {
-          id: 'observer.serial_number',
+          id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
           overrideField: 'agent.status',
           label: 'Agent status',
         },
         {
-          id: 'crowdstrike.event.DeviceId',
+          id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
           overrideField: 'agent.status',
           label: 'Agent status',
         },

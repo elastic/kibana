@@ -29,7 +29,7 @@ export async function getNonAggregatableDataStreams({
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   const response = await datasetQualityESClient.fieldCaps({
-    index: dataStream ?? `${type}-*`,
+    index: dataStream ?? `${type}-*-*`,
     fields: [_IGNORED],
     index_filter: {
       ...rangeQuery(start, end)[0],

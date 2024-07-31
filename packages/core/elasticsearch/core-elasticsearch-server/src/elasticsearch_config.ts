@@ -151,10 +151,10 @@ export interface IElasticsearchConfig {
   readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 
   /**
-   * The maximum number of seconds to retain the DNS lookup resolutions.
+   * The maximum time to retain the DNS lookup resolutions.
    * Set to 0 to disable the cache (default Node.js behavior)
    */
-  readonly dnsCacheTtlInSeconds: number;
+  readonly dnsCacheTtl: Duration;
 }
 
 /**

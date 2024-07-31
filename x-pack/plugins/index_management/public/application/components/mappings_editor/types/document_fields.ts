@@ -7,6 +7,8 @@
 
 import { ReactNode } from 'react';
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ModelConfig } from '@kbn/inference_integration_flyout';
 import { GenericObject } from './mappings_editor';
 
 import { PARAMETERS_DEFINITION } from '../constants';
@@ -164,7 +166,8 @@ export type ParameterName =
   | 'value'
   | 'meta'
   | 'time_series_metric'
-  | 'time_series_dimension';
+  | 'time_series_dimension'
+  | 'subobjects';
 
 export interface Parameter {
   fieldConfig: FieldConfig;
@@ -183,9 +186,6 @@ interface FieldBasic {
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
-  referenceField?: string;
-  inferenceId?: string;
-  inference_id?: string;
 
   // other* exist together as a holder of types that the mappings editor does not yet know about but
   // enables the user to create mappings with them.
@@ -193,10 +193,12 @@ interface FieldBasic {
 }
 
 type FieldParams = {
-  [K in ParameterName]: typeof PARAMETERS_DEFINITION[K]['fieldConfig']['defaultValue'] | unknown;
+  [K in ParameterName]: (typeof PARAMETERS_DEFINITION)[K]['fieldConfig']['defaultValue'] | unknown;
 };
 
 export type Field = FieldBasic & Partial<FieldParams>;
+
+export type SemanticTextField = Field & { inference_id: string; reference_field: string };
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;
@@ -244,4 +246,17 @@ export interface NormalizedRuntimeField {
 
 export interface NormalizedRuntimeFields {
   [id: string]: NormalizedRuntimeField;
+}
+export enum DefaultInferenceModels {
+  elser_model_2 = 'elser_model_2',
+  e5 = 'e5',
+}
+
+export enum DeploymentState {
+  'DEPLOYED' = 'deployed',
+  'NOT_DEPLOYED' = 'not_deployed',
+}
+export interface CustomInferenceEndpointConfig {
+  taskType: InferenceTaskType;
+  modelConfig: ModelConfig;
 }

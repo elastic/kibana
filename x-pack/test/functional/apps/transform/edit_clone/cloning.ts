@@ -383,9 +383,9 @@ export default function ({ getService }: FtrProviderContext) {
           transformPreview: {
             column: 0,
             values: [
-              'July 12th 2019, 23:06:43',
-              'July 12th 2019, 23:31:12',
-              'July 12th 2019, 23:45:36',
+              'July 12th 2023, 23:06:43',
+              'July 12th 2023, 23:31:12',
+              'July 12th 2023, 23:45:36',
             ],
           },
           retentionPolicySwitchEnabled: false,

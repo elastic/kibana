@@ -25,7 +25,7 @@ import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
 import { getRootIntegrations } from '../../../../../../common/services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, INGEST_SAVED_OBJECT_INDEX } from '../../../constants';
 import {
   useAuthz,
   usePagination,
@@ -320,6 +320,8 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem grow={4}>
           <SearchBar
             value={search}
+            indexPattern={INGEST_SAVED_OBJECT_INDEX}
+            fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,
@@ -327,8 +329,6 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            indexPattern={`.${AGENT_POLICY_SAVED_OBJECT_TYPE}`}
-            fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
             dataTestSubj="agentPolicyList.queryInput"
           />
         </EuiFlexItem>

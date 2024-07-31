@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetSignalsMigrationStatusSchema } from './get_signals_migration_status_route';
+import type { GetAlertsMigrationStatusRequestQuery } from './get_signals_migration_status.gen';
 
-export const getSignalsMigrationStatusSchemaMock = (): GetSignalsMigrationStatusSchema => ({
+export const getSignalsMigrationStatusSchemaMock = (): GetAlertsMigrationStatusRequestQuery => ({
   from: 'now-30d',
 });

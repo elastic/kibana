@@ -567,7 +567,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     )}
                     iconType="boxesHorizontal"
                     color="text"
-                    onClick={setIsActionMenuOpen.bind(null, true)}
+                    onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
                   />
                 }
                 isOpen={isActionMenuOpen}

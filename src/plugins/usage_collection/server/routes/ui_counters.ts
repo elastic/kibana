@@ -7,15 +7,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, ISavedObjectsRepository } from '@kbn/core/server';
-import { storeReport, reportSchema } from '../report';
-import { UsageCounter } from '../usage_counters';
-import { UiCounters } from '../../common/types';
+import type { IRouter, ISavedObjectsRepository } from '@kbn/core/server';
+import { storeUiReport, reportSchema } from '../report';
+import type { UsageCountersServiceSetup } from '../usage_counters';
+import type { UiCounters } from '../../common/types';
 
 export function registerUiCountersRoute(
   router: IRouter,
   getSavedObjects: () => ISavedObjectsRepository | undefined,
-  uiCountersUsageCounter: UsageCounter
+  usageCountersServiceSetup: UsageCountersServiceSetup
 ) {
   router.post(
     {
@@ -33,7 +33,8 @@ export function registerUiCountersRoute(
         if (!internalRepository) {
           throw Error(`The saved objects client hasn't been initialised yet`);
         }
-        await storeReport(internalRepository, uiCountersUsageCounter, requestBody.report);
+        // we pass the whole usageCountersServiceSetup, so that we can create UI counters dynamically
+        await storeUiReport(internalRepository, usageCountersServiceSetup, requestBody.report);
         const bodyOk: UiCounters.v1.UiCountersResponseOk = {
           status: 'ok',
         };

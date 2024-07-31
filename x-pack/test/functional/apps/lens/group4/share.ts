@@ -61,12 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.isShareActionEnabled('link'));
     });
 
-    xit('should preserve filter and query when sharing', async () => {
+    it('should preserve filter and query when sharing', async () => {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-
+      await PageObjects.lens.save('new');
       const url = await PageObjects.lens.getUrl();
       await PageObjects.lens.closeShareModal();
       await browser.openNewTab();

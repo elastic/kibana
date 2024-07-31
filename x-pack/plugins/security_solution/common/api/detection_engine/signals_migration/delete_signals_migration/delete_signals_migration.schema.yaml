@@ -1,0 +1,102 @@
+openapi: 3.0.0
+info:
+  title: Alerts migration cleanup API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/migration:
+    delete:
+      x-labels: [ess]
+      operationId: AlertsMigrationCleanup
+      x-codegen-enabled: true
+      summary: Clean up detection alert migrations
+      description: |
+        Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+        the migration process. A successful migration will result in both the old and new indices being present.
+        As such, the old, orphaned index can (and likely should) be deleted.
+        
+        While you can delete these indices manually,
+        the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
+        after 30 days. It also deletes other artifacts specific to the migration implementation.
+      tags:
+        - Alerts migration API
+      requestBody:
+        description: Array of `migration_id`s to cleanup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                migration_ids:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+              required: [migration_ids]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MigrationCleanupResult'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    MigrationCleanupResult:
+      type: object
+      properties:
+        id:
+          type: string
+        destinationIndex:
+          type: string
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - pending
+        sourceIndex:
+          type: string
+        version:
+          type: string
+        updated:
+          type: string
+          format: date-time
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              type: integer
+          required: [message, status_code]
+      required:
+        - id
+        - destinationIndex
+        - status
+        - sourceIndex
+        - version
+        - updated

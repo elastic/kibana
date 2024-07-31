@@ -136,21 +136,18 @@ export const PageReduxStream: FC = () => {
           label="Simulate errors (gets applied to new streams only, not currently running ones)."
           checked={simulateErrors}
           onChange={(e) => dispatch(setSimulateErrors(!simulateErrors))}
-          compressed
         />
         <EuiCheckbox
           id="responseStreamCompressionCheckbox"
           label="Toggle compression setting for response stream."
           checked={compressResponse}
           onChange={(e) => dispatch(setCompressResponse(!compressResponse))}
-          compressed
         />
         <EuiCheckbox
           id="responseStreamFlushFixCheckbox"
           label="Toggle flushFix setting for response stream."
           checked={flushFix}
           onChange={(e) => dispatch(setFlushFix(!flushFix))}
-          compressed
         />
       </EuiText>
     </Page>

@@ -118,7 +118,9 @@ import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
 import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
+import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
   LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
@@ -1062,10 +1064,22 @@ export const getXyVisualization = ({
   getTelemetryEventsOnSave(state, prevState) {
     const dataLayers = getDataLayers(state.layers);
     const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
-    return dataLayers.flatMap((l) => {
+    const colorMappingEvents = dataLayers.flatMap((l) => {
       const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
       return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
     });
+    const legendStatsEvents = getLegendStatsTelemetryEvents(
+      state.legend.legendStats,
+      prevState ? prevState.legend.legendStats : undefined
+    );
+    return colorMappingEvents.concat(legendStatsEvents);
+  },
+
+  getRenderEventCounters(state) {
+    if (shouldDisplayTable(state.legend.legendStats ?? [])) {
+      return [`legend_stats`];
+    }
+    return [];
   },
 });
 

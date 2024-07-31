@@ -11,7 +11,6 @@ import { omit } from 'lodash/fp';
 
 import {
   eventCategory,
-  someField,
   timestamp,
 } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockPartitionedFieldMetadata } from '../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
@@ -38,11 +37,11 @@ describe('helpers', () => {
     });
 
     test('it returns false when `enrichedFieldMetadata` contains an @timestamp field', () => {
-      expect(showMissingTimestampCallout([timestamp, eventCategory, someField])).toBe(false);
+      expect(showMissingTimestampCallout([timestamp, eventCategory])).toBe(false);
     });
 
     test('it returns true when `enrichedFieldMetadata` does NOT contain an @timestamp field', () => {
-      expect(showMissingTimestampCallout([eventCategory, someField])).toBe(true);
+      expect(showMissingTimestampCallout([eventCategory])).toBe(true);
     });
   });
 

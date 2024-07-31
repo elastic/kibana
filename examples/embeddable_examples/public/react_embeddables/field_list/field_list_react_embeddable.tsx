@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
@@ -25,7 +25,12 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import { FieldListApi, Services, FieldListSerializedStateState } from './types';
+import {
+  FieldListApi,
+  Services,
+  FieldListSerializedStateState,
+  FieldListRuntimeState,
+} from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
@@ -46,6 +51,7 @@ export const getFieldListFactory = (
 ) => {
   const fieldListEmbeddableFactory: ReactEmbeddableFactory<
     FieldListSerializedStateState,
+    FieldListRuntimeState,
     FieldListApi
   > = {
     type: FIELD_LIST_ID,

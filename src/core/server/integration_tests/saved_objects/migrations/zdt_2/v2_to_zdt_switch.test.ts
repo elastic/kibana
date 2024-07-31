@@ -18,7 +18,7 @@ import {
   startElasticsearch,
   currentVersion,
 } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getSampleAType } from '../fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'v2_to_zdt_switch.test.log');
@@ -35,7 +35,6 @@ describe('ZDT upgrades - switching from v2 algorithm', () => {
 
   afterEach(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const createBaseline = async ({

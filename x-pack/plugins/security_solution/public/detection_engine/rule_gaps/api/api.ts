@@ -6,11 +6,43 @@
  */
 
 import {
-  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
   INTERNAL_ALERTING_BACKFILL_API_PATH,
+  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
+  INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
 } from '@kbn/alerting-plugin/common';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 import { KibanaServices } from '../../../common/lib/kibana';
+import type { ScheduleBackfillProps } from '../types';
+
+/**
+ * Schedule rules run over a specified time range
+ *
+ * @param ruleIds `rule_id`s of each rule to be backfilled
+ * @param timeRange the time range over which the backfill should apply
+ *
+ * @throws An error if response is not OK
+ */
+export const scheduleRuleRun = async ({
+  ruleIds,
+  timeRange,
+}: ScheduleBackfillProps): Promise<ScheduleBackfillResponseBody> => {
+  const params = ruleIds.map((ruleId) => {
+    return {
+      rule_id: ruleId,
+      start: timeRange.startDate.toISOString(),
+      end: timeRange.endDate.toISOString(),
+    };
+  });
+  return KibanaServices.get().http.fetch<ScheduleBackfillResponseBody>(
+    INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
+    {
+      method: 'POST',
+      version: '2023-10-31',
+      body: JSON.stringify(params),
+    }
+  );
+};
 
 /**
  * Find backfills for the given rule IDs

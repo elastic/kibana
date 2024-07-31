@@ -26,12 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Infra Side Navigation', () => {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
       await svlObltNavigation.navigateToLandingPage();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('when Hosts settings is on', () => {

@@ -16,7 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { EndpointAppContext } from '../../types';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
@@ -105,7 +105,12 @@ export class CheckMetadataTransformsTask {
     // Check that this task is current
     if (taskInstance.id !== this.getTaskId()) {
       // old task, die
-      throwUnrecoverableError(new Error('Outdated task version'));
+      this.logger.info(
+        `Outdated task version: Got [${
+          taskInstance.id
+        }] from task instance. Current version is [${this.getTaskId()}]`
+      );
+      return getDeleteTaskRunResult();
     }
 
     const [{ elasticsearch }] = await core.getStartServices();

@@ -6,19 +6,16 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   BulkUpdateRulesRequestBody,
   validateUpdateRuleProps,
   BulkCrudRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
 import {
   transformBulkError,
   buildSiemResponse,
@@ -99,11 +96,11 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await detectionRulesClient.updateRule({
+                const updatedRule = await detectionRulesClient.updateRule({
                   ruleUpdate: payloadRule,
                 });
 
-                return transformValidateBulkError(rule.id, rule);
+                return updatedRule;
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

@@ -123,8 +123,8 @@ export function getActions(
         ),
         type: 'icon',
         icon: 'indexEdit',
-        onClick: (item: FieldVisConfig) => {
-          dataViewEditorRef.current = services.dataViewFieldEditor?.openEditor({
+        onClick: async (item: FieldVisConfig) => {
+          dataViewEditorRef.current = await services.dataViewFieldEditor?.openEditor({
             ctx: { dataView },
             fieldName: item.fieldName,
             onSave: refreshPage,

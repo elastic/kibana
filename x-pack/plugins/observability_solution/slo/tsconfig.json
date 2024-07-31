@@ -17,7 +17,6 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
     "@kbn/core",
-    "@kbn/navigation-plugin",
     "@kbn/translations-plugin",
     "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin",
@@ -38,7 +37,6 @@
     "@kbn/cases-plugin",
     "@kbn/data-plugin",
     "@kbn/core-ui-settings-browser",
-    "@kbn/security-plugin",
     "@kbn/charts-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/serverless",
@@ -96,6 +94,8 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/core-application-browser",
-    "@kbn/core-theme-browser"
+    "@kbn/core-theme-browser",
+    "@kbn/ebt-tools",
+    "@kbn/observability-alerting-rule-utils"
   ]
 }

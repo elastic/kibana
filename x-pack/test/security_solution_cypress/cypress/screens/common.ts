@@ -10,3 +10,5 @@ export const TOOLTIP = '[role="tooltip"]';
 export const BASIC_TABLE_LOADING = '.euiBasicTable.euiBasicTable-loading';
 
 export const COMBO_BOX_OPTION = '.euiComboBoxOptionsList button[role="option"]';
+
+export const CODE_BLOCK = '.euiCodeBlock';

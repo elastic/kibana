@@ -34,7 +34,7 @@ import {
 describe(
   'Backfill groups',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -58,7 +58,7 @@ describe(
       interceptFindBackfills();
       goToExecutionLogTab();
 
-      cy.get(RULE_BACKFILLS_INFO_HEADEAR).contains('Backfill runs');
+      cy.get(RULE_BACKFILLS_INFO_HEADEAR).contains('Manual runs');
       getBackfillsTableRows().should('have.length', 2);
       getBackfillsTableRows().eq(0).contains('Pending');
       getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_ERROR).contains('1');
@@ -76,11 +76,11 @@ describe(
 
       getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_DELETE_BUTTON).click();
 
-      cy.get(RULE_BACKFILLS_DELETE_MODAL).contains('Are you sure you want to stop this run?');
+      cy.get(RULE_BACKFILLS_DELETE_MODAL).contains('Stop this rule run');
       interceptDeleteBackfill(FIRST_BACKFILL_ID, 'deleteBackfill');
       cy.get(RULE_BACKFILL_DELETE_MODAL_CONFIRM_BUTTON).click();
       cy.wait('@deleteBackfill');
-      cy.get(TOASTER).contains('Run stopped');
+      cy.get(TOASTER).contains('Rule run stopped');
     });
   }
 );

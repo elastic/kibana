@@ -14,7 +14,7 @@
     "@kbn/core",
     "@kbn/cloud-plugin",
     "@kbn/config-schema",
-    "@kbn/analytics-shippers-fullstory",
+    "@kbn/ebt",
   ],
   "exclude": [
     "target/**/*",

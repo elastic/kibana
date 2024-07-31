@@ -19,7 +19,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import styled from 'styled-components';
-import { useCapabilities } from '../../../hooks/use_capabilities';
+import { usePermissions } from '../../../hooks/use_permissions';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { BurnRateRuleParams } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
@@ -76,7 +76,7 @@ export function SloItemActions({
   } = useKibana().services;
   const executionContextName = executionContext.get().name;
   const isDashboardContext = executionContextName === 'dashboards';
-  const { hasWriteCapabilities } = useCapabilities();
+  const { data: permissions } = usePermissions();
   const navigateToClone = useCloneSlo();
 
   const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl, sloDetailsUrl } =
@@ -182,7 +182,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             href={sloEditUrl}
             target={isRemote ? '_blank' : undefined}
             toolTipContent={
@@ -198,7 +198,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="createRule"
             icon="bell"
-            disabled={!hasWriteCapabilities || isRemote}
+            disabled={!permissions?.hasAllWriteRequested || isRemote}
             onClick={handleCreateRule}
             data-test-subj="sloActionsCreateRule"
             toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
@@ -210,7 +210,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="manageRules"
             icon="gear"
-            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
             toolTipContent={
@@ -225,7 +225,7 @@ export function SloItemActions({
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
@@ -239,7 +239,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="delete"
             icon="trash"
-            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             onClick={handleDelete}
             toolTipContent={
               hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
@@ -253,7 +253,7 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="reset"
             icon="refresh"
-            disabled={!hasWriteCapabilities || hasUndefinedRemoteKibanaUrl}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             onClick={handleReset}
             toolTipContent={
               hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''

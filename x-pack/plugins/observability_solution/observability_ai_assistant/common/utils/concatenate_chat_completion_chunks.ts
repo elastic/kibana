@@ -31,6 +31,7 @@ export const concatenateChatCompletionChunks =
           acc.message.content += message.content ?? '';
           acc.message.function_call.name += message.function_call?.name ?? '';
           acc.message.function_call.arguments += message.function_call?.arguments ?? '';
+
           return cloneDeep(acc);
         },
         {
@@ -43,6 +44,6 @@ export const concatenateChatCompletionChunks =
             },
             role: MessageRole.Assistant,
           },
-        }
+        } as ConcatenatedMessage
       )
     );

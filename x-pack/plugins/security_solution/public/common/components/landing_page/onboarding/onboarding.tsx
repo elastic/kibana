@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AVCResultsBanner2024 } from '@kbn/avc-banner';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -57,8 +58,9 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const { wrapperStyles, progressSectionStyles, stepsSectionStyles } = useOnboardingStyles();
-  const { telemetry } = useKibana().services;
+  const { wrapperStyles, progressSectionStyles, stepsSectionStyles, bannerStyles } =
+    useOnboardingStyles();
+  const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(
     (params: OnboardingHubStepLinkClickedParams) => {
       telemetry.reportOnboardingHubStepLinkClicked(params);
@@ -66,6 +68,14 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     [telemetry]
   );
   const isDataIngestionHubEnabled = useIsExperimentalFeatureEnabled('dataIngestionHubEnabled');
+
+  const [showAVCBanner, setShowAVCBanner] = useState(
+    storage.get('securitySolution.showAvcBanner') ?? true
+  );
+  const onBannerDismiss = useCallback(() => {
+    setShowAVCBanner(false);
+    storage.set('securitySolution.showAvcBanner', false);
+  }, [storage]);
 
   useScrollToHash();
 
@@ -81,6 +91,11 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
 
   return (
     <div className={wrapperStyles}>
+      {showAVCBanner && (
+        <KibanaPageTemplate.Section paddingSize="none" className={bannerStyles}>
+          <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+        </KibanaPageTemplate.Section>
+      )}
       <KibanaPageTemplate.Section restrictWidth={CONTENT_WIDTH} paddingSize="xl">
         {renderDataIngestionHubHeader}
       </KibanaPageTemplate.Section>

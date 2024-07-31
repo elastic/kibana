@@ -224,9 +224,11 @@ export class ElasticsearchService
     });
   }
 
-  private getAgentManager({ dnsCacheTtlInSeconds }: ElasticsearchClientConfig): AgentManager {
+  private getAgentManager({ dnsCacheTtl }: ElasticsearchClientConfig): AgentManager {
     if (!this.agentManager) {
-      this.agentManager = new AgentManager(this.log.get('agent-manager'), { dnsCacheTtlInSeconds });
+      this.agentManager = new AgentManager(this.log.get('agent-manager'), {
+        dnsCacheTtlInSeconds: dnsCacheTtl?.asSeconds() ?? 0, // it should always exists, but some test shortcuts and mocks break this assumption
+      });
     }
     return this.agentManager;
   }

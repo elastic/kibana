@@ -77,7 +77,7 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
+import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const ES_HOST_FIELD = 'host.name';
@@ -226,7 +226,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 rightSideItems={[
                   hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
                     <ResponderActionButton
-                      endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                      agentId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
                       agentType="endpoint"
                     />
                   ),

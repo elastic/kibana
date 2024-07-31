@@ -16,7 +16,6 @@ import {
 import styled from 'styled-components';
 
 export const TabHeaderContainer = styled.div`
-  margin-top: ${(props) => props.theme.eui.euiSizeS};
   width: 100%;
 `;
 

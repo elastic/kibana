@@ -148,6 +148,7 @@ export class ReportingPublicPlugin
       id: 'reporting',
       title: this.title,
       order: 3,
+      keywords: ['reports', 'report', 'reporting'],
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[coreStart, startDeps], { mountManagementSection }] = await Promise.all([

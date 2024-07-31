@@ -7,9 +7,24 @@
 
 import * as rt from 'io-ts';
 
+const userPrivilegesRt = rt.type({
+  canMonitor: rt.boolean,
+});
+
+const datasetUserPrivilegesRt = rt.intersection([
+  userPrivilegesRt,
+  rt.type({
+    canRead: rt.boolean,
+    canViewIntegrations: rt.boolean,
+  }),
+]);
+
+export type DatasetUserPrivileges = rt.TypeOf<typeof datasetUserPrivilegesRt>;
+
 export const dataStreamStatRt = rt.intersection([
   rt.type({
     name: rt.string,
+    userPrivileges: userPrivilegesRt,
   }),
   rt.partial({
     size: rt.string,
@@ -27,14 +42,13 @@ export const dashboardRT = rt.type({
   title: rt.string,
 });
 
+export type Dashboard = rt.TypeOf<typeof dashboardRT>;
+
 export const integrationDashboardsRT = rt.type({
   dashboards: rt.array(dashboardRT),
 });
 
-export type IntegrationDashboards = rt.TypeOf<typeof integrationDashboardsRT>;
-export type Dashboard = rt.TypeOf<typeof dashboardRT>;
-
-export const getIntegrationDashboardsResponseRt = rt.exact(integrationDashboardsRT);
+export type IntegrationDashboardsResponse = rt.TypeOf<typeof integrationDashboardsRT>;
 
 export const integrationIconRt = rt.intersection([
   rt.type({
@@ -57,17 +71,18 @@ export const integrationRt = rt.intersection([
     version: rt.string,
     icons: rt.array(integrationIconRt),
     datasets: rt.record(rt.string, rt.string),
-    dashboards: rt.array(dashboardRT),
   }),
 ]);
 
-export type Integration = rt.TypeOf<typeof integrationRt>;
+export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
 export const getIntegrationsResponseRt = rt.exact(
   rt.type({
     integrations: rt.array(integrationRt),
   })
 );
+
+export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
@@ -100,6 +115,7 @@ export type DegradedFieldResponse = rt.TypeOf<typeof getDataStreamDegradedFields
 
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+  integration: rt.string,
 });
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
@@ -111,12 +127,14 @@ export const dataStreamDetailsRt = rt.partial({
   sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
+  userPrivileges: userPrivilegesRt,
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
 
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.type({
+    datasetUserPrivileges: datasetUserPrivilegesRt,
     dataStreamsStats: rt.array(dataStreamStatRt),
   })
 );

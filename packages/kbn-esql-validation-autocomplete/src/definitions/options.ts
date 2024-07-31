@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommandOption, ESQLMessage } from '@kbn/esql-ast';
-import { isLiteralItem, isColumnItem } from '../shared/helpers';
+import { isLiteralItem, isColumnItem, isInlineCastItem } from '../shared/helpers';
 import { getMessageFromId } from '../validation/errors';
 import type { CommandOptionsDefinition } from './types';
 
@@ -130,11 +130,12 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
       !Array.isArray(firstArg) &&
       (!isLiteralItem(firstArg) || firstArg.literalType !== 'string')
     ) {
-      const value = 'value' in firstArg ? firstArg.value : firstArg.name;
+      const value =
+        'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;
       messages.push(
         getMessageFromId({
           messageId: 'wrongDissectOptionArgumentType',
-          values: { value },
+          values: { value: value ?? '' },
           locations: firstArg.location,
         })
       );

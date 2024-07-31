@@ -13,5 +13,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        // disabling the monaco editor to run tests for ace
+        `--console.dev.enableMonaco=false`,
+      ],
+    },
   };
 }

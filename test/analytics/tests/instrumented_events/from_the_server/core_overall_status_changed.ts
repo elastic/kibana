@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Event } from '@kbn/analytics-client';
+import { Event } from '@kbn/core/server';
 import { FtrProviderContext } from '../../../services';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -9,16 +9,16 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
+  getSLOPipelineId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
-import { getTimesliceTargetComparator, getFilterRange } from './common';
+import { InvalidTransformError } from '../../errors';
+import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(
@@ -34,7 +34,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       this.buildTransformId(slo),
       this.buildDescription(slo),
       await this.buildSource(slo, slo.indicator, dataViewService),
-      this.buildDestination(),
+      this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
@@ -69,9 +69,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }

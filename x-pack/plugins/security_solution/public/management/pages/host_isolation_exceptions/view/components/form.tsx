@@ -25,11 +25,10 @@ import type {
 } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
-  getArtifactTagsByEffectedPolicySelection,
-  getArtifactTagsWithoutPolicies,
+  getArtifactTagsByPolicySelection,
   getEffectedPolicySelectionByTags,
-  isGlobalPolicyEffected,
-} from '../../../../components/effected_policy_select/utils';
+  isArtifactGlobal,
+} from '../../../../../../common/endpoint/service/artifacts';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,
@@ -71,7 +70,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const getTestId = useTestIdGenerator(testIdPrefix);
 
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isGlobalPolicyEffected(exception.tags),
+      isGlobal: isArtifactGlobal(exception),
       selected: [],
     });
 
@@ -139,13 +138,10 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
         }
 
         notifyOfChange({
-          tags: getArtifactTagsByEffectedPolicySelection(
-            selection,
-            getArtifactTagsWithoutPolicies(exception.tags)
-          ),
+          tags: getArtifactTagsByPolicySelection(selection),
         });
       },
-      [exception.tags, notifyOfChange]
+      [notifyOfChange]
     );
 
     const handleOnDescriptionChange = useCallback(

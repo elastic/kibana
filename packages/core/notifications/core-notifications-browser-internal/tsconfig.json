@@ -31,7 +31,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-analytics-browser",
     "@kbn/core-analytics-browser-mocks",
-    "@kbn/analytics-client",
+    "@kbn/ebt",
   ],
   "exclude": [
     "target/**/*",

@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
@@ -46,12 +47,14 @@ export interface NavigationPublicStart {
 
 export interface NavigationPublicSetupDependencies {
   cloud?: CloudSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cloud?: CloudStart;
   cloudExperiments?: CloudExperimentsPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type SolutionType = 'es' | 'oblt' | 'security' | 'analytics';

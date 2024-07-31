@@ -14,10 +14,11 @@ import {
   DegradedDocs,
   NonAggregatableDatasets,
   DegradedFieldResponse,
+  DatasetUserPrivileges,
 } from '../../../common/api_types';
-import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
+import { datasetQualityPrivileges } from '../../services';
 import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
@@ -39,6 +40,7 @@ const statsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
+    datasetUserPrivileges: DatasetUserPrivileges;
     dataStreamsStats: DataStreamStat[];
   }> {
     const { context, params, getEsCapabilities } = resources;
@@ -48,19 +50,24 @@ const statsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const [dataStreams, dataStreamsStats] = await Promise.all([
-      getDataStreams({
-        esClient,
-        ...params.query,
-        uncategorisedOnly: false,
-      }),
-      getDataStreamsStats({ esClient, sizeStatsAvailable, ...params.query }),
-    ]);
+    const { items, datasetUserPrivileges } = await getDataStreams({
+      esClient,
+      ...params.query,
+      uncategorisedOnly: false,
+    });
+
+    const privilegedDataStreams = items.filter((stream) => {
+      return stream.userPrivileges.canMonitor;
+    });
+    const dataStreamsStats = await getDataStreamsStats({
+      esClient,
+      dataStreams: privilegedDataStreams.map((stream) => stream.name),
+      sizeStatsAvailable,
+    });
 
     return {
-      dataStreamsStats: values(
-        merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
-      ),
+      datasetUserPrivileges,
+      dataStreamsStats: values(merge(keyBy(items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
     };
   },
 });
@@ -86,6 +93,12 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    await datasetQualityPrivileges.throwIfCannotReadDataset(
+      esClient,
+      params.query.type,
+      params.query.datasetQuery
+    );
 
     const degradedDocs = await getDegradedDocsPaginated({
       esClient,
@@ -117,6 +130,8 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
 
     return await getNonAggregatableDataStreams({
       esClient,
@@ -198,27 +213,16 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const { type, dataset, namespace } = indexNameToDataStreamParts(dataStream);
     const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const dataStreamDetails = await getDataStreamDetails({
+      esClient,
+      dataStream,
+      start,
+      end,
+      sizeStatsAvailable,
+    });
 
-    const [dataStreamsStats, dataStreamDetails] = await Promise.all([
-      getDataStreamsStats({
-        esClient,
-        type,
-        datasetQuery: `${dataset}-${namespace}`,
-        sizeStatsAvailable,
-      }),
-      getDataStreamDetails({ esClient, dataStream, start, end, sizeStatsAvailable }),
-    ]);
-
-    return {
-      docsCount: dataStreamDetails?.docsCount,
-      degradedDocsCount: dataStreamDetails?.degradedDocsCount,
-      services: dataStreamDetails?.services,
-      hosts: dataStreamDetails?.hosts,
-      sizeBytes: dataStreamDetails?.sizeBytes,
-      lastActivity: dataStreamsStats.items?.[0]?.lastActivity,
-    };
+    return dataStreamDetails;
   },
 });
 

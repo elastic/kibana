@@ -96,20 +96,46 @@ export type {
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
   AnalyticsClient,
+  AnalyticsClientInitContext,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  KbnAnalyticsWindowApi,
+  // Types for the registerShipper API
+  ShipperClassConstructor,
+  RegisterShipperOpts,
+  // Types for the optIn API
+  OptInConfig,
+  OptInConfigPerType,
+  ShipperName,
+  // Types for the registerContextProvider API
+  ContextProviderOpts,
+  ContextProviderName,
+  // Types for the registerEventType API
+  EventTypeOpts,
+  // Events
   Event,
   EventContext,
   EventType,
-  EventTypeOpts,
-  IShipper,
-  ShipperClassConstructor,
-  OptInConfig,
-  ContextProviderOpts,
   TelemetryCounter,
   TelemetryCounterType,
-} from '@kbn/analytics-client';
+  // Schema
+  RootSchema,
+  SchemaObject,
+  SchemaArray,
+  SchemaChildValue,
+  SchemaMeta,
+  SchemaValue,
+  SchemaMetaOptional,
+  PossibleSchemaTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaTypes,
+  // Shippers
+  IShipper,
+} from '@kbn/core-analytics-browser';
 
 export { AppStatus } from '@kbn/core-application-browser';
 export type {

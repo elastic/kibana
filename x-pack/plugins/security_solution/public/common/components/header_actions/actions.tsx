@@ -6,11 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { selectNotesByDocumentId } from '../../../notes/store/notes.slice';
+import type { State } from '../../store';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 import {
   eventHasNotes,
   getEventType,
@@ -18,7 +21,7 @@ import {
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { timelineActions } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -31,7 +34,6 @@ import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
 import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
@@ -40,15 +42,19 @@ import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const ActionsContainer = styled.div`
   align-items: center;
   display: flex;
 `;
 
+const emptyNotes: string[] = [];
+
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   columnValues,
+  disableExpandAction = false,
   ecsData,
   eventId,
   eventIdToNoteIds,
@@ -58,19 +64,16 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onRuleChange,
   showNotes,
   timelineId,
-  toggleShowNotes,
   refetch,
+  toggleShowNotes,
+  disablePinAction = true,
 }) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+
+  const { timelineType } = useShallowEqualSelector((state) =>
+    isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
-  const emptyNotes: string[] = [];
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const timelineType = useShallowEqualSelector(
-    (state) =>
-      (isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults).timelineType
-  );
+
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -212,15 +215,35 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
-  const showExpandEvent = useMemo(
-    () => !unifiedComponentsInTimelineEnabled || isEventViewer || timelineId !== TimelineId.active,
-    [isEventViewer, timelineId, unifiedComponentsInTimelineEnabled]
+
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
   );
 
+  /* only applicable for new event based notes */
+  const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
+
+  /* only applicable notes before event based notes */
+  const timelineNoteIds = useMemo(
+    () => eventIdToNoteIds?.[eventId] ?? emptyNotes,
+    [eventIdToNoteIds, eventId]
+  );
+
+  const notesCount = useMemo(
+    () => (securitySolutionNotesEnabled ? documentBasedNotes.length : timelineNoteIds.length),
+    [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]
+  );
+
+  const noteIds = useMemo(() => {
+    return securitySolutionNotesEnabled
+      ? documentBasedNotes.map((note) => note.noteId)
+      : timelineNoteIds;
+  }, [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled]);
+
   return (
-    <ActionsContainer>
+    <ActionsContainer data-test-subj="actions-container">
       <>
-        {showExpandEvent && (
+        {!disableExpandAction && (
           <GuidedOnboardingTourStep
             isTourAnchor={isTourAnchor}
             onClick={onExpandEvent}
@@ -251,26 +274,27 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
           )}
         </>
-        {!isEventViewer && toggleShowNotes && (
-          <>
-            <AddEventNoteAction
-              ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
-              key="add-event-note"
-              showNotes={showNotes ?? false}
-              toggleShowNotes={toggleShowNotes}
-              timelineType={timelineType}
-              eventId={eventId}
-            />
-            <PinEventAction
-              ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
-              isAlert={isAlert(eventType)}
-              key="pin-event"
-              onPinClicked={handlePinClicked}
-              noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
-              eventIsPinned={isEventPinned}
-              timelineType={timelineType}
-            />
-          </>
+        {!isEventViewer && showNotes && (
+          <AddEventNoteAction
+            ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
+            key="add-event-note"
+            timelineType={timelineType}
+            notesCount={notesCount}
+            eventId={eventId}
+            toggleShowNotes={toggleShowNotes}
+          />
+        )}
+
+        {!isEventViewer && !disablePinAction && (
+          <PinEventAction
+            ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+            isAlert={isAlert(eventType)}
+            key="pin-event"
+            onPinClicked={handlePinClicked}
+            noteIds={noteIds}
+            eventIsPinned={isEventPinned}
+            timelineType={timelineType}
+          />
         )}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}

@@ -41,13 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('search', function () {
-      const itemsPerPage = 25;
-
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await PageObjects.discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === itemsPerPage;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
       });
 
@@ -63,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
 
-        await PageObjects.discover.findFieldByNameInDocViewer('.s');
+        await PageObjects.discover.findFieldByNameInDocViewer('.sr');
 
         await retry.waitFor('second updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
@@ -72,7 +70,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to search by wildcard', async function () {
         await PageObjects.discover.findFieldByNameInDocViewer('relatedContent*image');
-
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
@@ -80,9 +77,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to search with spaces as wildcard', async function () {
         await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');
-
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
+        });
+      });
+
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.discover.findFieldByNameInDocViewer('rel4tedContent.art');
+
+        await retry.waitFor('updates', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
         });
       });
 
@@ -95,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // expect no changes in the list
         await retry.waitFor('all items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === itemsPerPage;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
       });
     });

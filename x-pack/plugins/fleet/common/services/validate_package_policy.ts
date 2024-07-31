@@ -56,7 +56,8 @@ export type PackagePolicyValidationResults = {
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  safeLoadYaml: (yaml: string) => any
+  safeLoadYaml: (yaml: string) => any,
+  spaceSettings?: { allowedNamespacePrefixes?: string[] }
 ): PackagePolicyValidationResults => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
@@ -75,7 +76,11 @@ export const validatePackagePolicy = (
   }
 
   if (packagePolicy?.namespace) {
-    const namespaceValidation = isValidNamespace(packagePolicy?.namespace, true);
+    const namespaceValidation = isValidNamespace(
+      packagePolicy?.namespace,
+      true,
+      spaceSettings?.allowedNamespacePrefixes
+    );
     if (!namespaceValidation.valid && namespaceValidation.error) {
       validationResults.namespace = [namespaceValidation.error];
     }

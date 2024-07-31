@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
@@ -29,6 +30,7 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
+import { SolutionView } from './solution_view';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -54,6 +56,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
+  solutionNavExperiment?: Promise<boolean>;
 }
 
 interface State {
@@ -61,12 +64,15 @@ interface State {
   features: KibanaFeature[];
   originalSpace?: Partial<Space>;
   showAlteringActiveSpaceDialog: boolean;
+  haveDisabledFeaturesChanged: boolean;
+  hasSolutionViewChanged: boolean;
   isLoading: boolean;
   saveInProgress: boolean;
   formError?: {
     isInvalid: boolean;
     error?: string;
   };
+  isSolutionNavEnabled: boolean;
 }
 
 export class ManageSpacePage extends Component<Props, State> {
@@ -83,6 +89,9 @@ export class ManageSpacePage extends Component<Props, State> {
         color: getSpaceColor({}),
       },
       features: [],
+      isSolutionNavEnabled: false,
+      haveDisabledFeaturesChanged: false,
+      hasSolutionViewChanged: false,
     };
   }
 
@@ -107,9 +116,38 @@ export class ManageSpacePage extends Component<Props, State> {
         }),
       });
     }
+
+    this.props.solutionNavExperiment?.then((isEnabled) => {
+      this.setState({ isSolutionNavEnabled: isEnabled });
+    });
   }
 
-  public async componentDidUpdate(previousProps: Props) {
+  public async componentDidUpdate(previousProps: Props, prevState: State) {
+    const { originalSpace, space } = this.state;
+
+    if (originalSpace && space) {
+      let haveDisabledFeaturesChanged = prevState.haveDisabledFeaturesChanged;
+      if (prevState.space.disabledFeatures !== space.disabledFeatures) {
+        haveDisabledFeaturesChanged =
+          space.disabledFeatures?.length !== originalSpace.disabledFeatures?.length ||
+          difference(space.disabledFeatures, originalSpace.disabledFeatures ?? []).length > 0;
+      }
+      const hasSolutionViewChanged =
+        originalSpace.solution !== undefined
+          ? space.solution !== originalSpace.solution
+          : !!space.solution && space.solution !== 'classic';
+
+      if (
+        prevState.haveDisabledFeaturesChanged !== haveDisabledFeaturesChanged ||
+        prevState.hasSolutionViewChanged !== hasSolutionViewChanged
+      ) {
+        this.setState({
+          haveDisabledFeaturesChanged,
+          hasSolutionViewChanged,
+        });
+      }
+    }
+
     if (this.props.spaceId !== previousProps.spaceId && this.props.spaceId) {
       await this.loadSpace(this.props.spaceId, Promise.resolve(this.state.features));
     }
@@ -161,6 +199,13 @@ export class ManageSpacePage extends Component<Props, State> {
           validator={this.validator}
         />
 
+        {this.state.isSolutionNavEnabled && (
+          <>
+            <EuiSpacer size="l" />
+            <SolutionView space={this.state.space} onChange={this.onSpaceChange} />
+          </>
+        )}
+
         {this.props.allowFeatureVisibility && (
           <>
             <EuiSpacer />
@@ -173,6 +218,8 @@ export class ManageSpacePage extends Component<Props, State> {
         )}
 
         <EuiSpacer />
+
+        {this.getChangeImpactWarning()}
 
         {this.getFormButtons()}
 
@@ -205,6 +252,31 @@ export class ManageSpacePage extends Component<Props, State> {
     );
   };
 
+  public getChangeImpactWarning = () => {
+    if (!this.editingExistingSpace()) return null;
+    const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
+    if (!haveDisabledFeaturesChanged && !hasSolutionViewChanged) return null;
+
+    return (
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={i18n.translate('xpack.spaces.management.manageSpacePage.userImpactWarningTitle', {
+            defaultMessage: 'Warning',
+          })}
+          data-test-subj="userImpactWarning"
+        >
+          <FormattedMessage
+            id="xpack.spaces.management.manageSpacePage.userImpactWarningDescription"
+            defaultMessage="The changes made will impact all users in the space."
+          />
+        </EuiCallOut>
+        <EuiSpacer />
+      </>
+    );
+  };
+
   public getFormButtons = () => {
     const createSpaceText = i18n.translate(
       'xpack.spaces.management.manageSpacePage.createSpaceButton',
@@ -228,6 +300,7 @@ export class ManageSpacePage extends Component<Props, State> {
     );
 
     const saveText = this.editingExistingSpace() ? updateSpaceText : createSpaceText;
+
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
@@ -280,6 +353,7 @@ export class ManageSpacePage extends Component<Props, State> {
 
     const originalSpace: Space = this.state.originalSpace as Space;
     const space: Space = this.state.space as Space;
+    const { haveDisabledFeaturesChanged, hasSolutionViewChanged } = this.state;
     const result = this.validator.validateForSave(space);
     if (result.isInvalid) {
       this.setState({
@@ -295,11 +369,7 @@ export class ManageSpacePage extends Component<Props, State> {
       spacesManager.getActiveSpace().then((activeSpace) => {
         const editingActiveSpace = activeSpace.id === originalSpace.id;
 
-        const haveDisabledFeaturesChanged =
-          space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
-          difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
-
-        if (editingActiveSpace && haveDisabledFeaturesChanged) {
+        if (editingActiveSpace && (haveDisabledFeaturesChanged || hasSolutionViewChanged)) {
           this.setState({
             showAlteringActiveSpaceDialog: true,
           });
@@ -369,6 +439,7 @@ export class ManageSpacePage extends Component<Props, State> {
       disabledFeatures = [],
       imageUrl,
       avatarType,
+      solution,
     } = this.state.space;
 
     const params = {
@@ -379,6 +450,7 @@ export class ManageSpacePage extends Component<Props, State> {
       color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
+      solution,
     };
 
     let action;

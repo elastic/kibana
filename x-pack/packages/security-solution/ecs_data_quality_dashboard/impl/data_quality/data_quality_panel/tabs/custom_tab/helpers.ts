@@ -19,26 +19,26 @@ import {
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
 import { getFillColor } from '../summary_tab/helpers';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import type { CustomFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 export const getCustomMarkdownComment = ({
-  enrichedFieldMetadata,
+  customFieldMetadata,
 }: {
-  enrichedFieldMetadata: EnrichedFieldMetadata[];
+  customFieldMetadata: CustomFieldMetadata[];
 }): string =>
   getMarkdownComment({
     suggestedAction: `${i18n.CUSTOM_CALLOUT({
-      fieldCount: enrichedFieldMetadata.length,
+      fieldCount: customFieldMetadata.length,
       version: EcsVersion,
     })}
 
 ${i18n.ECS_IS_A_PERMISSIVE_SCHEMA}
 `,
-    title: i18n.CUSTOM_CALLOUT_TITLE(enrichedFieldMetadata.length),
+    title: i18n.CUSTOM_CALLOUT_TITLE(customFieldMetadata.length),
   });
 
-export const showCustomCallout = (enrichedFieldMetadata: EnrichedFieldMetadata[]): boolean =>
-  enrichedFieldMetadata.length > 0;
+export const showCustomCallout = (customFieldMetadata: CustomFieldMetadata[]): boolean =>
+  customFieldMetadata.length > 0;
 
 export const getCustomColor = (partitionedFieldMetadata: PartitionedFieldMetadata): string =>
   showCustomCallout(partitionedFieldMetadata.custom)
@@ -80,7 +80,7 @@ export const getAllCustomMarkdownComments = ({
   }),
   getTabCountsMarkdownComment(partitionedFieldMetadata),
   getCustomMarkdownComment({
-    enrichedFieldMetadata: partitionedFieldMetadata.custom,
+    customFieldMetadata: partitionedFieldMetadata.custom,
   }),
   getMarkdownTable({
     enrichedFieldMetadata: partitionedFieldMetadata.custom,

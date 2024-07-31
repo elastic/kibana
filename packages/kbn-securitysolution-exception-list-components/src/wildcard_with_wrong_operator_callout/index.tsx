@@ -26,7 +26,7 @@ export const WildCardWithWrongOperatorCallout = () => {
       <p>
         <FormattedMessage
           id="exceptionList-components.wildcardWithWrongOperatorCallout.body"
-          defaultMessage="Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. {operator} to ''{matches}'' to ensure wildcards run properly."
+          defaultMessage='Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. {operator} to "{matches}" to ensure wildcards run properly.'
           values={{
             operator: (
               <strong>

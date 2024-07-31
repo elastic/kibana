@@ -22,26 +22,15 @@ import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import {
-  HOST_ENDPOINT_UNENROLLED_TOOLTIP,
-  LOADING_ENDPOINT_DATA_TOOLTIP,
-  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../endpoint_responder/translations';
-import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
-import type { HttpSetup } from '@kbn/core/public';
-import {
-  isAlertFromEndpointAlert,
-  isAlertFromEndpointEvent,
-} from '../../../common/utils/endpoint_alert_check';
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
-import { HostStatus } from '../../../../common/endpoint/types';
-import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
   ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
 } from '../../../common/components/toolbar/bulk_actions/translations';
 
+jest.mock('../../../common/components/endpoint/host_isolation');
+jest.mock('../../../common/components/endpoint/responder');
 jest.mock('../../../common/components/user_privileges');
 
 jest.mock('../user_info', () => ({
@@ -66,34 +55,18 @@ jest.mock('../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
 }));
 
-jest.mock('../../../common/utils/endpoint_alert_check', () => {
-  const realEndpointAlertCheckUtils = jest.requireActual(
-    '../../../common/utils/endpoint_alert_check'
-  );
-  return {
-    isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
-    isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
-    isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
-  };
-});
-
-jest.mock('../../../../common/endpoint/service/host_isolation/utils', () => {
-  return {
-    isIsolationSupported: jest.fn().mockReturnValue(true),
-  };
-});
-
-jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', () => {
-  return {
-    useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
-      loading: false,
-      isIsolated: false,
-      agentStatus: 'healthy',
-    }),
-  };
-});
-
-jest.mock('../../../common/components/user_privileges');
+jest.mock(
+  '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
+  () => {
+    return {
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
+        loading: false,
+        isIsolated: false,
+        agentStatus: 'healthy',
+      }),
+    };
+  }
+);
 
 describe('take action dropdown', () => {
   let defaultProps: TakeActionDropdownProps;
@@ -292,15 +265,15 @@ describe('take action dropdown', () => {
       }
     };
 
-    const setAlertDetailsDataMockToEndpointAgent = () => {
+    const setAgentTypeOnAlertDetailsDataMock = (agentType: string = 'endpoint') => {
       if (defaultProps.detailsData) {
         defaultProps.detailsData = defaultProps.detailsData.map((obj) => {
           if (obj.field === 'agent.type') {
             return {
               category: 'agent',
               field: 'agent.type',
-              values: ['endpoint'],
-              originalValue: ['endpoint'],
+              values: [agentType],
+              originalValue: [agentType],
             };
           }
           if (obj.field === 'agent.id') {
@@ -335,9 +308,32 @@ describe('take action dropdown', () => {
       }
     };
 
-    describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {
-      let wrapper: ReactWrapper;
+    let wrapper: ReactWrapper;
 
+    const render = (): ReactWrapper => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown {...defaultProps} />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+
+      return wrapper;
+    };
+
+    it('should include the Isolate/Release action', () => {
+      render();
+
+      expect(wrapper.exists('[data-test-subj="isolate-host-action-item"]')).toBe(true);
+    });
+
+    it('should include the Responder action', () => {
+      render();
+
+      expect(wrapper.exists('[data-test-subj="endpointResponseActions-action-item"]')).toBe(true);
+    });
+
+    describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {
       beforeEach(() => {
         setTypeOnEcsDataWithAgentType();
         setAlertDetailsDataMockToEvent();
@@ -348,12 +344,7 @@ describe('take action dropdown', () => {
           ...mockInitialUserPrivilegesState(),
           endpointPrivileges: { loading: false, canWriteEventFilters: true },
         });
-        wrapper = mount(
-          <TestProviders>
-            <TakeActionDropdown {...defaultProps} />
-          </TestProviders>
-        );
-        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+        render();
         await waitFor(() => {
           expect(
             wrapper.find('[data-test-subj="add-event-filter-menu-item"]').last().getDOMNode()
@@ -366,204 +357,18 @@ describe('take action dropdown', () => {
           ...mockInitialUserPrivilegesState(),
           endpointPrivileges: { loading: false, canWriteEventFilters: false },
         });
-        wrapper = mount(
-          <TestProviders>
-            <TakeActionDropdown {...defaultProps} />
-          </TestProviders>
-        );
-        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+        render();
         await waitFor(() => {
           expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
         });
       });
 
       test('should hide the "Add Endpoint event filter" button if provided no event from endpoint', async () => {
+        setAgentTypeOnAlertDetailsDataMock('filebeat');
         setTypeOnEcsDataWithAgentType('filebeat');
-
-        wrapper = mount(
-          <TestProviders>
-            <TakeActionDropdown {...defaultProps} />
-          </TestProviders>
-        );
-        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+        render();
         await waitFor(() => {
           expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
-        });
-      });
-    });
-
-    describe('should correctly enable/disable the "Isolate Host" button', () => {
-      let wrapper: ReactWrapper;
-
-      const render = (): ReactWrapper => {
-        wrapper = mount(
-          <TestProviders>
-            <TakeActionDropdown {...defaultProps} />
-          </TestProviders>
-        );
-        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
-
-        return wrapper;
-      };
-
-      const isolateHostButtonExists = (): ReturnType<typeof wrapper.exists> => {
-        return wrapper.exists('[data-test-subj="isolate-host-action-item"]');
-      };
-
-      beforeEach(() => {
-        setTypeOnEcsDataWithAgentType();
-      });
-
-      it('should show Isolate host button if user has "Host isolation" privileges set to all', async () => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
-          ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canIsolateHost: true },
-        });
-        render();
-
-        await waitFor(() => {
-          expect(isolateHostButtonExists()).toBeTruthy();
-        });
-      });
-      it('should hide Isolate host button if user has "Host isolation" privileges set to none', () => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
-          ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canIsolateHost: false },
-        });
-        render();
-
-        expect(isolateHostButtonExists()).toBeFalsy();
-      });
-    });
-
-    describe('should correctly enable/disable the "Respond" button', () => {
-      let wrapper: ReactWrapper;
-      let apiMocks: ReturnType<typeof endpointMetadataHttpMocks>;
-
-      const render = (): ReactWrapper => {
-        wrapper = mount(
-          <TestProviders>
-            <TakeActionDropdown {...defaultProps} />
-          </TestProviders>
-        );
-        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
-
-        return wrapper;
-      };
-
-      const findLaunchResponderButton = (): ReturnType<typeof wrapper.find> => {
-        return wrapper.find('[data-test-subj="endpointResponseActions-action-item"]');
-      };
-
-      beforeAll(() => {
-        // Un-Mock endpoint alert check hooks
-        const actualChecks = jest.requireActual('../../../common/utils/endpoint_alert_check');
-        (isAlertFromEndpointEvent as jest.Mock).mockImplementation(
-          actualChecks.isAlertFromEndpointEvent
-        );
-        (isAlertFromEndpointAlert as jest.Mock).mockImplementation(
-          actualChecks.isAlertFromEndpointAlert
-        );
-      });
-
-      afterAll(() => {
-        // Set the mock modules back to what they were
-        (isAlertFromEndpointEvent as jest.Mock).mockImplementation(() => true);
-        (isAlertFromEndpointAlert as jest.Mock).mockImplementation(() => true);
-      });
-
-      beforeEach(() => {
-        setTypeOnEcsDataWithAgentType();
-        apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
-      });
-
-      it('should not display the button if user is not allowed to write event filters', async () => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
-          ...mockInitialUserPrivilegesState(),
-          endpointPrivileges: { loading: false, canWriteEventFilters: false },
-        });
-        render();
-
-        expect(findLaunchResponderButton()).toHaveLength(0);
-      });
-
-      it('should not display the button for Events', async () => {
-        setAlertDetailsDataMockToEvent();
-        render();
-
-        expect(findLaunchResponderButton()).toHaveLength(0);
-      });
-
-      it('should enable button for non endpoint event type when defend integration present', async () => {
-        setTypeOnEcsDataWithAgentType('filebeat');
-        if (defaultProps.detailsData) {
-          defaultProps.detailsData = generateAlertDetailsDataMock() as TimelineEventsDetailsItem[];
-        }
-        render();
-
-        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-          LOADING_ENDPOINT_DATA_TOOLTIP
-        );
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
-          wrapper.update();
-
-          expect(findLaunchResponderButton().first().prop('disabled')).toBe(false);
-          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(undefined);
-        });
-      });
-
-      it('should disable the button for non endpoint event type when defend integration not present', async () => {
-        setAlertDetailsDataMockToEndpointAgent();
-        apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
-          const error: Error & { body?: { statusCode: number } } = new Error();
-          error.body = { statusCode: 404 };
-          throw error;
-        });
-        render();
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.metadataDetails).toThrow();
-          wrapper.update();
-
-          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-            NOT_FROM_ENDPOINT_HOST_TOOLTIP
-          );
-        });
-      });
-
-      it('should disable the button if host status is unenrolled', async () => {
-        setAlertDetailsDataMockToEndpointAgent();
-        const getApiResponse = apiMocks.responseProvider.metadataDetails.getMockImplementation();
-        apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
-          if (getApiResponse) {
-            return {
-              ...getApiResponse(),
-              metadata: {
-                ...getApiResponse().metadata,
-                Endpoint: {
-                  ...getApiResponse().metadata.Endpoint,
-                  capabilities: [...ENDPOINT_CAPABILITIES],
-                },
-              },
-              host_status: HostStatus.UNENROLLED,
-            };
-          }
-          throw new Error('some error');
-        });
-        render();
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
-          wrapper.update();
-
-          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
-          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
-            HOST_ENDPOINT_UNENROLLED_TOOLTIP
-          );
         });
       });
     });

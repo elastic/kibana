@@ -21,6 +21,7 @@ type CommonProps = Pick<
   | 'onCancel'
   | 'entityName'
   | 'customValidators'
+  | 'showActivityView'
 >;
 
 export type Props = CommonProps;

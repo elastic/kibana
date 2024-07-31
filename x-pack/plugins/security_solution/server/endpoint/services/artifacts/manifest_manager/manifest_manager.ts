@@ -189,7 +189,7 @@ export class ManifestManager {
     const exceptions: ExceptionListItemSchema[] =
       listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
 
-    return convertExceptionsToEndpointFormat(exceptions, schemaVersion);
+    return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
 
   /**

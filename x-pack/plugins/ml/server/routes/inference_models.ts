@@ -7,11 +7,13 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { RouteInitialization } from '../types';
 import { createInferenceSchema } from './schemas/inference_schema';
 import { modelsProvider } from '../models/model_management';
 import { wrapError } from '../client/error_wrapper';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { syncSavedObjectsFactory } from '../saved_objects';
 
 export function inferenceModelRoutes(
   { router, routeGuard }: RouteInitialization,
@@ -42,14 +44,54 @@ export function inferenceModelRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const { inferenceId, taskType } = request.params;
+            const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
+              inferenceId,
+              taskType as InferenceTaskType,
+              request.body as InferenceModelConfig
+            );
+            const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
+            await syncSavedObjects(false);
+            return response.ok({
+              body,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {put} /internal/ml/_inference/:taskType/:inferenceId Create Inference Endpoint
+   * @apiName CreateInferenceEndpoint
+   * @apiDescription Create Inference Endpoint
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {},
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
         try {
-          const { inferenceId, taskType } = request.params;
-          const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
-            inferenceId,
-            taskType as InferenceTaskType,
-            request.body as InferenceModelConfig
-          );
+          const body = await client.asCurrentUser.transport.request<{
+            models: InferenceAPIConfigResponse[];
+          }>({
+            method: 'GET',
+            path: `/_inference/_all`,
+          });
           return response.ok({
             body,
           });

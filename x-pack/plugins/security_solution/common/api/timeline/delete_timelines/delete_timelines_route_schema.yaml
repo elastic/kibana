@@ -16,7 +16,7 @@ paths:
   /api/timeline:
     delete:
       operationId: deleteTimelines
-      description: Deletes one or more timelines or timeline templates.
+      summary: Deletes one or more timelines or timeline templates.
       tags:
         - access:securitySolution
       requestBody:
@@ -33,12 +33,13 @@ paths:
                   type: array
                   items:
                     type: string
-                searchId:
+                searchIds:
                   type: array
+                  description: Saved search ids that should be deleted alongside the timelines 
                   items:
                     type: string
       responses:
-        200:
+        '200':
           description: Indicates the timeline was successfully deleted.
           content:
             application/json:

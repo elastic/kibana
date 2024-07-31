@@ -11,12 +11,12 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/analytics-client",
     "@kbn/ebt-tools",
     "@kbn/core-base-server-internal",
     "@kbn/core-analytics-server",
     "@kbn/config-mocks",
     "@kbn/core-base-server-mocks",
+    "@kbn/ebt",
   ],
   "exclude": [
     "target/**/*",

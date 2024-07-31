@@ -112,53 +112,10 @@ export const MISSING_VARIABLES = (variables: string[]) =>
     values: { variableCount: variables.length, variables: variables.join(', ') },
   });
 
-export const USERNAME_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.error.requiredAuthUserNameText',
-  {
-    defaultMessage: 'Username is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.error.requiredAuthPasswordText',
-  {
-    defaultMessage: 'Password is required.',
-  }
-);
-
 export const SUMMARY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredWebhookSummaryText',
   {
     defaultMessage: 'Title is required.',
-  }
-);
-
-export const KEY_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.keyTextFieldLabel',
-  {
-    defaultMessage: 'Key',
-  }
-);
-
-export const VALUE_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.valueTextFieldLabel',
-  {
-    defaultMessage: 'Value',
-  }
-);
-
-export const ADD_BUTTON = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.addHeaderButton',
-  {
-    defaultMessage: 'Add',
-  }
-);
-
-export const DELETE_BUTTON = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.deleteHeaderButton',
-  {
-    defaultMessage: 'Delete',
-    description: 'Delete HTTP header',
   }
 );
 
@@ -335,41 +292,6 @@ export const HAS_AUTH = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.hasAuthSwitchLabel',
   {
     defaultMessage: 'Require authentication for this webhook',
-  }
-);
-
-export const USERNAME = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.userTextFieldLabel',
-  {
-    defaultMessage: 'Username',
-  }
-);
-
-export const PASSWORD = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.passwordTextFieldLabel',
-  {
-    defaultMessage: 'Password',
-  }
-);
-
-export const HEADERS_SWITCH = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.viewHeadersSwitch',
-  {
-    defaultMessage: 'Add HTTP header',
-  }
-);
-
-export const HEADERS_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.httpHeadersTitle',
-  {
-    defaultMessage: 'Headers in use',
-  }
-);
-
-export const AUTH_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.casesWebhook.authenticationLabel',
-  {
-    defaultMessage: 'Authentication',
   }
 );
 

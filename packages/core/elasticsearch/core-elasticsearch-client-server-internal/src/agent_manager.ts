@@ -60,6 +60,9 @@ export class AgentManager implements AgentFactoryProvider, AgentStatsProvider {
     this.agents = new Set();
     // Use DNS caching to avoid too many repetitive (and CPU-blocking) dns.lookup calls
     if (options.dnsCacheTtlInSeconds > 0) {
+      this.logger.info(
+        `Caching ES host DNS resolutions for up to ${options.dnsCacheTtlInSeconds}s. If this causes problems, change the setting "elasticsearch.dnsCacheTtl: ${options.dnsCacheTtlInSeconds}s".`
+      );
       this.cacheableLookup = new CacheableLookup({
         maxTtl: options.dnsCacheTtlInSeconds,
       });

@@ -16,7 +16,7 @@ import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
 import { useRefetchByScope } from '../../../../timelines/components/side_panel/event_details/flyout/use_refetch_by_scope';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
@@ -33,7 +33,7 @@ export const AlertHeaderTitle = memo(() => {
     isPreview,
     refetchFlyoutData,
     getFieldsData,
-  } = useRightPanelContext();
+  } = useDocumentDetailsContext();
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );

@@ -6,9 +6,19 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { firstValueFrom, from, of, ReplaySubject, shareReplay, take } from 'rxjs';
+import {
+  firstValueFrom,
+  from,
+  of,
+  ReplaySubject,
+  shareReplay,
+  take,
+  combineLatest,
+  map,
+} from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
@@ -57,9 +67,10 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud, cloudExperiments } = depsStart;
+    const { unifiedSearch, cloud, cloudExperiments, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+    const activeSpace$ = spaces?.getActiveSpace$() ?? of(undefined);
 
     /*
      *
@@ -91,13 +102,19 @@ export class NavigationPublicPlugin
     }
 
     // Initialize the solution navigation if it is enabled
-    this.isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isEnabled) => {
-      this.initiateChromeStyleAndSideNav(chrome, { isFeatureEnabled: isEnabled, isServerless });
+    combineLatest([this.isSolutionNavExperiementEnabled$, activeSpace$])
+      .pipe(take(1))
+      .subscribe(([isEnabled, activeSpace]) => {
+        this.initiateChromeStyleAndSideNav(chrome, {
+          isFeatureEnabled: isEnabled,
+          isServerless,
+          activeSpace,
+        });
 
-      if (!isEnabled) return;
+        if (!isEnabled) return;
 
-      chrome.project.setCloudUrls(cloud!);
-    });
+        chrome.project.setCloudUrls(cloud!);
+      });
 
     return {
       ui: {
@@ -111,7 +128,14 @@ export class NavigationPublicPlugin
           this.addSolutionNavigation(solutionNavigation);
         });
       },
-      isSolutionNavEnabled$: this.isSolutionNavExperiementEnabled$,
+      isSolutionNavEnabled$: combineLatest([
+        this.isSolutionNavExperiementEnabled$,
+        activeSpace$,
+      ]).pipe(
+        map(([isFeatureEnabled, activeSpace]) => {
+          return getIsProjectNav(isFeatureEnabled, activeSpace?.solution) && !isServerless;
+        })
+      ),
     };
   }
 
@@ -154,25 +178,30 @@ export class NavigationPublicPlugin
 
   private initiateChromeStyleAndSideNav(
     chrome: InternalChromeStart,
-    { isFeatureEnabled, isServerless }: { isFeatureEnabled: boolean; isServerless: boolean }
+    {
+      isFeatureEnabled,
+      isServerless,
+      activeSpace,
+    }: { isFeatureEnabled: boolean; isServerless: boolean; activeSpace?: Space }
   ) {
-    // Here we will read the space state and decide if we are in classic or project style
-    const mockSpaceState: { solutionView?: 'classic' | 'es' | 'oblt' | 'security' } = {
-      solutionView: 'security', // Change this value to test different solution views
-    };
-
-    const isProjectNav =
-      isFeatureEnabled &&
-      Boolean(mockSpaceState.solutionView) &&
-      mockSpaceState.solutionView !== 'classic';
+    const solutionView = activeSpace?.solution;
+    const isProjectNav = getIsProjectNav(isFeatureEnabled, solutionView) && !isServerless;
 
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
       chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
     }
 
-    if (isProjectNav && mockSpaceState.solutionView) {
-      chrome.project.changeActiveSolutionNavigation(mockSpaceState.solutionView);
+    if (isProjectNav) {
+      chrome.project.changeActiveSolutionNavigation(solutionView!);
     }
   }
+}
+
+function getIsProjectNav(isFeatureEnabled: boolean, solutionView?: string) {
+  return isFeatureEnabled && Boolean(solutionView) && isKnownSolutionView(solutionView);
+}
+
+function isKnownSolutionView(solution?: string) {
+  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
 }

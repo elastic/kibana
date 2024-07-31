@@ -33,7 +33,14 @@ export interface SummaryResult {
   };
 }
 
-type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sli_value' | 'status';
+type SortField =
+  | 'error_budget_consumed'
+  | 'error_budget_remaining'
+  | 'sli_value'
+  | 'status'
+  | 'burn_rate_5m'
+  | 'burn_rate_1h'
+  | 'burn_rate_1d';
 
 export interface Sort {
   field: SortField;
@@ -158,6 +165,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               sliValue: toHighPrecision(doc._source.sliValue),
               status: summaryDoc.status,
               summaryUpdatedAt: summaryDoc.summaryUpdatedAt,
+              fiveMinuteBurnRate: toHighPrecision(summaryDoc.fiveMinuteBurnRate?.value ?? 0),
+              oneHourBurnRate: toHighPrecision(summaryDoc.oneHourBurnRate?.value ?? 0),
+              oneDayBurnRate: toHighPrecision(summaryDoc.oneDayBurnRate?.value ?? 0),
             },
             groupings: getFlattenedGroupings({
               groupings: summaryDoc.slo.groupings,
@@ -230,6 +240,12 @@ function toDocumentSortField(field: SortField) {
       return 'status';
     case 'sli_value':
       return 'sliValue';
+    case 'burn_rate_5m':
+      return 'fiveMinuteBurnRate.value';
+    case 'burn_rate_1h':
+      return 'oneHourBurnRate.value';
+    case 'burn_rate_1d':
+      return 'oneDayBurnRate.value';
     default:
       assertNever(field);
   }

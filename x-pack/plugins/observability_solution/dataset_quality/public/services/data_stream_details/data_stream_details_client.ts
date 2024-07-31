@@ -11,7 +11,10 @@ import {
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
+  getIntegrationsResponseRt,
+  IntegrationDashboardsResponse,
   integrationDashboardsRT,
+  IntegrationResponse,
 } from '../../../common/api_types';
 import {
   DataStreamDetails,
@@ -24,10 +27,11 @@ import {
   GetDataStreamSettingsResponse,
   GetDataStreamsStatsError,
   GetIntegrationDashboardsParams,
-  GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
 import { IDataStreamDetailsClient } from './types';
 import { GetDataStreamsDetailsError } from '../../../common/data_stream_details';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   constructor(private readonly http: HttpStart) {}
@@ -38,7 +42,10 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         `/internal/dataset_quality/data_streams/${dataStream}/settings`
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data stream settings": ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch data stream settings": ${error}`,
+          error.body.statusCode
+        );
       });
 
     const dataStreamSettings = decodeOrThrow(
@@ -59,7 +66,10 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch data stream details": ${error}`,
+          error.body.statusCode
+        );
       });
 
     const dataStreamDetails = decodeOrThrow(
@@ -85,7 +95,8 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       )
       .catch((error) => {
         throw new GetDataStreamsDetailsError(
-          `Failed to fetch data stream degraded fields": ${error}`
+          `Failed to fetch data stream degraded fields": ${error}`,
+          error.body.statusCode
         );
       });
 
@@ -100,14 +111,17 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
 
   public async getIntegrationDashboards({ integration }: GetIntegrationDashboardsParams) {
     const response = await this.http
-      .get<GetIntegrationDashboardsResponse>(
+      .get<IntegrationDashboardsResponse>(
         `/internal/dataset_quality/integrations/${integration}/dashboards`
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch integration dashboards": ${error}`);
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch integration dashboards": ${error}`,
+          error.body.statusCode
+        );
       });
 
-    const integrationDashboards = decodeOrThrow(
+    const { dashboards } = decodeOrThrow(
       integrationDashboardsRT,
       (message: string) =>
         new GetDataStreamsStatsError(
@@ -115,6 +129,32 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         )
     )(response);
 
-    return integrationDashboards;
+    return dashboards;
+  }
+
+  public async getDataStreamIntegration(
+    params: GetDataStreamIntegrationParams
+  ): Promise<Integration | undefined> {
+    const { type, integrationName } = params;
+    const response = await this.http
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
+        query: { type },
+      })
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch integrations: ${error}`,
+          error.body.statusCode
+        );
+      });
+
+    const { integrations } = decodeOrThrow(
+      getIntegrationsResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(`Failed to decode integrations response: ${message}`)
+    )(response);
+
+    const integration = integrations.find((i) => i.name === integrationName);
+
+    if (integration) return Integration.create(integration);
   }
 }

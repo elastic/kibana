@@ -133,6 +133,7 @@ const ExportContentUi = ({
                   iconType="copyClipboard"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
+                  data-share-url={absoluteUrl}
                 >
                   <FormattedMessage
                     id="share.modalContent.copyUrlButtonLabel"
@@ -217,7 +218,6 @@ const ExportContentUi = ({
   return (
     <>
       <EuiForm>
-        <EuiSpacer size="l" />
         <>{helpText}</>
         <EuiSpacer size="m" />
         <>{renderRadioOptions()}</>

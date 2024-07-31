@@ -5,18 +5,38 @@
  * 2.0.
  */
 
-import type { TopNFunctions } from '@kbn/profiling-utils';
 import React from 'react';
+import { css } from '@emotion/react';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import { EMBEDDABLE_FUNCTIONS } from '.';
-import { ProfilingEmbeddable } from './profiling_embeddable';
+import { getProfilingComponent } from '../helpers/component_registry';
 
 interface Props {
   data?: TopNFunctions;
   isLoading: boolean;
   rangeFrom: number;
   rangeTo: number;
+  height?: string;
+  showFullScreenSelector?: boolean;
 }
 
 export function EmbeddableFunctions(props: Props) {
-  return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FUNCTIONS} />;
+  const EmbeddableFunctionsComponent = getProfilingComponent<Props>(EMBEDDABLE_FUNCTIONS);
+  const { height } = props;
+  const heightSetting = height ? `height: ${height}` : 'min-height: 0';
+
+  return (
+    <div
+      css={css`
+        width: 100%;
+        ${heightSetting};
+        overflow: visible;
+        display: flex;
+        flex: 1 1 100%;
+        z-index: 1;
+      `}
+    >
+      {EmbeddableFunctionsComponent && <EmbeddableFunctionsComponent {...props} />}
+    </div>
+  );
 }

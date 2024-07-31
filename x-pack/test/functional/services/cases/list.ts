@@ -24,6 +24,7 @@ export function CasesTableServiceProvider(
   const browser = getService('browser');
   const retry = getService('retry');
   const config = getService('config');
+  const toasts = getService('toasts');
 
   const assertCaseExists = (index: number, totalCases: number) => {
     if (index > totalCases - 1) {
@@ -49,6 +50,7 @@ export function CasesTableServiceProvider(
     },
 
     async deleteCase(index: number = 0) {
+      await toasts.dismissAll();
       this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');

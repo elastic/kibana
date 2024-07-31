@@ -9,7 +9,9 @@
 import { SerializedPanelState } from './serialized_state';
 
 export interface HasSerializedChildState<SerializedState extends object = object> {
-  getSerializedStateForChild: (childId: string) => SerializedPanelState<SerializedState>;
+  getSerializedStateForChild: (
+    childId: string
+  ) => SerializedPanelState<SerializedState> | undefined;
 }
 
 export interface HasRuntimeChildState<RuntimeState extends object = object> {

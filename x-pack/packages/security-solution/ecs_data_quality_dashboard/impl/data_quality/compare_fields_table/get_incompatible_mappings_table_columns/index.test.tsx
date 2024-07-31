@@ -12,8 +12,8 @@ import React from 'react';
 import { SAME_FAMILY } from '../../data_quality_panel/same_family/translations';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { eventCategory } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { EnrichedFieldMetadata } from '../../types';
-import { EMPTY_PLACEHOLDER, getIncompatibleMappingsTableColumns } from '.';
+import { EcsBasedFieldMetadata } from '../../types';
+import { getIncompatibleMappingsTableColumns } from '.';
 
 describe('getIncompatibleMappingsTableColumns', () => {
   test('it returns the expected column configuration', () => {
@@ -65,19 +65,6 @@ describe('getIncompatibleMappingsTableColumns', () => {
 
       expect(screen.getByTestId('codeSuccess')).toHaveTextContent(expected);
     });
-
-    test('it renders an empty placeholder when type is undefined', () => {
-      const columns = getIncompatibleMappingsTableColumns();
-      const typeColumnRender = columns[1].render;
-
-      render(
-        <TestProviders>
-          {typeColumnRender != null && typeColumnRender(undefined, eventCategory)}
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('codeSuccess')).toHaveTextContent(EMPTY_PLACEHOLDER);
-    });
   });
 
   describe('indexFieldType column render()', () => {
@@ -88,7 +75,7 @@ describe('getIncompatibleMappingsTableColumns', () => {
         const columns = getIncompatibleMappingsTableColumns();
         const indexFieldTypeColumnRender = columns[2].render;
 
-        const withTypeMismatchSameFamily: EnrichedFieldMetadata = {
+        const withTypeMismatchSameFamily: EcsBasedFieldMetadata = {
           ...eventCategory, // `event.category` is a `keyword` per the ECS spec
           indexFieldType, // this index has a mapping of `wildcard` instead of `keyword`
           isInSameFamily: true, // `wildcard` and `keyword` are in the same family
@@ -121,7 +108,7 @@ describe('getIncompatibleMappingsTableColumns', () => {
         const columns = getIncompatibleMappingsTableColumns();
         const indexFieldTypeColumnRender = columns[2].render;
 
-        const withTypeMismatchDifferentFamily: EnrichedFieldMetadata = {
+        const withTypeMismatchDifferentFamily: EcsBasedFieldMetadata = {
           ...eventCategory, // `event.category` is a `keyword` per the ECS spec
           indexFieldType, // this index has a mapping of `text` instead of `keyword`
           isInSameFamily: false, // `text` and `wildcard` are not in the same family

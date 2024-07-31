@@ -141,3 +141,17 @@ export const ERROR_FETCHING_REFERENCES_TITLE = i18n.translate(
     defaultMessage: 'Error fetching exception references',
   }
 );
+
+export const RULE_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.addException.ruleException',
+  {
+    defaultMessage: 'rule exception',
+  }
+);
+
+export const ENDPOINT_EXCEPTION = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.addException.endpointException',
+  {
+    defaultMessage: 'endpoint exception',
+  }
+);

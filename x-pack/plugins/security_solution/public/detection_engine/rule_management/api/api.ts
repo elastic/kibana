@@ -30,6 +30,7 @@ import type {
   BulkDuplicateRules,
   BulkActionEditPayload,
   BulkActionType,
+  BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
 } from '../../../../common/api/detection_engine/rule_management';
@@ -58,7 +59,7 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
 
-import type { PreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
+import type { RulePreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -148,8 +149,11 @@ export const patchRule = async ({
  *
  * @throws An error if response is not OK
  */
-export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
-  KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
+export const previewRule = async ({
+  rule,
+  signal,
+}: PreviewRulesProps): Promise<RulePreviewResponse> =>
+  KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
     method: 'POST',
     version: '2023-10-31',
     body: JSON.stringify(rule),
@@ -248,6 +252,7 @@ export const fetchRulesSnoozeSettings = async ({
 
   return response.data?.reduce((result, { id, ...snoozeSettings }) => {
     result[id] = {
+      name: snoozeSettings.name ?? '',
       muteAll: snoozeSettings.mute_all ?? false,
       activeSnoozes: snoozeSettings.active_snoozes ?? [],
       isSnoozedUntil: snoozeSettings.is_snoozed_until
@@ -330,7 +335,10 @@ export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefine
 type PlainBulkAction = {
   type: Exclude<
     BulkActionType,
-    BulkActionTypeEnum['edit'] | BulkActionTypeEnum['export'] | BulkActionTypeEnum['duplicate']
+    | BulkActionTypeEnum['edit']
+    | BulkActionTypeEnum['export']
+    | BulkActionTypeEnum['duplicate']
+    | BulkActionTypeEnum['run']
   >;
 } & QueryOrIds;
 
@@ -344,7 +352,16 @@ type DuplicateBulkAction = {
   duplicatePayload?: BulkDuplicateRules['duplicate'];
 } & QueryOrIds;
 
-export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
+export type ManualRuleRunBulkAction = {
+  type: BulkActionTypeEnum['run'];
+  runPayload: BulkManualRuleRun['run'];
+} & QueryOrIds;
+
+export type BulkAction =
+  | PlainBulkAction
+  | EditBulkAction
+  | DuplicateBulkAction
+  | ManualRuleRunBulkAction;
 
 export interface PerformBulkActionProps {
   bulkAction: BulkAction;
@@ -370,6 +387,7 @@ export async function performBulkAction({
     edit: bulkAction.type === BulkActionTypeEnum.edit ? bulkAction.editPayload : undefined,
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
+    run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

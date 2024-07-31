@@ -36,10 +36,22 @@ export const useDatasetQualityTable = () => {
   const { service } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+
   const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
+  const canUserMonitorDataset = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges.canMonitor
+  );
+  const canUserMonitorAnyDataStream = useSelector(
+    service,
+    (state) =>
+      !state.context.dataStreamStats ||
+      !state.context.dataStreamStats.length ||
+      state.context.dataStreamStats.some((s) => s.userPrivileges.canMonitor)
+  );
 
   const {
-    inactive: showInactiveDatasets,
+    inactive,
     fullNames: showFullDatasetNames,
     timeRange,
     integrations,
@@ -47,6 +59,7 @@ export const useDatasetQualityTable = () => {
     qualities,
     query,
   } = useSelector(service, (state) => state.context.filters);
+  const showInactiveDatasets = inactive || !canUserMonitorDataset;
 
   const flyout = useSelector(service, (state) => state.context.flyout);
 
@@ -112,6 +125,8 @@ export const useDatasetQualityTable = () => {
     () =>
       getDatasetQualityTableColumns({
         fieldFormats,
+        canUserMonitorDataset,
+        canUserMonitorAnyDataStream,
         selectedDataset: flyout?.dataset,
         openFlyout,
         loadingDataStreamStats,
@@ -122,6 +137,8 @@ export const useDatasetQualityTable = () => {
       }),
     [
       fieldFormats,
+      canUserMonitorDataset,
+      canUserMonitorAnyDataStream,
       flyout?.dataset,
       openFlyout,
       loadingDataStreamStats,
@@ -220,6 +237,8 @@ export const useDatasetQualityTable = () => {
     selectedDataset: flyout?.dataset,
     showInactiveDatasets,
     showFullDatasetNames,
+    canUserMonitorDataset,
+    canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
     isSizeStatsAvailable,

@@ -28,6 +28,7 @@ import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public'
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
@@ -247,7 +248,14 @@ export const IndexPatternTable = ({
           )}
           {dataView?.tags?.map(({ key: tagKey, name: tagName }) => (
             <span key={tagKey}>
-              &emsp;<EuiBadge>{tagName}</EuiBadge>
+              &emsp;
+              {tagKey === DataViewType.ROLLUP ? (
+                <RollupDeprecationTooltip>
+                  <EuiBadge color="warning">{tagName}</EuiBadge>
+                </RollupDeprecationTooltip>
+              ) : (
+                <EuiBadge>{tagName}</EuiBadge>
+              )}
             </span>
           ))}
         </div>

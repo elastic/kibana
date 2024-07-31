@@ -39,7 +39,7 @@ import { SameFamilyTab } from './same_family_tab';
 import { SummaryTab } from './summary_tab';
 import { getFillColor } from './summary_tab/helpers';
 import type {
-  EnrichedFieldMetadata,
+  EcsBasedFieldMetadata,
   IlmPhase,
   MeteringStatsIndex,
   PartitionedFieldMetadata,
@@ -56,8 +56,8 @@ ${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
   });
 
 export const showMissingTimestampCallout = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): boolean => !enrichedFieldMetadata.some((x) => x.name === '@timestamp');
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
+): boolean => !ecsBasedFieldMetadata.some((x) => x.name === '@timestamp');
 
 export const getEcsCompliantColor = (partitionedFieldMetadata: PartitionedFieldMetadata): string =>
   showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant)
@@ -212,11 +212,7 @@ export const getTabs = ({
       </EuiBadge>
     ),
     content: (
-      <EcsCompliantTab
-        indexName={indexName}
-        onAddToNewCase={onAddToNewCase}
-        partitionedFieldMetadata={partitionedFieldMetadata}
-      />
+      <EcsCompliantTab indexName={indexName} partitionedFieldMetadata={partitionedFieldMetadata} />
     ),
     id: ECS_COMPLIANT_TAB_ID,
     name: i18n.ECS_COMPLIANT_FIELDS,

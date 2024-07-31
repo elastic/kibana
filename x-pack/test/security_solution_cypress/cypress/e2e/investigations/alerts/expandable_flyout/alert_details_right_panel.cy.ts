@@ -41,6 +41,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_JSON_TAB,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import {
   closeFlyout,
@@ -200,10 +201,10 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     // cy.log('should isolate host');
 
-    // TODO figure out why isolate host isn't showing up in the dropdown
+    // TODO this will change when respond is improved
     //  https://github.com/elastic/security-team/issues/6302
-    // openTakeActionButton();
-    // cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.visible');
+    openTakeActionButton();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.disabled');
 
     cy.log('should respond');
 
@@ -214,6 +215,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.log('should investigate in timeline');
 
+    openTakeActionButton();
     selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
     cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
       .first()

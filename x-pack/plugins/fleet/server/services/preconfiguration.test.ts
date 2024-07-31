@@ -300,6 +300,9 @@ jest.mock('./app_context', () => ({
       ),
     getUninstallTokenService: () => ({
       generateTokenForPolicyId: jest.fn(),
+      scoped: jest.fn().mockReturnValue({
+        generateTokenForPolicyId: jest.fn(),
+      }),
     }),
     getExternalCallbacks: jest.fn(),
     getCloud: jest.fn(),

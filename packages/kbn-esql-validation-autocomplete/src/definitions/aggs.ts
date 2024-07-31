@@ -28,7 +28,7 @@ function createNumericAggDefinition({
     name,
     type: 'agg',
     description,
-    supportedCommands: ['stats'],
+    supportedCommands: ['stats', 'metrics'],
     signatures: [
       {
         params: [
@@ -98,7 +98,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the maximum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
@@ -107,6 +107,14 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'number',
+        },
+        {
+          params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
+          returnType: 'boolean',
+        },
+        {
+          params: [{ name: 'column', type: 'ip', noNestingFunctions: true }],
+          returnType: 'ip',
         },
       ],
       examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
@@ -117,7 +125,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the minimum value in a field.',
       }),
       type: 'agg',
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
@@ -126,6 +134,14 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'number',
+        },
+        {
+          params: [{ name: 'column', type: 'boolean', noNestingFunctions: true }],
+          returnType: 'boolean',
+        },
+        {
+          params: [{ name: 'column', type: 'ip', noNestingFunctions: true }],
+          returnType: 'ip',
         },
       ],
       examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
@@ -138,7 +154,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [
@@ -164,7 +180,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [
@@ -188,7 +204,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           defaultMessage: 'Returns the count of distinct values in a field.',
         }
       ),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
@@ -212,7 +228,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
         defaultMessage: 'Returns all values in a group as an array.',
       }),
-      supportedCommands: ['stats'],
+      supportedCommands: ['stats', 'metrics'],
       signatures: [
         {
           params: [{ name: 'expression', type: 'any', noNestingFunctions: true }],
@@ -222,6 +238,81 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       examples: [
         'from index | stats all_agents=values(agents.keyword)',
         'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',
+      ],
+    },
+    {
+      name: 'top',
+      type: 'agg',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.topListDoc', {
+        defaultMessage: 'Collects top N values per bucket.',
+      }),
+      supportedCommands: ['stats', 'metrics'],
+      signatures: [
+        {
+          params: [
+            {
+              name: 'field',
+              type: 'any',
+              noNestingFunctions: true,
+              optional: false,
+            },
+            {
+              name: 'limit',
+              type: 'number',
+              noNestingFunctions: true,
+              optional: false,
+              constantOnly: true,
+            },
+            {
+              name: 'order',
+              type: 'string',
+              noNestingFunctions: true,
+              optional: false,
+              constantOnly: true,
+              literalOptions: ['asc', 'desc'],
+            },
+          ],
+          returnType: 'any',
+        },
+      ],
+      examples: [
+        `from employees | stats top_salaries = top(salary, 10, "desc")`,
+        `from employees | stats date = top(hire_date, 2, "asc"), double = top(salary_change, 2, "asc"),`,
+      ],
+    },
+    {
+      name: 'weighted_avg',
+      type: 'agg',
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.definitions.weightedAvgDoc',
+        {
+          defaultMessage:
+            'An aggregation that computes the weighted average of numeric values that are extracted from the aggregated documents.',
+        }
+      ),
+      supportedCommands: ['stats', 'metrics'],
+      signatures: [
+        {
+          params: [
+            {
+              name: 'number',
+              type: 'number',
+              noNestingFunctions: true,
+              optional: false,
+            },
+            {
+              name: 'weight',
+              type: 'number',
+              noNestingFunctions: true,
+              optional: false,
+            },
+          ],
+          returnType: 'number',
+        },
+      ],
+      examples: [
+        `from employees | stats w_avg = weighted_avg(salary, height) by languages | eval w_avg = round(w_avg)`,
+        `from employees | stats w_avg_1 = weighted_avg(salary, 1), avg = avg(salary), w_avg_2 = weighted_avg(salary, height)`,
       ],
     },
   ]);

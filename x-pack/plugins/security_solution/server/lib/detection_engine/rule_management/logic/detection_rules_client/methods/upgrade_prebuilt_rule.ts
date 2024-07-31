@@ -6,79 +6,79 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
-import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
-import type { UpgradePrebuiltRuleArgs } from '../detection_rules_client_interface';
-import {
-  convertPatchAPIToInternalSchema,
-  convertCreateAPIToInternalSchema,
-} from '../../../normalization/rule_converters';
-import { transformAlertToRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
+import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
+import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
+import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
+import { applyRulePatch } from '../mergers/apply_rule_patch';
+import { ClientError, validateMlAuth } from '../utils';
+import { createRule } from './create_rule';
+import { getRuleByRuleId } from './get_rule_by_rule_id';
 
-import { validateMlAuth, ClientError } from '../utils';
-
-import { readRules } from '../read_rules';
-
-export const upgradePrebuiltRule = async (
-  rulesClient: RulesClient,
-  upgradePrebuiltRulePayload: UpgradePrebuiltRuleArgs,
-  mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
-  const { ruleAsset } = upgradePrebuiltRulePayload;
-
+export const upgradePrebuiltRule = async ({
+  actionsClient,
+  rulesClient,
+  ruleAsset,
+  mlAuthz,
+  prebuiltRuleAssetClient,
+}: {
+  actionsClient: ActionsClient;
+  rulesClient: RulesClient;
+  ruleAsset: PrebuiltRuleAsset;
+  mlAuthz: MlAuthz;
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+}): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
 
-  const existingRule = await readRules({
+  const existingRule = await getRuleByRuleId({
     rulesClient,
     ruleId: ruleAsset.rule_id,
-    id: undefined,
   });
 
   if (!existingRule) {
     throw new ClientError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
   }
 
-  if (ruleAsset.type !== existingRule.params.type) {
+  if (ruleAsset.type !== existingRule.type) {
     // If we're trying to change the type of a prepackaged rule, we need to delete the old one
     // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
     // and exception lists from the old rule
     await rulesClient.delete({ id: existingRule.id });
 
-    const internalRule = convertCreateAPIToInternalSchema(
-      {
+    const createdRule = await createRule({
+      actionsClient,
+      rulesClient,
+      mlAuthz,
+      rule: {
         ...ruleAsset,
+        immutable: true,
         enabled: existingRule.enabled,
-        exceptions_list: existingRule.params.exceptionsList,
-        actions: existingRule.actions.map(transformAlertToRuleAction),
-        timeline_id: existingRule.params.timelineId,
-        timeline_title: existingRule.params.timelineTitle,
+        exceptions_list: existingRule.exceptions_list,
+        actions: existingRule.actions,
+        timeline_id: existingRule.timeline_id,
+        timeline_title: existingRule.timeline_title,
       },
-      { immutable: true, defaultEnabled: existingRule.enabled }
-    );
-
-    return rulesClient.create<RuleParams>({
-      data: internalRule,
-      options: { id: existingRule.id },
+      id: existingRule.id,
     });
+
+    return createdRule;
   }
 
   // Else, simply patch it.
-  const patchedRule = convertPatchAPIToInternalSchema(ruleAsset, existingRule);
+  const patchedRule = await applyRulePatch({
+    prebuiltRuleAssetClient,
+    existingRule,
+    rulePatch: ruleAsset,
+  });
 
-  await rulesClient.update({
+  const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: patchedRule,
+    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
   });
 
-  const updatedRule = await readRules({
-    rulesClient,
-    ruleId: ruleAsset.rule_id,
-    id: undefined,
-  });
-
-  if (!updatedRule) {
-    throw new ClientError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
-  }
-
-  return updatedRule;
+  return convertAlertingRuleToRuleResponse(patchedInternalRule);
 };

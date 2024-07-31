@@ -33,6 +33,7 @@ import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
+  DefaultBurnRatesClient,
   DefaultSummaryClient,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
@@ -140,10 +141,10 @@ const createSLORoute = createSloServerRoute({
 });
 
 const inspectSLORoute = createSloServerRoute({
-  endpoint: 'POST /internal/api/observability/slos/_inspect 2023-10-31',
+  endpoint: 'POST /internal/observability/slos/_inspect',
   options: {
     tags: ['access:slo_write'],
-    access: 'public',
+    access: 'internal',
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger, dependencies, request }) => {
@@ -295,7 +296,8 @@ const getSLORoute = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const summaryClient = new DefaultSummaryClient(esClient);
+    const burnRatesClient = new DefaultBurnRatesClient(esClient);
+    const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
     const defintionClient = new SloDefinitionClient(repository, esClient, logger);
     const getSLO = new GetSLO(defintionClient, summaryClient);
 
@@ -453,7 +455,7 @@ const findSLORoute = createSloServerRoute({
 });
 
 const findSLOGroupsRoute = createSloServerRoute({
-  endpoint: 'GET /internal/api/observability/slos/_groups',
+  endpoint: 'GET /internal/observability/slos/_groups',
   options: {
     tags: ['access:slo_read'],
     access: 'internal',
@@ -473,7 +475,7 @@ const findSLOGroupsRoute = createSloServerRoute({
 });
 
 const getSLOSuggestionsRoute = createSloServerRoute({
-  endpoint: 'GET /internal/api/observability/slos/suggestions',
+  endpoint: 'GET /internal/observability/slos/suggestions',
   options: {
     tags: ['access:slo_read'],
     access: 'internal',
@@ -526,6 +528,7 @@ const fetchHistoricalSummary = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params, logger }) => {

@@ -7,6 +7,9 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import pLimit from 'p-limit';
+import { uniqBy } from 'lodash';
+
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { appContextService } from '../../app_context';
@@ -44,37 +47,49 @@ export async function bulkInstallPackages({
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
 
+  const uniquePackages = uniqBy(packagesToInstall, (pkg) => {
+    if (typeof pkg === 'string') {
+      return pkg;
+    }
+
+    return pkg.name;
+  });
+
+  const limiter = pLimit(10);
+
   const packagesResults = await Promise.allSettled(
-    packagesToInstall.map(async (pkg) => {
-      if (typeof pkg === 'string') {
-        return Registry.fetchFindLatestPackageOrThrow(pkg, {
-          prerelease,
+    uniquePackages.map(async (pkg) => {
+      return limiter(async () => {
+        if (typeof pkg === 'string') {
+          return Registry.fetchFindLatestPackageOrThrow(pkg, {
+            prerelease,
+          }).then((pkgRes) => ({
+            name: pkgRes.name,
+            version: pkgRes.version,
+            prerelease: undefined,
+            skipDataStreamRollover: undefined,
+          }));
+        }
+        if (pkg.version !== undefined) {
+          return Promise.resolve(
+            pkg as {
+              name: string;
+              version: string;
+              prerelease?: boolean;
+              skipDataStreamRollover?: boolean;
+            }
+          );
+        }
+
+        return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
+          prerelease: prerelease || pkg.prerelease,
         }).then((pkgRes) => ({
           name: pkgRes.name,
           version: pkgRes.version,
-          prerelease: undefined,
-          skipDataStreamRollover: undefined,
+          prerelease: pkg.prerelease,
+          skipDataStreamRollover: pkg.skipDataStreamRollover,
         }));
-      }
-      if (pkg.version !== undefined) {
-        return Promise.resolve(
-          pkg as {
-            name: string;
-            version: string;
-            prerelease?: boolean;
-            skipDataStreamRollover?: boolean;
-          }
-        );
-      }
-
-      return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
-        prerelease: prerelease || pkg.prerelease,
-      }).then((pkgRes) => ({
-        name: pkgRes.name,
-        version: pkgRes.version,
-        prerelease: pkg.prerelease,
-        skipDataStreamRollover: pkg.skipDataStreamRollover,
-      }));
+      });
     })
   );
 

@@ -129,9 +129,9 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               onChange={(event) => {
                 setSelectedLogLevel(event.target.value);
               }}
-              options={Object.entries(AGENT_LOG_LEVELS).map(([key, value]) => ({
-                value,
-                text: key,
+              options={AGENT_LOG_LEVELS.map((level) => ({
+                value: level,
+                text: level,
               }))}
             />
           </EuiFlexItem>

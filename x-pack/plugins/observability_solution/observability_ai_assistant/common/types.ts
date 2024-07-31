@@ -95,6 +95,7 @@ export interface KnowledgeBaseEntry {
 export interface UserInstruction {
   doc_id: string;
   text: string;
+  system?: boolean;
 }
 
 export type UserInstructionOrPlainText = string | UserInstruction;
@@ -109,7 +110,7 @@ export interface ObservabilityAIAssistantScreenContextRequest {
   actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
 }
 
-export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}: {
+export type ScreenContextActionRespondFunction<TArguments> = ({}: {
   args: TArguments;
   signal: AbortSignal;
   connectorId: string;
@@ -117,7 +118,7 @@ export type ScreenContextActionRespondFunction<TArguments extends unknown> = ({}
   messages: Message[];
 }) => Promise<FunctionResponse>;
 
-export interface ScreenContextActionDefinition<TArguments = undefined> {
+export interface ScreenContextActionDefinition<TArguments = any> {
   name: string;
   description: string;
   parameters?: CompatibleJSONSchema;
@@ -137,6 +138,6 @@ export interface ObservabilityAIAssistantScreenContext {
     description: string;
     value: any;
   }>;
-  actions?: ScreenContextActionDefinition[];
+  actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
 }

@@ -113,6 +113,52 @@ describe('#getAllFields', () => {
     expect(getAllFields(result)).toStrictEqual([{ name: 'host.os.name', value: 'Ubuntu' }]);
   });
 
+  it('should map metadata with nested properties with container data removing >3th level nesting', async () => {
+    const result = {
+      id: 'host1',
+      name: 'host1',
+      features: [
+        {
+          name: 'system.core',
+          source: 'metrics',
+        },
+      ],
+      info: {
+        container: {
+          id: '33d16f043d5f8a7dcc2f9a2164920d0d7ca4c13a9f737bff3dbedb507d954b8e',
+          name: 'load-generator',
+          image: {
+            name: 'ghcr.io/open-telemetry/demo:latest-loadgenerator', // accept
+          },
+          runtime: 'docker',
+          network: {
+            ingress: {
+              bytes: 1410228770498, // ignore
+            },
+            egress: {
+              bytes: 23527514469, // ignore
+            },
+          },
+        },
+      },
+    } as InfraMetadata;
+    expect(getAllFields(result)).toStrictEqual([
+      {
+        name: 'container.id',
+        value: '33d16f043d5f8a7dcc2f9a2164920d0d7ca4c13a9f737bff3dbedb507d954b8e',
+      },
+      { name: 'container.name', value: 'load-generator' },
+      {
+        name: 'container.image.name',
+        value: 'ghcr.io/open-telemetry/demo:latest-loadgenerator',
+      },
+      {
+        name: 'container.runtime',
+        value: 'docker',
+      },
+    ]);
+  });
+
   it('should map metadata with partial host, agent, could data', async () => {
     const result: InfraMetadata = {
       id: 'host1',

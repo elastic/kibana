@@ -28,7 +28,7 @@ import {
   useStartServices,
   sendPostRetrieveAgentsByActions,
 } from '../../../../../hooks';
-import { SO_SEARCH_LIMIT } from '../../../../../constants';
+import { SO_SEARCH_LIMIT, MAX_FLYOUT_WIDTH } from '../../../../../constants';
 
 import { getKuery } from '../../utils/get_kuery';
 
@@ -129,8 +129,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           refreshAgentActivity = false;
           onClose();
         }}
-        size="m"
         paddingSize="none"
+        maxWidth={MAX_FLYOUT_WIDTH}
       >
         <EuiFlyoutHeader aria-labelledby="FleetAgentActivityFlyoutTitle">
           <EuiPanel borderRadius="none" hasShadow={false} hasBorder={true}>

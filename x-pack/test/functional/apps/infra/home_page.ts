@@ -292,10 +292,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           [
-            { metric: 'cpuUsage', value: '2,500.0%' },
-            { metric: 'memoryUsage', value: '2,000.0%' },
+            { metric: 'cpuUsage', value: '25.0%' },
+            { metric: 'memoryUsage', value: '20.0%' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
@@ -309,12 +309,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpu', chartsCount: 1 },
             { metric: 'memory', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
-            it.skip(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
               const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
                 metric
               );
               expect(containers.length).to.equal(chartsCount);
             });
+          });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+            await pageObjects.assetDetails.overviewLinkToAlertsExist();
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
           });
         });
 
@@ -325,6 +332,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should show metadata table', async () => {
             await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
           });
         });
 
@@ -537,6 +554,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await returnTo(INVENTORY_PATH);
           });
         });
+      });
+
+      it('should not allow adding more than 20 custom metrics', async () => {
+        // open
+        await pageObjects.infraHome.clickCustomMetricDropdown();
+
+        const fields = [
+          'process.cpu.pct',
+          'process.memory.pct',
+          'system.core.total.pct',
+          'system.core.user.pct',
+          'system.core.nice.pct',
+          'system.core.idle.pct',
+          'system.core.iowait.pct',
+          'system.core.irq.pct',
+          'system.core.softirq.pct',
+          'system.core.steal.pct',
+          'system.cpu.nice.pct',
+          'system.cpu.idle.pct',
+          'system.cpu.iowait.pct',
+          'system.cpu.irq.pct',
+        ];
+
+        for (const field of fields) {
+          await pageObjects.infraHome.addCustomMetric(field);
+        }
+        const metricsCount = await pageObjects.infraHome.getMetricsContextMenuItemsCount();
+        // there are 6 default metrics in the context menu for hosts
+        expect(metricsCount).to.eql(20);
+
+        await pageObjects.infraHome.ensureCustomMetricAddButtonIsDisabled();
+        // close
+        await pageObjects.infraHome.clickCustomMetricDropdown();
       });
     });
 

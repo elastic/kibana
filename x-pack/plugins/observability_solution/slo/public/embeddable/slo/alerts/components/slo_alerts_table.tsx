@@ -98,6 +98,7 @@ export function SloAlertsTable({
 }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
+    observability: { observabilityRuleTypeRegistry },
   } = deps;
   return (
     <AlertsStateTable
@@ -107,7 +108,7 @@ export function SloAlertsTable({
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}
-      pageSize={ALERTS_PER_PAGE}
+      initialPageSize={ALERTS_PER_PAGE}
       showAlertStatusWithFlapping
       onLoaded={() => {
         if (onLoaded) {
@@ -115,6 +116,7 @@ export function SloAlertsTable({
         }
       }}
       lastReloadRequestTime={lastReloadRequestTime}
+      cellContext={{ observabilityRuleTypeRegistry }}
     />
   );
 }

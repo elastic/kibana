@@ -11,7 +11,8 @@ import { mount } from 'enzyme';
 import { ExceptionsViewerUtility } from './utility_bar';
 import { TestProviders } from '../../../../common/mock';
 
-describe('ExceptionsViewerUtility', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/185023
+describe.skip('ExceptionsViewerUtility', () => {
   it('it renders correct item counts', () => {
     const wrapper = mount(
       <TestProviders>

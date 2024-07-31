@@ -2147,6 +2147,22 @@
             "path": "x-pack/plugins/lens/public/types.ts"
           },
           {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/save_to_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/save_to_library.ts"
+          },
+          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/services/persistence/saved_workspace_references.ts"
           },
@@ -2541,14 +2557,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/common/migrations/references.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
           },
           {
             "plugin": "canvas",

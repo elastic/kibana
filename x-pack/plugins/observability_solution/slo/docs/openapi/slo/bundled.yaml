@@ -11,16 +11,13 @@ info:
 servers:
   - url: http://localhost:5601
     description: local
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
 paths:
   /s/{spaceId}/api/observability/slos:
     post:
-      summary: Creates an SLO.
+      summary: Create an SLO
       operationId: createSloOp
       description: |
         You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -69,7 +66,7 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      summary: Retrieves a paginated list of SLOs
+      summary: Get a paginated list of SLOs
       operationId: findSlosOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -159,7 +156,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
-      summary: Retrieves a SLO
+      summary: Get an SLO
       operationId: getSloOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -207,7 +204,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     put:
-      summary: Updates an SLO
+      summary: Update an SLO
       operationId: updateSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -255,7 +252,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Deletes an SLO
+      summary: Delete an SLO
       operationId: deleteSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -294,7 +291,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
-      summary: Enables an SLO
+      summary: Enable an SLO
       operationId: enableSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -333,7 +330,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
-      summary: Disables an SLO
+      summary: Disable an SLO
       operationId: disableSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -372,7 +369,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/_reset:
     post:
-      summary: Resets an SLO.
+      summary: Reset an SLO
       operationId: resetSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -413,116 +410,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-  /s/{spaceId}/internal/observability/slos/_historical_summary:
-    post:
-      summary: Retrieves the historical summary for a list of SLOs
-      operationId: historicalSummaryOp
-      description: |
-        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
-      tags:
-        - slo
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/historical_summary_request'
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/historical_summary_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
-        '401':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
-        '403':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403_response'
-  /s/{spaceId}/internal/observability/slos/_definitions:
-    get:
-      summary: Get the SLO definitions
-      operationId: getDefinitionsOp
-      description: |
-        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
-      tags:
-        - slo
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-        - name: includeOutdatedOnly
-          in: query
-          description: Indicates if the API returns only outdated SLO or all SLO definitions
-          schema:
-            type: boolean
-          example: true
-        - name: search
-          in: query
-          description: Filters the SLOs by name
-          schema:
-            type: string
-          example: my service availability
-        - name: page
-          in: query
-          description: The page to use for pagination, must be greater or equal than 1
-          schema:
-            type: number
-          example: 1
-        - name: perPage
-          in: query
-          description: Number of SLOs returned by page
-          schema:
-            type: integer
-            default: 100
-            maximum: 1000
-          example: 100
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/find_slo_definitions_response'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_response'
-        '401':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/401_response'
-        '403':
-          description: Unauthorized response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/403_response'
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
-      summary: Batch delete rollup and summary data for the matching list of sloId and instanceId
+      summary: Batch delete rollup and summary data
       operationId: deleteSloInstancesOp
       description: |
-        You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+        The deletion occurs for the specified list of `sloId` and `instanceId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
         - slo
       parameters:
@@ -558,15 +451,6 @@ paths:
       servers:
         - url: https://localhost:5601
 components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     kbn_xsrf:
       schema:
@@ -667,6 +551,8 @@ components:
           type: object
         value:
           type: string
+        field:
+          type: string
     filter:
       title: Filter
       description: Defines properties for a filter
@@ -679,6 +565,36 @@ components:
     kql_with_filters:
       title: KQL with filters
       description: Defines properties for a filter
+      oneOf:
+        - description: the KQL query to filter the documents with.
+          type: string
+          example: 'field.environment : "production" and service.name : "my-service"'
+        - type: object
+          properties:
+            kqlQuery:
+              type: string
+            filters:
+              type: array
+              items:
+                $ref: '#/components/schemas/filter'
+    kql_with_filters_good:
+      title: KQL query for good events
+      description: The KQL query used to define the good events.
+      oneOf:
+        - description: the KQL query to filter the documents with.
+          type: string
+          example: 'request.latency <= 150 and request.status_code : "2xx"'
+        - type: object
+          properties:
+            kqlQuery:
+              type: string
+            filters:
+              type: array
+              items:
+                $ref: '#/components/schemas/filter'
+    kql_with_filters_total:
+      title: KQL query for all events
+      description: The KQL query used to define all events.
       oneOf:
         - description: the KQL query to filter the documents with.
           type: string
@@ -713,17 +629,16 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
-              description: the KQL query to filter the documents with.
               $ref: '#/components/schemas/kql_with_filters'
             good:
-              description: the KQL query used to define the good events.
-              $ref: '#/components/schemas/kql_with_filters'
-              example: 'request.latency <= 150 and request.status_code : "2xx"'
+              $ref: '#/components/schemas/kql_with_filters_good'
             total:
-              description: the KQL query used to define all events.
-              $ref: '#/components/schemas/kql_with_filters'
-              example: ''
+              $ref: '#/components/schemas/kql_with_filters_total'
             timestampField:
               description: |
                 The timestamp field used in the source indice.
@@ -807,6 +722,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -924,6 +843,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -1107,6 +1030,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -1651,55 +1578,6 @@ components:
           description: The internal SLO version
           type: number
           example: 2
-    historical_summary_request:
-      title: Historical summary request
-      type: object
-      required:
-        - list
-      properties:
-        list:
-          description: The list of SLO identifiers to get the historical summary for
-          type: array
-          items:
-            type: string
-            example: 8853df00-ae2e-11ed-90af-09bb6422b258
-    historical_summary_response:
-      title: Historical summary response
-      type: object
-      additionalProperties:
-        type: array
-        items:
-          type: object
-          properties:
-            date:
-              type: string
-              example: '2022-01-01T00:00:00.000Z'
-            status:
-              $ref: '#/components/schemas/summary_status'
-            sliValue:
-              type: number
-              example: 0.9836
-            errorBudget:
-              $ref: '#/components/schemas/error_budget'
-    find_slo_definitions_response:
-      title: Find SLO definitions response
-      description: |
-        A paginated response of SLO definitions matching the query.
-      type: object
-      properties:
-        page:
-          type: number
-          example: 2
-        perPage:
-          type: number
-          example: 100
-        total:
-          type: number
-          example: 123
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/slo_definition_response'
     delete_slo_instances_request:
       title: Delete SLO instances request
       description: |

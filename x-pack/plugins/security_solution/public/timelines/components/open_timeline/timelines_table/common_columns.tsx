@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableDataType } from '@elastic/eui';
 import { omit } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -42,8 +43,9 @@ export const getCommonColumns = ({
   onToggleShowNotes: OnToggleShowNotes;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   timelineType: TimelineType | null;
-}) => [
+}): Array<EuiBasicTableColumn<object>> => [
   {
+    dataType: 'auto' as EuiTableDataType,
     isExpander: true,
     render: ({ notes, savedObjectId }: OpenTimelineResult) =>
       notes != null && notes.length > 0 && savedObjectId != null ? (
@@ -64,7 +66,7 @@ export const getCommonColumns = ({
     width: ACTION_COLUMN_WIDTH,
   },
   {
-    dataType: 'string',
+    dataType: 'string' as EuiTableDataType,
     field: 'title',
     name: timelineType === TimelineType.default ? i18n.TIMELINE_NAME : i18n.TIMELINE_TEMPLATE_NAME,
     render: (title: string, timelineResult: OpenTimelineResult) =>
@@ -92,7 +94,7 @@ export const getCommonColumns = ({
     sortable: false,
   },
   {
-    dataType: 'string',
+    dataType: 'string' as EuiTableDataType,
     field: 'description',
     name: i18n.DESCRIPTION,
     render: (description: string) => (
@@ -103,7 +105,7 @@ export const getCommonColumns = ({
     sortable: false,
   },
   {
-    dataType: 'date',
+    dataType: 'date' as EuiTableDataType,
     field: 'updated',
     name: i18n.LAST_MODIFIED,
     render: (date: number, timelineResult: OpenTimelineResult) => (

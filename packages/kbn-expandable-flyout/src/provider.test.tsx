@@ -67,7 +67,7 @@ describe('UrlSynchronizer', () => {
     expect(mockSet).toHaveBeenCalledWith('urlKey', {
       left: undefined,
       right: undefined,
-      preview: undefined,
+      preview: [undefined],
     });
   });
 

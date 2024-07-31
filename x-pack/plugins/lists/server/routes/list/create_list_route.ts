@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { CreateListRequestBody, CreateListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import {
-  CreateListRequestDecoded,
-  createListRequest,
-  createListResponse,
-} from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const createListRoute = (router: ListsPluginRouter): void => {
@@ -31,9 +27,7 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidation<typeof createListRequest, CreateListRequestDecoded>(
-              createListRequest
-            ),
+            body: buildRouteValidationWithZod(CreateListRequestBody),
           },
         },
         version: '2023-10-31',
@@ -52,38 +46,36 @@ export const createListRoute = (router: ListsPluginRouter): void => {
               body: `To create a list, the data stream must exist first. Data stream "${lists.getListName()}" does not exist`,
               statusCode: 400,
             });
-          } else {
-            // needs to be migrated to data stream
-            if (!dataStreamExists && indexExists) {
-              await lists.migrateListIndexToDataStream();
-            }
-            if (id != null) {
-              const list = await lists.getList({ id });
-              if (list != null) {
-                return siemResponse.error({
-                  body: `list id: "${id}" already exists`,
-                  statusCode: 409,
-                });
-              }
-            }
-            const list = await lists.createList({
-              description,
-              deserializer,
-              id,
-              immutable: false,
-              meta,
-              name,
-              serializer,
-              type,
-              version,
-            });
-            const [validated, errors] = validate(list, createListResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
+          }
+
+          // needs to be migrated to data stream
+          if (!dataStreamExists && indexExists) {
+            await lists.migrateListIndexToDataStream();
+          }
+
+          if (id != null) {
+            const list = await lists.getList({ id });
+            if (list != null) {
+              return siemResponse.error({
+                body: `list id: "${id}" already exists`,
+                statusCode: 409,
+              });
             }
           }
+
+          const list = await lists.createList({
+            description,
+            deserializer,
+            id,
+            immutable: false,
+            meta,
+            name,
+            serializer,
+            type,
+            version,
+          });
+
+          return response.ok({ body: CreateListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
