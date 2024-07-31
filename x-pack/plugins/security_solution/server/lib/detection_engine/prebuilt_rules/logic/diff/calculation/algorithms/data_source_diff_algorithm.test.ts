@@ -268,7 +268,7 @@ describe('dataSourceDiffAlgorithm', () => {
       );
     });
 
-    it('if base version is a different data type', () => {
+    it('if base version is a data view and others are index patterns ', () => {
       const mockVersions: ThreeVersionsOf<RuleDataSource> = {
         base_version: { type: DataSourceType.data_view, data_view_id: '123' },
         current_version: {
@@ -294,6 +294,33 @@ describe('dataSourceDiffAlgorithm', () => {
           diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Merged,
           conflict: ThreeWayDiffConflict.SOLVABLE,
+        })
+      );
+    });
+
+    it('if base version is a index patterns and other are data views', () => {
+      const mockVersions: ThreeVersionsOf<RuleDataSource> = {
+        base_version: {
+          type: DataSourceType.index_patterns,
+          index_patterns: ['one', 'three', 'four'],
+        },
+        current_version: { type: DataSourceType.data_view, data_view_id: '123' },
+        target_version: { type: DataSourceType.data_view, data_view_id: '456' },
+      };
+
+      const expectedMergedVersion: RuleDataSource = {
+        type: DataSourceType.data_view,
+        data_view_id: '123',
+      };
+
+      const result = dataSourceDiffAlgorithm(mockVersions);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          merged_version: expectedMergedVersion,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         })
       );
     });

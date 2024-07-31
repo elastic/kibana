@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { union } from 'lodash';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
   RuleDataSource,
@@ -107,34 +106,25 @@ const mergeVersions = ({
         dedupedCurrentVersion.type === DataSourceType.index_patterns &&
         dedupedTargetVersion.type === DataSourceType.index_patterns
       ) {
-        if (dedupedBaseVersion && dedupedBaseVersion.type === DataSourceType.index_patterns) {
-          // If all versions are index pattern types, merge all arrays
-          return {
-            conflict: ThreeWayDiffConflict.SOLVABLE,
-            mergeOutcome: ThreeWayMergeOutcome.Merged,
-            mergedVersion: {
-              type: DataSourceType.index_patterns,
-              index_patterns: mergeDedupedArrays(
-                dedupedBaseVersion.index_patterns,
-                dedupedCurrentVersion.index_patterns,
-                dedupedTargetVersion.index_patterns
-              ),
-            },
-          };
-        }
-        // If just the current and target versions are index pattern types, return the union of the arrays as the merged version
+        const baseVersionToMerge =
+          dedupedBaseVersion && dedupedBaseVersion.type === DataSourceType.index_patterns
+            ? dedupedBaseVersion.index_patterns
+            : [];
+
         return {
           conflict: ThreeWayDiffConflict.SOLVABLE,
           mergeOutcome: ThreeWayMergeOutcome.Merged,
           mergedVersion: {
             type: DataSourceType.index_patterns,
-            index_patterns: union(
+            index_patterns: mergeDedupedArrays(
+              baseVersionToMerge,
               dedupedCurrentVersion.index_patterns,
               dedupedTargetVersion.index_patterns
             ),
           },
         };
       }
+
       return {
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         mergeOutcome: ThreeWayMergeOutcome.Current,
