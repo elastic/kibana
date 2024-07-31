@@ -109,8 +109,11 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/observability-alerting-rule-utils",
+<<<<<<< HEAD
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
+=======
+>>>>>>> 72641dda8c7 (Amend tsconfig)
     "@kbn/core-application-browser"
   ],
   "exclude": ["target/**/*"]
