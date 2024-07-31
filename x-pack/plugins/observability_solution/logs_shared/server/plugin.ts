@@ -24,6 +24,7 @@ import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { LogEntriesService } from './services/log_entries';
 import { LogsSharedConfig } from '../common/plugin_config';
+import { registerDeprecations } from './deprecations';
 
 export class LogsSharedPlugin
   implements
@@ -83,6 +84,8 @@ export class LogsSharedPlugin
 
     const logEntriesService = new LogEntriesService();
     logEntriesService.setup(core, plugins);
+
+    registerDeprecations({ core });
 
     return {
       ...domainLibs,
