@@ -51,5 +51,35 @@ export const getEventDetailsAgentIdField = (
     return false;
   });
 
+  // ensure a `field` is always returned since we know the `agentType`. The field is sometime used
+  // to show the user what might have been missing in the data that prevented it from displaying
+  // response actions options.
+  if (!result.found) {
+    const eventDataset = getAlertDetailsFieldValue(
+      { category: 'event', field: 'event.dataset' },
+      eventData
+    ).toLowerCase();
+
+    // Let's try to get the event field that might be used for the given source of the alert.
+    // The `event.dataset` seems to contain the same pattern as the one used to store data
+    // by the integrations in the ES document - example: `sentinel_one.alert` or `sentinel_one.threat`.
+    // So we'll use this to see if the field is defined for this datasource.
+    if (eventDataset) {
+      for (const field of fieldList) {
+        if (field.toLowerCase().startsWith(eventDataset)) {
+          result.field = field;
+          result.category = parseEcsFieldPath(field).category;
+          break;
+        }
+      }
+    }
+
+    // Fallback: just set it to the first field defined for the agentType
+    if (!result.field) {
+      result.field = fieldList[0];
+      result.category = parseEcsFieldPath(result.field).category;
+    }
+  }
+
   return result;
 };

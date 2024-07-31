@@ -105,6 +105,13 @@ const generateEndpointAlertDetailsItemDataMock = (
     },
     {
       category: 'event',
+      field: 'event.dataset',
+      values: ['endpoint'],
+      originalValue: ['endpoint'],
+      isObjectArray: false,
+    },
+    {
+      category: 'event',
       field: 'event.category',
       originalValue: ['process'],
       values: ['process'],
@@ -151,6 +158,11 @@ const generateSentinelOneAlertDetailsItemDataMock = (
         itemData.originalValue = ['sentinel_one'];
         break;
 
+      case 'event.dataset':
+        itemData.values = ['sentinel_one.alert'];
+        itemData.originalValue = ['sentinel_one.alert'];
+        break;
+
       case 'agent.type':
         itemData.values = ['filebeat'];
         itemData.originalValue = ['filebeat'];
@@ -182,6 +194,11 @@ const generateCrowdStrikeAlertDetailsItemDataMock = (
       case 'event.module':
         itemData.values = ['crowdstrike'];
         itemData.originalValue = ['crowdstrike'];
+        break;
+
+      case 'event.dataset':
+        itemData.values = ['crowdstrike.alert'];
+        itemData.originalValue = ['crowdstrike.alert'];
         break;
 
       case 'agent.type':
