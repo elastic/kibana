@@ -16,7 +16,6 @@ import { writeDocuments } from './utils/write_documents';
 import { resolveGlobs } from './utils/resolve_globs';
 import { bundleDocument } from './bundler/bundle_document';
 import { withNamespaceComponentsProcessor } from './bundler/processor_sets';
-import { readDocument } from './utils/read_document';
 import { PrototypeDocument } from './prototype_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
@@ -42,12 +41,9 @@ export const merge = async ({
     throw new Error('As minimum one source glob is expected');
   }
 
-  const prototypeDoc: PrototypeDocument | undefined =
-    typeof options?.prototypeDocument === 'string'
-      ? await readDocument(options.prototypeDocument)
-      : options?.prototypeDocument;
-
-  validatePrototypeDocument(prototypeDoc);
+  const prototypeDoc = options?.prototypeDocument
+    ? await validatePrototypeDocument(options?.prototypeDocument)
+    : undefined;
 
   logger.info(chalk.bold(`Merging OpenAPI specs`));
   logger.info(

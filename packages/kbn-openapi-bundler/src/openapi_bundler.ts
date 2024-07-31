@@ -18,7 +18,6 @@ import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
 import { DEFAULT_BUNDLING_PROCESSORS, withIncludeLabelsProcessor } from './bundler/processor_sets';
 import { PrototypeDocument } from './prototype_document';
-import { readDocument } from './utils/read_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
 export interface BundlerConfig {
@@ -44,12 +43,9 @@ export const bundle = async ({
   outputFilePath = 'bundled-{version}.schema.yaml',
   options,
 }: BundlerConfig) => {
-  const prototypeDoc: PrototypeDocument | undefined =
-    typeof options?.prototypeDocument === 'string'
-      ? await readDocument(options.prototypeDocument)
-      : options?.prototypeDocument;
-
-  validatePrototypeDocument(prototypeDoc);
+  const prototypeDoc = options?.prototypeDocument
+    ? await validatePrototypeDocument(options?.prototypeDocument)
+    : undefined;
 
   logger.debug(chalk.bold(`Bundling API route schemas`));
   logger.debug(`👀  Searching for source files in ${chalk.underline(sourceGlob)}`);

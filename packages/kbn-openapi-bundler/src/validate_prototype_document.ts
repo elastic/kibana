@@ -8,6 +8,7 @@
 
 import chalk from 'chalk';
 import { PrototypeDocument } from './prototype_document';
+import { readDocument } from './utils/read_document';
 
 /**
  * Validates that passed `prototypeDocument` fulfills the requirements.
@@ -16,10 +17,13 @@ import { PrototypeDocument } from './prototype_document';
  * `components.securitySchemes` properties.
  *
  */
-export function validatePrototypeDocument(prototypeDocument: PrototypeDocument | undefined): void {
-  if (prototypeDocument === undefined) {
-    return;
-  }
+export async function validatePrototypeDocument(
+  prototypeDocumentOrString: PrototypeDocument | string
+): Promise<PrototypeDocument> {
+  const prototypeDocument: PrototypeDocument | undefined =
+    typeof prototypeDocumentOrString === 'string'
+      ? await readDocument(prototypeDocumentOrString)
+      : prototypeDocumentOrString;
 
   if (prototypeDocument.security && !prototypeDocument.components?.securitySchemes) {
     throw new Error(
@@ -36,4 +40,6 @@ export function validatePrototypeDocument(prototypeDocument: PrototypeDocument |
       )} are specified`
     );
   }
+
+  return prototypeDocument;
 }
