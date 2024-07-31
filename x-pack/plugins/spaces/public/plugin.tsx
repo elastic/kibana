@@ -82,7 +82,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         return false;
       });
 
-    if (!this.isServerless) {
+    // Only skip setup of space selector and management service if serverless and only one space is allowed
+    if (!(this.isServerless && hasOnlyDefaultSpace)) {
       const getRolesAPIClient = async () => {
         const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
           'security'
@@ -122,7 +123,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   }
 
   public start(core: CoreStart) {
-    if (!this.isServerless) {
+    // Only skip spaces navigation if serverless and only one space is allowed
+    if (!(this.isServerless && this.config.maxSpaces === 1)) {
       initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment);
     }
 

@@ -30,6 +30,8 @@
     "junit:transform": "node scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
-    "openapi:bundle": "node scripts/openapi/bundle"
+    "openapi:bundle:detections": "node scripts/openapi/bundle_detections",
+    "openapi:bundle:entity-analytics": "node scripts/openapi/bundle_entity_analytics",
+    "openapi:bundle:endpoint-management": "node scripts/openapi/bundle_endpoint_management"
   }
 }

@@ -9,7 +9,6 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
@@ -37,9 +36,7 @@ export function runCli() {
       };
       const answers = flags.yes ? getDefaultAnswers(overrides) : await askQuestions(overrides);
 
-      const outputDir = answers.internal
-        ? Path.resolve(answers.internalLocation, snakeCase(answers.name))
-        : Path.resolve(REPO_ROOT, 'plugins', snakeCase(answers.name));
+      const outputDir = Path.resolve(REPO_ROOT, 'plugins', snakeCase(answers.name));
 
       if (Fs.existsSync(outputDir)) {
         throw createFailError(`Target output directory [${outputDir}] already exists`);
@@ -50,11 +47,6 @@ export function runCli() {
         outputDir,
         answers,
       });
-
-      // init git repo in third party plugins
-      if (!answers.internal) {
-        await execa('git', ['init', outputDir]);
-      }
 
       log.success(
         `🎉\n\nYour plugin has been created in ${Path.relative(process.cwd(), outputDir)}\n`

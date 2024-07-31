@@ -38,8 +38,7 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/186438
-    describe.skip('CIS_AWS Organization Cloud Formation', () => {
+    describe('CIS_AWS Organization Cloud Formation', () => {
       it('Initial form state, AWS Org account, and CloudFormation should be selected by default', async () => {
         expect((await cisIntegration.isRadioButtonChecked('cloudbeat/cis_aws')) === true);
         expect((await cisIntegration.isRadioButtonChecked('organization-account')) === true);
@@ -77,8 +76,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           (
             await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton',
-              2
+              'confirmCloudFormationModalConfirmButton'
             )
           ).includes('console.aws.amazon.com%2Fcloudformation')
         ).to.be(true);

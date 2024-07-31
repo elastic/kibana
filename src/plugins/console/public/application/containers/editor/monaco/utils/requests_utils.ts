@@ -11,7 +11,7 @@ import { constructUrl } from '../../../../../lib/es';
 import { MetricsTracker } from '../../../../../types';
 import type { DevToolsVariable } from '../../../../components';
 import type { EditorRequest } from '../types';
-import { variableTemplateRegex } from './constants';
+import { urlVariableTemplateRegex, dataVariableTemplateRegex } from './constants';
 import { removeTrailingWhitespaces } from './tokens_utils';
 import { AdjustedParsedRequest } from '../types';
 
@@ -38,8 +38,8 @@ export const replaceRequestVariables = (
 ): EditorRequest => {
   return {
     method,
-    url: replaceVariables(url, variables),
-    data: data.map((dataObject) => replaceVariables(dataObject, variables)),
+    url: replaceVariables(url, variables, false),
+    data: data.map((dataObject) => replaceVariables(dataObject, variables, true)),
   };
 };
 
@@ -118,15 +118,35 @@ export const getRequestEndLineNumber = (
   return endLineNumber;
 };
 
+const isJsonString = (str: string) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
 /*
  * Internal helpers
  */
-const replaceVariables = (text: string, variables: DevToolsVariable[]): string => {
-  if (variableTemplateRegex.test(text)) {
-    text = text.replaceAll(variableTemplateRegex, (match, key) => {
+const replaceVariables = (
+  text: string,
+  variables: DevToolsVariable[],
+  isDataVariable: boolean
+): string => {
+  const variableRegex = isDataVariable ? dataVariableTemplateRegex : urlVariableTemplateRegex;
+  if (variableRegex.test(text)) {
+    text = text.replaceAll(variableRegex, (match, key) => {
       const variable = variables.find(({ name }) => name === key);
+      const value = variable?.value;
 
-      return variable?.value ?? match;
+      if (isDataVariable && value) {
+        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
+        return isJsonString(value) ? value : `"${value}"`;
+      }
+
+      return value ?? match;
     });
   }
   return text;

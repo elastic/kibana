@@ -70,5 +70,11 @@ export const MetricsContextMenu = ({
     },
   ];
 
-  return <EuiContextMenu initialPanelId={0} panels={panels} />;
+  return (
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={panels}
+      data-test-subj="infraInventoryMetricsContextMenu"
+    />
+  );
 };

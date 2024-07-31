@@ -112,7 +112,7 @@ async function getSpellingActionForColumns(
   }
   // @TODO add variables support
   const possibleFields = await getSpellingPossibilities(async () => {
-    const availableFields = await getFieldsByType('any');
+    const availableFields = (await getFieldsByType('any')).map(({ name }) => name);
     const enrichPolicies = ast.filter(({ name }) => name === 'enrich');
     if (enrichPolicies.length) {
       const enrichPolicyNames = enrichPolicies.flatMap(({ args }) =>
@@ -209,7 +209,7 @@ async function getQuotableActionForColumns(
         )
       );
     } else {
-      const availableFields = new Set(await getFieldsByType('any'));
+      const availableFields = new Set((await getFieldsByType('any')).map(({ name }) => name));
       if (availableFields.has(errorText) || availableFields.has(solution)) {
         actions.push(
           createAction(

@@ -60,6 +60,18 @@
     padding-right: 0;
   }
 
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='colorIndicator'],
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] {
+    padding: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
+    height: 100%;
+    padding: 0;
+    border-bottom: 0;
+  }
+
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }

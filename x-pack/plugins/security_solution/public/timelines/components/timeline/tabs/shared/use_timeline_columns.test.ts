@@ -14,7 +14,7 @@ import { defaultHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -41,7 +41,7 @@ describe('useTimelineColumns', () => {
     });
 
     it('should return the default unified data table (udt) columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
@@ -51,19 +51,19 @@ describe('useTimelineColumns', () => {
 
   describe('localColumns', () => {
     it('should return the default columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.localColumns).toEqual(defaultHeaders);
-    });
-
-    it('should return the default unified data table (udt) columns', () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
-      expect(result.current.localColumns).toEqual(defaultUdtHeaders);
+      expect(result.current.localColumns).toEqual([]);
+    });
+
+    it('should return the default unified data table (udt) columns', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      const { result } = renderHook(() => useTimelineColumns([]), {
+        wrapper: TestProviders,
+      });
+      expect(result.current.localColumns).toEqual([]);
     });
 
     it('should return the provided columns', () => {
@@ -84,7 +84,7 @@ describe('useTimelineColumns', () => {
     });
 
     it('should return the default unified data table (udt) columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });

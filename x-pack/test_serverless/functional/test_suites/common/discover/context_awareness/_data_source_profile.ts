@@ -10,12 +10,22 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'svlCommonPage',
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
 
   describe('data source profile', () => {
+    before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
+    });
+
     describe('ES|QL mode', () => {
       describe('cell renderers', () => {
         it('should not render custom @timestamp or log.level', async () => {
@@ -68,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Result');
         });
 
@@ -84,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.existOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
         });
       });
@@ -127,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Document');
         });
 
@@ -138,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.existOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
             'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
           );

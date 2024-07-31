@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { loadFromLibrary } from '../content_management';
-import { LinksByReferenceSerializedState, LinksSerializedState } from '../types';
+import { SOWithMetadata } from '@kbn/content-management-utils';
+import { LinksAttributes } from '../../common/content_management';
+import { injectReferences } from '../../common/persistable_state';
+import { LinksByReferenceSerializedState, LinksRuntimeState, LinksSerializedState } from '../types';
 import { resolveLinks } from './resolve_links';
 
 export const linksSerializeStateIsByReference = (
@@ -16,8 +18,11 @@ export const linksSerializeStateIsByReference = (
   return Boolean(state && (state as LinksByReferenceSerializedState).savedObjectId !== undefined);
 };
 
-export const deserializeLinksSavedObject = async (state: LinksByReferenceSerializedState) => {
-  const { attributes } = await loadFromLibrary(state.savedObjectId);
+export const deserializeLinksSavedObject = async (
+  linksSavedObject: SOWithMetadata<LinksAttributes>
+): Promise<LinksRuntimeState> => {
+  if (linksSavedObject.error) throw linksSavedObject.error;
+  const { attributes } = injectReferences(linksSavedObject);
 
   const links = await resolveLinks(attributes.links ?? []);
 
@@ -26,7 +31,7 @@ export const deserializeLinksSavedObject = async (state: LinksByReferenceSeriali
   return {
     links,
     layout,
-    savedObjectId: state.savedObjectId,
+    savedObjectId: linksSavedObject.id,
     defaultPanelTitle,
     defaultPanelDescription,
   };

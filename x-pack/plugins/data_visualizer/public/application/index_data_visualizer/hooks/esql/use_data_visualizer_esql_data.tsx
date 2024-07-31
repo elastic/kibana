@@ -221,6 +221,7 @@ export const useESQLDataVisualizerData = (
         }
       }
       return {
+        id: input.id,
         earliest,
         latest,
         aggInterval,
@@ -233,16 +234,16 @@ export const useESQLDataVisualizerData = (
         runtimeFieldMap: currentDataView?.getRuntimeMappings(),
         lastRefresh,
         filter,
+        timeRange,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       _timeBuckets,
       timefilter,
-      currentDataView?.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({ query, parentQuery, parentFilters }),
-      indexPattern,
+      currentDataView?.timeFieldName,
       lastRefresh,
       limitSize,
       input.timeRange?.from,
@@ -374,6 +375,7 @@ export const useESQLDataVisualizerData = (
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
     limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
+    timeRange: fieldStatsRequest?.timeRange,
   });
 
   useEffect(

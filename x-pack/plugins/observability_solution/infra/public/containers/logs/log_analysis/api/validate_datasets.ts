@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { HttpHandler } from '@kbn/core/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
   validateLogEntryDatasetsRequestPayloadRT,
   validateLogEntryDatasetsResponsePayloadRT,
 } from '../../../../../common/http_api';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   indices: string[];

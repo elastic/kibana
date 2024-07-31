@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useMemo, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -41,6 +41,9 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   } = context;
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
+  const [editorInstance, setEditorInstace] = useState<
+    monaco.editor.IStandaloneCodeEditor | undefined
+  >();
 
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
@@ -74,8 +77,15 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
+      setEditorInstace(editor);
+    },
+    [setupResizeChecker, setInputEditor, setEditorInstace]
+  );
+
+  useEffect(() => {
+    if (settings.isKeyboardShortcutsEnabled && editorInstance) {
       registerKeyboardCommands({
-        editor,
+        editor: editorInstance,
         sendRequest: sendRequestsCallback,
         autoIndent: async () => await actionsProvider.current?.autoIndent(),
         getDocumentationLink: getDocumenationLink,
@@ -83,15 +93,17 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           await actionsProvider.current?.moveToPreviousRequestEdge(),
         moveToNextRequestEdge: async () => await actionsProvider.current?.moveToNextRequestEdge(),
       });
-    },
-    [
-      getDocumenationLink,
-      registerKeyboardCommands,
-      sendRequestsCallback,
-      setupResizeChecker,
-      setInputEditor,
-    ]
-  );
+    } else {
+      unregisterKeyboardCommands();
+    }
+  }, [
+    editorInstance,
+    getDocumenationLink,
+    sendRequestsCallback,
+    registerKeyboardCommands,
+    unregisterKeyboardCommands,
+    settings.isKeyboardShortcutsEnabled,
+  ]);
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
@@ -126,7 +138,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       >
         <EuiFlexItem>
           <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltipContent', {
+            content={i18n.translate('console.monaco.sendRequestButtonTooltipContent', {
               defaultMessage: 'Click to send request',
             })}
           >
@@ -134,7 +146,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
               color="primary"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
-              aria-label={i18n.translate('console.sendRequestButtonTooltipAriaLabel', {
+              aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
             >
@@ -166,6 +178,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           theme: CONSOLE_THEME_ID,
         }}
         suggestionProvider={suggestionProvider}
+        enableFindAction={true}
       />
     </div>
   );

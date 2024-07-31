@@ -38,14 +38,15 @@ export const readListRoute = (router: ListsPluginRouter): void => {
           const { id } = request.query;
           const lists = await getListClient(context);
           const list = await lists.getList({ id });
+
           if (list == null) {
             return siemResponse.error({
               body: `list id: "${id}" does not exist`,
               statusCode: 404,
             });
-          } else {
-            return response.ok({ body: GetListResponse.parse(list) });
           }
+
+          return response.ok({ body: GetListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

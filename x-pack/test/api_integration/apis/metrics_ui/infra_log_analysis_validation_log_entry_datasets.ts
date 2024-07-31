@@ -11,7 +11,7 @@ import {
   validateLogEntryDatasetsRequestPayloadRT,
   validateLogEntryDatasetsResponsePayloadRT,
 } from '@kbn/infra-plugin/common/http_api';
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -141,7 +141,7 @@ export const DocViewerTable = ({
   onRemoveColumn,
 }: DocViewRenderProps) => {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -387,9 +387,13 @@ export const DocViewerTable = ({
               isPinned={pinned}
             />
 
-            {isDetails && fieldMapping?.customDescription ? (
+            {isDetails && !!fieldMapping ? (
               <div>
-                <FieldDescription field={fieldMapping} truncate={false} />
+                <FieldDescription
+                  fieldsMetadataService={fieldsMetadata}
+                  field={fieldMapping}
+                  truncate={false}
+                />
               </div>
             ) : null}
           </div>
@@ -409,7 +413,7 @@ export const DocViewerTable = ({
 
       return null;
     },
-    [rows, searchText]
+    [rows, searchText, fieldsMetadata]
   );
 
   const renderCellPopover = useCallback(

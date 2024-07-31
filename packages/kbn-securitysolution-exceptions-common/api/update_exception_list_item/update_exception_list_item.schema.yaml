@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: Update exception list item API endpoint
+  version: '2023-10-31'
+paths:
+  /api/exception_lists/items:
+    put:
+      x-labels: [serverless, ess]
+      operationId: UpdateExceptionListItem
+      x-codegen-enabled: true
+      summary: Updates an exception list item
+      tags:
+        - Exceptions API
+      requestBody:
+        description: Exception list item's properties
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemId'
+                  description: Either `id` or `item_id` must be specified
+                item_id:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+                  description: Either `id` or `item_id` must be specified
+                list_id:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+                type:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+                name:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+                description:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+                namespace_type:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+                  default: 'single'
+                os_types:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+                meta:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+                expire_time:
+                  type: string
+                  format: date-time
+                comments:
+                  $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
+                  default: []
+                _version:
+                  type: string
+              required:
+                - type
+                - name
+                - description
+                - entries
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItem'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        404:
+          description: Exception list item not found response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  x-codegen-enabled: true
+  schemas:
+    UpdateExceptionListItemComment:
+      type: object
+      properties:
+        id:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        comment:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - comment
+
+    UpdateExceptionListItemCommentArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/UpdateExceptionListItemComment'

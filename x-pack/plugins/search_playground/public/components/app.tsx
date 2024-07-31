@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { useFormContext } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 import { QueryMode } from './query_mode/query_mode';
 import { SetupPage } from './setup_page/setup_page';
 import { Header } from './header';
@@ -28,14 +28,17 @@ export enum ViewMode {
 export const App: React.FC<AppProps> = ({ showDocs = false }) => {
   const [showSetupPage, setShowSetupPage] = useState(true);
   const [selectedMode, setSelectedMode] = useState<ViewMode>(ViewMode.chat);
-  const { watch } = useFormContext<ChatForm>();
   const { data: connectors } = useLoadConnectors();
-  const hasSelectedIndices = watch(ChatFormFields.indices).length;
+  const hasSelectedIndices = useWatch<ChatForm, ChatFormFields.indices>({
+    name: ChatFormFields.indices,
+  }).length;
   const handleModeChange = (id: string) => setSelectedMode(id as ViewMode);
 
   useEffect(() => {
     if (showSetupPage && connectors?.length && hasSelectedIndices) {
       setShowSetupPage(false);
+    } else if (!showSetupPage && (!connectors?.length || !hasSelectedIndices)) {
+      setShowSetupPage(true);
     }
   }, [connectors, hasSelectedIndices, showSetupPage]);
 

@@ -19,4 +19,5 @@ export const getCasesToggleCustomField = () => ({
       }
     });
   },
+  getDefaultValue: () => false,
 });
