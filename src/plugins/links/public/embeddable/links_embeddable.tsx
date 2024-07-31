@@ -129,7 +129,6 @@ export const getLinksEmbeddableFactory = () => {
           },
           serializeState: async (): Promise<SerializedPanelState<LinksSerializedState>> => {
             if (savedObjectId$.value !== undefined) {
-              console.log(serializeTitles());
               const linksByReferenceState: LinksByReferenceSerializedState = {
                 savedObjectId: savedObjectId$.value,
                 ...serializeTitles(),
