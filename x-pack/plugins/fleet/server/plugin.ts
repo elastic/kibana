@@ -150,6 +150,7 @@ export interface FleetStartDeps {
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
+  spaces: SpacesPluginStart;
 }
 
 export interface FleetAppContext {
@@ -257,6 +258,7 @@ export class FleetPlugin
   private kibanaInstanceId: FleetAppContext['kibanaInstanceId'];
   private httpSetup?: HttpServiceSetup;
   private securitySetup!: SecurityPluginSetup;
+  private spacesPluginsStart?: SpacesPluginStart;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
@@ -517,6 +519,7 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
+        const spacesPluginsStart = this.spacesPluginsStart;
         return {
           get agentClient() {
             const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
@@ -554,7 +557,9 @@ export class FleetPlugin
           get spaceId() {
             return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           },
-
+          getAllSpaces() {
+            return spacesPluginsStart!.spacesService.createSpacesClient(request).getAll();
+          },
           get limitedToPackages() {
             if (routeAuthz && routeAuthz.granted) {
               return routeAuthz.scopeDataToPackages;
@@ -600,6 +605,7 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    this.spacesPluginsStart = plugins.spaces;
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({

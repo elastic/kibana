@@ -115,7 +115,7 @@ export const getFleetServerOrAgentPolicies = async (
     has_fleet_server: policy.has_fleet_server,
     fleet_server_host_id: policy.fleet_server_host_id,
     download_source_id: policy.download_source_id,
-    space_id: policy.space_id,
+    space_ids: policy.space_ids,
   });
 
   // If an agent policy is specified, return only that policy

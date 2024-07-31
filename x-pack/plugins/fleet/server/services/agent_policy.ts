@@ -542,7 +542,7 @@ class AgentPolicyService {
         if (options.withAgentCount) {
           await getAgentsByKuery(
             appContextService.getInternalUserESClient(),
-            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_id),
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
             {
               showInactive: true,
               perPage: 0,

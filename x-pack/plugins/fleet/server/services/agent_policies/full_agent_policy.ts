@@ -192,8 +192,8 @@ export async function getFullAgentPolicy(
     },
   };
 
-  if (agentPolicy.space_id) {
-    fullAgentPolicy.namespaces = [agentPolicy.space_id];
+  if (agentPolicy.space_ids) {
+    fullAgentPolicy.namespaces = agentPolicy.space_ids;
   }
 
   const dataPermissions =

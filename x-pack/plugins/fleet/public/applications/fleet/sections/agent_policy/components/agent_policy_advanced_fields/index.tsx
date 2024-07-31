@@ -60,6 +60,7 @@ import {
 } from './hooks';
 
 import { CustomFields } from './custom_fields';
+import { SpaceSelector } from './space_selector';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -254,6 +255,48 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             placeholder={i18n.translate('xpack.fleet.agentPolicyForm.descriptionFieldPlaceholder', {
               defaultMessage: 'Optional description',
             })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      {/* TODO feature flag condition */}
+      <EuiDescribedFormGroup
+        fullWidth
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
+              defaultMessage="Space"
+            />
+          </h3>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.spaceDescription"
+            defaultMessage="Select a space for this policy"
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          key="space"
+          error={
+            touchedFields.description && validation.description ? validation.description : null
+          }
+          isDisabled={disabled}
+          isInvalid={Boolean(touchedFields.description && validation.description)}
+        >
+          <SpaceSelector
+            isDisabled={disabled}
+            value={
+              'space_ids' in agentPolicy && agentPolicy.space_ids
+                ? agentPolicy.space_ids
+                : ['default']
+            }
+            onChange={(newValue) => {
+              updateAgentPolicy({
+                space_ids: newValue,
+              });
+            }}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

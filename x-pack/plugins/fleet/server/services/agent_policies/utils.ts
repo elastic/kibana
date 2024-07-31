@@ -40,7 +40,7 @@ export const mapAgentPolicySavedObjectToAgentPolicy = ({
   return {
     id,
     version,
-    space_id: namespaces?.[0] ? namespaces?.[0] : undefined,
+    space_ids: namespaces,
     description,
     is_default,
     is_default_fleet_server,
