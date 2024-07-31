@@ -102,13 +102,13 @@
     "@kbn/router-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/observability-alerting-rule-utils",
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/deeplinks-observability",
     "@kbn/event-annotation-common",
     "@kbn/logs-data-access-plugin",
-    "@kbn/core-application-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/observability-alerting-rule-utils"
   ],
   "exclude": [
     "target/**/*"

@@ -1011,25 +1011,25 @@
               "{ i18n: ",
               {
                 "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
+                "section": "def-public.I18nStart",
                 "text": "I18nStart"
               },
               "; analytics: ",
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
+                "section": "def-public.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
               "; theme: ",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
               "; }"
@@ -1172,25 +1172,25 @@
           "{ i18n: ",
           {
             "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
+            "section": "def-public.I18nStart",
             "text": "I18nStart"
           },
           "; analytics: ",
           {
             "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
+            "section": "def-public.AnalyticsServiceStart",
             "text": "AnalyticsServiceStart"
           },
           "; theme: ",
           {
             "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceSetup",
+            "section": "def-public.ThemeServiceSetup",
             "text": "ThemeServiceSetup"
           },
           "; }"

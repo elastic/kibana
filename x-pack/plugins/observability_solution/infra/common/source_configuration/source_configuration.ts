@@ -153,7 +153,6 @@ export const SourceStatusRuntimeType = rt.type({
   logIndicesExist: rt.boolean,
   metricIndicesExist: rt.boolean,
   remoteClustersExist: rt.boolean,
-  indexFields: rt.array(SourceStatusFieldRuntimeType),
 });
 
 export interface InfraSourceStatus extends rt.TypeOf<typeof SourceStatusRuntimeType> {}
