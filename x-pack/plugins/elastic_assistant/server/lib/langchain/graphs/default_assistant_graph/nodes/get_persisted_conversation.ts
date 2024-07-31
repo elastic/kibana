@@ -55,7 +55,7 @@ export const getPersistedConversation = async ({
       conversation,
       messages,
       chatTitle: conversation.title,
-      input: lastMessage?.content,
+      input: lastMessage?.content as string,
     };
   }
 
