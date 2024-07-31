@@ -1259,7 +1259,6 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /test/functional/services/remote @elastic/appex-qa
 /test/visual_regression @elastic/appex-qa
 /x-pack/test/visual_regression @elastic/appex-qa
-/x-pack/performance @elastic/appex-qa
 /packages/kbn-test/src/functional_test_runner @elastic/appex-qa
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
