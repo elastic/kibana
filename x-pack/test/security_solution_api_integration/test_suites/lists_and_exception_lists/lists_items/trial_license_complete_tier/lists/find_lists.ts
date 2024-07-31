@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless find_lists', () => {
+  describe('@ess @serverless @serverlessQA find_lists', () => {
     describe('find lists', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

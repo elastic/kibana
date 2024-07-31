@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless find_list_items', () => {
+  describe('@ess @serverless @serverlessQA find_list_items', () => {
     describe('find list items', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

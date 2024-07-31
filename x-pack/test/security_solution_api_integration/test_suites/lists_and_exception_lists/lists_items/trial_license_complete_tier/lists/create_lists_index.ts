@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless create_list_index_route', () => {
+  describe('@ess @serverless @serverlessQA create_list_index_route', () => {
     beforeEach(async () => {
       await deleteListsIndex(supertest, log);
     });

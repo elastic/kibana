@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless patch_list_items', () => {
+  describe('@ess @serverless @serverlessQA patch_list_items', () => {
     describe('patch list items', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);

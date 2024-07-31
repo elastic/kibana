@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless import_list_items', () => {
+  describe('@ess @serverless @serverlessQA import_list_items', () => {
     describe('importing list items without an index', () => {
       it('should not import a list item if the index does not exist yet', async () => {
         const { body } = await supertest
