@@ -9,18 +9,20 @@
 import { useCallback, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useLoadRuleTypesQuery, useAlertDataView, useRuleAADFields } from '../common/hooks';
+import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../common/hooks';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
+
+const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
 
 export const AlertsSearchBar = ({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds,
+  featureIds = EMPTY_FEATURE_IDS,
   ruleTypeId,
   query,
   filters,
@@ -40,8 +42,8 @@ export const AlertsSearchBar = ({
   dataViewsService,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataViews, loading } = useAlertDataView({
-    featureIds: featureIds ?? [],
+  const { dataView } = useAlertsDataView({
+    featureIds,
     http,
     toasts,
     dataViewsService,
@@ -53,7 +55,11 @@ export const AlertsSearchBar = ({
   });
 
   const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataViews;
+    ruleTypeId && aadFields?.length
+      ? [{ title: ruleTypeId, fields: aadFields }]
+      : dataView
+      ? [dataView]
+      : null;
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
@@ -99,7 +105,7 @@ export const AlertsSearchBar = ({
     appName,
     disableQueryLanguageSwitcher,
     // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-    indexPatterns: loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns,
+    indexPatterns: !indexPatterns || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns,
     placeholder,
     query: { query: query ?? '', language: queryLanguage },
     filters,

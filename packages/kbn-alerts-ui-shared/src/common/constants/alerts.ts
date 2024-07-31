@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './alerts';
-export * from './i18n_weekdays';
-export * from './routes';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+
+export const DEFAULT_ALERTS_PAGE_SIZE = 10;
+export const EMPTY_AAD_FIELDS: DataViewField[] = [];

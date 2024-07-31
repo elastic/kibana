@@ -6,6 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './alerts';
-export * from './i18n_weekdays';
-export * from './routes';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
+
+export interface FetchAlertsIndexNamesParams {
+  // Dependencies
+  http: HttpSetup;
+
+  // Params
+  /**
+   * Array of feature ids used for authorization and area-based filtering
+   */
+  featureIds: ValidFeatureId[];
+}

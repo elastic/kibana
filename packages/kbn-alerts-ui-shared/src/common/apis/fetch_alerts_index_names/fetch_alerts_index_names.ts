@@ -6,21 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { BASE_RAC_ALERTS_API_PATH } from '../constants';
+import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
+import { FetchAlertsIndexNamesParams } from './types';
 
-export async function fetchAlertIndexNames({
-  http,
-  features,
-}: {
-  http: HttpSetup;
-  features: string;
-}): Promise<string[]> {
-  const { index_name: indexNamesStr = [] } = await http.get<{ index_name: string[] }>(
+export const fetchAlertsIndexNames = async ({ http, featureIds }: FetchAlertsIndexNamesParams) => {
+  const { index_name: indexNames = [] } = await http.get<{ index_name: string[] }>(
     `${BASE_RAC_ALERTS_API_PATH}/index`,
     {
-      query: { features },
+      query: { features: featureIds.sort().join(',') },
     }
   );
-  return indexNamesStr;
-}
+  return indexNames;
+};
