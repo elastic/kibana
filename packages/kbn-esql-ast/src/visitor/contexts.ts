@@ -27,6 +27,7 @@ import type {
   ESQLTimeInterval,
 } from '../types';
 import type {
+  CommandVisitorInput,
   ESQLAstExpressionNode,
   ESQLAstQueryNode,
   ExpressionVisitorInput,
@@ -88,7 +89,7 @@ export class VisitorContext<
 
   public visitCommand(
     commandNode: ESQLAstCommand,
-    input: ExpressionVisitorInput<Methods>
+    input: CommandVisitorInput<Methods>
   ): ExpressionVisitorOutput<Methods> {
     return this.ctx.visitCommand(this, commandNode, input);
   }
