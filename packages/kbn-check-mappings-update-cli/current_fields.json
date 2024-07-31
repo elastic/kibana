@@ -435,9 +435,7 @@
     "updated_by",
     "version"
   ],
-  "favorites": [
-    "userId"
-  ],
+  "favorites": [],
   "file": [
     "FileKind",
     "Meta",

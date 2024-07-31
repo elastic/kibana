@@ -1480,11 +1480,7 @@
   },
   "favorites": {
     "dynamic": false,
-    "properties": {
-      "userId": {
-        "type": "keyword"
-      }
-    }
+    "properties": {}
   },
   "file": {
     "dynamic": false,

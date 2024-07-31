@@ -27,11 +27,7 @@ export const favoritesSavedObjectType: SavedObjectsType = {
   namespaceType: 'single',
   mappings: {
     dynamic: false,
-    properties: {
-      userId: {
-        type: 'keyword',
-      },
-    },
+    properties: {},
   },
   modelVersions: {
     1: {
