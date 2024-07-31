@@ -29,7 +29,6 @@ import { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 const defaultStatus = {
-  indexFields: [],
   metricIndicesExist: false,
   remoteClustersExist: false,
 };
@@ -51,9 +50,6 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     /**
      * Extract values from promises settlements
      */
-    const indexFields = isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)
-      ? indexFieldsSettled.value
-      : defaultStatus.indexFields;
     const metricIndicesExist = isFulfilled<boolean>(metricIndicesExistSettled)
       ? metricIndicesExistSettled.value
       : defaultStatus.metricIndicesExist;
@@ -73,7 +69,6 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     }
 
     return {
-      indexFields,
       metricIndicesExist,
       remoteClustersExist,
     };
