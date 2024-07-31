@@ -280,7 +280,7 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Space',
         }),
         sortable: true,
-        render: (value: string, rowRecord) => (
+        render: (value: string, rowRecord: Space) => (
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
               <EuiLink
@@ -319,7 +319,7 @@ export class SpacesGridPage extends Component<Props, State> {
         sortable: (space: Space) => {
           return getEnabledFeatures(this.state.features, space).length;
         },
-        render: (_disabledFeatures: string[], rowRecord) => {
+        render: (_disabledFeatures: string[], rowRecord: Space) => {
           const enabledFeatureCount = getEnabledFeatures(this.state.features, rowRecord).length;
           if (enabledFeatureCount === this.state.features.length) {
             return (
@@ -427,7 +427,7 @@ export class SpacesGridPage extends Component<Props, State> {
           type: 'icon',
           icon: 'merge',
           color: 'primary',
-          href: (rowRecord) =>
+          href: (rowRecord: Space) =>
             addSpaceIdToPath(
               this.props.serverBasePath,
               rowRecord.id,
@@ -456,7 +456,7 @@ export class SpacesGridPage extends Component<Props, State> {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (rowRecord) => this.onDeleteSpaceClick(rowRecord),
+          onClick: (rowRecord: Space) => this.onDeleteSpaceClick(rowRecord),
           enabled: (rowRecord: Space) => !isReservedSpace(rowRecord),
           'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
         },
