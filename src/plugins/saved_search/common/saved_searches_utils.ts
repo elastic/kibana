@@ -46,5 +46,6 @@ export const fromSavedSearchAttributes = <
     sampleSize: attributes.sampleSize,
     breakdownField: attributes.breakdownField,
     visContext: attributes.visContext,
+    density: attributes.density,
     managed,
   } as ReturnType);

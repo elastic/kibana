@@ -13,13 +13,8 @@ import {
   DATA_GRID_STYLE_COMPACT,
   DATA_GRID_STYLE_EXPANDED,
   DATA_GRID_STYLE_NORMAL,
+  DataGridDensity,
 } from '../constants';
-
-export enum DataGridDensity {
-  COMPACT = 'compact',
-  NORMAL = 'normal',
-  EXPANDED = 'expanded',
-}
 
 export const DATA_GRID_DENSITY_STYLE_MAP = {
   [DataGridDensity.COMPACT]: DATA_GRID_STYLE_COMPACT,

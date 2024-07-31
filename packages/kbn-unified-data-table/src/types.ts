@@ -14,6 +14,8 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
+export type { DataGridDensity } from './constants';
+
 /**
  * User configurable state of data grid, persisted in saved search
  */

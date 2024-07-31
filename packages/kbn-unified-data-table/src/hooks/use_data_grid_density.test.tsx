@@ -8,8 +8,8 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
-import { useDataGridDensity, DataGridDensity } from './use_data_grid_density';
-import { DATA_GRID_STYLE_EXPANDED } from '../constants';
+import { useDataGridDensity } from './use_data_grid_density';
+import { DATA_GRID_STYLE_EXPANDED, DataGridDensity } from '../constants';
 
 const localStorageMock = {
   get: jest.fn(),

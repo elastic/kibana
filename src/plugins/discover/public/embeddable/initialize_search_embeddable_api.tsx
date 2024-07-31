@@ -21,7 +21,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { getDefaultRowsPerPage } from '../../common/constants';
@@ -93,6 +93,7 @@ export const initializeSearchEmbeddableApi = async (
   const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
+  const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
   /**
@@ -132,6 +133,7 @@ export const initializeSearchEmbeddableApi = async (
     sort: sort$,
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
+    density: density$,
   };
 
   /** The saved search should be the source of truth for all state  */
@@ -200,6 +202,7 @@ export const initializeSearchEmbeddableApi = async (
       ],
       viewMode: [savedSearchViewMode$, (value) => savedSearchViewMode$.next(value)],
       grid: [grid$, (value) => grid$.next(value)],
+      density: [density$, (value) => density$.next(value)],
     },
   };
 };

@@ -81,6 +81,7 @@ export function getStateDefaults({
     sampleSize: undefined,
     grid: undefined,
     breakdownField: undefined,
+    density: undefined,
   };
 
   if (savedSearch.grid) {
@@ -112,6 +113,9 @@ export function getStateDefaults({
   }
   if (savedSearch.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
+  }
+  if (savedSearch.density) {
+    defaultState.density = savedSearch.density;
   }
 
   return defaultState;

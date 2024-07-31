@@ -48,11 +48,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import {
-  DATA_GRID_DENSITY_STYLE_MAP,
-  DataGridDensity,
-  useDataGridDensity,
-} from '../hooks/use_data_grid_density';
+import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -84,6 +80,7 @@ import {
   DEFAULT_ROWS_PER_PAGE,
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
+  DataGridDensity,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -242,6 +239,10 @@ export interface UnifiedDataTableProps {
    * Whether or not to show the density selector
    */
   showDensitySelector?: boolean;
+  /**
+   * Density from state
+   */
+  dataGridDensityState?: DataGridDensity;
   /**
    * Callback when the data grid density configuration is modified
    */
@@ -482,6 +483,7 @@ export const UnifiedDataTable = ({
   renderCellPopover,
   getRowIndicator,
   showDensitySelector = false,
+  dataGridDensityState,
   onUpdateDataGridDensity,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
@@ -629,6 +631,7 @@ export const UnifiedDataTable = ({
   const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
     storage,
     consumer,
+    dataGridDensityState,
     onUpdateDataGridDensity,
   });
 
