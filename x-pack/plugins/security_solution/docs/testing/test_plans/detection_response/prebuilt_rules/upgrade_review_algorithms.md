@@ -27,11 +27,14 @@ Status: `in progress`.
     - [**Scenario: `ABC` - Rule field is a mergable multi line string**](#scenario-abc---rule-field-is-a-mergable-multi-line-string)
     - [**Scenario: `ABC` - Rule field is a non-mergable multi line string**](#scenario-abc---rule-field-is-a-non-mergable-multi-line-string)
     - [**Scenario: `ABC` - Rule field is an array of scalar values**](#scenario-abc---rule-field-is-an-array-of-scalar-values)
+    - [**Scenario: `ABC` - Rule field is a solvable `data_source` object**](#scenario-abc---rule-field-is-a-solvable-data_source-object)
+    - [**Scenario: `ABC` - Rule field is a non-solvable `data_source` object**](#scenario-abc---rule-field-is-a-non-solvable-data_source-object)
   - [Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same-and-the-rule-base-version-doesnt-exist----aa)
     - [**Scenario: `-AA` - Rule field is any type**](#scenario--aa---rule-field-is-any-type)
   - [Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same-and-the-rule-base-version-doesnt-exist----bc)
     - [**Scenario: `-BC` - Rule field is a number or single line string**](#scenario--bc---rule-field-is-a-number-or-single-line-string)
     - [**Scenario: `-BC` - Rule field is an array of scalar values**](#scenario--bc---rule-field-is-an-array-of-scalar-values)
+    - [**Scenario: `-BC` - Rule field is a solvable `data_source` object**](#scenario--bc---rule-field-is-a-solvable-data_source-object)
 
 ## Useful information
 
@@ -52,6 +55,9 @@ Status: `in progress`.
 
 - **Merged version**: Also labeled as `merged_version`. This is the version of the rule that we determine via the various algorithms. It could contain a mix of all the rule versions on a per-field basis to create a singluar version of the rule containing all relevant updates and user changes to display to the user.
 
+- **Grouped fields**
+  - `data_source`: an object field that contains either a `data_view_id` string OR an `index` array of strings
+
 ### Assumptions
 
 - All scenarios will contain at least 1 prebuilt rule installed in Kibana.
@@ -63,7 +69,7 @@ Status: `in progress`.
 
 #### **Scenario: `AAA` - Rule field is any type**
 
-**Automation**: 4 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 6 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given <field_name> field is not customized by the user (current version == base version)
@@ -78,13 +84,15 @@ Examples:
 | multi line string  | description | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
 | number             | risk_score  | 1                                         | 1                                         | 1                                         | 1                                         |
 | array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
+| data_source        | data_source | ["one", "two", "three"]                   | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
+| data_source        | data_source | "A"                                       | "A"                                       | "A"                                       | "A"                                       |
 ```
 
 ### Rule field doesn't have an update but has a custom value - `ABA`
 
 #### **Scenario: `ABA` - Rule field is any type**
 
-**Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 6 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given <field_name> field is customized by the user (current version != base version)
@@ -99,13 +107,15 @@ Examples:
 | multi line string  | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
 | number             | risk_score  | 1                                         | 2                                               | 1                                         | 2                                               |
 | array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "three"]                   | ["one", "two", "four"]                          |
+| data_source        | data_source | ["one", "two", "three"]                   | "A"                                             | ["one", "two", "three"]                   | "A"                                             |
+| data_source        | data_source | "A"                                       | ["one", "two", "three"]                         | "A"                                       | ["one", "two", "three"]                         |
 ```
 
 ### Rule field has an update and doesn't have a custom value - `AAB`
 
 #### **Scenario: `AAB` - Rule field is any type**
 
-**Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 6 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given <field_name> field is not customized by the user (current version == base version)
@@ -120,13 +130,15 @@ Examples:
 | multi line string  | description | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
 | number             | risk_score  | 1                                         | 1                                         | 2                                               | 2                                               |
 | array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "four"]                          |
+| data_source        | data_source | ["one", "two", "three"]                   | ["one", "two", "three"]                   | "A"                                             | "A"                                             |
+| data_source        | data_source | "A"                                       | "A"                                       | ["one", "two", "three"]                         | ["one", "two", "three"]                         |
 ```
 
 ### Rule field has an update and a custom value that are the same - `ABB`
 
 #### **Scenario: `ABB` - Rule field is any type**
 
-**Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 6 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given <field_name> field is customized by the user (current version != base version)
@@ -142,6 +154,8 @@ Examples:
 | multi line string  | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
 | number             | risk_score  | 1                                         | 2                                               | 2                                               | 2                                               |
 | array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "four"]                          | ["one", "two", "four"]                          |
+| data_source        | data_source | ["one", "two", "three"]                   | "A"                                             | "A"                                             | "A"                                             |
+| data_source        | data_source | "A"                                       | ["one", "two", "three"]                         | ["one", "two", "three"]                         | ["one", "two", "three"]                         |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
@@ -225,11 +239,54 @@ Examples:
 | array of scalars | index      | ["logs-*"]                            | ["logs-*", "Logs-*"]    | ["logs-*", "new-*"]              | ["logs-*", "Logs-*", "new-*"]    |
 ```
 
+#### **Scenario: `ABC` - Rule field is a solvable `data_source` object**
+
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithm
+
+```Gherkin
+Given data_source field is customized by the user (current version != base version)
+And data_source field is updated by Elastic in this upgrade (target version != base version)
+And customized data_source field is different than the Elastic update in this upgrade (current version != target version)
+And current version and target version are both array fields in data_source
+Then for data_source field the diff algorithm should output a custom merged version with a solvable conflict
+And arrays should be deduplicated before comparison
+And arrays should be compared sensitive of case
+And arrays should be compared agnostic of order
+And data_source field should be returned from the `upgrade/_review` API endpoint
+And data_source field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm    | base_version            | current_version                | target_version          | merged_version                   |
+| data_source  | ["one", "two", "three"] | ["two", "one", "four"]         | ["one", "two", "five"]  | ["one", "two", "four", "five"]   |
+| data_source  | "A"                     | ["one", "one", "two", "three"] | ["one", "two", "five"]  | ["one", "two", "three", "five"]  |
+```
+
+#### **Scenario: `ABC` - Rule field is a non-solvable `data_source` object**
+
+**Automation**: 5 integration tests with mock rules + a set of unit tests for the algorithm
+
+```Gherkin
+Given data_source field is customized by the user (current version != base version)
+And data_source field is updated by Elastic in this upgrade (target version != base version)
+And customized data_source field is different than the Elastic update in this upgrade (current version != target version)
+Then for data_source field the diff algorithm should output the current version as the merged version with a non-solvable conflict
+And data_source field should be returned from the `upgrade/_review` API endpoint
+And data_source field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm    | base_version            | current_version         | target_version          | merged_version          |
+| data_source  | ["one", "two", "three"] | "A"                     | "B"                     | "A"                     |
+| data_source  | "A"                     | ["one", "two", "three"] | "B"                     | ["one", "two", "three"] |
+| data_source  | "A"                     | "B"                     | ["one", "two", "three"] | "B"                     |
+| data_source  | ["one", "two", "three"] | ["one", "two", "four"]  | "C"                     | ["one", "two", "four"]  |
+| data_source  | ["one", "two", "three"] | "A"                     | ["one", "two", "five"]  | "A"                     |
+```
+
 ### Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`
 
 #### **Scenario: `-AA` - Rule field is any type**
 
-**Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 5 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given at least 1 installed prebuilt rule has a new version available
@@ -245,13 +302,15 @@ Examples:
 | multi line string  | description | N/A          | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
 | number             | risk_score  | N/A          | 1                                         | 1                                         | 1                                         |
 | array of scalars   | tags        | N/A          | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
+| data_source        | data_source | N/A          | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
+| data_source        | data_source | N/A          | "A"                                       | "A"                                       | "A"                                       |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`
 
 #### **Scenario: `-BC` - Rule field is a number or single line string**
 
-**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithms
+**Automation**: 4 integration tests with mock rules + a set of unit tests for the algorithms
 
 ```Gherkin
 Given at least 1 installed prebuilt rule has a new version available
@@ -266,6 +325,7 @@ Examples:
 | single line string | name        | N/A          | "B"                                       | "C"                                             | "C"                                             |
 | multi line string  | description | N/A          | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
 | number             | risk_score  | N/A          | 2                                         | 3                                               | 3                                               |
+| data_source        | data_source | N/A          | "A"                                       | "A"                                             | "A"                                             |
 ```
 
 #### **Scenario: `-BC` - Rule field is an array of scalar values**
@@ -273,8 +333,8 @@ Examples:
 **Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
-Given <field_name> field is customized by the user (current version != base version)
-And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+Given at least 1 installed prebuilt rule has a new version available
+And the base version of the rule cannot be determined
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
 Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
 And arrays should be deduplicated before comparison
@@ -287,4 +347,25 @@ And <field_name> field should be shown in the upgrade preview UI
 Examples:
 | algorithm        | field_name | base_version | current_version        | target_version         | merged_version                 |
 | array of scalars | tags       | N/A          | ["one", "two", "four"] | ["one", "two", "five"] | ["one", "two", "four", "five"] |
+```
+
+#### **Scenario: `-BC` - Rule field is a solvable `data_source` object**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
+
+```Gherkin
+Given at least 1 installed prebuilt rule has a new version available
+And the base version of the rule cannot be determined
+And customized data_source field is different than the Elastic update in this upgrade (current version != target version)
+And current version and target version are both array fields in data_source
+Then for data_source field the diff algorithm should output a custom merged version with a solvable conflict
+And arrays should be deduplicated before comparison
+And arrays should be compared sensitive of case
+And arrays should be compared agnostic of order
+And data_source field should be returned from the `upgrade/_review` API endpoint
+And data_source field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm    | base_version | current_version                | target_version          | merged_version                   |
+| data_source  | N/A          | ["two", "one", "three"]        | ["one", "two", "four"]  | ["one", "two", "three", "four"]  |
 ```
