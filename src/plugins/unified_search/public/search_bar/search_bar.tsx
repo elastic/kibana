@@ -115,7 +115,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   disableQueryLanguageSwitcher?: boolean;
   // defines padding and border; use 'inPage' to avoid any padding or border;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
-  displayStyle?: 'inPage' | 'detached';
+  displayStyle?: 'inPage' | 'detached' | 'withBorders';
   // super update button background fill control
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;

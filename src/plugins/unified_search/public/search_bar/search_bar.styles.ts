@@ -21,6 +21,11 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
     inPage: css`
       padding: 0;
     `,
+    withBorders: css`
+      border: ${euiTheme.border.thin};
+      border-radius: ${euiTheme.border.radius};
+      border-bottom: none;
+    `,
     hidden: css`
       display: none;
     `,
