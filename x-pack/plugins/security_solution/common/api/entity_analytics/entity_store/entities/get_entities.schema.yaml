@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Get Entity Store
+  version: '1'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /store/entities:
+    get:
+      x-labels: [ess, serverless]
+      operationId: GetEntities
+      x-codegen-enabled: true
+      summary: Get Entity Relations
+      parameters:
+        - in: query
+          name: entity_type
+          required: true
+          schema:
+            $ref: './common.schema.yaml#/components/schemas/EntityType'
+        - in: query
+          name: entity_id
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './common.schema.yaml#/components/schemas/EntityRecord'

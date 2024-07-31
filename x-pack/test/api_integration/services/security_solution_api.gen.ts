@@ -48,6 +48,7 @@ import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
+import { GetEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/get_entities.gen';
 import { GetEntityRelationsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/relations/get_entity_relations.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
@@ -313,6 +314,14 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    getEntities(props: GetEntitiesProps) {
+      return supertest
+        .get('/store/entities')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     getEntityRelations(props: GetEntityRelationsProps) {
       return supertest
@@ -596,6 +605,9 @@ export interface GetAlertsMigrationStatusProps {
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
+}
+export interface GetEntitiesProps {
+  query: GetEntitiesRequestQueryInput;
 }
 export interface GetEntityRelationsProps {
   query: GetEntityRelationsRequestQueryInput;
