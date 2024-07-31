@@ -8,11 +8,12 @@
 
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
-import { DataSourceCategory } from '../../../profiles';
+import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createNginxErrorLogsDataSourceProfileProvider } from './nginx_error_logs';
 
+const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 const dataSourceProfileProvider = createNginxErrorLogsDataSourceProfileProvider(
@@ -22,6 +23,7 @@ const dataSourceProfileProvider = createNginxErrorLogsDataSourceProfileProvider(
 describe('createNginxErrorLogsDataSourceProfileProvider', () => {
   it('should match a valid index pattern', async () => {
     const result = await dataSourceProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
       query: { esql: 'FROM logs-nginx.error-*' },
     });
@@ -30,6 +32,7 @@ describe('createNginxErrorLogsDataSourceProfileProvider', () => {
 
   it('should not match an invalid index pattern', async () => {
     const result = await dataSourceProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
       query: { esql: 'FROM logs-nginx.access-*' },
     });

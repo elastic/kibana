@@ -8,11 +8,12 @@
 
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
-import { DataSourceCategory } from '../../../profiles';
+import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from '../profile';
 import { createSystemLogsDataSourceProfileProvider } from './system_logs';
 
+const ROOT_CONTEXT: RootContext = { solutionType: SolutionType.Default };
 const { profileProviderServices } = createContextAwarenessMocks();
 const logsDataSourceProfileProvider = createLogsDataSourceProfileProvider(profileProviderServices);
 const dataSourceProfileProvider = createSystemLogsDataSourceProfileProvider(
@@ -22,6 +23,7 @@ const dataSourceProfileProvider = createSystemLogsDataSourceProfileProvider(
 describe('createSystemLogsDataSourceProfileProvider', () => {
   it('should match a valid index pattern', async () => {
     const result = await dataSourceProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
       query: { esql: 'FROM logs-system.syslog-*' },
     });
@@ -30,6 +32,7 @@ describe('createSystemLogsDataSourceProfileProvider', () => {
 
   it('should not match an invalid index pattern', async () => {
     const result = await dataSourceProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
       dataSource: createEsqlDataSource(),
       query: { esql: 'FROM logs-notsystem.syslog-*' },
     });

@@ -15,7 +15,7 @@ export const extractIndexPatternFrom = ({
   dataSource,
   dataView,
   query,
-}: DataSourceProfileProviderParams) => {
+}: Pick<DataSourceProfileProviderParams, 'dataSource' | 'dataView' | 'query'>) => {
   if (isEsqlSource(dataSource) && isOfAggregateQueryType(query)) {
     return getIndexPatternFromESQLQuery(query.esql);
   } else if (isDataViewSource(dataSource) && dataView) {

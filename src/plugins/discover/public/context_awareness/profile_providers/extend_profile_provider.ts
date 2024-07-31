@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { AsyncProfileProvider, ProfileProvider } from '../profile_service';
+import type { BaseProfileProvider } from '../profile_service';
 
-export const extendProfileProvider = <
-  TProvider extends ProfileProvider<{}, {}, {}> | AsyncProfileProvider<{}, {}, {}>
->(
+export const extendProfileProvider = <TProvider extends BaseProfileProvider<{}>>(
   baseProvider: TProvider,
   extension: Partial<TProvider> & Pick<TProvider, 'profileId'>
 ): TProvider => ({
