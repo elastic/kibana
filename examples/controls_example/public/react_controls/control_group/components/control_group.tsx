@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
   DndContext,
@@ -98,64 +98,84 @@ export function ControlGroup({
     };
   }, [controlGroupApi]);
 
+  const ApplyButtonComponent = useMemo(() => {
+    return (
+      <EuiButtonIcon
+        size="m"
+        disabled={!hasUnappliedSelections}
+        iconSize="m"
+        display="fill"
+        color={'success'}
+        iconType={'check'}
+        data-test-subj="controlGroup--applyFiltersButton"
+        aria-label={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
+        onClick={applySelections}
+      />
+    );
+  }, [hasUnappliedSelections, applySelections]);
+
   return (
-    <EuiPanel borderRadius="m" paddingSize="none" color={draggingId ? 'success' : 'transparent'}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
+    <EuiPanel
+      borderRadius="m"
+      paddingSize="none"
+      color={draggingId ? 'success' : 'transparent'}
+      className="controlsWrapper"
+    >
+      <EuiFlexGroup
+        gutterSize="s"
+        direction="row"
+        responsive={false}
+        data-test-subj="controls-group"
+      >
         {!isInitialized && <EuiLoadingChart />}
-        <DndContext
-          onDragStart={({ active }) => setDraggingId(`${active.id}`)}
-          onDragEnd={onDragEnd}
-          onDragCancel={() => setDraggingId(null)}
-          sensors={sensors}
-          measuring={{
-            droppable: {
-              strategy: MeasuringStrategy.BeforeDragging,
-            },
-          }}
-        >
-          <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-            {controlsInOrder.map(({ id, type }) => (
-              <ControlRenderer
-                key={id}
-                uuid={id}
-                type={type}
-                getParentApi={() => controlGroupApi}
-                onApiAvailable={(controlApi) => {
-                  controlsManager.setControlApi(id, controlApi);
-                }}
-                isControlGroupInitialized={isInitialized}
-              />
-            ))}
-          </SortableContext>
-          <DragOverlay>
-            {draggingId ? (
-              <ControlClone
-                key={draggingId}
-                labelPosition={labelPosition}
-                controlApi={controlsManager.getControlApi(draggingId)}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-        {!autoApplySelections && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={ControlGroupStrings.management.getApplyButtonTitle(hasUnappliedSelections)}
-            >
-              <EuiButtonIcon
-                size="m"
-                disabled={!hasUnappliedSelections}
-                iconSize="m"
-                display="fill"
-                color={'success'}
-                iconType={'check'}
-                data-test-subj="controlGroup--applyFiltersButton"
-                aria-label={ControlGroupStrings.management.getApplyButtonTitle(
-                  hasUnappliedSelections
-                )}
-                onClick={applySelections}
-              />
-            </EuiToolTip>
+        <EuiFlexItem>
+          <DndContext
+            onDragStart={({ active }) => setDraggingId(`${active.id}`)}
+            onDragEnd={onDragEnd}
+            onDragCancel={() => setDraggingId(null)}
+            sensors={sensors}
+            measuring={{
+              droppable: {
+                strategy: MeasuringStrategy.BeforeDragging,
+              },
+            }}
+          >
+            <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
+              <EuiFlexGroup className="controlGroup" alignItems="center" gutterSize="s" wrap={true}>
+                {controlsInOrder.map(({ id, type }) => (
+                  <ControlRenderer
+                    key={id}
+                    uuid={id}
+                    type={type}
+                    getParentApi={() => controlGroupApi}
+                    onApiAvailable={(controlApi) => {
+                      controlsManager.setControlApi(id, controlApi);
+                    }}
+                    isControlGroupInitialized={isInitialized}
+                  />
+                ))}
+              </EuiFlexGroup>
+            </SortableContext>
+            <DragOverlay>
+              {draggingId ? (
+                <ControlClone
+                  key={draggingId}
+                  labelPosition={labelPosition}
+                  controlApi={controlsManager.getControlApi(draggingId)}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </EuiFlexItem>
+        {isInitialized && !autoApplySelections && (
+          <EuiFlexItem grow={false} className="controlGroup--endButtonGroup">
+            {hasUnappliedSelections ? (
+              ApplyButtonComponent
+            ) : (
+              <EuiToolTip content={ControlGroupStrings.management.getApplyButtonTitle(false)}>
+                {ApplyButtonComponent}
+              </EuiToolTip>
+            )}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityService } from '../../../../../../test/common/services/security/security';
+import { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
 
 export const usersAndRolesFactory = (security: SecurityService) => ({
   createRole: async ({ name, privileges }: { name: string; privileges: any }) => {

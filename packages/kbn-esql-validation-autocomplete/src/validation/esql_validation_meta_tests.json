@@ -2093,46 +2093,6 @@
       "warning": []
     },
     {
-      "query": "meta",
-      "error": [
-        "SyntaxError: missing 'functions' at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "meta functions",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "meta functions()",
-      "error": [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "meta functions blah",
-      "error": [
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'a'",
-        "SyntaxError: token recognition error at: 'h'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "meta info",
-      "error": [
-        "SyntaxError: token recognition error at: 'i'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'fo'",
-        "SyntaxError: missing 'functions' at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
       "query": "show",
       "error": [
         "SyntaxError: missing 'info' at '<EOF>'"

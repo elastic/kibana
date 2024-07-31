@@ -13,6 +13,7 @@ import { TaskManagerConfig } from '../config';
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
+      max_workers: 10,
       max_attempts: 9,
       poll_interval: 6000000,
       allow_reading_invalid_state: false,
@@ -54,8 +55,7 @@ describe('Configuration Statistics Aggregator', () => {
     };
 
     const managedConfig = {
-      startingCapacity: 10,
-      capacityConfiguration$: new Subject<number>(),
+      maxWorkersConfiguration$: new Subject<number>(),
       pollIntervalConfiguration$: new Subject<number>(),
     };
 
@@ -65,12 +65,7 @@ describe('Configuration Statistics Aggregator', () => {
           .pipe(take(3), bufferCount(3))
           .subscribe(([initial, updatedWorkers, updatedInterval]) => {
             expect(initial.value).toEqual({
-              capacity: {
-                config: 10,
-                as_workers: 10,
-                as_cost: 20,
-              },
-              claim_strategy: 'default',
+              max_workers: 10,
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -84,12 +79,7 @@ describe('Configuration Statistics Aggregator', () => {
               },
             });
             expect(updatedWorkers.value).toEqual({
-              capacity: {
-                config: 8,
-                as_workers: 8,
-                as_cost: 16,
-              },
-              claim_strategy: 'default',
+              max_workers: 8,
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -103,12 +93,7 @@ describe('Configuration Statistics Aggregator', () => {
               },
             });
             expect(updatedInterval.value).toEqual({
-              capacity: {
-                config: 8,
-                as_workers: 8,
-                as_cost: 16,
-              },
-              claim_strategy: 'default',
+              max_workers: 8,
               poll_interval: 3000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -123,7 +108,7 @@ describe('Configuration Statistics Aggregator', () => {
             });
             resolve();
           }, reject);
-        managedConfig.capacityConfiguration$.next(8);
+        managedConfig.maxWorkersConfiguration$.next(8);
         managedConfig.pollIntervalConfiguration$.next(3000);
       } catch (error) {
         reject(error);

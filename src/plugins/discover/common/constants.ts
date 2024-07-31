@@ -7,7 +7,7 @@
  */
 
 import { SAMPLE_ROWS_PER_PAGE_SETTING } from '@kbn/discover-utils';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
