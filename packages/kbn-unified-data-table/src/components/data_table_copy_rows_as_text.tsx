@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -16,12 +16,15 @@ import { UnifiedDataTableContext } from '../table_context';
 interface DataTableCopyRowsAsTextProps {
   toastNotifications: ToastsStart;
   columns: string[];
+  onCompleted: () => void;
 }
 
 export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = ({
   toastNotifications,
   columns,
+  onCompleted,
 }) => {
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { valueToStringConverter, dataView, rows, selectedDocsState } =
     useContext(UnifiedDataTableContext);
   const { isDocSelected } = selectedDocsState;
@@ -30,7 +33,9 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
     <EuiContextMenuItem
       data-test-subj="unifiedDataTableCopyRowsAsText"
       icon="copyClipboard"
+      disabled={isProcessing}
       onClick={async () => {
+        setIsProcessing(true);
         await copyRowsAsTextToClipboard({
           columns,
           // preserving the original order of rows rather than the order of selecting rows
@@ -44,6 +49,8 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
           toastNotifications,
           dataView,
         });
+        setIsProcessing(false);
+        onCompleted();
       }}
     >
       <FormattedMessage

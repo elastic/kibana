@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -15,11 +15,14 @@ import { UnifiedDataTableContext } from '../table_context';
 
 interface DataTableCopyRowsAsJsonProps {
   toastNotifications: ToastsStart;
+  onCompleted: () => void;
 }
 
 export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = ({
   toastNotifications,
+  onCompleted,
 }) => {
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { rows, selectedDocsState, isPlainRecord } = useContext(UnifiedDataTableContext);
   const { getSelectedDocsOrderedByRows } = selectedDocsState;
 
@@ -27,12 +30,16 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
     <EuiContextMenuItem
       data-test-subj="dscGridCopySelectedDocumentsJSON"
       icon="copyClipboard"
+      disabled={isProcessing}
       onClick={async () => {
+        setIsProcessing(true);
         await copyRowsAsJsonToClipboard({
           // preserving the original order of rows rather than the order of selecting rows
           selectedRows: getSelectedDocsOrderedByRows(rows),
           toastNotifications,
         });
+        setIsProcessing(false);
+        onCompleted();
       }}
     >
       {isPlainRecord ? (

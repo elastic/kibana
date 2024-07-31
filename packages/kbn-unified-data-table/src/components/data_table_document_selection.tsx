@@ -180,6 +180,10 @@ export function DataTableDocumentToolbarBtn({
   const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
     selectedDocsState;
 
+  const closePopover = useCallback(() => {
+    setIsSelectionPopoverOpen(false);
+  }, [setIsSelectionPopoverOpen]);
+
   const shouldSuggestToSelectAll = useMemo(() => {
     const canSelectMore = selectedDocsCount < rows.length && rows.length > 1;
     if (typeof pageSize !== 'number' || isFilterActive || !canSelectMore) {
@@ -205,9 +209,14 @@ export function DataTableDocumentToolbarBtn({
         key="copyRowsAsText"
         toastNotifications={toastNotifications}
         columns={columns}
+        onCompleted={closePopover}
       />,
       // Copy results to clipboard as JSON
-      <DataTableCopyRowsAsJson key="copyRowsAsJson" toastNotifications={toastNotifications} />,
+      <DataTableCopyRowsAsJson
+        key="copyRowsAsJson"
+        toastNotifications={toastNotifications}
+        onCompleted={closePopover}
+      />,
       isFilterActive ? (
         // Show all documents
         <EuiContextMenuItem
@@ -215,7 +224,7 @@ export function DataTableDocumentToolbarBtn({
           key="showAllDocuments"
           icon="eye"
           onClick={() => {
-            setIsSelectionPopoverOpen(false);
+            closePopover();
             setIsFilterActive(false);
           }}
         >
@@ -238,7 +247,7 @@ export function DataTableDocumentToolbarBtn({
           key="showSelectedDocuments"
           icon="eye"
           onClick={() => {
-            setIsSelectionPopoverOpen(false);
+            closePopover();
             setIsFilterActive(true);
           }}
         >
@@ -261,7 +270,7 @@ export function DataTableDocumentToolbarBtn({
         key="clearSelection"
         icon="cross"
         onClick={() => {
-          setIsSelectionPopoverOpen(false);
+          closePopover();
           clearAllSelectedDocs();
           setIsFilterActive(false);
         }}
@@ -280,6 +289,7 @@ export function DataTableDocumentToolbarBtn({
     setIsCompareActive,
     toastNotifications,
     columns,
+    closePopover,
   ]);
 
   const toggleSelectionToolbar = useCallback(
