@@ -26,7 +26,7 @@ export class EventTracker {
       this.analytics.reportEvent(eventType, eventFields);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(err);
+      console.error(`Navigation EventTracker error: ${err.toString()}`);
     }
   }
 

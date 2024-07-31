@@ -282,13 +282,7 @@ describe('NavControlPopover', () => {
       },
     ];
 
-    const activeSpace: Space = {
-      id: 'space-1',
-      name: 'Default Space',
-      description: 'this is your default space',
-      solution: 'classic',
-      disabledFeatures: [],
-    };
+    const activeSpace = spaces[0];
     const wrapper = await setup(spaces, true /** isSolutionEnabled **/, activeSpace);
 
     await act(async () => {
