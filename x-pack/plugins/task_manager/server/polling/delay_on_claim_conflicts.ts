@@ -19,14 +19,13 @@ import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskPollingCycleEvent } from '../task_events';
 import { ClaimAndFillPoolResult } from '../lib/fill_pool';
-import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
-import { getCapacityInWorkers } from '../task_pool';
+import { createRunningAveragedStat } from '../monitoring/task_run_calcultors';
 
 /**
  * Emits a delay amount in ms to apply to polling whenever the task store exceeds a threshold of claim claimClashes
  */
 export function delayOnClaimConflicts(
-  capacityConfiguration$: ManagedConfiguration['capacityConfiguration$'],
+  maxWorkersConfiguration$: ManagedConfiguration['maxWorkersConfiguration$'],
   pollIntervalConfiguration$: ManagedConfiguration['pollIntervalConfiguration$'],
   taskLifecycleEvents$: Observable<TaskLifecycleEvent>,
   claimClashesPercentageThreshold: number,
@@ -38,7 +37,7 @@ export function delayOnClaimConflicts(
   merge(
     of(0),
     combineLatest([
-      capacityConfiguration$,
+      maxWorkersConfiguration$,
       pollIntervalConfiguration$,
       taskLifecycleEvents$.pipe(
         map<TaskLifecycleEvent, Option<number>>((taskEvent: TaskLifecycleEvent) =>
@@ -52,10 +51,7 @@ export function delayOnClaimConflicts(
         map((claimClashes: Option<number>) => (claimClashes as Some<number>).value)
       ),
     ]).pipe(
-      map(([capacity, pollInterval, latestClaimConflicts]) => {
-        // convert capacity to maxWorkers
-        const maxWorkers = getCapacityInWorkers(capacity);
-
+      map(([maxWorkers, pollInterval, latestClaimConflicts]) => {
         // add latest claimConflict count to queue
         claimConflictQueue(latestClaimConflicts);
 

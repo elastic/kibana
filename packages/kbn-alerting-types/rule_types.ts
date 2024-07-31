@@ -241,7 +241,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   flapping?: {
     lookBackWindow: number;
     statusChangeThreshold: number;
-  }
+  };
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

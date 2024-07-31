@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { SchemaObject, SchemaValue } from '@kbn/ebt';
+import { SchemaObject, SchemaValue } from '@elastic/ebt';
+
 import {
   DatasetEbtFilter,
   DatasetEbtProps,
