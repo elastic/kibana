@@ -33,12 +33,28 @@ export interface DataStreamBasicInfo {
   streamName?: string;
 }
 
+export interface DataStreamStatsByNamespace {
+  streamName: string;
+  namespace: string;
+  totalDocuments: number;
+  totalSize: number;
+  totalIndices: number;
+}
+
+export interface DataStreamStats {
+  streamName: string;
+  totalNamespaces: number;
+  totalDocuments: number;
+  totalSize: number;
+  totalIndices: number;
+}
+
 export interface DataTelemetryEvent {
   'cluster-uuid': string;
   '@timestamp': string;
   stream_name: string;
-  number_of_documents: 123456;
-  number_of_indices: 123;
-  number_of_namespaces: 5;
+  number_of_documents: number;
+  number_of_indices: number;
+  number_of_namespaces: number;
   size_in_bytes: number;
 }

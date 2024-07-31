@@ -5,14 +5,44 @@
  * 2.0.
  */
 
-import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
+import {
+  Subject,
+  timer,
+  from,
+  delay,
+  filter,
+  tap,
+  takeUntil,
+  exhaustMap,
+  switchMap,
+  concatMap,
+  map,
+  of,
+  EMPTY,
+} from 'rxjs';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { EXCLUDE_ELASTIC_LOGS, STARTUP_DELAY, TELEMETRY_INTERVAL } from './constants';
-import { getDatasetsForStreamOfLogs } from './helpers';
+import {
+  BREATHE_DELAY_MEDIUM,
+  BREATHE_DELAY_SHORT,
+  NON_LOG_SIGNALS,
+  EXCLUDE_ELASTIC_LOGS,
+  MAX_STREAMS_TO_REPORT,
+  STARTUP_DELAY,
+  TELEMETRY_INTERVAL,
+  TELEMETRY_CHANNEL,
+} from './constants';
+import {
+  addMappingsToDataStreams,
+  addStreamNameAndNamespace,
+  groupStatsByStreamName,
+  addDataStreamBasicStats,
+  getDataStreamsInfoForStreamOfLogs,
+  streamStatsToTelemetryEvents,
+} from './helpers';
 
 import { DataTelemetryEvent, StreamOfLog } from './types';
 
@@ -24,7 +54,9 @@ export class DataTelemetryService {
 
   // @ts-ignore: Unused variable
   private telemetrySetup?: TelemetryPluginSetup;
-  private isSending = false;
+
+  // @ts-ignore: Unused variable
+  private isInProgress = false;
 
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
@@ -49,7 +81,17 @@ export class DataTelemetryService {
     timer(STARTUP_DELAY, TELEMETRY_INTERVAL)
       .pipe(
         takeUntil(this.stop$),
-        exhaustMap(() => this.collectAndSend())
+        tap(() => (this.isInProgress = true)),
+        switchMap(() => from(this.isTelemetryOptedIn())),
+        tap((isOptedIn) => {
+          if (!isOptedIn) {
+            this.logTelemetryNotOptedIn();
+            this.isInProgress = false;
+          }
+        }),
+        filter((isOptedIn) => isOptedIn),
+        exhaustMap(() => this.collectAndSend()),
+        tap(() => (this.isInProgress = false))
       )
       .subscribe();
   }
@@ -63,35 +105,76 @@ export class DataTelemetryService {
     return this.isOptedIn === true;
   }
 
-  private async collectAndSend() {
+  private collectAndSend() {
     // Gather data streams related to each stream of log
-
-    if (this.isSending) {
-      return;
-    }
-
-    this.isSending = true;
-
-    this.isOptedIn = await this.isTelemetryOptedIn();
-    if (!this.isOptedIn) {
-      this.logger.debug(`[Logs Data Telemetry] Telemetry is not opted-in.`);
-      return;
-    }
-
-    // From StreamOfLog
     const streamOfLogs = Object.values(StreamOfLog);
     if (this.esClient) {
-      // Get all data streams
-      const results = await getDatasetsForStreamOfLogs({
+      return getDataStreamsInfoForStreamOfLogs({
         esClient: this.esClient,
         streamOfLogs,
-        excludeStreamsStartingWith: EXCLUDE_ELASTIC_LOGS,
-      });
+        excludeStreamsStartingWith: [...NON_LOG_SIGNALS, ...EXCLUDE_ELASTIC_LOGS],
+        breatheDelay: BREATHE_DELAY_MEDIUM,
+      }).pipe(
+        switchMap((dataStreamsInfo) => {
+          if (dataStreamsInfo.length > MAX_STREAMS_TO_REPORT) {
+            this.logger.debug(
+              `[Logs Data Telemetry] Number of data streams exceeds ${MAX_STREAMS_TO_REPORT}. Skipping telemetry collection.`
+            );
+            return EMPTY;
+          }
+          return of(dataStreamsInfo);
+        }),
+        delay(BREATHE_DELAY_SHORT),
+        switchMap((dataStreamsInfo) => {
+          return addMappingsToDataStreams({
+            esClient: this.esClient!,
+            dataStreamsInfo,
+            breatheDelay: BREATHE_DELAY_MEDIUM,
+          });
+        }),
+        delay(BREATHE_DELAY_SHORT),
+        switchMap((dataStreamsInfo) => {
+          return addStreamNameAndNamespace({
+            dataStreamsInfo,
+            breatheDelay: BREATHE_DELAY_SHORT,
+          });
+        }),
+        delay(BREATHE_DELAY_SHORT),
+        switchMap((streams) => {
+          return addDataStreamBasicStats({
+            esClient: this.esClient!,
+            streams,
+            breatheDelay: BREATHE_DELAY_MEDIUM,
+          });
+        }),
+        delay(BREATHE_DELAY_SHORT),
+        map((dataStreamsInfo) => {
+          return groupStatsByStreamName(dataStreamsInfo);
+        }),
+        switchMap((statsByStream) => {
+          return from(this.fetchClusterInfo()).pipe(
+            map((clusterInfo) => {
+              return streamStatsToTelemetryEvents(statsByStream, clusterInfo);
+            })
+          );
+        }),
+        delay(BREATHE_DELAY_SHORT),
+        switchMap((dataTelemetryEvents) => {
+          return from(this.getTelemetryChannelUrl(TELEMETRY_CHANNEL)).pipe(
+            concatMap((telemetryUrl) => {
+              return this.send(dataTelemetryEvents, telemetryUrl);
+            })
+          );
+        })
+      );
+    } else {
+      this.logger.warn(
+        `[Logs Data Telemetry] Elasticsearch client is unavailable: cannot retrieve data streams
+        for stream of logs`
+      );
 
-      // TODO: Send telemetry events
+      return EMPTY;
     }
-
-    this.isSending = false;
   }
 
   private async fetchClusterInfo(): Promise<InfoResponse | undefined> {
@@ -104,22 +187,21 @@ export class DataTelemetryService {
     try {
       return await this.esClient.info();
     } catch (e) {
-      this.logger.debug(`[Logs Data Telemetry] Error fetching cluster information: ${e}`);
+      this.logger.warn(`[Logs Data Telemetry] Error fetching cluster information: ${e}`);
     }
   }
 
-  // @ts-ignore: Unused function
-  public async scheduleSendingEvents(telemetryUrl: string, events: DataTelemetryEvent[]) {
-    // TODO: Implement sending events to the channel
-  }
-
-  // @ts-ignore: Unused function
   private async getTelemetryChannelUrl(channel: string) {
-    // TODO: Implement fetching telemetry URL
+    return ''; // TODO: Implement fetching telemetry URL
   }
 
   // @ts-ignore: Unused function
-  private async send(events: unknown[], telemetryUrl: string) {
+  private async send(events: DataTelemetryEvent[], telemetryUrl: string) {
     // TODO: Implement sending events to the telemetry URL over HTTP
+    return Promise.resolve(events);
+  }
+
+  private logTelemetryNotOptedIn() {
+    this.logger.debug(`[Logs Data Telemetry] Telemetry is not opted-in.`);
   }
 }

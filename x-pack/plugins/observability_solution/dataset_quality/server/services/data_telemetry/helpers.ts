@@ -5,107 +5,166 @@
  * 2.0.
  */
 
-import { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
+import { from, of, Observable, concatMap, delay, map, toArray } from 'rxjs';
+import { InfoResponse, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndexName } from '@kbn/ml-data-frame-analytics-utils/src/types';
-import { DataStreamBasicInfo } from './types';
 
-export async function getDatasetsForStreamOfLogs({
+import {
+  DataStreamBasicInfo,
+  DataStreamStatsByNamespace,
+  DataStreamStats,
+  DataTelemetryEvent,
+} from './types';
+
+/**
+ * Retrieves unique data streams for all streams of logs.
+ * Excludes streams for known signals other than logs e.g. alerts, metrics etc as well log streams which are not
+ * relevant for data telemetry.
+ */
+export function getDataStreamsInfoForStreamOfLogs({
   esClient,
   streamOfLogs,
   excludeStreamsStartingWith,
+  breatheDelay,
 }: {
   esClient: ElasticsearchClient;
   streamOfLogs: string[];
   excludeStreamsStartingWith: string[];
-}) {
+  breatheDelay: number; // Breathing time between each request to prioritize other cluster operations
+}): Observable<DataStreamBasicInfo[]> {
   const uniqueDataStreamsSet = new Set<string>();
   const dataStreamsInfo: DataStreamBasicInfo[] = [];
 
-  for (const streamOfLog of streamOfLogs) {
-    const dataStreamsForStreamOfLog = await getDataStreamsInfoForPattern({
-      esClient,
-      pattern: streamOfLog,
-    });
+  return from(streamOfLogs).pipe(
+    concatMap((streamOfLog) =>
+      of(streamOfLog).pipe(
+        delay(breatheDelay),
+        concatMap(() => from(getDataStreamsInfoForPattern({ esClient, pattern: streamOfLog }))),
+        map((dataStreamsForStreamOfLog) => {
+          return dataStreamsForStreamOfLog.filter(
+            // Exclude streams starting with known signals
+            (dataStream) =>
+              !excludeStreamsStartingWith.some((excludeStream) =>
+                dataStream.name.startsWith(excludeStream)
+              )
+          );
+        }),
+        map((logDataStreams) =>
+          logDataStreams.filter((dataStream) => {
+            if (uniqueDataStreamsSet.has(dataStream.name)) {
+              return false;
+            }
+            uniqueDataStreamsSet.add(dataStream.name);
+            return true;
+          })
+        ),
+        map((dataStreamsInfoRecords) => {
+          dataStreamsInfo.push(...dataStreamsInfoRecords);
+          return dataStreamsInfoRecords;
+        })
+      )
+    ),
+    toArray(),
+    map(() => dataStreamsInfo)
+  );
+}
 
-    // Filter out logs which start with EXCLUDE_ELASTIC_LOGS
-    const logDataStreams = dataStreamsForStreamOfLog.filter(
-      (dataStream) =>
-        !excludeStreamsStartingWith.some((excludeStream) =>
-          dataStream.name.startsWith(excludeStream)
-        )
-    );
+export function addMappingsToDataStreams({
+  esClient,
+  dataStreamsInfo,
+  breatheDelay,
+}: {
+  esClient: ElasticsearchClient;
+  dataStreamsInfo: DataStreamBasicInfo[];
+  breatheDelay: number;
+}): Observable<DataStreamBasicInfo[]> {
+  return from(dataStreamsInfo).pipe(
+    delay(breatheDelay),
+    concatMap((info) =>
+      of(info).pipe(
+        concatMap(() =>
+          getDataStreamIndexMappings({
+            esClient,
+            indexName: info.name,
+            latestIndex: info.latestIndex,
+          })
+        ),
+        map((mapping) => {
+          info.mapping = mapping;
+          return info;
+        })
+      )
+    ),
+    toArray()
+  );
+}
 
-    // Filter out duplicate dataStreams or dataStreams which are already dealt with
-    const dataStreamsInfoRecords: DataStreamBasicInfo[] = logDataStreams.filter((dataStream) => {
-      if (uniqueDataStreamsSet.has(dataStream.name)) {
-        return false;
-      }
+export function addStreamNameAndNamespace({
+  dataStreamsInfo,
+  breatheDelay,
+}: {
+  dataStreamsInfo: DataStreamBasicInfo[];
+  breatheDelay: number;
+}): Observable<DataStreamBasicInfo[]> {
+  return from(dataStreamsInfo).pipe(
+    delay(breatheDelay),
+    concatMap((info) =>
+      of(info).pipe(
+        map((dataStream) => getStreamNameAndNamespace(dataStream)),
+        map(({ namespace, streamName }) => {
+          info.namespace = namespace;
+          info.streamName = streamName;
+          return info;
+        })
+      )
+    ),
+    toArray()
+  );
+}
 
-      uniqueDataStreamsSet.add(dataStream.name);
-      return true;
-    });
-
-    dataStreamsInfo.push(...dataStreamsInfoRecords);
-  }
-
-  // Get DataStream Mapping and keep the record
-  for (const dataStream of dataStreamsInfo) {
-    dataStream.mapping = await getDataStreamIndexMappings({
-      esClient,
-      indexName: dataStream.name,
-      latestIndex: dataStream.latestIndex,
-    });
-  }
-
-  // Determine namespace of each dataStream utilizing mapping
-  for (const dataStream of dataStreamsInfo) {
-    const { namespace, streamName } = getStreamNameAndNamespace(dataStream);
-    dataStream.namespace = namespace;
-    dataStream.streamName = streamName;
-  }
-
-  // Group dataStreams by stream_name
-  const streamsByStreamName = dataStreamsInfo.reduce<Record<string, DataStreamBasicInfo[]>>(
-    (acc, dataStream) => {
-      if (!dataStream.streamName) {
-        return acc;
-      }
-
-      if (!acc[dataStream.streamName]) {
-        acc[dataStream.streamName] = [];
-      }
-
-      acc[dataStream.streamName].push(dataStream);
-
+export function groupStatsByStreamName(dataStreamsStats: DataStreamStatsByNamespace[]) {
+  const statsByStream = dataStreamsStats.reduce<Map<string, DataStreamStats>>((acc, stats) => {
+    if (!stats.streamName) {
       return acc;
-    },
-    {}
+    }
+
+    if (!acc.get(stats.streamName)) {
+      acc.set(stats.streamName, {
+        streamName: stats.streamName,
+        totalNamespaces: 0,
+        totalDocuments: 0,
+        totalSize: 0,
+        totalIndices: 0,
+      });
+    }
+
+    const streamStats = acc.get(stats.streamName)!;
+    streamStats.totalNamespaces += stats.namespace ? 1 : 0;
+    streamStats.totalDocuments += stats.totalDocuments;
+    streamStats.totalSize += stats.totalSize;
+    streamStats.totalIndices += stats.totalIndices;
+
+    return acc;
+  }, new Map());
+
+  return Array.from(statsByStream.values());
+}
+
+export function addDataStreamBasicStats({
+  esClient,
+  streams,
+  breatheDelay,
+}: {
+  esClient: ElasticsearchClient;
+  streams: DataStreamBasicInfo[];
+  breatheDelay: number;
+}) {
+  return from(streams).pipe(
+    delay(breatheDelay),
+    concatMap((info) => from(getDataStreamStats(esClient, info))),
+    toArray()
   );
-
-  // Calculate the total number of namespaces, documents, indices and size stream
-  const results = await Promise.all(
-    Object.entries(streamsByStreamName).map(async ([streamName, dataStreams]) => {
-      const namespacesSet = new Set<string>();
-      const statsSum = { totalDocuments: 0, totalSize: 0, totalIndices: 0 };
-
-      for (const dataStream of dataStreams) {
-        namespacesSet.add(dataStream.namespace ?? '');
-        const stats = await getDataStreamStats(esClient, dataStream.name);
-        statsSum.totalDocuments += stats.totalDocuments;
-        statsSum.totalSize += stats.totalSize;
-        statsSum.totalIndices += stats.totalIndices;
-      }
-
-      return {
-        streamName,
-        totalNamespaces: namespacesSet.size,
-        ...statsSum,
-      };
-    })
-  );
-
-  return results;
 }
 
 async function getDataStreamsInfoForPattern({
@@ -152,7 +211,7 @@ async function getDataStreamIndexMappings({
  * dataStream name as the namespace.
  */
 function getStreamNameAndNamespace(dataStreamInfo: DataStreamBasicInfo) {
-  const dataStreamMapping: MappingPropertyBase =
+  const dataStreamMapping: MappingPropertyBase | undefined =
     dataStreamInfo?.mapping?.mappings?.properties?.data_stream;
 
   const namespaceInMapping = (dataStreamMapping?.properties?.namespace as { value?: string })
@@ -173,9 +232,12 @@ function getStreamNameAndNamespace(dataStreamInfo: DataStreamBasicInfo) {
   };
 }
 
-export async function getDataStreamStats(esClient: ElasticsearchClient, dataStream: string) {
+export async function getDataStreamStats(
+  esClient: ElasticsearchClient,
+  info: DataStreamBasicInfo
+): Promise<DataStreamStatsByNamespace> {
   const resp = await esClient.indices.stats({
-    index: dataStream,
+    index: info.name,
   });
 
   const totalDocs = resp._all.primaries?.docs?.count;
@@ -183,8 +245,25 @@ export async function getDataStreamStats(esClient: ElasticsearchClient, dataStre
   const totalIndices = Object.keys(resp.indices ?? []).length;
 
   return {
+    streamName: info.streamName ?? '',
+    namespace: info.namespace ?? '',
     totalDocuments: totalDocs ?? 0,
     totalSize: totalSize ?? 0,
     totalIndices,
   };
+}
+
+export function streamStatsToTelemetryEvents(
+  stats: DataStreamStats[],
+  clusterInfo?: InfoResponse
+): DataTelemetryEvent[] {
+  return stats.map((stat) => ({
+    '@timestamp': new Date().toISOString(),
+    'cluster-uuid': clusterInfo?.cluster_uuid ?? '',
+    stream_name: stat.streamName,
+    number_of_documents: stat.totalDocuments,
+    number_of_indices: stat.totalIndices,
+    number_of_namespaces: stat.totalNamespaces,
+    size_in_bytes: stat.totalSize,
+  }));
 }
