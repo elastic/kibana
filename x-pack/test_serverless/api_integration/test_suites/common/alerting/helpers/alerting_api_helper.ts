@@ -11,7 +11,7 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import {
   InternalRequestHeader,
   RoleCredentials,
-  SuperTestWithoutAuthProviderType,
+  SupertestWithoutAuthProviderType,
 } from '../../../../../shared/services';
 
 interface CreateEsQueryRuleParams {
@@ -40,7 +40,7 @@ export async function createIndexConnector({
   name,
   indexName,
 }: {
-  supertestWithoutAuth: SuperTestWithoutAuthProviderType;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
   name: string;
@@ -68,7 +68,7 @@ export async function createSlackConnector({
   internalReqHeader,
   name,
 }: {
-  supertestWithoutAuth: SuperTestWithoutAuthProviderType;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
   name: string;
@@ -103,7 +103,7 @@ export async function createEsQueryRule({
   notifyWhen,
   enabled = true,
 }: {
-  supertestWithoutAuth: SuperTestWithoutAuthProviderType;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
   ruleTypeId: string;
@@ -360,7 +360,7 @@ export async function runRule({
   internalReqHeader,
   ruleId,
 }: {
-  supertestWithoutAuth: SuperTestWithoutAuthProviderType;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
   ruleId: string;
