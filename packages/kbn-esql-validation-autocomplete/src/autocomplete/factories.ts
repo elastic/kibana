@@ -201,11 +201,15 @@ export const buildSourcesDefinitions = (
 export const buildConstantsDefinitions = (
   userConstants: string[],
   detail?: string,
-  sortText?: string
+  sortText?: string,
+  /**
+   * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
+   */
+  advanceCursorAndOpenSuggestions: boolean = false
 ): SuggestionRawDefinition[] =>
   userConstants.map((label) => ({
     label,
-    text: label,
+    text: advanceCursorAndOpenSuggestions ? `${label} ` : label,
     kind: 'Constant',
     detail:
       detail ??
@@ -213,6 +217,7 @@ export const buildConstantsDefinitions = (
         defaultMessage: `Constant`,
       }),
     sortText: sortText ?? 'A',
+    command: advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
 export const buildValueDefinitions = (
@@ -363,7 +368,7 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   if (types.includes('number')) {
     if (commandName === 'limit') {
       // suggest 10/100/1000 for limit
-      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, true));
     }
   }
   if (types.includes('time_literal')) {

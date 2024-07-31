@@ -1313,7 +1313,7 @@ describe('autocomplete', () => {
     // KEEP field TODO
 
     // LIMIT number
-    testSuggestions('FROM a | LIMIT ', ['10', '100', '1000'].map(attachTriggerCommand));
+    testSuggestions('FROM a | LIMIT ', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
     // SORT field
     testSuggestions(
