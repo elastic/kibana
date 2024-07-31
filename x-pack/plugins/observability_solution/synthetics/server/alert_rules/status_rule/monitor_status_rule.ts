@@ -18,6 +18,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
 import {
@@ -38,7 +39,7 @@ import {
   getViewInAppUrl,
   getRelativeViewInAppUrl,
   getFullViewInAppMessage,
-  UptimeRuleTypeAlertDefinition,
+  SyntheticsRuleTypeAlertDefinition,
 } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
@@ -172,9 +173,10 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: {
-      ...UptimeRuleTypeAlertDefinition,
+      ...SyntheticsRuleTypeAlertDefinition,
       shouldWrite: true,
     } as IRuleTypeAlerts<MonitorStatusAlert>,
+    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

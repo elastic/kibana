@@ -112,7 +112,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
           agentPolicies={agentPolicies}
           updateAgentPolicies={updateAgentPolicies}
           setHasAgentPolicyError={setHasAgentPolicyError}
-          selectedAgentPolicyIds={selectedAgentPolicyIds}
+          initialSelectedAgentPolicyIds={selectedAgentPolicyIds}
         />
       ),
     },

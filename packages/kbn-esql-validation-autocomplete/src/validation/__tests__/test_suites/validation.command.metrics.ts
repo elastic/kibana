@@ -19,7 +19,7 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
           ]);
           await expectErrors('metrics ', [
-            "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+            "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
           ]);
         });
 
@@ -61,10 +61,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('metrics index,', [
-              "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
             ]);
             await expectErrors(`metrics index\n, \tother_index\t,\n \t `, [
-              "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
+              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
             ]);
           });
 
@@ -75,10 +75,7 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
               "SyntaxError: token recognition error at: '='",
               "SyntaxError: token recognition error at: '1'",
             ]);
-            await expectErrors('metrics `index`', [
-              "SyntaxError: token recognition error at: '`'",
-              "SyntaxError: token recognition error at: '`'",
-            ]);
+            await expectErrors('metrics `index`', ['Unknown index [`index`]']);
           });
 
           test('errors on unknown index', async () => {

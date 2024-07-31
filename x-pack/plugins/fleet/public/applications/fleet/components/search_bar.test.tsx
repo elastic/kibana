@@ -173,7 +173,7 @@ describe('SearchBar', () => {
 
 describe('getFieldSpecs', () => {
   it('returns fieldSpecs for Fleet agents', () => {
-    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(67);
+    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(73);
   });
 
   it('returns fieldSpecs for Fleet enrollment tokens', () => {

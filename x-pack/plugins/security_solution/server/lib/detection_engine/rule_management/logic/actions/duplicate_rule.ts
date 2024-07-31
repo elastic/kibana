@@ -9,10 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
-import { convertImmutableToRuleSource } from '../../normalization/rule_converters';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -34,6 +34,7 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
   const isPrebuilt = rule.params.immutable;
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
+
   const actions = transformToActionFrequency(rule.actions, rule.throttle);
 
   // Duplicated rules are always considered custom rules
@@ -47,7 +48,9 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
     params: {
       ...rule.params,
       immutable,
-      ruleSource: convertImmutableToRuleSource(immutable),
+      ruleSource: {
+        type: 'internal',
+      },
       ruleId,
       relatedIntegrations,
       requiredFields,
@@ -56,5 +59,6 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
     schedule: rule.schedule,
     enabled: false,
     actions,
+    systemActions: rule.systemActions ?? [],
   };
 };

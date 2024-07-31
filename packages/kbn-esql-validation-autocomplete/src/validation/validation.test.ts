@@ -12,7 +12,7 @@ import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
-import { chronoLiterals, timeUnits, timeUnitsToSuggest } from '../definitions/literals';
+import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
@@ -58,13 +58,9 @@ const nestedFunctions = {
 };
 
 const literals = {
-  chrono_literal: chronoLiterals[0].name,
   time_literal: timeUnitsToSuggest[0].name,
 };
-function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
-  if (typeString === 'chrono_literal') {
-    return literals[typeString];
-  }
+function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
@@ -103,7 +99,7 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
         },
       ],
     },
-    { withTypes: false }
+    { withTypes: false, capitalize: false }
   )[0].declaration;
 }
 function getFieldMapping(
@@ -144,7 +140,7 @@ function getFieldMapping(
     }
     if (/literal$/.test(typeString) && useLiterals) {
       return {
-        name: getLiteralType(typeString as 'chrono_literal' | 'time_literal'),
+        name: getLiteralType(typeString as 'time_literal'),
         type,
         ...rest,
       };
@@ -450,40 +446,8 @@ describe('validation logic', () => {
       });
     });
 
-    describe('meta', () => {
-      testErrorsAndWarnings('meta', ["SyntaxError: missing 'functions' at '<EOF>'"]);
-      testErrorsAndWarnings('meta functions', []);
-      testErrorsAndWarnings('meta functions()', [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-      ]);
-      testErrorsAndWarnings('meta functions blah', [
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'a'",
-        "SyntaxError: token recognition error at: 'h'",
-      ]);
-      testErrorsAndWarnings('meta info', [
-        "SyntaxError: token recognition error at: 'i'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'fo'",
-        "SyntaxError: missing 'functions' at '<EOF>'",
-      ]);
-    });
-
     describe('show', () => {
       testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
-      testErrorsAndWarnings('show functions', [
-        "SyntaxError: token recognition error at: 'f'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'c'",
-        "SyntaxError: token recognition error at: 't'",
-        "SyntaxError: token recognition error at: 'io'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 's'",
-        "SyntaxError: missing 'info' at '<EOF>'",
-      ]);
       testErrorsAndWarnings('show info', []);
       testErrorsAndWarnings('show numberField', [
         "SyntaxError: token recognition error at: 'n'",
@@ -1359,7 +1323,8 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy `, []);
       testErrorsAndWarnings('from a_index | enrich `this``is fine`', [
-        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME",
+        "SyntaxError: extraneous input 'fine`' expecting <EOF>",
+        'Unknown policy [`this``is]',
       ]);
       testErrorsAndWarnings('from a_index | enrich this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
@@ -1551,22 +1516,6 @@ describe('validation logic', () => {
         expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
         expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
           query: `from enrich_index | keep otherField, yetAnotherField`,
-        });
-      });
-
-      it('should call fields callbacks also for meta command', async () => {
-        const callbackMocks = getCallbackMocks();
-        await validateQuery(
-          `meta functions | keep name`,
-          getAstAndSyntaxErrors,
-          undefined,
-          callbackMocks
-        );
-        expect(callbackMocks.getSources).not.toHaveBeenCalled();
-        expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-          query: 'meta functions',
         });
       });
 
@@ -1783,8 +1732,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [string]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [string]',
           ]
         );
       });
@@ -2609,6 +2558,13 @@ describe('validation logic', () => {
       describe('date_extract', () => {
         testErrorsAndWarnings('row var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", now())', []);
         testErrorsAndWarnings('row date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", now())', []);
+        testErrorsAndWarnings(
+          'from a_index | eval date_extract("SOME_RANDOM_STRING", now())',
+          [],
+          [
+            'Invalid option ["SOME_RANDOM_STRING"] for date_extract. Supported options: ["ALIGNED_DAY_OF_WEEK_IN_MONTH", "ALIGNED_DAY_OF_WEEK_IN_YEAR", "ALIGNED_WEEK_OF_MONTH", "ALIGNED_WEEK_OF_YEAR", "AMPM_OF_DAY", "CLOCK_HOUR_OF_AMPM", "CLOCK_HOUR_OF_DAY", "DAY_OF_MONTH", "DAY_OF_WEEK", "DAY_OF_YEAR", "EPOCH_DAY", "ERA", "HOUR_OF_AMPM", "HOUR_OF_DAY", "INSTANT_SECONDS", "MICRO_OF_DAY", "MICRO_OF_SECOND", "MILLI_OF_DAY", "MILLI_OF_SECOND", "MINUTE_OF_DAY", "MINUTE_OF_HOUR", "MONTH_OF_YEAR", "NANO_OF_DAY", "NANO_OF_SECOND", "OFFSET_SECONDS", "PROLEPTIC_MONTH", "SECOND_OF_DAY", "SECOND_OF_MINUTE", "YEAR", "YEAR_OF_ERA"].',
+          ]
+        );
 
         testErrorsAndWarnings(
           'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", dateField)',
@@ -2626,7 +2582,6 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(stringField, stringField)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [stringField] type [string]',
           'Argument of [date_extract] must be [date], found value [stringField] type [string]',
         ]);
 
@@ -2641,7 +2596,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('row var = date_extract(true, true)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [true] type [boolean]',
+          'Argument of [date_extract] must be [string], found value [true] type [boolean]',
           'Argument of [date_extract] must be [date], found value [true] type [boolean]',
         ]);
 
@@ -2651,7 +2606,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | eval date_extract(booleanField, booleanField)', [
-          'Argument of [date_extract] must be [chrono_literal], found value [booleanField] type [boolean]',
+          'Argument of [date_extract] must be [string], found value [booleanField] type [boolean]',
           'Argument of [date_extract] must be [date], found value [booleanField] type [boolean]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_extract(null, null)', []);
@@ -2665,7 +2620,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
           [
-            'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_extract] must be [date], found value [concat("20","22")] type [string]',
           ]
         );
       });
@@ -2709,7 +2664,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_format(stringField, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_format(stringField, concat("20", "22"))', [
-          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [date_format] must be [date], found value [concat("20","22")] type [string]',
         ]);
       });
 
@@ -2814,15 +2769,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
-          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_trunc("2022", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | eval date_trunc(concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_trunc] must be [time_literal], found value [concat("20", "22")] type [string]',
-            'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_trunc] must be [time_literal], found value [concat("20","22")] type [string]',
+            'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [string]',
           ]
         );
       });
@@ -9162,14 +9117,68 @@ describe('validation logic', () => {
           'EVAL does not support function max',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats max(booleanField)', [
-          'Argument of [max] must be [number], found value [booleanField] type [boolean]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats max(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
         testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [number], found value [concat("20", "22")] type [string]',
+          'Argument of [max] must be [number], found value [concat("20","22")] type [string]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats max(cartesianPointField)', [
+          'Argument of [max] must be [number], found value [cartesianPointField] type [cartesian_point]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(booleanField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(booleanField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(booleanField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(booleanField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(booleanField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(booleanField) > 0', [
+          'EVAL does not support function max',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = max(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats max(ipField)', []);
+
+        testErrorsAndWarnings('from a_index | where max(ipField)', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where max(ipField) > 0', [
+          'WHERE does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(ipField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = max(ipField) > 0', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(ipField)', [
+          'EVAL does not support function max',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval max(ipField) > 0', [
+          'EVAL does not support function max',
         ]);
       });
 
@@ -9306,14 +9315,68 @@ describe('validation logic', () => {
           'EVAL does not support function min',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats min(booleanField)', [
-          'Argument of [min] must be [number], found value [booleanField] type [boolean]',
-        ]);
+        testErrorsAndWarnings('from a_index | stats min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats min(null)', []);
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
         testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [number], found value [concat("20", "22")] type [string]',
+          'Argument of [min] must be [number], found value [concat("20","22")] type [string]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats min(cartesianPointField)', [
+          'Argument of [min] must be [number], found value [cartesianPointField] type [cartesian_point]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(booleanField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(booleanField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(booleanField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(booleanField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(booleanField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(booleanField) > 0', [
+          'EVAL does not support function min',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = min(ipField)', []);
+        testErrorsAndWarnings('from a_index | stats min(ipField)', []);
+
+        testErrorsAndWarnings('from a_index | where min(ipField)', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where min(ipField) > 0', [
+          'WHERE does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(ipField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = min(ipField) > 0', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(ipField)', [
+          'EVAL does not support function min',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval min(ipField) > 0', [
+          'EVAL does not support function min',
         ]);
       });
 
@@ -9631,34 +9694,34 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
         testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | stats by bucket(concat("20", "22"), 1 year)', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "a")', []);
         testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 5, "a", "a")', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), concat("20", "22"))',
-          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+          ['Argument of [bucket] must be [date], found value [concat("20","22")] type [string]']
         );
 
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), 5, "a", concat("20", "22"))',
-          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+          ['Argument of [bucket] must be [date], found value [concat("20","22")] type [string]']
         );
 
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "a")', []);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), "a")',
-          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+          ['Argument of [bucket] must be [date], found value [concat("20","22")] type [string]']
         );
       });
 
@@ -10155,6 +10218,379 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort repeat(stringField, numberField)', []);
         testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
+      });
+
+      describe('top', () => {
+        describe('no errors on correct usage', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 3, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top(stringField, 1, "desc")', []);
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
+        });
+
+        describe('errors on invalid argument count', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 3)', [
+            'Error: [top] function expects exactly 3 arguments, got 2.',
+          ]);
+          testErrorsAndWarnings('from a_index | stats var = top(stringField)', [
+            'Error: [top] function expects exactly 3 arguments, got 1.',
+          ]);
+        });
+
+        describe('limit must be a literal', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, numberField, "asc")', [
+            'Argument of [=] must be a constant, received [top(stringField,numberField,"asc")]',
+          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top(stringField, 100 + numberField, "asc")',
+            [
+              'Argument of [=] must be a constant, received [top(stringField,100+numberField,"asc")]',
+            ]
+          );
+        });
+
+        describe('order must be "asc" or "desc"', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 1, stringField)', [
+            'Argument of [=] must be a constant, received [top(stringField,1,stringField)]',
+          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top(stringField, 1, "asdf")',
+            [],
+            ['Invalid option ["asdf"] for top. Supported options: ["asc", "desc"].']
+          );
+        });
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, numberField, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, numberField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(stringField, numberField, "asc") > 0',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, 5, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, 5, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, 5, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, 5, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+        testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
+        testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
+
+        testErrorsAndWarnings('from a_index | stats top(stringField, numberField, "asc")', [
+          'Argument of [top] must be a constant, received [numberField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats top(null, null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats top(nullVar, nullVar, nullVar)', [
+          'Argument of [top] must be a constant, received [nullVar]',
+          'Argument of [top] must be a constant, received [nullVar]',
+        ]);
+      });
+
+      describe('st_distance', () => {
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = st_distance(true, true)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(booleanField, booleanField)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(geoPointField, geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval st_distance(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField, extraArg)',
+          ['Error: [st_distance] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval st_distance(nullVar, nullVar)', []);
+      });
+
+      describe('weighted_avg', () => {
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(numberField, numberField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats weighted_avg(numberField, numberField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(avg(numberField), avg(numberField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(booleanField, booleanField)', [
+          'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+          'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort weighted_avg(numberField, numberField)', [
+          'SORT does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(numberField, numberField)', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where weighted_avg(numberField, numberField) > 0', [
+          'WHERE does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = weighted_avg(numberField, numberField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(numberField, numberField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField)', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField) > 0', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats weighted_avg(nullVar, nullVar)', []);
+      });
+
+      describe('exp', () => {
+        testErrorsAndWarnings('row var = exp(5)', []);
+        testErrorsAndWarnings('row exp(5)', []);
+        testErrorsAndWarnings('row var = exp(to_integer(true))', []);
+
+        testErrorsAndWarnings('row var = exp(true)', [
+          'Argument of [exp] must be [number], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where exp(numberField) > 0', []);
+
+        testErrorsAndWarnings('from a_index | where exp(booleanField) > 0', [
+          'Argument of [exp] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval var = exp(to_integer(booleanField))', []);
+
+        testErrorsAndWarnings('from a_index | eval exp(booleanField)', [
+          'Argument of [exp] must be [number], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = exp(*)', [
+          'Using wildcards (*) in exp is not allowed',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval exp(numberField, extraArg)', [
+          'Error: [exp] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort exp(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval exp(null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval exp(nullVar)', []);
       });
     });
   });

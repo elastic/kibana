@@ -11,7 +11,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 
@@ -23,11 +22,7 @@ import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
 import type { PatchTimelinesResponse } from '../../../../../../common/api/timeline';
 
-export const patchTimelinesRoute = (
-  router: SecuritySolutionPluginRouter,
-  _: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
     .patch({
       path: TIMELINE_URL,
@@ -47,7 +42,7 @@ export const patchTimelinesRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timelineId, timeline, version } = request.body;
           const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
             timeline;

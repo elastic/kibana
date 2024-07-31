@@ -54,7 +54,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       return synthtrace.index([
         timerange(start, end)
@@ -76,7 +76,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       ]);
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('returns error when dataStream param is not provided', async () => {

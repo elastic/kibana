@@ -25,11 +25,15 @@ import {
   useStartServices,
   useGetAgentPolicies,
   useGetPackageInfoByKeyQuery,
+  useConfig,
 } from '../../../../hooks';
 
 jest.mock('../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../hooks'),
+    useConfig: jest.fn().mockReturnValue({
+      agents: { enabled: true },
+    }),
     useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
     sendGetStatus: jest
       .fn()
@@ -374,7 +378,6 @@ describe('When on the package policy create page', () => {
 
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledWith({
         ...newPackagePolicy,
-        policy_id: 'agent-policy-1',
         policy_ids: ['agent-policy-1'],
         force: false,
       });
@@ -671,7 +674,7 @@ describe('When on the package policy create page', () => {
       });
     });
 
-    describe('With agentless policy available', () => {
+    describe('With agentless policy and Serverless available', () => {
       beforeEach(async () => {
         (useStartServices as jest.MockedFunction<any>).mockReturnValue({
           ...useStartServices(),
@@ -680,7 +683,7 @@ describe('When on the package policy create page', () => {
             isServerlessEnabled: true,
           },
         });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
         );
@@ -703,7 +706,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should not force create package policy when not in serverless', async () => {
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false } as any);
         (useStartServices as jest.MockedFunction<any>).mockReturnValue({
           ...useStartServices(),
           cloud: {
@@ -767,6 +770,60 @@ describe('When on the package policy create page', () => {
 
         expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+      });
+    });
+
+    describe('With agentless Cloud available', () => {
+      beforeEach(async () => {
+        (useConfig as jest.MockedFunction<any>).mockReturnValue({
+          agentless: {
+            api: {
+              url: 'http://agentless-api-url',
+            },
+          },
+          agents: { enabled: true },
+        });
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: false,
+            isCloudEnabled: true,
+          },
+        });
+        (sendCreateAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: {
+            item: { id: 'agentless-policy-1', name: 'Agentless policy 1', namespace: 'default' },
+          },
+        });
+
+        (sendCreatePackagePolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agentless-policy-1'] } },
+        });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
+        );
+
+        await act(async () => {
+          render();
+        });
+      });
+
+      test('should create create agent and package policy when in cloud and agentless API url is set', async () => {
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        // tech debt: this should be converted to use MSW to mock the API calls
+        // https://github.com/elastic/security-team/issues/9816
+        expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreateAgentPolicy).toHaveBeenCalled();
+        expect(sendCreatePackagePolicy).toHaveBeenCalled();
+
+        await waitFor(() => {
+          expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+        });
       });
     });
   });

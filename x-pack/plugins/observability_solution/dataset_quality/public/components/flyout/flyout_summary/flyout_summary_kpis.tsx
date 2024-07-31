@@ -12,7 +12,8 @@ import { _IGNORED } from '../../../../common/es_fields';
 
 import { DataStreamDetails } from '../../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { useRedirectLink } from '../../../hooks';
+import { NavigationSource } from '../../../services/telemetry';
+import { useDatasetDetailsTelemetry, useRedirectLink } from '../../../hooks';
 import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryKpiItem, FlyoutSummaryKpiItemLoading } from './flyout_summary_kpi_item';
 import { getSummaryKpis } from './get_summary_kpis';
@@ -31,12 +32,17 @@ export function FlyoutSummaryKpis({
   const {
     services: { observabilityShared },
   } = useKibanaContextForPlugin();
+  const telemetry = useDatasetDetailsTelemetry();
   const hostsLocator = observabilityShared.locators.infra.hostsLocator;
 
-  const redirectLinkProps = useRedirectLink({
+  const degradedDocsLinkProps = useRedirectLink({
     dataStreamStat,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
     timeRangeConfig: timeRange,
+    telemetry: {
+      page: 'details',
+      navigationSource: NavigationSource.Summary,
+    },
   });
 
   const kpis = useMemo(
@@ -44,10 +50,11 @@ export function FlyoutSummaryKpis({
       getSummaryKpis({
         dataStreamDetails,
         timeRange,
-        degradedDocsHref: redirectLinkProps.href,
+        degradedDocsLinkProps,
         hostsLocator,
+        telemetry,
       }),
-    [dataStreamDetails, redirectLinkProps, hostsLocator, timeRange]
+    [dataStreamDetails, degradedDocsLinkProps, hostsLocator, telemetry, timeRange]
   );
 
   return (
@@ -64,10 +71,12 @@ export function FlyoutSummaryKpis({
 }
 
 export function FlyoutSummaryKpisLoading() {
+  const telemetry = useDatasetDetailsTelemetry();
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true} gutterSize="m">
-        {getSummaryKpis({}).map(({ title }) => (
+        {getSummaryKpis({ telemetry }).map(({ title }) => (
           <EuiFlexItem key={title}>
             <FlyoutSummaryKpiItemLoading title={title} />
           </EuiFlexItem>

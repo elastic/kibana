@@ -14,7 +14,7 @@ import {
 } from '../../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
-import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../../../timelines/components/field_renderers/default_renderer';
 import type { FlowTarget } from '../../../../../../common/search_strategy';
 
 interface PointToolTipContentProps {

@@ -14,7 +14,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
@@ -25,7 +25,6 @@ interface EncryptionKeyRotationServiceOptions {
   logger: Logger;
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
   getStartServices: StartServicesAccessor;
-  security?: SecurityPluginSetup;
 }
 
 interface EncryptionKeyRotationParams {
@@ -69,7 +68,7 @@ export class EncryptionKeyRotationService {
     request: KibanaRequest,
     { batchSize, type }: EncryptionKeyRotationParams
   ): Promise<EncryptionKeyRotationResult> {
-    const [{ savedObjects }] = await this.options.getStartServices();
+    const [{ security, savedObjects }] = await this.options.getStartServices();
     const typeRegistry = savedObjects.getTypeRegistry();
 
     // We need to retrieve all SavedObject types which have encrypted attributes, specifically
@@ -105,7 +104,7 @@ export class EncryptionKeyRotationService {
     // don't want to have Encrypted Saved Objects wrapper so that it doesn't strip encrypted
     // attributes. But for the update we want to have it so that it automatically re-encrypts
     // attributes with the new primary encryption key.
-    const user = this.options.security?.authc.getCurrentUser(request) ?? undefined;
+    const user = security.authc.getCurrentUser(request) ?? undefined;
     const retrieveClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,
       excludedExtensions: [ENCRYPTION_EXTENSION_ID],
@@ -206,7 +205,7 @@ export class EncryptionKeyRotationService {
     }
 
     this.options.logger.info(
-      `Encryption key rotation is completed. ${result.successful} objects out ouf ${result.total} were successfully re-encrypted with the primary encryption key and ${result.failed} objects failed.`
+      `Encryption key rotation is completed. ${result.successful} objects out of ${result.total} were successfully re-encrypted with the primary encryption key and ${result.failed} objects failed.`
     );
 
     return result;

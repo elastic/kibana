@@ -14,7 +14,11 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { SpacesManager } from '../spaces_manager';
 
-export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
+export function initSpacesNavControl(
+  spacesManager: SpacesManager,
+  core: CoreStart,
+  solutionNavExperiment: Promise<boolean>
+) {
   core.chrome.navControls.registerLeft({
     order: 1000,
     mount(targetDomElement: HTMLElement) {
@@ -38,6 +42,7 @@ export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreSta
               capabilities={core.application.capabilities}
               navigateToApp={core.application.navigateToApp}
               navigateToUrl={core.application.navigateToUrl}
+              solutionNavExperiment={solutionNavExperiment}
             />
           </Suspense>
         </KibanaRenderContextProvider>,

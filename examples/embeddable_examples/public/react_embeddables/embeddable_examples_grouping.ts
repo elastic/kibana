@@ -10,4 +10,5 @@ export const embeddableExamplesGrouping = {
   id: 'embeddableExamples',
   getIconType: () => 'documentation',
   getDisplayName: () => 'Embeddable examples',
+  order: -10,
 };

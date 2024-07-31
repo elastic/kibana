@@ -91,25 +91,3 @@ export type RegistrationCallback = ({}: {
   client: ObservabilityAIAssistantClient;
   functions: ChatFunctionClient;
 }) => Promise<void>;
-
-export interface ObservabilityAIAssistantResourceNames {
-  componentTemplate: {
-    conversations: string;
-    kb: string;
-  };
-  indexTemplate: {
-    conversations: string;
-    kb: string;
-  };
-  aliases: {
-    conversations: string;
-    kb: string;
-  };
-  indexPatterns: {
-    conversations: string;
-    kb: string;
-  };
-  pipelines: {
-    kb: string;
-  };
-}

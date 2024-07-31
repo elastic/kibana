@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect } from 'react';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
+import { useMemo } from 'react';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import {
   InfraTimerangeInput,
   SnapshotNodeResponseRT,
@@ -19,79 +16,74 @@ import {
 
 export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
-  filterQuery: string | null | symbol | undefined;
+  filterQuery?: string | null | symbol;
   currentTime: number;
-  sendRequestImmediately?: boolean;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
-  requestTs?: number;
-}
-
-export interface UseSnapshotRequestOptions {
-  abortable?: boolean;
 }
 
 export function useSnapshot(
-  {
-    timerange,
-    currentTime,
-    accountId = '',
-    region = '',
-    groupBy = null,
-    sendRequestImmediately = true,
-    includeTimeseries = true,
-    dropPartialBuckets = true,
-    requestTs,
-    ...args
-  }: UseSnapshotRequest,
-  options?: UseSnapshotRequestOptions
+  props: UseSnapshotRequest,
+  { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
-  const decodeResponse = (response: any) => {
-    return pipe(
-      SnapshotNodeResponseRT.decode(response),
-      fold(throwErrors(createPlainError), identity)
-    );
-  };
+  const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
 
-  const payload: Omit<SnapshotRequest, 'filterQuery'> = {
-    ...args,
+  const { data, status, error, refetch } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/metrics/snapshot', {
+        method: 'POST',
+        body: payload,
+      });
+
+      return decodeOrThrow(SnapshotNodeResponseRT)(response);
+    },
+    [payload],
+    {
+      autoFetch: sendRequestImmediately,
+    }
+  );
+
+  return {
+    error: (error && error.message) || null,
+    loading: isPending(status),
+    nodes: data?.nodes || [],
+    interval: data?.interval || '60s',
+    reload: refetch,
+  };
+}
+
+const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
+  const {
+    accountId = '',
+    currentTime,
+    dropPartialBuckets = true,
+    filterQuery = '',
+    groupBy = null,
+    includeTimeseries = true,
+    metrics,
+    nodeType,
+    overrideCompositeSize,
+    region = '',
+    sourceId,
+    timerange,
+  } = args;
+
+  return {
     accountId,
-    region,
+    dropPartialBuckets,
+    filterQuery: filterQuery as string,
     groupBy,
+    includeTimeseries,
+    metrics,
+    nodeType,
+    sourceId,
+    overrideCompositeSize,
+    region,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,
       from: currentTime - 1200 * 1000,
       lookbackSize: 5,
     },
-    includeTimeseries,
-    dropPartialBuckets,
   };
-
-  const { error, loading, response, makeRequest, resetRequestState } = useHTTPRequest(
-    '/api/metrics/snapshot',
-    'POST',
-    JSON.stringify(payload),
-    decodeResponse,
-    undefined,
-    undefined,
-    options?.abortable
-  );
-
-  useEffect(() => {
-    if (sendRequestImmediately) {
-      makeRequest();
-    }
-    return () => {
-      resetRequestState();
-    };
-  }, [makeRequest, sendRequestImmediately, resetRequestState, requestTs]);
-
-  return {
-    error: (error && error.message) || null,
-    loading,
-    nodes: response ? response.nodes : [],
-    interval: response ? response.interval : '60s',
-    reload: makeRequest,
-  };
-}
+};

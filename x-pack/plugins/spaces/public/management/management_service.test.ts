@@ -38,6 +38,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: getRolesAPIClientMock,
+        solutionNavExperiment: Promise.resolve(false),
       });
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
@@ -58,6 +59,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: getRolesAPIClientMock,
+        solutionNavExperiment: Promise.resolve(false),
       });
     });
   });
@@ -79,6 +81,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
         config,
         getRolesAPIClient: jest.fn(),
+        solutionNavExperiment: Promise.resolve(false),
       });
 
       service.stop();

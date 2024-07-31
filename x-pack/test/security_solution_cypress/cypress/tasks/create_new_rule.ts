@@ -150,8 +150,8 @@ import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/contr
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
-import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -802,13 +802,16 @@ export const continueFromDefineStep = () => {
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
+const optionsToComboboxText = (options: string[]) => {
+  return options.map((o) => `${o}{downArrow}{enter}{esc}`).join('');
+};
+
 export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreateProps) => {
   const jobsAsArray = isArray(rule.machine_learning_job_id)
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
-
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
   });
@@ -861,6 +864,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
         if (emptyTableState.length > 0) {
@@ -908,14 +912,12 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
-const optionsToComboboxText = (options: string[]) => {
-  return options.map((o) => `${o}{downArrow}{enter}{esc}`).join('');
-};
-
 export const fillAlertSuppressionFields = (fields: string[]) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(optionsToComboboxText(fields));
+  fields.forEach((field) => {
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+  });
 };
 
 export const clearAlertSuppressionFields = () => {

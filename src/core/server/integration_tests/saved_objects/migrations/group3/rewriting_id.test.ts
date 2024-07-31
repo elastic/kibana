@@ -108,8 +108,6 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   it('rewrites id deterministically for SO with namespaceType: "multiple" and "multiple-isolated"', async () => {

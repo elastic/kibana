@@ -41,7 +41,6 @@ import {
   updateSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
-  toggleDetailPanel,
   setEventsLoading,
   removeColumn,
   upsertColumn,
@@ -95,7 +94,6 @@ import {
   updateTimelineGraphEventId,
   updateFilters,
   updateTimelineSessionViewConfig,
-  updateTimelineDetailsPanel,
   setLoadingTableEvents,
   removeTableColumn,
   upsertTableColumn,
@@ -376,19 +374,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         eqlOptions: {
           ...(state.timelineById[id].eqlOptions ?? {}),
           [field]: value,
-        },
-      },
-    },
-  }))
-  .case(toggleDetailPanel, (state, action) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [action.id]: {
-        ...state.timelineById[action.id],
-        expandedDetail: {
-          ...state.timelineById[action.id].expandedDetail,
-          ...updateTimelineDetailsPanel(action),
         },
       },
     },

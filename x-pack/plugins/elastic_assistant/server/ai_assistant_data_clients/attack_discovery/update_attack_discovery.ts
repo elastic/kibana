@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryResponse,
   AttackDiscoveryStatus,
@@ -13,7 +13,6 @@ import {
   Provider,
   UUID,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import * as uuid from 'uuid';
 import { EsReplacementSchema } from '../conversations/types';
 import { getAttackDiscovery } from './get_attack_discovery';
@@ -42,8 +41,9 @@ export interface UpdateAttackDiscoverySchema {
   average_interval_ms?: number;
   generation_intervals?: Array<{ date: string; duration_ms: number }>;
   replacements?: EsReplacementSchema[];
-  status: AttackDiscoveryStatus;
+  status?: AttackDiscoveryStatus;
   updated_at?: string;
+  last_viewed_at?: string;
   failure_reason?: string;
 }
 
@@ -97,6 +97,7 @@ export const transformToUpdateScheme = (
     generationIntervals,
     id,
     replacements,
+    lastViewedAt,
     status,
   }: AttackDiscoveryUpdateProps
 ): UpdateAttackDiscoverySchema => {
@@ -148,8 +149,9 @@ export const transformToUpdateScheme = (
           value: replacements[key],
         }))
       : undefined,
-    status,
-    updated_at: updatedAt,
+    ...(status ? { status } : {}),
+    // only update updated_at time if this is not an update to last_viewed_at
+    ...(lastViewedAt ? { last_viewed_at: lastViewedAt } : { updated_at: updatedAt }),
     ...averageIntervalMsObj,
   };
 };

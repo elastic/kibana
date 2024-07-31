@@ -55,7 +55,6 @@ describe(`installRiskScoresRoute - ${RiskScoreEntity.host}`, () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
-  const security = undefined;
   const mockSpaceId = 'mockSpaceId';
 
   beforeAll(async () => {
@@ -71,7 +70,7 @@ describe(`installRiskScoresRoute - ${RiskScoreEntity.host}`, () => {
       },
     });
 
-    installRiskScoresRoute(server.router, logger, security);
+    installRiskScoresRoute(server.router, logger);
     await server.inject(request, requestContextMock.convertContext(context));
   });
 
@@ -120,7 +119,6 @@ describe(`installRiskScoresRoute - ${RiskScoreEntity.user}`, () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
-  const security = undefined;
   const mockSpaceId = 'mockSpaceId';
 
   beforeAll(async () => {
@@ -136,7 +134,7 @@ describe(`installRiskScoresRoute - ${RiskScoreEntity.user}`, () => {
       },
     });
 
-    installRiskScoresRoute(server.router, logger, security);
+    installRiskScoresRoute(server.router, logger);
     await server.inject(request, requestContextMock.convertContext(context));
   });
 

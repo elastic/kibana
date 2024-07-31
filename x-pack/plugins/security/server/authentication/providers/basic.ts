@@ -87,7 +87,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
         state: authHeaders,
       });
     } catch (err) {
-      this.logger.debug(`Failed to perform a login: ${getDetailedErrorMessage(err)}`);
+      this.logger.debug(() => `Failed to perform a login: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
   }
@@ -172,7 +172,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {
       this.logger.debug(
-        `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
+        () => `Failed to authenticate request via state: ${getDetailedErrorMessage(err)}`
       );
       return AuthenticationResult.failed(err);
     }

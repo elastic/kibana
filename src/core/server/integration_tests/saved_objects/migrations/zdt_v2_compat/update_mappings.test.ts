@@ -11,7 +11,7 @@ import fs from 'fs/promises';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import { parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
   getFooType,
@@ -32,7 +32,6 @@ describe('ZDT with v2 compat - basic mapping update', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const createBaseline = async () => {

@@ -70,6 +70,7 @@ export const postAttackDiscoveryRoute = (
         try {
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
+          const actionsClient = await actions.getActionsClientWithRequest(request);
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
           const authenticatedUser = assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
@@ -120,7 +121,7 @@ export const postAttackDiscoveryRoute = (
           }
 
           const assistantToolParams = getAssistantToolParams({
-            actions,
+            actionsClient,
             alertsIndexPattern,
             anonymizationFields,
             apiConfig,

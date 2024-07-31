@@ -17,7 +17,9 @@ import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form'
 import { Header } from './header/header';
 import { SystemLogsPanel } from './quickstart_flows/system_logs';
 import { CustomLogsPanel } from './quickstart_flows/custom_logs';
+import { OtelLogsPanel } from './quickstart_flows/otel_logs';
 import { AutoDetectPanel } from './quickstart_flows/auto_detect';
+import { KubernetesPanel } from './quickstart_flows/kubernetes';
 import { BackButton } from './shared/back_button';
 
 const queryClient = new QueryClient();
@@ -64,6 +66,14 @@ export function ObservabilityOnboardingFlow() {
             <Route path="/customLogs">
               <BackButton />
               <CustomLogsPanel />
+            </Route>
+            <Route path="/kubernetes">
+              <BackButton />
+              <KubernetesPanel />
+            </Route>
+            <Route path="/otel-logs">
+              <BackButton />
+              <OtelLogsPanel />
             </Route>
             <Route>
               <OnboardingFlowForm />

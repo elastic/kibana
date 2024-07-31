@@ -30,27 +30,36 @@ import { UserPanelHeader } from './header';
 import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { UserPreviewPanelFooter } from '../user_preview/footer';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
   isDraggable?: boolean;
+  isPreviewMode?: boolean;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'user-panel';
+  key: 'user-panel' | 'user-preview-panel';
   params: UserPanelProps;
 }
 
 export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
+export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
 };
 
-export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPanelProps) => {
+export const UserPanel = ({
+  contextID,
+  scopeId,
+  userName,
+  isDraggable,
+  isPreviewMode,
+}: UserPanelProps) => {
   const { telemetry } = useKibana().services;
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -106,6 +115,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         id: UserDetailsPanelKey,
         params: {
           isRiskScoreExist: !!userRiskData?.user?.risk,
+          scopeId,
           user: {
             name: userName,
             email,
@@ -114,7 +124,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         path: tab ? { tab } : undefined,
       });
     },
-    [telemetry, email, openLeftPanel, userName, userRiskData]
+    [telemetry, openLeftPanel, userRiskData?.user?.risk, userName, email, scopeId]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
@@ -147,7 +157,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={hasUserDetailsData}
+              flyoutIsExpandable={!isPreviewMode && hasUserDetailsData}
               expandDetails={openPanelFirstTab}
             />
             <UserPanelHeader
@@ -165,8 +175,17 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={openPanelTab}
+              openDetailsPanel={!isPreviewMode ? openPanelTab : undefined}
+              isPreviewMode={isPreviewMode}
             />
+            {isPreviewMode && (
+              <UserPreviewPanelFooter
+                userName={userName}
+                contextID={contextID}
+                scopeId={scopeId}
+                isDraggable={!!isDraggable}
+              />
+            )}
           </>
         );
       }}

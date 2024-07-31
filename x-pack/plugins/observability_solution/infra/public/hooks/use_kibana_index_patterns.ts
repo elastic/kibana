@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useTrackedPromise } from '../utils/use_tracked_promise';
+import { useTrackedPromise } from './use_tracked_promise';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useKibanaIndexPatternService = () => {

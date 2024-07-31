@@ -648,9 +648,10 @@ export const installTransforms = async ({
     );
     if (previousInstalledTransformEsAssets.length > 0) {
       logger.debug(
-        `Found previous transform references:\n ${JSON.stringify(
-          previousInstalledTransformEsAssets
-        )}`
+        () =>
+          `Found previous transform references:\n ${JSON.stringify(
+            previousInstalledTransformEsAssets
+          )}`
       );
     }
   }

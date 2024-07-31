@@ -23,7 +23,9 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
+import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
@@ -54,6 +56,9 @@ export type ControlGroupApi = PresentationContainer &
   PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch>> & {
     autoApplySelections$: PublishingSubject<boolean>;
+    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    untilInitialized: () => Promise<void>;
   };
 
 export interface ControlGroupRuntimeState {

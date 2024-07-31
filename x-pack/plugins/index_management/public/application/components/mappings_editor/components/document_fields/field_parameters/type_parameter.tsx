@@ -30,7 +30,7 @@ export const TypeParameter = ({
   isMultiField,
   isRootLevelField,
   showDocLink = false,
-  isSemanticTextEnabled = false,
+  isSemanticTextEnabled = true,
 }: Props) => {
   const fieldTypeOptions = useMemo(() => {
     let options = isMultiField

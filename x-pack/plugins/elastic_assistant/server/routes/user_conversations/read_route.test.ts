@@ -14,7 +14,7 @@ import {
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Read conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -17,18 +17,10 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPolicyOutOfDate } from '../../utils';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import {
-  AgentStatus,
-  EndpointAgentStatus,
-} from '../../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import {
-  getEndpointPendingActionsCallback,
-  nonExistingPolicies,
-  uiQueryParams,
-} from '../../store/selectors';
+import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -50,13 +42,11 @@ interface EndpointDetailsContentProps {
 
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
-    const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
       [hostInfo]
     );
-    const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
     const policyResponseRoutePath = useMemo(() => {
@@ -92,15 +82,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               />
             </ColumnTitle>
           ),
-          // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
-          description: agentStatusClientEnabled ? (
-            <AgentStatus agentId={hostInfo.metadata.agent.id} agentType="endpoint" />
-          ) : (
-            <EndpointAgentStatus
-              pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
-              endpointHostInfo={hostInfo}
-            />
-          ),
+          description: <AgentStatus agentId={hostInfo.metadata.agent.id} agentType="endpoint" />,
         },
         {
           title: (
@@ -198,15 +180,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
           ),
         },
       ];
-    }, [
-      hostInfo,
-      agentStatusClientEnabled,
-      getHostPendingActions,
-      policyInfo,
-      missingPolicies,
-      policyStatus,
-      policyStatusClickHandler,
-    ]);
+    }, [hostInfo, policyInfo, missingPolicies, policyStatus, policyStatusClickHandler]);
 
     return (
       <div>

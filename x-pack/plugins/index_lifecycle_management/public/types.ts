@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
+import { ApplicationStart, HttpSetup, OverlayStart, ScopedHistory } from '@kbn/core/public';
 import { DocLinksStart } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -41,5 +41,9 @@ export interface AppServicesContext {
   license: ILicense;
   cloud?: CloudSetup;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   docLinks: DocLinksStart;
+  overlays: OverlayStart;
+  http: HttpSetup;
+  history: ScopedHistory;
 }

@@ -37,7 +37,7 @@ import { useGroupName } from './hooks/use_group_name';
 interface Props {
   group: string;
   kqlQuery?: string;
-  sloView: SLOView;
+  view: SLOView;
   sort?: SortField;
   direction?: SortDirection;
   groupBy: GroupByField;
@@ -48,7 +48,7 @@ interface Props {
 export function GroupListView({
   group,
   kqlQuery,
-  sloView,
+  view,
   sort,
   direction,
   groupBy,
@@ -203,7 +203,7 @@ export function GroupListView({
                   sloList={results}
                   loading={isLoading || isRefetching}
                   error={isError}
-                  sloView={sloView}
+                  view={view}
                 />
                 <EuiSpacer size="m" />
                 {total > 0 && total > itemsPerPage ? (

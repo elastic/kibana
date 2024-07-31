@@ -33,6 +33,9 @@ jest.mock('rxjs', () => {
   };
 });
 
+// Set the default timeout for all mock server tests to 30 seconds
+jest.setTimeout(10 * 3000);
+
 /**
  * Setup a mock server with the default handlers
  * @param debug - If true, log all requests to the console

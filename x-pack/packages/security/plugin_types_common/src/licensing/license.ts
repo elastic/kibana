@@ -13,6 +13,7 @@ import type { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
   isLicenseAvailable(): boolean;
+  getLicenseType(): string | undefined;
   getUnavailableReason: () => string | undefined;
   isEnabled(): boolean;
   getFeatures(): SecurityLicenseFeatures;

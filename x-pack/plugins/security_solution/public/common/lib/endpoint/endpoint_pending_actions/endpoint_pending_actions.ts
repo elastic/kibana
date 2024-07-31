@@ -21,6 +21,8 @@ import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
 export const fetchPendingActionsByAgentId = (
   agentIds: PendingActionsRequestQuery['agent_ids']
 ): Promise<PendingActionsResponse> => {
+  // FIXME:PT Delete method now that we are using new internal API (team issue: 9783)
+
   return KibanaServices.get().http.get<PendingActionsResponse>(ACTION_STATUS_ROUTE, {
     version: '2023-10-31',
     query: {

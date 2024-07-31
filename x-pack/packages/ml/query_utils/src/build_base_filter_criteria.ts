@@ -23,9 +23,10 @@ import { isFilterBasedDefaultQuery } from './filter_based_default_query';
  */
 export function buildBaseFilterCriteria(
   timeFieldName?: string,
-  earliestMs?: number,
-  latestMs?: number,
-  query?: Query['query']
+  earliestMs?: number | string,
+  latestMs?: number | string,
+  query?: Query['query'],
+  timeFormat = 'epoch_millis'
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
 
@@ -33,9 +34,9 @@ export function buildBaseFilterCriteria(
     filterCriteria.push({
       range: {
         [timeFieldName]: {
-          gte: earliestMs,
-          lte: latestMs,
-          format: 'epoch_millis',
+          gte: earliestMs as estypes.DateMath,
+          lte: latestMs as estypes.DateMath,
+          format: timeFormat,
         },
       },
     });

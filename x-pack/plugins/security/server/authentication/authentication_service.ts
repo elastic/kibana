@@ -348,7 +348,6 @@ export class AuthenticationService {
       applicationName,
       kibanaFeatures,
     });
-
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config
      * to construct a server base URL (deprecated, used by the SAML provider only).

@@ -145,20 +145,20 @@ function createDiscoverLocator(
 }
 
 export function getDiscoverLink(
-  discover: DiscoverStart,
   slo: SLOWithSummaryResponse,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  discover?: DiscoverStart
 ) {
   const config = createDiscoverLocator(slo, false, false, timeRange);
   return discover?.locator?.getRedirectUrl(config);
 }
 
 export function openInDiscover(
-  discover: DiscoverStart,
   slo: SLOWithSummaryResponse,
   showBad = false,
   showGood = false,
-  timeRange?: TimeRange
+  timeRange?: TimeRange,
+  discover?: DiscoverStart
 ) {
   const config = createDiscoverLocator(slo, showBad, showGood, timeRange);
   discover?.locator?.navigate(config);

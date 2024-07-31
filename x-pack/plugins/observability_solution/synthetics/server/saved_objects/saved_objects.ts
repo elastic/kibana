@@ -32,7 +32,7 @@ import {
 } from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
 
-export const registerUptimeSavedObjects = (
+export const registerSyntheticsSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) => {

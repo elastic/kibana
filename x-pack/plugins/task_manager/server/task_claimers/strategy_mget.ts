@@ -36,10 +36,12 @@ import {
   EnabledTask,
   OneOfTaskTypes,
   RecognizedTask,
+  tasksWithPartitions,
 } from '../queries/mark_available_tasks_as_claimed';
 
 import { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -51,6 +53,7 @@ interface OwnershipClaimingOpts {
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
   taskMaxAttempts: Record<string, number>;
+  taskPartitioner: TaskPartitioner;
 }
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
@@ -89,7 +92,7 @@ async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwner
 }
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
-  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
+  const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
   const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
   const { logger } = opts;
   const loggerTag = claimAvailableTasksMget.name;
@@ -111,6 +114,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     claimOwnershipUntil,
     size: initialCapacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
+    taskPartitioner,
   });
 
   if (docs.length === 0)
@@ -267,7 +271,7 @@ async function searchAvailableTasks({
   excludedTypes,
   taskStore,
   size,
-  taskMaxAttempts,
+  taskPartitioner,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
   const searchedTypes = Array.from(taskTypes)
     .concat(Array.from(removedTypes))
@@ -283,9 +287,14 @@ async function searchAvailableTasks({
     // must have a status that isn't 'unrecognized'
     RecognizedTask
   );
+  const partitions = await taskPartitioner.getPartitions();
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
-  const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
+  const query = matchesClauses(
+    queryForScheduledTasks,
+    filterDownBy(InactiveTasks),
+    tasksWithPartitions(partitions)
+  );
 
   return await taskStore.fetch({
     query,

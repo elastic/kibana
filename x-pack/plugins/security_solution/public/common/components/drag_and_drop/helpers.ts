@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isString, keyBy } from 'lodash/fp';
+import { keyBy } from 'lodash/fp';
 import type { DropResult } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
@@ -232,8 +232,6 @@ export const addFieldToColumns = ({
       scopedActions.upsertColumn({
         column: {
           columnHeaderType: 'not-filtered',
-          description: isString(column.description) ? column.description : undefined,
-          example: isString(column.example) ? column.example : undefined,
           id: fieldId,
           linkField: linkFields[fieldId] ?? undefined,
           type: column.type,

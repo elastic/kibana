@@ -76,7 +76,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
           });
 
           const patchedRule = await detectionRulesClient.patchRule({
-            nextParams: params,
+            rulePatch: params,
           });
 
           return response.ok({

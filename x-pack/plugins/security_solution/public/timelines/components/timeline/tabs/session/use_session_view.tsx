@@ -8,7 +8,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import type { EntityType } from '@kbn/timelines-plugin/common';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
@@ -242,15 +241,7 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
   };
 };
 
-export const useSessionView = ({
-  scopeId,
-  entityType,
-  height,
-}: {
-  scopeId: string;
-  entityType?: EntityType;
-  height?: number;
-}) => {
+export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: number }) => {
   const { sessionView } = useKibana().services;
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
@@ -264,7 +255,7 @@ export const useSessionView = ({
   const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
-  const { sessionViewConfig, activeTab } = useDeepEqualSelector((state) => ({
+  const { sessionViewConfig } = useDeepEqualSelector((state) => ({
     activeTab: timelineDefaults.activeTab,
     prevActiveTab: timelineDefaults.prevActiveTab,
     ...((getScope && getScope(state, scopeId)) ?? defaults),
@@ -289,12 +280,9 @@ export const useSessionView = ({
       return SourcererScopeName.default;
     }
   }, [scopeId]);
-  const { openEventDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: !isActiveTimeline(scopeId),
-    entityType,
+  const { openEventDetailsPanel } = useDetailPanel({
     sourcererScope,
     scopeId,
-    tabType: isActiveTimeline(scopeId) ? activeTab : TimelineTabs.query,
   });
 
   const sessionViewComponent = useMemo(() => {
@@ -320,8 +308,6 @@ export const useSessionView = ({
 
   return {
     openEventDetailsPanel,
-    shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
-    DetailsPanel,
   };
 };

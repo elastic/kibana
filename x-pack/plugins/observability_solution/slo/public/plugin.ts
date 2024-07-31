@@ -56,7 +56,6 @@ export class SloPlugin
     const mount = async (params: AppMountParameters<unknown>) => {
       const { renderApp } = await import('./application');
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-      const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
 
       return renderApp({
@@ -67,7 +66,7 @@ export class SloPlugin
         kibanaVersion,
         usageCollection: pluginsSetup.usageCollection,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        plugins: pluginsStart,
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
       });
@@ -138,7 +137,8 @@ export class SloPlugin
         const registerAsyncSloUiActions = async () => {
           if (pluginsSetup.uiActions) {
             const { registerSloUiActions } = await import('./ui_actions');
-            registerSloUiActions(pluginsSetup.uiActions, coreSetup);
+
+            registerSloUiActions(coreSetup, pluginsSetup, pluginsStart);
           }
         };
         registerAsyncSloUiActions();
@@ -155,8 +155,6 @@ export class SloPlugin
 
   public start(coreStart: CoreStart, pluginsStart: SloPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
-    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
-
     return {
       getCreateSLOFlyout: getCreateSLOFlyoutLazy({
         core: coreStart,
@@ -164,7 +162,7 @@ export class SloPlugin
         kibanaVersion,
         observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        plugins: pluginsStart,
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
       }),

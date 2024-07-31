@@ -94,7 +94,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         }
       );
     } catch (err) {
-      this.logger.debug(`Failed to perform a login: ${getDetailedErrorMessage(err)}`);
+      this.logger.debug(() => `Failed to perform a login: ${getDetailedErrorMessage(err)}`);
       return AuthenticationResult.failed(err);
     }
   }

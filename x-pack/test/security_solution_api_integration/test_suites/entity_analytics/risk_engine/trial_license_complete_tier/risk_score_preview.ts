@@ -566,5 +566,16 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     });
+
+    it('does not return an 404 when the data_view_id is an non existent index', async () => {
+      const { scores } = await previewRiskScores({
+        body: { data_view_id: 'invalid-index' },
+      });
+
+      expect(scores).to.eql({
+        host: [],
+        user: [],
+      });
+    });
   });
 };

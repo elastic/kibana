@@ -147,6 +147,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
+    getInvalidSelectionMessage: () =>
+      i18n.translate('controls.optionsList.popover.selectionError', {
+        defaultMessage: 'There was an error when making your selection',
+      }),
     getInvalidSearchMessage: (fieldType: string) => {
       switch (fieldType) {
         case 'ip': {

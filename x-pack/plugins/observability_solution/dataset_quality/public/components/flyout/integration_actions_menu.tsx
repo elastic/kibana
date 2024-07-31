@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { Dashboard } from '../../../common/api_types';
 
 const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
   defaultMessage: 'Integration actions',
@@ -40,15 +41,17 @@ const viewDashboardsText = i18n.translate('xpack.datasetQuality.flyoutViewDashbo
 
 export function IntegrationActionsMenu({
   integration,
+  dashboards,
   dashboardsLoading,
 }: {
   integration: Integration;
+  dashboards: Dashboard[];
   dashboardsLoading: boolean;
 }) {
   const { dataStreamStat, canUserAccessDashboards, canUserViewIntegrations } =
     useDatasetQualityFlyout();
+  const { version, name: integrationName } = integration;
   const { type, name } = dataStreamStat!;
-  const { dashboards = [], version, name: integrationName } = integration;
   const {
     isOpen,
     handleCloseMenu,

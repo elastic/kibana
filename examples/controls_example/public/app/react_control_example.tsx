@@ -6,42 +6,44 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCallOut,
   EuiCodeBlock,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiSuperDatePicker,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import {
+  CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { combineCompatibleChildrenApis, PresentationContainer } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataLoading,
   HasUniqueId,
   PublishesDataLoading,
-  PublishesUnifiedSearch,
-  PublishesViewMode,
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
   ViewMode as ViewModeType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { useEffect, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import useMount from 'react-use/lib/useMount';
-import { BehaviorSubject } from 'rxjs';
+
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
+import { openDataControlEditor } from '../react_controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
@@ -57,11 +59,12 @@ const toggleViewButtons = [
 ];
 
 const searchControlId = 'searchControl1';
+const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
     type: SEARCH_CONTROL_TYPE,
-    order: 0,
+    order: 2,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -70,7 +73,20 @@ const controlGroupPanels = {
       title: 'Message',
       grow: true,
       width: 'medium',
-      searchString: 'this',
+      enhancements: {},
+    },
+  },
+  [rangeSliderControlId]: {
+    type: RANGE_SLIDER_CONTROL_TYPE,
+    order: 1,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: rangeSliderControlId,
+      fieldName: 'bytes',
+      title: 'Bytes',
+      grow: true,
+      width: 'medium',
       enhancements: {},
     },
   },
@@ -87,18 +103,7 @@ const controlGroupPanels = {
   },
 };
 
-/**
- * I am mocking the dashboard API so that the data table embeddble responds to changes to the
- * data view publishing subject from the control group
- */
-type MockedDashboardApi = PresentationContainer &
-  PublishesDataLoading &
-  PublishesViewMode &
-  PublishesUnifiedSearch & {
-    publishFilters: (newFilters: Filter[] | undefined) => void;
-    setViewMode: (newViewMode: ViewMode) => void;
-    setChild: (child: HasUniqueId) => void;
-  };
+const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 export const ReactControlExample = ({
   core,
@@ -110,6 +115,15 @@ export const ReactControlExample = ({
   const dataLoading$ = useMemo(() => {
     return new BehaviorSubject<boolean | undefined>(false);
   }, []);
+  const controlGroupFilters$ = useMemo(() => {
+    return new BehaviorSubject<Filter[] | undefined>(undefined);
+  }, []);
+  const filters$ = useMemo(() => {
+    return new BehaviorSubject<Filter[] | undefined>(undefined);
+  }, []);
+  const unifiedSearchFilters$ = useMemo(() => {
+    return new BehaviorSubject<Filter[] | undefined>(undefined);
+  }, []);
   const timeRange$ = useMemo(() => {
     return new BehaviorSubject<TimeRange | undefined>({
       from: 'now-24h',
@@ -119,29 +133,35 @@ export const ReactControlExample = ({
   const timeslice$ = useMemo(() => {
     return new BehaviorSubject<[number, number] | undefined>(undefined);
   }, []);
-  const [dataLoading, timeRange] = useBatchedPublishingSubjects(dataLoading$, timeRange$);
+  const viewMode$ = useMemo(() => {
+    return new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
+  }, []);
+  const [dataLoading, timeRange, viewMode] = useBatchedPublishingSubjects(
+    dataLoading$,
+    timeRange$,
+    viewMode$
+  );
 
-  const [dashboardApi, setDashboardApi] = useState<MockedDashboardApi | undefined>(undefined);
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
-  const viewModeSelected = useStateFromPublishingSubject(dashboardApi?.viewMode);
+  const [isControlGroupInitialized, setIsControlGroupInitialized] = useState(false);
+  const [dataViewNotFound, setDataViewNotFound] = useState(false);
 
-  useMount(() => {
-    const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
-    const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+  const dashboardApi = useMemo(() => {
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
-    setDashboardApi({
+    return {
       dataLoading: dataLoading$,
-      viewMode,
+      unifiedSearchFilters$,
+      viewMode: viewMode$,
       filters$,
       query$,
       timeRange$,
       timeslice$,
       children$,
-      publishFilters: (newFilters) => filters$.next(newFilters),
-      setViewMode: (newViewMode) => viewMode.next(newViewMode),
-      setChild: (child) => children$.next({ ...children$.getValue(), [child.uuid]: child }),
+      publishFilters: (newFilters: Filter[] | undefined) => filters$.next(newFilters),
+      setChild: (child: HasUniqueId) =>
+        children$.next({ ...children$.getValue(), [child.uuid]: child }),
       removePanel: () => {},
       replacePanel: () => {
         return Promise.resolve('');
@@ -152,8 +172,10 @@ export const ReactControlExample = ({
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },
-    });
-  });
+      lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const subscription = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
@@ -174,26 +196,47 @@ export const ReactControlExample = ({
     };
   }, [dashboardApi, dataLoading$]);
 
-  // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
-  const {
-    loading,
-    value: dataViews,
-    error,
-  } = useAsync(async () => {
-    return await dataViewsService.find('kibana_sample_data_logs');
+  useEffect(() => {
+    let ignore = false;
+    dataViewsService.get(WEB_LOGS_DATA_VIEW_ID).catch(() => {
+      if (!ignore) {
+        setDataViewNotFound(true);
+      }
+    });
+
+    return () => {
+      ignore = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!controlGroupApi) return;
 
     const subscription = controlGroupApi.filters$.subscribe((controlGroupFilters) => {
-      if (dashboardApi) dashboardApi.publishFilters(controlGroupFilters);
+      controlGroupFilters$.next(controlGroupFilters);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [dashboardApi, controlGroupApi]);
+  }, [controlGroupFilters$, controlGroupApi]);
+
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    let ignore = false;
+    controlGroupApi.untilInitialized().then(() => {
+      if (!ignore) {
+        setIsControlGroupInitialized(true);
+      }
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [controlGroupApi]);
 
   useEffect(() => {
     if (!controlGroupApi) return;
@@ -207,20 +250,28 @@ export const ReactControlExample = ({
     };
   }, [controlGroupApi, timeslice$]);
 
-  if (error || (!dataViews?.[0]?.id && !loading))
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>There was an error!</h2>}
-        body={<p>{error ? error.message : 'Please add at least one data view.'}</p>}
-      />
+  useEffect(() => {
+    const subscription = combineLatest([controlGroupFilters$, unifiedSearchFilters$]).subscribe(
+      ([controlGroupFilters, unifiedSearchFilters]) => {
+        filters$.next([...(controlGroupFilters ?? []), ...(unifiedSearchFilters ?? [])]);
+      }
     );
 
-  return loading ? (
-    <EuiLoadingSpinner />
-  ) : (
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupFilters$, filters$, unifiedSearchFilters$]);
+
+  return (
     <>
+      {dataViewNotFound && (
+        <>
+          <EuiCallOut color="warning" iconType="warning">
+            <p>{`Install "Sample web logs" to run example`}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -253,13 +304,42 @@ export const ReactControlExample = ({
             Serialize control group
           </EuiButton>
         </EuiFlexItem>
+        {controlGroupApi && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                openDataControlEditor({
+                  initialState: {
+                    grow: DEFAULT_CONTROL_GROW,
+                    width: DEFAULT_CONTROL_WIDTH,
+                    dataViewId: dashboardApi.lastUsedDataViewId.getValue(),
+                  },
+                  onSave: ({ type: controlType, state: initialState }) => {
+                    controlGroupApi.addNewPanel({
+                      panelType: controlType,
+                      initialState,
+                    });
+                  },
+                  controlGroupApi,
+                  services: {
+                    core,
+                    dataViews: dataViewsService,
+                  },
+                });
+              }}
+              size="s"
+            >
+              Add new data control
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             legend="Change the view mode"
             options={toggleViewButtons}
-            idSelected={`viewModeToggle_${viewModeSelected}`}
+            idSelected={`viewModeToggle_${viewMode}`}
             onChange={(_, value) => {
-              dashboardApi?.setViewMode(value);
+              viewMode$.next(value);
             }}
           />
         </EuiFlexItem>
@@ -297,9 +377,14 @@ export const ReactControlExample = ({
             } as object,
             references: [
               {
-                name: `controlGroup_${searchControlId}:searchControlDataView`,
+                name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
-                id: dataViews?.[0].id!,
+                id: WEB_LOGS_DATA_VIEW_ID,
+              },
+              {
+                name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
+                type: 'index-pattern',
+                id: WEB_LOGS_DATA_VIEW_ID,
               },
             ],
           }),
@@ -307,22 +392,24 @@ export const ReactControlExample = ({
         key={`control_group`}
       />
       <EuiSpacer size="l" />
-      <div style={{ height: '400px' }}>
-        <ReactEmbeddableRenderer
-          type={'data_table'}
-          getParentApi={() => ({
-            ...dashboardApi,
-            getSerializedStateForChild: () => ({
-              rawState: {},
-              references: [],
-            }),
-          })}
-          hidePanelChrome={false}
-          onApiAvailable={(api) => {
-            dashboardApi?.setChild(api);
-          }}
-        />
-      </div>
+      {isControlGroupInitialized && (
+        <div style={{ height: '400px' }}>
+          <ReactEmbeddableRenderer
+            type={'data_table'}
+            getParentApi={() => ({
+              ...dashboardApi,
+              getSerializedStateForChild: () => ({
+                rawState: {},
+                references: [],
+              }),
+            })}
+            hidePanelChrome={false}
+            onApiAvailable={(api) => {
+              dashboardApi?.setChild(api);
+            }}
+          />
+        </div>
+      )}
     </>
   );
 };

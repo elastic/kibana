@@ -26,6 +26,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -37,7 +38,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    const connectorSelector = screen.getByTestId('connectorSelectorPlaceholderButton');
+    const connectorSelector = screen.getByTestId('addNewConnectorButton');
 
     expect(connectorSelector).toBeInTheDocument();
   });
@@ -48,6 +49,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={connectorsAreConfigured}
           isDisabledActions={false}
@@ -59,7 +61,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    const connectorSelector = screen.queryByTestId('connectorSelectorPlaceholderButton');
+    const connectorSelector = screen.queryByTestId('addNewConnectorButton');
 
     expect(connectorSelector).not.toBeInTheDocument();
   });
@@ -70,6 +72,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -97,6 +100,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -119,6 +123,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -142,6 +147,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -165,6 +171,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId={connectorId}
           connectorsAreConfigured={true}
           isDisabledActions={false}

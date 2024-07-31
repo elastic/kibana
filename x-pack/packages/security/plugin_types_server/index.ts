@@ -14,15 +14,6 @@ export type {
   AuditLogger,
 } from './src/audit';
 export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  GrantAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  InvalidateAPIKeyResult,
   APIKeys,
   AuthenticationServiceStart,
   UpdateAPIKeyParams,
@@ -39,7 +30,6 @@ export type {
   CheckPrivilegesWithRequest,
   CheckSavedObjectsPrivilegesWithRequest,
   CheckPrivilegesDynamicallyWithRequest,
-  KibanaPrivilegesType,
   SavedObjectActions,
   UIActions,
   CheckPrivilegesPayload,
@@ -51,7 +41,6 @@ export type {
   CheckPrivilegesOptions,
   CheckUserProfilesPrivilegesPayload,
   CheckUserProfilesPrivilegesResponse,
-  ElasticsearchPrivilegesType,
   CasesActions,
   CheckPrivileges,
   AlertingActions,
@@ -72,11 +61,30 @@ export type {
 } from './src/user_profile';
 
 export {
-  restApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
   getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  crossClusterApiKeySchema,
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './src/authentication';
-export { GLOBAL_RESOURCE, elasticsearchRoleSchema, getKibanaRoleSchema } from './src/authorization';
+
+export type {
+  ElasticsearchPrivilegesType,
+  KibanaPrivilegesType,
+  APIKeysService,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyResult,
+} from '@kbn/core-security-server';
+export { isCreateRestAPIKeyParams } from '@kbn/core-security-server';
+
+export {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  getRestApiKeyWithKibanaPrivilegesSchema,
+} from './src/authentication';
+export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './src/authorization';

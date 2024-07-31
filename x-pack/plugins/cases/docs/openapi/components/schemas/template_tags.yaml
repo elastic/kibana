@@ -1,0 +1,7 @@
+description: >
+  The words and phrases that help categorize templates. It can be an empty array.
+type: array
+maxItems: 200
+items:
+  type: string
+  maxLength: 256

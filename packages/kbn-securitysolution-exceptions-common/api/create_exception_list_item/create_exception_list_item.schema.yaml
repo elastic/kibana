@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Create exception list item API endpoint
+  version: '2023-10-31'
+paths:
+  /api/exception_lists/items:
+    post:
+      x-labels: [serverless, ess]
+      operationId: CreateExceptionListItem
+      x-codegen-enabled: true
+      summary: Creates an exception list item
+      tags:
+        - Exceptions API
+      requestBody:
+        description: Exception list item's properties
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+                list_id:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+                type:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+                name:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+                description:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+                namespace_type:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+                  default: 'single'
+                os_types:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+                  default: []
+                meta:
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+                expire_time:
+                  type: string
+                  format: date-time
+                comments:
+                  $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
+                  default: []
+              required:
+                - list_id
+                - type
+                - name
+                - description
+                - entries
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItem'
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        409:
+          description: Exception list item already exists response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  x-codegen-enabled: true
+  schemas:
+    CreateExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - comment
+
+    CreateExceptionListItemCommentArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/CreateExceptionListItemComment'

@@ -7,9 +7,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { UsageCounters } from '../../common/types';
+import type { UsageCounters } from '../../common';
 
-export interface UsageCounterDeps {
+export interface UsageCounterParams {
   domainId: string;
   counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
 }
@@ -31,19 +31,27 @@ export class UsageCounter implements IUsageCounter {
   private domainId: string;
   private counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
 
-  constructor({ domainId, counter$ }: UsageCounterDeps) {
+  constructor({ domainId, counter$ }: UsageCounterParams) {
     this.domainId = domainId;
     this.counter$ = counter$;
   }
 
   public incrementCounter = (params: UsageCounters.v1.IncrementCounterParams) => {
-    const { counterName, counterType = 'count', incrementBy = 1 } = params;
+    const {
+      counterName,
+      counterType = 'count',
+      source = 'server', // default behavior before introducing the property
+      incrementBy = 1,
+      namespace,
+    } = params;
 
     this.counter$.next({
-      counterName,
       domainId: this.domainId,
+      counterName,
       counterType,
+      source,
       incrementBy,
+      ...(namespace && { namespace }),
     });
   };
 }

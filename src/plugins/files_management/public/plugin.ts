@@ -8,7 +8,7 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import type { SetupDependencies, StartDependencies } from './types';
 
 export class FilesManagementPlugin
@@ -22,7 +22,18 @@ export class FilesManagementPlugin
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
         const [coreStart, depsStart] = await core.getStartServices();
-        return mountManagementSection(coreStart, depsStart, params);
+
+        const { docTitle } = coreStart.chrome;
+        docTitle.change(PLUGIN_NAME);
+
+        const { setBreadcrumbs } = params;
+        setBreadcrumbs(LIST_BREADCRUMB);
+
+        const unmountAppCallback = mountManagementSection(coreStart, depsStart, params);
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
   }

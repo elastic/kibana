@@ -25,7 +25,7 @@ import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -50,12 +50,19 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
 import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { SloPublicStart } from '@kbn/slo-plugin/public';
+import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
+import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -72,7 +79,10 @@ export interface ClientPluginsSetup {
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
+  embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
+  uiActions: UiActionsSetup;
+  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
@@ -102,9 +112,12 @@ export interface ClientPluginsStart {
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  slo?: SloPublicStart;
+  presentationUtil: PresentationUtilPluginStart;
+  dashboard: DashboardStart;
 }
 
-export interface UptimePluginServices extends Partial<CoreStart> {
+export interface SyntheticsPluginServices extends Partial<CoreStart> {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -114,7 +127,7 @@ export interface UptimePluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
-export class UptimePlugin
+export class SyntheticsPlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
   private readonly _packageInfo: Readonly<PackageInfo>;
@@ -123,12 +136,25 @@ export class UptimePlugin
     this._packageInfo = initContext.env.packageInfo;
   }
 
-  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
+  public setup(
+    coreSetup: CoreSetup<ClientPluginsStart, unknown>,
+    plugins: ClientPluginsSetup
+  ): void {
     locators.forEach((locator) => {
       plugins.share.url.locators.create(locator);
     });
 
-    registerSyntheticsRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
+
+    coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      kibanaService.init({
+        coreSetup,
+        coreStart,
+        startPlugins: clientPluginsStart,
+        isDev: this.initContext.env.mode.dev,
+        isServerless: this._isServerless,
+      });
+    });
 
     const appKeywords = [
       'Synthetics',
@@ -149,7 +175,7 @@ export class UptimePlugin
     ];
 
     // Register the Synthetics UI plugin
-    core.application.register({
+    coreSetup.application.register({
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
@@ -177,23 +203,20 @@ export class UptimePlugin
         },
       ],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
-
+        kibanaService.appMountParameters = params;
         const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(
-          coreStart,
-          plugins,
-          corePlugins,
-          params,
-          this.initContext.env.mode.dev,
-          this._isServerless
-        );
+        await coreSetup.getStartServices();
+
+        return renderApp(params);
       },
     });
+
+    registerSyntheticsEmbeddables(coreSetup, plugins);
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+    setStartServices(coreStart);
 
     setStartServices(coreStart);
 

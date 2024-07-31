@@ -12,6 +12,7 @@ import type {
 
 export const indexEndpointHeartbeats = (options: {
   count?: number;
+  unbilledCount?: number;
 }): Cypress.Chainable<
   Pick<IndexedEndpointHeartbeats, 'data'> & {
     cleanup: () => Cypress.Chainable<DeletedEndpointHeartbeats>;

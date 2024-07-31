@@ -8,19 +8,22 @@
 import { z } from 'zod';
 import {
   arrayOfStringsSchema,
-  entityTypeSchema,
   keyMetricSchema,
   metadataSchema,
   filterSchema,
   durationSchema,
   identityFieldsSchema,
+  semVerSchema,
+  historySettingsSchema,
+  durationSchemaWithMinimum,
 } from './common';
 
 export const entityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
+  version: semVerSchema,
   name: z.string(),
   description: z.optional(z.string()),
-  type: entityTypeSchema,
+  type: z.string(),
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
@@ -31,25 +34,16 @@ export const entityDefinitionSchema = z.object({
   managed: z.optional(z.boolean()).default(false),
   history: z.object({
     timestampField: z.string(),
-    interval: durationSchema.refine((val) => val.asMinutes() >= 1, {
-      message: 'The history.interval can not be less than 1m',
-    }),
-    lookbackPeriod: z.optional(durationSchema),
-    settings: z.optional(
-      z.object({
-        syncField: z.optional(z.string()),
-        syncDelay: z.optional(z.string()),
-        frequency: z.optional(z.string()),
-      })
-    ),
+    interval: durationSchemaWithMinimum(1),
+    settings: historySettingsSchema,
   }),
   latest: z.optional(
     z.object({
       settings: z.optional(
         z.object({
           syncField: z.optional(z.string()),
-          syncDelay: z.optional(z.string()),
-          frequency: z.optional(z.string()),
+          syncDelay: z.optional(durationSchema),
+          frequency: z.optional(durationSchema),
         })
       ),
     })

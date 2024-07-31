@@ -18,7 +18,7 @@ interface GroupPanelProps<T> {
   extraAction?: React.ReactNode;
   forceState?: 'open' | 'closed';
   groupBucket: GroupingBucket<T>;
-  groupPanelRenderer?: JSX.Element;
+  groupPanel?: JSX.Element;
   groupingLevel?: number;
   isLoading: boolean;
   isNullGroup?: boolean;
@@ -62,7 +62,7 @@ const GroupPanelComponent = <T,>({
   extraAction,
   forceState,
   groupBucket,
-  groupPanelRenderer,
+  groupPanel,
   groupingLevel = 0,
   isLoading,
   isNullGroup = false,
@@ -115,7 +115,7 @@ const GroupPanelComponent = <T,>({
       buttonClassName={customAccordionButtonClassName}
       buttonContent={
         <div data-test-subj="group-panel-toggle" className="groupingPanelRenderer">
-          {groupPanelRenderer ?? (
+          {groupPanel ?? (
             <DefaultGroupPanelRenderer
               title={groupFieldValue.asString}
               isNullGroup={isNullGroup}

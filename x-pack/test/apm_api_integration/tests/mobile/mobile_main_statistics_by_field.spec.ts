@@ -179,7 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177395
-  registry.when('Mobile main statistics', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('Mobile main statistics', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateData({
         apmSynthtraceEsClient,

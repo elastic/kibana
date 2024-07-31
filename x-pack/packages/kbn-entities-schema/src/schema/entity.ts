@@ -13,7 +13,6 @@ const entitySchema = z.object({
     id: z.string(),
     identityFields: arrayOfStringsSchema,
     displayName: z.string(),
-    spaceId: z.string(),
     metrics: z.record(z.string(), z.number()),
   }),
 });

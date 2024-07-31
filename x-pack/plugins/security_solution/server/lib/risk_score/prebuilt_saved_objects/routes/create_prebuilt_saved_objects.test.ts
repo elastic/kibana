@@ -5,12 +5,10 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
-  mockGetCurrentUser,
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { getEmptySavedObjectsResponse } from '../../../detection_engine/routes/__mocks__/request_responses';
@@ -52,7 +50,6 @@ const createPrebuiltSavedObjectsRequest = (savedObjectTemplate: string) =>
 
 describe('createPrebuiltSavedObjects', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   let { clients, context } = requestContextMock.createTools();
   const logger = { error: jest.fn() } as unknown as Logger;
 
@@ -62,16 +59,9 @@ describe('createPrebuiltSavedObjects', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
     clients.savedObjectsClient.bulkCreate.mockResolvedValue(getEmptySavedObjectsResponse());
 
-    createPrebuiltSavedObjectsRoute(server.router, logger, securitySetup);
+    createPrebuiltSavedObjectsRoute(server.router, logger);
   });
 
   it.each([['hostRiskScoreDashboards'], ['userRiskScoreDashboards']])(

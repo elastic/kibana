@@ -79,6 +79,28 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should accept empty string filter', async () => {
+        await supertest
+          .post(LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateMinimalListSchemaMock())
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}&filter=`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body).toEqual({
+          cursor: 'WzBd',
+          data: [],
+          page: 1,
+          per_page: 20,
+          total: 0,
+        });
+      });
+
       it('should return a single list item when a single list item is loaded from a find with defaults added', async () => {
         const listMock = getCreateMinimalListSchemaMock();
         const listItemMock = getCreateMinimalListItemSchemaMock();

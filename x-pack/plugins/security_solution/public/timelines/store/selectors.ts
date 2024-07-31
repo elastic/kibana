@@ -215,3 +215,8 @@ export const selectTimelinesItemPageOptions = createSelector(
   selectTimelineById,
   (timeline) => timeline?.itemsPerPageOptions
 );
+
+export const selectExcludedRowRendererIds = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.excludedRowRendererIds
+);
