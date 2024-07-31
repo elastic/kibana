@@ -84,7 +84,7 @@ import {
   createUnknownItem,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
-import {
+import type {
   ESQLLiteral,
   ESQLColumn,
   ESQLFunction,
@@ -289,7 +289,7 @@ function visitOperatorExpression(
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
     const fn = createFunction('*', ctx, undefined, 'binary-expression');
-    fn.args.push(createFakeMultiplyLiteral(ctx, 'integer'));
+    fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
     }
@@ -328,21 +328,16 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     // e.g. 1 year, 15 months
     return createTimeUnit(ctx);
   }
-
-  // Decimal type covers multiple ES|QL types: long, double, etc.
   if (ctx instanceof DecimalLiteralContext) {
-    return createNumericLiteral(ctx.decimalValue(), 'decimal');
+    return createNumericLiteral(ctx.decimalValue());
   }
-
-  // Integer type encompasses integer
   if (ctx instanceof IntegerLiteralContext) {
-    return createNumericLiteral(ctx.integerValue(), 'integer');
+    return createNumericLiteral(ctx.integerValue());
   }
   if (ctx instanceof BooleanLiteralContext) {
     return getBooleanValue(ctx);
   }
   if (ctx instanceof StringLiteralContext) {
-    // String literal covers multiple ES|QL types: text and keyword types
     return createLiteral('string', ctx.string_().QUOTED_STRING());
   }
   if (
@@ -351,18 +346,14 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     ctx instanceof StringArrayLiteralContext
   ) {
     const values: ESQLLiteral[] = [];
-
     for (const numericValue of ctx.getTypedRuleContexts(NumericValueContext)) {
-      const isDecimal =
-        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
       const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(createNumericLiteral(value!, isDecimal ? 'decimal' : 'integer'));
+      values.push(createNumericLiteral(value!));
     }
     for (const booleanValue of ctx.getTypedRuleContexts(BooleanValueContext)) {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
-      // String literal covers multiple ES|QL types: text and keyword types
       const literal = createLiteral('string', string.QUOTED_STRING());
       if (literal) {
         values.push(literal);

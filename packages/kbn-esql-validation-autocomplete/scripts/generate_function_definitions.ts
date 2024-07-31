@@ -12,6 +12,7 @@ import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { FunctionDefinition } from '../src/definitions/types';
+import { esqlToKibanaType } from '../src/shared/esql_to_kibana_type';
 
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -239,10 +240,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
         ...signature,
         params: signature.params.map((param: any) => ({
           ...param,
-          type: param.type,
+          type: esqlToKibanaType(param.type),
           description: undefined,
         })),
-        returnType: signature.returnType,
+        returnType: esqlToKibanaType(signature.returnType),
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
           ? signature.params.filter((param: any) => !param.optional).length

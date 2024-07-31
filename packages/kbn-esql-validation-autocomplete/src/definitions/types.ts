@@ -8,20 +8,10 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
-// Currently, partial of the full list
-// https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
 export const supportedFieldTypes = [
-  'double',
-  'unsigned_long',
-  'long',
-  'integer',
-  'counter_integer',
-  'counter_long',
-  'counter_double',
+  'number',
   'date',
-  'date_period',
-  'text',
-  'keyword',
+  'string',
   'boolean',
   'ip',
   'cartesian_point',
@@ -38,43 +28,21 @@ export type SupportedFieldType = (typeof supportedFieldTypes)[number];
 
 export type FunctionParameterType =
   | SupportedFieldType
-  | 'string'
   | 'null'
   | 'any'
   | 'chrono_literal'
   | 'time_literal'
-  | 'time_duration'
-  | 'double[]'
-  | 'unsigned_long[]'
-  | 'long[]'
-  | 'integer[]'
-  | 'counter_integer[]'
-  | 'counter_long[]'
-  | 'counter_double[]'
+  | 'number[]'
   | 'string[]'
-  | 'keyword[]'
-  | 'text[]'
   | 'boolean[]'
   | 'any[]'
-  | 'datetime[]'
-  | 'date_period[]';
+  | 'date[]';
 
 export type FunctionReturnType =
-  | 'double'
-  | 'unsigned_long'
-  | 'long'
-  | 'integer'
-  | 'int'
-  | 'counter_integer'
-  | 'counter_long'
-  | 'counter_double'
+  | 'number'
   | 'date'
-  | 'date_period'
-  | 'time_duration'
   | 'any'
   | 'boolean'
-  | 'text'
-  | 'keyword'
   | 'string'
   | 'cartesian_point'
   | 'cartesian_shape'

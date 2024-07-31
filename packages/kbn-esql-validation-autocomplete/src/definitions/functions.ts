@@ -43,41 +43,11 @@ const absDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -102,41 +72,11 @@ const acosDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -159,41 +99,11 @@ const asinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -216,41 +126,11 @@ const atanDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -273,241 +153,16 @@ const atan2Definition: FunctionDefinition = {
       params: [
         {
           name: 'y_coordinate',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'x_coordinate',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'y_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'x_coordinate',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -530,41 +185,11 @@ const cbrtDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -586,41 +211,11 @@ const ceilDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -648,23 +243,7 @@ const cidrMatchDefinition: FunctionDefinition = {
         },
         {
           name: 'blockX',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'ip',
-          type: 'ip',
-          optional: false,
-        },
-        {
-          name: 'blockX',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -801,27 +380,27 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
       minParams: 1,
     },
     {
@@ -844,81 +423,27 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'keyword',
+          type: 'string',
           optional: true,
         },
       ],
-      returnType: 'keyword',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'long',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
       minParams: 1,
     },
     {
@@ -957,64 +482,16 @@ const concatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string1',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'string2',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
       minParams: 2,
     },
   ],
@@ -1039,41 +516,11 @@ const cosDefinition: FunctionDefinition = {
       params: [
         {
           name: 'angle',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1095,41 +542,11 @@ const coshDefinition: FunctionDefinition = {
       params: [
         {
           name: 'angle',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1152,7 +569,7 @@ const dateDiffDefinition: FunctionDefinition = {
       params: [
         {
           name: 'unit',
-          type: 'keyword',
+          type: 'string',
           optional: false,
           literalOptions: [
             'year',
@@ -1227,27 +644,7 @@ const dateDiffDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'unit',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'startTimestamp',
-          type: 'date',
-          optional: false,
-        },
-        {
-          name: 'endTimestamp',
-          type: 'date',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1271,7 +668,7 @@ const dateExtractDefinition: FunctionDefinition = {
       params: [
         {
           name: 'datePart',
-          type: 'keyword',
+          type: 'string',
           optional: false,
           literalOptions: [
             'ALIGNED_DAY_OF_WEEK_IN_MONTH',
@@ -1312,22 +709,7 @@ const dateExtractDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'datePart',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'date',
-          type: 'date',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1352,7 +734,7 @@ const dateFormatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'dateFormat',
-          type: 'keyword',
+          type: 'string',
           optional: true,
         },
         {
@@ -1361,22 +743,7 @@ const dateFormatDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'dateFormat',
-          type: 'text',
-          optional: true,
-        },
-        {
-          name: 'date',
-          type: 'date',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1401,57 +768,12 @@ const dateParseDefinition: FunctionDefinition = {
       params: [
         {
           name: 'datePattern',
-          type: 'keyword',
+          type: 'string',
           optional: true,
         },
         {
           name: 'dateString',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'datePattern',
-          type: 'keyword',
-          optional: true,
-        },
-        {
-          name: 'dateString',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'datePattern',
-          type: 'text',
-          optional: true,
-        },
-        {
-          name: 'dateString',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'datePattern',
-          type: 'text',
-          optional: true,
-        },
-        {
-          name: 'dateString',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -1492,7 +814,7 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
-          type: 'time_duration',
+          type: 'date',
           optional: false,
         },
         {
@@ -1525,7 +847,7 @@ const eDefinition: FunctionDefinition = {
   signatures: [
     {
       params: [],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1548,27 +870,12 @@ const endsWithDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'suffix',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'suffix',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -1594,41 +901,11 @@ const expDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1650,41 +927,11 @@ const floorDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1706,21 +953,11 @@ const fromBase64Definition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1770,43 +1007,27 @@ const greatestDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'double',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'integer',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
       minParams: 1,
     },
     {
@@ -1829,81 +1050,27 @@ const greatestDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'keyword',
+          type: 'string',
           optional: true,
         },
       ],
-      returnType: 'keyword',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'long',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
       minParams: 1,
     },
     {
@@ -1947,12 +1114,12 @@ const ipPrefixDefinition: FunctionDefinition = {
         },
         {
           name: 'prefixLengthV4',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'prefixLengthV6',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
@@ -2008,43 +1175,27 @@ const leastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'double',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'integer',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
       minParams: 1,
     },
     {
@@ -2067,81 +1218,27 @@ const leastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'keyword',
+          type: 'string',
           optional: true,
         },
       ],
-      returnType: 'keyword',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'long',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-      minParams: 1,
-    },
-    {
-      params: [
-        {
-          name: 'first',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'rest',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
       minParams: 1,
     },
     {
@@ -2181,31 +1278,16 @@ const leftDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'length',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'length',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2229,21 +1311,11 @@ const lengthDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2266,141 +1338,36 @@ const locateDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'substring',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'substring',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'substring',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'substring',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'substring',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'substring',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'substring',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'substring',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2423,281 +1390,26 @@ const logDefinition: FunctionDefinition = {
       params: [
         {
           name: 'base',
-          type: 'double',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'base',
-          type: 'double',
+          type: 'number',
           optional: true,
         },
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: true,
-        },
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2746,41 +1458,11 @@ const log10Definition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2825,21 +1507,11 @@ const ltrimDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2923,16 +1595,16 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'field2',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -2968,21 +1640,6 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'field2',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field1',
           type: 'ip',
           optional: false,
         },
@@ -2998,46 +1655,16 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'field2',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field1',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'field2',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'field2',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
     {
       params: [
@@ -3075,41 +1702,11 @@ const mvAvgDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -3132,61 +1729,16 @@ const mvConcatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'delim',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -3216,7 +1768,7 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3226,7 +1778,7 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3236,7 +1788,7 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3246,17 +1798,17 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3266,7 +1818,7 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3276,17 +1828,7 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3296,47 +1838,17 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3346,7 +1858,7 @@ const mvCountDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -3408,11 +1920,11 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -3438,16 +1950,6 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'ip',
           optional: false,
         },
@@ -3458,31 +1960,11 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
     {
       params: [
@@ -3555,11 +2037,11 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -3585,16 +2067,6 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'ip',
           optional: false,
         },
@@ -3605,41 +2077,11 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'string',
     },
     {
       params: [
@@ -3712,11 +2154,11 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -3742,16 +2184,6 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'ip',
           optional: false,
         },
@@ -3762,41 +2194,11 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'string',
     },
     {
       params: [
@@ -3849,21 +2251,11 @@ const mvMaxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -3879,41 +2271,11 @@ const mvMaxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'string',
     },
     {
       params: [
@@ -3949,41 +2311,11 @@ const mvMedianDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -4029,21 +2361,11 @@ const mvMinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -4059,41 +2381,11 @@ const mvMinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'string',
     },
     {
       params: [
@@ -4134,12 +2426,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4154,12 +2446,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4174,12 +2466,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4194,12 +2486,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4209,21 +2501,21 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -4234,12 +2526,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4254,36 +2546,16 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
       returnType: 'geo_shape',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'end',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
     },
     {
       params: [
@@ -4294,12 +2566,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4309,61 +2581,21 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'end',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'end',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
     {
       params: [
@@ -4374,12 +2606,12 @@ const mvSliceDefinition: FunctionDefinition = {
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'end',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
@@ -4413,7 +2645,7 @@ const mvSortDefinition: FunctionDefinition = {
         },
         {
           name: 'order',
-          type: 'keyword',
+          type: 'string',
           optional: true,
           literalOptions: ['asc', 'desc'],
         },
@@ -4429,7 +2661,7 @@ const mvSortDefinition: FunctionDefinition = {
         },
         {
           name: 'order',
-          type: 'keyword',
+          type: 'string',
           optional: true,
           literalOptions: ['asc', 'desc'],
         },
@@ -4440,33 +2672,17 @@ const mvSortDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'order',
-          type: 'keyword',
+          type: 'string',
           optional: true,
           literalOptions: ['asc', 'desc'],
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          literalOptions: ['asc', 'desc'],
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -4477,7 +2693,7 @@ const mvSortDefinition: FunctionDefinition = {
         },
         {
           name: 'order',
-          type: 'keyword',
+          type: 'string',
           optional: true,
           literalOptions: ['asc', 'desc'],
         },
@@ -4488,49 +2704,17 @@ const mvSortDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'order',
-          type: 'keyword',
+          type: 'string',
           optional: true,
           literalOptions: ['asc', 'desc'],
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          literalOptions: ['asc', 'desc'],
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'order',
-          type: 'keyword',
-          optional: true,
-          literalOptions: ['asc', 'desc'],
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
     {
       params: [
@@ -4541,7 +2725,7 @@ const mvSortDefinition: FunctionDefinition = {
         },
         {
           name: 'order',
-          type: 'keyword',
+          type: 'string',
           optional: true,
           literalOptions: ['asc', 'desc'],
         },
@@ -4569,41 +2753,11 @@ const mvSumDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -4626,221 +2780,36 @@ const mvZipDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string1',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'string2',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
         {
           name: 'string1',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'string2',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'delim',
-          type: 'keyword',
+          type: 'string',
           optional: true,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'keyword',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'keyword',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'keyword',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string1',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'string2',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -4882,7 +2851,7 @@ const piDefinition: FunctionDefinition = {
   signatures: [
     {
       params: [],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -4904,241 +2873,16 @@ const powDefinition: FunctionDefinition = {
       params: [
         {
           name: 'base',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'exponent',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'base',
-          type: 'unsigned_long',
-          optional: false,
-        },
-        {
-          name: 'exponent',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5164,31 +2908,16 @@ const repeatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'number',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5211,161 +2940,21 @@ const replaceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'regex',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'newString',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'regex',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'newString',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5388,31 +2977,16 @@ const rightDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'length',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'length',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5437,86 +3011,26 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
         {
           name: 'decimals',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'decimals',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'decimals',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5540,21 +3054,11 @@ const rtrimDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5579,41 +3083,11 @@ const signumDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5635,41 +3109,11 @@ const sinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'angle',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5691,41 +3135,11 @@ const sinhDefinition: FunctionDefinition = {
       params: [
         {
           name: 'angle',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5747,61 +3161,16 @@ const splitDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'delim',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'delim',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -5824,41 +3193,11 @@ const sqrtDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6168,7 +3507,7 @@ const stDistanceDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -6183,7 +3522,7 @@ const stDistanceDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6490,7 +3829,7 @@ const stXDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -6500,7 +3839,7 @@ const stXDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6529,7 +3868,7 @@ const stYDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -6539,7 +3878,7 @@ const stYDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6564,27 +3903,12 @@ const startsWithDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'prefix',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'prefix',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -6611,41 +3935,21 @@ const substringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
         {
           name: 'start',
-          type: 'integer',
+          type: 'number',
           optional: false,
         },
         {
           name: 'length',
-          type: 'integer',
+          type: 'number',
           optional: true,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'start',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'length',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6671,41 +3975,11 @@ const tanDefinition: FunctionDefinition = {
       params: [
         {
           name: 'angle',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6727,41 +4001,11 @@ const tanhDefinition: FunctionDefinition = {
       params: [
         {
           name: 'angle',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'angle',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6781,7 +4025,7 @@ const tauDefinition: FunctionDefinition = {
   signatures: [
     {
       params: [],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6803,21 +4047,11 @@ const toBase64Definition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6850,7 +4084,7 @@ const toBooleanDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
@@ -6860,47 +4094,7 @@ const toBooleanDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
+          type: 'string',
           optional: false,
         },
       ],
@@ -6940,17 +4134,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_point',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -7002,17 +4186,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_shape',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -7051,7 +4225,7 @@ const toDatetimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
@@ -7061,47 +4235,7 @@ const toDatetimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'date',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
+          type: 'string',
           optional: false,
         },
       ],
@@ -7130,41 +4264,11 @@ const toDegreesDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7191,37 +4295,17 @@ const toDoubleDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'counter_double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'counter_integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'counter_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
@@ -7231,67 +4315,17 @@ const toDoubleDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'double',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7326,17 +4360,7 @@ const toGeopointDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_point',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -7383,17 +4407,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_shape',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -7426,17 +4440,17 @@ const toIntegerDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'counter_integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
@@ -7446,67 +4460,17 @@ const toIntegerDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'integer',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'integer',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7538,17 +4502,7 @@ const toIpDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'ip',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -7581,27 +4535,17 @@ const toLongDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'long',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'counter_integer',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'counter_long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
+      returnType: 'number',
     },
     {
       params: [
@@ -7611,67 +4555,17 @@ const toLongDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'long',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7695,21 +4589,11 @@ const toLowerDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7731,41 +4615,11 @@ const toRadiansDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'number',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7791,7 +4645,7 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7801,7 +4655,7 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7811,7 +4665,7 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7821,17 +4675,17 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7841,7 +4695,7 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7851,17 +4705,7 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7871,47 +4715,17 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
     {
       params: [
@@ -7921,7 +4735,7 @@ const toStringDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'keyword',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7951,7 +4765,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
     {
       params: [
@@ -7961,67 +4775,27 @@ const toUnsignedLongDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'double',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
     {
       params: [
         {
           name: 'field',
-          type: 'integer',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'unsigned_long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'unsigned_long',
-          optional: false,
-        },
-      ],
-      returnType: 'unsigned_long',
+      returnType: 'number',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8045,21 +4819,11 @@ const toUpperDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -8081,17 +4845,7 @@ const toVersionDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'version',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       ],
@@ -8127,21 +4881,11 @@ const trimDefinition: FunctionDefinition = {
       params: [
         {
           name: 'string',
-          type: 'keyword',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'keyword',
-    },
-    {
-      params: [
-        {
-          name: 'string',
-          type: 'text',
-          optional: false,
-        },
-      ],
-      returnType: 'text',
+      returnType: 'string',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],

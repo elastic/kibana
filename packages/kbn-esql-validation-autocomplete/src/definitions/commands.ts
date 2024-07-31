@@ -273,7 +273,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'integer', constantOnly: true }],
+      params: [{ name: 'size', type: 'number', constantOnly: true }],
     },
     options: [],
     modes: [],
@@ -390,7 +390,6 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
@@ -408,7 +407,6 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
