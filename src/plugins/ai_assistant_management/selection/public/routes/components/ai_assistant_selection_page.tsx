@@ -95,7 +95,7 @@ export function AiAssistantSelectionPage() {
                 <p>
                   <FormattedMessage
                     id="aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkDescription"
-                    defaultMessage="For more info, see our {documentation}."
+                    defaultMessage="For more info, refer to our {documentation}."
                     values={{
                       documentation: (
                         <EuiLink
@@ -156,7 +156,7 @@ export function AiAssistantSelectionPage() {
                         'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
                         {
                           defaultMessage:
-                            'This feature is disabled. It can be enabled from Spaces > Features.',
+                            'This feature is disabled. You can enable it from from Spaces > Features.',
                         }
                       )}
                       size="s"
@@ -168,7 +168,7 @@ export function AiAssistantSelectionPage() {
                 <p>
                   <FormattedMessage
                     id="aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription"
-                    defaultMessage="For more info, see our {documentation}."
+                    defaultMessage="For more info, refer to our {documentation}."
                     values={{
                       documentation: (
                         <EuiLink
