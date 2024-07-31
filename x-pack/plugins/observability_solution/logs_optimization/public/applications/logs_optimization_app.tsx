@@ -70,7 +70,7 @@ export const RecommendationsApp = ({
           <Router history={appParams.history}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <Routes>
-                <Route path="/" exact={true} render={() => <RecommendationsRoute />} />
+                <Route path="/:dataStream" exact={true} render={() => <RecommendationsRoute />} />
                 <Route render={() => <NotFoundPage />} />
               </Routes>
             </EuiThemeProvider>

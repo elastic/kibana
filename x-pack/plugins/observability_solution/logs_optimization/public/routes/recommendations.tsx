@@ -23,6 +23,7 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { FieldName } from '@kbn/fields-metadata-plugin/common';
+import { useParams } from 'react-router-dom';
 import { createRenameProcessor } from '../../common/pipeline_utils';
 import { Recommendation } from '../../common/recommendations';
 import { LogsOptimizationPageTemplate } from '../components/page_template';
@@ -34,11 +35,12 @@ export const RecommendationsRoute = () => {
   const { services } = useKibanaContextForPlugin();
   const { useRecommendations, serverless, chrome } = services;
 
+  const { dataStream: queryDataStream } = useParams<{ dataStream: string }>();
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
   const dataStreamFieldRef = useRef<HTMLInputElement | null>(null);
 
-  const [dataStream, setDataStream] = useState('logs-random-generic');
+  const [dataStream, setDataStream] = useState(queryDataStream);
 
   const { recommendations, loading, error, applyRecommendation } = useRecommendations(
     { dataStream },

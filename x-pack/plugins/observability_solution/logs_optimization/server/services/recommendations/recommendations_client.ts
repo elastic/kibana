@@ -100,9 +100,7 @@ export class RecommendationsClient implements IRecommendationsClient {
         );
       }
     } else if (newestIndex && newestIndex.info.isManaged) {
-      // Do something for DSNS indices
       // 1. Get if an ad-hoc index template is in place or relies on default one
-
       const customTemplateName = indexManager.getCustomIndexTemplateName();
       const defaultPipelineName = indexManager.getDefaultPipelineName();
       const dataStreamWildcard = indexManager.getDataStreamWildcard();
@@ -128,6 +126,7 @@ export class RecommendationsClient implements IRecommendationsClient {
         }
       } else {
         if (newestIndex.info.template) {
+          // 2. Duplicate index template, updating default pipeline with <template-name>
           const defaultTemplate = await indexManager.getIndexTemplate(newestIndex.info.template);
 
           const customTemplateDraft = deepmerge(
@@ -167,10 +166,7 @@ export class RecommendationsClient implements IRecommendationsClient {
           };
           await indexManager.updateIndexPipeline(defaultPipelineName, customPipelineDraft);
         }
-        // Need to duplicate the template, create component template for settings, create pipeline, set default pipeline
       }
-      // 2. Duplicate index template, updating default pipeline with <template-name>
-      // 3. Create/update custom pipeline, duplicating from initial one
     } else {
       // Do something for non data stream indices
     }

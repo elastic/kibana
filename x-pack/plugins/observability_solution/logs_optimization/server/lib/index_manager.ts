@@ -98,13 +98,11 @@ export class IndexManager {
 
   async getNewestDataStreamIndex(): Promise<NewestIndex | null> {
     const dataStream = await this.getDataStream();
-
     if (!dataStream) {
       return null;
     }
 
     const lastIndex = dataStream.indices.pop();
-
     if (!lastIndex) {
       return null;
     }
