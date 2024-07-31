@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment';
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
-import { getEsQueryConfig } from '../../../../utils/get_es_query_config';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import {
   Aggregators,
@@ -44,12 +44,11 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   alertOnGroupDisappear: boolean,
   logger: Logger,
   timeframe: { start: string; end: string },
-  uiSettings: IUiSettingsClient,
+  esQueryConfig: EsQueryConfig,
   lastPeriodEnd?: number,
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, searchConfiguration } = params;
-  const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   return Promise.all(
     criteria.map(async (criterion) => {

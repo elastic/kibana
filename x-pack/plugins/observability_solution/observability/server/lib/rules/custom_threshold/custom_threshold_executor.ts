@@ -18,10 +18,11 @@ import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
-import { getEvaluationValues, getThreshold } from './lib/get_values';
+import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
+import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
@@ -134,6 +135,7 @@ export const createCustomThresholdExecutor = ({
 
     // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
+    const esQueryConfig = await getEsQueryConfig(uiSettingsClient);
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
@@ -143,7 +145,7 @@ export const createCustomThresholdExecutor = ({
       alertOnGroupDisappear,
       logger,
       { end: dateEnd, start: dateStart },
-      uiSettingsClient,
+      esQueryConfig,
       state.lastRunTimestamp,
       previousMissingGroups
     );
