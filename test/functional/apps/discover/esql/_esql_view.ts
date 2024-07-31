@@ -113,11 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
 
-      it('should render the histogram for indices with no @timestamp field when the ?earliest, ?latest params are in the query', async function () {
+      it('should render the histogram for indices with no @timestamp field when the ?start, ?end params are in the query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?earliest and timestamp <= ?latest`;
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?start and timestamp <= ?end`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');

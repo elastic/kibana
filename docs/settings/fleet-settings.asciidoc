@@ -311,4 +311,10 @@ List of proxies to access {fleet-server} that are configured when the {fleet} ap
 `xpack.fleet.enableExperimental`::
 List of experimental feature flag to enable in Fleet.
 
+[NOTE]
+====
+Experimental features should not be enabled in production environments.
+The features in this section are experimental and may be changed or removed completely in future releases.
+Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features.
+====
 

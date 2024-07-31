@@ -17,6 +17,7 @@ interface Props {
   rangeFrom: number;
   rangeTo: number;
   height?: string;
+  showFullScreenSelector?: boolean;
 }
 
 export function EmbeddableFunctions(props: Props) {

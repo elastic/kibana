@@ -92,9 +92,9 @@ export function MachineLearningSingleMetricViewerProvider(
     },
 
     async ensureAnomalyActionDiscoverButtonClicked() {
-      await retry.tryForTime(3 * 1000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');
-        await testSubjects.existOrFail('discoverLayoutResizableContainer');
+        await testSubjects.existOrFail('discoverLayoutResizableContainer', { timeout: 10 * 1000 });
       });
     },
 
