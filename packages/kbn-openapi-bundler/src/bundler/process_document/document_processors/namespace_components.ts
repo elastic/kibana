@@ -154,7 +154,3 @@ function normalizeNamespace(namespace: string): string {
     .trim()
     .replaceAll(SPACES_REGEX, '_');
 }
-
-function isLocalRef(ref: string): boolean {
-  return ref.startsWith('#/');
-}
