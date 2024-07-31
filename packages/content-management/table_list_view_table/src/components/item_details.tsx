@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer, EuiHighlight, useEuiTheme } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FavoriteButton } from '@kbn/content-management-favorites-public';
 import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -46,6 +46,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   onClickTag,
   isFavoritesEnabled,
 }: Props<T>) {
+  const { euiTheme } = useEuiTheme();
   const {
     references,
     attributes: { title, description },
@@ -97,15 +98,16 @@ export function ItemDetails<T extends UserContentCommonSchema>({
         {isFavoritesEnabled && (
           <FavoriteButton
             id={item.id}
-            // trying to nicer align the star with the title
             css={css`
-              transform: translateY(-2px);
+              margin-top: -${euiTheme.size.xs}; // trying to nicer align the star with the title
+              margin-left: ${euiTheme.size.xxs};
             `}
           />
         )}
       </RedirectAppLinks>
     );
   }, [
+    euiTheme,
     getDetailViewLink,
     getOnClickTitle,
     id,
