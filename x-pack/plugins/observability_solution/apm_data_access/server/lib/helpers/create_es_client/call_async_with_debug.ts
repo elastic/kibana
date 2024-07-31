@@ -8,11 +8,11 @@
 /* eslint-disable no-console */
 
 import chalk from 'chalk';
-import { KibanaRequest } from '@kbn/core/server';
-import { RequestStatus } from '@kbn/inspector-plugin/common';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RequestStatus } from '@kbn/inspector-plugin/common';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
-import { inspectableEsQueriesMap } from '../../../routes/apm_routes/register_apm_server_routes';
+import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 
 function formatObj(obj: Record<string, any>) {
   return JSON.stringify(obj, null, 2);
@@ -26,6 +26,7 @@ export async function callAsyncWithDebug<T>({
   requestParams,
   operationName,
   isCalledWithInternalUser,
+  inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>(),
 }: {
   cb: () => Promise<T>;
   getDebugMessage: () => { body: string; title: string };
@@ -34,6 +35,7 @@ export async function callAsyncWithDebug<T>({
   requestParams: Record<string, any>;
   operationName: string;
   isCalledWithInternalUser: boolean; // only allow inspection of queries that were retrieved with credentials of the end user
+  inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
 }): Promise<T> {
   if (!debug) {
     return cb();

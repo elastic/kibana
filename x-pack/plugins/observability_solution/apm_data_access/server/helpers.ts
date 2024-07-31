@@ -4,4 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+export {
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getBackwardCompatibleDocumentTypeFilter,
+  callAsyncWithDebug,
+  cancelEsRequestOnAbort,
+  getDebugBody,
+  getDebugTitle,
+} from './lib/helpers';
