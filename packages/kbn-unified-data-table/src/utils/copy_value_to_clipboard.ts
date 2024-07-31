@@ -193,7 +193,7 @@ export const copyRowsAsTextToClipboard = async ({
         .map((columnId) => {
           const result = valueToStringConverter(rowIndex, columnId, { compatibleWithCSV: true });
           withFormula = withFormula || result.withFormula;
-          return result.formattedString;
+          return result.formattedString || '-';
         })
         .join(columnSeparator) + rowSeparator;
   });
