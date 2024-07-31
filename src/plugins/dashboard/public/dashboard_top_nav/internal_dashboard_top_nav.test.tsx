@@ -36,7 +36,6 @@ describe('Internal dashboard top nav', () => {
     // @ts-ignore
     pluginServices.getServices().navigation.TopNavMenu = ({ badges }: TopNavMenuProps) =>
       mockTopNav(badges);
-    // .badges.mockImplementation(mockTopNav);
   });
 
   it('should not render the managed badge by default', async () => {
