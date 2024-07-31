@@ -12,7 +12,7 @@ import {
   newLineRegex,
   numberStartRegex,
   questionMarkRegex,
-  slashRegex,
+  slashesRegex,
   whitespacesRegex,
 } from './constants';
 
@@ -48,9 +48,9 @@ export const parseUrl = (
   const urlParts = url.split(questionMarkRegex);
   // 1st part is the url path
   const urlPath = urlParts[0];
-  // try to parse into url path tokens (split on slash)
+  // try to parse into url path tokens (split on slashes, only keep non-empty tokens)
   if (urlPath) {
-    urlPathTokens = urlPath.split(slashRegex);
+    urlPathTokens = urlPath.split(slashesRegex).filter(Boolean);
   }
   // 2nd part is the url params
   const urlParams = urlParts[1];
