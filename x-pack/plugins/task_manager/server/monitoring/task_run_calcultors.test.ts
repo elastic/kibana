@@ -12,7 +12,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
-} from './task_run_calculators';
+} from './task_run_calcultors';
 
 describe('calculateRunningAverage', () => {
   test('calculates the running average and median of a window of values', async () => {
