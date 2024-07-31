@@ -6,56 +6,59 @@
  * Side Public License, v 1.
  */
 
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { render } from '@testing-library/react';
 import { buildMockDashboard } from '../mocks';
-import DashboardTopNavWithContext from './dashboard_top_nav_with_context';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
-import React, { ComponentProps } from 'react';
+import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { pluginServices } from '../services/plugin_services';
 import { DashboardAPIContext } from '../dashboard_app/dashboard_app';
-import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
-
-jest.mock('../services/plugin_services', () => {
-  const module = jest.requireActual('../services/plugin_services');
-  const _pluginServices = module.pluginServices.getServices();
-
-  const mockRegistry: { [key: string]: PluginServiceRegistry<typeof _pluginServices> } = {};
-  jest
-    .spyOn(_pluginServices.embeddable, 'getEmbeddableFactories')
-    .mockReturnValue(new Map().values());
-  jest.spyOn(_pluginServices.uiActions, 'getTriggerCompatibleActions').mockResolvedValue([]);
-  jest.spyOn(_pluginServices.visualizations, 'getByGroup').mockReturnValue([]);
-  jest.spyOn(_pluginServices.visualizations, 'getAliases').mockReturnValue([]);
-
-  return {
-    ...module,
-    pluginServices: {
-      ...module.pluginServices,
-      registry: mockRegistry,
-      getServices: jest.fn().mockReturnValue(_pluginServices),
-    },
-  };
-});
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 
 describe('Internal dashboard top nav', () => {
-  const defaultProps: ComponentProps<typeof InternalDashboardTopNav> = {
-    redirectTo: jest.fn(),
+  const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
+    if (badges) {
+      return badges?.map((badge, index) => (
+        <div key={index} className="badge">
+          {badge?.badgeText}
+        </div>
+      ));
+    } else {
+      return <></>;
+    }
   };
-  it('should not render the managed badge by default', async () => {
-    render(<InternalDashboardTopNav {...defaultProps} />, {
-      wrapper: ({ children }) => {
-        return (
-          <DashboardAPIContext.Provider value={buildMockDashboard()}>
-            {children}
-          </DashboardAPIContext.Provider>
-        );
-      },
-    });
+  beforeEach(() => {
+    setMockedPresentationUtilServices();
+    pluginServices.getServices().data.query.filterManager.getFilters = jest
+      .fn()
+      .mockReturnValue([]);
+    // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
+    // @ts-ignore
+    pluginServices.getServices().navigation.TopNavMenu = ({ badges }: TopNavMenuProps) =>
+      mockTopNav(badges);
+    // .badges.mockImplementation(mockTopNav);
   });
-  xit('should render the managed badge when the dashboard is managed', async () => {
+
+  it('should not render the managed badge by default', async () => {
+    const component = render(
+      <DashboardAPIContext.Provider value={buildMockDashboard()}>
+        <InternalDashboardTopNav redirectTo={jest.fn()} />
+      </DashboardAPIContext.Provider>
+    );
+
+    expect(component.queryByText('Managed')).toBeNull();
+  });
+  it('should render the managed badge when the dashboard is managed', async () => {
     const container = buildMockDashboard();
     container.dispatch.setManaged(true);
-    DashboardTopNavWithContext({ dashboardContainer: container, redirectTo: jest.fn() });
-    InternalDashboardTopNav({ redirectTo: jest.fn() });
-    expect(await screen.findByText('Managed')).toBeInTheDocument();
+    const component = render(
+      <DashboardAPIContext.Provider value={container}>
+        <InternalDashboardTopNav redirectTo={jest.fn()} />
+      </DashboardAPIContext.Provider>
+    );
+
+    expect(
+      component.getByText('Elastic manages this dashboard. Duplicate it to make changes.')
+    ).toBeInTheDocument();
   });
 });
