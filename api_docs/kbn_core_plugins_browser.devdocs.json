@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-plugins-browser",
-        "id": "def-common.Plugin",
+        "id": "def-public.Plugin",
         "type": "Interface",
         "tags": [],
         "label": "Plugin",
@@ -32,9 +16,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.Plugin.setup",
+            "id": "def-public.Plugin.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -54,9 +38,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<TPluginsStart, TStart>, plugins: TPluginsSetup) => TSetup"
@@ -67,7 +51,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-browser",
-                "id": "def-common.Plugin.setup.$1",
+                "id": "def-public.Plugin.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -75,9 +59,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<TPluginsStart, TStart>"
@@ -89,7 +73,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-browser",
-                "id": "def-common.Plugin.setup.$2",
+                "id": "def-public.Plugin.setup.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -107,7 +91,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.Plugin.start",
+            "id": "def-public.Plugin.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -116,9 +100,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: TPluginsStart) => TStart"
@@ -129,7 +113,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-browser",
-                "id": "def-common.Plugin.start.$1",
+                "id": "def-public.Plugin.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -137,9 +121,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -150,7 +134,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-plugins-browser",
-                "id": "def-common.Plugin.start.$2",
+                "id": "def-public.Plugin.start.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "plugins",
@@ -168,7 +152,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.Plugin.stop",
+            "id": "def-public.Plugin.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -195,7 +179,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-browser",
-        "id": "def-common.PluginInitializerContext",
+        "id": "def-public.PluginInitializerContext",
         "type": "Interface",
         "tags": [],
         "label": "PluginInitializerContext",
@@ -205,9 +189,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.PluginInitializerContext",
+            "section": "def-public.PluginInitializerContext",
             "text": "PluginInitializerContext"
           },
           "<ConfigSchema>"
@@ -218,7 +202,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.PluginInitializerContext.opaqueId",
+            "id": "def-public.PluginInitializerContext.opaqueId",
             "type": "Uncategorized",
             "tags": [],
             "label": "opaqueId",
@@ -234,7 +218,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.PluginInitializerContext.env",
+            "id": "def-public.PluginInitializerContext.env",
             "type": "Object",
             "tags": [],
             "label": "env",
@@ -243,17 +227,17 @@
               "{ mode: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.EnvironmentMode",
+                "section": "def-server.EnvironmentMode",
                 "text": "EnvironmentMode"
               },
               ">; packageInfo: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.PackageInfo",
+                "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
               ">; }"
@@ -264,7 +248,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.PluginInitializerContext.logger",
+            "id": "def-public.PluginInitializerContext.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -284,7 +268,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.PluginInitializerContext.config",
+            "id": "def-public.PluginInitializerContext.config",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -304,7 +288,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-plugins-browser",
-        "id": "def-common.PluginInitializer",
+        "id": "def-public.PluginInitializer",
         "type": "Type",
         "tags": [],
         "label": "PluginInitializer",
@@ -315,17 +299,17 @@
           "(core: ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.PluginInitializerContext",
+            "section": "def-public.PluginInitializerContext",
             "text": "PluginInitializerContext"
           },
           "<object>) => ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
@@ -337,7 +321,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-browser",
-            "id": "def-common.PluginInitializer.$1",
+            "id": "def-public.PluginInitializer.$1",
             "type": "Object",
             "tags": [],
             "label": "core",
@@ -345,9 +329,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCorePluginsBrowserPluginApi",
-                "section": "def-common.PluginInitializerContext",
+                "section": "def-public.PluginInitializerContext",
                 "text": "PluginInitializerContext"
               },
               "<object>"
@@ -360,6 +344,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

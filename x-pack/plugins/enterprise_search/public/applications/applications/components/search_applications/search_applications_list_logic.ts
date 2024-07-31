@@ -119,6 +119,7 @@ export const SearchApplicationsListLogic = kea<
       null,
       {
         closeDeleteSearchApplicationModal: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteSearchApplicationModal: (_, { searchApplication }) => searchApplication,
       },
     ],
@@ -142,15 +143,18 @@ export const SearchApplicationsListLogic = kea<
     parameters: [
       { count: 0, meta: DEFAULT_META },
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (state, { count }) => ({
           ...state,
           count,
           meta: updateMetaTotalState(state.meta, count), // update total count from response
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { pageNumber }) => ({
           ...state,
           meta: updateMetaPageIndex(state.meta, pageNumber),
         }),
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchQuery: (state, { searchQuery }) => ({
           ...state,
           searchQuery: searchQuery ? searchQuery : undefined,
@@ -160,6 +164,7 @@ export const SearchApplicationsListLogic = kea<
     searchQuery: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchQuery: (_, { searchQuery }) => searchQuery,
       },
     ],
