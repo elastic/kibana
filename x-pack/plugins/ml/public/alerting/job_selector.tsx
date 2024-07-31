@@ -45,7 +45,7 @@ export interface JobSelectorControlProps {
    */
   options?: Array<EuiComboBoxOptionOption<string>>;
   /**
-   * Flag to indicate wheter to use the job creation button in the empty prompt or the dropdown when no jobs are available.
+   * Flag to indicate whether to use the job creation button in the empty prompt or the dropdown when no jobs are available.
    */
   shouldUseDropdownJobCreate?: boolean;
 }
