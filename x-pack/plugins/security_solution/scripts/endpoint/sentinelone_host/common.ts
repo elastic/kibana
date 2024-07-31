@@ -274,11 +274,12 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   log: ToolingLog
 ): Promise<RuleResponse> => {
   const ruleName = 'Promote SentinelOne alerts';
-  const sentinelOneAlertsIndexPattern = 'logs-sentinel_one.alert*';
-  const ruleQueryValue = 'observer.serial_number:*';
+  const tag = 'dev-script-run-sentinelone-host';
+  const index = ['logs-sentinel_one.alert*', 'logs-sentinel_one.threat*'];
+  const ruleQueryValue = 'sentinel_one.alert.agent.id:* OR sentinel_one.threat.agent.id:*';
 
   const { data } = await findRules(kbnClient, {
-    filter: `(alert.attributes.params.query: "${ruleQueryValue}" AND alert.attributes.params.index: ${sentinelOneAlertsIndexPattern})`,
+    filter: `alert.attributes.tags:("${tag}")`,
   });
 
   if (data.length) {
@@ -292,9 +293,12 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   log.info(`Creating new detection engine rule named [${ruleName}] for SentinelOne`);
 
   const createdRule = await createRule(kbnClient, {
-    index: [sentinelOneAlertsIndexPattern],
+    index,
     query: ruleQueryValue,
     from: 'now-3660s',
+    name: ruleName,
+    description: `Created by dev script located at: ${__filename}`,
+    tags: [tag],
   });
 
   log.verbose(dump(createdRule));
