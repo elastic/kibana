@@ -28,9 +28,9 @@
           "<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.EmbeddableApiContext",
+            "section": "def-public.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           ">"
@@ -196,9 +196,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.EmbeddableApiContext",
+                "section": "def-public.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<boolean>"
@@ -217,9 +217,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.EmbeddableApiContext",
+                    "section": "def-public.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],
@@ -242,9 +242,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.EmbeddableApiContext",
+                "section": "def-public.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<void>"
@@ -263,9 +263,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.EmbeddableApiContext",
+                    "section": "def-public.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],
