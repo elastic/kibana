@@ -292,7 +292,7 @@ export class SpacesGridPage extends Component<Props, State> {
             </EuiFlexItem>
             {this.state.activeSpace?.name === rowRecord.name && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="primary">
+                <EuiBadge color="primary" data-test-subj={`spacesListCurrentBadge-${rowRecord.id}`}>
                   {i18n.translate('xpack.spaces.management.spacesGridPage.currentSpaceMarkerText', {
                     defaultMessage: 'current',
                   })}
