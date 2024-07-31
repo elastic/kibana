@@ -18,7 +18,7 @@ import {
 } from '../../lib/auth';
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { installBuiltInEntityDefinitions } from '../../lib/entities/install_entity_definition';
-import { ERROR_API_KEY_SERVICE_DISABLED, ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
+import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
@@ -48,10 +48,8 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const canEnable = await canEnableEntityDiscovery(esClient);
         if (!canEnable) {
-          return res.ok({
+          return res.forbidden({
             body: {
-              success: false,
-              reason: ERROR_USER_NOT_AUTHORIZED,
               message:
                 'Current Kibana user does not have the required permissions to enable entity discovery',
             },
@@ -75,7 +73,6 @@ export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         }
 
         const apiKey = await generateEntityDiscoveryAPIKey(server, req);
-
         if (apiKey === undefined) {
           return res.customError({
             statusCode: 500,
