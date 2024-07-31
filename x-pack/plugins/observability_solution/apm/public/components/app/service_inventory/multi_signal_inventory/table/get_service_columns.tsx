@@ -11,7 +11,6 @@ import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { isEmpty } from 'lodash';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
