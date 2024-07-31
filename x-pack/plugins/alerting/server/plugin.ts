@@ -587,6 +587,7 @@ export class AlertingPlugin {
       getRulesClientWithRequest,
       spaceIdToNamespace,
       actionsPlugin: plugins.actions,
+      taskManager: plugins.taskManager,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,

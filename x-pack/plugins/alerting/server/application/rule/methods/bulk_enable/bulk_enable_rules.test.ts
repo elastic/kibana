@@ -582,17 +582,6 @@ describe('bulkEnableRules', () => {
       expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
     });
 
-    // test('should should call task manager bulkEnable only for one task, if one rule have an error', async () => {
-    //   unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-    //     saved_objects: [enabledRuleForBulkOps1, savedObjectWith500Error],
-    //   });
-
-    //   await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
-
-    //   expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
-    //   expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1']);
-    // });
-
     test('should enable task for an already enabled rule', async () => {
       mockCreatePointInTimeFinderAsInternalUser({
         saved_objects: [disabledRule1, enabledRuleForBulkOps2],

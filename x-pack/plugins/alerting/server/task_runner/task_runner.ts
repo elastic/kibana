@@ -605,6 +605,14 @@ export class TaskRunner<
           runResultWithMetrics: stateWithMetrics,
         });
 
+        // disable task if rule was disabled
+        if (
+          executionStatus.error &&
+          executionStatus.error.reason === RuleExecutionStatusErrorReasons.Disabled
+        ) {
+          this.context.taskManager.bulkDisable([ruleId]);
+        }
+
         if (apm.currentTransaction) {
           apm.currentTransaction.setOutcome(outcome);
         }

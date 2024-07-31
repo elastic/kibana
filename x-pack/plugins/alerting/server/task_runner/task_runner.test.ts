@@ -23,6 +23,7 @@ import {
   createTaskRunError,
   isUnrecoverableError,
   TaskErrorSource,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './types';
 import { TaskRunner } from './task_runner';
@@ -42,6 +43,7 @@ import { alertsMock, rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
@@ -160,6 +162,7 @@ describe('Task Runner', () => {
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
+    taskManager: jest.Mocked<TaskManagerStartContract>;
     eventLogger: jest.Mocked<IEventLogger>;
     executionContext: ReturnType<typeof executionContextServiceMock.createInternalStartContract>;
   };
@@ -172,6 +175,7 @@ describe('Task Runner', () => {
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),
+    taskManager: taskManagerMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
     logger,
@@ -1995,6 +1999,45 @@ describe('Task Runner', () => {
       `"Executing Rule default:test:1 has resulted in Error: test"`
     );
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+  });
+
+  test('should throw framework error and disable the task when rule is not enabled', async () => {
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    rulesClient.getAlertFromRaw.mockReturnValue({
+      ...mockedRuleTypeSavedObject,
+      enabled: false,
+    } as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: false,
+      },
+    });
+
+    await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: Rule failed to execute because rule ran after it was disabled."`
+    );
+    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+
+    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledWith([
+      mockedRawRuleSO.id,
+    ]);
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {

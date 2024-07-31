@@ -14,7 +14,11 @@ import type {
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  DecoratedError,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
@@ -156,6 +160,7 @@ export interface RuleRunnerErrorStackTraceLog {
 export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
+  taskManager: TaskManagerStartContract;
   alertsService: AlertsService | null;
   backfillClient: BackfillClient;
   basePathService: IBasePath;
