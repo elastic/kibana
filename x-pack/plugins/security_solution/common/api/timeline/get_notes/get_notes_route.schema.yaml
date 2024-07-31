@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Notes API
-  version: 8.9.0
+  version: '2023-10-31'
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -12,19 +12,19 @@ servers:
 paths:
   /api/note:
     get:
-      operationId: getNotes
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetNotes
       description: Gets notes
+      summary: Get all notes for a given document.
       tags:
         - access:securitySolution
       parameters:
         - name: documentIds
           in: query
+          required: true
           schema:
-            oneOf:
-              - type: array
-                items:
-                  type: string
-              - type: string
+            $ref: '#/components/schemas/DocumentIds'
         - name: page
           in: query
           schema:
@@ -56,5 +56,14 @@ paths:
             type: string
             nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the requested notes were returned.
+
+components:
+  schemas:
+    DocumentIds:
+      oneOf:
+        - type: array
+          items:
+            type: string
+        - type: string
