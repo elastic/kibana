@@ -13,5 +13,16 @@
   "exclude": [
     "target/**/*",
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core-analytics-browser",
+    "@kbn/core-http-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-plugins-browser",
+    "@kbn/core-plugins-server",
+    "@kbn/core-analytics-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-lifecycle-server",
+    "@kbn/logging",
+    "@kbn/config-schema",
+  ]
 }
