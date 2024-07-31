@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { StackframeWithLineContext, Stackframe } from '@kbn/apm-types/es_schemas_raw';
+export type { StackframeWithLineContext, Stackframe } from '@kbn/apm-types/es_schemas_raw';

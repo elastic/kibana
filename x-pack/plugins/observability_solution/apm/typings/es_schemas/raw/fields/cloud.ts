@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Cloud } from '@kbn/apm-types/es_schemas_raw';
+export type { Cloud } from '@kbn/apm-types/es_schemas_raw';

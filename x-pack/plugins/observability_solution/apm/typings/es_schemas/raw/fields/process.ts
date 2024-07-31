@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Process } from '@kbn/apm-types/es_schemas_raw';
+export type { Process } from '@kbn/apm-types/es_schemas_raw';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ErrorRaw } from '@kbn/apm-types/es_schemas_raw';
+export type { ErrorRaw, Log, Exception, Processor } from '@kbn/apm-types/es_schemas_raw';

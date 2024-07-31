@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EventRaw } from '@kbn/apm-types/es_schemas_raw';
+export type { EventRaw } from '@kbn/apm-types/es_schemas_raw';

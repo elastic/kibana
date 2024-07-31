@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Http } from '@kbn/apm-types/es_schemas_raw';
+export type { Http } from '@kbn/apm-types/es_schemas_raw';

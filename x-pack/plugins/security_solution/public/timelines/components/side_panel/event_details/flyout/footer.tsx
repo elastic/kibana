@@ -41,6 +41,7 @@ interface AddExceptionModalWrapperData {
   ruleName: string;
 }
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const FlyoutFooterComponent = ({
   detailsData,
   detailsEcsData,

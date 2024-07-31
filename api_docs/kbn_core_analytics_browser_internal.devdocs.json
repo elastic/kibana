@@ -1,26 +1,10 @@
 {
   "id": "@kbn/core-analytics-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-analytics-browser-internal",
-        "id": "def-common.AnalyticsService",
+        "id": "def-public.AnalyticsService",
         "type": "Class",
         "tags": [],
         "label": "AnalyticsService",
@@ -31,7 +15,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-browser-internal",
-            "id": "def-common.AnalyticsService.Unnamed",
+            "id": "def-public.AnalyticsService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,7 +29,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-browser-internal",
-                "id": "def-common.AnalyticsService.Unnamed.$1",
+                "id": "def-public.AnalyticsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -63,7 +47,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-browser-internal",
-            "id": "def-common.AnalyticsService.setup",
+            "id": "def-public.AnalyticsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -74,9 +58,9 @@
               ") => ",
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceSetup",
+                "section": "def-public.AnalyticsServiceSetup",
                 "text": "AnalyticsServiceSetup"
               }
             ],
@@ -86,7 +70,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-analytics-browser-internal",
-                "id": "def-common.AnalyticsService.setup.$1",
+                "id": "def-public.AnalyticsService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ injectedMetadata }",
@@ -104,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-browser-internal",
-            "id": "def-common.AnalyticsService.start",
+            "id": "def-public.AnalyticsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -113,9 +97,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
+                "section": "def-public.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               }
             ],
@@ -127,7 +111,7 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-browser-internal",
-            "id": "def-common.AnalyticsService.stop",
+            "id": "def-public.AnalyticsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -145,6 +129,22 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

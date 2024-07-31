@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Transaction } from '@kbn/apm-types/es_schemas_ui';
+export type { Transaction } from '@kbn/apm-types/es_schemas_ui';

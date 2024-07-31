@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Faas } from '@kbn/apm-types/es_schemas_raw';
+export type { Faas } from '@kbn/apm-types/es_schemas_raw';

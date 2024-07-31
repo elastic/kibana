@@ -16,9 +16,9 @@ import {
 
 import {
   PromptResponse,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  PromptsBulkActionSkipResult,
+  PromptsBulkCrudActionResponse,
+  PromptsBulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
@@ -60,9 +60,9 @@ const buildBulkResponse = (
     updated?: PromptResponse[];
     created?: PromptResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: PromptsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<PromptsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -74,7 +74,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: PromptsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -82,7 +82,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<PromptsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -100,7 +100,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: PromptsBulkCrudActionResponse = {
     success: true,
     prompts_count: summary.total,
     attributes: { results, summary },

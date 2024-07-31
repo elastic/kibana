@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { TimestampUs } from '@kbn/apm-types/es_schemas_raw';
+export type { TimestampUs } from '@kbn/apm-types/es_schemas_raw';

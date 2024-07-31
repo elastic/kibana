@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Span } from '@kbn/apm-types/es_schemas_ui';
+export type { Span } from '@kbn/apm-types/es_schemas_ui';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Service } from '@kbn/apm-types/es_schemas_raw';
+export type { Service } from '@kbn/apm-types/es_schemas_raw';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Event } from '@kbn/apm-types/es_schemas_ui';
+export type { Event } from '@kbn/apm-types/es_schemas_ui';

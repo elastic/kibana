@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export {
+export type {
   Agent,
   ElasticAgentName,
   OpenTelemetryAgentName,

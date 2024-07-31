@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { UserAgent } from '@kbn/apm-types/es_schemas_raw';
+export type { UserAgent } from '@kbn/apm-types/es_schemas_raw';

@@ -187,7 +187,7 @@ export interface OpenTimelineProps {
   /** The results of executing a search, null is the status before data fatched */
   searchResults: OpenTimelineResult[] | null;
   /** the currently-selected timelines in the table */
-  selectedItems: OpenTimelineResult[];
+  selectedItems?: OpenTimelineResult[];
   /** Toggle export timelines modal*/
   setImportDataModalToggle?: React.Dispatch<React.SetStateAction<boolean>>;
   /** the requested sort direction of the query results */

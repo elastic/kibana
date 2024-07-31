@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Metric } from '@kbn/apm-types/es_schemas_ui';
+export type { Metric } from '@kbn/apm-types/es_schemas_ui';

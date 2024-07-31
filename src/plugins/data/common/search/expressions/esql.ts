@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getEarliestLatestParams } from '@kbn/esql-utils';
+import { getStartEndParams } from '@kbn/esql-utils';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
@@ -154,7 +154,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const namedParams = getEarliestLatestParams(query, input.timeRange);
+            const namedParams = getStartEndParams(query, input.timeRange);
 
             if (namedParams.length) {
               params.params = namedParams;

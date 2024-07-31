@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Observer } from '@kbn/apm-types/es_schemas_raw';
+export type { Observer } from '@kbn/apm-types/es_schemas_raw';

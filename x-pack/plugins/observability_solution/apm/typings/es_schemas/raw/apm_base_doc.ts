@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { APMBaseDoc } from '@kbn/apm-types/es_schemas_raw';
+export type { APMBaseDoc } from '@kbn/apm-types/es_schemas_raw';

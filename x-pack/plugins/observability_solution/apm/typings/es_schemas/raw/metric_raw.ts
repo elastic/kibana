@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MetricRaw } from '@kbn/apm-types/es_schemas_raw';
+export type { MetricRaw } from '@kbn/apm-types/es_schemas_raw';

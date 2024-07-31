@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Host } from '@kbn/apm-types/es_schemas_raw';
+export type { Host } from '@kbn/apm-types/es_schemas_raw';
