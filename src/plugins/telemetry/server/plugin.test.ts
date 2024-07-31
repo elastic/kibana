@@ -51,7 +51,7 @@ describe('TelemetryPlugin', () => {
 
         expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledTimes(1);
         expect(telemetryPlugin['getSendToEnv']).toHaveBeenCalledWith(undefined);
-        
+
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3ServerShipper,
           {
@@ -99,7 +99,6 @@ describe('TelemetryPlugin', () => {
 
         const plugin = new TelemetryPlugin(initializerContext);
 
-        // eslint-disable-next-line dot-notation
         const startFetcherMock = (plugin['startFetcher'] = jest.fn());
 
         plugin.setup(coreMock.createSetup(), {

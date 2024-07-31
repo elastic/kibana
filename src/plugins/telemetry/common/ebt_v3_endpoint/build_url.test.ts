@@ -18,7 +18,7 @@ describe('buildUrl', () => {
 
   test('returns staging URL', () => {
     const buildShipperUrl = createBuildShipperUrl('staging');
-    expect(buildShipperUrl({channelName: 'test-channel' })).toBe(
+    expect(buildShipperUrl({ channelName: 'test-channel' })).toBe(
       'https://telemetry-staging.elastic.co/v3/send/test-channel'
     );
   });

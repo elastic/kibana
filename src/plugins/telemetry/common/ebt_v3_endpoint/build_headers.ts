@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  BuildShipperHeaders
-} from '@elastic/ebt/shippers/elastic_v3/common';
+import type { BuildShipperHeaders } from '@elastic/ebt/shippers/elastic_v3/common';
 
 /**
  * Returns the headers to send to the Remote Telemetry Service.
@@ -16,11 +14,15 @@ import type {
  * @param version The version of the ES cluster.
  * @param licenseId The ID of the license (if available).
  */
-export const buildShipperHeaders: BuildShipperHeaders = (clusterUuid: string, version: string, licenseId?: string) => {
+export const buildShipperHeaders: BuildShipperHeaders = (
+  clusterUuid: string,
+  version: string,
+  licenseId?: string
+) => {
   return {
     'content-type': 'application/x-ndjson',
     'x-elastic-cluster-id': clusterUuid,
     'x-elastic-stack-version': version,
     ...(licenseId && { 'x-elastic-license-id': licenseId }),
   };
-}
+};

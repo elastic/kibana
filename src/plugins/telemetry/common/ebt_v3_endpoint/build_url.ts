@@ -14,11 +14,13 @@ import type {
 /**
  * Builds the URL for the V3 API.
  */
-export const createBuildShipperUrl = (sendTo: 'production' | 'staging' ): BuildShipperUrl => (urlOptions: BuildShipperUrlOptions): string => {
-  const { channelName } = urlOptions;
-  const baseUrl =
-    sendTo === 'production'
-      ? 'https://telemetry.elastic.co'
-      : 'https://telemetry-staging.elastic.co';
-  return `${baseUrl}/v3/send/${channelName}`;
-};
+export const createBuildShipperUrl =
+  (sendTo: 'production' | 'staging'): BuildShipperUrl =>
+  (urlOptions: BuildShipperUrlOptions): string => {
+    const { channelName } = urlOptions;
+    const baseUrl =
+      sendTo === 'production'
+        ? 'https://telemetry.elastic.co'
+        : 'https://telemetry-staging.elastic.co';
+    return `${baseUrl}/v3/send/${channelName}`;
+  };
