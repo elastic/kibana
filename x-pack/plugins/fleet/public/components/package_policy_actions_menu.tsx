@@ -105,7 +105,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         (agentPolicy?.supports_agentless ?? false) && (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetails.integrationList.editIntegrationAgentlessTooltip"
-            defaultMessage="It is not allowed to edit an agentless integration. Please add a new integration if needed."
+            defaultMessage="Editing an agentless integration is not supported. Add a new integration if needed."
           />
         )
       }

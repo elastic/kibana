@@ -73,7 +73,7 @@ const IntegrationDetailsLink = memo<{
               'xpack.fleet.epm.packageDetails.integrationList.disabledEditTitle',
               {
                 defaultMessage:
-                  'It is not allowed to edit an agentless integration. Please add a new integration if needed.',
+                  'Editing an agentless integration is not supported. Add a new integration if needed.',
               }
             ),
           }
