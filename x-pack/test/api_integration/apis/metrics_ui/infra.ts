@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
       to: new Date(DATES['8.0.0'].logs_and_metrics.max).toISOString(),
     },
     query: { bool: { must_not: [], filter: [], should: [], must: [] } },
-    sourceId: 'default',
   };
 
   const makeRequest = async ({
