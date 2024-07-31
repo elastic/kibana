@@ -36,6 +36,7 @@ export const createMatchPhraseFilter = (
     disabled: false,
     index: undefined,
     negate: false,
+    // @ts-expect-error
     params: { query: value },
     value: undefined,
     ruleTypeIds: [],

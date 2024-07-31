@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
@@ -34,7 +34,7 @@ export interface UrlSyncedAlertsSearchBarProps
   > {
   showFilterControls?: boolean;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
-  onActiveRuleTypeFiltersChange?: (value: string[]) => void;
+  onRuleTypesChanged?: (ruleTypeIds: string[]) => void;
 }
 
 /**
@@ -43,7 +43,7 @@ export interface UrlSyncedAlertsSearchBarProps
 export const UrlSyncedAlertsSearchBar = ({
   showFilterControls = false,
   onEsQueryChange,
-  onActiveRuleTypeFiltersChange,
+  onRuleTypesChanged,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -84,11 +84,6 @@ export const UrlSyncedAlertsSearchBar = ({
 
   useEffect(() => {
     try {
-      onActiveRuleTypeFiltersChange?.([
-        ...new Set(
-          filters.flatMap((f) => (f as AlertsFeatureIdsFilter).meta.ruleTypeIds).filter(nonNullable)
-        ),
-      ]);
       onEsQueryChange(
         buildEsQuery({
           timeRange: {
@@ -105,17 +100,7 @@ export const UrlSyncedAlertsSearchBar = ({
       });
       onKueryChange('');
     }
-  }, [
-    controlFilters,
-    filters,
-    kuery,
-    onActiveRuleTypeFiltersChange,
-    onEsQueryChange,
-    onKueryChange,
-    rangeFrom,
-    rangeTo,
-    toasts,
-  ]);
+  }, [controlFilters, filters, kuery, onEsQueryChange, onKueryChange, rangeFrom, rangeTo, toasts]);
 
   const onQueryChange = useCallback<NonNullable<AlertsSearchBarProps['onQueryChange']>>(
     ({ query, dateRange }) => {
@@ -128,6 +113,18 @@ export const UrlSyncedAlertsSearchBar = ({
     [onKueryChange, onRangeFromChange, onRangeToChange, setSavedQuery, timeFilterService]
   );
 
+  const onFiltersUpdated = (updatedFilters: Filter[]) => {
+    onRuleTypesChanged?.([
+      ...new Set(
+        updatedFilters
+          .flatMap((ruleTypeId) => (ruleTypeId as AlertsFeatureIdsFilter).meta.ruleTypeIds)
+          .filter(nonNullable)
+      ),
+    ]);
+
+    onFiltersChange(updatedFilters);
+  };
+
   return (
     <>
       <AlertsSearchBar
@@ -136,7 +133,7 @@ export const UrlSyncedAlertsSearchBar = ({
         query={kuery}
         onQuerySubmit={onQueryChange}
         filters={filters}
-        onFiltersUpdated={onFiltersChange}
+        onFiltersUpdated={onFiltersUpdated}
         savedQuery={savedQuery}
         onSavedQueryUpdated={setSavedQuery}
         onClearSavedQuery={clearSavedQuery}

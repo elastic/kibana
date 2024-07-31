@@ -21,6 +21,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   AlertConsumers,
+  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery } from '@kbn/es-query';
@@ -31,7 +32,6 @@ import { NoPermissionPrompt } from '../../../components/prompts/no_permission_pr
 import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
 import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
-import { NON_SIEM_FEATURE_IDS } from '../../alerts_search_bar/constants';
 import { alertProducersData } from '../../alerts_table/constants';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -77,64 +77,47 @@ const PageContent = () => {
     alertsTableConfigurationRegistry,
   } = useKibana().services;
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
-  const [activeRuleTypeFilters, setActiveRuleTypeFilters] = useState<string[]>([]);
-
+  const [ruleTypeIds, setRuleTypeIds] = useState<string[]>([]);
   const ruleStats = useRuleStats();
+
   const {
     ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
-
-  const browsingSiem = useMemo(
-    () => activeRuleTypeFilters.length === 1 && activeRuleTypeFilters[0] === AlertConsumers.SIEM,
-    [activeRuleTypeFilters]
-  );
-
-  const filteringBySolution = useMemo(
-    () => activeRuleTypeFilters.length > 0,
-    [activeRuleTypeFilters.length]
-  );
-
-  const featureIds = useMemo(
-    () =>
-      filteringBySolution
-        ? browsingSiem
-          ? [AlertConsumers.SIEM]
-          : activeRuleTypeFilters
-        : NON_SIEM_FEATURE_IDS,
-    [activeRuleTypeFilters, browsingSiem, filteringBySolution]
-  );
+  const browsingSiem = ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0]);
+  const filteringBySolution = ruleTypeIds.length > 0;
+  const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];
-    if (Object.values(ruleTypeIdsByFeatureId).length > 0) {
+    if (ruleTypeIdsByFeatureIdEntries.length > 0) {
       filters.push(
-        ...Object.entries(ruleTypeIdsByFeatureId)
-          .map(([featureId, ruleTypeIds]) => {
+        ...ruleTypeIdsByFeatureIdEntries
+          .map(([featureId, _ruleTypeIds]) => {
             const producerData = alertProducersData[featureId as AlertsTableSupportedConsumers];
             if (!producerData) {
               return null;
             }
+
             const filterLabel = getFeatureFilterLabel(producerData.displayName);
             const disabled =
               filteringBySolution && featureId === AlertConsumers.SIEM
                 ? !browsingSiem
                 : browsingSiem;
+
             return {
               name: filterLabel,
               icon: producerData.icon,
-              filter: createRuleTypesFilter(
-                producerData.subFeatureIds ?? [featureId as AlertConsumers],
-                filterLabel,
-                ruleTypeIds
-              ),
+              filter: createRuleTypesFilter(_ruleTypeIds, filterLabel),
               disabled,
             };
           })
           .filter(nonNullable)
       );
     }
+
     filters.push({
       title: i18n.translate('xpack.triggersActionsUI.sections.globalAlerts.quickFilters.status', {
         defaultMessage: 'Status',
@@ -146,7 +129,8 @@ const PageContent = () => {
       })),
     });
     return filters;
-  }, [browsingSiem, filteringBySolution, ruleTypeIdsByFeatureId]);
+  }, [browsingSiem, filteringBySolution, ruleTypeIdsByFeatureIdEntries]);
+
   const tableConfigurationId = useMemo(
     // TODO in preparation for using solution-specific configurations
     () => ALERT_TABLE_GLOBAL_CONFIG_ID,
@@ -191,7 +175,7 @@ const PageContent = () => {
             showFilterControls
             showFilterBar
             quickFilters={quickFilters}
-            onActiveRuleTypeFiltersChange={setActiveRuleTypeFilters}
+            onRuleTypesChanged={setRuleTypeIds}
             onEsQueryChange={setEsQuery}
           />
           <Suspense fallback={<EuiLoadingSpinner />}>

@@ -30,9 +30,10 @@ export const useRuleTypeIdsByFeatureId = (ruleTypesIndex: RuleTypeIndex) =>
     if (!ruleTypesIndex?.size) {
       return {};
     }
+
     const map = Array.from(ruleTypesIndex.entries()).reduce<RuleTypeIdsByFeatureId<Set<string>>>(
-      (types, [key, value]) => {
-        let producer = value.producer as keyof RuleTypeIdsByFeatureId;
+      (types, [ruleTypeId, ruleType]) => {
+        let producer = ruleType.producer as keyof RuleTypeIdsByFeatureId;
         // Some o11y apps are listed under 'observability' to create a grouped filter
         if (observabilityFeatureIds.includes(producer)) {
           producer = AlertConsumers.OBSERVABILITY;
@@ -41,14 +42,15 @@ export const useRuleTypeIdsByFeatureId = (ruleTypesIndex: RuleTypeIndex) =>
         if (stackFeatureIds.includes(producer)) {
           producer = AlertConsumers.STACK_ALERTS;
         }
+
         // Multi consumer rule type ids should be listed both in Observability and Stack alerts
-        if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(value.id)) {
+        if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
           (types[AlertConsumers.OBSERVABILITY] =
-            types[AlertConsumers.OBSERVABILITY] || new Set()).add(key);
+            types[AlertConsumers.OBSERVABILITY] || new Set()).add(ruleTypeId);
           (types[AlertConsumers.STACK_ALERTS] =
-            types[AlertConsumers.STACK_ALERTS] || new Set()).add(key);
+            types[AlertConsumers.STACK_ALERTS] || new Set()).add(ruleTypeId);
         } else {
-          (types[producer] = types[producer] || new Set()).add(key);
+          (types[producer] = types[producer] || new Set()).add(ruleTypeId);
         }
         return types;
       },
