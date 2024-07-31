@@ -41,7 +41,7 @@ export const merge = async ({
     throw new Error('As minimum one source glob is expected');
   }
 
-  const prototypeDoc = options?.prototypeDocument
+  const prototypeDocument = options?.prototypeDocument
     ? await validatePrototypeDocument(options?.prototypeDocument)
     : undefined;
 
@@ -63,18 +63,18 @@ export const merge = async ({
 
   const blankOasDocumentFactory = (oasVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
-      info: prototypeDoc?.info ? { ...DEFAULT_INFO, ...prototypeDoc.info } : DEFAULT_INFO,
-      servers: prototypeDoc?.servers,
-      security: prototypeDoc?.security,
+      info: prototypeDocument?.info ? { ...DEFAULT_INFO, ...prototypeDocument.info } : DEFAULT_INFO,
+      servers: prototypeDocument?.servers,
+      security: prototypeDocument?.security,
       components: {
-        securitySchemes: prototypeDoc?.components?.securitySchemes,
+        securitySchemes: prototypeDocument?.components?.securitySchemes,
       },
     });
 
   const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: false,
-    skipServers: Boolean(prototypeDoc?.servers),
-    skipSecurity: Boolean(prototypeDoc?.security),
+    skipServers: Boolean(prototypeDocument?.servers),
+    skipSecurity: Boolean(prototypeDocument?.security),
   });
   // Only one document is expected when `splitDocumentsByVersion` is set to `false`
   const mergedDocument = Array.from(resultDocumentsMap.values())[0];

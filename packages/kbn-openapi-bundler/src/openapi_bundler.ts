@@ -43,7 +43,7 @@ export const bundle = async ({
   outputFilePath = 'bundled-{version}.schema.yaml',
   options,
 }: BundlerConfig) => {
-  const prototypeDoc = options?.prototypeDocument
+  const prototypeDocument = options?.prototypeDocument
     ? await validatePrototypeDocument(options?.prototypeDocument)
     : undefined;
 
@@ -69,19 +69,19 @@ export const bundle = async ({
 
   const blankOasDocumentFactory = (oasVersion: string, apiVersion: string) =>
     createBlankOpenApiDocument(oasVersion, {
-      info: prototypeDoc?.info
-        ? { ...DEFAULT_INFO, ...prototypeDoc.info, version: apiVersion }
+      info: prototypeDocument?.info
+        ? { ...DEFAULT_INFO, ...prototypeDocument.info, version: apiVersion }
         : { ...DEFAULT_INFO, version: apiVersion },
-      servers: prototypeDoc?.servers,
-      security: prototypeDoc?.security,
+      servers: prototypeDocument?.servers,
+      security: prototypeDocument?.security,
       components: {
-        securitySchemes: prototypeDoc?.components?.securitySchemes,
+        securitySchemes: prototypeDocument?.components?.securitySchemes,
       },
     });
   const resultDocumentsMap = await mergeDocuments(bundledDocuments, blankOasDocumentFactory, {
     splitDocumentsByVersion: true,
-    skipServers: Boolean(prototypeDoc?.servers),
-    skipSecurity: Boolean(prototypeDoc?.security),
+    skipServers: Boolean(prototypeDocument?.servers),
+    skipSecurity: Boolean(prototypeDocument?.security),
   });
 
   await writeDocuments(resultDocumentsMap, outputFilePath);
