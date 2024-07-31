@@ -257,6 +257,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -15,6 +15,7 @@ import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
+import { WelcomeHeaderHub } from './welcome_header_hub';
 import { Footer } from './footer';
 import { useScrollToHash } from './hooks/use_scroll';
 import type { SecurityProductTypes } from './configs';
@@ -24,6 +25,7 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -63,13 +65,24 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
     },
     [telemetry]
   );
+  const isDataIngestionHubEnabled = useIsExperimentalFeatureEnabled('dataIngestionHubEnabled');
 
   useScrollToHash();
+
+  const renderDataIngestionHubHeader = useMemo(
+    () =>
+      isDataIngestionHubEnabled ? (
+        <WelcomeHeaderHub />
+      ) : (
+        <WelcomeHeader productTier={productTier} />
+      ),
+    [isDataIngestionHubEnabled, productTier]
+  );
 
   return (
     <div className={wrapperStyles}>
       <KibanaPageTemplate.Section restrictWidth={CONTENT_WIDTH} paddingSize="xl">
-        <WelcomeHeader productTier={productTier} />
+        {renderDataIngestionHubHeader}
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section
         restrictWidth={CONTENT_WIDTH}
