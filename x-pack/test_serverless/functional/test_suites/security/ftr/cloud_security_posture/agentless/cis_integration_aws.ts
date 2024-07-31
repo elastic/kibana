@@ -5,8 +5,6 @@
  * 2.0.
  */
 const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-
 const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
@@ -45,9 +43,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
         await cisIntegration.selectSetupTechnology('agentless');
-
-        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+        await cisIntegration.selectAwsCredentials('direct');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -63,8 +59,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.selectSetupTechnology('agentless');
 
-        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+        await cisIntegration.selectAwsCredentials('temporary');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -82,8 +77,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
         await cisIntegration.selectSetupTechnology('agentless');
 
-        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+        await cisIntegration.selectAwsCredentials('direct');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -96,8 +90,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.selectSetupTechnology('agentless');
 
-        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+        await cisIntegration.selectAwsCredentials('temporary');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
