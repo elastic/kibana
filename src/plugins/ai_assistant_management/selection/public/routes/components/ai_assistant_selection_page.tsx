@@ -87,6 +87,7 @@ export function AiAssistantSelectionPage() {
                         }
                       )}
                       size="s"
+                      className="eui-displayInlineBlock"
                     />
                     <EuiSpacer size="s" />
                   </>
@@ -159,6 +160,7 @@ export function AiAssistantSelectionPage() {
                         }
                       )}
                       size="s"
+                      className="eui-displayInlineBlock"
                     />
                     <EuiSpacer size="s" />
                   </>
