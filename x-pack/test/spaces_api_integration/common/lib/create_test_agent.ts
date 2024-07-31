@@ -20,9 +20,11 @@ export const createTestAgent = (
     // If a user is provided, apply authentication to the request
     if (user) {
       request = request.auth(user.username, user.password);
+    } else {
+      // keeping original logic where request.auth(undefined, undefined)
+      request.set('Authorization', `Basic ${Buffer.from(`undefined:undefined`).toString()}`);
     }
 
-    // Return the request object with or without auth
     return request;
   };
 };

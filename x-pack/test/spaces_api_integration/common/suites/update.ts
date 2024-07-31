@@ -73,11 +73,11 @@ export function updateTestSuiteFactory(
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: UpdateTestDefinition) => {
       describeFn(description, () => {
-        before(() => {
+        before(() =>
           esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
-        });
+          )
+        );
         after(() =>
           esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
