@@ -10,6 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { TriggersAndActionsUiServices } from '../..';
 import { fetchAlertIndexNames } from '../lib/rule_api/alert_index';
 import { fetchAlertFields } from '../lib/rule_api/alert_fields';
@@ -27,7 +28,7 @@ export function useAlertDataViews(ruleTypeIds: string[]): UserAlertDataViews {
   } = useKibana<TriggersAndActionsUiServices>().services;
   const [dataViews, setDataViews] = useState<DataView[] | undefined>(undefined);
   const ruleTypes = ruleTypeIds.sort().join(',');
-  const hasSecurity = ruleTypeIds.some((ruleTypeId) => ruleTypeId.startsWith('siem.'));
+  const hasSecurity = ruleTypeIds.some(isSiemRuleType);
   const isOnlySecurity = ruleTypeIds.length === 1 && hasSecurity;
   const hasSecurityAndO11yFeatureIds = ruleTypeIds.length > 1 && hasSecurity;
 

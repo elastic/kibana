@@ -19,6 +19,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import { partition } from 'lodash';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '../../common';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
@@ -49,13 +50,9 @@ export const ruleRegistrySearchStrategyProvider = (
       // SIEM uses RBAC fields in their alerts but also utilizes ES DLS which
       // is different than every other solution so we need to special case
       // those requests.
-      const isAnyRuleTypeESAuthorized = request.ruleTypeIds.some((ruleTypeId) =>
-        ruleTypeId.startsWith('siem.')
-      );
+      const isAnyRuleTypeESAuthorized = request.ruleTypeIds.some(isSiemRuleType);
 
-      const isEachRuleTypeESAuthorized = request.ruleTypeIds.every((ruleTypeId) =>
-        ruleTypeId.startsWith('siem.')
-      );
+      const isEachRuleTypeESAuthorized = request.ruleTypeIds.every(isSiemRuleType);
 
       const registeredRuleTypes = alerting.listTypes();
 

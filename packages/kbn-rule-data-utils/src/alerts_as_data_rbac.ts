@@ -92,4 +92,7 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
   return paramKeysWithValues;
 };
 
+/**
+ * TODO: Abstract it and remove it
+ */
 export const isSiemRuleType = (ruleTypeId: string) => ruleTypeId.startsWith('siem.');

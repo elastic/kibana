@@ -9,7 +9,7 @@
 import { useCallback, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
@@ -63,7 +63,7 @@ export const AlertsSearchBar = ({
   });
 
   const isSecurity =
-    (ruleTypeIds && ruleTypeIds.length === 1 && ruleTypeIds[0].startsWith('siem.')) ||
+    (ruleTypeIds && ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0])) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);

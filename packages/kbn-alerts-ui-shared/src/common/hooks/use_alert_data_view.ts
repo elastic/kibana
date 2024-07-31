@@ -12,6 +12,7 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common'
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { useQuery } from '@tanstack/react-query';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { fetchAlertIndexNames } from '../apis/fetch_alert_index_names';
 
@@ -32,7 +33,7 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
 
   const [dataViews, setDataViews] = useState<DataView[]>([]);
   const ruleTypes = ruleTypeIds.sort().join(',');
-  const hasSecurity = ruleTypeIds.some((ruleTypeId) => ruleTypeId.startsWith('siem.'));
+  const hasSecurity = ruleTypeIds.some(isSiemRuleType);
   const isOnlySecurity = ruleTypeIds.length === 1 && hasSecurity;
   const hasSecurityAndO11yFeatureIds = ruleTypeIds.length > 1 && hasSecurity;
 

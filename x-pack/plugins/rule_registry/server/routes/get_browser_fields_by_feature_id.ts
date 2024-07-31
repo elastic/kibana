@@ -9,6 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import * as t from 'io-ts';
 
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
@@ -36,9 +37,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const alertsClient = await racContext.getAlertsClient();
         const { ruleTypeIds = [] } = request.query;
 
-        const onlyO11yRuleTypeIds = ruleTypeIds.filter(
-          (ruleTypeId) => !ruleTypeId.startsWith('siem.')
-        );
+        const onlyO11yRuleTypeIds = ruleTypeIds.filter((ruleTypeId) => !isSiemRuleType(ruleTypeId));
 
         const o11yIndices =
           (onlyO11yRuleTypeIds

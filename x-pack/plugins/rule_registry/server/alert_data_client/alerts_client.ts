@@ -21,6 +21,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
+  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -1197,7 +1198,7 @@ export class AlertsClient {
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
     const { fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    if (ruleTypeId.startsWith('siem.')) {
+    if (isSiemRuleType(ruleTypeId)) {
       throw Boom.badRequest(`Security solution rule type is not supported`);
     }
     const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);

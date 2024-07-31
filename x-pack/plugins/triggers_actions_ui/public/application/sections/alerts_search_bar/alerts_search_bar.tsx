@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, isSiemRuleType } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
@@ -64,7 +64,7 @@ export function AlertsSearchBar({
   });
 
   const isSecurity =
-    (ruleTypeIds && ruleTypeIds.length === 1 && ruleTypeIds[0].startsWith('siem.')) ||
+    (ruleTypeIds && ruleTypeIds.length === 1 && isSiemRuleType(ruleTypeIds[0])) ||
     (ruleType &&
       ruleTypeId &&
       ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);
