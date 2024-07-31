@@ -15,7 +15,9 @@ import { AddEmptyPrompt } from './empty_prompt/add_empty_prompt';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
 
 export const InferenceEndpoints: React.FC = () => {
-  const { inferenceEndpoints } = useQueryInferenceEndpoints();
+  const { data } = useQueryInferenceEndpoints();
+
+  const inferenceEndpoints = data || [];
 
   return (
     <>
