@@ -35,6 +35,15 @@ export type ESQLAstField = ESQLFunction | ESQLColumn;
  */
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
+export type ESQLAstNodeWithArgs = ESQLCommand | ESQLCommandOption | ESQLFunction;
+
+/**
+ * *Proper* are nodes which are objects with `type` property, once we get rid
+ * of the nodes which are plain arrays, all nodes will be *proper* and we can
+ * remove this type.
+ */
+export type ESQLProperNode = ESQLSingleAstItem | ESQLAstCommand;
+
 export interface ESQLLocation {
   min: number;
   max: number;
