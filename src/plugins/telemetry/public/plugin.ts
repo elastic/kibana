@@ -22,10 +22,11 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ElasticV3BrowserShipper } from '@kbn/ebt/shippers/elastic_v3/browser';
+import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
-
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
+import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
+
 import type { TelemetryConfigLabels } from '../server/config';
 import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
 import type { v2 } from '../common/types';
@@ -192,10 +193,12 @@ export class TelemetryPlugin
       },
     });
 
+    const sendTo = this.getSendToEnv(config.sendUsageTo);
     analytics.registerShipper(ElasticV3BrowserShipper, {
       channelName: 'kibana-browser',
       version: currentKibanaVersion,
-      sendTo: config.sendUsageTo === 'prod' ? 'production' : 'staging',
+      buildShipperHeaders,
+      buildShipperUrl: createBuildShipperUrl(sendTo),
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
@@ -294,6 +297,10 @@ export class TelemetryPlugin
 
   public stop() {
     this.telemetrySender?.stop();
+  }
+
+  private getSendToEnv(sendUsageTo: string): 'production' | 'staging' {
+    return sendUsageTo === 'prod' ? 'production' : 'staging';
   }
 
   /**
