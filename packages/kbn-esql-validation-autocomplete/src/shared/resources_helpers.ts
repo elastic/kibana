@@ -20,8 +20,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
   const getFields = async () => {
     if (!cacheFields.size && queryText) {
       const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
-      const supportedFieldsOfType = fieldsOfType?.filter((f) => f.type !== 'unsupported');
-      for (const field of supportedFieldsOfType || []) {
+      for (const field of fieldsOfType || []) {
         cacheFields.set(field.name, field);
       }
     }
