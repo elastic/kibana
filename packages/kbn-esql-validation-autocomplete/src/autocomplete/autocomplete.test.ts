@@ -1213,4 +1213,220 @@ describe('autocomplete', () => {
       33
     );
   });
+
+  describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
+    const attachTriggerCommand = (
+      s: string | PartialSuggestionWithText
+    ): PartialSuggestionWithText =>
+      typeof s === 'string'
+        ? {
+            text: s,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }
+        : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
+
+    const attachAsSnippet = (s: PartialSuggestionWithText): PartialSuggestionWithText => ({
+      ...s,
+      asSnippet: true,
+    });
+
+    // Source command
+    testSuggestions(
+      'F',
+      ['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      undefined,
+      1,
+      undefined
+    );
+
+    // Pipe command
+    testSuggestions(
+      'FROM a | E',
+      commandDefinitions
+        .filter(({ name }) => !sourceCommands.includes(name))
+        .map(({ name }) => attachTriggerCommand(name.toUpperCase() + ' $0'))
+        .map(attachAsSnippet), // TODO consider making this check more fundamental
+      undefined,
+      10,
+      undefined
+    );
+
+    // Function argument
+    const dateDiffFirstParamSuggestions =
+      evalFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0].params?.[0]
+        .literalSuggestions ?? [];
+    testSuggestions(
+      'FROM a | EVAL DATE_DIFF()',
+      dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand),
+      undefined,
+      24,
+      undefined
+    );
+
+    // PIPE (|)
+    testSuggestions(
+      'FROM a ',
+      [attachTriggerCommand('| '), ',', attachAsSnippet(attachTriggerCommand('METADATA $0'))],
+      undefined,
+      7,
+      undefined
+    );
+
+    // Assignment
+    testSuggestions(`FROM a | ENRICH policy on b with `, [
+      attachTriggerCommand('var0 = '),
+      ...getPolicyFields('policy'),
+    ]);
+
+    // FROM source
+    //
+    // Using an Invoke trigger kind here because that's what Monaco uses when the show suggestions
+    // action is triggered (e.g. accepting the "FROM" suggestion)
+    testSuggestions(
+      'FROM ',
+      [
+        { text: 'index1 ', command: TRIGGER_SUGGESTION_COMMAND },
+        { text: 'index2 ', command: TRIGGER_SUGGESTION_COMMAND },
+      ],
+      undefined,
+      5,
+      [
+        ,
+        [
+          { name: 'index1', hidden: false },
+          { name: 'index2', hidden: false },
+        ],
+      ]
+    );
+
+    // FROM source METADATA
+    testSuggestions(
+      'FROM index1 M',
+      [',', attachAsSnippet(attachTriggerCommand('METADATA $0')), '| '],
+      undefined,
+      13,
+      undefined
+    );
+
+    // FROM source METADATA field TODO
+
+    // KEEP field TODO
+
+    // LIMIT number
+    testSuggestions('FROM a | LIMIT ', ['10', '100', '1000'].map(attachTriggerCommand));
+
+    // SORT field
+    testSuggestions(
+      'FROM a | SORT ',
+      [
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
+      ].map(attachTriggerCommand),
+      undefined,
+      14
+    );
+
+    // SORT field order
+    testSuggestions(
+      'FROM a | SORT field ',
+      [',', ...['ASC ', 'DESC ', '| '].map(attachTriggerCommand)],
+      undefined,
+      20
+    );
+
+    // SORT field order nulls
+    testSuggestions(
+      'FROM a | SORT field ASC ',
+      [',', ...['NULLS FIRST ', 'NULLS LAST ', '| '].map(attachTriggerCommand)],
+      undefined,
+      24
+    );
+
+    // STATS argument
+    testSuggestions(
+      'FROM a | STATS ',
+      [
+        'var0 = ',
+        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }).map(
+          attachAsSnippet
+        ),
+      ].map(attachTriggerCommand),
+      undefined,
+      15
+    );
+
+    // STATS argument BY
+    testSuggestions(
+      'FROM a | STATS AVG(numberField) ',
+      [',', attachAsSnippet(attachTriggerCommand('BY $0')), attachTriggerCommand('| ')],
+      undefined,
+      32
+    );
+
+    // STATS argument BY field
+    const allByCompatibleFunctions = getFunctionSignaturesByReturnType(
+      'stats',
+      'any',
+      {
+        scalar: true,
+        grouping: true,
+      },
+      undefined,
+      undefined,
+      'by'
+    );
+    testSuggestions(
+      'FROM a | STATS AVG(numberField) BY ',
+      [
+        attachTriggerCommand('var0 = '),
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allByCompatibleFunctions,
+      ],
+      undefined,
+      35
+    );
+
+    // STATS argument BY assignment (checking field suggestions)
+    testSuggestions(
+      'FROM a | STATS AVG(numberField) BY var0 = ',
+      [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allByCompatibleFunctions,
+      ],
+      undefined,
+      41
+    );
+
+    // WHERE argument (field suggestions)
+    testSuggestions(
+      'FROM a | WHERE ',
+      [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }).map(attachAsSnippet),
+      ],
+      undefined,
+      15
+    );
+
+    // WHERE argument comparison
+    testSuggestions(
+      'FROM a | WHERE stringField ',
+      getFunctionSignaturesByReturnType(
+        'where',
+        'boolean',
+        {
+          builtin: true,
+        },
+        ['string']
+      ).map(attachTriggerCommand),
+      undefined,
+      27
+    );
+  });
 });
