@@ -381,7 +381,6 @@ describe('alert actions', () => {
             eventIdToNoteIds: {},
             eventType: 'all',
             excludedRowRendererIds: [],
-            expandedDetail: {},
             filters: [
               {
                 $state: {

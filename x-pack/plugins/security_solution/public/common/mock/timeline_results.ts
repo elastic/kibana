@@ -1871,7 +1871,6 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
-  expandedDetail: {},
   filters: [
     {
       $state: {
@@ -1938,7 +1937,6 @@ export const mockDataTableModel: DataTableModel = {
   defaultColumns: mockTimelineModelColumns,
   dataViewId: null,
   deletedEventIds: [],
-  expandedDetail: {},
   filters: [
     {
       $state: {
@@ -2072,7 +2070,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
       RowRendererId.threat_match,
       RowRendererId.zeek,
     ],
-    expandedDetail: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],

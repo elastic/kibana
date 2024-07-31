@@ -107,8 +107,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe(`on the ${protection} protections card`, () => {
         let policyInfo: PolicyTestResourceInfo;
         const cardTestSubj:
-          | typeof formTestSubjects['ransomware']
-          | typeof formTestSubjects['malware'] =
+          | (typeof formTestSubjects)['ransomware']
+          | (typeof formTestSubjects)['malware'] =
           formTestSubjects[
             protection as keyof Pick<typeof formTestSubjects, 'malware' | 'ransomware'>
           ];

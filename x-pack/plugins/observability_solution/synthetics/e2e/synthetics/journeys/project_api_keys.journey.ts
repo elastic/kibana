@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { recordVideo } from '../../helpers/record_video';
 
 journey('ProjectAPIKeys', async ({ page }) => {

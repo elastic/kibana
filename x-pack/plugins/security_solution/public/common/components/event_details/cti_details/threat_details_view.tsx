@@ -72,6 +72,7 @@ const EnrichmentSection: React.FC<{
   );
 };
 
+// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
   showInvestigationTimeEnrichments: boolean;

@@ -66,14 +66,13 @@ export async function fetchSearchSourceQuery({
     latestTimestamp,
     dateStart,
     dateEnd,
+    logger,
     alertLimit
   );
 
+  const searchRequestBody: unknown = searchSource.getSearchRequestBody();
   logger.debug(
-    () =>
-      `search source query rule (${ruleId}) query: ${JSON.stringify(
-        searchSource.getSearchRequestBody()
-      )}`
+    () => `search source query rule (${ruleId}) query: ${JSON.stringify(searchRequestBody)}`
   );
 
   const searchResult = await searchSource.fetch();
@@ -99,6 +98,7 @@ export async function fetchSearchSourceQuery({
       sourceFieldsParams: params.sourceFields,
     }),
     index: [index.name],
+    query: searchRequestBody,
   };
 }
 
@@ -109,6 +109,7 @@ export async function updateSearchSource(
   latestTimestamp: string | undefined,
   dateStart: string,
   dateEnd: string,
+  logger: Logger,
   alertLimit?: number
 ): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -172,6 +173,7 @@ export async function updateSearchSource(
         ),
       },
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
+      loggerCb: (message: string) => logger.warn(message),
     })
   );
   return {

@@ -289,6 +289,16 @@ export const sharedOas = {
             },
           },
           {
+            description: 'A required header to protect against CSRF attacks',
+            in: 'header',
+            name: 'kbn-xsrf',
+            required: true,
+            schema: {
+              example: 'true',
+              type: 'string',
+            },
+          },
+          {
             description: 'id',
             in: 'path',
             name: 'id',

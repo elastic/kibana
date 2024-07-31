@@ -101,6 +101,7 @@ export type {
   CategorySummaryItem,
   CategorySummaryList,
   PackageInfo,
+  PackageMetadata,
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,

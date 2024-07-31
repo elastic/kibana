@@ -46,13 +46,11 @@ type ServicesDetailedStatisticsAPIResponse =
 export function getServiceColumns({
   query,
   breakpoints,
-  link,
   timeseriesDataLoading,
   timeseriesData,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
-  link: any;
   timeseriesDataLoading: boolean;
   timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
