@@ -19,7 +19,7 @@ interface Props {
   size?: IconSize;
 }
 
-const getBenchmarkIdIconType = (type: BenchmarkId) => {
+const getBenchmarkIdIconType = (type: BenchmarkId): string | undefined => {
   switch (type) {
     case 'cis_eks':
       return cisEksIcon;

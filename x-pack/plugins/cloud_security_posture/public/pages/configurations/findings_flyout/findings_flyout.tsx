@@ -144,7 +144,7 @@ export const RuleNameLink = ({
       <EuiLink href={ruleFlyoutLink}>{ruleName}</EuiLink>
     </EuiToolTip>
   ) : (
-    ruleName
+    <>{ruleName}</>
   );
 };
 
