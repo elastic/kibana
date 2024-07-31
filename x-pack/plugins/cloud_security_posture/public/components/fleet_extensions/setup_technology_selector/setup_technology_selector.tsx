@@ -53,7 +53,11 @@ export const SetupTechnologySelector = ({
       />
     );
     return (
-      <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+        data-test-subj="setup-technology-agentless-option"
+      >
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
           <EuiBetaBadge
@@ -80,23 +84,6 @@ export const SetupTechnologySelector = ({
 
   const options = [
     {
-      value: SetupTechnology.AGENTLESS,
-      inputDisplay: agentlessOptionBadge(false),
-      dropdownDisplay: (
-        <>
-          {agentlessOptionBadge(true)}
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription"
-                defaultMessage="Set up the integration without an agent"
-              />
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-    {
       value: SetupTechnology.AGENT_BASED,
       inputDisplay: (
         <FormattedMessage
@@ -117,6 +104,23 @@ export const SetupTechnologySelector = ({
               <FormattedMessage
                 id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDescription"
                 defaultMessage="Set up the integration with an agent"
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
+    {
+      value: SetupTechnology.AGENTLESS,
+      inputDisplay: agentlessOptionBadge(false),
+      dropdownDisplay: (
+        <>
+          {agentlessOptionBadge(true)}
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription"
+                defaultMessage="Set up the integration without an agent"
               />
             </p>
           </EuiText>

@@ -30,6 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     const previousPackageVersion = '1.9.0';
+    const testSubjects = getService('testSubjects');
 
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -47,8 +48,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
+        await agentlessButton.click();
+
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
@@ -66,8 +69,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
+        await agentlessButton.click();
+
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
@@ -86,8 +91,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
+        await agentlessButton.click();
+
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
@@ -102,8 +109,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
         await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
+        await agentlessButton.click();
+
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
