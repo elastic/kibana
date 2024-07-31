@@ -30,6 +30,7 @@ describe('fillPool', () => {
               tasksUpdated: tasks?.length ?? 0,
               tasksConflicted: 0,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: tasks,
           })

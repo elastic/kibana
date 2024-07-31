@@ -28,9 +28,9 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
 import { Welcome } from '../../../shared/entity_enablement/welcome_modal';
-import { useServiceEcoTour } from '../../../../hooks/use_eco_tour';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
@@ -150,7 +150,7 @@ export function MultiSignalInventory() {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
-  const { tourState, hideModal } = useServiceEcoTour();
+  const { tourState, updateTourState } = useEntityManagerEnablementContext();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
 
@@ -174,6 +174,10 @@ export function MultiSignalInventory() {
       services.telemetry.reportEntityInventoryPageState({ state: 'available' });
     }
   }, [services.telemetry, data?.hasData]);
+
+  function handleModalClose() {
+    updateTourState({ isModalVisible: false, isTourActive: true });
+  }
 
   return (
     <>
@@ -219,8 +223,8 @@ export function MultiSignalInventory() {
       )}
       <Welcome
         isModalVisible={tourState.isModalVisible ?? false}
-        onClose={() => hideModal()}
-        onConfirm={() => hideModal()}
+        onClose={handleModalClose}
+        onConfirm={handleModalClose}
       />
     </>
   );

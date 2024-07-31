@@ -16,13 +16,21 @@ import {
   SelectInferenceIdProps,
 } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
 import React from 'react';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 const createInferenceEndpointMock = jest.fn();
 const mockDispatch = jest.fn();
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
-    core: { application: {} },
+    core: {
+      application: {},
+      http: {
+        basePath: {
+          get: jest.fn().mockReturnValue('/base-path'),
+        },
+      },
+    },
     docLinks: {
       links: {
         enterpriseSearch: {
@@ -58,6 +66,18 @@ jest.mock(
 jest.mock('../../../public/application/components/mappings_editor/mappings_state_context', () => ({
   useMappingsState: () => ({ inferenceToModelIdMap: {} }),
   useDispatch: () => mockDispatch,
+}));
+
+jest.mock('../../../public/application/services/api', () => ({
+  useLoadInferenceEndpoints: jest.fn().mockReturnValue({
+    data: [
+      { model_id: 'endpoint-1', task_type: 'text_embedding' },
+      { model_id: 'endpoint-2', task_type: 'sparse_embedding' },
+      { model_id: 'endpoint-3', task_type: 'completion' },
+    ] as InferenceAPIConfigResponse[],
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 function getTestForm(Component: React.FC<SelectInferenceIdProps>) {
@@ -107,5 +127,8 @@ describe('SelectInferenceId', () => {
     find('inferenceIdButton').simulate('click');
     expect(find('data-inference-endpoint-list').contains('e5')).toBe(true);
     expect(find('data-inference-endpoint-list').contains('elser_model_2')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('endpoint-1')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('endpoint-2')).toBe(true);
+    expect(find('data-inference-endpoint-list').contains('endpoint-3')).toBe(false);
   });
 });
