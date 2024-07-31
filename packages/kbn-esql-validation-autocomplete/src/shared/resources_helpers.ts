@@ -22,6 +22,10 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
       const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
       for (const field of fieldsOfType || []) {
         cacheFields.set(field.name, field);
+
+        // if (field.type !== 'unsupported') {
+        //   cacheFields.set(field.name, field);
+        // }
       }
     }
   };
@@ -35,12 +39,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
       return (
         Array.from(cacheFields.values())?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
-          return (
-            !ignored.includes(name) &&
-            ts
-              .filter((t) => t !== 'unsupported')
-              .some((t) => types[0] === 'any' || types.includes(t))
-          );
+          return !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t));
         }) || []
       );
     },

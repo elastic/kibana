@@ -461,10 +461,12 @@ export function checkFunctionArgMatchesDefinition(
     );
   }
   if (arg.type === 'inlineCast') {
+    const lowerArgType = argType?.toLowerCase();
+    const lowerArgCastType = arg.castType?.toLowerCase();
     return (
-      argType === arg.castType ||
+      lowerArgType === lowerArgCastType ||
       // for valid shorthand casts like 321.12::int or "false"::bool
-      (['int', 'bool'].includes(arg.castType) && argType.startsWith(arg.castType))
+      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
     );
   }
 }

@@ -1631,6 +1631,10 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | eval trim(23::keyword)', []);
       testErrorsAndWarnings('from a_index | eval 1 + "2"::long', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"::LONG', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"::Long', []);
+      testErrorsAndWarnings('from a_index | eval 1 + "2"::LoNg', []);
+
       testErrorsAndWarnings('from a_index | eval 1 + "2"', [
         // just a counter-case to make sure the previous test is meaningful
         'Argument of [+] must be [date_period], found value [1] type [integer]',
@@ -1642,13 +1646,16 @@ describe('validation logic', () => {
         ]
       );
 
-      // accepts elasticsearch subtypes and type aliases like int and keyword
-      // (once https://github.com/elastic/kibana/issues/174710 is done this won't be a special case anymore)
       testErrorsAndWarnings('from a_index | eval CEIL(23::long)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::unsigned_long)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::int)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::integer)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::Integer)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::double)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::DOUBLE)', []);
+      testErrorsAndWarnings('from a_index | eval CEIL(23::doubla)', [
+        'Argument of [ceil] must be [double], found value [23::doubla] type [doubla]"',
+      ]);
 
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
