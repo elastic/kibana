@@ -49,7 +49,6 @@ export function setupRoutes({
   defineGetCspBenchmarkRulesStatesRoute(router);
 
   core.http.registerOnPreRouting(async (request, response, toolkit) => {
-    // if (request.url.pathname === '/internal/cloud_security_posture/status') {
     if (request.url.pathname === STATUS_ROUTE_PATH) {
       try {
         const [coreStart, startDeps] = await core.getStartServices();
