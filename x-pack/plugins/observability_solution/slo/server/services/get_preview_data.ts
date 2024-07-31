@@ -43,7 +43,7 @@ interface Options {
   interval: string;
   instanceId?: string;
   remoteName?: string;
-  groupBy?: string;
+  groupBy?: string | string[];
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
@@ -516,15 +516,20 @@ export class GetPreviewData {
 
   private getGroupingsFilter(options: Options, filter: estypes.QueryDslQueryContainer[]) {
     const groupingsKeys = Object.keys(options.groupings || []);
+
     if (groupingsKeys.length) {
       groupingsKeys.forEach((key) => {
         filter.push({
           term: { [key]: options.groupings?.[key] },
         });
       });
-    } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
+    } else if (options.instanceId && options.instanceId !== ALL_VALUE && options.groupBy) {
+      const instanceIdPart = options.instanceId.split(',');
+      const groupByPart = Array.isArray(options.groupBy) ? options.groupBy : [options.groupBy];
+      groupByPart.forEach((groupBy, index) => {
+        filter.push({
+          term: { [groupBy]: instanceIdPart[index] },
+        });
       });
     }
   }

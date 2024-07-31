@@ -29,7 +29,7 @@ export function useGetPreviewData({
   remoteName,
 }: {
   isValid: boolean;
-  groupBy?: string;
+  groupBy?: string | string[];
   instanceId?: string;
   remoteName?: string;
   groupings?: Record<string, unknown>;

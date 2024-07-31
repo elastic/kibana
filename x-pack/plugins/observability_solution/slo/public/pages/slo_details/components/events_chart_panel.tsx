@@ -42,6 +42,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,
+    groupBy: slo.groupBy,
     indicator: slo.indicator,
     groupings: slo.groupings,
     instanceId: slo.instanceId,
