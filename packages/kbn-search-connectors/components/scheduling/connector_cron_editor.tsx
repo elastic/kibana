@@ -26,7 +26,7 @@ interface ConnectorCronEditorProps {
 export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
   dataTelemetryIdPrefix,
   disabled = false,
-  frequencyBlockList = ['MINUTE'],
+  frequencyBlockList = [],
   hasSyncTypeChanges,
   onReset,
   onSave,

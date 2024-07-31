@@ -42,6 +42,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 export interface TaskManagerSetupContract {
   /**
@@ -281,6 +282,8 @@ export class TaskManagerPlugin
         taskTypes: new Set(this.definitions.getAllTypes()),
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
+
+      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -292,6 +295,7 @@ export class TaskManagerPlugin
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         ...managedConfiguration,
+        taskPartitioner,
       });
 
       this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({

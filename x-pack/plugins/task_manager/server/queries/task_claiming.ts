@@ -27,6 +27,7 @@ import {
   ClaimOwnershipResult,
   getTaskClaimer,
 } from '../task_claimers';
+import { TaskPartitioner } from '../lib/task_partitioner';
 
 export type { ClaimOwnershipResult } from '../task_claimers';
 export interface TaskClaimingOpts {
@@ -38,6 +39,7 @@ export interface TaskClaimingOpts {
   maxAttempts: number;
   excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
+  taskPartitioner: TaskPartitioner;
 }
 
 export interface OwnershipClaimingOpts {
@@ -92,6 +94,7 @@ export class TaskClaiming {
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
   private readonly taskClaimer: TaskClaimerFn;
+  private readonly taskPartitioner: TaskPartitioner;
 
   /**
    * Constructs a new TaskStore.
@@ -111,6 +114,7 @@ export class TaskClaiming {
     this.unusedTypes = opts.unusedTypes;
     this.taskClaimer = getTaskClaimer(this.logger, opts.strategy);
     this.events$ = new Subject<TaskClaim>();
+    this.taskPartitioner = opts.taskPartitioner;
 
     this.logger.info(`using task claiming strategy: ${opts.strategy}`);
   }
@@ -178,6 +182,7 @@ export class TaskClaiming {
         taskMaxAttempts: this.taskMaxAttempts,
         excludedTaskTypes: this.excludedTaskTypes,
         logger: this.logger,
+        taskPartitioner: this.taskPartitioner,
       };
       return this.taskClaimer(opts).pipe(map((claimResult) => asOk(claimResult)));
     }

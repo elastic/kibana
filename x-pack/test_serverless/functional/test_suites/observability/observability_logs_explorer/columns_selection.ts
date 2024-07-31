@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await navigateToLogsExplorer();
     });
 
@@ -185,12 +185,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
           const logLevelChip = await cellElement.findByTestSubject('*logLevelBadge-');
-          await logLevelChip.click();
+
+          const actionSelector = 'dataTableCellAction_addToFilterAction_log.level';
+          // Open popover if not already open
+          if (!(await testSubjects.exists(actionSelector, { timeout: 0 }))) {
+            await logLevelChip.click();
+          }
 
           // Find Filter In button
-          const filterInButton = await testSubjects.find(
-            'dataTableCellAction_addToFilterAction_log.level'
-          );
+          const filterInButton = await testSubjects.find(actionSelector);
 
           await filterInButton.click();
           const rowWithLogLevelInfo = await testSubjects.findAll('*logLevelBadge-');
@@ -203,12 +206,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           const cellElement = await dataGrid.getCellElement(0, 4);
           const logLevelChip = await cellElement.findByTestSubject('*logLevelBadge-');
-          await logLevelChip.click();
+
+          const actionSelector = 'dataTableCellAction_removeFromFilterAction_log.level';
+          // Open popover if not already open
+          if (!(await testSubjects.exists(actionSelector, { timeout: 0 }))) {
+            await logLevelChip.click();
+          }
 
           // Find Filter Out button
-          const filterOutButton = await testSubjects.find(
-            'dataTableCellAction_removeFromFilterAction_log.level'
-          );
+          const filterOutButton = await testSubjects.find(actionSelector);
 
           await filterOutButton.click();
           await testSubjects.missingOrFail('*logLevelBadge-');
@@ -221,12 +227,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const serviceNameChip = await cellElement.findByTestSubject(
             'dataTablePopoverChip_service.name'
           );
-          await serviceNameChip.click();
+
+          const actionSelector = 'dataTableCellAction_addToFilterAction_service.name';
+          // Open popover if not already open
+          if (!(await testSubjects.exists(actionSelector, { timeout: 0 }))) {
+            await serviceNameChip.click();
+          }
 
           // Find Filter In button
-          const filterInButton = await testSubjects.find(
-            'dataTableCellAction_addToFilterAction_service.name'
-          );
+          const filterInButton = await testSubjects.find(actionSelector);
 
           await filterInButton.click();
           const rowWithLogLevelInfo = await testSubjects.findAll(

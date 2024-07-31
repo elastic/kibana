@@ -1,0 +1,55 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the Kibana API document
+  version: 0.0.1
+actions:
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
+  - target: '$.components.securitySchemes'
+    description: Add an API key security scheme
+    update:
+      apiKeyAuth:
+        in: header
+        name: Authorization
+        type: apiKey
+        description: You must create an API key and use the encoded value in the request header. To learn about creating keys, go to [API keys](https://www.elastic.co/guide/en/kibana/current/api-keys.html).
+  - target: '$.components.securitySchemes'
+    description: Add an basic security scheme
+    update:
+      basicAuth:
+        type: http
+        scheme: basic
+  - target: '$'
+    description: Add document-level security.
+    update:
+      security:
+        - apiKeyAuth: []
+        - basicAuth: []
+  - target: '$'
+    description: Add an extra page about spaces
+    update:
+      x-topics:
+        - title: Kibana spaces
+          content: |
+            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
+            You can use the default space or create your own spaces.
+
+            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
+            For example:
+
+            ```
+            curl -X GET "http://localhost:5601/s/marketing/api/data_views"
+            ```
+
+            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
+
+            To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/current/xpack-spaces.html).

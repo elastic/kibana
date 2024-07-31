@@ -73,7 +73,7 @@ export const SUPPORTED_TRAINED_MODELS = {
   },
 } as const;
 export type SupportedTrainedModelNamesType =
-  typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
+  (typeof SUPPORTED_TRAINED_MODELS)[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
 
 export interface TrainedModelVocabulary {
   vocabulary: string[];

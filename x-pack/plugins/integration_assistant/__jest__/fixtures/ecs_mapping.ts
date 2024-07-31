@@ -91,7 +91,7 @@ export const ecsMappingExpectedResults = {
           description: 'Ensures the date processor does not receive an array value.',
           lang: 'painless',
           source:
-            'if (ctx.mysql_enterprise.audit.timestamp instanceof ArrayList){\n    ctx.mysql_enterprise.audit.timestamp = ctx.mysql_enterprise.audit.timestamp[0];\n}\n',
+            'if (ctx.mysql_enterprise?.audit?.timestamp != null &&\n    ctx.mysql_enterprise.audit.timestamp instanceof ArrayList){\n    ctx.mysql_enterprise.audit.timestamp = ctx.mysql_enterprise.audit.timestamp[0];\n}\n',
           tag: 'script_convert_array_to_string',
         },
       },

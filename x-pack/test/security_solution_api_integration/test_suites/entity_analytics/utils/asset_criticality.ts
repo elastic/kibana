@@ -23,7 +23,7 @@ import {
 import type {
   AssetCriticalityRecord,
   CreateAssetCriticalityRecord,
-  ListAssetCriticalityQueryParams,
+  FindAssetCriticalityRecordsRequestQuery,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -187,7 +187,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .expect(expectStatusCode);
   },
   list: async (
-    opts: ListAssetCriticalityQueryParams = {},
+    opts: FindAssetCriticalityRecordsRequestQuery = {},
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
     const qs = querystring.stringify(opts);

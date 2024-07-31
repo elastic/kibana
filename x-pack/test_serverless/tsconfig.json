@@ -2,10 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "rootDirs": [
-      ".",
-      "../test"
-    ],
     "types": [
       "node",
       "@kbn/ambient-ftr-types",
@@ -27,9 +23,7 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
-    {
-      "path": "../test/tsconfig.json"
-    },
+    "@kbn/test-suites-xpack",
     "@kbn/expect",
     "@kbn/test",
     "@kbn/repo-info",
@@ -105,5 +99,6 @@
     "@kbn/features-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/ml-trained-models-utils",
+    "@kbn/test-suites-src",
   ]
 }

@@ -14,7 +14,7 @@ import {
   EXPAND_SETTING_NAME,
   STACK_BY_SETTING_NAME,
   TREEMAP_CATEGORY,
-} from '../../../detections/pages/detection_engine/chart_panels/alerts_local_storage/constants';
+} from '../../../detections/components/alerts_kpis/chart_panels/alerts_local_storage/constants';
 import { getSettingKey, isDefaultWhenEmptyString } from './helpers';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { useLocalStorage } from '.';

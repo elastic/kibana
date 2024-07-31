@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  description: ''
+  title: Security Solution Entity Analytics API (Elastic Cloud Serverless)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/asset_criticality:
+    delete:
+      operationId: DeleteAssetCriticalityRecord
+      parameters:
+        - description: The ID value of the asset.
+          in: query
+          name: id_value
+          required: true
+          schema:
+            type: string
+        - description: The field representing the ID.
+          example: host.name
+          in: query
+          name: id_field
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdField'
+        - description: If 'wait_for' the request will wait for the index refresh.
+          in: query
+          name: refresh
+          required: false
+          schema:
+            enum:
+              - wait_for
+            type: string
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Delete Criticality Record
+    get:
+      operationId: GetAssetCriticalityRecord
+      parameters:
+        - description: The ID value of the asset.
+          in: query
+          name: id_value
+          required: true
+          schema:
+            type: string
+        - description: The field representing the ID.
+          example: host.name
+          in: query
+          name: id_field
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdField'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityRecord'
+          description: Successful response
+        '400':
+          description: Invalid request
+        '404':
+          description: Criticality record not found
+      summary: Get Criticality Record
+    post:
+      operationId: CreateAssetCriticalityRecord
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+                - type: object
+                  properties:
+                    refresh:
+                      description: >-
+                        If 'wait_for' the request will wait for the index
+                        refresh.
+                      enum:
+                        - wait_for
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCriticalityRecord'
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Create Criticality Record
+  /api/asset_criticality/bulk:
+    post:
+      operationId: BulkUpsertAssetCriticalityRecords
+      requestBody:
+        content:
+          application/json:
+            schema:
+              example:
+                records:
+                  - criticality_level: low_impact
+                    id_field: host.name
+                    id_value: host-1
+                  - criticality_level: medium_impact
+                    id_field: host.name
+                    id_value: host-2
+              type: object
+              properties:
+                records:
+                  items:
+                    $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - records
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                example:
+                  errors:
+                    - index: 0
+                      message: Invalid ID field
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
+                type: object
+                properties:
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/AssetCriticalityBulkUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/AssetCriticalityBulkUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: >-
+        Bulk upsert asset criticality data, creating or updating records as
+        needed
+  /api/asset_criticality/list:
+    post:
+      operationId: FindAssetCriticalityRecords
+      parameters:
+        - description: The field to sort by.
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            enum:
+              - id_value
+              - id_field
+              - criticality_level
+              - \@timestamp
+            type: string
+        - description: The order to sort by.
+          in: query
+          name: sort_direction
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: The page number to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - description: The number of records to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 1000
+            minimum: 1
+            type: integer
+        - description: The kuery to filter by.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    minimum: 1
+                    type: integer
+                  per_page:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+                  records:
+                    items:
+                      $ref: '#/components/schemas/AssetCriticalityRecord'
+                    type: array
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total
+          description: Bulk upload successful
+      summary: 'List asset criticality data, filtering and sorting as needed'
+components:
+  schemas:
+    AssetCriticalityBulkUploadErrorItem:
+      type: object
+      properties:
+        index:
+          type: integer
+        message:
+          type: string
+      required:
+        - message
+        - index
+    AssetCriticalityBulkUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
+    AssetCriticalityLevel:
+      description: The criticality level of the asset.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+      type: string
+    AssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - type: object
+          properties:
+            '@timestamp':
+              description: The time the record was created or updated.
+              example: '2017-07-21T17:32:28Z'
+              format: date-time
+              type: string
+          required:
+            - '@timestamp'
+    AssetCriticalityRecordIdParts:
+      type: object
+      properties:
+        id_field:
+          $ref: '#/components/schemas/IdField'
+          description: The field representing the ID.
+          example: host.name
+        id_value:
+          description: The ID value of the asset.
+          type: string
+      required:
+        - id_value
+        - id_field
+    CreateAssetCriticalityRecord:
+      allOf:
+        - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+        - type: object
+          properties:
+            criticality_level:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality_level
+    IdField:
+      enum:
+        - host.name
+        - user.name
+      type: string
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []

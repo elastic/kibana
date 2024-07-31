@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
@@ -16,27 +15,28 @@ import {
   EuiFormRow,
   EuiPanel,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { InputType } from '../../../../../../common';
 import { useActions, type State } from '../../state';
 import type { IntegrationSettings } from '../../types';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { SampleLogsInput } from './sample_logs_input';
 import type { OnComplete } from './generation_modal';
 import { GenerationModal } from './generation_modal';
-import { useLoadPackageNames } from './use_load_package_names';
+import { SampleLogsInput } from './sample_logs_input';
 import * as i18n from './translations';
+import { useLoadPackageNames } from './use_load_package_names';
 
 export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
-  { value: 'aws_cloudwatch', label: 'AWS Cloudwatch' },
-  { value: 'aws_s3', label: 'AWS S3' },
-  { value: 'azure_blob_storage', label: 'Azure Blob Storage' },
-  { value: 'azure_eventhub', label: 'Azure Event Hub' },
+  { value: 'aws-cloudwatch', label: 'AWS Cloudwatch' },
+  { value: 'aws-s3', label: 'AWS S3' },
+  { value: 'azure-blob-storage', label: 'Azure Blob Storage' },
+  { value: 'azure-eventhub', label: 'Azure Event Hub' },
   { value: 'cel', label: 'Common Expression Language (CEL)' },
   { value: 'cloudfoundry', label: 'Cloud Foundry' },
   { value: 'filestream', label: 'File Stream' },
-  { value: 'gcp_pubsub', label: 'GCP Pub/Sub' },
+  { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
   { value: 'gcs', label: 'Google Cloud Storage' },
-  { value: 'http_endpoint', label: 'HTTP Endpoint' },
+  { value: 'http-endpoint', label: 'HTTP Endpoint' },
   { value: 'journald', label: 'Journald' },
   { value: 'kafka', label: 'Kafka' },
   { value: 'tcp', label: 'TCP' },

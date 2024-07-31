@@ -77,16 +77,16 @@ export const Pipeline = z.object({
  */
 export type InputType = z.infer<typeof InputType>;
 export const InputType = z.enum([
-  'aws_cloudwatch',
-  'aws_s3',
-  'azure_blob_storage',
-  'azure_eventhub',
+  'aws-cloudwatch',
+  'aws-s3',
+  'azure-blob-storage',
+  'azure-eventhub',
   'cel',
   'cloudfoundry',
   'filestream',
-  'gcp_pubsub',
+  'gcp-pubsub',
   'gcs',
-  'http_endpoint',
+  'http-endpoint',
   'journald',
   'kafka',
   'tcp',

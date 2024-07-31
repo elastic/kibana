@@ -36,6 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover esql view', async function () {
+    // see details: https://github.com/elastic/kibana/issues/188816
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
@@ -111,11 +114,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
       });
 
-      it('should render the histogram for indices with no @timestamp field when the ?earliest, ?latest params are in the query', async function () {
+      it('should render the histogram for indices with no @timestamp field when the ?start, ?end params are in the query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?earliest and timestamp <= ?latest`;
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?start and timestamp <= ?end`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
