@@ -185,9 +185,9 @@
               "{ application: { navigateToUrl: (url: string, options?: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToUrlOptions",
+                "section": "def-public.NavigateToUrlOptions",
                 "text": "NavigateToUrlOptions"
               },
               " | undefined) => Promise<void>; }; chrome: { recentlyAccessed: { get$: () => ",
@@ -195,9 +195,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeRecentlyAccessedHistoryItem",
+                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
                 "text": "ChromeRecentlyAccessedHistoryItem"
               },
               "[]>; }; navLinks: { getNavLinks$: () => ",
@@ -205,9 +205,9 @@
               "<readonly ",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeNavLink",
+                "section": "def-public.ChromeNavLink",
                 "text": "ChromeNavLink"
               },
               "[]>; }; getIsSideNavCollapsed$: () => ",
@@ -232,9 +232,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]>"
@@ -285,9 +285,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeRecentlyAccessedHistoryItem",
+                "section": "def-public.ChromeRecentlyAccessedHistoryItem",
                 "text": "ChromeRecentlyAccessedHistoryItem"
               },
               "[]>"
@@ -318,9 +318,9 @@
               "(url: string, options?: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToUrlOptions",
+                "section": "def-public.NavigateToUrlOptions",
                 "text": "NavigateToUrlOptions"
               },
               " | undefined) => Promise<void>"
@@ -351,9 +351,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToUrlOptions",
+                    "section": "def-public.NavigateToUrlOptions",
                     "text": "NavigateToUrlOptions"
                   },
                   " | undefined"
@@ -376,9 +376,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]>"
@@ -443,9 +443,9 @@
               "Pick<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\"> & { title: React.ReactNode; }"
@@ -466,9 +466,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
+                "section": "def-public.ChromeProjectNavigationNode",
                 "text": "ChromeProjectNavigationNode"
               },
               "[][]"
@@ -553,9 +553,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.NavigationTreeDefinitionUI",
+                "section": "def-public.NavigationTreeDefinitionUI",
                 "text": "NavigationTreeDefinitionUI"
               },
               ">"

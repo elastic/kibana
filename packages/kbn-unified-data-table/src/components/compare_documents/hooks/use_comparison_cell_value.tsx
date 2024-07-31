@@ -39,7 +39,7 @@ export interface UseComparisonCellValueProps {
   dataView: DataView;
   comparisonFields: string[];
   fieldColumnId: string;
-  selectedDocs: string[];
+  selectedDocIds: string[];
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
@@ -50,13 +50,13 @@ export const useComparisonCellValue = ({
   dataView,
   comparisonFields,
   fieldColumnId,
-  selectedDocs,
+  selectedDocIds,
   diffMode,
   fieldFormats,
   getDocById,
   additionalFieldGroups,
 }: UseComparisonCellValueProps) => {
-  const baseDocId = selectedDocs[0];
+  const baseDocId = selectedDocIds[0];
   const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
   const [calculateDiffMemoized] = useState(() => createCalculateDiffMemoized());
 
@@ -92,7 +92,7 @@ export const useComparisonCellValue = ({
   );
 };
 
-type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocs'> &
+type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
   EuiDataGridCellValueElementProps & {
     baseDocId: string;
     baseDoc: DataTableRecord['flattened'] | undefined;

@@ -105,15 +105,13 @@ export const ReactEmbeddableRenderer = <
         const setApi = (
           apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
         ) => {
-          const fullApi = {
+          return {
             ...apiRegistration,
             uuid,
             phase$,
             parentApi,
             type: factory.type,
           } as unknown as Api;
-          onApiAvailable?.(fullApi);
-          return fullApi;
         };
 
         const buildEmbeddable = async () => {
@@ -194,6 +192,7 @@ export const ReactEmbeddableRenderer = <
 
         try {
           const { api, Component } = await buildEmbeddable();
+          onApiAvailable?.(api);
           return React.forwardRef<typeof api>((_, ref) => {
             // expose the api into the imperative handle
             useImperativeHandle(ref, () => api, []);
