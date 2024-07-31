@@ -77,6 +77,7 @@ export const useInsightQuery = ({
     ...(relativeTimerange
       ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
       : {}),
+    fetchNotes: false,
   });
 
   const isQueryLoading = useMemo(
