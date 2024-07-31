@@ -149,6 +149,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     submitEditedExceptionItem();
     goToAlertsTab();
 
-    cy.get(ALERTS_COUNT).should('contain', '0');
+    cy.get(ALERTS_COUNT).should('not.exist');
   });
 });
