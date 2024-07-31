@@ -37,7 +37,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
   const [inferenceServices, setInferenceServices] = useState<EuiSelectOption[]>([]);
   const [selectedInference, setSelectedInference] = useState<string | undefined>();
   const [selectedFieldOption, setSelectedFieldOption] = useState<string | undefined>();
-  const [renameToFieldOption, setRenameToFieldOption] = useState<string | undefined>();
+  const [renameToFieldOption, setRenameToFieldOption] = useState<string>('');
   const [fieldError, setFieldError] = useState<string | undefined>();
 
   const fieldOptions = useMemo(
@@ -171,7 +171,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
             )}
             value={renameToFieldOption}
             onChange={(e) => setRenameToFieldOption(e.target.value)}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label="field name"
           />
         </EuiFormRow>
       ) : null}
