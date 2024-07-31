@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
+import type { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {

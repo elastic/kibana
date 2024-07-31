@@ -62,7 +62,7 @@ export function GetStartedPanel({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             {dashboardLinks.map(({ id, label, title }) => (
-              <EuiFlexItem>
+              <EuiFlexItem key={id}>
                 <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
                   <EuiText key={id} size="s">
                     <p>{title}</p>

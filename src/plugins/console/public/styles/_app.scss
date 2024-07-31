@@ -131,7 +131,7 @@
  * The highlighting for the selected requests in the monaco editor
  */
 .console__monaco_editor__selectedRequests {
-  background: transparentize($euiColorLightShade, .3);
+  background: transparentize($euiColorPrimary, .9);
 }
 /*
  * The z-index for the autocomplete suggestions popup

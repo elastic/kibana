@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -18,27 +17,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
 import { AddNoteUI } from '../add_note_ui';
 import { AddObservationUI } from '../add_observation_ui';
+import { InvestigateSearchBar } from '../investigate_search_bar';
 import { InvestigateWidgetGrid } from '../investigate_widget_grid';
-
-const containerClassName = css`
-  overflow: auto;
-  padding: 24px 24px 24px 24px;
-`;
-
-const scrollContainerClassName = css`
-  min-width: 1px;
-`;
-
-const gridContainerClassName = css`
-  position: relative;
-`;
-
-const sideBarClassName = css`
-  width: 240px;
-  position: sticky;
-  top: 0;
-  padding: 0px 12px 32px 12px;
-`;
 
 function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const {
@@ -47,10 +27,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       start: { investigate },
     },
   } = useKibana();
-
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
-
   const [range, setRange] = useDateRange();
+  const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   const {
     addItem,
@@ -61,6 +40,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     investigation,
     lockItem,
     setItemParameters,
+    setGlobalParameters,
     unlockItem,
     revision,
   } = investigate.useInvestigation({
@@ -76,7 +56,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   };
 
   const createWidgetRef = useRef(createWidget);
-
   createWidgetRef.current = createWidget;
 
   useEffect(() => {
@@ -138,18 +117,41 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     });
   }, [revision, widgetDefinitions, uiSettings]);
 
-  const [searchBarFocused] = useState(false);
-
   if (!investigation || !revision || !gridItems) {
     return <EuiLoadingSpinner />;
   }
 
   return (
-    <EuiFlexGroup direction="row" className={containerClassName}>
-      <EuiFlexItem grow className={scrollContainerClassName}>
-        <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexEnd">
+    <EuiFlexGroup direction="row">
+      <EuiFlexItem grow={8}>
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem className={gridContainerClassName} grow={false}>
+            <EuiFlexItem>
+              <InvestigateSearchBar
+                rangeFrom={range.from}
+                rangeTo={range.to}
+                onQuerySubmit={async ({ dateRange }) => {
+                  const nextDateRange = {
+                    from: datemath.parse(dateRange.from)!.toISOString(),
+                    to: datemath.parse(dateRange.to)!.toISOString(),
+                  };
+                  await setGlobalParameters({
+                    ...revision.parameters,
+                    timeRange: nextDateRange,
+                  });
+
+                  setRange(nextDateRange);
+                }}
+                onFocus={() => {
+                  setSearchBarFocused(true);
+                }}
+                onBlur={() => {
+                  setSearchBarFocused(false);
+                }}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
                 items={gridItems}
                 onItemsChange={async (nextGridItems) => {
@@ -189,17 +191,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AddNoteUI
-                user={user}
-                filters={revision.parameters.filters}
-                timeRange={revision.parameters.timeRange}
-                onWidgetAdd={(widget) => {
-                  return createWidgetRef.current(widget);
-                }}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
+
           <AddObservationUI
             filters={revision.parameters.filters}
             timeRange={revision.parameters.timeRange}
@@ -210,11 +203,15 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false} className={sideBarClassName}>
-        {i18n.translate(
-          'xpack.investigateApp.investigateViewWithUser.placeholderForRightSidebarFlexItemLabel',
-          { defaultMessage: 'placeholder for right sidebar' }
-        )}
+      <EuiFlexItem grow={2}>
+        <AddNoteUI
+          user={user}
+          filters={revision.parameters.filters}
+          timeRange={revision.parameters.timeRange}
+          onWidgetAdd={(widget) => {
+            return createWidgetRef.current(widget);
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
