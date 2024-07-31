@@ -6,10 +6,10 @@
  */
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
+import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, omit, pick } from 'lodash';
+import { keyBy, noop, omit, pick } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
@@ -49,24 +49,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     to: range.end.toISOString(),
   });
 
-  const [_editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
-
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
     return addItem(widgetCreate);
   };
 
   const createWidgetRef = useRef(createWidget);
   createWidgetRef.current = createWidget;
-
-  useEffect(() => {
-    const itemIds = revision?.items.map((item) => item.id) ?? [];
-    setEditingItem((prevEditingItem) => {
-      if (prevEditingItem && !itemIds.includes(prevEditingItem.id)) {
-        return undefined;
-      }
-      return prevEditingItem;
-    });
-  }, [revision]);
 
   useEffect(() => {
     if (
@@ -91,11 +79,11 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
 
-    return revision?.items.map((item) => {
-      const definitionForType = widgetDefinitionsByType[item.type];
+    return (
+      revision?.items.map((item) => {
+        const definitionForType = widgetDefinitionsByType[item.type];
 
-      return (
-        {
+        return {
           title: item.title,
           description: item.description ?? '',
           id: item.id,
@@ -112,9 +100,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
               )
             : [],
-        } ?? []
-      );
-    });
+        };
+      }) ?? []
+    );
   }, [revision, widgetDefinitions, uiSettings]);
 
   if (!investigation || !revision || !gridItems) {
@@ -187,7 +175,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                   }
                 }}
                 onItemEditClick={(itemToEdit) => {
-                  setEditingItem(revision.items.find((item) => item.id === itemToEdit.id));
+                  noop();
                 }}
               />
             </EuiFlexItem>
