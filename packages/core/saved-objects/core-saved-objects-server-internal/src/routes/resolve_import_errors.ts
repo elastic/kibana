@@ -40,6 +40,8 @@ export const registerResolveImportErrorsRoute = (
         summary: `Resolve import errors`,
         tags: ['oas-tag:saved objects'],
         access: 'public',
+        description:
+          'To resolve errors from the import objects API, you can retry certain saved objects, overwrite specific saved objects, and change references to different saved objects',
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
