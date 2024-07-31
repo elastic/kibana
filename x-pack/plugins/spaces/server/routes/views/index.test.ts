@@ -107,7 +107,7 @@ describe('Enter Space view routes', () => {
     });
   });
 
-  const testCase = async (
+  const testCase = (
     description: string,
     {
       query,
