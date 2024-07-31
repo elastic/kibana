@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/router-to-openapispec",
-        "id": "def-common.generateOpenApiDocument",
+        "id": "def-server.generateOpenApiDocument",
         "type": "Function",
         "tags": [],
         "label": "generateOpenApiDocument",
@@ -32,17 +24,17 @@
           "<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
+            "section": "def-server.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
           ">[]; versionedRouters: ",
           {
             "pluginId": "@kbn/core-http-router-server-internal",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
-            "section": "def-common.CoreVersionedRouter",
+            "section": "def-server.CoreVersionedRouter",
             "text": "CoreVersionedRouter"
           },
           "[]; }, opts: ",
@@ -57,7 +49,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/router-to-openapispec",
-            "id": "def-common.generateOpenApiDocument.$1",
+            "id": "def-server.generateOpenApiDocument.$1",
             "type": "Object",
             "tags": [],
             "label": "appRouters",
@@ -68,7 +60,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/router-to-openapispec",
-                "id": "def-common.generateOpenApiDocument.$1.routers",
+                "id": "def-server.generateOpenApiDocument.$1.routers",
                 "type": "Array",
                 "tags": [],
                 "label": "routers",
@@ -78,9 +70,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.RequestHandlerContextBase",
+                    "section": "def-server.RequestHandlerContextBase",
                     "text": "RequestHandlerContextBase"
                   },
                   ">[]"
@@ -91,7 +83,7 @@
               },
               {
                 "parentPluginId": "@kbn/router-to-openapispec",
-                "id": "def-common.generateOpenApiDocument.$1.versionedRouters",
+                "id": "def-server.generateOpenApiDocument.$1.versionedRouters",
                 "type": "Array",
                 "tags": [],
                 "label": "versionedRouters",
@@ -99,9 +91,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-router-server-internal",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
-                    "section": "def-common.CoreVersionedRouter",
+                    "section": "def-server.CoreVersionedRouter",
                     "text": "CoreVersionedRouter"
                   },
                   "[]"
@@ -114,7 +106,7 @@
           },
           {
             "parentPluginId": "@kbn/router-to-openapispec",
-            "id": "def-common.generateOpenApiDocument.$2",
+            "id": "def-server.generateOpenApiDocument.$2",
             "type": "Object",
             "tags": [],
             "label": "opts",
@@ -132,6 +124,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
