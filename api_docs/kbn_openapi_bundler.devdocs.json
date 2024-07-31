@@ -211,7 +211,7 @@
             "signature": [
               "{ mergedSpecInfo?: Partial<",
               "OpenAPIV3",
-              ".InfoObject> | undefined; conflictsResolution?: { prependComponentsWith: \"title\"; } | undefined; } | undefined"
+              ".InfoObject> | undefined; } | undefined"
             ],
             "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,

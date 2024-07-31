@@ -140,12 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         request_capacity: 1000,
-        capacity: {
-          config: 10,
-          as_workers: 10,
-          as_cost: 20,
-        },
-        claim_strategy: 'default',
+        max_workers: 10,
       });
     });
 
