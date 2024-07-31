@@ -7,7 +7,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
+import type {
+  FindFileStructureResponse,
+  IngestPipeline,
+} from '@kbn/file-upload-plugin/common/types';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -21,6 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
+import type {
+  InferenceModelConfigContainer,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createSemanticTextCombinedField, getFieldNames, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';
@@ -54,13 +61,13 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   useEffect(() => {
     http
-      .fetch<any>('/internal/data_visualizer/inference_services', {
+      .fetch<InferenceModelConfigContainer[]>('/internal/data_visualizer/inference_services', {
         method: 'GET',
         version: '1',
       })
       .then((response) => {
         setInferenceServices(
-          response.map((service: any) => ({ value: service.model_id, text: service.model_id }))
+          response.map((service) => ({ value: service.model_id, text: service.model_id }))
         );
       });
   }, [http]);
@@ -88,19 +95,20 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
     }
     addCombinedField(
       createSemanticTextCombinedField(renameToFieldOption, selectedFieldOption),
-      (mappings: any) => {
+      (mappings: MappingTypeMapping) => {
         if (renameToFieldOption === undefined || selectedFieldOption === undefined) {
           return mappings;
         }
 
         const newMappings = cloneDeep(mappings);
-        newMappings.properties[renameToFieldOption ?? selectedFieldOption] = {
+        newMappings.properties![renameToFieldOption ?? selectedFieldOption] = {
+          // @ts-ignore types are missing semantic_text
           type: 'semantic_text',
           inference_id: selectedInference,
         };
         return newMappings;
       },
-      (pipeline: any) => {
+      (pipeline: IngestPipeline) => {
         const newPipeline = cloneDeep(pipeline);
         if (renameToFieldOption !== null) {
           newPipeline.processors.push({

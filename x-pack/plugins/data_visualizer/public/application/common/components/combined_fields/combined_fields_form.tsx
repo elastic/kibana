@@ -19,7 +19,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { SemanticTextForm } from './semantic_text';
@@ -43,8 +44,8 @@ interface State {
 
 export type AddCombinedField = (
   combinedField: CombinedField,
-  addToMappings: (mappings: any) => any,
-  addToPipeline: (pipeline: any) => any
+  addToMappings: (mappings: MappingTypeMapping) => MappingTypeMapping,
+  addToPipeline: (pipeline: IngestPipeline) => IngestPipeline
 ) => void;
 
 export class CombinedFieldsForm extends Component<Props, State> {
@@ -66,8 +67,8 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
   addCombinedField = (
     combinedField: CombinedField,
-    addToMappings: (mappings: any) => {},
-    addToPipeline: (pipeline: any) => {}
+    addToMappings: (mappings: MappingTypeMapping) => {},
+    addToPipeline: (pipeline: IngestPipeline) => {}
   ) => {
     const mappings = this.parseMappings();
     const pipeline = this.parsePipeline();
