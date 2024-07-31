@@ -9,3 +9,4 @@
 export { HostDetailsButton } from './src/cells/renderers/host';
 
 export * from './src/flyout';
+export * from './src/cells/renderers';

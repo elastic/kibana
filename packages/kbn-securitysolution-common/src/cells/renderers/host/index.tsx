@@ -6,24 +6,5 @@
  * Side Public License, v 1.
  */
 
-import React, { SyntheticEvent } from 'react';
-import { EuiLink } from '@elastic/eui';
-
-interface HostDetailsButtonProps {
-  children?: React.ReactNode;
-  value?: string;
-  onClick?: (e: SyntheticEvent) => void;
-  title?: string;
-}
-
-export const HostDetailsButton: React.FC<HostDetailsButtonProps> = ({
-  children,
-  onClick,
-  title,
-}) => {
-  return (
-    <EuiLink data-test-subj="host-details-button" onClick={onClick} title={title ?? 'Host Details'}>
-      {children}
-    </EuiLink>
-  );
-};
+export * from './button';
+export * from './with_flyout';

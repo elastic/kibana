@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import React from 'react';
 import {
   FlyoutBody,
@@ -16,22 +17,20 @@ import {
 // import { getEntityTableColumns } from './columns';
 // import type { BasicEntityData, EntityTableRows } from './types';
 
-interface HostRightPanelProps {
-  contextID: string;
+export interface HostRightPanelParamProps extends Record<string, unknown> {
   hostName: string;
-  scopeId: string;
-  isDraggable: false;
 }
 
-export const HostRightPanel = (props: HostRightPanelProps) => {
-  console.log({ props });
-  // const columns = useMemo(() => getEntityTableColumns(), []);
-  // const rows = useMemo(() => getEntityTableRows(), []);
+export interface HostRightPanelProps extends FlyoutPanelProps {
+  key: 'host';
+  params: HostRightPanelParamProps;
+}
 
+export const HostRightPanel = (props: HostRightPanelParamProps) => {
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={true} />
-      <FlyoutHeader>{'Host Flyout Header'}</FlyoutHeader>
+      <FlyoutHeader>{`Host Flyout Header - ${props.hostName}`}</FlyoutHeader>
       <FlyoutBody>{'Host Flyout'}</FlyoutBody>
       <FlyoutFooter>{'Host Flyout Footer'}</FlyoutFooter>
     </>

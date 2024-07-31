@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { HostDetailsButton, DiscoverFlyout } from '@kbn/securitysolution-common';
-import React, { PropsWithChildren, useCallback } from 'react';
-import { ExpandableFlyoutProvider, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import React from 'react';
+import { getDiscoverCellRenderer } from '@kbn/securitysolution-common';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
@@ -22,50 +20,18 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
     getCellRenderers: (prev) => () => ({
       ...prev(),
       'host.name': (props) => {
-        const value = getFieldValue(props.row, 'host.name');
-
-        return (
-          <ExpandableFlyoutProvider>
-            <HostDetailsWithFlyout>{value}</HostDetailsWithFlyout>{' '}
-          </ExpandableFlyoutProvider>
-        );
+        const CellRenderer = getDiscoverCellRenderer({
+          fieldName: 'host.name',
+        });
+        return <CellRenderer {...props} />;
       },
     }),
   },
   resolve: (params) => {
     if (params.solutionNavId === SolutionType.Security) {
-      return { isMatch: true, context: { solutionType: SolutionType.Default } };
+      return { isMatch: true, context: { solutionType: SolutionType.Security } };
     }
 
     return { isMatch: false };
   },
 });
-
-const HostDetailsWithFlyout = ({ children }: PropsWithChildren<{ value?: string }>) => {
-  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
-
-  const onClick = useCallback(() => {
-    openFlyout({
-      right: {
-        id: 'host',
-        params: {
-          contextID: 'host',
-          hostName: '',
-          scopeId: '',
-          isDraggable: false,
-        },
-      },
-    });
-  }, [openFlyout]);
-
-  return (
-    <>
-      <DiscoverFlyout /> <HostDetailsButton onClick={onClick}>{children}</HostDetailsButton>
-    </>
-  );
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
-};

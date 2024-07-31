@@ -48,6 +48,7 @@ export {
   getLogLevelCoalescedValueLabel,
   LogLevelCoalescedValue,
   LogLevelBadge,
+  getFieldValue,
 } from './src';
 
 export type { LogsContextService } from './src';

@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { HostRightPanel } from './host/right';
+export * from './host/right';
+export * from './keys';
