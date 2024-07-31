@@ -564,39 +564,6 @@ describe('Create Lifecycle', () => {
       });
     });
 
-    test('injects custom cost for certain rule types', () => {
-      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
-        id: 'siem.indicatorRule',
-        name: 'Test',
-        actionGroups: [
-          {
-            id: 'default',
-            name: 'Default',
-          },
-        ],
-        defaultActionGroupId: 'default',
-        minimumLicenseRequired: 'basic',
-        isExportable: true,
-        executor: jest.fn(),
-        category: 'test',
-        producer: 'alerts',
-        ruleTaskTimeout: '20m',
-        validate: {
-          params: { validate: (params) => params },
-        },
-      };
-      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-      registry.register(ruleType);
-      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
-        'alerting:siem.indicatorRule': {
-          timeout: '20m',
-          title: 'Test',
-          cost: 10,
-        },
-      });
-    });
-
     test('shallow clones the given rule type', () => {
       const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: 'test',

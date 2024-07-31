@@ -21,10 +21,8 @@ import {
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import type {
-  BrowserFields,
-  RuleRegistrySearchRequestPagination,
-} from '@kbn/rule-registry-plugin/common';
+import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import type { BrowserFields } from '@kbn/alerting-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   QueryDslQueryContainer,
@@ -297,7 +295,7 @@ const AlertsTableStateWithQueryProvider = memo(
       storage,
       id,
       defaultColumns: columnConfigByClient,
-      initialBrowserFields: propBrowserFields,
+      browserFields: propBrowserFields,
     });
 
     const [queryParams, setQueryParams] = useState({

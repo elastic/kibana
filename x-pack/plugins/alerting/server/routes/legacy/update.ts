@@ -56,6 +56,11 @@ export const updateAlertRoute = (
         body: bodySchema,
         params: paramSchema,
       },
+      options: {
+        summary: 'Update an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {

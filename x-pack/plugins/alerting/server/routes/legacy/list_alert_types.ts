@@ -20,6 +20,11 @@ export const listAlertTypesRoute = (
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`,
       validate: {},
+      options: {
+        summary: 'Get the alert types',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);
