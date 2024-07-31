@@ -26,6 +26,7 @@ import {
   type EuiTextProps,
   EuiToolTip,
   EuiToolTipProps,
+  type CommonProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
@@ -50,15 +51,14 @@ const CounterButtonLink = ({
   text,
   count,
   color,
-  testSubj,
+  'data-test-subj': dataTestSubj,
   onClick,
 }: {
   count: number;
   text: string;
   color: EuiTextProps['color'];
-  testSubj: string;
   onClick: EuiLinkButtonProps['onClick'];
-}) => {
+} & Pick<CommonProps, 'data-test-subj'>) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -76,7 +76,7 @@ const CounterButtonLink = ({
       <EuiLink
         color="text"
         onClick={onClick}
-        data-test-subj={testSubj}
+        data-test-subj={dataTestSubj}
         css={css`
           display: flex;
           &:hover {
@@ -151,7 +151,7 @@ const PercentageLabels = ({
           text="Passed Findings"
           count={stats.totalPassed}
           color={statusColors.passed}
-          testSubj="dashboard-summary-passed-findings"
+          data-test-subj="dashboard-summary-passed-findings"
           onClick={() => onEvalCounterClick(RULE_PASSED)}
         />
       </EuiFlexItem>
@@ -160,7 +160,7 @@ const PercentageLabels = ({
           text="Failed Findings"
           count={stats.totalFailed}
           color={statusColors.failed}
-          testSubj="dashboard-summary-failed-findings"
+          data-test-subj="dashboard-summary-failed-findings"
           onClick={() => onEvalCounterClick(RULE_FAILED)}
         />
       </EuiFlexItem>
