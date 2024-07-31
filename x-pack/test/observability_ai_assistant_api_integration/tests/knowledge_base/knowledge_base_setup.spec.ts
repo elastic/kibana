@@ -13,43 +13,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('/internal/observability_ai_assistant/kb/status', () => {
-    before(async () => {
+  describe('/internal/observability_ai_assistant/kb/setup', () => {
+    it('returns empty object when successful', async () => {
       await createKnowledgeBaseModel(ml);
-      await observabilityAIAssistantAPIClient
+      const res = await observabilityAIAssistantAPIClient
         .editorUser({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(200);
-    });
-
-    after(async () => {
+      expect(res.body).to.eql({});
       await deleteKnowledgeBaseModel(ml);
     });
 
-    it('returns correct status after knowledge base is setup', async () => {
+    it('returns bad request if model cannot be installed', async () => {
       const res = await observabilityAIAssistantAPIClient
         .editorUser({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
-        .expect(200);
-      expect(res.body.deployment_state).to.eql('started');
-      expect(res.body.model_name).to.eql(TINY_ELSER.id);
-    });
-
-    it('returns correct status after elser is stopped', async () => {
-      await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-
-      const res = await observabilityAIAssistantAPIClient
-        .editorUser({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
-        })
-        .expect(200);
-
-      expect(res.body).to.eql({
-        ready: false,
-        model_name: TINY_ELSER.id,
-      });
+        .expect(400);
+      expect(res.body).to.have.property('message', `Failed to create model ${TINY_ELSER.id}`);
     });
   });
 }
