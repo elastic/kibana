@@ -17,6 +17,11 @@ export function parseCliOptions(): CliOptions {
     .description(
       'A script to start Fleet Server, enroll Elastic Agent, and create a Synthetics private location'
     )
+    .option(
+      '--elasticsearch-host <address>',
+      'The address to the Elasticsearch cluster',
+      DEFAULTS.ELASTICSEARCH_HOST
+    )
     .option('--kibana-url <address>', 'The address to the Kibana server', DEFAULTS.KIBANA_URL)
     .option(
       '--kibana-username <username>',

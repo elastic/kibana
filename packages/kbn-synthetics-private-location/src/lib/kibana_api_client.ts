@@ -68,4 +68,9 @@ export class KibanaAPIClient {
       throw e;
     }
   }
+
+  public async getKibanaVersion() {
+    const res = await this.sendRequest({ method: 'GET', url: 'api/status' });
+    return res.data.version.number;
+  }
 }

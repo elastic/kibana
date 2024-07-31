@@ -33,5 +33,5 @@ export async function run(options: CliOptions, logger: ToolingLog) {
   );
   const [enrollmentTokenConfig] = list;
   const { api_key: enrollmentToken } = enrollmentTokenConfig;
-  enrollAgent(options, logger, enrollmentToken);
+  enrollAgent(options, enrollmentToken, kibanaClient);
 }

@@ -9,18 +9,19 @@
 import execa from 'execa';
 import { spawn } from 'child_process';
 import * as path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
 import { CliOptions } from '../types';
+import { KibanaAPIClient } from './kibana_api_client';
 
 export async function enrollAgent(
-  { fleetServerUrl, kibanaUrl, kibanaPassword, kibanaUsername, elasticsearchHost }: CliOptions,
-  logger: ToolingLog,
-  enrollmentToken: string
+  { kibanaUrl, elasticsearchHost }: CliOptions,
+  enrollmentToken: string,
+  kibanaApiClient: KibanaAPIClient
 ) {
   const formattedKibanaURL = new URL(kibanaUrl);
   if (formattedKibanaURL.hostname === 'localhost') {
     formattedKibanaURL.hostname = 'host.docker.internal';
   }
+  const version = `${await kibanaApiClient.getKibanaVersion()}-SNAPSHOT`;
   await new Promise((res, rej) => {
     try {
       const fleetProcess = spawn(
@@ -36,7 +37,7 @@ export async function enrollAgent(
           '-e',
           'FLEET_INSECURE=1',
           '-e',
-          `KIBANA_HOST=${formattedKibanaURL.href}`,
+          `KIBANA_HOST=${formattedKibanaURL.origin}`,
           '-e',
           'KIBANA_USERNAME=elastic',
           '-e',
@@ -46,10 +47,11 @@ export async function enrollAgent(
           '-p',
           '8220:8220',
           '--rm',
-          'docker.elastic.co/beats/elastic-agent:8.16.0-SNAPSHOT',
+          `docker.elastic.co/beats/elastic-agent:${version}`,
         ],
         {
           shell: true,
+          stdio: 'inherit',
           cwd: path.join(__dirname, '../'),
           timeout: 120000,
         }
@@ -74,7 +76,7 @@ export async function enrollAgent(
       '-e',
       'FLEET_INSECURE=1',
       '--rm',
-      'docker.elastic.co/beats/elastic-agent-complete:8.15.0-SNAPSHOT',
+      `docker.elastic.co/beats/elastic-agent-complete:${version}`,
     ],
     {
       stdio: 'inherit',

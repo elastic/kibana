@@ -12,4 +12,5 @@ export interface CliOptions {
   kibanaUrl: string;
   kibanaUsername: string;
   kibanaPassword: string;
+  elasticsearchHost: string;
 }
