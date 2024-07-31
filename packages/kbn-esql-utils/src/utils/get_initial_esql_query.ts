@@ -5,11 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 /**
- * Builds an ES|QL query for the provided index or index pattern
- * @param indexOrIndexPattern
+ * Builds an ES|QL query for the provided dataView
+ * @param dataView
  */
-export function getInitialESQLQuery(indexOrIndexPattern: string): string {
-  return `FROM ${indexOrIndexPattern} | LIMIT 10`;
+export function getInitialESQLQuery(dataView: DataView): string {
+  const timeFieldName =
+    dataView?.fields?.getByName?.('@timestamp')?.type === 'date' ? '@timestamp' : undefined;
+  const sortByTimeStamp = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
+  return `FROM ${dataView.getIndexPattern()}${sortByTimeStamp} | LIMIT 10`;
 }

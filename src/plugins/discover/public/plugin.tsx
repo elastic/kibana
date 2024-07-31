@@ -278,7 +278,7 @@ export class DiscoverPlugin
       plugins.share?.url.locators.create(
         new DiscoverESQLLocatorDefinition({
           discoverAppLocator: this.locator,
-          getIndices: plugins.dataViews.getIndices,
+          dataViews: plugins.dataViews,
         })
       );
     }
