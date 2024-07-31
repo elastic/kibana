@@ -72,7 +72,8 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
             />
           </EuiText>
         ),
-        iconType: 'arrowStart',
+        // Commented this out until we have the expanded flyout
+        // iconType: 'arrowStart',
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >

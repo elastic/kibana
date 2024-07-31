@@ -72,15 +72,7 @@ export const HostPanelContent = ({
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />
       <EuiHorizontalRule />
-      <InsightEntity
-        // observedData={observedHost}
-        hostName={hostName}
-        contextID={contextID}
-        scopeId={scopeId}
-        isDraggable={isDraggable}
-        // observedFields={observedFields}
-        queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
-      />
+      <InsightEntity hostName={hostName} />
     </FlyoutBody>
   );
 };

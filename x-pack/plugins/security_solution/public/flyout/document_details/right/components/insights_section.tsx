@@ -32,6 +32,7 @@ const KEY = 'insights';
 export const InsightsSection = memo(() => {
   const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+
   const { activeStep, isTourShown } = useTourContext();
   const isGuidedOnboardingTourShown =
     isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase;
