@@ -212,7 +212,7 @@ export const lexerRules = {
         {
           cases: {
             '@keywords': 'keyword',
-            '@builtinFunctions': 'identifier',
+            '@builtinFunctions': 'keyword',
             '@default': 'identifier',
           },
         },
