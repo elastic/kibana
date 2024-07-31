@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
 
   describe('saved objects relationships flyout', () => {
@@ -36,12 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.savedObjects.clickRelationshipsByTitle('Dashboard with missing refs');
 
-      let invalidRelations: any[] = [];
-
-      await retry.waitFor('2 invalid relations to be found', async () => {
-        invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
-        return invalidRelations.length === 2;
-      });
+      const invalidRelations = await PageObjects.savedObjects.getInvalidRelations();
 
       expect(invalidRelations).to.eql([
         {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { map as mapAsync } from 'bluebird';
 import { FtrService } from '../ftr_provider_context';
 
 export class WatcherPageObject extends FtrService {
@@ -51,7 +50,7 @@ export class WatcherPageObject extends FtrService {
   // get all the watches in the list
   async getWatches() {
     const watches = await this.find.allByCssSelector('.euiTableRow');
-    return mapAsync(watches, async (watch) => {
+    return await Promise.all(watches.map(async (watch) => {
       const checkBox = await watch.findByCssSelector('td:nth-child(1)');
       const id = await watch.findByCssSelector('td:nth-child(2)');
       const name = await watch.findByCssSelector('td:nth-child(3)');
@@ -61,6 +60,6 @@ export class WatcherPageObject extends FtrService {
         id: await id.getVisibleText(),
         name: (await name.getVisibleText()).split(',').map((role) => role.trim()),
       };
-    });
+    }));
   }
 }

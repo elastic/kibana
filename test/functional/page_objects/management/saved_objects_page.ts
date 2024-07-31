@@ -7,7 +7,6 @@
  */
 
 import { keyBy } from 'lodash';
-import { map as mapAsync } from 'bluebird';
 import { FtrService } from '../../ftr_provider_context';
 
 export class SavedObjectsPageObject extends FtrService {
@@ -185,7 +184,7 @@ export class SavedObjectsPageObject extends FtrService {
 
   async getElementsInTable() {
     const rows = await this.testSubjects.findAll('~savedObjectsTableRow');
-    return mapAsync(rows, async (row) => {
+    return await Promise.all(rows.map(async (row) => {
       const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
       // return the object type aria-label="index patterns"
       const objectType = await row.findByTestSubject('objectType');
@@ -229,7 +228,7 @@ export class SavedObjectsPageObject extends FtrService {
         relationshipsElement,
         copySaveObjectsElement,
       };
-    });
+    }));
   }
 
   async getRowTitles() {
@@ -243,7 +242,7 @@ export class SavedObjectsPageObject extends FtrService {
 
   async getRelationshipFlyout() {
     const rows = await this.testSubjects.findAll('relationshipsTableRow');
-    return mapAsync(rows, async (row) => {
+    return await Promise.all(rows.map(async (row) => {
       const objectType = await row.findByTestSubject('relationshipsObjectType');
       const relationship = await row.findByTestSubject('directRelationship');
       const titleElement = await row.findByTestSubject('relationshipsTitle');
@@ -255,12 +254,12 @@ export class SavedObjectsPageObject extends FtrService {
         title: await titleElement.getVisibleText(),
         inspectElement,
       };
-    });
+    }));
   }
 
   async getInvalidRelations() {
     const rows = await this.testSubjects.findAll('invalidRelationshipsTableRow');
-    return mapAsync(rows, async (row) => {
+    return Promise.all(rows.map(async (row) => {
       const objectType = await row.findByTestSubject('relationshipsObjectType');
       const objectId = await row.findByTestSubject('relationshipsObjectId');
       const relationship = await row.findByTestSubject('directRelationship');
@@ -271,7 +270,7 @@ export class SavedObjectsPageObject extends FtrService {
         relationship: await relationship.getVisibleText(),
         error: await error.getVisibleText(),
       };
-    }).then((result) => result.sort((a, b) => a.id.localeCompare(b.id)));
+    })).then((result) => result.sort((a, b) => a.id.localeCompare(b.id)));
   }
 
   async getTableSummary() {
