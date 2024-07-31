@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
-import { ResizableTextInput } from '../resizable_text_input';
+import { i18n } from '@kbn/i18n';
+import { InvestigateWidgetCreate } from '@kbn/investigate-plugin/common';
+import React, { useState } from 'react';
 import { createNoteWidget } from '../../widgets/note_widget/create_note_widget';
+import { ResizableTextInput } from '../resizable_text_input';
 
 interface NoteWidgetControlProps {
   user: Pick<AuthenticatedUser, 'full_name' | 'username'>;
@@ -46,8 +46,8 @@ export function NoteWidgetControl({ user, onWidgetAdd }: NoteWidgetControlProps)
   }
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-      <EuiFlexItem grow>
+    <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+      <EuiFlexItem grow={false}>
         <ResizableTextInput
           placeholder={i18n.translate('xpack.investigateApp.noteWidgetControl.placeholder', {
             defaultMessage: 'Add a note to the investigation',
@@ -63,20 +63,24 @@ export function NoteWidgetControl({ user, onWidgetAdd }: NoteWidgetControlProps)
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
+        <EuiButton
           data-test-subj="investigateAppNoteWidgetControlButton"
-          aria-label={i18n.translate('xpack.investigateApp.noteWidgetControl.submitLabel', {
-            defaultMessage: 'Submit',
+          fullWidth
+          color="text"
+          aria-label={i18n.translate('xpack.investigateApp.noteWidgetControl.addButtonLabel', {
+            defaultMessage: 'Add',
           })}
           disabled={loading || note.trim() === ''}
-          display="base"
-          iconType="kqlFunction"
           isLoading={loading}
           size="m"
           onClick={() => {
             submit();
           }}
-        />
+        >
+          {i18n.translate('xpack.investigateApp.noteWidgetControl.addButtonLabel', {
+            defaultMessage: 'Add',
+          })}
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
