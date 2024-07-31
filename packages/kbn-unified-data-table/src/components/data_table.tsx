@@ -475,7 +475,13 @@ export const UnifiedDataTable = ({
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
-  const { isDocSelected, hasSelectedDocs, selectedDocIds, replaceSelectedDocs } = selectedDocsState;
+  const {
+    isDocSelected,
+    hasSelectedDocs,
+    selectedDocsCount,
+    replaceSelectedDocs,
+    docIdsInSelectionOrder,
+  } = selectedDocsState;
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -873,13 +879,13 @@ export const UnifiedDataTable = ({
     controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
 
   const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocIds.length) {
+    if (!externalAdditionalControls && !selectedDocsCount) {
       return null;
     }
 
     return (
       <>
-        {Boolean(selectedDocIds.length) && (
+        {Boolean(selectedDocsCount) && (
           <DataTableDocumentToolbarBtn
             isPlainRecord={isPlainRecord}
             isFilterActive={isFilterActive}
@@ -899,7 +905,7 @@ export const UnifiedDataTable = ({
       </>
     );
   }, [
-    selectedDocIds,
+    selectedDocsCount,
     selectedDocsState,
     externalAdditionalControls,
     isPlainRecord,
@@ -1068,7 +1074,7 @@ export const UnifiedDataTable = ({
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
               additionalFieldGroups={additionalFieldGroups}
-              selectedDocIds={selectedDocIds}
+              selectedDocIds={docIdsInSelectionOrder}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
               showFullScreenButton={showFullScreenButton}

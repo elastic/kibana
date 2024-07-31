@@ -80,15 +80,17 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 
 export const SelectAllButton = () => {
   const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
-  const { getCountOfSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
+  const { getCountOfFilteredSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
     return getDocIdsForCurrentPage(rows, pageIndex, pageSize);
   }, [rows, pageIndex, pageSize]);
 
   const countOfSelectedDocs = useMemo(() => {
-    return docIdsFromCurrentPage?.length ? getCountOfSelectedDocs(docIdsFromCurrentPage) : 0;
-  }, [docIdsFromCurrentPage, getCountOfSelectedDocs]);
+    return docIdsFromCurrentPage?.length
+      ? getCountOfFilteredSelectedDocs(docIdsFromCurrentPage)
+      : 0;
+  }, [docIdsFromCurrentPage, getCountOfFilteredSelectedDocs]);
 
   const isIndeterminateForCurrentPage = useMemo(() => {
     if (docIdsFromCurrentPage?.length) {
@@ -175,24 +177,25 @@ export function DataTableDocumentToolbarBtn({
   columns: string[];
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
-  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, selectedDocIds } = selectedDocsState;
+  const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
+    selectedDocsState;
 
   const shouldSuggestToSelectAll = useMemo(() => {
-    const canSelectMore = selectedDocIds.length < rows.length && rows.length > 1;
+    const canSelectMore = selectedDocsCount < rows.length && rows.length > 1;
     if (typeof pageSize !== 'number' || isFilterActive || !canSelectMore) {
       return false;
     }
-    return selectedDocIds.length >= pageSize;
-  }, [rows, pageSize, selectedDocIds.length, isFilterActive]);
+    return selectedDocsCount >= pageSize;
+  }, [rows, pageSize, selectedDocsCount, isFilterActive]);
 
   const getMenuItems = useCallback(() => {
     return [
       // Compare selected documents
-      ...(enableComparisonMode && selectedDocIds.length > 1
+      ...(enableComparisonMode && selectedDocsCount > 1
         ? [
             <DataTableCompareToolbarBtn
               key="compareSelected"
-              selectedDocIds={selectedDocIds}
+              selectedDocIds={docIdsInSelectionOrder}
               setIsCompareActive={setIsCompareActive}
             />,
           ]
@@ -269,11 +272,10 @@ export function DataTableDocumentToolbarBtn({
   }, [
     isFilterActive,
     isPlainRecord,
-    rows,
     setIsFilterActive,
-    isDocSelected,
     clearAllSelectedDocs,
-    selectedDocIds,
+    selectedDocsCount,
+    docIdsInSelectionOrder,
     enableComparisonMode,
     setIsCompareActive,
     toastNotifications,
@@ -295,12 +297,12 @@ export function DataTableDocumentToolbarBtn({
           iconSide="left"
           iconType="arrowDown"
           onClick={toggleSelectionToolbar}
-          data-selected-documents={selectedDocIds.length}
+          data-selected-documents={selectedDocsCount}
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
           badgeContent={fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convert(selectedDocIds.length)}
+            .convert(selectedDocsCount)}
           css={css`
             .euiButtonEmpty__content {
               flex-direction: row-reverse;

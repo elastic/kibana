@@ -20,7 +20,8 @@ interface DataTableCopyRowsAsJsonProps {
 export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = ({
   toastNotifications,
 }) => {
-  const { rows, selectedDocs, isPlainRecord } = useContext(UnifiedDataTableContext);
+  const { rows, selectedDocsState, isPlainRecord } = useContext(UnifiedDataTableContext);
+  const { getSelectedDocsOrderedByRows } = selectedDocsState;
 
   return (
     <EuiContextMenuItem
@@ -28,7 +29,8 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
       icon="copyClipboard"
       onClick={async () => {
         await copyRowsAsJsonToClipboard({
-          selectedRows: rows.filter((row) => selectedDocs.includes(row.id)),
+          // preserving the original order of rows rather than the order of selecting rows
+          selectedRows: getSelectedDocsOrderedByRows(rows),
           toastNotifications,
         });
       }}

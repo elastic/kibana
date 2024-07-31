@@ -22,8 +22,9 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
   toastNotifications,
   columns,
 }) => {
-  const { valueToStringConverter, dataView, rows, selectedDocs } =
+  const { valueToStringConverter, dataView, rows, selectedDocsState } =
     useContext(UnifiedDataTableContext);
+  const { isDocSelected } = selectedDocsState;
 
   return (
     <EuiContextMenuItem
@@ -32,7 +33,13 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
       onClick={async () => {
         await copyRowsAsTextToClipboard({
           columns,
-          selectedRowIndices: selectedDocs.map((id) => rows.findIndex((row) => row.id === id)),
+          // preserving the original order of rows rather than the order of selecting rows
+          selectedRowIndices: rows.reduce((acc, row, index) => {
+            if (isDocSelected(row.id)) {
+              acc.push(index);
+            }
+            return acc;
+          }, [] as number[]),
           valueToStringConverter,
           toastNotifications,
           dataView,
