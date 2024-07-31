@@ -26,15 +26,13 @@ import {
   AgentNotFoundError,
   FleetUnauthorizedError,
 } from '../../errors';
-
 import { auditLoggingService } from '../audit_logging';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
-
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
-import { getCurrentNamespace } from '../spaces/get_current_namespace';
-import { isAgentInNamespace } from '../spaces/agent_namespaces';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
