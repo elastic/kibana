@@ -242,7 +242,7 @@ const RelatedEntity: React.FC<RelatedEntityProps> = ({
 }) => {
   const entityDataContent = (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-      <EntityLogo document={document} />
+      <EntityLogo document={doc} />
       <EuiFlexItem
         css={css`
           max-width: 150px;
