@@ -48,7 +48,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private spacesApi!: SpacesApi;
 
   private managementService?: ManagementService;
-  private readonly config: ConfigType;
+  private config: ConfigType;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -68,6 +68,14 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
     };
+
+    const onCloud = plugins.cloud !== undefined && plugins.cloud.isCloudEnabled;
+    if (!onCloud) {
+      this.config = {
+        ...this.config,
+        allowSolutionVisibility: false,
+      };
+    }
 
     // Only skip setup of space selector and management service if serverless and only one space is allowed
     if (!(this.isServerless && hasOnlyDefaultSpace)) {
