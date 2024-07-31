@@ -35,7 +35,12 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
       return (
         Array.from(cacheFields.values())?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
-          return !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t));
+          return (
+            !ignored.includes(name) &&
+            ts
+              .filter((t) => t !== 'unsupported')
+              .some((t) => types[0] === 'any' || types.includes(t))
+          );
         }) || []
       );
     },
