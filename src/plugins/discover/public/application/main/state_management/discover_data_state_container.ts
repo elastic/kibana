@@ -263,10 +263,38 @@ export function getDataStateContainer({
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllStartTime = window.performance.now();
 
-          await fetchAll(dataSubjects, options.reset, {
-            abortController,
-            ...commonFetchDeps,
-          });
+          await fetchAll(
+            dataSubjects,
+            options.reset,
+            {
+              abortController,
+              ...commonFetchDeps,
+            },
+            async () => {
+              const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
+
+              if (dataView) {
+                const stateUpdate = getDefaultProfileState({
+                  profilesManager,
+                  resetDefaultProfileState,
+                  defaultColumns,
+                  dataView,
+                  esqlQueryColumns,
+                });
+
+                if (stateUpdate) {
+                  await appStateContainer.replaceUrlState(stateUpdate);
+                }
+              }
+
+              internalStateContainer.transitions.setResetDefaultProfileState({
+                columns: false,
+                rowHeight: false,
+              });
+            }
+          );
 
           const fetchAllDuration = window.performance.now() - fetchAllStartTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -282,29 +310,6 @@ export function getDataStateContainer({
             autoRefreshDone?.();
             autoRefreshDone = undefined;
           }
-
-          const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
-          const { esqlQueryColumns } = dataSubjects.documents$.getValue();
-          const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
-
-          if (dataView) {
-            const stateUpdate = getDefaultProfileState({
-              profilesManager,
-              resetDefaultProfileState,
-              defaultColumns,
-              dataView,
-              esqlQueryColumns,
-            });
-
-            if (stateUpdate) {
-              await appStateContainer.replaceUrlState(stateUpdate);
-            }
-          }
-
-          internalStateContainer.transitions.setResetDefaultProfileState({
-            columns: false,
-            rowHeight: false,
-          });
         })
       )
       .subscribe();
