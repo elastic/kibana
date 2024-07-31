@@ -9,6 +9,7 @@
 /** @type {{ [k in import('./types').KibanaPackageType]: true }} */
 const PACKAGE_TYPE_MAP = {
   'functional-tests': true,
+  core: true,
   plugin: true,
   'shared-browser': true,
   'shared-common': true,

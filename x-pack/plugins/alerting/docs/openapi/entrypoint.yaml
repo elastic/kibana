@@ -1,8 +1,8 @@
-openapi: 3.1.0
+openapi: 3.0.1
 info:
   title: Alerting
   description: OpenAPI schema for alerting endpoints
-  version: '0.2'
+  version: '0.1'
   contact:
     name: Alerting Team
   license:
@@ -14,62 +14,48 @@ tags:
 servers:
   - url: /
 paths:
-  '/s/{spaceId}/api/alerting/rule':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/_disable':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_disable.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/_enable':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_enable.yaml'
-  '/s/{spaceId}/api/alerting/rules/_find':
-    $ref: 'paths/s@{spaceid}@api@alerting@rules@_find.yaml'
-  '/s/{spaceId}/api/alerting/_health':
-    $ref: paths/s@{spaceid}@api@alerting@_health.yaml
-  '/s/{spaceId}/api/alerting/rule_types':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule_types.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_mute_all.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_unmute_all.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@_update_api_key.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
-  '/s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':
-    $ref: 'paths/s@{spaceid}@api@alerting@rule@{ruleid}@alert@{alertid}@_unmute.yaml'
+  '/api/alerting/rule':
+    $ref: 'paths/api@alerting@rule.yaml'
+  '/api/alerting/rule/{ruleId}':
+    $ref: 'paths/api@alerting@rule@{ruleid}.yaml'
+  '/api/alerting/rule/{ruleId}/_disable':
+    $ref: 'paths/api@alerting@rule@{ruleid}@_disable.yaml'
+  '/api/alerting/rule/{ruleId}/_enable':
+    $ref: 'paths/api@alerting@rule@{ruleid}@_enable.yaml'
+  '/api/alerting/rules/_find':
+    $ref: 'paths/api@alerting@rules@_find.yaml'
+  '/api/alerting/_health':
+    $ref: paths/api@alerting@_health.yaml
+  '/api/alerting/rule_types':
+    $ref: 'paths/api@alerting@rule_types.yaml'
+  '/api/alerting/rule/{ruleId}/_mute_all':
+    $ref: 'paths/api@alerting@rule@{ruleid}@_mute_all.yaml'
+  '/api/alerting/rule/{ruleId}/_unmute_all':
+    $ref: 'paths/api@alerting@rule@{ruleid}@_unmute_all.yaml'
+  '/api/alerting/rule/{ruleId}/_update_api_key':
+    $ref: 'paths/api@alerting@rule@{ruleid}@_update_api_key.yaml'
+  '/api/alerting/rule/{ruleId}/alert/{alertId}/_mute':
+    $ref: 'paths/api@alerting@rule@{ruleid}@alert@{alertid}@_mute.yaml'
+  '/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute':
+    $ref: 'paths/api@alerting@rule@{ruleid}@alert@{alertid}@_unmute.yaml'
 # Deprecated APIs
-  '/s/{spaceId}/api/alerts/alert/{alertId}':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}.yaml'
-  '/s/{spaceId}/api/alerts/alert/{alertId}/_disable':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_disable.yaml'
-  '/s/{spaceId}/api/alerts/alert/{alertId}/_enable':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_enable.yaml'
-  '/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_mute_all.yaml'
-  '/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@_unmute_all.yaml'
-  '/s/{spaceId}/api/alerts/alerts/_find':
-    $ref: 'paths/s@{spaceid}@api@alerts@_find.yaml'
-  '/s/{spaceId}/api/alerts/alerts/_health':
-    $ref: 'paths/s@{spaceid}@api@alerts@_health.yaml'
-  '/s/{spaceId}/api/alerts/alerts/list_alert_types':
-    $ref: 'paths/s@{spaceid}@api@alerts@list_alert_types.yaml'
-  '/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_mute.yaml'
-  '/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute':
-    $ref: 'paths/s@{spaceid}@api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_unmute.yaml'
-
-components:
-  securitySchemes:
-    basicAuth:
-      type: http
-      scheme: basic
-    apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
+  '/api/alerts/alert/{alertId}':
+    $ref: 'paths/api@alerts@alert@{alertid}.yaml'
+  '/api/alerts/alert/{alertId}/_disable':
+    $ref: 'paths/api@alerts@alert@{alertid}@_disable.yaml'
+  '/api/alerts/alert/{alertId}/_enable':
+    $ref: 'paths/api@alerts@alert@{alertid}@_enable.yaml'
+  '/api/alerts/alert/{alertId}/_mute_all':
+    $ref: 'paths/api@alerts@alert@{alertid}@_mute_all.yaml'
+  '/api/alerts/alert/{alertId}/_unmute_all':
+    $ref: 'paths/api@alerts@alert@{alertid}@_unmute_all.yaml'
+  '/api/alerts/alerts/_find':
+    $ref: 'paths/api@alerts@_find.yaml'
+  '/api/alerts/alerts/_health':
+    $ref: 'paths/api@alerts@_health.yaml'
+  '/api/alerts/alerts/list_alert_types':
+    $ref: 'paths/api@alerts@list_alert_types.yaml'
+  '/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute':
+    $ref: 'paths/api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_mute.yaml'
+  '/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute':
+    $ref: 'paths/api@alerts@alert@{alertid}@alert_instance@{alertinstanceid}@_unmute.yaml'

@@ -112,6 +112,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const normalizedFields = fields.map((f) => ({
     normalizedType: f.type,
+    esTypes: f.esTypes,
     name: f.name,
   }));
 
