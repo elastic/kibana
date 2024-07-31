@@ -35,15 +35,12 @@ const getBenchmarkIdIconType = (type: BenchmarkId): string | undefined => {
 };
 
 export const CISBenchmarkIcon = (props: Props) => {
-  if (!getBenchmarkIdIconType(props.type)) return <></>;
+  const iconType = getBenchmarkIdIconType(props.type);
+  if (!iconType) return <></>;
 
   return (
     <EuiToolTip content={props.name}>
-      <EuiIcon
-        type={getBenchmarkIdIconType(props.type)}
-        size={props.size || 'xl'}
-        css={props.style}
-      />
+      <EuiIcon type={iconType} size={props.size || 'xl'} css={props.style} />
     </EuiToolTip>
   );
 };
