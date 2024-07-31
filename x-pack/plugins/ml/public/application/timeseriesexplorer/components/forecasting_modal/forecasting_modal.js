@@ -14,10 +14,9 @@ import { get } from 'lodash';
 
 import React, { Component } from 'react';
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
@@ -27,9 +26,8 @@ import { isJobVersionGte } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
-import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
 import { forecastServiceFactory } from '../../../services/forecast_service';
+import { ForecastButton } from './forecast_button';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.
 
@@ -57,9 +55,13 @@ function getDefaultState() {
 
 export class ForecastingModal extends Component {
   static propTypes = {
+    buttonMode: PropTypes.string,
     isDisabled: PropTypes.bool,
     job: PropTypes.object,
+    jobState: PropTypes.string,
     detectorIndex: PropTypes.number,
+    earliestRecordTimestamp: PropTypes.number,
+    latestRecordTimestamp: PropTypes.number,
     entities: PropTypes.array,
     setForecastId: PropTypes.func,
   };
@@ -93,6 +95,12 @@ export class ForecastingModal extends Component {
 
   viewForecast = (forecastId) => {
     this.props.setForecastId(forecastId);
+    if (this.props.onForecastComplete !== undefined && this.state.previousForecasts.length > 0) {
+      const forecastToView = this.state.previousForecasts.find(
+        (forecast) => forecastId === forecast.forecast_id
+      );
+      this.props.onForecastComplete(forecastToView.forecast_end_timestamp);
+    }
     this.closeModal();
   };
 
@@ -149,7 +157,7 @@ export class ForecastingModal extends Component {
 
     // A forecast can only be run on an opened job,
     // so open job if it is closed.
-    if (this.props.job.state === JOB_STATE.CLOSED) {
+    if (this.props.jobState === JOB_STATE.CLOSED || this.props.job.state === JOB_STATE.CLOSED) {
       this.openJobAndRunForecast();
     } else {
       this.runForecast(false);
@@ -162,8 +170,8 @@ export class ForecastingModal extends Component {
       jobOpeningState: PROGRESS_STATES.WAITING,
     });
 
-    mlJobService
-      .openJob(this.props.job.job_id)
+    this.context.services.mlServices.mlApiServices
+      .openJob({ jobId: this.props.job.job_id })
       .then(() => {
         // If open was successful run the forecast, then close the job again.
         this.setState({
@@ -219,8 +227,8 @@ export class ForecastingModal extends Component {
 
     if (closeJob === true) {
       this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-      mlJobService
-        .closeJob(this.props.job.job_id)
+      this.context.services.mlServices.mlApiServices
+        .closeJob({ jobId: this.props.job.job_id })
         .then(() => {
           this.setState({ jobClosingState: PROGRESS_STATES.DONE });
         })
@@ -294,10 +302,14 @@ export class ForecastingModal extends Component {
           if (status === FORECAST_REQUEST_STATE.FINISHED) {
             clearInterval(this.forecastChecker);
 
+            if (this.props.onForecastComplete !== undefined) {
+              this.props.onForecastComplete(resp.stats.forecast_end_timestamp);
+            }
+
             if (closeJobAfterRunning === true) {
               this.setState({ jobClosingState: PROGRESS_STATES.WAITING });
-              mlJobService
-                .closeJob(this.props.job.job_id)
+              this.context.services.mlServices.mlApiServices
+                .closeJob({ jobId: this.props.job.job_id })
                 .then(() => {
                   this.setState({
                     jobClosingState: PROGRESS_STATES.DONE,
@@ -387,7 +399,7 @@ export class ForecastingModal extends Component {
   };
 
   openModal = () => {
-    const job = this.props.job;
+    const { job, entities, earliestRecordTimestamp, latestRecordTimestamp } = this.props;
 
     if (typeof job === 'object') {
       // Get the list of all the finished forecasts for this job with results at or later than the dashboard 'from' time.
@@ -420,16 +432,17 @@ export class ForecastingModal extends Component {
 
       // Display a warning about running a forecast if there is high number
       // of partitioning fields.
-      const entityFieldNames = this.props.entities.map((entity) => entity.fieldName);
+      const entityFieldNames = entities.map((entity) => entity.fieldName);
       if (entityFieldNames.length > 0) {
-        ml.getCardinalityOfFields({
-          index: job.datafeed_config.indices,
-          fieldNames: entityFieldNames,
-          query: job.datafeed_config.query,
-          timeFieldName: job.data_description.time_field,
-          earliestMs: job.data_counts.earliest_record_timestamp,
-          latestMs: job.data_counts.latest_record_timestamp,
-        })
+        this.context.services.mlServices.mlApiServices
+          .getCardinalityOfFields({
+            index: job.datafeed_config.indices,
+            fieldNames: entityFieldNames,
+            query: job.datafeed_config.query,
+            timeFieldName: job.data_description.time_field,
+            earliestMs: earliestRecordTimestamp,
+            latestMs: latestRecordTimestamp,
+          })
           .then((results) => {
             let numPartitions = 1;
             Object.values(results).forEach((cardinality) => {
@@ -510,18 +523,12 @@ export class ForecastingModal extends Component {
         );
       }
     }
-
     const forecastButton = (
-      <EuiButton
+      <ForecastButton
         onClick={this.openModal}
         isDisabled={isForecastingDisabled}
-        data-test-subj="mlSingleMetricViewerButtonForecast"
-      >
-        <FormattedMessage
-          id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastButtonLabel"
-          defaultMessage="Forecast"
-        />
-      </EuiButton>
+        mode={this.props.buttonMode}
+      />
     );
 
     return (
@@ -536,6 +543,7 @@ export class ForecastingModal extends Component {
 
         {this.state.isModalVisible && (
           <Modal
+            jobState={this.props.jobState}
             job={this.props.job}
             forecasts={this.state.previousForecasts}
             close={this.closeModal}
