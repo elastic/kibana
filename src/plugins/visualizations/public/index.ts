@@ -7,8 +7,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { PublicContract } from '@kbn/utility-types';
-import type { VisualizeEmbeddable } from './embeddable';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -20,6 +18,7 @@ export { TypesService } from './vis_types/types_service';
 export {
   apiHasVisualizeConfig,
   VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_APP_NAME,
   VIS_EVENT_TO_TRIGGER,
   COMMON_VISUALIZATION_GROUPING,
 } from './embeddable';
@@ -64,7 +63,6 @@ export {
   DEFAULT_LEGEND_SIZE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { prepareLogTable, XYCurveTypes } from '../common';
 export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
@@ -76,7 +74,11 @@ export type {
 export { urlFor, getFullPath } from './utils/saved_visualize_utils';
 export { convertSavedObjectAttributesToReferences } from './utils/saved_visualization_references';
 
-export type { IEditorController, EditorRenderProps } from './visualize_app/types';
+export type {
+  IEditorController,
+  EditorRenderProps,
+  EmbeddableApiHandler,
+} from './visualize_app/types';
 
 export {
   VISUALIZE_EDITOR_TRIGGER,

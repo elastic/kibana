@@ -8,17 +8,14 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Vis } from '../types';
-import type {
-  VisualizeInput,
-  VisualizeEmbeddable,
-  VisualizeEmbeddableDeps,
-} from './legacy_visualize_embeddable';
+import type { VisualizeInput, VisualizeEmbeddable } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
-import { createVisualizeEmbeddableAsync } from './legacy_visualize_embeddable_async';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject =
-  (deps: VisualizeEmbeddableDeps) =>
+  (deps: VisualizeEmbeddableFactoryDeps) =>
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string }

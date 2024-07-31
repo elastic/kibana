@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { VisualizeEmbeddable as VisualizeEmbeddableType } from './legacy_visualize_embeddable';
+import type { VisualizeEmbeddable as VisualizeEmbeddableType } from './visualize_embeddable';
 
 export const createVisualizeEmbeddableAsync = async (
   ...args: ConstructorParameters<typeof VisualizeEmbeddableType>
@@ -14,7 +14,7 @@ export const createVisualizeEmbeddableAsync = async (
   // Build optimization. Move app styles from main bundle
 
   const [{ VisualizeEmbeddable }] = await Promise.all([
-    import('./legacy_visualize_embeddable'),
+    import('./visualize_embeddable'),
     // @ts-expect-error TS error, cannot find type declaration for scss
     import('./embeddables.scss'),
   ]);

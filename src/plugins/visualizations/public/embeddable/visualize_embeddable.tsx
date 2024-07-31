@@ -6,55 +6,52 @@
  * Side Public License, v 1.
  */
 
+import _, { get } from 'lodash';
+import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { Warnings } from '@kbn/charts-plugin/public';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import type {
+import { Warnings } from '@kbn/charts-plugin/public';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
+import {
   Adapters,
+  AttributeService,
+  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  FilterableEmbeddable,
+  IContainer,
+  ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
-import type { ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { RenderCompleteDispatcher, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
-import fastIsEqual from 'fast-deep-equal';
-import _, { cloneDeep, get } from 'lodash';
-import React from 'react';
-import { render } from 'react-dom';
-import { debounceTime, merge, mergeMap, Observable, ReplaySubject, skip, Subscription } from 'rxjs';
-import VisualizationError from '../components/visualization_error';
-import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
-import { VisualizationsStartDeps } from '../plugin';
-import { getApplication, getExpressions, getUiActions } from '../services';
-import { VisSavedObject } from '../types';
-import { SerializedVis, Vis } from '../vis';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { isFallbackDataView } from '../visualize_app/utils';
+import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
+import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { SerializedVis, Vis } from '../vis';
+import { getApplication, getExecutionContext, getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-
-export interface VisualizeEmbeddableDeps {
-  start: StartServicesGetter<
-    Pick<
-      VisualizationsStartDeps,
-      'inspector' | 'embeddable' | 'data' | 'savedObjectsTaggingOss' | 'spaces'
-    >
-  >;
-}
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -62,7 +59,7 @@ export interface VisualizeEmbeddableConfiguration {
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
-  deps: VisualizeEmbeddableDeps;
+  deps: VisualizeEmbeddableFactoryDeps;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -94,21 +91,21 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
 export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
 
-/**
- * The legacy visualize embeddable class. This class remains for backwards compatibility with
- * the visualize editor only. For rendering an agg based visualization on a Dashboard, use the
- * React Embeddable instead.
- */
-export class VisualizeEmbeddable {
-  public readonly id: string;
-  public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-
+export class VisualizeEmbeddable
+  extends Embeddable<VisualizeInput, VisualizeOutput>
+  implements
+    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
+    FilterableEmbeddable
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
   private searchSessionId?: string;
+  private syncColors?: boolean;
+  private syncTooltips?: boolean;
+  private syncCursor?: boolean;
   private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -116,43 +113,49 @@ export class VisualizeEmbeddable {
   private vis: Vis;
   private domNode: any;
   private warningDomNode: any;
-
+  public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private abortController?: AbortController;
-  private readonly deps: VisualizeEmbeddableDeps;
+  private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
+  private attributeService?: AttributeService<
+    VisualizeSavedObjectAttributes,
+    VisualizeByValueInput,
+    VisualizeByReferenceInput
+  >;
   private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
   >(1);
 
-  protected output: VisualizeOutput;
-  protected input: VisualizeInput;
-  protected destroyed: boolean = false;
-  protected renderComplete = new RenderCompleteDispatcher();
-
-  private readonly inputSubject = new ReplaySubject<VisualizeInput>(1);
-  private readonly outputSubject = new ReplaySubject<VisualizeOutput>(1);
-  private readonly input$ = this.inputSubject.asObservable();
-  private readonly output$ = this.outputSubject.asObservable();
-
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
-    initialInput: VisualizeInput
+    initialInput: VisualizeInput,
+    attributeService?: AttributeService<
+      VisualizeSavedObjectAttributes,
+      VisualizeByValueInput,
+      VisualizeByReferenceInput
+    >,
+    parent?: IContainer
   ) {
-    this.id = initialInput.id;
-    this.output = {
-      defaultTitle: vis.title,
-      defaultDescription: vis.description,
-      editPath,
-      editApp: 'visualize',
-      editUrl,
-      indexPatterns,
-      visTypeName: vis.type.name,
-    };
-    this.input = initialInput;
+    super(
+      initialInput,
+      {
+        defaultTitle: vis.title,
+        defaultDescription: vis.description,
+        editPath,
+        editApp: 'visualize',
+        editUrl,
+        indexPatterns,
+        visTypeName: vis.type.name,
+      },
+      parent
+    );
     this.deps = deps;
     this.timefilter = timefilter;
+    this.syncColors = this.input.syncColors;
+    this.syncTooltips = this.input.syncTooltips;
+    this.syncCursor = this.input.syncCursor;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
     this.embeddableTitle = this.getTitle();
@@ -160,6 +163,17 @@ export class VisualizeEmbeddable {
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
+    this.attributeService = attributeService;
+
+    if (this.attributeService) {
+      const readOnly = Boolean(vis.type.disableEdit);
+      const isByValue = !this.inputIsRefType(initialInput);
+      const editable = readOnly
+        ? false
+        : capabilities.visualizeSave ||
+          (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
+      this.updateOutput({ ...this.getOutput(), editable });
+    }
 
     this.subscriptions.push(
       this.getInput$().subscribe(() => {
@@ -179,78 +193,30 @@ export class VisualizeEmbeddable {
     }
   }
 
-  public updateInput(changes: Partial<VisualizeInput>): void {
-    if (this.destroyed) {
-      throw new Error('Embeddable has been destroyed');
-    }
-    const newInput = cloneDeep({
-      ...this.input,
-      ...changes,
-    });
-
-    if (!fastIsEqual(this.input, newInput)) {
-      const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
-      this.input = newInput;
-      this.inputSubject.next(newInput);
-
-      const title = this.input.hidePanelTitles ? '' : this.input.title ?? this.output.defaultTitle;
-      const description = this.input.hidePanelTitles
-        ? ''
-        : this.input.description ?? this.output.defaultDescription;
-
-      this.updateOutput({
-        title,
-        description,
-      });
-      if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
-        this.reload();
-      }
-    }
-  }
-
-  public updateOutput(outputChanges: Partial<VisualizeOutput>): void {
-    const newOutput = {
-      ...this.output,
-      ...outputChanges,
-    };
-    if (!fastIsEqual(this.output, newOutput)) {
-      this.output = newOutput;
-      this.outputSubject.next(this.output);
-    }
-  }
-
-  public getInput$(): Readonly<Observable<VisualizeInput>> {
-    return this.input$;
-  }
-
-  public getOutput$(): Readonly<Observable<VisualizeOutput>> {
-    return this.output$;
-  }
-
-  public getUpdated$(): Readonly<Observable<VisualizeInput | VisualizeOutput>> {
-    return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
-      debounceTime(0)
-    );
-  }
-
-  public getOutput(): Readonly<VisualizeOutput> {
-    return this.output;
-  }
-
-  public getInput(): Readonly<VisualizeInput> {
-    return this.input;
-  }
-
-  public getTitle(): string {
-    return this.output.title ?? '';
-  }
-
   public reportsEmbeddableLoad() {
     return true;
   }
 
   public getVis() {
     return this.vis;
+  }
+
+  /**
+   * Gets the Visualize embeddable's local filters
+   * @returns Local/panel-level array of filters for Visualize embeddable
+   */
+  public getFilters() {
+    const filters = this.vis.serialize().data.searchSource?.filter ?? [];
+    // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
+    return mapAndFlattenFilters(_.cloneDeep(filters));
+  }
+
+  /**
+   * Gets the Visualize embeddable's local query
+   * @returns Local/panel-level query for Visualize embeddable
+   */
+  public getQuery() {
+    return this.vis.serialize().data.searchSource.query;
   }
 
   public getInspectorAdapters = () => {
@@ -299,6 +265,8 @@ export class VisualizeEmbeddable {
 
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
+    } else if (this.parent) {
+      this.vis.uiState.clearAllKeys();
     }
   }
 
@@ -335,6 +303,21 @@ export class VisualizeEmbeddable {
 
     if (this.searchSessionId !== this.input.searchSessionId) {
       this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
+    }
+
+    if (this.syncColors !== this.input.syncColors) {
+      this.syncColors = this.input.syncColors;
+      dirty = true;
+    }
+
+    if (this.syncTooltips !== this.input.syncTooltips) {
+      this.syncTooltips = this.input.syncTooltips;
+      dirty = true;
+    }
+
+    if (this.syncCursor !== this.input.syncCursor) {
+      this.syncCursor = this.input.syncCursor;
       dirty = true;
     }
 
@@ -463,9 +446,7 @@ export class VisualizeEmbeddable {
     this.warningDomNode = warningDiv;
 
     this.domNode = div;
-    this.renderComplete.setEl(div);
-    this.renderComplete.setTitle(this.output.title || '');
-
+    super.render(this.domNode);
     const { core } = this.deps.start();
 
     render(
@@ -524,6 +505,7 @@ export class VisualizeEmbeddable {
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
     }
+
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
 
@@ -562,11 +544,7 @@ export class VisualizeEmbeddable {
   }
 
   public destroy() {
-    this.destroyed = true;
-
-    this.inputSubject.complete();
-    this.outputSubject.complete();
-
+    super.destroy();
     this.subscriptions.forEach((s) => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
     this.vis.uiState.off('reload', this.reload);
@@ -578,17 +556,22 @@ export class VisualizeEmbeddable {
   }
 
   public reload = async () => {
-    this.handleChanges();
-    await this.updateHandler();
+    await this.handleVisUpdate();
   };
 
-  private getExecutionContext(): KibanaExecutionContext {
-    return {
+  private getExecutionContext() {
+    const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
+    const child: KibanaExecutionContext = {
       type: 'agg_based',
       name: this.vis.type.name,
       id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
+    };
+
+    return {
+      ...parentContext,
+      child,
     };
   }
 
@@ -643,11 +626,20 @@ export class VisualizeEmbeddable {
     }
   }
 
+  private handleVisUpdate = async () => {
+    this.handleChanges();
+    await this.updateHandler();
+  };
+
   private uiStateChangeHandler = () => {
     this.updateInput({
       ...this.vis.uiState.toJSON(),
     });
   };
+
+  public supportedTriggers(): string[] {
+    return this.vis.type.getSupportedTriggers?.(this.vis.params) ?? [];
+  }
 
   public getExpressionVariables$() {
     return this.expressionVariablesSubject.asObservable();
@@ -656,4 +648,58 @@ export class VisualizeEmbeddable {
   public getExpressionVariables() {
     return this.expressionVariables;
   }
+
+  inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
+    if (!this.attributeService) {
+      throw new Error('AttributeService must be defined for getInputAsRefType');
+    }
+    return this.attributeService.inputIsRefType(input as VisualizeByReferenceInput);
+  };
+
+  getInputAsValueType = async (): Promise<VisualizeByValueInput> => {
+    const input = {
+      savedVis: this.vis.serialize(),
+    };
+    delete input.savedVis.id;
+    _.unset(input, 'savedVis.title');
+    return new Promise<VisualizeByValueInput>((resolve) => {
+      resolve({ ...(input as VisualizeByValueInput) });
+    });
+  };
+
+  getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
+    const { plugins, core } = this.deps.start();
+    const { data, spaces, savedObjectsTaggingOss } = plugins;
+    const savedVis = await getSavedVisualization({
+      search: data.search,
+      dataViews: data.dataViews,
+      spaces,
+      savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+      ...core,
+    });
+    if (!savedVis) {
+      throw new Error('Error creating a saved vis object');
+    }
+    if (!this.attributeService) {
+      throw new Error('AttributeService must be defined for getInputAsRefType');
+    }
+    const saveModalTitle = this.getTitle()
+      ? this.getTitle()
+      : i18n.translate('visualizations.embeddable.placeholderTitle', {
+          defaultMessage: 'Placeholder Title',
+        });
+    // @ts-ignore
+    const attributes: VisualizeSavedObjectAttributes = {
+      savedVis,
+      vis: this.vis,
+      title: this.vis.title,
+    };
+    return this.attributeService.getInputAsRefType(
+      {
+        id: this.id,
+        attributes,
+      },
+      { showSaveModal: true, saveModalTitle }
+    );
+  };
 }
