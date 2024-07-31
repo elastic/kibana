@@ -875,7 +875,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                           link: (
                             <EuiLink
                               data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
-                              href="https://www.elastic.co/guide/en/observability/current/get-started-opentelemetry.html"
+                              href="https://ela.st/elastic-otel"
                               target="_blank"
                               external
                             >

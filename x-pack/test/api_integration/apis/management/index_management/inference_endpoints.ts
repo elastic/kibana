@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const modelId = '.elser_model_2';
 
   // FLAKY: https://github.com/elastic/kibana/issues/189333
+  // Failing: See https://github.com/elastic/kibana/issues/189333
   describe.skip('Inference endpoints', function () {
     after(async () => {
       try {

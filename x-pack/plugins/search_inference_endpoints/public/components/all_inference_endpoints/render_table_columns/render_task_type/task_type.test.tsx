@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { TaskTypes } from '../../../../../common/types';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TaskType } from './task_type';
-import { TaskTypes } from '../../types';
 
 describe('TaskType component', () => {
   it.each([
