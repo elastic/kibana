@@ -22,10 +22,10 @@ describe('delayOnClaimConflicts', () => {
     'initializes with a delay of 0',
     fakeSchedulers(async () => {
       const pollInterval = 100;
-      const capacity = 10;
+      const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
       const delays = delayOnClaimConflicts(
-        of(capacity),
+        of(maxWorkers),
         of(pollInterval),
         taskLifecycleEvents$,
         80,
@@ -42,11 +42,11 @@ describe('delayOnClaimConflicts', () => {
     'emits a random delay whenever p50 of claim clashes exceed 80% of available max_workers',
     fakeSchedulers(async () => {
       const pollInterval = 100;
-      const capacity = 10;
+      const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const delays$ = firstValueFrom<number[]>(
-        delayOnClaimConflicts(of(capacity), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
+        delayOnClaimConflicts(of(maxWorkers), of(pollInterval), taskLifecycleEvents$, 80, 2).pipe(
           take(2),
           bufferCount(2)
         )
@@ -60,6 +60,7 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 8,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: [],
           })
@@ -93,6 +94,7 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 8,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: [],
           })
@@ -109,6 +111,7 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 10,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: [],
           })
@@ -134,14 +137,18 @@ describe('delayOnClaimConflicts', () => {
     'doesnt emit a new delay when conflicts have reduced',
     fakeSchedulers(async () => {
       const pollInterval = 100;
-      const capacity = 10;
+      const maxWorkers = 10;
       const taskLifecycleEvents$ = new Subject<TaskLifecycleEvent>();
 
       const handler = jest.fn();
 
-      delayOnClaimConflicts(of(capacity), of(pollInterval), taskLifecycleEvents$, 80, 2).subscribe(
-        handler
-      );
+      delayOnClaimConflicts(
+        of(maxWorkers),
+        of(pollInterval),
+        taskLifecycleEvents$,
+        80,
+        2
+      ).subscribe(handler);
 
       await sleep(0);
       expect(handler).toHaveBeenCalledWith(0);
@@ -154,6 +161,7 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 8,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: [],
           })
@@ -174,6 +182,7 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 7,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: [],
           })
@@ -192,6 +201,7 @@ describe('delayOnClaimConflicts', () => {
               tasksUpdated: 0,
               tasksConflicted: 9,
               tasksClaimed: 0,
+              tasksRejected: 0,
             },
             docs: [],
           })
