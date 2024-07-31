@@ -279,6 +279,7 @@ export class AlertingPlugin {
         'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
+    this.logger.debug('yo');
 
     const taskManagerStartPromise = core
       .getStartServices()
