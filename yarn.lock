@@ -3418,6 +3418,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-types@link:packages/kbn-apm-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-utils@link:packages/kbn-apm-utils":
   version "0.0.0"
   uid ""

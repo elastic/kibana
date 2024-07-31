@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export interface Url {
-  domain?: string;
-  full: string;
-  original?: string;
-}
+export { Url } from '@kbn/apm-types/es_schemas_raw';

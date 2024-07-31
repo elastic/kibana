@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type EventOutcome = 'success' | 'failure' | 'unknown';
+export { EventOutcome } from '@kbn/apm-types/es_schemas_raw';

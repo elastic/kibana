@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface TimestampUs {
-  us: number;
-}
+export { TimestampUs } from '@kbn/apm-types/es_schemas_raw';
