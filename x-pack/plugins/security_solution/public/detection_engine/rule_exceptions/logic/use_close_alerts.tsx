@@ -76,12 +76,12 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             'in-progress',
           ]);
 
-          const fitlterByRuleIds = buildAlertsFilterByRuleIds(ruleStaticIds);
+          const filterByRuleIds = buildAlertsFilterByRuleIds(ruleStaticIds);
 
           const filter = await getEsQueryFilter(
             '',
             'kuery',
-            [...fitlterByRuleIds, ...alertStatusFilter],
+            [...filterByRuleIds, ...alertStatusFilter],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItems),
             false
