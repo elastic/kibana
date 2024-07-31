@@ -27,11 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('keyboard shortcuts', () => {
-      let tabCount = 1;
+      let tabOpened = false;
       afterEach(async () => {
-        if (tabCount > 1) {
+        if (tabOpened) {
           await browser.closeCurrentWindow();
-          tabCount = 1;
+          tabOpened = false;
           await browser.switchTab(0);
         }
       });
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.console.monaco.pressCtrlSlash();
             await retry.tryForTime(10000, async () => {
               await browser.switchTab(1);
-              tabCount++;
+              tabOpened = true;
             });
 
             // Retry until the documentation is loaded
