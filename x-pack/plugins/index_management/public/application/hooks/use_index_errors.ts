@@ -40,7 +40,7 @@ export const useIndexErrors = (
       const semanticTextFieldsWithErrors = semanticTextFields
         .map((field) => {
           const model = endpoints.find(
-            (endpoint) => endpoint.model_id === field.source.inference_id
+            (endpoint) => endpoint.inference_id === field.source.inference_id
           );
           if (!model) {
             return {
