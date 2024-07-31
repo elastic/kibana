@@ -161,6 +161,39 @@ describe('SpacesGridPage', () => {
     });
   });
 
+  it('renders a "current" badge for the current space', async () => {
+    spacesManager.getActiveSpace.mockResolvedValue(spaces[2]);
+    const current = await spacesManager.getActiveSpace();
+    expect(current.id).toBe('custom-2');
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        getUrlForApp={getUrlForApp}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        solutionNavExperiment={Promise.resolve(true)}
+        {...spacesGridCommonProps}
+      />
+    );
+
+    // allow spacesManager to load spaces and lazy-load SpaceAvatar
+    await act(async () => {});
+    wrapper.update();
+
+    const activeRow = wrapper.find('[data-test-subj="spacesListTableRow-custom-2"]');
+    const nameCell = activeRow.find('[data-test-subj="spacesListTableRowNameCell"]');
+    const activeBadge = nameCell.find('EuiBadge');
+    expect(activeBadge.text()).toBe('current');
+  });
+
   it('renders a create spaces button', async () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);

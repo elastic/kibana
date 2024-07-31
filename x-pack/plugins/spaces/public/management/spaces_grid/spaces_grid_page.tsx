@@ -301,6 +301,7 @@ export class SpacesGridPage extends Component<Props, State> {
             )}
           </EuiFlexGroup>
         ),
+        'data-test-subj': 'spacesListTableRowNameCell',
       },
       {
         field: 'description',
