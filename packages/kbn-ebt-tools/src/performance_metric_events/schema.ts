@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RootSchema } from '@kbn/ebt/client';
+import type { RootSchema } from '@elastic/ebt/client';
 
 /**
  * Structure of the `metric` event
