@@ -8,8 +8,6 @@
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SupportedLogo } from '../shared/logo_icon';
 
-export type SupportedPath = '/kubernetes' | '/otel-logs' | '/auto-detect';
-
 export interface CustomHeaderSection {
   logo?: SupportedLogo;
   euiIconType?: EuiIconType;

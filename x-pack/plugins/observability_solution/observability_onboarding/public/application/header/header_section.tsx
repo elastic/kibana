@@ -9,8 +9,9 @@ import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import backgroundImageUrl from './background.svg';
+import { Header } from './header';
 
-export function Header() {
+export function HeaderSection() {
   return (
     <EuiPageTemplate.Section
       paddingSize="xl"
