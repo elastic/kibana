@@ -148,7 +148,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     selectBulkCloseAlerts();
     submitEditedExceptionItem();
     goToAlertsTab();
-    cy.pause();
 
     cy.get(ALERTS_COUNT).should('contain', '0');
   });
