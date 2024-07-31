@@ -17,7 +17,7 @@ import {
 
 describe('getMiniHistogramAgg', () => {
   it('returns DSL for a mini histogram aggregation', () => {
-    expect(getMiniHistogramAgg(paramsMock, 1234)).toStrictEqual({
+    expect(getMiniHistogramAgg(paramsMock)).toStrictEqual({
       mini_histogram: {
         histogram: {
           extended_bounds: {
@@ -25,7 +25,7 @@ describe('getMiniHistogramAgg', () => {
             min: 0,
           },
           field: 'the-time-field-name',
-          interval: 1234,
+          interval: 2.6315789473684212,
           min_doc_count: 0,
         },
       },
@@ -36,17 +36,13 @@ describe('getMiniHistogramAgg', () => {
 describe('getMiniHistogramDataFromAggResponse', () => {
   it('returns data for a mini histogram chart', () => {
     // overall time series mock
-    const numericChartDataMock: NumericChartData = {
-      data: Object.entries(getDateHistogramBuckets()).map(([key, value]) => ({
-        doc_count: value,
-        key: parseInt(key, 10),
-        key_as_string: new Date(parseInt(key, 10)).toISOString(),
-      })),
-      id: 'the-id',
-      interval: 10,
-      stats: [0, 0],
-      type: 'numeric',
-    };
+    const numericChartDataMock: NumericChartData['data'] = Object.entries(
+      getDateHistogramBuckets()
+    ).map(([key, value]) => ({
+      doc_count: value,
+      key: parseInt(key, 10),
+      key_as_string: new Date(parseInt(key, 10)).toISOString(),
+    }));
 
     // aggregation response mock
     const aggResponseMock: Record<string, MiniHistogramAgg> = {
