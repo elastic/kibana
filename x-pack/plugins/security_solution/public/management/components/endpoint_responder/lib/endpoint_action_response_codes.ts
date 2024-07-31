@@ -288,7 +288,7 @@ const CODES = Object.freeze({
 
   // Dev:
   // scan quota exceeded failure
-  'ra_scan_error-queue-quota': i18n.translate(
+  'ra_scan_error_queue-quota': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.queueQuota',
     { defaultMessage: 'Too many scans are queued' }
   ),
