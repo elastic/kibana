@@ -87,9 +87,11 @@ export const InfrastructurePage = () => {
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
-                        <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
-                        <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
-                        <HeaderLinkAnomalyFlyoutRoute path="/detail/host/:node" />
+                        <Routes>
+                          <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
+                          <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
+                          <HeaderLinkAnomalyFlyoutRoute path="/detail/host/:node" />
+                        </Routes>
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
@@ -149,7 +151,7 @@ const HeaderLinkAnomalyFlyoutRoute = ({ path }: { path: string }) => {
     <Route
       path={path}
       render={() => (
-        <AnomalyDetectionFlyout hideJobType={!isInventory} hideSelectGroup={!isInventory} />
+        <AnomalyDetectionFlyout hideJobType={isInventory} hideSelectGroup={isInventory} />
       )}
     />
   );
