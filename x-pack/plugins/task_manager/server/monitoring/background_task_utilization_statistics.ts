@@ -21,7 +21,7 @@ import {
 } from '../task_events';
 import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { createRunningAveragedStat } from './task_run_calculators';
+import { createRunningAveragedStat } from './task_run_calcultors';
 import { DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW } from '../config';
 
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
