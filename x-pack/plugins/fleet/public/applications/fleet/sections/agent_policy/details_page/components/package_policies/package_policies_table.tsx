@@ -136,7 +136,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                           'xpack.fleet.policyDetails.packagePoliciesTable.disabledEditTitle',
                           {
                             defaultMessage:
-                              'It is not allowed to edit an agentless integration. Please add a new integration if needed.',
+                              'Editing an agentless integration is not supported. Add a new integration if needed.',
                           }
                         )
                       : value
