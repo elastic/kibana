@@ -47,7 +47,12 @@ export class FavoritesService {
       );
     }
 
-    const newFavoriteIds = [...(favoritesSavedObject.attributes.favoriteIds ?? []), id];
+    const newFavoriteIds = [
+      ...(favoritesSavedObject.attributes.favoriteIds ?? []).filter(
+        (favoriteId) => favoriteId !== id
+      ),
+      id,
+    ];
 
     await this.deps.savedObjectClient.update(
       favoritesSavedObjectType.name,
