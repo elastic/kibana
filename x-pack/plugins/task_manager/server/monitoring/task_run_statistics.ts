@@ -35,7 +35,7 @@ import {
   calculateFrequency,
   createRunningAveragedStat,
   createMapOfRunningAveragedStats,
-} from './task_run_calculators';
+} from './task_run_calcultors';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
