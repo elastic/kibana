@@ -19,6 +19,8 @@ export const useEntityResolutions = (entity: SearchEntity) => {
   // HACK: Just using this to trigger the LLM scan. The actual loading state should come from the `allCandidates` query return object
   const [scanning, setScanning] = useState(false);
 
+  const [connectorId, setConnectorId] = useState('');
+
   const verifications = useQuery(['VERIFIED_ENTITY_RESOLUTION', entity], () =>
     fetchEntityRelations({ name: entity.name, type: entity.type }).then((relations) => {
       // TODO: hit the entity store index to retrieve entity data
@@ -31,8 +33,10 @@ export const useEntityResolutions = (entity: SearchEntity) => {
     () => {
       return getConnectors()
         .then((connectors) => {
+          const connector = connectors.find(({ id }) => id === connectorId);
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          const { connector_type_id, id, config } = connectors[0];
+          const { connector_type_id, id, config } = connector ?? connectors[0];
+
           return Promise.all([
             fetchEntityCandidates(
               { name: entity.name, type: entity.type },
@@ -95,6 +99,7 @@ export const useEntityResolutions = (entity: SearchEntity) => {
     markResolved,
     scanning: allCandidates.isFetching,
     setScanning,
+    setConnectorId,
   };
 };
 
