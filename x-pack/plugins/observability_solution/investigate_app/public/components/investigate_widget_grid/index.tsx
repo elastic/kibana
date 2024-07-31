@@ -347,6 +347,7 @@ export function InvestigateWidgetGrid({
             </EuiFlexItem>
           );
         }
+
         return (
           <EuiFlexItem grow={false} key={index}>
             {section.item.chrome === ChromeOption.disabled ? (

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import type { DeepPartial, PickByValue } from 'utility-types';
 import type { AuthenticatedUser } from '@kbn/core/public';
+import type { Filter } from '@kbn/es-query';
+import type { DeepPartial } from 'utility-types';
 
 export interface GlobalWidgetParameters {
   timeRange: {
@@ -64,13 +63,3 @@ export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };
-
-export interface WorkflowBlock {
-  id: string;
-  content?: string;
-  description?: string;
-  loading: boolean;
-  onClick?: () => void;
-  color?: keyof PickByValue<EuiThemeComputed<{}>['colors'], string>;
-  children?: React.ReactNode;
-}

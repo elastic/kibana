@@ -9,7 +9,6 @@ export type {
   InvestigationRevision,
   InvestigateWidget,
   InvestigateWidgetCreate,
-  WorkflowBlock,
 } from './types';
 
 export { mergePlainObjects } from './utils/merge_plain_objects';
