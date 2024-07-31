@@ -11,13 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const DEFAULTS = {
   LOCATION_NAME: `Default location ${uuidv4()}`,
   AGENT_POLICY_NAME: `Synthetics agent policy ${uuidv4()}`,
-  ELASTICSEARCH_HOST: 'http://host.docker.internal:9200',
-  ELASTICSEARCH_USERNAME: 'elastic',
-  ELASTICSEARCH_PASSWORD: 'changeme',
-  ELASTICSEARCH_API_KEY: '',
   KIBANA_URL: 'http://localhost:5601',
   KIBANA_USERNAME: 'elastic',
   KIBANA_PASSWORD: 'changeme',
-  INCLUDE_FLEET_SERVER: true,
-  FLEET_SERVER_URL: 'http://host.docker.internal:8220',
 };

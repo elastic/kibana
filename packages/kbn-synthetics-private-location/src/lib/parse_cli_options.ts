@@ -14,23 +14,9 @@ export function parseCliOptions(): CliOptions {
   const program = new Command();
   program
     .name('synthetics_private_location.js')
-    .description('A data generation tool that will create realistic data with different scenarios.')
-    .option(
-      '--elasticsearch-host <address>',
-      'The address to the Elasticsearch cluster',
-      DEFAULTS.ELASTICSEARCH_HOST
+    .description(
+      'A script to start Fleet Server, enroll Elastic Agent, and create a Synthetics private location'
     )
-    .option(
-      '--elasticsearch-username <username>',
-      'The username to for the Elasticsearch cluster',
-      DEFAULTS.ELASTICSEARCH_USERNAME
-    )
-    .option(
-      '--elasticsearch-password <password>',
-      'The password for the Elasticsearch cluster',
-      DEFAULTS.ELASTICSEARCH_PASSWORD
-    )
-    .option('--elasticsearch-api-key <key>', 'The API key to connect to the Elasticsearch cluster')
     .option('--kibana-url <address>', 'The address to the Kibana server', DEFAULTS.KIBANA_URL)
     .option(
       '--kibana-username <username>',
@@ -41,16 +27,6 @@ export function parseCliOptions(): CliOptions {
       '--kibana-password <password>',
       'The password for the Kibana server',
       DEFAULTS.KIBANA_PASSWORD
-    )
-    .option(
-      '--include-fleet-server <boolean>',
-      'Whether or not to instrument Fleet Server',
-      DEFAULTS.INCLUDE_FLEET_SERVER
-    )
-    .option(
-      '--fleet-server-url <address>',
-      'The address to the Fleet Server',
-      DEFAULTS.FLEET_SERVER_URL
     )
     .option(
       '--location-name <name>',

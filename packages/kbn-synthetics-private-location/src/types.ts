@@ -9,13 +9,7 @@
 export interface CliOptions {
   locationName: string;
   agentPolicyName: string;
-  elasticsearchHost: string;
-  elasticsearchUsername: string;
-  elasticsearchPassword: string;
-  elasticsearchApiKey?: undefined | string;
-  includeFleetServer?: undefined | boolean;
   kibanaUrl: string;
   kibanaUsername: string;
   kibanaPassword: string;
-  fleetServerUrl: string;
 }

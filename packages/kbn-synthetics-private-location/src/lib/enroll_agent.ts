@@ -13,10 +13,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { CliOptions } from '../types';
 
 export async function enrollAgent(
-  { fleetServerUrl, elasticsearchHost }: CliOptions,
+  { fleetServerUrl, kibanaUrl, kibanaPassword, kibanaUsername, elasticsearchHost }: CliOptions,
   logger: ToolingLog,
   enrollmentToken: string
 ) {
+  const formattedKibanaURL = new URL(kibanaUrl);
+  if (formattedKibanaURL.hostname === 'localhost') {
+    formattedKibanaURL.hostname = 'host.docker.internal';
+  }
   await new Promise((res, rej) => {
     try {
       const fleetProcess = spawn(
@@ -32,7 +36,7 @@ export async function enrollAgent(
           '-e',
           'FLEET_INSECURE=1',
           '-e',
-          'KIBANA_HOST=http://host.docker.internal:5601',
+          `KIBANA_HOST=${formattedKibanaURL.href}`,
           '-e',
           'KIBANA_USERNAME=elastic',
           '-e',
