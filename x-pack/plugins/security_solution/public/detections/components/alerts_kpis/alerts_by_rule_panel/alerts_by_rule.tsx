@@ -34,7 +34,7 @@ const COLUMNS: Array<EuiBasicTableColumn<AlertsByRuleData>> = [
   {
     field: 'rule',
     name: ALERTS_HEADERS_RULE_NAME,
-    'data-test-subj': 'detectionsTable-rule',
+    'data-test-subj': 'alert-by-rule-table-rule-name',
     truncateText: true,
     render: (rule: string) => (
       <EuiText size="xs" className="eui-textTruncate">
@@ -57,7 +57,7 @@ const COLUMNS: Array<EuiBasicTableColumn<AlertsByRuleData>> = [
     name: COUNT_TABLE_TITLE,
     dataType: 'number',
     sortable: true,
-    'data-test-subj': 'detectionsTable-count',
+    'data-test-subj': 'alert-by-rule-table-count',
     render: (count: number) => (
       <EuiText grow={false} size="xs">
         <FormattedCount count={count} />
@@ -67,19 +67,19 @@ const COLUMNS: Array<EuiBasicTableColumn<AlertsByRuleData>> = [
   },
 ];
 
+const SORTING: { sort: { field: keyof AlertsByRuleData; direction: SortOrder } } = {
+  sort: {
+    field: 'value',
+    direction: 'desc',
+  },
+};
+
+const PAGINATION: {} = {
+  pageSize: 25,
+  showPerPageOptions: false,
+};
+
 export const AlertsByRule: React.FC<AlertsByRuleProps> = ({ data, isLoading }) => {
-  const sorting: { sort: { field: keyof AlertsByRuleData; direction: SortOrder } } = {
-    sort: {
-      field: 'value',
-      direction: 'desc',
-    },
-  };
-
-  const pagination: {} = {
-    pageSize: 25,
-    showPerPageOptions: false,
-  };
-
   return (
     <Wrapper data-test-subj="alerts-by-rule">
       <EuiSpacer size="xs" />
@@ -89,8 +89,8 @@ export const AlertsByRule: React.FC<AlertsByRuleProps> = ({ data, isLoading }) =
           columns={COLUMNS}
           items={data}
           loading={isLoading}
-          sorting={sorting}
-          pagination={pagination}
+          sorting={SORTING}
+          pagination={PAGINATION}
         />
       </TableWrapper>
     </Wrapper>

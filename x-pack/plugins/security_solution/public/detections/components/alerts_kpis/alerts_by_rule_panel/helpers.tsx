@@ -25,7 +25,7 @@ export const parseAlertsRuleData = (
 };
 
 export const getIsAlertsByRuleData = (data: SummaryChartsData[]): data is AlertsByRuleData[] => {
-  return data?.every((x) => has(x, 'rule'));
+  return data.length > 0 && data.every((x) => has(x, 'rule'));
 };
 
 export const getIsAlertsByRuleAgg = (
