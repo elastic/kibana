@@ -25,7 +25,7 @@ export class Builder {
   });
 
   /**
-   * Constructs a number literal node.
+   * Constructs a integer literal node.
    */
   public static readonly numericLiteral = (
     template: Omit<AstNodeTemplate<ESQLNumberLiteral>, 'literalType' | 'name'>
@@ -34,7 +34,7 @@ export class Builder {
       ...template,
       ...Builder.parserFields(template),
       type: 'literal',
-      literalType: 'number',
+      literalType: 'integer',
       name: template.value.toString(),
     };
 
