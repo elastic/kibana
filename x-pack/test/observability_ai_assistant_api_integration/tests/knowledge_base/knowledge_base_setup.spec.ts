@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteKnowledgeBaseModel, createKnowledgeBaseModel, TINY_ELSER } from './helpers';
+import { deleteKnowledgeBaseModel, createKnowledgeBaseModel } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
