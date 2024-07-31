@@ -53,7 +53,11 @@ export const SetupTechnologySelector = ({
       />
     );
     return (
-      <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+        data-test-subj="setup-technology-agentless-option"
+      >
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
           <EuiBetaBadge
