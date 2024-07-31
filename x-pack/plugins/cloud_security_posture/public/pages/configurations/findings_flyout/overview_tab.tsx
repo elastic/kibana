@@ -31,7 +31,13 @@ import {
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown, RuleNameLink } from './findings_flyout';
+import {
+  CisKubernetesIcons,
+  CodeBlock,
+  CspFlyoutMarkdown,
+  EMPTY_VALUE,
+  RuleNameLink,
+} from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
@@ -49,7 +55,7 @@ const getDetailsList = (
     description: data.rule?.name ? (
       <RuleNameLink ruleFlyoutLink={ruleFlyoutLink} ruleName={data.rule.name} />
     ) : (
-      '-'
+      EMPTY_VALUE
     ),
   },
   {
@@ -69,14 +75,16 @@ const getDetailsList = (
         ))}
       </>
     ) : (
-      '-'
+      EMPTY_VALUE
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
       defaultMessage: 'Evaluated at',
     }),
-    description: data['@timestamp'] ? moment(data['@timestamp']).format(CSP_MOMENT_FORMAT) : '-',
+    description: data['@timestamp']
+      ? moment(data['@timestamp']).format(CSP_MOMENT_FORMAT)
+      : EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
@@ -89,20 +97,20 @@ const getDetailsList = (
           benchmarkName={data.rule?.benchmark?.name}
         />
       ) : (
-        '-'
+        EMPTY_VALUE
       ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
       defaultMessage: 'Framework Section',
     }),
-    description: data.rule?.section ? data.rule?.section : '-',
+    description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
       defaultMessage: 'Source',
     }),
-    description: getDatasetDisplayName(data.data_stream?.dataset) || '-',
+    description: getDatasetDisplayName(data.data_stream?.dataset) || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
@@ -122,14 +130,14 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     description: rule?.remediation ? (
       <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>
     ) : (
-      '-'
+      EMPTY_VALUE
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
       defaultMessage: 'Impact',
     }),
-    description: rule?.impact ? <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown> : '-',
+    description: rule?.impact ? <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown> : EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
@@ -138,14 +146,18 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     description: rule?.default_value ? (
       <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>
     ) : (
-      '-'
+      EMPTY_VALUE
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
       defaultMessage: 'Rationale',
     }),
-    description: rule?.rationale ? <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown> : '-',
+    description: rule?.rationale ? (
+      <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
   },
 ];
 
