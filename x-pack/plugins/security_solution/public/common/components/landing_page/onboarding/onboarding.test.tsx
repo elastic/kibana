@@ -89,7 +89,7 @@ describe('OnboardingComponent', () => {
       render();
       expect(renderResult.getByTestId('avcReadTheBlog')).toHaveAttribute(
         'href',
-        'https://www.elastic.co/blog/elastic-security-malware-protection-test-av-comparatives'
+        'https://www.elastic.co/blog/elastic-av-comparatives-business-security-test'
       );
     });
 

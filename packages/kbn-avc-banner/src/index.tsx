@@ -15,9 +15,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import avcBannerBackground from './avc_banner_background.svg';
 
 // Logic to hide banner at EOY 2024
-export const useIsStillYear2024: boolean = () => {
-  useMemo(() => {
-    new Date().getFullYear() === 2024;
+export const useIsStillYear2024: () => boolean = () => {
+  return useMemo(() => {
+    return new Date().getFullYear() === 2024;
   }, []);
 };
 
