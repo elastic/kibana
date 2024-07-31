@@ -53,11 +53,7 @@ export const SetupTechnologySelector = ({
       />
     );
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        responsive={false}
-        data-test-subj="setup-technology-agentless-option"
-      >
+      <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
           <EuiBetaBadge
@@ -85,6 +81,7 @@ export const SetupTechnologySelector = ({
   const options = [
     {
       value: SetupTechnology.AGENT_BASED,
+      'data-test-subj': 'setup-technology-agent-based-option',
       inputDisplay: (
         <FormattedMessage
           id="xpack.csp.fleetIntegration.setupTechnology.agentbasedInputDisplay"
@@ -113,6 +110,7 @@ export const SetupTechnologySelector = ({
     {
       value: SetupTechnology.AGENTLESS,
       inputDisplay: agentlessOptionBadge(false),
+      'data-test-subj': 'setup-technology-agentless-option',
       dropdownDisplay: (
         <>
           {agentlessOptionBadge(true)}

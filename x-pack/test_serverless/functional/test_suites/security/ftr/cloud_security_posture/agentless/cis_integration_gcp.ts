@@ -38,11 +38,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
 
-        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
-        await agentlessButton.click();
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -54,9 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -71,11 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -86,11 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
 
         await cisIntegration.clickOptionButton(CIS_GCP_OPTION_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 

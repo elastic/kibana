@@ -6,8 +6,6 @@
  */
 const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
 const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
-const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 
 const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
@@ -15,7 +13,7 @@ import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-p
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'settings',
     'common',
@@ -30,7 +28,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     const previousPackageVersion = '1.9.0';
-    const testSubjects = getService('testSubjects');
 
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -46,11 +43,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
 
-        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
-        await agentlessButton.click();
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
@@ -67,11 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-
-        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
-        await agentlessButton.click();
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
@@ -89,11 +79,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
 
-        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
-        await agentlessButton.click();
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
@@ -107,11 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
 
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-
-        const agentlessButton = await testSubjects.find('setup-technology-agentless-option');
-        await agentlessButton.click();
+        await cisIntegration.selectSetupTechnology('agentless');
 
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');

@@ -17,6 +17,9 @@ export function AddCisIntegrationFormPageProvider({
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
 
+  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
+  const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+
   const cisAzure = {
     getPostInstallArmTemplateModal: async () => {
       return await testSubjects.find('postInstallAzureArmTemplateModal');
@@ -207,6 +210,18 @@ export function AddCisIntegrationFormPageProvider({
     await advancedAccordian.click();
   };
 
+  const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
+    await clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+    await clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+
+    const agentButton = await testSubjects.find(
+      setupTechnology === 'agentless'
+        ? 'setup-technology-agentless-option'
+        : 'setup-technology-agent-based-option'
+    );
+    await agentButton.click();
+  };
+
   const clickOptionButton = async (text: string) => {
     const optionToBeClicked = await findOptionInPage(text);
     await optionToBeClicked.scrollIntoView();
@@ -317,6 +332,7 @@ export function AddCisIntegrationFormPageProvider({
     getIntegrationFormEditPage,
     findOptionInPage,
     clickOptionButton,
+    selectSetupTechnology,
     clickSaveButton,
     clickSaveIntegrationButton,
     clickAccordianButton,
