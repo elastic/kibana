@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-
-export function isBackfillEnabled(definition: EntityDefinition) {
-  return definition.history.settings.backfillSyncDelay != null;
+export class EntityManagerUnauthorizedError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
 }
