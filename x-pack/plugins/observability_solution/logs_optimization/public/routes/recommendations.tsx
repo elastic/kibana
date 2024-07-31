@@ -7,7 +7,6 @@
 import {
   EuiAccordion,
   EuiButton,
-  EuiButtonEmpty,
   EuiCode,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -19,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { FieldName } from '@kbn/fields-metadata-plugin/common';
@@ -35,12 +34,8 @@ export const RecommendationsRoute = () => {
   const { services } = useKibanaContextForPlugin();
   const { useRecommendations, serverless, chrome } = services;
 
-  const { dataStream: queryDataStream } = useParams<{ dataStream: string }>();
+  const { dataStream } = useParams<{ dataStream: string }>();
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
-
-  const dataStreamFieldRef = useRef<HTMLInputElement | null>(null);
-
-  const [dataStream, setDataStream] = useState(queryDataStream);
 
   const { recommendations, loading, error, applyRecommendation } = useRecommendations(
     { dataStream },
@@ -51,32 +46,9 @@ export const RecommendationsRoute = () => {
     <LogsOptimizationPageTemplate
       restrictWidth
       pageHeader={{
-        pageTitle: 'Recommendations',
+        pageTitle: `Logs optimizations for ${dataStream}`,
       }}
     >
-      <EuiSpacer />
-      <EuiFieldText
-        inputRef={dataStreamFieldRef}
-        data-test-subj="logsOptimizationRecommendationsRouteFieldText"
-        name="dataStream"
-        defaultValue={dataStream}
-        prepend="Dataset"
-        append={
-          <EuiButtonEmpty
-            data-test-subj="logsOptimizationRecommendationsRouteButtonButton"
-            size="xs"
-            onClick={() => {
-              if (dataStreamFieldRef.current?.value) {
-                setDataStream(dataStreamFieldRef.current?.value);
-              }
-            }}
-          >
-            {i18n.translate('app_not_found_in_i18nrc.recommendationsRoute.buttonButtonEmptyLabel', {
-              defaultMessage: 'Find suggestions',
-            })}
-          </EuiButtonEmpty>
-        }
-      />
       <EuiSpacer size="xxl" />
       {Boolean(loading && !recommendations) && 'Loading...'}
       {error && error.message}
@@ -147,8 +119,12 @@ const FieldExtractionRecommendation = ({
         {i18n.translate('app_not_found_in_i18nrc.extractionRecommendation.extractLabel', {
           defaultMessage: 'Extract {targetField} from {sourceField}',
           values: {
-            targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
-            sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+            targetField: (
+              <EuiCode key="targetField">{recommendation.detection.targetField}</EuiCode>
+            ),
+            sourceField: (
+              <EuiCode key="sourceField">{recommendation.detection.sourceField}</EuiCode>
+            ),
           },
         })}
       </h3>
@@ -201,8 +177,12 @@ const FieldExtractionRecommendation = ({
                   defaultMessage:
                     'We can extract the {targetField} field from this dataStream {sourceField} field.',
                   values: {
-                    targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
-                    sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+                    targetField: (
+                      <EuiCode key="targetField">{recommendation.detection.targetField}</EuiCode>
+                    ),
+                    sourceField: (
+                      <EuiCode key="sourceField">{recommendation.detection.sourceField}</EuiCode>
+                    ),
                   },
                 }
               )}
@@ -574,7 +554,7 @@ const MappingGapRecommendation = ({
           <EuiFlexItem grow={4}>
             <EuiFlexGroup direction="column">
               {recommendation.detection.gaps.map((gap) => (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} key={gap.field}>
                   <EuiFlexGroup alignItems="center">
                     <EuiFieldText
                       data-test-subj="logsOptimizationMappingGapRecommendationFieldText"
