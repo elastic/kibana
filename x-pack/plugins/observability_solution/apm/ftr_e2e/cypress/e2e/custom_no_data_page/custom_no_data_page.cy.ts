@@ -23,11 +23,10 @@ describe('Custom no data page', () => {
   });
 
   it('shows the custom no data screen when entity centric experience is enabled', () => {
-    cy.visitKibana('/app/apm');
     cy.updateAdvancedSettings({
       'observability:entityCentricExperience': true,
     });
-
+    cy.visitKibana('/app/apm');
     cy.contains('Welcome to Elastic Observability!').should('not.exist');
     cy.contains('Detect and resolve problems with your application');
     cy.contains('Try collecting services from logs');
