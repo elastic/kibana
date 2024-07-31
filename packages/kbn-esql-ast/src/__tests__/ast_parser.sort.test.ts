@@ -36,7 +36,7 @@ describe('SORT', () => {
       ]);
     });
 
-    // Un-skip one https://github.com/elastic/kibana/issues/189491 fixed.
+    // Un-skip once https://github.com/elastic/kibana/issues/189491 fixed.
     it.skip('can parse various sorting columns with options', () => {
       const text =
         'FROM a | SORT a, b ASC, c DESC, d NULLS FIRST, e NULLS LAST, f ASC NULLS FIRST, g DESC NULLS LAST';
