@@ -7,9 +7,11 @@
  */
 
 import React, { useContext, useState } from 'react';
+import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { calcFieldCounts } from '@kbn/discover-utils';
 import { copyRowsAsTextToClipboard } from '../utils/copy_value_to_clipboard';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -36,8 +38,20 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
       disabled={isProcessing}
       onClick={async () => {
         setIsProcessing(true);
+
+        const outputColumns = columns.reduce((acc, column) => {
+          if (column === '_source') {
+            // split Document column into individual columns
+            const fieldCounts = calcFieldCounts(rows);
+            acc.push(...Object.keys(fieldCounts).sort());
+            return acc;
+          }
+          acc.push(column);
+          return acc;
+        }, [] as string[]);
+
         await copyRowsAsTextToClipboard({
-          columns,
+          columns: uniq(outputColumns),
           // preserving the original order of rows rather than the order of selecting rows
           selectedRowIndices: rows.reduce((acc, row, index) => {
             if (isDocSelected(row.id)) {
