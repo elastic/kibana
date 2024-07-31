@@ -25,7 +25,7 @@ export function mergeTags(
 
   // To streamline API endpoints categorization it's expected that
   // tags are sorted alphabetically by name
-  merged.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+  merged.sort((a, b) => a.name.localeCompare(b.name));
 
   return merged;
 }
