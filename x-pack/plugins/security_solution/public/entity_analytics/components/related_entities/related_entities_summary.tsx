@@ -95,11 +95,14 @@ export const RelatedEntitiesSummaryContent: React.FC<Props> = ({ resolution, onO
     return <EuiLoadingSpinner size="xl" />;
   }
 
-  if (resolution.verifications.data && resolution.verifications.data.length > 0) {
+  if (
+    resolution.verifications.data &&
+    resolution.verifications.data.relatedEntitiesDocs.length > 0
+  ) {
     return (
       <EuiBasicTable
         tableCaption="Verified as the same entity"
-        items={resolution.verifications.data}
+        items={resolution.verifications.data.relatedEntitiesDocs}
         rowHeader="firstName"
         columns={entityColumns}
       />
@@ -142,7 +145,7 @@ export const RelatedEntitiesSummaryContent: React.FC<Props> = ({ resolution, onO
 
 const entityColumns: Array<EuiBasicTableColumn<EntityResolutionSuggestion>> = [
   {
-    field: 'related_entity.name',
+    field: 'user.name',
     name: 'Entity',
 
     render: (name: string) => <EuiText>{name}</EuiText>,

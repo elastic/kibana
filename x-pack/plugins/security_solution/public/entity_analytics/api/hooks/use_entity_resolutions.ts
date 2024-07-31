@@ -13,8 +13,13 @@ import type { RelatedEntityRelation } from '../../../../common/api/entity_analyt
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const useEntityResolutions = (entity: SearchEntity) => {
-  const { fetchEntityCandidates, fetchEntityRelations, createEntityRelation, getConnectors } =
-    useEntityAnalyticsRoutes();
+  const {
+    fetchEntityCandidates,
+    fetchEntityRelations,
+    createEntityRelation,
+    getConnectors,
+    fetchEntity,
+  } = useEntityAnalyticsRoutes();
 
   // HACK: Just using this to trigger the LLM scan. The actual loading state should come from the `allCandidates` query return object
   const [scanning, setScanning] = useState(false);
@@ -23,8 +28,14 @@ export const useEntityResolutions = (entity: SearchEntity) => {
 
   const verifications = useQuery(['VERIFIED_ENTITY_RESOLUTION', entity], () =>
     fetchEntityRelations({ name: entity.name, type: entity.type }).then((relations) => {
-      // TODO: hit the entity store index to retrieve entity data
-      return relations;
+      const promises = relations
+        .filter((r) => r.relation === 'is_same' && r.entity.name === entity.name)
+        .map((r) => fetchEntity(r.related_entity.id));
+      return Promise.all(promises)
+        .then((response) => response.flat())
+        .then((relatedEntitiesDocs) => {
+          return { relatedEntitiesDocs, relations };
+        });
     })
   );
 
@@ -53,7 +64,7 @@ export const useEntityResolutions = (entity: SearchEntity) => {
   );
 
   const resolutions = useMemo(() => {
-    const relations = verifications.data || [];
+    const relations = verifications.data?.relations || [];
     const same = relations
       .filter((r) => r.relation === 'is_same' && r.entity.name === entity.name)
       .map((r) => r.related_entity);
@@ -66,7 +77,7 @@ export const useEntityResolutions = (entity: SearchEntity) => {
     }
 
     const notVerified = (candidate: EntityResolutionCandidate) => {
-      return verifications.data?.every(
+      return verifications.data?.relations.every(
         (r) => r.related_entity.id !== candidate.id && r.entity.name === entity.name
       );
     };

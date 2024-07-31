@@ -41,8 +41,8 @@ export const getEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router']) =>
           const entityStoreDataClient = securitySolution.getEntityStoreDataClient();
 
           const entities = await entityStoreDataClient.search({
-            entityType: request.query.entity_type,
-            entityIds: request.query.entity_id,
+            entityType: request.query.entity_type || 'user',
+            entityIds: [request.query.entity_id],
           });
 
           return response.ok({

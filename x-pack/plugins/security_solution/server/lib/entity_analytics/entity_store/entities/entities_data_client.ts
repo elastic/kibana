@@ -38,7 +38,7 @@ export class EntityStoreDataClient {
   }: SearchParams): Promise<EntityRecord[]> {
     const query: ESFilter = {
       terms: {
-        'entity.id': entityIds,
+        _id: entityIds,
       },
     };
 

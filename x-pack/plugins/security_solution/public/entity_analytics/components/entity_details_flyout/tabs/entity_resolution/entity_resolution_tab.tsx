@@ -28,7 +28,6 @@ import { css } from '@emotion/css';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { noop } from 'lodash/fp';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import type { EntityRelationRecord } from '../../../../../../common/api/entity_analytics/entity_store/relations/common.gen';
 import { USER_PREVIEW_BANNER } from '../../../../../flyout/document_details/right/components/user_entity_overview';
 import { UserPreviewPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useEntityResolutions } from '../../../../api/hooks/use_entity_resolutions';
@@ -67,16 +66,18 @@ export const EntityResolutionTab = ({ username, scopeId }: Props) => {
     return <EuiLoadingElastic size="xl" />;
   }
 
-  const related = ER.resolutions.same.length > 0 && (
+  const related = ER.verifications.data && ER.verifications.data.relatedEntitiesDocs.length > 0 && (
     <>
       <EuiText>{'Related Entities'}</EuiText>
       <EuiSpacer size="s" />
 
-      {ER.resolutions.same.map((entity) => (
+      {(ER.verifications.data?.relatedEntitiesDocs).map((doc) => (
         <RelatedEntity
-          {...entity}
-          key={entity.id}
-          openPreviewPanel={() => openPreview(entity?.name)}
+          doc={doc}
+          id={doc.entity.id}
+          name={doc.user.name}
+          key={doc.entity.id}
+          openPreviewPanel={() => openPreview(doc?.user.name)}
         />
       ))}
     </>
@@ -226,11 +227,19 @@ const Candidate: React.FC<CandidateProps> = ({
   );
 };
 
-type RelatedEntityProps = EntityRelationRecord['related_entity'] & {
+interface RelatedEntityProps {
+  doc: {};
+  id: string;
+  name: string;
   openPreviewPanel: (id: string) => void;
-};
+}
 
-const RelatedEntity: React.FC<RelatedEntityProps> = ({ id, name, openPreviewPanel = noop }) => {
+const RelatedEntity: React.FC<RelatedEntityProps> = ({
+  id,
+  name,
+  openPreviewPanel = noop,
+  doc,
+}) => {
   const entityDataContent = (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
       <EntityLogo document={document} />
@@ -254,7 +263,10 @@ const RelatedEntity: React.FC<RelatedEntityProps> = ({ id, name, openPreviewPane
       <EuiPanel hasBorder>
         <EuiAccordion id={id} buttonContent={entityDataContent} extraAction={entityActions}>
           <EuiSpacer size="m" />
-          <JsonCodeEditor json={document as unknown as Record<string, unknown>} height={300} />
+          <JsonCodeEditor
+            json={{ ...doc, id, name } as unknown as Record<string, unknown>}
+            height={300}
+          />
         </EuiAccordion>
       </EuiPanel>
       <EuiSpacer size="xs" />

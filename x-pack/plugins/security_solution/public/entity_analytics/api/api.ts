@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { ENTITY_RESOLUTION } from '@kbn/elastic-assistant-plugin/common/constants';
 import type { EntityResolutionPostResponse, SearchEntity } from '@kbn/elastic-assistant-common';
 import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
+import type { EntityRecord } from '../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { EntityRelationRecord } from '../../../common/api/entity_analytics/entity_store/relations/common.gen';
 import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
@@ -46,7 +47,10 @@ import {
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import { ENTITY_STORE_GET_RELATIONS_URL } from '../../../common/entity_analytics/entity_store/constants';
+import {
+  ENTITY_STORE_GET_ENTITIES_URL,
+  ENTITY_STORE_GET_RELATIONS_URL,
+} from '../../../common/entity_analytics/entity_store/constants';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -278,6 +282,18 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(relation),
       });
 
+    /**
+     * Fetches entities
+     */
+    const fetchEntity = async (id: string) =>
+      http.fetch<EntityRecord>(ENTITY_STORE_GET_ENTITIES_URL, {
+        version: '1',
+        method: 'GET',
+        query: {
+          entity_id: id,
+        },
+      });
+
     const getConnectors = async () => {
       return http.fetch<AllConnectorsResponseV1[]>('/api/actions/connectors', {
         method: 'GET',
@@ -303,6 +319,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntityRelations,
       createEntityRelation,
       getConnectors,
+      fetchEntity,
     };
   }, [http]);
 };

@@ -26,17 +26,12 @@ paths:
           name: entity_id
           required: true
           schema:
-            type: array
-            items:
-              type: string
-          style: form
-          explode: true
+            type: string
+           
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: './common.schema.yaml#/components/schemas/EntityRecord'
+                $ref: './common.schema.yaml#/components/schemas/EntityRecord'
