@@ -38,6 +38,9 @@ Saved objects can only be imported into the same version, a newer minor on the s
 
 `space_id`::
   (Optional, string) An identifier for the <<xpack-spaces,space>>. If `space_id` is not provided in the URL, the default space is used.
++
+NOTE: It is possible to specify a non-existing `space_id`.  The objects will be imported and will be available if the space is later created.
+
 
 [[saved-objects-api-import-query-params]]
 ==== Query parameters
