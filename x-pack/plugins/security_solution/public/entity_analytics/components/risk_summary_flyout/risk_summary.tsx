@@ -51,14 +51,16 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
-const RiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
   recalculatingScore,
   queryId,
   openDetailsPanel,
+  isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -189,7 +191,9 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           link: riskScoreData.loading
             ? undefined
             : {
-                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                callback: openDetailsPanel
+                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                  : undefined,
                 tooltip: (
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
@@ -197,7 +201,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   />
                 ),
               },
-          iconType: 'arrowStart',
+          iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,
@@ -283,5 +287,5 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 };
 
-export const RiskSummary = React.memo(RiskSummaryComponent);
-RiskSummary.displayName = 'RiskSummary';
+export const FlyoutRiskSummary = React.memo(FlyoutRiskSummaryComponent);
+FlyoutRiskSummary.displayName = 'RiskSummary';

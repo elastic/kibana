@@ -5,6 +5,7 @@ info:
 paths:
   /api/lists/items/_export:
     post:
+      x-labels: [serverless, ess]
       operationId: ExportListItems
       x-codegen-enabled: true
       summary: Exports list items

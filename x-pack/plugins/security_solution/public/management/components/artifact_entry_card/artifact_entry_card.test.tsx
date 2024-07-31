@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import type { ArtifactEntryCardProps } from './artifact_entry_card';
+import type {
+  ArtifactEntryCardDecoratorProps,
+  ArtifactEntryCardProps,
+} from './artifact_entry_card';
 import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
 import type { AnyArtifact } from './types';
@@ -267,6 +270,20 @@ describe.each([
       ).not.toBeNull();
 
       expect(renderResult.getByText('policy-1').textContent).not.toBeNull();
+    });
+
+    it('should pass item to decorator function and display its result', () => {
+      let passedItem: ArtifactEntryCardDecoratorProps['item'] | null = null;
+      const MockDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
+        passedItem = actualItem;
+        return <p>{'mock decorator'}</p>;
+      });
+      MockDecorator.displayName = 'MockDecorator';
+
+      render({ Decorator: MockDecorator });
+
+      expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
+      expect(passedItem).toBe(item);
     });
   });
 });

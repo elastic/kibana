@@ -5,65 +5,45 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import { useLoadIndexMappings } from '../../../../../services';
 import { getFieldConfig } from '../../../lib';
-import { Form, SuperSelectField, UseField, useForm } from '../../../shared_imports';
+import { useMappingsState } from '../../../mappings_state_context';
+import { SuperSelectField, UseField } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
 
-interface Props {
-  onChange(value: string): void;
-  'data-test-subj'?: string;
-  indexName?: string;
-}
+export const ReferenceFieldSelects = () => {
+  const { fields, mappingViewFields } = useMappingsState();
 
-export const ReferenceFieldSelects = ({
-  onChange,
-  'data-test-subj': dataTestSubj,
-  indexName,
-}: Props) => {
-  const { form } = useForm();
-  const { subscribe } = form;
+  const allFields = {
+    byId: {
+      ...mappingViewFields.byId,
+      ...fields.byId,
+    },
+    rootLevelFields: [],
+    aliases: {},
+    maxNestedDepth: 0,
+  };
 
-  const { data } = useLoadIndexMappings(indexName ?? '');
-  const referenceFieldOptions: SuperSelectOption[] = [];
-  if (data && data.mappings && data.mappings.properties) {
-    Object.keys(data.mappings.properties).forEach((key) => {
-      const field = data.mappings.properties[key];
-      if (field.type === 'text') {
-        referenceFieldOptions.push({
-          value: key,
-          inputDisplay: key,
-          'data-test-subj': `select-reference-field-${key}`,
-        });
-      }
-    });
-  }
+  const referenceFieldOptions: SuperSelectOption[] = Object.values(allFields.byId)
+    .filter((field) => field.source.type === 'text' && !field.isMultiField)
+    .map((field) => ({
+      value: field.path.join('.'),
+      inputDisplay: field.path.join('.'),
+      'data-test-subj': `select-reference-field-${field.path.join('.')}}`,
+    }));
   const fieldConfigReferenceField = getFieldConfig('reference_field');
-
-  useEffect(() => {
-    const subscription = subscribe((updateData) => {
-      const formData = updateData.data.internal;
-      const value = formData.main;
-      onChange(value);
-    });
-
-    return subscription.unsubscribe;
-  }, [subscribe, onChange]);
   return (
-    <Form form={form} data-test-subj="referenceField">
-      <UseField path="main" config={fieldConfigReferenceField}>
-        {(field) => (
-          <SuperSelectField
-            field={field}
-            euiFieldProps={{
-              options: referenceFieldOptions,
-            }}
-            data-test-subj={dataTestSubj}
-          />
-        )}
-      </UseField>
-    </Form>
+    <UseField path="reference_field" config={fieldConfigReferenceField}>
+      {(field) => (
+        <SuperSelectField
+          field={field}
+          euiFieldProps={{
+            options: referenceFieldOptions,
+          }}
+          data-test-subj="referenceFieldSelect"
+        />
+      )}
+    </UseField>
   );
 };

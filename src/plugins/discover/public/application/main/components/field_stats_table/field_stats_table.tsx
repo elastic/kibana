@@ -20,6 +20,7 @@ import {
   SmartFieldFallbackTooltip,
 } from '@kbn/unified-field-list';
 import type { DataVisualizerTableItem } from '@kbn/data-visualizer-plugin/public/application/common/components/stats_table/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 
@@ -51,10 +52,16 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
     trackUiMetric,
     searchSessionId,
     additionalFieldGroups,
+    timeRange,
   } = props;
 
   const visibleFields = useMemo(
-    () => convertFieldsToFallbackFields({ fields: columns, additionalFieldGroups }),
+    () =>
+      convertFieldsToFallbackFields({
+        // `discover:searchFieldsFromSource` adds `_source` to the columns, but we should exclude it for Field Statistics
+        fields: columns.filter((col) => col !== '_source'),
+        additionalFieldGroups,
+      }),
     [additionalFieldGroups, columns]
   );
   const allFallbackFields = useMemo(
@@ -156,6 +163,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         dataView={dataView}
         savedSearch={savedSearch}
         filters={filters}
+        esqlQuery={isEsqlMode && isOfAggregateQueryType(query) ? query : undefined}
         query={query}
         visibleFieldNames={visibleFields}
         sessionId={searchSessionId}
@@ -166,8 +174,9 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
         showPreviewByDefault={showPreviewByDefault}
         onTableUpdate={updateState}
         renderFieldName={renderFieldName}
-        esql={isEsqlMode}
+        isEsqlMode={isEsqlMode}
         overridableServices={overridableServices}
+        timeRange={timeRange}
       />
     </EuiFlexItem>
   );

@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       it('dataset quality table exists', async () => {
-        await PageObjects.datasetQuality.navigateTo();
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTable
         );

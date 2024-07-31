@@ -7,13 +7,13 @@
 
 import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
-import type { Datastream } from '../../common';
+import type { DataStream } from '../../common';
 import { copySync, createSync, ensureDirSync, listDirSync } from '../util';
 
-export function createDatastream(
+export function createDataStream(
   packageName: string,
   specificDataStreamDir: string,
-  dataStream: Datastream
+  dataStream: DataStream
 ): void {
   const dataStreamName = dataStream.name;
   const pipelineDir = joinPath(specificDataStreamDir, 'elasticsearch', 'ingest_pipeline');
@@ -40,16 +40,6 @@ export function createDatastream(
 
     const combinedManifest = `${dataStreamManifest}\n${commonManifest}`;
     dataStreams.push(combinedManifest);
-
-    // We comment this out for now, as its not really needed for custom integrations
-    /* createDataStreamSystemTests(
-      specificDataStreamDir,
-      inputType,
-      mappedValues,
-      packageName,
-      dataStreamName
-    );
-    */
   }
 
   const finalManifest = nunjucks.render('data_stream.yml.njk', {
@@ -96,27 +86,3 @@ function createPipelineTests(
   );
   createSync(testFileName, rawSamples.join('\n'));
 }
-
-// We are skipping this one for now, as its not really needed for custom integrations
-/* function createDataStreamSystemTests(
-  specificDataStreamDir: string,
-  inputType: string,
-  mappedValues: Record<string, string>,
-  packageName: string,
-  dataStreamName: string
-): void {
-  const systemTestTemplatesDir = joinPath(__dirname, '../templates/system_tests');
-  nunjucks.configure({ autoescape: true });
-  const env = new nunjucks.Environment(new nunjucks.FileSystemLoader(systemTestTemplatesDir));
-  mappedValues.package_name = packageName.replace(/_/g, '-');
-  mappedValues.data_stream_name = dataStreamName.replace(/_/g, '-');
-  const systemTestFolder = joinPath(specificDataStreamDir, '_dev/test/system');
-
-  fs.mkdirSync(systemTestFolder, { recursive: true });
-
-  const systemTestTemplate = env.getTemplate(`test_${inputType.replaceAll('-', '_')}_config.yml.njk`);
-  const systemTestRendered = systemTestTemplate.render(mappedValues);
-
-  const systemTestFileName = joinPath(systemTestFolder, `test-${inputType}-config.yml`);
-  fs.writeFileSync(systemTestFileName, systemTestRendered, 'utf-8');
-}*/

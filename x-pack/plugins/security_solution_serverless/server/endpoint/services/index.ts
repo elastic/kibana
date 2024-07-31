@@ -6,4 +6,4 @@
  */
 
 export { endpointMeteringService } from './metering_service';
-export { setEndpointPackagePolicyServerlessFlag } from './set_package_policy_flag';
+export { setEndpointPackagePolicyServerlessBillingFlags } from './set_package_policy_flag';

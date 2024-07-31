@@ -408,7 +408,7 @@ const GcpAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
             />
           </EuiText>
         </>
@@ -533,14 +533,13 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
-    agentPolicy,
     newPolicy,
     onChange,
     validationResults,
     isEditPage,
     packageInfo,
     handleSetupTechnologyChange,
-    agentlessPolicy,
+    isAgentlessEnabled,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
@@ -551,8 +550,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
-      agentPolicy,
-      agentlessPolicy,
+      isAgentlessEnabled,
       handleSetupTechnologyChange,
       isEditPage,
     });
@@ -781,6 +779,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           setIsValid={setIsValid}
           disabled={isEditPage}
           setupTechnology={setupTechnology}
+          isEditPage={isEditPage}
         />
         <EuiSpacer />
       </>

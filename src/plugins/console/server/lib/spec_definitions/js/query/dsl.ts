@@ -517,10 +517,10 @@ export const query = (specService: SpecDefinitionsService) => {
         format: 'dd/MM/yyyy||yyyy',
       },
     },
-    rule_query: {
+    rule: {
       __template: {
         organic: {},
-        ruleset_id: '',
+        ruleset_ids: [''],
         match_criteria: {
           FIELD: 'VALUE',
         },
@@ -582,6 +582,18 @@ export const query = (specService: SpecDefinitionsService) => {
       __template: spanWithinTemplate,
       little: SPAN_QUERIES,
       big: SPAN_QUERIES,
+    },
+    sparse_vector: {
+      field: 'NAME',
+      inference_id: '',
+      query: '',
+      prune: true,
+      pruning_config: {
+        tokens_freq_ratio_threshold: 5,
+        tokens_weight_threshold: 0.4,
+        only_score_pruned_tokens: false,
+      },
+      query_vector: [],
     },
     term: {
       __template: {

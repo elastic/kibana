@@ -16,7 +16,7 @@ paths:
   /api/timeline/_import:
     post:
       operationId: importTimelines
-      description: Imports timelines.
+      summary: Imports timelines.
       tags:
         - access:securitySolution
       requestBody:
@@ -40,7 +40,7 @@ paths:
                           headers:
                             type: object
       responses:
-        200:
+        '200':
           description: Indicates the import of timelines was successful.
           content:
             application/json:
@@ -52,7 +52,7 @@ paths:
                 required:
                   - data
 
-        400:
+        '400':
           description: Indicates the import of timelines was unsuccessful because of an invalid file extension.
           content:
             application/json:
@@ -66,7 +66,7 @@ paths:
                   statusCode:
                     type: number
 
-        404:
+        '404':
           description: Indicates that we were unable to locate the saved object client necessary to handle the import.
           content:
             application/json:
@@ -77,7 +77,7 @@ paths:
                     type: string
                   statusCode:
                     type: number
-        409:
+        '409':
           description: Indicates the import of timelines was unsuccessful.
           content:
             application/json:

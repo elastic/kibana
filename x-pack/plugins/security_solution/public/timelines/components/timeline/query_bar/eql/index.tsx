@@ -83,14 +83,17 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const initialState = {
-    ...defaultValues,
-    index: selectedPatterns.sort(),
-    eqlQueryBar: {
-      ...defaultValues.eqlQueryBar,
-      query: { query: optionsSelected.query ?? '', language: 'eql' },
-    },
-  };
+  const initialState = useMemo(
+    () => ({
+      ...defaultValues,
+      index: [...selectedPatterns].sort(),
+      eqlQueryBar: {
+        ...defaultValues.eqlQueryBar,
+        query: { query: optionsSelected.query ?? '', language: 'eql' },
+      },
+    }),
+    [optionsSelected.query, selectedPatterns]
+  );
 
   const { form } = useForm<TimelineEqlQueryBar>({
     defaultValue: initialState,
@@ -144,7 +147,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   useEffect(() => {
     const { index: indexField } = getFields();
-    const newIndexValue = selectedPatterns.sort();
+    const newIndexValue = [...selectedPatterns].sort();
     const indexFieldValue = (indexField.value as string[]).sort();
     if (!isEqual(indexFieldValue, newIndexValue)) {
       indexField.setValue(newIndexValue);

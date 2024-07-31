@@ -22,5 +22,3 @@ export const getSpacesFeatureDescription = () => {
 export const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
   defaultMessage: 'object',
 });
-
-export const SOLUTION_NAV_FEATURE_FLAG_NAME = 'solutionNavEnabled';

@@ -41,24 +41,39 @@ const NotesContainer = styled(EuiFlexGroup)`
 `;
 NotesContainer.displayName = 'NotesContainer';
 
-interface Props {
+export interface NoteCardsProps {
   ariaRowindex: number;
   associateNote: AssociateNote;
   className?: string;
   notes: TimelineResultNote[];
   showAddNote: boolean;
-  toggleShowAddNote: (eventId?: string) => void;
+  toggleShowAddNote?: (eventId?: string) => void;
   eventId?: string;
+  timelineId: string;
+  onCancel?: () => void;
+  showToggleEventDetailsAction?: boolean;
 }
 
 /** A view for entering and reviewing notes */
-export const NoteCards = React.memo<Props>(
-  ({ ariaRowindex, associateNote, className, notes, showAddNote, toggleShowAddNote, eventId }) => {
+export const NoteCards = React.memo<NoteCardsProps>(
+  ({
+    ariaRowindex,
+    associateNote,
+    className,
+    notes,
+    showAddNote,
+    toggleShowAddNote,
+    eventId,
+    timelineId,
+    onCancel,
+    showToggleEventDetailsAction = true,
+  }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
       (noteId: string) => {
         associateNote(noteId);
+        if (!toggleShowAddNote) return;
         if (eventId != null) {
           toggleShowAddNote(eventId);
         } else {
@@ -69,12 +84,14 @@ export const NoteCards = React.memo<Props>(
     );
 
     const onCancelAddNote = useCallback(() => {
+      onCancel?.();
+      if (!toggleShowAddNote) return;
       if (eventId != null) {
         toggleShowAddNote(eventId);
       } else {
         toggleShowAddNote();
       }
-    }, [eventId, toggleShowAddNote]);
+    }, [eventId, toggleShowAddNote, onCancel]);
 
     return (
       <NoteCardsCompContainer
@@ -94,7 +111,11 @@ export const NoteCards = React.memo<Props>(
               <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
                 <p>{i18n.YOU_ARE_VIEWING_NOTES(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <NotePreviews notes={notes} />
+              <NotePreviews
+                timelineId={timelineId}
+                notes={notes}
+                showToggleEventDetailsAction={showToggleEventDetailsAction}
+              />
             </NotesContainer>
           </NotePreviewsContainer>
         ) : null}

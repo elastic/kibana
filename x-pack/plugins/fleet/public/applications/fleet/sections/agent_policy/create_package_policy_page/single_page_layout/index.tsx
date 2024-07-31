@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import { SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../../../../../../common/constants';
 
 import {
@@ -35,6 +36,7 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
   splitPkgKey,
@@ -80,8 +82,9 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
+import { useAgentless } from './hooks/setup_technology';
 
-const StepsWithLessPadding = styled(EuiSteps)`
+export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
@@ -109,12 +112,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
+  const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+    generateNewAgentPolicyWithDefaults({
+      name: 'Agent policy 1',
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(newAgentPolicy);
+  const validation = agentPolicyFormValidation(newAgentPolicy, {
+    allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
+  });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
     queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
@@ -293,7 +302,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyId={queryParamsPolicyId}
+        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
       />
     ),
     [
@@ -340,15 +349,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-
-  const { agentlessPolicy, handleSetupTechnologyChange, selectedSetupTechnology } =
-    useSetupTechnology({
-      newAgentPolicy,
-      updateNewAgentPolicy,
-      updateAgentPolicies,
-      setSelectedPolicyTab,
-      packageInfo,
-    });
+  const { isAgentlessEnabled } = useAgentless();
+  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
+    newAgentPolicy,
+    setNewAgentPolicy,
+    updateAgentPolicies,
+    setSelectedPolicyTab,
+    packageInfo,
+    packagePolicy,
+  });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -357,14 +366,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : (
         <ExtensionWrapper>
           <replaceDefineStepView.Component
-            agentPolicy={agentPolicies[0]}
+            agentPolicies={agentPolicies}
             packageInfo={packageInfo}
             newPolicy={packagePolicy}
             onChange={handleExtensionViewOnChange}
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            agentlessPolicy={agentlessPolicy}
+            isAgentlessEnabled={isAgentlessEnabled}
           />
         </ExtensionWrapper>
       )
@@ -377,7 +386,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
-            agentPolicies={agentPolicies}
+            namespacePlaceholder={getInheritedNamespace(
+              agentPolicies,
+              spaceSettings?.allowedNamespacePrefixes?.[0]
+            )}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
@@ -422,6 +434,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       integrationInfo?.name,
       extensionView,
       handleExtensionViewOnChange,
+      spaceSettings?.allowedNamespacePrefixes,
     ]
   );
 
@@ -462,10 +475,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
 
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
-  const unprivilegedAgentsCount = agentPolicies.reduce(
-    (acc, curr) => acc + (curr.unprivileged_agents ?? 0),
-    0
-  );
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
@@ -478,13 +487,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
                 onCancel={() => setFormState('VALID')}
-                showUnprivilegedAgentsCallout={Boolean(
-                  packageInfo &&
-                    isRootPrivilegesRequired(packageInfo) &&
-                    unprivilegedAgentsCount > 0
-                )}
-                unprivilegedAgentsCount={unprivilegedAgentsCount}
-                dataStreams={rootPrivilegedDataStreams}
               />
             )}
             {formState === 'SUBMITTED_NO_AGENTS' &&

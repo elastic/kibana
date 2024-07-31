@@ -24,7 +24,7 @@ export type FindListsCursor = z.infer<typeof FindListsCursor>;
 export const FindListsCursor = NonEmptyString;
 
 export type FindListsFilter = z.infer<typeof FindListsFilter>;
-export const FindListsFilter = NonEmptyString;
+export const FindListsFilter = z.string();
 
 export type FindListsRequestQuery = z.infer<typeof FindListsRequestQuery>;
 export const FindListsRequestQuery = z.object({

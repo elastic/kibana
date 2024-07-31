@@ -11,6 +11,7 @@ import { safeLoad } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -49,7 +50,7 @@ import {
 
 import { useAgentless } from './setup_technology';
 
-async function createAgentPolicy({
+export async function createAgentPolicy({
   packagePolicy,
   newAgentPolicy,
   withSysMonitoring,
@@ -71,6 +72,45 @@ async function createAgentPolicy({
   }
   return resp.data.item;
 }
+
+export const createAgentPolicyIfNeeded = async ({
+  selectedPolicyTab,
+  withSysMonitoring,
+  newAgentPolicy,
+  packagePolicy,
+  packageInfo,
+}: {
+  selectedPolicyTab: SelectedPolicyTab;
+  withSysMonitoring: boolean;
+  newAgentPolicy: NewAgentPolicy;
+  packagePolicy: NewPackagePolicy;
+  packageInfo?: PackageInfo;
+}): Promise<AgentPolicy | undefined> => {
+  if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+    if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
+      const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
+      // skip preinstall of input package, to be able to rollback when package policy creation fails
+      if (packageInfo && packageInfo.type !== 'input') {
+        packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
+      }
+      if (withSysMonitoring) {
+        packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
+      }
+      if (newAgentPolicy.monitoring_enabled?.length ?? 0 > 0) {
+        packagesToPreinstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
+      }
+
+      if (packagesToPreinstall.length > 0) {
+        await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
+      }
+    }
+    return await createAgentPolicy({
+      newAgentPolicy,
+      packagePolicy,
+      withSysMonitoring,
+    });
+  }
+};
 
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
@@ -113,6 +153,7 @@ export function useOnSubmit({
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
+  const spaceSettings = useSpaceSettingsContext();
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
@@ -165,7 +206,8 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad
+          safeLoad,
+          spaceSettings
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -174,7 +216,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo]
+    [packagePolicy, packageInfo, spaceSettings]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -281,33 +323,21 @@ export function useOnSubmit({
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
-      if (selectedPolicyTab === SelectedPolicyTab.NEW && !overrideCreatedAgentPolicy) {
+      if (!overrideCreatedAgentPolicy) {
         try {
           setFormState('LOADING');
-          if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
-            const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            // skip preinstall of input package, to be able to rollback when package policy creation fails
-            if (packageInfo && packageInfo.type !== 'input') {
-              packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
-            }
-            if (withSysMonitoring) {
-              packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
-            }
-            if (newAgentPolicy.monitoring_enabled?.length ?? 0 > 0) {
-              packagesToPreinstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
-            }
-
-            if (packagesToPreinstall.length > 0) {
-              await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
-            }
-          }
-          createdPolicy = await createAgentPolicy({
+          const newPolicy = await createAgentPolicyIfNeeded({
             newAgentPolicy,
             packagePolicy,
             withSysMonitoring,
+            packageInfo,
+            selectedPolicyTab,
           });
-          setAgentPolicies([createdPolicy]);
-          updatePackagePolicy({ policy_ids: [createdPolicy.id] });
+          if (newPolicy) {
+            createdPolicy = newPolicy;
+            setAgentPolicies([createdPolicy]);
+            updatePackagePolicy({ policy_ids: [createdPolicy.id] });
+          }
         } catch (e) {
           setFormState('VALID');
           notifications.toasts.addError(e, {

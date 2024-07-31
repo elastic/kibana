@@ -48,6 +48,7 @@ export class MlCapabilitiesService {
 
   private _isPlatinumOrTrialLicense$ = new BehaviorSubject<boolean | null>(null);
   private _mlFeatureEnabledInSpace$ = new BehaviorSubject<boolean | null>(null);
+  private _isUpgradeInProgress$ = new BehaviorSubject<boolean | null>(null);
 
   public capabilities$ = this._capabilities$.pipe(distinctUntilChanged(isEqual));
 
@@ -73,6 +74,7 @@ export class MlCapabilitiesService {
         this._capabilities$.next(results.capabilities);
         this._isPlatinumOrTrialLicense$.next(results.isPlatinumOrTrialLicense);
         this._mlFeatureEnabledInSpace$.next(results.mlFeatureEnabledInSpace);
+        this._isUpgradeInProgress$.next(results.upgradeInProgress);
         this._isLoading$.next(false);
 
         /**
@@ -92,6 +94,14 @@ export class MlCapabilitiesService {
 
   public mlFeatureEnabledInSpace(): boolean | null {
     return this._mlFeatureEnabledInSpace$.getValue();
+  }
+
+  public isUpgradeInProgress$() {
+    return this._isUpgradeInProgress$;
+  }
+
+  public isUpgradeInProgress(): boolean | null {
+    return this._isUpgradeInProgress$.getValue();
   }
 
   public getCapabilities$() {
@@ -137,6 +147,23 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
   }, [capabilities]);
 }
 
+/**
+ * Check whether upgrade mode has been set.
+ */
+export function useUpgradeCheck(): boolean {
+  const {
+    services: {
+      mlServices: { mlCapabilities: mlCapabilitiesService },
+    },
+  } = useMlKibana();
+
+  const isUpgradeInProgress = useObservable(
+    mlCapabilitiesService.isUpgradeInProgress$(),
+    mlCapabilitiesService.isUpgradeInProgress()
+  );
+  return isUpgradeInProgress ?? false;
+}
+
 export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalServices) {
   return new Promise<void>(async (resolve, reject) => {
     try {
@@ -160,6 +187,7 @@ export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalSer
           capabilities,
           isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
           mlFeatureEnabledInSpace: mlCapabilities.mlFeatureEnabledInSpace(),
+          isUpgradeInProgress: mlCapabilities.isUpgradeInProgress(),
         });
       }
     } catch (error) {

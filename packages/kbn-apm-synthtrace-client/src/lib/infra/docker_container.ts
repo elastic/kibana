@@ -51,5 +51,13 @@ class DockerContainerMetrics extends Serializable<DockerContainerMetricsDocument
 export function dockerContainer(id: string): DockerContainer {
   return new DockerContainer({
     'container.id': id,
+    'container.name': `container-${id}`,
+    'container.runtime': 'docker',
+    'container.image.name': 'image-1',
+    'host.name': 'host-1',
+    'cloud.instance.id': 'instance-1',
+    'cloud.image.id': 'image-1',
+    'cloud.provider': 'aws',
+    'event.dataset': 'docker.container',
   });
 }

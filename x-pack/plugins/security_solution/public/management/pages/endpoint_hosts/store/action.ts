@@ -141,10 +141,6 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
-export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
-  payload: EndpointState['endpointPendingActions'];
-};
-
 export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
 
 export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
@@ -173,7 +169,6 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged
   | LoadMetadataTransformStats
   | MetadataTransformStatsChanged
   | ServerFinishedInitialization;

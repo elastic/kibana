@@ -9,6 +9,7 @@
 import {
   apiIsPresentationContainer,
   HasSerializedChildState,
+  HasSnapshottableState,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
@@ -104,15 +105,13 @@ export const ReactEmbeddableRenderer = <
         const setApi = (
           apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
         ) => {
-          const fullApi = {
+          return {
             ...apiRegistration,
             uuid,
             phase$,
             parentApi,
             type: factory.type,
           } as unknown as Api;
-          onApiAvailable?.(fullApi);
-          return fullApi;
         };
 
         const buildEmbeddable = async () => {
@@ -170,7 +169,7 @@ export const ReactEmbeddableRenderer = <
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
             cleanupFunction.current = () => cleanup();
-            return fullApi;
+            return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 
           const { api, Component } = await factory.buildEmbeddable(
@@ -188,12 +187,12 @@ export const ReactEmbeddableRenderer = <
           } else {
             reportPhaseChange(false);
           }
-
           return { api, Component };
         };
 
         try {
           const { api, Component } = await buildEmbeddable();
+          onApiAvailable?.(api);
           return React.forwardRef<typeof api>((_, ref) => {
             // expose the api into the imperative handle
             useImperativeHandle(ref, () => api, []);

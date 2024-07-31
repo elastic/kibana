@@ -140,11 +140,13 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         timeRange,
         indexPatterns,
         limit,
+        agentId,
       }: {
         ids: string[];
         timeRange: TimeRange;
         indexPatterns: string[];
         limit: number;
+        agentId: string;
       }): Promise<SafeResolverEvent[]> {
         return nodeDataResponse;
       },
@@ -159,6 +161,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         indices,
         ancestors,
         descendants,
+        agentId,
       }: {
         dataId: string;
         schema: ResolverSchema;
@@ -166,6 +169,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
         indices: string[];
         ancestors: number;
         descendants: number;
+        agentId: string;
       }): Promise<ResolverNode[]> {
         return tree.nodes;
       },
@@ -182,8 +186,10 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
               parent: 'process.parent.entity_id',
               ancestry: 'process.Ext.ancestry',
               name: 'process.name',
+              agentId: 'agent.id',
             },
             id: metadata.entityIDs.origin,
+            agentId: 'mockedAgentId',
           },
         ];
       },

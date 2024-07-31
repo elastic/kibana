@@ -52,16 +52,19 @@ export class DashboardAddPanelService extends FtrService {
   async clickEditorMenuButton() {
     this.log.debug('DashboardAddPanel.clickEditorMenuButton');
     await this.testSubjects.click('dashboardEditorMenuButton');
-    await this.testSubjects.existOrFail('dashboardEditorContextMenu');
+    await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('dashboardPanelSelectionList');
+    });
   }
 
   async expectEditorMenuClosed() {
-    await this.testSubjects.missingOrFail('dashboardEditorContextMenu');
+    await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
   }
 
   async clickAggBasedVisualizations() {
     this.log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
-    await this.testSubjects.click('dashboardEditorAggBasedMenuItem');
+    await this.clickAddNewPanelFromUIActionLink('Aggregation based');
   }
 
   async clickVisType(visType: string) {
@@ -69,9 +72,14 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`visType-${visType}`);
   }
 
-  async clickEmbeddableFactoryGroupButton(groupId: string) {
-    this.log.debug('DashboardAddPanel.clickEmbeddableFactoryGroupButton');
-    await this.testSubjects.click(`dashboardEditorMenu-${groupId}Group`);
+  async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {
+    this.log.debug('DashboardAddPanel.verifyEmbeddableFactoryGroupExists');
+    const testSubject = `dashboardEditorMenu-${groupId}Group`;
+    if (expectExist) {
+      await this.testSubjects.existOrFail(testSubject);
+    } else {
+      await this.testSubjects.missingOrFail(testSubject);
+    }
   }
 
   async clickAddNewEmbeddableLink(type: string) {

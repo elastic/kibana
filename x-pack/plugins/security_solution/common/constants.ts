@@ -194,6 +194,10 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
 export const ENABLE_ASSET_CRITICALITY_SETTING = 'securitySolution:enableAssetCriticality' as const;
 
+/** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
+export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
+  'securitySolution:excludedDataTiersForRuleExecution' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -429,7 +433,8 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
   ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  INVESTIGATION_FIELDS_FEATURE = 'INVESTIGATION_FIELDS_FEATURE',
+  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
+  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
 }
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
@@ -493,3 +498,9 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
  * Cases external attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+
+/**
+ * Rule gaps
+ */
+export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;

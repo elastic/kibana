@@ -13,7 +13,7 @@ import { SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
-import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import { fireEvent, waitFor, render } from '@testing-library/react';
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';

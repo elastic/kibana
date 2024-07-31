@@ -78,12 +78,12 @@ export async function fileIdsWithoutChunksByIndex(
 ): Promise<{ fileIdsByIndex: FileIdsByIndex; allFileIds: Set<string> }> {
   const allFileIds: Set<string> = new Set();
   const noChunkFileIdsByIndex = files.reduce((acc, file) => {
-    allFileIds.add(file._id);
+    allFileIds.add(file._id!);
 
     const { index: metadataIndex } = parseFileStorageIndex(file._index);
     const fileIds = acc[metadataIndex];
 
-    acc[metadataIndex] = fileIds ? fileIds.add(file._id) : new Set([file._id]);
+    acc[metadataIndex] = fileIds ? fileIds.add(file._id!) : new Set([file._id!]);
 
     return acc;
   }, {} as FileIdsByIndex);

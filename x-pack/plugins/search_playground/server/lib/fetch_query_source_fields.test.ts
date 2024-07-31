@@ -26,6 +26,8 @@ import {
   DENSE_SEMANTIC_FIELD_MAPPINGS,
   DENSE_SEMANTIC_FIELD_FIELD_CAPS,
   DENSE_SEMANTIC_FIELD_MAPPINGS_MISSING_TASK_TYPE,
+  DENSE_PIPELINE_FIELD_CAPS,
+  DENSE_OLD_PIPELINE_DOCS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import {
   fetchFields,
@@ -60,10 +62,10 @@ describe('fetch_query_source_fields', () => {
       ).toEqual({
         workplace_index: {
           bm25_query_fields: [
-            'metadata.summary',
-            'metadata.rolePermissions',
-            'text',
             'metadata.name',
+            'metadata.rolePermissions',
+            'metadata.summary',
+            'text',
           ],
           dense_vector_query_fields: [],
           elser_query_fields: [
@@ -71,19 +73,20 @@ describe('fetch_query_source_fields', () => {
               field: 'vector.tokens',
               model_id: '.elser_model_2',
               indices: ['workplace_index'],
+              sparse_vector: false,
             },
           ],
           skipped_fields: 8,
-          source_fields: ['metadata.summary', 'metadata.rolePermissions', 'text', 'metadata.name'],
+          source_fields: ['metadata.name', 'metadata.rolePermissions', 'metadata.summary', 'text'],
           semantic_fields: [],
         },
         workplace_index2: {
           semantic_fields: [],
           bm25_query_fields: [
-            'metadata.summary',
             'content',
-            'metadata.rolePermissions',
             'metadata.name',
+            'metadata.rolePermissions',
+            'metadata.summary',
           ],
           dense_vector_query_fields: [],
           skipped_fields: 8,
@@ -92,13 +95,14 @@ describe('fetch_query_source_fields', () => {
               field: 'content_vector.tokens',
               model_id: '.elser_model_2',
               indices: ['workplace_index2'],
+              sparse_vector: false,
             },
           ],
           source_fields: [
-            'metadata.summary',
             'content',
-            'metadata.rolePermissions',
             'metadata.name',
+            'metadata.rolePermissions',
+            'metadata.summary',
           ],
         },
       });
@@ -121,19 +125,19 @@ describe('fetch_query_source_fields', () => {
         'search-example-main': {
           semantic_fields: [],
           bm25_query_fields: [
-            'page_content_key',
-            'title',
-            'main_button.button_title',
-            'page_notification',
             'bread_crumbs',
-            'url',
-            'page_content_text',
-            'buttons.button_title',
-            'filter_list',
             'buttons.button_link',
             'buttons.button_new_tab',
-            'title_text',
+            'buttons.button_title',
+            'filter_list',
             'main_button.button_link',
+            'main_button.button_title',
+            'page_content_key',
+            'page_content_text',
+            'page_notification',
+            'title',
+            'title_text',
+            'url',
           ],
           dense_vector_query_fields: [
             {
@@ -145,19 +149,19 @@ describe('fetch_query_source_fields', () => {
           elser_query_fields: [],
           skipped_fields: 30,
           source_fields: [
-            'page_content_key',
-            'title',
-            'main_button.button_title',
-            'page_notification',
             'bread_crumbs',
-            'url',
-            'page_content_text',
-            'buttons.button_title',
-            'filter_list',
             'buttons.button_link',
             'buttons.button_new_tab',
-            'title_text',
+            'buttons.button_title',
+            'filter_list',
             'main_button.button_link',
+            'main_button.button_title',
+            'page_content_key',
+            'page_content_text',
+            'page_notification',
+            'title',
+            'title_text',
+            'url',
           ],
         },
       });
@@ -186,6 +190,7 @@ describe('fetch_query_source_fields', () => {
               field: 'ml.inference.body_content_expanded.predicted_value',
               indices: ['search-nethys'],
               model_id: '.elser_model_2_linux-x86_64',
+              sparse_vector: true,
             },
           ],
           source_fields: ['body_content', 'headings', 'title'],
@@ -211,27 +216,27 @@ describe('fetch_query_source_fields', () => {
       ).toEqual({
         workplace_index_nested: {
           bm25_query_fields: [
-            'metadata.category',
             'content',
-            'metadata.url',
-            'metadata.rolePermissions',
-            'metadata.name',
-            'passages.text',
-            'metadata.summary',
+            'metadata.category',
             'metadata.content',
+            'metadata.name',
+            'metadata.rolePermissions',
+            'metadata.summary',
+            'metadata.url',
+            'passages.text',
           ],
           dense_vector_query_fields: [],
           elser_query_fields: [],
           semantic_fields: [],
           source_fields: [
-            'metadata.category',
             'content',
-            'metadata.url',
-            'metadata.rolePermissions',
-            'metadata.name',
-            'passages.text',
-            'metadata.summary',
+            'metadata.category',
             'metadata.content',
+            'metadata.name',
+            'metadata.rolePermissions',
+            'metadata.summary',
+            'metadata.url',
+            'passages.text',
           ],
           skipped_fields: 18,
         },
@@ -290,6 +295,7 @@ describe('fetch_query_source_fields', () => {
               field: 'text_embedding',
               indices: ['index'],
               model_id: '.elser_model_2',
+              sparse_vector: true,
             },
           ],
           dense_vector_query_fields: [],
@@ -345,6 +351,7 @@ describe('fetch_query_source_fields', () => {
               field: 'text_embedding',
               indices: ['elser_index'],
               model_id: 'my-elser-model',
+              sparse_vector: true,
             },
           ],
           skipped_fields: 2,
@@ -502,6 +509,54 @@ describe('fetch_query_source_fields', () => {
               },
             },
           },
+        },
+      });
+    });
+
+    it('should perform a search request with the correct modelid for old style inference', async () => {
+      const client = {
+        asCurrentUser: {
+          fieldCaps: jest.fn().mockResolvedValue(DENSE_PIPELINE_FIELD_CAPS),
+          search: jest.fn().mockResolvedValue(DENSE_OLD_PIPELINE_DOCS[0]),
+          indices: {
+            getMapping: jest.fn().mockResolvedValue({
+              'search-test-e5': {
+                mappings: {},
+              },
+            }),
+          },
+        },
+      } as any;
+      const indices = ['search-test-e5'];
+      const response = await fetchFields(client, indices);
+      expect(client.asCurrentUser.search).toHaveBeenCalledWith({
+        index: 'search-test-e5',
+        body: {
+          size: 0,
+          aggs: {
+            'ml.inference.body_content.model_id': {
+              terms: {
+                field: 'ml.inference.body_content.model_id.enum',
+                size: 1,
+              },
+            },
+          },
+        },
+      });
+      expect(response).toEqual({
+        'search-test-e5': {
+          bm25_query_fields: expect.any(Array),
+          dense_vector_query_fields: [
+            {
+              field: 'ml.inference.body_content.predicted_value',
+              indices: ['search-test-e5'],
+              model_id: '.multilingual-e5-small_linux-x86_64',
+            },
+          ],
+          elser_query_fields: [],
+          semantic_fields: [],
+          source_fields: expect.any(Array),
+          skipped_fields: 30,
         },
       });
     });

@@ -15,12 +15,12 @@ import {
   setPolicy,
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
+import type { CreateAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import type { CreateIndexResponse } from '../../../../../common/api/detection_engine';
 import { buildSiemResponse } from '../utils';
 import {
   getSignalsTemplate,
@@ -49,7 +49,7 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
         version: '2023-10-31',
         validate: false,
       },
-      async (context, _, response): Promise<IKibanaResponse<CreateIndexResponse>> => {
+      async (context, _, response): Promise<IKibanaResponse<CreateAlertsIndexResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

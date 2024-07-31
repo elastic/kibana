@@ -18,7 +18,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
@@ -723,9 +723,9 @@ export const QueryBarTopRow = React.memo(
 
     function renderTextLangEditor() {
       const adHocDataview = props.indexPatterns?.[0];
-      let detectTimestamp = false;
+      let detectedTimestamp;
       if (adHocDataview && typeof adHocDataview !== 'string') {
-        detectTimestamp = Boolean(adHocDataview?.timeFieldName);
+        detectedTimestamp = adHocDataview?.timeFieldName;
       }
       return (
         isQueryLangSelected &&
@@ -738,7 +738,7 @@ export const QueryBarTopRow = React.memo(
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
-            detectTimestamp={detectTimestamp}
+            detectedTimestamp={detectedTimestamp}
             onTextLangQuerySubmit={async () =>
               onSubmit({
                 query: queryRef.current,

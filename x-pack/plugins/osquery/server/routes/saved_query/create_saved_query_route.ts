@@ -55,7 +55,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           ecs_mapping,
         } = request.body;
 
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         const conflictingEntries = await savedObjectsClient.find<SavedQuerySavedObject>({
           type: savedQuerySavedObjectType,

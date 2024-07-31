@@ -10,7 +10,7 @@ import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import type { TestData } from '../../types';
 
 export const farequoteDataViewTestDataWithQuery: TestData = {
-  suiteTitle: 'farequote with spike',
+  suiteTitle: 'farequote with spike with query',
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
   autoRun: false,
   dataGenerator: 'farequote_with_spike',
@@ -21,7 +21,7 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
   chartClickCoordinates: [0, 0],
   columnSelectorSearch: 'p-value',
   fieldSelectorSearch: 'airline',
-  fieldSelectorApplyAvailable: false,
+  fieldSelectorApplyAvailable: true,
   query: 'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
   expected: {
     totalDocCountFormatted: '48,799',
@@ -44,8 +44,17 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
         impact: 'High',
       },
     ],
-    columnSelectorPopover: ['Log rate', 'Doc count', 'p-value', 'Impact', 'Actions'],
-    fieldSelectorPopover: ['airline', 'custom_field.keyword'],
+    columnSelectorPopover: [
+      'Log rate',
+      'Doc count',
+      'p-value',
+      'Impact',
+      'Baseline rate',
+      'Deviation rate',
+      'Log rate change',
+      'Actions',
+    ],
+    fieldSelectorPopover: ['@version.keyword', 'airline', 'custom_field.keyword', 'type.keyword'],
     globalState: {
       refreshInterval: { pause: true, value: 60000 },
       time: { from: '2016-02-07T00:00:00.000Z', to: '2016-02-11T23:59:54.000Z' },

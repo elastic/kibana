@@ -77,7 +77,11 @@ export class ConsolePageObject extends FtrService {
     getAutocompleteSuggestion: async (index: number) => {
       const suggestionsWidget = await this.find.byClassName('suggest-widget');
       const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
-      const label = await suggestions[index].findByClassName('label-name');
+      const suggestion = suggestions[index];
+      if (!suggestion) {
+        return undefined;
+      }
+      const label = await suggestion.findByClassName('label-name');
       return label.getVisibleText();
     },
     pressUp: async (shift: boolean = false) => {
@@ -277,6 +281,18 @@ export class ConsolePageObject extends FtrService {
       await fontSizeInput.clearValue({ withJS: true });
       await fontSizeInput.click();
       await fontSizeInput.type(String(newSize));
+    });
+
+    await this.testSubjects.click('settings-save-button');
+  }
+
+  public async toggleKeyboardShortcuts(enabled: boolean) {
+    await this.openSettings();
+
+    // while the settings form opens/loads this may fail, so retry for a while
+    await this.retry.try(async () => {
+      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
+      await toggle.click();
     });
 
     await this.testSubjects.click('settings-save-button');

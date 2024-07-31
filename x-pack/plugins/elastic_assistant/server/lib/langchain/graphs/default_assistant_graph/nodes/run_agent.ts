@@ -19,7 +19,8 @@ export interface RunAgentParams extends NodeParamsBase {
 
 export const AGENT_NODE = 'agent';
 
-const NO_HISTORY = '[No existing knowledge history]';
+export const AGENT_NODE_TAG = 'agent_run';
+
 /**
  * Node to run the agent
  *
@@ -36,23 +37,18 @@ export const runAgent = async ({
   logger,
   state,
 }: RunAgentParams) => {
-  logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const knowledgeHistory = await dataClients?.kbDataClient?.getKnowledgeBaseDocuments({
-    kbResource: 'user',
-    required: true,
-    query: '',
-  });
-
-  const agentOutcome = await agentRunnable.invoke(
+  const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
+      messages: state.messages.splice(-1),
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-      knowledge_history: knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY,
     },
     config
   );
   return {
+    ...state,
     agentOutcome,
   };
 };

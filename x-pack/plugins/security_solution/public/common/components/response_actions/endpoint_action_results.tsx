@@ -67,6 +67,7 @@ export const EndpointResponseActionResults = ({
         expandedAction ? (
           <ActionsLogExpandedTray
             action={expandedAction}
+            fromAlertWorkaround
             data-test-subj={`response-results-${hostName}`}
           />
         ) : (

@@ -11,6 +11,6 @@ export const SKIP_AGENT_INSTALLATION_BTN = '[data-test-subj="skipAgentInstallati
 
 export const INTEGRATION_ADDED_POP_UP = '[data-test-subj="postInstallAddAgentModal"]';
 
-export const QUEUE_URL = '.euiFieldText.euiFormControlLayout--1icons';
+export const QUEUE_URL = '.euiFieldText';
 
 export const SAVE_AND_CONTINUE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';

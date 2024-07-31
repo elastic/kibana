@@ -44,5 +44,6 @@
     "@kbn/management-cards-navigation",
     "@kbn/discover-plugin",
     "@kbn/logging",
+    "@kbn/integration-assistant-plugin",
   ]
 }

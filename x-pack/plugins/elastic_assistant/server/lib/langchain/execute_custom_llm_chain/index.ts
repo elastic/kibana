@@ -5,22 +5,26 @@
  * 2.0.
  */
 import agent, { Span } from 'elastic-apm-node';
-import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import {
+  initializeAgentExecutorWithOptions,
+  createToolCallingAgent,
+  AgentExecutor as lcAgentExecutor,
+} from 'langchain/agents';
 
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  getDefaultArguments,
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
+import { getDefaultArguments } from '@kbn/langchain/server';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
+import { getLlmClass } from '../../../routes/utils';
+import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
-import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
@@ -30,11 +34,10 @@ export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
  */
 export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
-  actions,
+  actionsClient,
   alertsIndexPattern,
-  anonymizationFields,
-  isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   esClient,
   esStore,
@@ -48,14 +51,15 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   request,
   size,
   traceOptions,
+  dataClients,
+  conversationId,
 }) => {
   const isOpenAI = llmType === 'openai';
-  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   const llm = new llmClass({
-    actions,
+    actionsClient,
     connectorId,
-    request,
     llmType,
     logger,
     // possible client model override,
@@ -70,6 +74,16 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
   });
+
+  const anonymizationFieldsRes =
+    await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+      perPage: 1000,
+      page: 1,
+    });
+
+  const anonymizationFields = anonymizationFieldsRes
+    ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
+    : undefined;
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -93,7 +107,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
-    isEnabledKnowledgeBase,
+    isEnabledKnowledgeBase: true,
     llm,
     logger,
     modelExists,
@@ -107,7 +121,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
-  logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
+  logger.debug(
+    () => `applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`
+  );
 
   const executorArgs = {
     memory,
@@ -120,13 +136,31 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         agentType: 'openai-functions',
         ...executorArgs,
       })
+    : llmType === 'bedrock' && bedrockChatEnabled
+    ? new lcAgentExecutor({
+        agent: await createToolCallingAgent({
+          llm,
+          tools,
+          prompt: ChatPromptTemplate.fromMessages([
+            ['system', 'You are a helpful assistant'],
+            ['placeholder', '{chat_history}'],
+            ['human', '{input}'],
+            ['placeholder', '{agent_scratchpad}'],
+          ]),
+          streamRunnable: isStream,
+        }),
+        tools,
+      })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'structured-chat-zero-shot-react-description',
         ...executorArgs,
         returnIntermediateSteps: false,
         agentArgs: {
           // this is important to help LangChain correctly format tool input
-          humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+          humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
+          memoryPrompts: [new MessagesPlaceholder('chat_history')],
+          suffix:
+            'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
         },
       });
 
@@ -257,6 +291,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       trace_data: traceData,
       replacements,
       status: 'ok',
+      conversationId,
     },
     headers: {
       'content-type': 'application/json',

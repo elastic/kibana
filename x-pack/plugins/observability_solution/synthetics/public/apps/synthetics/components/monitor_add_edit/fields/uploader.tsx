@@ -10,6 +10,10 @@ import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiFilePicker } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 
 interface Props {
   onUpload: ({ scriptText, fileName }: { scriptText: string; fileName: string }) => void;
@@ -18,7 +22,7 @@ interface Props {
 export function Uploader({ onUpload }: Props) {
   const fileReader = useRef<null | FileReader>(null);
   const [error, setError] = useState<string | null>(null);
-  const filePickerRef = useRef<EuiFilePicker>(null);
+  const filePickerRef = useRef<EuiFilePickerClass>(null);
 
   const handleFileRead = (fileName: string) => {
     const content = fileReader?.current?.result as string;
@@ -58,7 +62,7 @@ export function Uploader({ onUpload }: Props) {
       <EuiFilePicker
         id="syntheticsFleetScriptRecorderUploader"
         data-test-subj="syntheticsFleetScriptRecorderUploader"
-        ref={filePickerRef}
+        ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
         initialPromptText={PROMPT_TEXT}
         onChange={handleFileChosen}
         display={'large'}

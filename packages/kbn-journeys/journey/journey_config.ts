@@ -142,6 +142,11 @@ export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | u
    * },
    */
   synthtrace?: JourneySynthtrace<CtxExt>;
+
+  /**
+   * Take browser page screenshot on every step complete
+   */
+  takeScreenshotOnSuccess?: boolean;
 }
 
 export class JourneyConfig<CtxExt extends object> {
@@ -218,5 +223,9 @@ export class JourneyConfig<CtxExt extends object> {
 
   getSynthtraceConfig() {
     return this.#opts.synthtrace;
+  }
+
+  takeScreenshotOnSuccess() {
+    return !!this.#opts.takeScreenshotOnSuccess;
   }
 }

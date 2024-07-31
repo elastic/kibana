@@ -16,28 +16,6 @@ steps:
           limit: 1
   - wait
 
-  - label: 'Triggering changes-based pipelines'
-    branches: main
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    # TODO: this can probably be deleted after the migration https://github.com/elastic/kibana-operations/issues/15
-    plugins:
-      - chronotc/monorepo-diff#v2.0.4:
-          watch:
-            - path:
-                - 'versions.json'
-              config:
-                command: 'ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-buildkite-pipelines-deploy main'
-                label: 'Trigger pipeline deploy'
-                agents:
-                  image: family/kibana-ubuntu-2004
-                  imageProject: elastic-images-prod
-                  provider: gcp
-                  machineType: n2-standard-2
-
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution and Plugins
     agents:

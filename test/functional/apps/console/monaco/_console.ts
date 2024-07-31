@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // issue with the url params with whitespaces https://github.com/elastic/kibana/issues/184927
-    it.skip('default request response should include `"timed_out" : false`', async () => {
+    it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.monaco.selectAllRequests();
       await PageObjects.console.clickPlay();

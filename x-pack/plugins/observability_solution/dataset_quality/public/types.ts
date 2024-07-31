@@ -13,6 +13,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginSetup } from '@kbn/observability-shared-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 import type { CreateDatasetQualityController } from './controller';
 import type { DatasetQualityProps } from './components/dataset_quality';
@@ -33,6 +34,7 @@ export interface DatasetQualityStartDeps {
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginSetup;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface DatasetQualitySetupDeps {

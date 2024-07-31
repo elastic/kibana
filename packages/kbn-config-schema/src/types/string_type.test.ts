@@ -169,7 +169,7 @@ describe('#defaultValue', () => {
 
 test('meta', () => {
   const string = schema.string({ minLength: 1, maxLength: 3 });
-  const [meta1, meta2] = string.getSchema().describe().metas;
+  const [meta1, meta2] = string.getSchema().describe().metas ?? [];
   expect(meta1).toEqual({
     [META_FIELD_X_OAS_MIN_LENGTH]: 1,
   });

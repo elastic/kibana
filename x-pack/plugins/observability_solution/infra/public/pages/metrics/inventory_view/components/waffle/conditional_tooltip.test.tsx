@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { SnapshotNodeResponse } from '../../../../../../common/http_api';
-import { InfraWaffleMapNode } from '../../../../../lib/lib';
+import { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
@@ -102,19 +102,16 @@ describe('ConditionalToolTip', () => {
     const tooltip = wrapper.find('[data-test-subj~="conditionalTooltipContent-host-01"]');
     expect(tooltip.render()).toMatchSnapshot();
 
-    expect(mockedUseSnapshot).toBeCalledWith(
-      {
-        filterQuery: expectedQuery,
-        metrics: expectedMetrics,
-        groupBy: [],
-        nodeType: 'host',
-        sourceId: 'default',
-        currentTime,
-        accountId: '',
-        region: '',
-      } as UseSnapshotRequest,
-      { abortable: true }
-    );
+    expect(mockedUseSnapshot).toBeCalledWith({
+      filterQuery: expectedQuery,
+      metrics: expectedMetrics,
+      groupBy: [],
+      nodeType: 'host',
+      sourceId: 'default',
+      currentTime,
+      accountId: '',
+      region: '',
+    } as UseSnapshotRequest);
   });
 });
 

@@ -22,6 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendRequest } from '../../../hooks';
 
+import { debugRoutesService } from '../../../../../../common/services';
+
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -29,7 +31,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-  INGEST_SAVED_OBJECT_INDEX,
+  API_VERSIONS,
 } from '../../../../../../common/constants';
 
 import { CodeBlock } from './code_block';
@@ -37,35 +39,22 @@ import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
 const fetchSavedObjects = async (type?: string, name?: string) => {
   if (!type || !name) return;
-  const path = `/${INGEST_SAVED_OBJECT_INDEX}/_search`;
-  const body = {
-    query: {
-      bool: {
-        must: {
-          match: { [`${type}.name`]: name },
-        },
-        filter: {
-          term: {
-            type,
-          },
-        },
-      },
-    },
-  };
+
   const response = await sendRequest({
     method: 'post',
-    path: `/api/console/proxy`,
-    query: {
-      path,
-      method: 'GET',
+    path: debugRoutesService.getSavedObjectsPath(),
+    body: {
+      type,
+      name,
     },
-    body,
+    version: API_VERSIONS.internal.v1,
   });
 
   if (response.error) {
     throw new Error(response.error.message);
   }
-  return response.data?.hits;
+
+  return response.data?.saved_objects;
 };
 
 export const SavedObjectDebugger: React.FunctionComponent = () => {

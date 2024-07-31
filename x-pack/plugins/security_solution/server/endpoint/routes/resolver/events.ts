@@ -55,6 +55,7 @@ export function handleEvents(
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
       shouldExcludeColdAndFrozenTiers,
+      agentId: body.agentId,
     });
     const results = await eventsQuery.search(eventsClient, body, alertsClient);
     return res.ok({

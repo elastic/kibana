@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PreviewRulesSchema } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RulePreviewRequestBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * This is a typical simple preview rule for testing that is easy for most basic testing
@@ -16,7 +16,7 @@ import type { PreviewRulesSchema } from '@kbn/security-solution-plugin/common/ap
 export const getSimplePreviewRule = (
   ruleId = 'preview-rule-1',
   invocationCount = 12
-): PreviewRulesSchema => ({
+): RulePreviewRequestBody => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   risk_score: 1,

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import * as i18n from '../translations';
 import type {
@@ -29,19 +30,6 @@ import { getIconHeaderColumns } from './icon_header_columns';
 import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-// there are a number of type mismatches across this file
-const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-const BasicTable = styled(EuiBasicTable)`
-  .euiTableCellContent {
-    animation: none; /* Prevents applying max-height from animation */
-  }
-
-  .euiTableRow-isExpandedRow .euiTableCellContent__text {
-    width: 100%; /* Fixes collapsing nested flex content in IE11 */
-  }
-`;
-BasicTable.displayName = 'BasicTable';
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -77,7 +65,7 @@ export const getTimelinesTableColumns = ({
   showExtendedColumns: boolean;
   timelineType: TimelineTypeLiteralWithNull;
   hasCrudAccess: boolean;
-}) => {
+}): Array<EuiBasicTableColumn<object>> => {
   return [
     ...getCommonColumns({
       itemIdToExpandedNotesRowMap,
@@ -123,8 +111,7 @@ export interface TimelinesTableProps {
   sortDirection: 'asc' | 'desc';
   sortField: string;
   timelineType: TimelineTypeLiteralWithNull;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
+  tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   totalSearchResultsCount: number;
 }
 
@@ -157,33 +144,39 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     timelineType,
     totalSearchResultsCount,
   }) => {
-    const pagination = {
-      showPerPageOptions: showExtendedColumns,
-      pageIndex,
-      pageSize,
-      pageSizeOptions: [
-        Math.floor(Math.max(defaultPageSize, 1) / 2),
-        defaultPageSize,
-        defaultPageSize * 2,
-      ],
-      totalItemCount: totalSearchResultsCount,
-    };
+    const pagination = useMemo(() => {
+      return {
+        showPerPageOptions: showExtendedColumns,
+        pageIndex,
+        pageSize,
+        pageSizeOptions: [
+          Math.floor(Math.max(defaultPageSize, 1) / 2),
+          defaultPageSize,
+          defaultPageSize * 2,
+        ],
+        totalItemCount: totalSearchResultsCount,
+      };
+    }, [defaultPageSize, pageIndex, pageSize, showExtendedColumns, totalSearchResultsCount]);
 
-    const sorting = {
-      sort: {
-        field: sortField as keyof OpenTimelineResult,
-        direction: sortDirection,
-      },
-    };
+    const sorting = useMemo(() => {
+      return {
+        sort: {
+          field: sortField as keyof OpenTimelineResult,
+          direction: sortDirection,
+        },
+      };
+    }, [sortField, sortDirection]);
 
-    const selection = {
-      selectable: (timelineResult: OpenTimelineResult) =>
-        timelineResult.savedObjectId != null && timelineResult.status !== TimelineStatus.immutable,
-      selectableMessage: (selectable: boolean) =>
-        !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
-      onSelectionChange,
-    };
-    const basicTableProps = tableRef != null ? { ref: tableRef } : {};
+    const selection = useMemo(() => {
+      return {
+        selectable: (timelineResult: OpenTimelineResult) =>
+          timelineResult.savedObjectId != null &&
+          timelineResult.status !== TimelineStatus.immutable,
+        selectableMessage: (selectable: boolean) =>
+          !selectable ? i18n.MISSING_SAVED_OBJECT_ID : '',
+        onSelectionChange,
+      };
+    }, [onSelectionChange]);
     const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
     const columns = useMemo(
       () =>
@@ -227,7 +220,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         : i18n.ZERO_TIMELINES_MATCH;
 
     return (
-      <BasicTable
+      <EuiBasicTable
         columns={columns}
         data-test-subj="timelines-table"
         itemId="savedObjectId"
@@ -239,7 +232,16 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         pagination={pagination}
         selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
         sorting={sorting}
-        {...basicTableProps}
+        css={css`
+          .euiTableCellContent {
+            animation: none; /* Prevents applying max-height from animation */
+          }
+
+          .euiTableRow-isExpandedRow .euiTableCellContent__text {
+            width: 100%; /* Fixes collapsing nested flex content in IE11 */
+          }
+        `}
+        ref={tableRef}
       />
     );
   }

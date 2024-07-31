@@ -275,7 +275,7 @@ test('pulls panels from override input', async () => {
 
   // instead, the unsaved changes for React embeddables should be applied to the "restored runtime state" property of the Dashboard.
   expect(
-    (dashboard!.restoredRuntimeState!.someReactEmbeddablePanel as { title: string }).title
+    (dashboard!.getRuntimeStateForChild('someReactEmbeddablePanel') as { title: string }).title
   ).toEqual('an elegant override, from a more civilized age');
 });
 
@@ -497,12 +497,11 @@ test('creates new embeddable with specified size if size is provided', async () 
   expect(dashboard!.getState().explicitInput.panels.new_panel.gridData.h).toBe(1);
 });
 
-test('creates a control group from the control group factory and waits for it to be initialized', async () => {
+test('creates a control group from the control group factory', async () => {
   const mockControlGroupContainer = {
     destroy: jest.fn(),
     render: jest.fn(),
     updateInput: jest.fn(),
-    untilInitialized: jest.fn(),
     getInput: jest.fn().mockReturnValue({}),
     getInput$: jest.fn().mockReturnValue(new Observable()),
     getOutput: jest.fn().mockReturnValue({}),
@@ -532,7 +531,6 @@ test('creates a control group from the control group factory and waits for it to
     undefined,
     { lastSavedInput: expect.objectContaining({ controlStyle: 'oneLine' }) }
   );
-  expect(mockControlGroupContainer.untilInitialized).toHaveBeenCalled();
 });
 
 /*

@@ -28,7 +28,7 @@ import { SectionTitle } from '../../../components/section_title';
 import { Section } from '../../../components/section';
 
 interface MetadataSummaryProps {
-  metadata: InfraMetadata | null;
+  metadata?: InfraMetadata;
   loading: boolean;
   assetType: InventoryItemType;
 }
@@ -104,7 +104,7 @@ const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataDat
   },
   {
     field: 'containerImageName',
-    value: metadataInfo?.container?.imageName,
+    value: metadataInfo?.container?.image?.name,
     tooltipFieldLabel: 'container.image.name',
   },
   {

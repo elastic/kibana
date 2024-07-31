@@ -143,8 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168991
-    describe.skip('Create detection rule', () => {
+    describe('Create detection rule', () => {
       it('Creates a detection rule from the Take Action button and navigates to rule page', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
@@ -167,6 +166,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.click('csp:toast-success-link');
 
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageTitle = await testSubjects.find('header-page-title');
         expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
       });
@@ -193,7 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
         await testSubjects.click('csp:toast-success-link');
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageTitle = await testSubjects.find('header-page-title');
         expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
       });
@@ -204,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
         await testSubjects.click('csp:toast-success-link');
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageDescription = await testSubjects.find(
           'stepAboutRuleDetailsToggleDescriptionText'
         );
@@ -223,7 +223,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-detection-rule-count')).click();
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await (await testSubjects.find('ruleName')).getVisibleText()).to.be(ruleName1);
       });
       it('Clicking on count of Alerts should navigate to the alerts page', async () => {
@@ -231,7 +231,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-alert-count')).click();
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await (await testSubjects.find('header-page-title')).getVisibleText()).to.be(
           'Alerts'
         );

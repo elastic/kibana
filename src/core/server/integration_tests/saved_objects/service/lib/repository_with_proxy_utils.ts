@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 import Hapi from '@hapi/hapi';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  type ISavedObjectTypeRegistry,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: string) => ({
@@ -304,21 +310,32 @@ export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: strin
     },
   });
 
-export function allCombinationsPermutations<T>(collection: T[]): T[][] {
-  const recur = (subcollection: T[], size: number): T[][] => {
-    if (size <= 0) {
-      return [[]];
-    }
-    const permutations: T[][] = [];
-    subcollection.forEach((value, index, array) => {
-      array = array.slice();
-      array.splice(index, 1);
-      recur(array, size - 1).forEach((permutation) => {
-        permutation.unshift(value);
-        permutations.push(permutation);
-      });
-    });
-    return permutations;
-  };
-  return collection.map((_, n) => recur(collection, n + 1)).flat();
-}
+/**
+ * Obtain the versioned Kibana index, tipically used by the Elasticsearch client
+ * e.g. .kibana_8.15.0
+ * @returns string
+ */
+export const getVersionedKibanaIndex = (): string => {
+  return `${MAIN_SAVED_OBJECT_INDEX}_${pkg.version}`;
+};
+
+/**
+ * Obtain a comma separated list of all SO indices that contain namespace-aware SO types
+ * inspired on delete_by_namespace.ts
+ *
+ * @param registry The SO type registry to query registered types
+ * @returns string
+ */
+export const getIndicesWithNamespaceAwareTypes = (registry: ISavedObjectTypeRegistry): string => {
+  const allTypes = registry.getAllTypes();
+  const unique = (array: string[]) => [...new Set(array)];
+
+  return unique(
+    [
+      ...allTypes
+        .filter((type) => !registry.isNamespaceAgnostic(type.name))
+        .map(({ name }) => name),
+      LEGACY_URL_ALIAS_TYPE,
+    ].map((type) => `${registry.getIndex(type) || MAIN_SAVED_OBJECT_INDEX}_${pkg.version}`)
+  ).join(',');
+};

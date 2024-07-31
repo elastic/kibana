@@ -47,7 +47,7 @@ export const ManagedUser = ({
   managedUser: ManagedUserData;
   contextID: string;
   isDraggable: boolean;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
 }) => {
   const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
   const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];

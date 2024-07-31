@@ -20,6 +20,10 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
+  formatESQLColumns,
+  getTimeFieldFromESQLQuery,
+  getStartEndParams,
+  hasStartEndParams,
   TextBasedLanguages,
 } from './src';
 

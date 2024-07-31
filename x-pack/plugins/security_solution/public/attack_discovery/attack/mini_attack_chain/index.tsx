@@ -9,9 +9,9 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { getTacticMetadata } from '../../helpers';
 import { ATTACK_CHAIN_TOOLTIP } from './translations';
-import type { AttackDiscovery } from '../../types';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

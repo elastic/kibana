@@ -20,8 +20,6 @@ import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
-jest.mock('../../../../common/experimental_features_service');
-
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
   isFetching?: boolean;
@@ -463,7 +461,12 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
 
-    it('should set selected command filter options to URL params ', () => {
+    // TODO: remove this test when responseActionScanEnabled is removed
+    it('should set selected command filter options to URL params (without `responseActionScanEnabled`)', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionScanEnabled: false,
+      });
+
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -477,6 +480,27 @@ describe('Response actions history page', () => {
 
       expect(history.location.search).toEqual(
         '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+      );
+    });
+
+    it('should set selected command filter options to URL params (with `responseActionScanEnabled`)', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionScanEnabled: true,
+      });
+
+      const filterPrefix = 'actions-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual(
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
     });
 
@@ -607,7 +631,12 @@ describe('Response actions history page', () => {
   });
 
   describe('Clear all selected options on a filter', () => {
-    it('should clear all selected options on `actions` filter', () => {
+    // TODO: remove this test when responseActionScanEnabled is removed
+    it('should clear all selected options on `actions` filter (without `responseActionScanEnabled`)', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionScanEnabled: false,
+      });
+
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -621,6 +650,32 @@ describe('Response actions history page', () => {
 
       expect(history.location.search).toEqual(
         '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
+      );
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      clearAllButton.style.pointerEvents = 'all';
+      userEvent.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear all selected options on `actions` filter (with `responseActionScanEnabled`)', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionScanEnabled: true,
+      });
+
+      const filterPrefix = 'actions-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual(
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload%2Cscan'
       );
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);

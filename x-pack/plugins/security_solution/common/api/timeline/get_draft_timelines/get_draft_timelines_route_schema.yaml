@@ -2,9 +2,6 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Get Draft Timelines API
   version: 8.9.0
-externalDocs:
-  url: https://www.elastic.co/guide/en/security/current/_get_timeline_timeline_template_by_savedobjectid.html
-  description: Documentation
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -16,7 +13,7 @@ paths:
   /api/timeline/_draft:
     get:
       operationId: getDraftTimelines
-      description: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
+      summary: Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
       tags:
         - access:securitySolution
       parameters:
@@ -25,7 +22,7 @@ paths:
           schema:
             $ref: '../model/components.yaml#/components/schemas/TimelineType'
       responses:
-        200:
+        '200':
           description: Indicates that the draft timeline was successfully retrieved.
           content:
             application/json:
@@ -40,7 +37,7 @@ paths:
                         properties:
                           timeline:
                             $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
-        403:
+        '403':
           description: If a draft timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft timeline.
           content:
             application:json:
@@ -51,7 +48,7 @@ paths:
                     type: string
                   status_code:
                     type: number
-        409:
+        '409':
           description: This should never happen, but if a draft timeline was not found and we attempted to create one, it indicates that there is already a draft timeline with the given timelineId.
           content:
             application:json:

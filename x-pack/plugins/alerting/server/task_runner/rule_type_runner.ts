@@ -30,6 +30,7 @@ import {
 import { ExecutorServices } from './get_executor_services';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
+import { withAlertingSpan } from './lib';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -211,67 +212,69 @@ export class RuleTypeRunner<
               context.namespace ?? DEFAULT_NAMESPACE_STRING
             }] namespace`,
           };
-          executorResult = await this.options.context.executionContext.withContext(ctx, () =>
-            ruleType.executor({
-              executionId,
-              services: {
-                alertFactory: alertsClient.factory(),
-                alertsClient: alertsClient.client(),
-                dataViews: executorServices.dataViews,
-                ruleMonitoringService: executorServices.ruleMonitoringService,
-                ruleResultService: executorServices.ruleResultService,
-                savedObjectsClient: executorServices.savedObjectsClient,
-                scopedClusterClient: executorServices.wrappedScopedClusterClient.client(),
-                searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
-                share: this.options.context.share,
-                shouldStopExecution: () => this.cancelled,
-                shouldWriteAlerts: () =>
-                  this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
-                uiSettingsClient: executorServices.uiSettingsClient,
-              },
-              params: validatedParams,
-              state: ruleTypeState as RuleState,
-              startedAtOverridden,
-              startedAt,
-              previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-              spaceId: context.spaceId,
-              namespace: context.namespace,
-              rule: {
-                id: context.ruleId,
-                name,
-                tags,
-                consumer,
-                producer: ruleType.producer,
-                revision,
-                ruleTypeId,
-                ruleTypeName: ruleType.name,
-                enabled,
-                schedule,
-                actions,
-                createdBy,
-                updatedBy,
-                createdAt,
-                updatedAt,
-                throttle,
-                notifyWhen,
-                muteAll,
-                snoozeSchedule,
-                alertDelay,
-              },
-              logger: this.options.logger,
-              flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
-              // passed in so the rule registry knows about maintenance windows
-              ...(maintenanceWindowsWithoutScopedQueryIds.length
-                ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
-                : {}),
-              getTimeRange: (timeWindow) =>
-                getTimeRange({
-                  logger: this.options.logger,
-                  window: timeWindow,
-                  ...(context.queryDelaySec ? { queryDelay: context.queryDelaySec } : {}),
-                  ...(startedAtOverridden ? { forceNow: startedAt } : {}),
-                }),
-            })
+          executorResult = await withAlertingSpan('rule-type-executor', () =>
+            this.options.context.executionContext.withContext(ctx, () =>
+              ruleType.executor({
+                executionId,
+                services: {
+                  alertFactory: alertsClient.factory(),
+                  alertsClient: alertsClient.client(),
+                  dataViews: executorServices.dataViews,
+                  ruleMonitoringService: executorServices.ruleMonitoringService,
+                  ruleResultService: executorServices.ruleResultService,
+                  savedObjectsClient: executorServices.savedObjectsClient,
+                  scopedClusterClient: executorServices.wrappedScopedClusterClient.client(),
+                  searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
+                  share: this.options.context.share,
+                  shouldStopExecution: () => this.cancelled,
+                  shouldWriteAlerts: () =>
+                    this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
+                  uiSettingsClient: executorServices.uiSettingsClient,
+                },
+                params: validatedParams,
+                state: ruleTypeState as RuleState,
+                startedAtOverridden,
+                startedAt,
+                previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+                spaceId: context.spaceId,
+                namespace: context.namespace,
+                rule: {
+                  id: context.ruleId,
+                  name,
+                  tags,
+                  consumer,
+                  producer: ruleType.producer,
+                  revision,
+                  ruleTypeId,
+                  ruleTypeName: ruleType.name,
+                  enabled,
+                  schedule,
+                  actions,
+                  createdBy,
+                  updatedBy,
+                  createdAt,
+                  updatedAt,
+                  throttle,
+                  notifyWhen,
+                  muteAll,
+                  snoozeSchedule,
+                  alertDelay,
+                },
+                logger: this.options.logger,
+                flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
+                // passed in so the rule registry knows about maintenance windows
+                ...(maintenanceWindowsWithoutScopedQueryIds.length
+                  ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
+                  : {}),
+                getTimeRange: (timeWindow) =>
+                  getTimeRange({
+                    logger: this.options.logger,
+                    window: timeWindow,
+                    ...(context.queryDelaySec ? { queryDelay: context.queryDelaySec } : {}),
+                    ...(startedAtOverridden ? { forceNow: startedAt } : {}),
+                  }),
+              })
+            )
           );
           // Rule type execution has successfully completed
           // Check that the rule type either never requested the max alerts limit
@@ -318,31 +321,35 @@ export class RuleTypeRunner<
       return { state: undefined, error, stackTrace };
     }
 
-    await this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-      alertsClient.processAlerts({
-        flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
-        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
-        alertDelay: alertDelay?.active ?? 0,
-        ruleRunMetricsStore: context.ruleRunMetricsStore,
-      });
-    });
+    await withAlertingSpan('alerting:process-alerts', () =>
+      this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
+        alertsClient.processAlerts({
+          flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
+          maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
+          alertDelay: alertDelay?.active ?? 0,
+          ruleRunMetricsStore: context.ruleRunMetricsStore,
+        });
+      })
+    );
 
-    await this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-      const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts(
-        maintenanceWindows
-      );
-
-      // Set the event log MW ids again, this time including the ids that matched alerts with
-      // scoped query
-      if (
-        updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-        updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-      ) {
-        context.alertingEventLogger.setMaintenanceWindowIds(
-          updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+    await withAlertingSpan('alerting:index-alerts-as-data', () =>
+      this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+        const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts(
+          maintenanceWindows
         );
-      }
-    });
+
+        // Set the event log MW ids again, this time including the ids that matched alerts with
+        // scoped query
+        if (
+          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
+          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
+        ) {
+          context.alertingEventLogger.setMaintenanceWindowIds(
+            updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+          );
+        }
+      })
+    );
 
     alertsClient.logAlerts({
       eventLogger: context.alertingEventLogger,

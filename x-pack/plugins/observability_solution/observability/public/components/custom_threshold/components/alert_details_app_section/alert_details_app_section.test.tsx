@@ -18,7 +18,7 @@ import {
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
 import { CustomThresholdAlertFields } from '../../types';
-import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { CustomThresholdAlert } from '../types';
 import AlertDetailsAppSection from './alert_details_app_section';
 
@@ -47,7 +47,7 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
+jest.mock('../../../rule_condition_chart/rule_condition_chart', () => ({
   RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 

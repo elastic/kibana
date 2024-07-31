@@ -15,6 +15,7 @@ import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public
 import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 
@@ -43,7 +44,7 @@ export type ColumnHeaderOptions = Pick<
   description?: string | null;
   esTypes?: string[];
   example?: string | number | null;
-  format?: string;
+  format?: SerializedFieldFormat;
   linkField?: string;
   placeholder?: string;
   subType?: IFieldSubType;
@@ -86,6 +87,7 @@ export interface ActionProps {
   columnId: string;
   columnValues: string;
   data: TimelineNonEcsData[];
+  disableExpandAction?: boolean;
   disabled?: boolean;
   ecsData: Ecs;
   eventId: string;
@@ -102,11 +104,16 @@ export interface ActionProps {
   setEventsDeleted: SetEventsDeleted;
   setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
+  /**
+   * This prop is used to determine if the notes button should be displayed
+   * as the part of Row Actions
+   * */
   showNotes?: boolean;
   tabType?: string;
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
+  disablePinAction?: boolean;
 }
 
 interface AdditionalControlColumnProps {

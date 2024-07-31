@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import {
@@ -115,10 +113,12 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
+
 describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
   });
 
   afterEach(() => {
@@ -230,7 +230,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
+    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful without agentless feature', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: false } as any);
@@ -249,7 +249,7 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
     });
@@ -273,7 +273,7 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
     });
@@ -314,6 +314,66 @@ describe('Agent policy', () => {
         schema_version: '1.1.1',
         is_protected: false,
       });
+    });
+
+    it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      const res = await agentPolicyService.create(soClient, esClient, {
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+      expect(res).toEqual({
+        id: 'mocked',
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+        status: 'active',
+        is_managed: true,
+        revision: 1,
+        updated_at: expect.anything(),
+        updated_by: 'system',
+        schema_version: '1.1.1',
+        is_protected: false,
+      });
+    });
+
+    it('should throw error when attempting to create policy with supports_agentless true on cloud environment that does not support the agentless feature', async () => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ agentless: true } as any);
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).rejects.toThrowError(
+        new AgentPolicyInvalidError(
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
+        )
+      );
     });
   });
 
@@ -426,99 +486,241 @@ describe('Agent policy', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
 
-    beforeEach(() => {
-      soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
-      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        {
-          id: 'package-1',
-        },
-      ] as any);
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    describe('with enableReusableIntegrationPolicies disabled', () => {
+      beforeEach(() => {
+        soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+        mockedPackagePolicyService.create.mockReset();
+        esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({
-        agents: [],
-        total: 0,
-        page: 1,
-        perPage: 10,
+        (getAgentsByKuery as jest.Mock).mockResolvedValue({
+          agents: [],
+          total: 0,
+          page: 1,
+          perPage: 10,
+        });
+
+        mockedPackagePolicyService.delete.mockResolvedValue([
+          {
+            id: 'package-1',
+          } as any,
+        ]);
+        jest
+          .spyOn(appContextService, 'getExperimentalFeatures')
+          .mockReturnValue({ enableReusableIntegrationPolicies: false } as any);
       });
 
-      mockedPackagePolicyService.delete.mockResolvedValue([
-        {
-          id: 'package-1',
-        } as any,
-      ]);
-    });
-
-    it('should throw error for agent policy which has managed package policy', async () => {
-      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        {
-          id: 'package-1',
-          is_managed: true,
-        },
-      ] as any);
-      try {
-        await agentPolicyService.delete(soClient, esClient, 'mocked');
-      } catch (e) {
-        expect(e.message).toEqual(
-          new PackagePolicyRestrictionRelatedError(
-            `Cannot delete agent policy mocked that contains managed package policies`
-          ).message
-        );
-      }
-    });
-
-    it('should allow delete with force for agent policy which has managed package policy', async () => {
-      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        {
-          id: 'package-1',
-          is_managed: true,
-        },
-      ] as any);
-      const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
-        force: true,
-      });
-      expect(response.id).toEqual('mocked');
-    });
-
-    it('should call audit logger', async () => {
-      await agentPolicyService.delete(soClient, esClient, 'mocked');
-
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
-        action: 'delete',
-        id: 'mocked',
-        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      });
-    });
-
-    it('should throw error if active agents are assigned to the policy', async () => {
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({
-        agents: [],
-        total: 2,
-        page: 1,
-        perPage: 10,
-      });
-      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
-        'Cannot delete an agent policy that is assigned to any active or inactive agents'
-      );
-    });
-
-    it('should delete .fleet-policies entries on agent policy delete', async () => {
-      esClient.deleteByQuery.mockResolvedValueOnce({
-        deleted: 2,
-      });
-
-      await agentPolicyService.delete(soClient, esClient, 'mocked');
-
-      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: AGENT_POLICY_INDEX,
-          query: {
-            term: {
-              policy_id: 'mocked',
-            },
+      it('should throw error for agent policy which has managed package policy', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+            is_managed: true,
           },
-        })
-      );
+        ] as any);
+        try {
+          await agentPolicyService.delete(soClient, esClient, 'mocked');
+        } catch (e) {
+          expect(e.message).toEqual(
+            new PackagePolicyRestrictionRelatedError(
+              `Cannot delete agent policy mocked that contains managed package policies`
+            ).message
+          );
+        }
+      });
+
+      it('should allow delete with force for agent policy which has managed package policy', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+            is_managed: true,
+          },
+        ] as any);
+        const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
+          force: true,
+        });
+        expect(response.id).toEqual('mocked');
+      });
+
+      it('should call audit logger', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+          },
+        ] as any);
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+          action: 'delete',
+          id: 'mocked',
+          savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should throw error if active agents are assigned to the policy', async () => {
+        (getAgentsByKuery as jest.Mock).mockResolvedValue({
+          agents: [],
+          total: 2,
+          page: 1,
+          perPage: 10,
+        });
+        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+          'Cannot delete an agent policy that is assigned to any active or inactive agents'
+        );
+      });
+
+      it('should delete .fleet-policies entries on agent policy delete', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+          },
+        ] as any);
+        esClient.deleteByQuery.mockResolvedValueOnce({
+          deleted: 2,
+        });
+
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: AGENT_POLICY_INDEX,
+            query: {
+              term: {
+                policy_id: 'mocked',
+              },
+            },
+          })
+        );
+      });
+    });
+
+    describe('with enableReusableIntegrationPolicies enabled', () => {
+      beforeEach(() => {
+        soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+          },
+        ] as any);
+        esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        (getAgentsByKuery as jest.Mock).mockResolvedValue({
+          agents: [],
+          total: 0,
+          page: 1,
+          perPage: 10,
+        });
+        mockedPackagePolicyService.create.mockReset();
+        jest
+          .spyOn(appContextService, 'getExperimentalFeatures')
+          .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+      });
+
+      it('should throw error for agent policy which has managed package policy', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+            is_managed: true,
+          },
+        ] as any);
+        try {
+          await agentPolicyService.delete(soClient, esClient, 'mocked');
+        } catch (e) {
+          expect(e.message).toEqual(
+            new PackagePolicyRestrictionRelatedError(
+              `Cannot delete agent policy mocked that contains managed package policies`
+            ).message
+          );
+        }
+      });
+
+      it('should allow delete with force for agent policy which has managed package policy', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+            is_managed: true,
+          },
+        ] as any);
+        const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
+          force: true,
+        });
+        expect(response.id).toEqual('mocked');
+      });
+
+      it('should call audit logger', async () => {
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+          action: 'delete',
+          id: 'mocked',
+          savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        });
+      });
+
+      it('should throw error if active agents are assigned to the policy', async () => {
+        (getAgentsByKuery as jest.Mock).mockResolvedValue({
+          agents: [],
+          total: 2,
+          page: 1,
+          perPage: 10,
+        });
+        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+          'Cannot delete an agent policy that is assigned to any active or inactive agents'
+        );
+      });
+
+      it('should delete .fleet-policies entries on agent policy delete', async () => {
+        esClient.deleteByQuery.mockResolvedValueOnce({
+          deleted: 2,
+        });
+
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: AGENT_POLICY_INDEX,
+            query: {
+              term: {
+                policy_id: 'mocked',
+              },
+            },
+          })
+        );
+      });
+
+      it('should only delete package polices that are not shared with other agent policies', async () => {
+        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+          {
+            id: 'package-1',
+            policy_id: ['policy_1'],
+            policy_ids: ['policy_1', 'int_policy_2'],
+          },
+          {
+            id: 'package-2',
+            policy_id: ['policy_1'],
+            policy_ids: ['policy_1'],
+          },
+          {
+            id: 'package-3',
+          },
+        ] as any);
+        await agentPolicyService.delete(soClient, esClient, 'policy_1');
+        expect(mockedPackagePolicyService.delete).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ['package-2', 'package-3'],
+          expect.anything()
+        );
+        expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          [
+            {
+              id: 'package-1',
+              policy_id: 'int_policy_2',
+              policy_ids: ['int_policy_2'],
+            },
+          ]
+        );
+      });
     });
   });
 
@@ -587,7 +789,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -662,7 +864,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -887,13 +1089,13 @@ describe('Agent policy', () => {
       ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
     });
 
-    it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
+    it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+        .mockReturnValue({ agentless: true } as any);
       jest
         .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: false } as any);
+        .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -910,11 +1112,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
-        new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
-        )
-      );
+      ).resolves.not.toThrow();
     });
 
     it('should throw AgentPolicyInvalidError if agentless flag is disabled in serverless', async () => {
@@ -942,7 +1140,7 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new AgentPolicyInvalidError(
-          'supports_agentless is only allowed in serverless environments that support the agentless feature'
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
     });
@@ -1032,6 +1230,7 @@ describe('Agent policy', () => {
       mockedGetFullAgentPolicy.mockResolvedValue({
         id: 'policy123',
         revision: 1,
+        namespaces: ['mySpace'],
         inputs: [
           {
             id: 'input-123',
@@ -1084,10 +1283,16 @@ describe('Agent policy', () => {
             }),
             expect.objectContaining({
               '@timestamp': expect.anything(),
-              data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+              data: {
+                id: 'policy123',
+                inputs: [{ id: 'input-123' }],
+                revision: 1,
+                namespaces: ['mySpace'],
+              },
               default_fleet_server: false,
               policy_id: 'policy123',
               revision_idx: 1,
+              namespaces: ['mySpace'],
             }),
           ],
           refresh: 'wait_for',

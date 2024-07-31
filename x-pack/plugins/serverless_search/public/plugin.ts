@@ -101,11 +101,10 @@ export class ServerlessSearchPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
-        const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
         let user: AuthenticatedUser | undefined;
         try {
-          const response = await security.authc.getCurrentUser();
+          const response = await coreStart.security.authc.getCurrentUser();
           user = response;
         } catch {
           user = undefined;

@@ -20,6 +20,11 @@ import {
 
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
 
+import {
+  getRulesSchemaMock,
+  getRulesMlSchemaMock,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
+
 import { patchRuleRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
@@ -34,7 +39,7 @@ describe('Patch rule route', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.detectionRulesClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.patchRule.mockResolvedValue(getRulesSchemaMock());
 
     patchRuleRoute(server.router);
   });
@@ -99,14 +104,11 @@ describe('Patch rule route', () => {
 
       const anomalyThreshold = 4;
       const machineLearningJobId = 'some_job_id';
-      clients.detectionRulesClient.patchRule.mockResolvedValueOnce(
-        getRuleMock(
-          getMlRuleParams({
-            anomalyThreshold,
-            machineLearningJobId: [machineLearningJobId],
-          })
-        )
-      );
+      clients.detectionRulesClient.patchRule.mockResolvedValueOnce({
+        ...getRulesMlSchemaMock(),
+        anomaly_threshold: anomalyThreshold,
+        machine_learning_job_id: [machineLearningJobId],
+      });
 
       const request = requestMock.create({
         method: 'patch',

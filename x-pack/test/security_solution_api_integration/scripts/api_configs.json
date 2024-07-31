@@ -1,0 +1,198 @@
+{
+  "nlp_cleanup_task:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" },
+      { "product_line": "cloud", "product_tier": "essentials" }
+    ]
+  },
+  "nlp_cleanup_task:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" },
+      { "product_line": "cloud", "product_tier": "essentials" }
+    ]
+  },
+  "entity_analytics:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" },
+      { "product_line": "cloud", "product_tier": "essentials" }
+    ]
+  },
+  "entity_analytics:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" },
+      { "product_line": "cloud", "product_tier": "essentials" }
+    ]
+  },
+  "exception_workflows:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_workflows:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_date_numeric_types:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_date_numeric_types:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_keyword:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_keyword:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_ips:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_ips:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_long:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_long:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_text:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "exception_operators_text:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "alerts:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "alerts:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_creation:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_creation:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_update:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_update:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_patch:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_patch:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_delete:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_delete:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_import_export:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_import_export:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rules_management:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rules_management:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_read:essentials:qa:serverless": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  },
+  "rule_read:essentials:qa:serverless:release": {
+    "productTypes": [
+      { "product_line": "security", "product_tier": "essentials" },
+      { "product_line": "endpoint", "product_tier": "essentials" }
+    ]
+  }
+}

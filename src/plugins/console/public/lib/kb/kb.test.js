@@ -133,12 +133,12 @@ describe('Knowledge base', () => {
   );
 
   indexTest('Index integration 2', ['index1'], [], {
-    index: ['index1'],
+    indices: ['index1'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
 
   indexTest('Index integration 2', [['index1', 'index2']], [], {
-    index: ['index1', 'index2'],
+    indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
 });

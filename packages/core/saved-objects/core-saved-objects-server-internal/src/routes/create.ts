@@ -34,8 +34,10 @@ export const registerCreateRoute = (
     {
       path: '/{type}/{id?}',
       options: {
+        summary: `Create a saved object`,
+        tags: ['oas-tag:saved objects'],
         access,
-        description: `Create a saved object`,
+        deprecated: true,
       },
       validate: {
         params: schema.object({

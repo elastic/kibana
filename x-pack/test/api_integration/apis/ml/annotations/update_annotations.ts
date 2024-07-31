@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body._id).to.eql(originalAnnotation._id);
       expect(body.result).to.eql('updated');
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
 
       if (updatedAnnotation) {
         Object.keys(commonAnnotationUpdateRequestBody).forEach((key) => {
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body._id).to.eql(originalAnnotation._id);
       expect(body.result).to.eql('updated');
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
       if (updatedAnnotation) {
         Object.keys(commonAnnotationUpdateRequestBody).forEach((key) => {
           const field = key as keyof Annotation;
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
       expect(updatedAnnotation).to.eql(originalAnnotation._source);
     });
 
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send(annotationUpdateRequestBodyWithMissingFields);
       ml.api.assertResponseStatusCode(200, status, body);
 
-      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id!);
       if (updatedAnnotation) {
         Object.keys(annotationUpdateRequestBodyWithMissingFields).forEach((key) => {
           if (key !== '_id') {

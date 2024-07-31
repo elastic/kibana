@@ -14,6 +14,7 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { bulkUpdateRulesRoute } from './route';
 import type { BulkError } from '../../../../routes/utils';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -32,7 +33,7 @@ describe('Bulk update rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    clients.detectionRulesClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     bulkUpdateRulesRoute(server.router, logger);

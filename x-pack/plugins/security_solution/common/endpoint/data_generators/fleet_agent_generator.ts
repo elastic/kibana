@@ -65,7 +65,8 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         // Casting here is needed because several of the attributes in `FleetServerAgent` are
         // defined as optional, but required in `Agent` type.
         ...(hit._source as Agent),
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
         policy_revision: hit._source?.policy_revision_idx,
         access_api_key: undefined,
         status: this.randomAgentStatus(),

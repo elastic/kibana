@@ -6,7 +6,6 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { getSentinelOneAgentStatus } from '../../services/agent/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -59,6 +58,10 @@ export const getAgentStatusRouteHandler = (
     const { agentType = 'endpoint', agentIds: _agentIds } = request.query;
     const agentIds = Array.isArray(_agentIds) ? _agentIds : [_agentIds];
 
+    logger.debug(
+      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
+    );
+
     // Note: because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since
     //        `agent_type` is included in the schema independent of the feature flag
@@ -77,36 +80,17 @@ export const getAgentStatusRouteHandler = (
 
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
+    const connectorActionsClient = (await context.actions).getActionsClient();
     const agentStatusClient = getAgentStatusClient(agentType, {
       esClient,
       soClient,
+      connectorActionsClient,
       endpointService: endpointContext.service,
-      connectorActionsClient:
-        agentType === 'crowdstrike' ? (await context.actions).getActionsClient() : undefined,
     });
-
-    // 8.15: use the new `agentStatusClientEnabled` FF enabled
-    const data = endpointContext.experimentalFeatures.agentStatusClientEnabled
-      ? await agentStatusClient.getAgentStatuses(agentIds)
-      : agentType === 'sentinel_one'
-      ? await getSentinelOneAgentStatus({
-          agentType,
-          agentIds,
-          logger,
-          connectorActionsClient: (await context.actions).getActionsClient(),
-        })
-      : [];
-
-    logger.debug(
-      `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
-    );
+    const data = await agentStatusClient.getAgentStatuses(agentIds);
 
     try {
-      return response.ok({
-        body: {
-          data,
-        },
-      });
+      return response.ok({ body: { data } });
     } catch (e) {
       return errorHandler(logger, response, e);
     }

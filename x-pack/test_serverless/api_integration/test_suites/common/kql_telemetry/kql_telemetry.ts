@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('telemetry API', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       // TODO: Clean `kql-telemetry` before running the tests
       await kibanaServer.savedObjects.clean({ types: ['kql-telemetry'] });
       await kibanaServer.importExport.load(
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should increment the opt *in* counter in the .kibana_analytics/kql-telemetry document', async () => {

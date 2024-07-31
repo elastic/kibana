@@ -161,6 +161,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -256,6 +257,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -310,6 +312,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -358,6 +361,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -406,6 +410,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -486,6 +491,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -605,6 +611,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });

@@ -68,7 +68,7 @@ import {
   useSourceContext,
   withSourceProvider,
 } from '../../../containers/metrics_source';
-import { InfraWaffleMapOptions } from '../../../lib/lib';
+import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';

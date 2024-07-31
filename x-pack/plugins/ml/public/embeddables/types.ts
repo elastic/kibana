@@ -174,8 +174,9 @@ export interface AnomalyChartsEmbeddableState
 
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {
-  jobIds: JobId[];
+  forecastId?: string;
   functionDescription?: string;
+  jobIds: JobId[];
   selectedDetectorIndex: number;
   selectedEntities?: MlEntity;
   panelTitle?: string;
@@ -214,16 +215,18 @@ export type SingleMetricViewerEmbeddableApi =
  */
 export type SingleMetricViewerRuntimeState = Omit<
   SingleMetricViewerEmbeddableState,
-  'id' | 'filters' | 'query' | 'refreshConfig'
+  'id' | 'filters' | 'query' | 'refreshConfig' | 'forecastId'
 >;
 
 export interface SingleMetricViewerComponentApi {
+  forecastId: PublishingSubject<string | undefined>;
   functionDescription: PublishingSubject<string | undefined>;
   jobIds: PublishingSubject<JobId[]>;
   selectedDetectorIndex: PublishingSubject<number>;
   selectedEntities: PublishingSubject<MlEntity | undefined>;
 
   updateUserInput: (input: SingleMetricViewerEmbeddableUserInput) => void;
+  updateForecastId: (id: string | undefined) => void;
 }
 
 export interface AnomalyChartsServices {

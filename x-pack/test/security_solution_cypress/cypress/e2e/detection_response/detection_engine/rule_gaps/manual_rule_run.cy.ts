@@ -32,7 +32,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
     );
     manualRuleRunFromDetailsPage();
 
-    cy.get(TOASTER).should('have.text', 'Successfully scheduled backfill for 1 rule');
+    cy.get(TOASTER).should('have.text', 'Successfully scheduled manual run for 1 rule');
   });
 
   it('schedule from rules management table', () => {
@@ -42,7 +42,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
         disableAutoRefresh();
         manuallyRunFirstRule();
 
-        cy.get(TOASTER).should('have.text', 'Successfully scheduled backfill for 1 rule');
+        cy.get(TOASTER).should('have.text', 'Successfully scheduled manual run for 1 rule');
       }
     );
   });

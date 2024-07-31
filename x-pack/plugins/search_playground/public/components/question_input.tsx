@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiTextArea, keys, useEuiTheme } from '@elastic/eui';
@@ -25,6 +25,7 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
   button,
   isDisabled,
 }) => {
+  const [isComposing, setIsComposing] = useState(false);
   const { euiTheme } = useEuiTheme();
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -35,13 +36,20 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
     },
     [onChange]
   );
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === keys.ENTER && !event.shiftKey) {
-      event.preventDefault();
+  const handleCompositionStart = () => setIsComposing(true);
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === keys.ENTER && !event.shiftKey && !isComposing) {
+        event.preventDefault();
 
-      event.currentTarget.form?.requestSubmit();
-    }
-  }, []);
+        event.currentTarget.form?.requestSubmit();
+      }
+    },
+    [isComposing]
+  );
 
   return (
     <div css={{ position: 'relative' }}>
@@ -67,6 +75,8 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
         disabled={isDisabled}
         resize="none"
         data-test-subj="questionInput"
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
       />
 
       <div
