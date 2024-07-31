@@ -1,18 +1,12 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-onboarding-plugin",
-  "owner": [
-    "@elastic/obs-ux-logs-team",
-    "@elastic/obs-ux-onboarding-team"
-  ],
+  "owner": ["@elastic/obs-ux-logs-team", "@elastic/obs-ux-onboarding-team"],
   "plugin": {
     "id": "observabilityOnboarding",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "observability_onboarding"
-    ],
+    "configPath": ["xpack", "observability_onboarding"],
     "requiredPlugins": [
       "data",
       "observability",
@@ -20,19 +14,10 @@
       "discover",
       "share",
       "fleet",
-      "security",
-      "customIntegrations",
+      "customIntegrations"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "cloudExperiments",
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "optionalPlugins": ["cloud", "cloudExperiments", "usageCollection"],
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": ["common"]
   }
 }

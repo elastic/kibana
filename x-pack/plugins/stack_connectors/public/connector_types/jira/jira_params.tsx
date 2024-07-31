@@ -195,7 +195,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const areLabelsInvalid =
     errors['subActionParams.incident.labels'] != null &&
     errors['subActionParams.incident.labels'] !== undefined &&
-    errors['subActionParams.incident.labels'].length > 0 &&
+    Number(errors['subActionParams.incident.labels'].length) > 0 &&
     incident.labels !== undefined;
 
   return (
@@ -282,7 +282,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           error={errors['subActionParams.incident.summary']}
           isInvalid={
             errors['subActionParams.incident.summary'] !== undefined &&
-            errors['subActionParams.incident.summary'].length > 0 &&
+            Number(errors['subActionParams.incident.summary'].length) > 0 &&
             incident.summary !== undefined
           }
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
@@ -388,7 +388,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           error={errors['subActionParams.incident.otherFields']}
           isInvalid={
             errors['subActionParams.incident.otherFields'] !== undefined &&
-            errors['subActionParams.incident.otherFields'].length > 0
+            Number(errors['subActionParams.incident.otherFields'].length) > 0
           }
         >
           <JsonEditorWithMessageVariables

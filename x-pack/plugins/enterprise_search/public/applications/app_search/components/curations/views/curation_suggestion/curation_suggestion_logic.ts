@@ -71,6 +71,7 @@ export const CurationSuggestionLogic = kea<
     suggestion: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onSuggestionLoaded: (_, { suggestion }) => suggestion,
       },
     ],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityService } from '../../../../test/common/services/security/security';
+import type { SecurityService } from '@kbn/test-suites-src/common/services/security/security';
 
 export const testUsers: {
   [rollName: string]: { username: string; password: string; permissions?: any };

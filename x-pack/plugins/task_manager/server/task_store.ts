@@ -84,11 +84,6 @@ export interface FetchResult {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
-export interface BulkUpdateOpts {
-  validate: boolean;
-  excludeLargeFields?: boolean;
-}
-
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
   { type: string; id: string; error: SavedObjectError }
@@ -113,7 +108,6 @@ export class TaskStore {
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
   public readonly taskValidator: TaskValidator;
-  private readonly logger: Logger;
 
   private esClient: ElasticsearchClient;
   private esClientWithoutRetries: ElasticsearchClient;
@@ -140,7 +134,6 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
-    this.logger = opts.logger;
     this.taskValidator = new TaskValidator({
       logger: opts.logger,
       definitions: opts.definitions,
@@ -239,13 +232,15 @@ export class TaskStore {
    * Fetches a list of scheduled tasks with default sorting.
    *
    * @param opts - The query options used to filter tasks
-   * @param limitResponse - Whether to exclude the task state and params from the source for a smaller respose payload
    */
-  public async fetch(
-    { sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {},
-    limitResponse: boolean = false
-  ): Promise<FetchResult> {
-    return this.search({ ...opts, sort }, limitResponse);
+  public async fetch({
+    sort = [{ 'task.runAt': 'asc' }],
+    ...opts
+  }: SearchOpts = {}): Promise<FetchResult> {
+    return this.search({
+      ...opts,
+      sort,
+    });
   }
 
   /**
@@ -301,23 +296,13 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    { validate, excludeLargeFields = false }: BulkUpdateOpts
+    options: { validate: boolean }
   ): Promise<BulkUpdateResult[]> {
-    // if we're excluding large fields (state and params), we cannot apply validation so log a warning
-    if (validate && excludeLargeFields) {
-      validate = false;
-      this.logger.warn(`Skipping validation for bulk update because excludeLargeFields=true.`);
-    }
-
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-        validate,
+        validate: options.validate,
       });
-      const taskAttributes = taskInstanceToAttributes(taskInstance, doc.id);
-      attrsById.set(
-        doc.id,
-        excludeLargeFields ? omit(taskAttributes, 'state', 'params') : taskAttributes
-      );
+      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance, doc.id));
       return attrsById;
     }, new Map());
 
@@ -357,7 +342,7 @@ export class TaskStore {
         ),
       });
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
-        validate,
+        validate: options.validate,
       });
       return asOk(result);
     });
@@ -504,20 +489,18 @@ export class TaskStore {
     }
   }
 
-  private async search(
-    opts: SearchOpts = {},
-    limitResponse: boolean = false
-  ): Promise<FetchResult> {
+  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: { ...opts, query },
-        ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
+        body: {
+          ...opts,
+          query,
+        },
       });
-
       const {
         hits: { hits: tasks },
       } = result;
@@ -644,10 +627,7 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-export function taskInstanceToAttributes(
-  doc: TaskInstance,
-  id: string
-): SerializedConcreteTaskInstance {
+function taskInstanceToAttributes(doc: TaskInstance, id: string): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
