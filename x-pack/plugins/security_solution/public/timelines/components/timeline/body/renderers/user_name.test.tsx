@@ -10,17 +10,13 @@ import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineActions } from '../../../../store';
 import { UserName } from './user_name';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
-import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenRightPanel = jest.fn();
-
-jest.mock('../../../../../common/hooks/use_experimental_features');
 
 jest.mock('@kbn/expandable-flyout', () => {
   return {
@@ -28,14 +24,6 @@ jest.mock('@kbn/expandable-flyout', () => {
       openRightPanel: mockOpenRightPanel,
     }),
     TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
-  };
-});
-
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useDispatch: jest.fn().mockReturnValue(jest.fn()),
   };
 });
 
@@ -56,28 +44,6 @@ jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
-
-jest.mock('../../../../store', () => {
-  const original = jest.requireActual('../../../../store');
-  return {
-    ...original,
-    timelineActions: {
-      ...original.timelineActions,
-      toggleDetailPanel: jest.fn(),
-    },
-  };
-});
-
-jest.mock('@kbn/securitysolution-data-table', () => {
-  const original = jest.requireActual('@kbn/securitysolution-data-table');
-  return {
-    ...original,
-    dataTableActions: {
-      ...original.dataTableActions,
-      toggleDetailPanel: jest.fn(),
-    },
-  };
-});
 
 describe('UserName', () => {
   afterEach(() => {
@@ -127,8 +93,6 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(mockOpenRightPanel).not.toHaveBeenCalled();
     });
   });
@@ -151,82 +115,11 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
-    });
-  });
-
-  test('should open old flyout on table', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'expandableFlyoutDisabled') return true;
-    });
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TableId.alertsOnAlertsPage,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <UserName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
-    await waitFor(() => {
-      expect(dataTableActions.toggleDetailPanel).toHaveBeenCalledWith({
-        id: context.timelineID,
-        panelView: 'userDetail',
-        params: {
-          userName: props.value,
-        },
-        tabType: context.tabType,
-      });
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
-    });
-  });
-
-  test('should open old flyout in timeline', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'expandableFlyoutDisabled') return true;
-    });
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TimelineId.active,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <UserName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        id: context.timelineID,
-        panelView: 'userDetail',
-        params: {
-          userName: props.value,
-        },
-        tabType: context.tabType,
-      });
-      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(mockOpenRightPanel).not.toHaveBeenCalled();
     });
   });
 
   test('should open expandable flyout on table', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'expandableFlyoutDisabled') return false;
-    });
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -252,15 +145,10 @@ describe('UserName', () => {
           isDraggable: false,
         },
       });
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
     });
   });
 
   test('should open expandable flyout in timeline', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {
-      if (feature === 'expandableFlyoutDisabled') return false;
-    });
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
@@ -286,8 +174,6 @@ describe('UserName', () => {
           isDraggable: false,
         },
       });
-      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(dataTableActions.toggleDetailPanel).not.toHaveBeenCalled();
     });
   });
 });

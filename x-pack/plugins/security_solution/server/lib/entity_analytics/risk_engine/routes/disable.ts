@@ -7,7 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { RiskEngineDisableResponse } from '../../../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import type { DisableRiskEngineResponse } from '../../../../../common/api/entity_analytics';
 import { RISK_ENGINE_DISABLE_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
@@ -71,7 +71,7 @@ export const riskEngineDisableRoute = (
 
         try {
           await riskEngineClient.disableRiskEngine({ taskManager });
-          const body: RiskEngineDisableResponse = { success: true };
+          const body: DisableRiskEngineResponse = { success: true };
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

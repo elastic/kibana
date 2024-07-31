@@ -14,6 +14,10 @@ export type FieldsMetadataMap = Record<string, FieldMetadata>;
 export class FieldsMetadataDictionary {
   private constructor(private readonly fields: FieldsMetadataMap) {}
 
+  getFields() {
+    return this.fields;
+  }
+
   pick(attributes: FieldAttribute[]): Record<string, PartialFieldMetadataPlain> {
     return mapValues(this.fields, (field) => field.pick(attributes));
   }

@@ -12,7 +12,14 @@ import type { FleetServerAgentComponentUnit } from '../../common/types/models/ag
 
 import type { PackagePolicyValidationResults } from '../services';
 
-import type { Agent, AgentPolicy, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
+import type {
+  Agent,
+  AgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+  PackagePolicy,
+  SetupTechnology,
+} from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -36,8 +43,8 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   validationResults?: PackagePolicyValidationResults;
   agentPolicies?: AgentPolicy[];
   packageInfo: PackageInfo;
-  agentlessPolicy?: AgentPolicy;
-  handleSetupTechnologyChange?: (setupTechnology: string) => void;
+  isAgentlessEnabled?: boolean;
+  handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
 };
 
 /**

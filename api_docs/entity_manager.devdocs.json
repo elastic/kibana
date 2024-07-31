@@ -77,6 +77,96 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.ERROR_API_KEY_NOT_FOUND",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_API_KEY_NOT_FOUND",
+        "description": [],
+        "signature": [
+          "\"api_key_not_found\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.ERROR_API_KEY_NOT_VALID",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_API_KEY_NOT_VALID",
+        "description": [],
+        "signature": [
+          "\"api_key_not_valid\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.ERROR_API_KEY_SERVICE_DISABLED",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_API_KEY_SERVICE_DISABLED",
+        "description": [],
+        "signature": [
+          "\"api_key_service_disabled\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.ERROR_DEFINITION_STOPPED",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_DEFINITION_STOPPED",
+        "description": [],
+        "signature": [
+          "\"error_definition_stopped\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.ERROR_PARTIAL_BUILTIN_INSTALLATION",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_PARTIAL_BUILTIN_INSTALLATION",
+        "description": [],
+        "signature": [
+          "\"partial_builtin_installation\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.ERROR_USER_NOT_AUTHORIZED",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_USER_NOT_AUTHORIZED",
+        "description": [],
+        "signature": [
+          "\"user_not_authorized\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

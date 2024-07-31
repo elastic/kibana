@@ -27,7 +27,7 @@ export const DeleteConfirmModal = React.memo(() => {
   }, [dispatch]);
 
   const onConfirm = useCallback(() => {
-    dispatch(deleteNotes({ ids: pendingDeleteIds }));
+    dispatch(deleteNotes({ ids: pendingDeleteIds, refetch: true }));
   }, [dispatch, pendingDeleteIds]);
 
   return (

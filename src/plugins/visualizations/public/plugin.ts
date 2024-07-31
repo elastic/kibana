@@ -400,8 +400,6 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editInLensAction);
-    const addAggVisAction = new AddAggVisualizationPanelAction();
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
@@ -498,6 +496,9 @@ export class VisualizationsPlugin
     if (savedObjectsTaggingOss) {
       setSavedObjectTagging(savedObjectsTaggingOss);
     }
+
+    const addAggVisAction = new AddAggVisualizationPanelAction(types);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAggVisAction);
 
     return {
       ...types,

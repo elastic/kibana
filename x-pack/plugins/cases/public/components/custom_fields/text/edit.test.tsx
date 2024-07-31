@@ -380,7 +380,7 @@ describe('Edit ', () => {
     userEvent.click(await screen.findByTestId('case-text-custom-field-edit-button-test_key_1'));
     userEvent.clear(await screen.findByTestId('case-text-custom-field-form-field-test_key_1'));
 
-    expect(await screen.findByText('A My test label 1 is required.')).toBeInTheDocument();
+    expect(await screen.findByText('My test label 1 is required.')).toBeInTheDocument();
   });
 
   it('does not shows a validation error if the field is not required', async () => {

@@ -9,7 +9,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { SetupPlugins } from '../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import {
@@ -27,10 +26,7 @@ import { rulesToMap } from '../../logic/utils';
 import { buildFrameworkRequest } from '../../../../timeline/utils/common';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
 
-export const getPrebuiltRulesAndTimelinesStatusRoute = (
-  router: SecuritySolutionPluginRouter,
-  security: SetupPlugins['security']
-) => {
+export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       access: 'public',
@@ -71,7 +67,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
           const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
           const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const prebuiltTimelineStatus = await checkTimelinesStatus(frameworkRequest);
           const [validatedPrebuiltTimelineStatus] = validate(
             prebuiltTimelineStatus,

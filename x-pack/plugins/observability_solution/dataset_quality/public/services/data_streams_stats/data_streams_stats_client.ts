@@ -12,6 +12,7 @@ import {
   getDataStreamsStatsResponseRt,
   getIntegrationsResponseRt,
   getNonAggregatableDatasetsRt,
+  IntegrationResponse,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
@@ -24,7 +25,6 @@ import {
   GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
   GetNonAggregatableDataStreamsResponse,
-  IntegrationsResponse,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { IDataStreamsStatsClient } from './types';
@@ -113,9 +113,9 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
 
   public async getIntegrations(
     params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
-  ): Promise<IntegrationsResponse> {
+  ): Promise<Integration[]> {
     const response = await this.http
-      .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/integrations', {
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
         query: params,
       })
       .catch((error) => {

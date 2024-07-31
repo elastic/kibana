@@ -11,12 +11,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "agent.ephemeral_id",
             "searchable": true,
             "type": "string",
@@ -25,12 +19,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "keyword",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "agent.hostname",
             "searchable": true,
@@ -41,12 +29,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "agent.id",
             "searchable": true,
             "type": "string",
@@ -55,12 +37,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "keyword",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "agent.name",
             "searchable": true,
@@ -75,10 +51,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-            ],
             "name": "auditd.data.a0",
             "searchable": true,
             "type": "string",
@@ -88,10 +60,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-            ],
             "name": "auditd.data.a1",
             "searchable": true,
             "type": "string",
@@ -100,10 +68,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "keyword",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
             ],
             "name": "auditd.data.a2",
             "searchable": true,
@@ -118,12 +82,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "date",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "@timestamp",
             "readFromDocValues": true,
             "searchable": true,
@@ -132,11 +90,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
           "_id": Object {
             "aggregatable": false,
             "esTypes": Array [],
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "_id",
             "searchable": true,
             "type": "string",
@@ -146,12 +99,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "text",
             ],
-            "format": "string",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
+            "format": Object {
+              "id": "string",
+            },
             "name": "message",
             "searchable": true,
             "type": "string",
@@ -165,12 +115,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "client.address",
             "searchable": true,
             "type": "string",
@@ -179,12 +123,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "long",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "client.bytes",
             "searchable": true,
@@ -195,12 +133,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "client.domain",
             "searchable": true,
             "type": "string",
@@ -209,12 +141,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "keyword",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "client.geo.country_iso_code",
             "searchable": true,
@@ -229,12 +155,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "cloud.account.id",
             "searchable": true,
             "type": "string",
@@ -243,12 +163,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "keyword",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "cloud.availability_zone",
             "searchable": true,
@@ -263,12 +177,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "container.id",
             "searchable": true,
             "type": "string",
@@ -278,12 +186,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "container.image.name",
             "searchable": true,
             "type": "string",
@@ -292,12 +194,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "keyword",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "container.image.tag",
             "searchable": true,
@@ -312,12 +208,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "destination.address",
             "searchable": true,
             "type": "string",
@@ -326,12 +216,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "long",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "destination.bytes",
             "searchable": true,
@@ -342,12 +226,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "destination.domain",
             "searchable": true,
             "type": "string",
@@ -357,12 +235,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "ip",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "destination.ip",
             "searchable": true,
             "type": "ip",
@@ -371,12 +243,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "long",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "destination.port",
             "searchable": true,
@@ -391,18 +257,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
-            "indexes": Array [
-              "apm-*-transaction*",
-              "auditbeat-*",
-              "endgame-*",
-              "filebeat-*",
-              "logs-*",
-              "packetbeat-*",
-              "traces-apm*",
-              "winlogbeat-*",
-              "-*elastic-cloud-logs-*",
-            ],
+            "format": Object {
+              "id": "string",
+            },
             "name": "event.action",
             "searchable": true,
             "type": "string",
@@ -412,18 +269,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
-            "indexes": Array [
-              "apm-*-transaction*",
-              "auditbeat-*",
-              "endgame-*",
-              "filebeat-*",
-              "logs-*",
-              "packetbeat-*",
-              "traces-apm*",
-              "winlogbeat-*",
-              "-*elastic-cloud-logs-*",
-            ],
+            "format": Object {
+              "id": "string",
+            },
             "name": "event.category",
             "searchable": true,
             "type": "string",
@@ -432,18 +280,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "date",
-            ],
-            "format": "",
-            "indexes": Array [
-              "apm-*-transaction*",
-              "auditbeat-*",
-              "endgame-*",
-              "filebeat-*",
-              "logs-*",
-              "packetbeat-*",
-              "traces-apm*",
-              "winlogbeat-*",
-              "-*elastic-cloud-logs-*",
             ],
             "name": "event.end",
             "searchable": true,
@@ -454,18 +290,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
-            "indexes": Array [
-              "apm-*-transaction*",
-              "auditbeat-*",
-              "endgame-*",
-              "filebeat-*",
-              "logs-*",
-              "packetbeat-*",
-              "traces-apm*",
-              "winlogbeat-*",
-              "-*elastic-cloud-logs-*",
-            ],
+            "format": Object {
+              "id": "string",
+            },
             "name": "event.kind",
             "searchable": true,
             "type": "string",
@@ -475,18 +302,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "long",
             ],
-            "format": "number",
-            "indexes": Array [
-              "apm-*-transaction*",
-              "auditbeat-*",
-              "endgame-*",
-              "filebeat-*",
-              "logs-*",
-              "packetbeat-*",
-              "traces-apm*",
-              "winlogbeat-*",
-              "-*elastic-cloud-logs-*",
-            ],
+            "format": Object {
+              "id": "number",
+            },
             "name": "event.severity",
             "searchable": true,
             "type": "number",
@@ -500,18 +318,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
-            "indexes": Array [
-              "apm-*-transaction*",
-              "auditbeat-*",
-              "endgame-*",
-              "filebeat-*",
-              "logs-*",
-              "packetbeat-*",
-              "traces-apm*",
-              "winlogbeat-*",
-              "-*elastic-cloud-logs-*",
-            ],
+            "format": Object {
+              "id": "string",
+            },
             "name": "host.name",
             "searchable": true,
             "type": "string",
@@ -522,12 +331,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
         "fields": Object {
           "nestedField.firstAttributes": Object {
             "aggregatable": false,
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "nestedField.firstAttributes",
             "searchable": true,
             "subType": Object {
@@ -539,12 +342,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
           },
           "nestedField.secondAttributes": Object {
             "aggregatable": false,
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "nestedField.secondAttributes",
             "searchable": true,
             "subType": Object {
@@ -556,12 +353,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
           },
           "nestedField.thirdAttributes": Object {
             "aggregatable": false,
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "nestedField.thirdAttributes",
             "searchable": true,
             "subType": Object {
@@ -580,7 +371,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "",
             "name": "process.args",
             "readFromDocValues": true,
             "searchable": true,
@@ -595,12 +385,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "ip",
             ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
             "name": "source.ip",
             "searchable": true,
             "type": "ip",
@@ -609,12 +393,6 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "aggregatable": true,
             "esTypes": Array [
               "long",
-            ],
-            "format": "",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
             ],
             "name": "source.port",
             "searchable": true,
@@ -629,12 +407,9 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             "esTypes": Array [
               "keyword",
             ],
-            "format": "string",
-            "indexes": Array [
-              "auditbeat",
-              "filebeat",
-              "packetbeat",
-            ],
+            "format": Object {
+              "id": "string",
+            },
             "name": "user.name",
             "searchable": true,
             "type": "string",

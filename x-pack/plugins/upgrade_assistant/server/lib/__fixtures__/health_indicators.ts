@@ -19,6 +19,11 @@ export const diskIndicatorGreen: estypes.HealthReportDiskIndicator = {
   },
 };
 
+export const diskIndicatorUnknown: estypes.HealthReportDiskIndicator = {
+  status: 'unknown',
+  symptom: 'No disk usage data.',
+};
+
 export const diskIndicatorRed: estypes.HealthReportDiskIndicator = {
   status: 'red',
   symptom: 'The cluster does not have enough available disk space.',

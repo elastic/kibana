@@ -16,11 +16,10 @@ export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement>
   isDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
-  isFlyoutMode: boolean;
 }
 
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, isFlyoutMode }, ref) => {
+  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange }, ref) => {
     const onChangeCallback = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         handlePromptChange(event.target.value);
@@ -30,13 +29,16 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
 
     const onKeyDown = useCallback(
       (event) => {
-        if (event.key === 'Enter' && !event.shiftKey && value.trim().length > 0) {
+        // keyCode 13 is needed in case of IME input
+        if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
-          onPromptSubmit(event.target.value?.trim());
-          handlePromptChange('');
-        } else if (event.key === 'Enter' && !event.shiftKey && value.trim().length === 0) {
-          event.preventDefault();
-          event.stopPropagation();
+
+          if (value.trim().length) {
+            onPromptSubmit(event.target.value?.trim());
+            handlePromptChange('');
+          } else {
+            event.stopPropagation();
+          }
         }
       },
       [value, onPromptSubmit, handlePromptChange]
@@ -46,8 +48,8 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
       <EuiTextArea
         css={css`
           padding-right: 64px !important;
-          min-height: ${!isFlyoutMode ? '125px' : '64px'};
-          max-height: ${!isFlyoutMode ? 'auto' : '350px'};
+          min-height: 64px;
+          max-height: 350px;
         `}
         className="eui-scrollBar"
         inputRef={ref}
@@ -61,7 +63,7 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}
-        rows={isFlyoutMode ? 1 : 6}
+        rows={1}
       />
     );
   }

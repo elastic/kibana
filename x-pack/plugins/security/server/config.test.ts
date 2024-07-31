@@ -8,6 +8,7 @@
 jest.mock('crypto', () => ({
   randomBytes: jest.fn(),
   constants: jest.requireActual('crypto').constants,
+  createHash: jest.requireActual('crypto').createHash,
 }));
 
 jest.mock('@kbn/utils', () => ({

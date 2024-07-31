@@ -22,5 +22,5 @@ module.exports = {
     '!<rootDir>/packages/kbn-grouping/**/translations',
     '!<rootDir>/packages/kbn-grouping/**/types/*',
   ],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-grouping/setup_test.ts'],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-grouping/setup_tests.ts'],
 };

@@ -4,14 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ResponseActionParametersWithPidOrEntityId } from '../../../../../common/endpoint/types';
+import type {
+  ResponseActionParametersWithEntityId,
+  ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessName,
+} from '../../../../../common/endpoint/types';
 
-export const parsedPidOrEntityIdParameter = (parameters: {
+export const parsedKillOrSuspendParameter = (parameters: {
   pid?: string[];
   entityId?: string[];
-}): ResponseActionParametersWithPidOrEntityId => {
+  processName?: string[];
+}):
+  | ResponseActionParametersWithPid
+  | ResponseActionParametersWithEntityId
+  | ResponseActionParametersWithProcessName => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
+  }
+
+  if (parameters.processName) {
+    return {
+      process_name: parameters.processName[0] ?? '',
+    };
   }
 
   return {

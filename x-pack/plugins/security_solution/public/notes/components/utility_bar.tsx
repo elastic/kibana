@@ -28,14 +28,13 @@ export const NotesUtilityBar = React.memo(() => {
   const dispatch = useDispatch();
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
-  const totalItems = pagination.total ?? 0;
   const selectedItems = useSelector(selectNotesTableSelectedIds);
   const resultsCount = useMemo(() => {
-    const { perPage, page } = pagination;
+    const { perPage, page, total } = pagination;
     const startOfCurrentPage = perPage * (page - 1) + 1;
-    const endOfCurrentPage = Math.min(perPage * page, totalItems);
-    return perPage === 0 ? 'All' : `${startOfCurrentPage}-${endOfCurrentPage} of ${totalItems}`;
-  }, [pagination, totalItems]);
+    const endOfCurrentPage = Math.min(perPage * page, total);
+    return perPage === 0 ? 'All' : `${startOfCurrentPage}-${endOfCurrentPage} of ${total}`;
+  }, [pagination]);
   const deleteSelectedNotes = useCallback(() => {
     dispatch(userSelectedBulkDelete());
   }, [dispatch]);

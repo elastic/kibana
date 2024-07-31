@@ -551,17 +551,6 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Invalid kuery', async () => {
-      const validationObj = validateKuery(
-        'test%3A',
-        [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        AGENT_POLICY_MAPPINGS,
-        true
-      );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toContain(`KQLSyntaxError: Invalid key`);
-    });
-
     it('Kuery with non existent parameter wrapped by SO', async () => {
       const validationObj = validateKuery(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.non_existent_parameter: 'test_id'`,
@@ -834,15 +823,15 @@ describe('validateKuery validates real kueries', () => {
       expect(validationObj?.isValid).toEqual(true);
     });
 
-    it('Invalid search by non existent parameter', async () => {
+    it('Search without field parameter', async () => {
       const validationObj = validateKuery(
         `policyId1`,
         [FLEET_ENROLLMENT_API_PREFIX],
         ENROLLMENT_API_KEY_MAPPINGS,
         true
       );
-      expect(validationObj?.isValid).toEqual(false);
-      expect(validationObj?.error).toEqual(`KQLSyntaxError: Invalid key`);
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
     });
   });
   describe('Feature flag enableStrictKQLValidation', () => {

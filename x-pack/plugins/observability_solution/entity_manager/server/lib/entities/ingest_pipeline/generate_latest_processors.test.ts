@@ -10,7 +10,7 @@ import { generateLatestProcessors } from './generate_latest_processors';
 
 describe('generateLatestProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {
-    const processors = generateLatestProcessors(entityDefinition, 'default');
+    const processors = generateLatestProcessors(entityDefinition);
     expect(processors).toMatchSnapshot();
   });
 });

@@ -16,7 +16,7 @@ import {
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../common/runtime_types';
-import { createEsParams, UptimeEsClient } from '../lib';
+import { createEsParams, SyntheticsEsClient } from '../lib';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -34,7 +34,7 @@ const fields = [
 ];
 
 export async function queryMonitorStatus(
-  esClient: UptimeEsClient,
+  esClient: SyntheticsEsClient,
   monitorLocationIds: string[],
   range: { from: string; to: string },
   monitorQueryIds: string[],

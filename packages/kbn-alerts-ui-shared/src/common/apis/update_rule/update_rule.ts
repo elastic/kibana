@@ -21,6 +21,14 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'schedule',
   'params',
   'alertDelay',
+];
+
+export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
+  'name',
+  'tags',
+  'schedule',
+  'params',
+  'alertDelay',
   'actions',
 ];
 
@@ -36,7 +44,7 @@ export async function updateRule({
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
-      body: JSON.stringify(transformUpdateRuleBody(pick(rule, UPDATE_FIELDS))),
+      body: JSON.stringify(transformUpdateRuleBody(pick(rule, UPDATE_FIELDS_WITH_ACTIONS))),
     }
   );
   return transformRule(res);

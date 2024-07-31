@@ -13,7 +13,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
 import {
-  AvailableFields$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -93,11 +92,6 @@ const mountComponent = async ({
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   }) as DataDocuments$;
 
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
-
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
@@ -107,7 +101,6 @@ const mountComponent = async ({
     main$,
     documents$,
     totalHits$,
-    availableFields$,
   };
 
   const session = getSessionServiceMock();

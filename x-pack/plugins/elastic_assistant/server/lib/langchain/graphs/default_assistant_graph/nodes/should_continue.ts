@@ -19,7 +19,7 @@ export interface ShouldContinueParams extends NodeParamsBase {
  * @param state - The current state of the graph
  */
 export const shouldContinue = ({ logger, state }: ShouldContinueParams) => {
-  logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
   if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
     return 'end';
@@ -31,7 +31,7 @@ export const shouldContinue = ({ logger, state }: ShouldContinueParams) => {
 export const shouldContinueGenerateTitle = ({ logger, state }: ShouldContinueParams) => {
   logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  if (state.conversation?.title !== NEW_CHAT) {
+  if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {
     return 'end';
   }
 

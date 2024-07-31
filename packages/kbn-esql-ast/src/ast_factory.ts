@@ -29,7 +29,7 @@ import {
   default as esql_parser,
   type MetaCommandContext,
   type MetricsCommandContext,
-  IndexIdentifierContext,
+  IndexPatternContext,
 } from './antlr/esql_parser';
 import { default as ESQLParserListener } from './antlr/esql_parser_listener';
 import {
@@ -76,6 +76,7 @@ export class AstListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.text = ctx.getText();
     if (textExistsAndIsValid(ctx.INFO().getText())) {
+      // TODO: these probably should not be functions, instead use "column", like: INFO <identifier>?
       commandAst?.args.push(createFunction('info', ctx, getPosition(ctx.INFO().symbol)));
     }
   }
@@ -154,7 +155,7 @@ export class AstListener implements ESQLParserListener {
       type: 'command',
       args: [],
       sources: ctx
-        .getTypedRuleContexts(IndexIdentifierContext)
+        .getTypedRuleContexts(IndexPatternContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);
@@ -204,7 +205,7 @@ export class AstListener implements ESQLParserListener {
     const command = createCommand('limit', ctx);
     this.ast.push(command);
     if (ctx.getToken(esql_parser.INTEGER_LITERAL, 0)) {
-      const literal = createLiteral('number', ctx.INTEGER_LITERAL());
+      const literal = createLiteral('integer', ctx.INTEGER_LITERAL());
       if (literal) {
         command.args.push(literal);
       }

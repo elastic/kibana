@@ -47,7 +47,11 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     path: { serviceName },
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}',
+    '/logs-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

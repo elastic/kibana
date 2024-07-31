@@ -16,6 +16,9 @@ export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH,
+      options: {
+        tags: ['access:cloud-security-posture-read'],
+      },
     })
     .addVersion(
       {

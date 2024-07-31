@@ -36,30 +36,25 @@ export class SavedObjectsManagementActionService {
 
   setup(): SavedObjectsManagementActionServiceSetup {
     return {
-      register: (action) => {
-        if (this.actions.has(action.id)) {
-          throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
-        }
-        this.actions.set(action.id, action);
-      },
+      register: (action) => this.register(action),
     };
   }
 
   start(spacesApi?: SpacesApi): SavedObjectsManagementActionServiceStart {
     if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
-      registerSpacesApiActions(this, spacesApi);
+      this.register(new ShareToSpaceSavedObjectsManagementAction(spacesApi.ui));
+      this.register(new CopyToSpaceSavedObjectsManagementAction(spacesApi.ui));
     }
     return {
       has: (actionId) => this.actions.has(actionId),
       getAll: () => [...this.actions.values()],
     };
   }
-}
 
-function registerSpacesApiActions(
-  service: SavedObjectsManagementActionService,
-  spacesApi: SpacesApi
-) {
-  service.setup().register(new ShareToSpaceSavedObjectsManagementAction(spacesApi.ui));
-  service.setup().register(new CopyToSpaceSavedObjectsManagementAction(spacesApi.ui));
+  private register(action: SavedObjectsManagementAction) {
+    if (this.actions.has(action.id)) {
+      throw new Error(`Saved Objects Management Action with id '${action.id}' already exists`);
+    }
+    this.actions.set(action.id, action);
+  }
 }

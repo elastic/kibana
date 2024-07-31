@@ -21,7 +21,7 @@ import {
   MetricsExplorerChartType,
 } from '../../hooks/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
-import { InfraFormatterType } from '../../../../../lib/lib';
+import { InfraFormatterType } from '../../../../../common/inventory/types';
 import { createMetricLabel } from './create_metric_label';
 
 /*

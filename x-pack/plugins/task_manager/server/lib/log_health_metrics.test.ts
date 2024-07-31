@@ -135,7 +135,10 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats: ',
+        ''
+      )
     );
     expect(firstDebug).toMatchObject(health);
   });
@@ -154,7 +157,10 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstInfo = JSON.parse(
-      (logger as jest.Mocked<Logger>).info.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+      ((logger as jest.Mocked<Logger>).info.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats: ',
+        ''
+      )
     );
     expect(firstInfo).toMatchObject(health);
   });
@@ -173,7 +179,10 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats: ',
+        ''
+      )
     );
     expect(firstDebug).toMatchObject(health);
   });
@@ -342,7 +351,10 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats: ',
+        ''
+      )
     );
     expect(firstDebug).toMatchObject(health);
   });
@@ -379,7 +391,10 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, false, docLinks);
 
     const firstDebug = JSON.parse(
-      (logger as jest.Mocked<Logger>).debug.mock.calls[0][0].replace('Latest Monitored Stats: ', '')
+      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+        'Latest Monitored Stats: ',
+        ''
+      )
     );
     expect(firstDebug).toMatchObject(health);
   });

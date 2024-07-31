@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback } from 'react';
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { TextBasedLangEditor } from '@kbn/esql/public';
 import { EuiFlexItem } from '@elastic/eui';
 import type { AggregateQuery } from '@kbn/es-query';
 

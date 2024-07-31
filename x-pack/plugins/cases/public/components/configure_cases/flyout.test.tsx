@@ -601,6 +601,11 @@ describe('CommonFlyout ', () => {
                 value: true,
               },
               {
+                key: 'test_key_3',
+                type: 'text',
+                value: null,
+              },
+              {
                 key: 'test_key_4',
                 type: 'toggle',
                 value: false,
@@ -766,7 +771,7 @@ describe('CommonFlyout ', () => {
         expect(props.onSaveField).not.toHaveBeenCalled();
       });
 
-      expect(await screen.findByText('A Template name is required.')).toBeInTheDocument();
+      expect(await screen.findByText('Template name is required.')).toBeInTheDocument();
     });
 
     it('shows error if template name is too long', async () => {
