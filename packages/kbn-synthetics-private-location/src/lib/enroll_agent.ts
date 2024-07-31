@@ -18,8 +18,12 @@ export async function enrollAgent(
   kibanaApiClient: KibanaAPIClient
 ) {
   const formattedKibanaURL = new URL(kibanaUrl);
+  const formattedElasticsearchHost = new URL(elasticsearchHost);
   if (formattedKibanaURL.hostname === 'localhost') {
     formattedKibanaURL.hostname = 'host.docker.internal';
+  }
+  if (formattedElasticsearchHost.hostname === 'localhost') {
+    formattedElasticsearchHost.hostname = 'host.docker.internal';
   }
   const version = `${await kibanaApiClient.getKibanaVersion()}-SNAPSHOT`;
   await new Promise((res, rej) => {
@@ -31,7 +35,7 @@ export async function enrollAgent(
           '-e',
           'FLEET_SERVER_ENABLE=1',
           '-e',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=${elasticsearchHost}`,
+          `FLEET_SERVER_ELASTICSEARCH_HOST=${formattedElasticsearchHost.origin}`,
           '-e',
           'FLEET_SERVER_POLICY_ID=fleet-server-policy',
           '-e',
@@ -51,7 +55,6 @@ export async function enrollAgent(
         ],
         {
           shell: true,
-          stdio: 'inherit',
           cwd: path.join(__dirname, '../'),
           timeout: 120000,
         }
