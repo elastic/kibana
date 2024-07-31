@@ -12,11 +12,11 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportAmbiguousConflictError,
 } from '@kbn/core/server';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { createTestAgent } from '../lib/create_test_agent';
 
 type TestResponse = Record<string, any>;
 
@@ -794,12 +794,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
       description: string,
       { user, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
-      let testAgent: SupertestWithoutAuthProviderType;
       describeFn(description, () => {
         before(async () => {
-          testAgent = user
-            ? supertestWithoutAuth.auth(user.username, user.password)
-            : supertestWithoutAuth;
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
 
@@ -824,8 +820,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return testAgent
-              .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'post',
+              `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+            )
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -842,8 +840,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return testAgent
-              .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'post',
+              `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+            )
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -860,8 +860,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return testAgent
-              .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'post',
+              `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+            )
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -878,8 +880,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return testAgent
-              .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'post',
+              `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+            )
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -895,8 +899,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
             const conflictDestination = getDestinationWithConflicts(spaceId);
             const noConflictDestination = getDestinationWithoutConflicts();
 
-            return testAgent
-              .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'post',
+              `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+            )
               .send({
                 objects: [dashboardObject],
                 spaces: [conflictDestination, noConflictDestination],
@@ -927,8 +933,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           });
 
           it(`should return ${tests.nonExistentSpace.statusCode} when copying to non-existent space`, async () => {
-            return testAgent
-              .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'post',
+              `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+            )
               .send({
                 objects: [dashboardObject],
                 spaces: ['non_existent_space'],
@@ -956,8 +964,10 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {
               it(`should return ${statusCode} when ${testTitle}`, async () => {
-                return testAgent
-                  .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+                return createTestAgent(supertestWithoutAuth, user)(
+                  'post',
+                  `${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`
+                )
                   .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
                   .expect(statusCode)
                   .then(response);

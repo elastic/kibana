@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { createTestAgent } from '../lib/create_test_agent';
 
 interface GetTest {
   statusCode: number;
@@ -28,7 +29,10 @@ interface GetTestDefinition {
 
 const nonExistantSpaceId = 'not-a-space';
 
-export function getTestSuiteFactory(esArchiver: any, supertest: SupertestWithoutAuthProviderType) {
+export function getTestSuiteFactory(
+  esArchiver: any,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType
+) {
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
@@ -78,10 +82,8 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SupertestWithout
   const makeGetTest =
     (describeFn: DescribeFn) =>
     (description: string, { user, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
-      let testAgent: SupertestWithoutAuthProviderType;
       describeFn(description, () => {
         before(() => {
-          testAgent = user ? supertest.auth(user.username, user.password) : supertest;
           esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           );
@@ -94,8 +96,10 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SupertestWithout
 
         getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.default.statusCode} ${scenario}`, async () => {
-            return testAgent
-              .get(`${urlPrefix}/api/spaces/space/${spaceId}`)
+            return createTestAgent(supertestWithoutAuth, user)(
+              'get',
+              `${urlPrefix}/api/spaces/space/${spaceId}`
+            )
               .expect(tests.default.statusCode)
               .then(tests.default.response);
           });
