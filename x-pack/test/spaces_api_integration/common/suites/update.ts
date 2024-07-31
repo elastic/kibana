@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -27,7 +27,10 @@ interface UpdateTestDefinition {
   tests: UpdateTests;
 }
 
-export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function updateTestSuiteFactory(
+  esArchiver: any,
+  supertest: SupertestWithoutAuthProviderType
+) {
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
@@ -67,7 +70,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeUpdateTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, spaceId, tests }: UpdateTestDefinition) => {
+    (description: string, { user, spaceId, tests }: UpdateTestDefinition) => {
+      const testAgent = user ? supertest.auth(user.username, user.password) : supertest;
       describeFn(description, () => {
         before(() =>
           esArchiver.load(
@@ -82,9 +86,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
         describe('space_1', () => {
           it(`should return ${tests.alreadyExists.statusCode}`, async () => {
-            return supertest
+            return testAgent
               .put(`${getUrlPrefix(spaceId)}/api/spaces/space/space_1`)
-              .auth(user.username, user.password)
               .send({
                 name: 'space 1',
                 id: 'space_1',
@@ -100,9 +103,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
         describe(`default space`, () => {
           it(`should return ${tests.defaultSpace.statusCode}`, async () => {
-            return supertest
+            return testAgent
               .put(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
-              .auth(user.username, user.password)
               .send({
                 name: 'the new default',
                 id: 'default',
@@ -118,9 +120,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
         describe(`when space doesn't exist`, () => {
           it(`should return ${tests.newSpace.statusCode}`, async () => {
-            return supertest
+            return testAgent
               .put(`${getUrlPrefix(spaceId)}/api/spaces/space/marketing`)
-              .auth(user.username, user.password)
               .send({
                 name: 'marketing',
                 id: 'marketing',

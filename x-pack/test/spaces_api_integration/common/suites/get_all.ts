@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -58,7 +58,10 @@ const ALL_SPACE_RESULTS = [
   },
 ];
 
-export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function getAllTestSuiteFactory(
+  esArchiver: any,
+  supertest: SupertestWithoutAuthProviderType
+) {
   const createExpectResults =
     (...spaceIds: string[]) =>
     (resp: { [key: string]: any }) => {
@@ -89,7 +92,8 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
   const makeGetAllTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, spaceId, tests }: GetAllTestDefinition) => {
+    (description: string, { user, spaceId, tests }: GetAllTestDefinition) => {
+      const testAgent = user ? supertest.auth(user.username, user.password) : supertest;
       describeFn(description, () => {
         before(() =>
           esArchiver.load(
@@ -105,9 +109,8 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         getTestScenariosForSpace(spaceId).forEach(({ scenario, urlPrefix }) => {
           describe('undefined purpose', () => {
             it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-              return supertest
+              return testAgent
                 .get(`${urlPrefix}/api/spaces/space`)
-                .auth(user.username, user.password)
                 .expect(tests.exists.statusCode)
                 .then(tests.exists.response);
             });
@@ -115,10 +118,9 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
           describe('copySavedObjectsIntoSpace purpose', () => {
             it(`should return ${tests.copySavedObjectsPurpose.statusCode} ${scenario}`, async () => {
-              return supertest
+              return testAgent
                 .get(`${urlPrefix}/api/spaces/space`)
                 .query({ purpose: 'copySavedObjectsIntoSpace' })
-                .auth(user.username, user.password)
                 .expect(tests.copySavedObjectsPurpose.statusCode)
                 .then(tests.copySavedObjectsPurpose.response);
             });
@@ -126,10 +128,9 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
           describe('shareSavedObjectsIntoSpace purpose', () => {
             it(`should return ${tests.shareSavedObjectsPurpose.statusCode} ${scenario}`, async () => {
-              return supertest
+              return testAgent
                 .get(`${urlPrefix}/api/spaces/space`)
                 .query({ purpose: 'shareSavedObjectsIntoSpace' })
-                .auth(user.username, user.password)
                 .expect(tests.copySavedObjectsPurpose.statusCode)
                 .then(tests.copySavedObjectsPurpose.response);
             });
@@ -137,10 +138,9 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
           describe('include_authorized_purposes=true', () => {
             it(`should return ${tests.includeAuthorizedPurposes.statusCode} ${scenario}`, async () => {
-              return supertest
+              return testAgent
                 .get(`${urlPrefix}/api/spaces/space`)
                 .query({ include_authorized_purposes: true })
-                .auth(user.username, user.password)
                 .expect(tests.includeAuthorizedPurposes.statusCode)
                 .then(tests.includeAuthorizedPurposes.response);
             });

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperAgent } from 'superagent';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -20,7 +20,7 @@ interface GetTests {
 }
 
 interface GetTestDefinition {
-  user?: TestDefinitionAuthentication;
+  user: TestDefinitionAuthentication;
   currentSpaceId: string;
   spaceId: string;
   tests: GetTests;
@@ -28,7 +28,7 @@ interface GetTestDefinition {
 
 const nonExistantSpaceId = 'not-a-space';
 
-export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
+export function getTestSuiteFactory(esArchiver: any, supertest: SupertestWithoutAuthProviderType) {
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
@@ -77,7 +77,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
 
   const makeGetTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user = {}, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
+    (description: string, { user, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
       describeFn(description, () => {
         before(() =>
           esArchiver.load(

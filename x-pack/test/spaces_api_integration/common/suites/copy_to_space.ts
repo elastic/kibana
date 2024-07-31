@@ -791,8 +791,11 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
     (describeFn: DescribeFn) =>
     (
       description: string,
-      { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
+      { user, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
+      const testAgent = user
+        ? supertestWithoutAuth.auth(user.username, user.password)
+        : supertestWithoutAuth;
       describeFn(description, () => {
         before(async () => {
           // test data only allows for the following spaces as the copy origin
@@ -819,9 +822,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return testAgent
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -838,9 +840,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return testAgent
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -857,9 +858,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return testAgent
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -876,9 +876,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
 
             await assertSpaceCounts(destination, INITIAL_COUNTS[destination]);
 
-            return supertestWithoutAuth
+            return testAgent
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [destination],
@@ -894,9 +893,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
             const conflictDestination = getDestinationWithConflicts(spaceId);
             const noConflictDestination = getDestinationWithoutConflicts();
 
-            return supertestWithoutAuth
+            return testAgent
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: [conflictDestination, noConflictDestination],
@@ -927,9 +925,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           });
 
           it(`should return ${tests.nonExistentSpace.statusCode} when copying to non-existent space`, async () => {
-            return supertestWithoutAuth
+            return testAgent
               .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-              .auth(user.username, user.password)
               .send({
                 objects: [dashboardObject],
                 spaces: ['non_existent_space'],
@@ -957,9 +954,8 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
             const testCases = tests.multiNamespaceTestCases(overwrite, createNewCopies);
             testCases.forEach(({ testTitle, objects, statusCode, response }) => {
               it(`should return ${statusCode} when ${testTitle}`, async () => {
-                return supertestWithoutAuth
+                return testAgent
                   .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
-                  .auth(user.username, user.password)
                   .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
                   .expect(statusCode)
                   .then(response);
