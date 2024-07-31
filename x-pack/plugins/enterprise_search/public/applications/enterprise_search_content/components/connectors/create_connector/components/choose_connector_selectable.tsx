@@ -95,7 +95,6 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   const initialOptions = getInitialOptions();
 
   useEffect(() => {
-    // Setting options when changing the radiobutton to self managed but it doesn't update the values for disable nor badges
     selectableSetOptions(initialOptions);
   }, [selfManaged]);
 
@@ -136,7 +135,6 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
           selectableSetOptions(newOptions);
           setIsOpen(false);
           if (changedOption.checked === 'on') {
-            // console.log(allConnectors);
             const keySelected = Number(changedOption.key);
             setConnectorSelected(allConnectors[keySelected]);
             setIsSearching(false);

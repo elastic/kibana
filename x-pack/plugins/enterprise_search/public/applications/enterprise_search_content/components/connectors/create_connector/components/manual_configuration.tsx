@@ -74,6 +74,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
+  const [flyoutConten, setFlyoutConten] = useState<React.FC>();
   const cliCode = CREATE_CONNECTOR_PLUGIN.CLI_SNIPPET;
 
   const flyoutCliContent: React.FC = () => (
@@ -163,7 +164,10 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
             </b>{' '}
             {i18n.translate(
               'xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.optionWhichCreatesALabel',
-              { defaultMessage: 'option which creates a new index and API key automatically.' }
+              {
+                defaultMessage:
+                  'option, here you can bring your already existing index or API key.',
+              }
             )}
           </p>
         </EuiText>
@@ -299,7 +303,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
       </EuiFlyoutFooter>
     </>
   );
-  const [flyoutConten, setFlyoutConten] = useState<React.FC>(flyoutManualConfigContent);
+  
   const items = [
     <EuiContextMenuItem
       key="copy"

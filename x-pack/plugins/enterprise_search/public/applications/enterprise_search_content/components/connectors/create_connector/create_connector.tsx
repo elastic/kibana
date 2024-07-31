@@ -291,26 +291,6 @@ export const CreateConnector: React.FC = () => {
     },
   ];
 
-  const updateStep = (action: string) => {
-    const allSteps = selfManaged === true ? selfManagedSteps : elasticManagedSteps;
-    switch (action) {
-      case 'next':
-        if (currentStep === allSteps.length - 1) {
-          return;
-        }
-        setCurrentStep(currentStep + 1);
-        break;
-      case 'back':
-        if (currentStep === 0) {
-          return;
-        }
-        setCurrentStep(currentStep - 1);
-        break;
-      default:
-        break;
-    }
-  };
-
   useEffect(() => {
     if (selfManaged === true) {
       switch (currentStep) {
@@ -364,9 +344,6 @@ export const CreateConnector: React.FC = () => {
     }
   }, [currentStep]);
 
-  // useEffect(() => {
-  // }, []);
-
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -410,7 +387,7 @@ export const CreateConnector: React.FC = () => {
                     data-test-subj="enterpriseSearchCreateConnectorBackButton"
                     iconType="arrowLeft"
                     size="s"
-                    onClick={() => updateStep('back')}
+                    onClick={() => setCurrentStep(currentStep - 1)}
                   >
                     {Constants.BACK_BUTTON_LABEL}
                   </EuiButtonEmpty>
