@@ -27,7 +27,6 @@ import {
 import { JOB_STATE } from '../../../../../common/constants/states';
 import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
 import { ForecastProgress } from './forecast_progress';
-import { currentMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import {
   checkPermission,
   createPermissionFailureMessage,
@@ -35,13 +34,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-function getRunInputDisabledState(job, isForecastRequested) {
+function getRunInputDisabledState(job, isForecastRequested, mlNodesAvailable, jobState) {
   // Disable the 'run forecast' text field and button if any of the conditions are met:
   // - No ML nodes are available
   // - No canForecastJob permission
   // - Job is not in an OPENED or CLOSED state
   // - A new forecast has been requested
-  if (currentMlNodesAvailable() === false) {
+  if (mlNodesAvailable === false) {
     return {
       isDisabled: true,
       isDisabledToolTipText: i18n.translate(
@@ -61,14 +60,14 @@ function getRunInputDisabledState(job, isForecastRequested) {
     };
   }
 
-  if (job.state !== JOB_STATE.OPENED && job.state !== JOB_STATE.CLOSED) {
+  if (jobState !== JOB_STATE.OPENED && jobState !== JOB_STATE.CLOSED) {
     return {
       isDisabled: true,
       isDisabledToolTipText: i18n.translate(
         'xpack.ml.timeSeriesExplorer.runControls.forecastsCanNotBeRunOnJobsTooltip',
         {
           defaultMessage: 'Forecasts cannot be run on {jobState} jobs',
-          values: { jobState: job.state },
+          values: { jobState: jobState },
         }
       ),
     };
@@ -79,6 +78,7 @@ function getRunInputDisabledState(job, isForecastRequested) {
 
 export function RunControls({
   job,
+  mlNodesAvailable,
   newForecastDuration,
   isNewForecastDurationValid,
   newForecastDurationErrors,
@@ -88,8 +88,14 @@ export function RunControls({
   forecastProgress,
   jobOpeningState,
   jobClosingState,
+  jobState,
 }) {
-  const disabledState = getRunInputDisabledState(job, isForecastRequested);
+  const disabledState = getRunInputDisabledState(
+    job,
+    isForecastRequested,
+    mlNodesAvailable,
+    jobState
+  );
 
   const durationInput = (
     <EuiFieldText
