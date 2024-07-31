@@ -187,6 +187,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onTextLangQueryChange: (query: AggregateQuery) => void;
   submitOnBlur?: boolean;
   renderQueryInputAppend?: () => React.ReactNode;
+  disableExternalPadding?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -777,7 +778,9 @@ export const QueryBarTopRow = React.memo(
               responsive={false}
               gutterSize="s"
               css={css`
-                padding: ${isQueryLangSelected ? euiTheme.size.s : 0};
+                padding: ${isQueryLangSelected && !props.disableExternalPadding
+                  ? euiTheme.size.s
+                  : 0};
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap

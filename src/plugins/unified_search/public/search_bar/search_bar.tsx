@@ -658,6 +658,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
           renderQueryInputAppend={this.props.renderQueryInputAppend}
+          disableExternalPadding={this.props.displayStyle === 'withBorders'}
         />
       </div>
     );

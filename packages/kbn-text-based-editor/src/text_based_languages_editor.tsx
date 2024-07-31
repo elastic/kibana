@@ -578,10 +578,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     wrappingIndent: 'none',
   };
 
-  codeEditorOptions.overviewRulerLanes = 4;
-  codeEditorOptions.hideCursorInOverviewRuler = false;
-  codeEditorOptions.overviewRulerBorder = true;
-
   const editorPanel = (
     <>
       {Boolean(editorIsInline) && (
