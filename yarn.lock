@@ -4772,6 +4772,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ebt-local-shipper-plugin@link:examples/ebt_local_shipper":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""

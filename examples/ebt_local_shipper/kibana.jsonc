@@ -1,0 +1,11 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ebt-local-shipper-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "ebtLocalShipper",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": []
+  }
+}
