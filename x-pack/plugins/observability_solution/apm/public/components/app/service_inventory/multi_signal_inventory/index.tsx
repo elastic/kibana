@@ -148,9 +148,9 @@ function useServicesEntitiesDetailedStatisticsFetcher({
 export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
-  const { tourState, hideModal } = useServiceEcoTour();
   const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
+  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+  const { tourState, hideModal } = useServiceEcoTour();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
 
