@@ -7,16 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 
-import { createApiKey } from '../../lib/indices/create_api_key';
 import { RouteDependencies } from '../../plugin';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerApiKeysRoutes(
-  { log, router }: RouteDependencies,
-  security: SecurityPluginStart
-) {
+export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/{indexName}/api_keys',
@@ -32,8 +28,22 @@ export function registerApiKeysRoutes(
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.indexName);
       const { keyName } = request.body;
+      const { security: coreSecurity } = await context.core;
 
-      const createResponse = await createApiKey(request, security, indexName, keyName);
+      const createResponse = await coreSecurity.authc.apiKeys.create({
+        name: keyName,
+        role_descriptors: {
+          [`${toAlphanumeric(indexName)}-key-role`]: {
+            cluster: [],
+            index: [
+              {
+                names: [indexName],
+                privileges: ['all'],
+              },
+            ],
+          },
+        },
+      });
 
       if (!createResponse) {
         throw new Error('Unable to create API Key');
@@ -118,7 +128,8 @@ export function registerApiKeysRoutes(
       },
     },
     async (context, request, response) => {
-      const result = await security.authc.apiKeys.create(request, request.body);
+      const { security: coreSecurity } = await context.core;
+      const result = await coreSecurity.authc.apiKeys.create(request.body);
       if (result) {
         const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };
         return response.ok({ body: apiKey });

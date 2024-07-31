@@ -284,9 +284,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
     });
 
-    void getStartServices().then(([, { security: securityStart }]) => {
-      registerApiKeysRoutes(dependencies, securityStart);
-    });
+    registerApiKeysRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
