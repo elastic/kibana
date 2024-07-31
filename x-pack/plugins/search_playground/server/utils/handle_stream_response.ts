@@ -7,141 +7,39 @@
 
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
-const timeout = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-import { PassThrough } from 'stream';
-
-import type { Headers, ResponseHeaders } from '@kbn/core-http-server';
-import { repeat } from 'lodash';
-
-const DELIMITER = `
-`;
-
-export interface StreamResponseWithHeaders {
-  body: PassThrough;
-  headers?: ResponseHeaders;
-}
-
-export interface StreamFactoryReturnType {
-  DELIMITER: string;
-  end: () => void;
-  push: (d: string) => void;
-  responseWithHeaders: StreamResponseWithHeaders;
-}
-
-export function streamFactory(
-  headers: Headers,
-  logger: Logger,
-  flushFix: boolean = true
-): StreamFactoryReturnType {
-  const cloudProxyBufferSize = 4096;
-
-  const flushPayload = flushFix
-    ? DELIMITER + '10: "' + repeat('0', cloudProxyBufferSize * 2) + '"' + DELIMITER
-    : undefined;
-  let currentBufferSize = 0;
-
-  const stream = new PassThrough();
-  const backPressureBuffer: string[] = [];
-  let tryToEnd = false;
-
-  const flushBufferIfNeeded = () => {
-    if (currentBufferSize && currentBufferSize <= cloudProxyBufferSize) {
-      push(flushPayload as unknown as string);
-      currentBufferSize = 0;
-    }
-  };
-
-  const flushIntervalId = setInterval(flushBufferIfNeeded, 250);
-
-  function end() {
-    tryToEnd = true;
-    clearInterval(flushIntervalId);
-
-    if (backPressureBuffer.length > 0) {
-      const el = backPressureBuffer.shift();
-      if (el !== undefined) {
-        push(el);
-      }
-      return;
-    }
-
-    stream.end();
-  }
-
-  function push(d: string) {
-    if (d === undefined) {
-      logger.error('Stream chunk must not be undefined.');
-      return;
-    }
-
-    if (backPressureBuffer.length > 0) {
-      backPressureBuffer.push(d);
-      return;
-    }
-
-    try {
-      const line = d as unknown as string;
-      const writeOk = stream.write(line);
-
-      currentBufferSize =
-        currentBufferSize <= cloudProxyBufferSize
-          ? JSON.stringify(line).length + currentBufferSize
-          : cloudProxyBufferSize;
-
-      if (!writeOk) {
-        backPressureBuffer.push(d);
-      }
-    } catch (e) {
-      logger.error(`Could not serialize or stream data chunk: ${e.toString()}`);
-    }
-  }
-
-  const responseWithHeaders: StreamResponseWithHeaders = {
-    body: stream,
-    headers: {
-      ...headers,
-      'X-Accel-Buffering': 'no',
-      'X-Content-Type-Options': 'nosniff',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-      'Transfer-Encoding': 'chunked',
-    },
-  };
-
-  return { DELIMITER, end, push, responseWithHeaders };
-}
+import { streamFactory } from './stream_factory';
 
 export const handleStreamResponse = async ({
   stream,
   request,
   response,
   logger,
-  maxTimeoutMs = 250,
+  isCloud = false,
 }: {
   stream: ReadableStream;
   logger: Logger;
   request: KibanaRequest;
   response: KibanaResponseFactory;
   maxTimeoutMs?: number;
+  isCloud?: boolean;
 }) => {
-  const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
-  const reader = (stream as ReadableStream).getReader();
+  const { end, push, responseWithHeaders } = streamFactory(logger, isCloud);
+  const reader = stream.getReader();
   const textDecoder = new TextDecoder();
 
-  let handleStopRequest = false;
+  const abortController = new AbortController();
+
   request.events.aborted$.subscribe(() => {
-    handleStopRequest = true;
+    abortController.abort();
   });
   request.events.completed$.subscribe(() => {
-    handleStopRequest = true;
+    abortController.abort();
   });
 
   async function pushStreamUpdate() {
+    const { done, value }: { done: boolean; value?: Uint8Array } = await reader.read();
     try {
-      const { done, value }: { done: boolean; value?: Uint8Array } = await reader.read();
-
-      if (done || handleStopRequest) {
+      if (done || abortController.signal.aborted) {
         end();
         return;
       }
@@ -156,15 +54,15 @@ export const handleStreamResponse = async ({
 
       push(decodedValue);
 
-      await timeout(Math.floor(Math.random() * maxTimeoutMs));
-
-      void pushStreamUpdate();
+      pushStreamUpdate();
     } catch (e) {
       logger.error(`There was an error: ${e.toString()}`);
+      end();
+      abortController.abort();
     }
   }
 
-  void pushStreamUpdate();
+  pushStreamUpdate();
 
   return response.ok(responseWithHeaders);
 };
