@@ -94,6 +94,7 @@ export const getLinksEmbeddableFactory = () => {
       return {
         title,
         description,
+        hidePanelTitles,
         links: resolvedLinks,
         layout: attributesWithInjectedIds.layout,
         defaultPanelTitle: attributesWithInjectedIds.title,
