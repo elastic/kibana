@@ -36,7 +36,7 @@ export const SetupTechnologySelector = ({
           <EuiBetaBadge
             label="Beta"
             size="s"
-            tooltipContent="This module is not GA. Please help us by reporting any bugs."
+            tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
           />
         </>
       ),
