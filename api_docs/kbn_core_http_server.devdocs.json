@@ -6237,10 +6237,6 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/external/update_objects_spaces.ts"
               },
               {
-                "plugin": "serverless",
-                "path": "x-pack/plugins/serverless/server/plugin.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/create.ts"
               },
@@ -6323,6 +6319,10 @@
               {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/plugins/encrypted_saved_objects/server/routes/key_rotation.ts"
+              },
+              {
+                "plugin": "serverless",
+                "path": "x-pack/plugins/serverless/server/plugin.ts"
               },
               {
                 "plugin": "actions",
@@ -6426,7 +6426,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_alert.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7634,14 +7634,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_alert.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unmute_alert.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.test.ts"
               },
               {
@@ -8139,6 +8131,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unmute_alert/unmute_alert_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -15671,6 +15671,10 @@
               {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis_field_candidates/define_route.ts"
               },
               {
                 "plugin": "aiops",
