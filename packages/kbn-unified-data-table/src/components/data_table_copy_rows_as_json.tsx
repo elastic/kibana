@@ -45,12 +45,12 @@ export const DataTableCopyRowsAsJson: React.FC<DataTableCopyRowsAsJsonProps> = (
       {isPlainRecord ? (
         <FormattedMessage
           id="unifiedDataTable.copyResultsToClipboardJSON"
-          defaultMessage="Copy results to clipboard (JSON)"
+          defaultMessage="Copy results as JSON"
         />
       ) : (
         <FormattedMessage
-          id="unifiedDataTable.copyToClipboardJSON"
-          defaultMessage="Copy documents to clipboard (JSON)"
+          id="unifiedDataTable.copyDocsToClipboardJSON"
+          defaultMessage="Copy documents as JSON"
         />
       )}
     </EuiContextMenuItem>

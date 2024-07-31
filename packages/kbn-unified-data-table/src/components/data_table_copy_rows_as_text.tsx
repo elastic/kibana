@@ -69,7 +69,7 @@ export const DataTableCopyRowsAsText: React.FC<DataTableCopyRowsAsTextProps> = (
     >
       <FormattedMessage
         id="unifiedDataTable.copySelectionToClipboard"
-        defaultMessage="Copy selection to clipboard"
+        defaultMessage="Copy selection as text"
       />
     </EuiContextMenuItem>
   );

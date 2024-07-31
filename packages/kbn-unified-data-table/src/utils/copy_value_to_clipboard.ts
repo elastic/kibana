@@ -187,7 +187,7 @@ export const copyRowsAsTextToClipboard = async ({
       })
       .join(columnSeparator) + rowSeparator;
 
-  selectedRowIndices.forEach((rowIndex) => {
+  selectedRowIndices.forEach((rowIndex, index) => {
     textToCopy +=
       columns
         .map((columnId) => {
@@ -195,7 +195,7 @@ export const copyRowsAsTextToClipboard = async ({
           withFormula = withFormula || result.withFormula;
           return result.formattedString || '-';
         })
-        .join(columnSeparator) + rowSeparator;
+        .join(columnSeparator) + (index !== selectedRowIndices.length - 1 ? rowSeparator : '');
   });
 
   let copied;

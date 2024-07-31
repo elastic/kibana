@@ -243,7 +243,7 @@ describe('UnifiedDataTable', () => {
       findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        '"\'@timestamp"\t "_index"\t "_score"\t bytes\t date\t extension\t message\t name\n-\t i\t 1\t -\t "2020-20-01T12:12:12.124"\t jpg\t -\t test2\n-\t i\t 1\t 50\t "2020-20-01T12:12:12.124"\t gif\t -\t test3\n'
+        '"\'@timestamp"\t "_index"\t "_score"\t bytes\t date\t extension\t message\t name\n-\t i\t 1\t -\t "2020-20-01T12:12:12.124"\t jpg\t -\t test2\n-\t i\t 1\t 50\t "2020-20-01T12:12:12.124"\t gif\t -\t test3'
       );
     });
 
@@ -257,7 +257,7 @@ describe('UnifiedDataTable', () => {
       findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'unifiedDataTableCopyRowsAsText').simulate('click');
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        '"\'@timestamp"\t date\t extension\t name\n-\t "2020-20-01T12:12:12.124"\t jpg\t test2\n-\t "2020-20-01T12:12:12.124"\t gif\t test3\n'
+        '"\'@timestamp"\t date\t extension\t name\n-\t "2020-20-01T12:12:12.124"\t jpg\t test2\n-\t "2020-20-01T12:12:12.124"\t gif\t test3'
       );
     });
   });
