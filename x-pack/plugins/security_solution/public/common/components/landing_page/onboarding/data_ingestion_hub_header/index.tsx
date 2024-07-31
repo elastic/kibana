@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-const WelcomeHeaderHubComponent: React.FC = () => {
-  return <></>;
+const DataIngestionHubHeaderComponent: React.FC = () => {
+  return <div data-test-subj="data-ingestion-hub-header" />;
 };
 
-export const WelcomeHeaderHub = React.memo(WelcomeHeaderHubComponent);
+export const DataIngestionHubHeader = React.memo(DataIngestionHubHeaderComponent);

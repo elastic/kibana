@@ -16,7 +16,7 @@ import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
-import { WelcomeHeaderHub } from './welcome_header_hub';
+import { DataIngestionHubHeader } from './data_ingestion_hub_header';
 import { Footer } from './footer';
 import { useScrollToHash } from './hooks/use_scroll';
 import type { SecurityProductTypes } from './configs';
@@ -82,7 +82,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   const renderDataIngestionHubHeader = useMemo(
     () =>
       isDataIngestionHubEnabled ? (
-        <WelcomeHeaderHub />
+        <DataIngestionHubHeader />
       ) : (
         <WelcomeHeader productTier={productTier} />
       ),
