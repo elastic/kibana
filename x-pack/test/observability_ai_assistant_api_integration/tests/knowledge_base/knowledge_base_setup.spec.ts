@@ -26,12 +26,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if model cannot be installed', async () => {
-      const res = await observabilityAIAssistantAPIClient
+      await observabilityAIAssistantAPIClient
         .editorUser({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
         })
         .expect(400);
-      expect(res.body).to.have.property('message', `Failed to create model ${TINY_ELSER.id}`);
     });
   });
 }

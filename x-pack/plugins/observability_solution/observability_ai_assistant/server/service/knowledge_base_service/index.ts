@@ -46,7 +46,13 @@ function isModelMissingOrUnavailableErrors(error: Error) {
       error.body.error.type === 'status_exception')
   );
 }
-
+function isCreateModelValidationError(error: Error) {
+  return (
+    error instanceof errors.ResponseError &&
+    error.statusCode === 400 &&
+    error.body?.error?.type === 'action_request_validation_exception'
+  );
+}
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
@@ -129,7 +135,11 @@ export class KnowledgeBaseService {
           { requestTimeout: '20m' }
         );
       } catch (error) {
-        throw badRequest(`Failed to create model ${elserModelId}`);
+        if (isCreateModelValidationError(error)) {
+          throw badRequest(error);
+        } else {
+          throw error;
+        }
       }
       this.dependencies.logger.info('Finished installing ELSER model');
     };
