@@ -33,6 +33,33 @@ test('"visitExpression" captures all non-captured expressions', () => {
   );
 });
 
+test('can terminate walk early, does not visit all literals', () => {
+  const numbers: number[] = [];
+  const { ast } = getAstAndSyntaxErrors(`
+    FROM index
+      | STATS 0, 1, 2, 3
+      | LIMIT 123
+  `);
+  const result = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return 0;
+    })
+    .on('visitLiteralExpression', (ctx) => {
+      numbers.push(ctx.node.value as number);
+      return ctx.node.value;
+    })
+    .on('visitCommand', (ctx) => {
+      for (const res of ctx.visitArguments()) if (res) return res;
+    })
+    .on('visitQuery', (ctx) => {
+      for (const res of ctx.visitCommands()) if (res) return res;
+    })
+    .visitQuery(ast);
+
+  expect(result).toBe(1);
+  expect(numbers).toEqual([0, 1]);
+});
+
 test('"visitColumnExpression" takes over all column visits', () => {
   const { ast } = getAstAndSyntaxErrors(`
     FROM index | STATS a
