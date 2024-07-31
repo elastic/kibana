@@ -607,7 +607,7 @@ export class TaskRunner<
 
         // disable task if rule was disabled
         if (
-          executionStatus.error &&
+          executionStatus.error?.reason &&
           executionStatus.error.reason === RuleExecutionStatusErrorReasons.Disabled
         ) {
           this.context.taskManager.bulkDisable([ruleId]);
