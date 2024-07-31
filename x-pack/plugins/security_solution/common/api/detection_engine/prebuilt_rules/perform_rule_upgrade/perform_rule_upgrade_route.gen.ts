@@ -69,22 +69,17 @@ import {
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { ErrorSchema } from '../../model/error_schema.gen';
 
-export type RulePickVersionValues = z.infer<typeof RulePickVersionValues>;
-export const RulePickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
-export type RulePickVersionValuesEnum = typeof RulePickVersionValues.enum;
-export const RulePickVersionValuesEnum = RulePickVersionValues.enum;
-
-export type FieldPickVersionValues = z.infer<typeof FieldPickVersionValues>;
-export const FieldPickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED', 'RESOLVED']);
-export type FieldPickVersionValuesEnum = typeof FieldPickVersionValues.enum;
-export const FieldPickVersionValuesEnum = FieldPickVersionValues.enum;
+export type PickVersionValues = z.infer<typeof PickVersionValues>;
+export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
+export type PickVersionValuesEnum = typeof PickVersionValues.enum;
+export const PickVersionValuesEnum = PickVersionValues.enum;
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
   rule_id: RuleSignatureId,
   revision: z.number(),
   version: RuleVersion,
-  pick_version: RulePickVersionValues.optional(),
+  pick_version: PickVersionValues.optional(),
   /** 
       * Fields that can be customized during the upgrade workflow
 as decided in: https://github.com/elastic/kibana/issues/186544
@@ -95,244 +90,444 @@ will default to a `pick_version` of `MERGED`.
   fields: z
     .object({
       name: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleName.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleName,
+          }),
+        ])
         .optional(),
       tags: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleTagArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleTagArray,
+          }),
+        ])
         .optional(),
       description: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleDescription.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleDescription,
+          }),
+        ])
         .optional(),
       severity: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: Severity.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: Severity,
+          }),
+        ])
         .optional(),
       severity_mapping: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: SeverityMapping.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: SeverityMapping,
+          }),
+        ])
         .optional(),
       risk_score: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RiskScore.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RiskScore,
+          }),
+        ])
         .optional(),
       risk_score_mapping: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RiskScoreMapping.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RiskScoreMapping,
+          }),
+        ])
         .optional(),
       references: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleReferenceArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleReferenceArray,
+          }),
+        ])
         .optional(),
       false_positives: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleFalsePositiveArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleFalsePositiveArray,
+          }),
+        ])
         .optional(),
       threat: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: ThreatArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: ThreatArray,
+          }),
+        ])
         .optional(),
       note: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: InvestigationGuide.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: InvestigationGuide,
+          }),
+        ])
         .optional(),
       setup: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: SetupGuide.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: SetupGuide,
+          }),
+        ])
         .optional(),
       related_integrations: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RelatedIntegrationArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RelatedIntegrationArray,
+          }),
+        ])
         .optional(),
       required_fields: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RequiredFieldArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RequiredFieldArray,
+          }),
+        ])
         .optional(),
       max_signals: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: MaxSignals.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: MaxSignals,
+          }),
+        ])
         .optional(),
       building_block_type: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: BuildingBlockType.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: BuildingBlockType,
+          }),
+        ])
         .optional(),
       from: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleIntervalFrom.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleIntervalFrom,
+          }),
+        ])
         .optional(),
       interval: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleInterval.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleInterval,
+          }),
+        ])
         .optional(),
       exceptions_list: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleExceptionList.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleExceptionList,
+          }),
+        ])
         .optional(),
       rule_name_override: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleNameOverride.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleNameOverride,
+          }),
+        ])
         .optional(),
       timestamp_override: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: TimestampOverride.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: TimestampOverride,
+          }),
+        ])
         .optional(),
       timestamp_override_fallback_disabled: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: TimestampOverrideFallbackDisabled.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: TimestampOverrideFallbackDisabled,
+          }),
+        ])
         .optional(),
       timeline_id: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: TimelineTemplateId.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: TimelineTemplateId,
+          }),
+        ])
         .optional(),
       timeline_title: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: TimelineTemplateTitle.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: TimelineTemplateTitle,
+          }),
+        ])
         .optional(),
       index: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: IndexPatternArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: IndexPatternArray,
+          }),
+        ])
         .optional(),
       data_view_id: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: DataViewId.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: DataViewId,
+          }),
+        ])
         .optional(),
       query: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleQuery.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleQuery,
+          }),
+        ])
         .optional(),
       language: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: QueryLanguage.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: QueryLanguage,
+          }),
+        ])
         .optional(),
       filters: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: RuleFilterArray.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: RuleFilterArray,
+          }),
+        ])
         .optional(),
       saved_id: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: SavedQueryId.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: SavedQueryId,
+          }),
+        ])
         .optional(),
       machine_learning_job_id: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: MachineLearningJobId.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: MachineLearningJobId,
+          }),
+        ])
         .optional(),
       anomaly_threshold: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: AnomalyThreshold.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: AnomalyThreshold,
+          }),
+        ])
         .optional(),
       threat_query: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: ThreatQuery.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: ThreatQuery,
+          }),
+        ])
         .optional(),
       threat_mapping: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: ThreatMapping.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: ThreatMapping,
+          }),
+        ])
         .optional(),
       threat_index: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: ThreatIndex.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: ThreatIndex,
+          }),
+        ])
         .optional(),
       threat_filters: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: ThreatFilters.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: ThreatFilters,
+          }),
+        ])
         .optional(),
       threat_indicator_path: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: ThreatIndicatorPath.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: ThreatIndicatorPath,
+          }),
+        ])
         .optional(),
       threat_language: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: KqlQueryLanguage.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: KqlQueryLanguage,
+          }),
+        ])
         .optional(),
       new_terms_fields: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: NewTermsFields.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: NewTermsFields,
+          }),
+        ])
         .optional(),
       history_window_start: z
-        .object({
-          pick_version: FieldPickVersionValues,
-          resolved_value: HistoryWindowStart.optional(),
-        })
+        .union([
+          z.object({
+            pick_version: PickVersionValues,
+          }),
+          z.object({
+            pick_version: z.literal('RESOLVED'),
+            resolved_value: HistoryWindowStart,
+          }),
+        ])
         .optional(),
     })
     .optional(),
@@ -342,13 +537,13 @@ export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesReq
 export const UpgradeSpecificRulesRequest = z.object({
   mode: z.literal('SPECIFIC_RULES'),
   rules: z.array(RuleUpgradeSpecifier),
-  pick_version: RulePickVersionValues.optional(),
+  pick_version: PickVersionValues.optional(),
 });
 
 export type UpgradeAllRulesRequest = z.infer<typeof UpgradeAllRulesRequest>;
 export const UpgradeAllRulesRequest = z.object({
   mode: z.literal('ALL_RULES'),
-  pick_version: RulePickVersionValues.optional(),
+  pick_version: PickVersionValues.optional(),
 });
 
 export type SkipRuleUpgradeReason = z.infer<typeof SkipRuleUpgradeReason>;
