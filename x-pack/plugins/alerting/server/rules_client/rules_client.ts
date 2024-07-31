@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UnmuteAlertParams } from '../application/rule/methods/unmute_alert/types';
 import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
@@ -55,12 +56,12 @@ import {
 import { bulkEnableRules, BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
 import { updateRuleApiKey } from '../application/rule/methods/update_api_key/update_rule_api_key';
-import { disable } from './methods/disable';
+import { disableRule } from '../application/rule/methods/disable/disable_rule';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { muteAll } from './methods/mute_all';
 import { unmuteAll } from './methods/unmute_all';
-import { unmuteInstance } from './methods/unmute_instance';
+import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
@@ -75,6 +76,7 @@ import { getBackfill } from '../application/backfill/methods/get';
 import { findBackfill } from '../application/backfill/methods/find';
 import { deleteBackfill } from '../application/backfill/methods/delete';
 import { FindBackfillParams } from '../application/backfill/methods/find/types';
+import { DisableRuleParams } from '../application/rule/methods/disable';
 import { EnableRuleParams } from '../application/rule/methods/enable_rule';
 
 export type ConstructorOptions = Omit<
@@ -166,9 +168,8 @@ export class RulesClient {
     bulkDisableRules(this.context, options);
 
   public updateRuleApiKey = (params: { id: string }) => updateRuleApiKey(this.context, params);
-
+  public disableRule = (params: DisableRuleParams) => disableRule(this.context, params);
   public enableRule = (params: EnableRuleParams) => enableRule(this.context, params);
-  public disable = (options: { id: string; untrack?: boolean }) => disable(this.context, options);
 
   public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
   public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
@@ -181,7 +182,7 @@ export class RulesClient {
   public muteAll = (options: { id: string }) => muteAll(this.context, options);
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
-  public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
+  public unmuteInstance = (options: UnmuteAlertParams) => unmuteInstance(this.context, options);
 
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
