@@ -57,7 +57,7 @@ interface Props {
 export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isReadOnly }) => {
   const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
   const [roleAPIClientInitialized, setRoleAPIClientInitialized] = useState(false);
-  const [systemRoles, setSystemRoles] = useState<Role[]>([]);
+  const [spaceUnallocatedRole, setSpaceUnallocatedRole] = useState<Role[]>([]);
 
   const rolesAPIClient = useRef<RolesAPIClient>();
 
@@ -80,13 +80,24 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
 
   useEffect(() => {
     async function fetchAllSystemRoles() {
-      setSystemRoles((await rolesAPIClient.current?.getRoles()) ?? []);
+      const systemRoles = (await rolesAPIClient.current?.getRoles()) ?? [];
+
+      // exclude roles that are already assigned to this space
+      const spaceUnallocatedRoles = systemRoles.filter(
+        (role) =>
+          !role.metadata?._reserved &&
+          role.kibana.some((privileges) => {
+            return !privileges.spaces.includes(space.id) || !privileges.spaces.includes('*');
+          })
+      );
+
+      setSpaceUnallocatedRole(spaceUnallocatedRoles);
     }
 
     if (roleAPIClientInitialized) {
       fetchAllSystemRoles?.();
     }
-  }, [roleAPIClientInitialized]);
+  }, [roleAPIClientInitialized, space.id]);
 
   return (
     <>
@@ -100,7 +111,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
           onSaveClick={() => {
             setShowRolesPrivilegeEditor(false);
           }}
-          systemRoles={systemRoles}
+          spaceUnallocatedRole={spaceUnallocatedRole}
           // rolesAPIClient would have been initialized before the privilege editor is displayed
           roleAPIClient={rolesAPIClient.current!}
         />
@@ -126,7 +137,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
         </EuiFlexItem>
         <EuiFlexItem>
           <SpaceAssignedRolesTable
-            isReadOnly={isReadOnly}
+            isReadOnly={isReadOnly || !spaceUnallocatedRole.length}
             assignedRoles={roles}
             onAssignNewRoleClick={async () => {
               if (!roleAPIClientInitialized) {
@@ -144,7 +155,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isRe
 interface PrivilegesRolesFormProps extends Omit<Props, 'isReadOnly' | 'roles'> {
   closeFlyout: () => void;
   onSaveClick: () => void;
-  systemRoles: Role[];
+  spaceUnallocatedRole: Role[];
   roleAPIClient: RolesAPIClient;
 }
 
@@ -155,7 +166,7 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
   }));
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const { onSaveClick, closeFlyout, features, roleAPIClient, systemRoles } = props;
+  const { onSaveClick, closeFlyout, features, roleAPIClient, spaceUnallocatedRole } = props;
 
   const [space, setSpaceState] = useState<Partial<Space>>(props.space);
   const [spacePrivilege, setSpacePrivilege] = useState<KibanaPrivilegeBase | 'custom'>('all');
@@ -192,7 +203,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               values: { spaceName: space.name },
             })}
             placeholder="Select roles"
-            options={createRolesComboBoxOptions(systemRoles)}
+            options={createRolesComboBoxOptions(spaceUnallocatedRole)}
             selectedOptions={selectedRoles}
             onChange={(value) => {
               setSelectedRoles((prevRoles) => {

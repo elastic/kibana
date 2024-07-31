@@ -44,7 +44,7 @@ export const useViewSpaceServices = (): ViewSpaceServices => {
   const context = useContext(ViewSpaceContext);
   if (!context) {
     throw new Error(
-      'ViewSpace Context is mising. Ensure the component or React root is wrapped with ViewSpaceContext'
+      'ViewSpace Context is missing. Ensure the component or React root is wrapped with ViewSpaceContext'
     );
   }
 

@@ -117,6 +117,12 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
               defaultMessage: 'Reserved',
             }
           ),
+          description: i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.column.actions.reservedIndictor.description',
+            {
+              defaultMessage: 'No action to perform, this role is reserved',
+            }
+          ),
           isPrimary: true,
           enabled: () => false,
           available: (rowRecord) => !isEditableRole(rowRecord),
@@ -131,7 +137,13 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
             }
           ),
           isPrimary: true,
-          description: 'Click this action to edit the role privileges of this user for this space.',
+          description: i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.description',
+            {
+              defaultMessage:
+                'Click this action to edit the role privileges of this user for this space.',
+            }
+          ),
           showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
           onClick: () => {
@@ -149,7 +161,12 @@ const getTableColumns = ({ isReadOnly }: Pick<ISpaceAssignedRolesTableProps, 'is
               defaultMessage: 'Remove from space',
             }
           ),
-          description: 'Click this action to remove the user from this space.',
+          description: i18n.translate(
+            'xpack.spaces.management.spaceDetails.rolesTable.column.actions.edit.description',
+            {
+              defaultMessage: 'Click this action to remove the user from this space.',
+            }
+          ),
           showOnHover: true,
           available: (rowRecord) => isEditableRole(rowRecord),
           onClick: (rowRecord, event) => {
