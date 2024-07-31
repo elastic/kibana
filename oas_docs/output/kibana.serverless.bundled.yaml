@@ -2,75 +2,60 @@ openapi: 3.0.3
 info:
   contact:
     name: Kibana Team
-  description: |-
-    **Technical preview**  
+  description: >
+    The Kibana REST APIs enable you to manage resources such as connectors, data
+    views, and saved objects.
 
-        This functionality is in technical preview and may be changed or removed in
-        a future release.
+    The API calls are stateless.
 
-        Elastic will work to fix any issues, but features in technical preview are
-        not subject to the support SLA of official GA features.
+    Each request that you make happens in isolation from other calls and must
+    include all of the necessary information for Kibana to fulfill the
 
+    request.
 
-        The Kibana REST APIs for Elastic serverless enable you to manage resources
-
-        such as connectors, data views, and saved objects. The API calls are
-
-        stateless. Each request that you make happens in isolation from other calls
-
-        and must include all of the necessary information for Kibana to fulfill the
-
-        request. API requests return JSON output, which is a format that is
-
-        machine-readable and works well for automation.
+    API requests return JSON output, which is a format that is machine-readable
+    and works well for automation.
 
 
-        To interact with Kibana APIs, use the following operations:
+    To interact with Kibana APIs, use the following operations:
 
 
-        - GET: Fetches the information.
+    - GET: Fetches the information.
 
-        - POST: Adds new information.
+    - PATCH: Applies partial modifications to the existing information.
 
-        - PUT: Updates the existing information.
+    - POST: Adds new information.
 
-        - DELETE: Removes the information.
+    - PUT: Updates the existing information.
 
-
-        You can prepend any Kibana API endpoint with `kbn:` and run the request in
-
-        **Dev Tools → Console**. For example:
+    - DELETE: Removes the information.
 
 
-        ```
+    You can prepend any Kibana API endpoint with `kbn:` and run the request in
+    **Dev Tools → Console**.
 
-        GET kbn:/api/data_views
+    For example:
 
-        ```
+
+    ```
+
+    GET kbn:/api/data_views
+
+    ```
+
+
+    For more information about the console, refer to [Run API
+    requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
   license:
     name: Elastic License 2.0
     url: 'https://www.elastic.co/licensing/elastic-license'
-  title: Kibana Serverless
+  title: Kibana APIs
   version: 1.0.2
 servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
-  - url: 'http://localhost:5622'
-  - url: 'https://{kibanaUrl}'
-    variables:
-      kibanaUrl:
-        default: 'localhost:5601'
   - url: 'https://{kibana_url}'
     variables:
       kibana_url:
         default: 'localhost:5601'
-  - url: /
-  - description: local
-    url: 'http://localhost:5601'
 paths:
   /api/actions/connector:
     post:
@@ -2127,6 +2112,534 @@ paths:
       summary: List all detection rule tags
       tags:
         - Tags API
+  /api/endpoint/action:
+    get:
+      operationId: EndpointGetActionsList
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointActionListRequestQuery
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Actions List schema
+  '/api/endpoint/action_log/{agent_id}':
+    get:
+      operationId: EndpointGetActionAuditLog
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_AuditLogRequestQuery
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_AuditLogRequestParams
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get action audit log schema
+  /api/endpoint/action_status:
+    get:
+      operationId: EndpointGetActionsStatus
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agent_ids:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_AgentIds
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Actions status schema
+  '/api/endpoint/action/{action_id}':
+    get:
+      operationId: EndpointGetActionsDetails
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_DetailsRequestParams
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Action details schema
+  '/api/endpoint/action/{action_id}/file/{file_id}/download`':
+    get:
+      operationId: EndpointFileDownload
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_FileDownloadRequestParams
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: File Download schema
+  '/api/endpoint/action/{action_id}/file/{file_id}`':
+    get:
+      operationId: EndpointFileInfo
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_FileInfoRequestParams
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: File Info schema
+  /api/endpoint/action/execute:
+    post:
+      operationId: EndpointExecuteAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_ExecuteActionRequestBody
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Execute Action
+  /api/endpoint/action/get_file:
+    post:
+      operationId: EndpointGetFileAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_GetFileActionRequestBody
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get File Action
+  /api/endpoint/action/isolate:
+    post:
+      operationId: EndpointIsolateHostAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+                case_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+                comment:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+                endpoint_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+                parameters:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Isolate host Action
+  /api/endpoint/action/kill_process:
+    post:
+      operationId: EndpointKillProcessAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_ProcessActionSchemas
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Kill process Action
+  /api/endpoint/action/running_procs:
+    post:
+      operationId: EndpointGetRunningProcessesAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+                case_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+                comment:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+                endpoint_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+                parameters:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Running Processes Action
+  /api/endpoint/action/scan:
+    post:
+      operationId: EndpointScanAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_ScanActionRequestBody
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Scan Action
+  /api/endpoint/action/state:
+    get:
+      operationId: EndpointGetActionsState
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Action State schema
+  /api/endpoint/action/suspend_process:
+    post:
+      operationId: EndpointSuspendProcessAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_ProcessActionSchemas
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Suspend process Action
+  /api/endpoint/action/unisolate:
+    post:
+      operationId: EndpointUnisolateHostAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                alert_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+                case_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+                comment:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+                endpoint_ids:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+                parameters:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Unisolate host Action
+  /api/endpoint/action/upload:
+    post:
+      operationId: EndpointUploadAction
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_FileUploadActionRequestBody
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Upload Action
+  /api/endpoint/metadata:
+    get:
+      operationId: GetEndpointMetadataList
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_ListRequestQuery
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Metadata List schema
+  '/api/endpoint/metadata/{id}':
+    get:
+      operationId: GetEndpointMetadata
+      parameters:
+        - in: path
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Metadata schema
+  /api/endpoint/metadata/transforms:
+    get:
+      operationId: GetEndpointMetadataTransform
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Metadata Transform schema
+  /api/endpoint/policy_response:
+    get:
+      operationId: GetPolicyResponse
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              agentId:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_AgentId
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Policy Response schema
+  /api/endpoint/policy/summaries:
+    get:
+      operationId: GetAgentPolicySummary
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: object
+            properties:
+              package_name:
+                type: string
+              policy_id:
+                nullable: true
+                type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get Agent Policy Summary schema
+  '/api/endpoint/protection_updates_note/{package_policy_id}':
+    get:
+      operationId: GetProtectionUpdatesNote
+      parameters:
+        - in: path
+          name: package_policy_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_ProtectionUpdatesNoteResponse
+          description: OK
+      summary: Get Protection Updates Note schema
+    post:
+      operationId: CreateUpdateProtectionUpdatesNote
+      parameters:
+        - in: path
+          name: package_policy_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_ProtectionUpdatesNoteResponse
+          description: OK
+      summary: Create Update Protection Updates Note schema
+  '/api/endpoint/suggestions/{suggestion_type}':
+    post:
+      operationId: GetEndpointSuggestions
+      parameters:
+        - in: path
+          name: suggestion_type
+          required: true
+          schema:
+            enum:
+              - eventFilters
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                field:
+                  type: string
+                fieldMeta: {}
+                filters: {}
+                query:
+                  type: string
+              required:
+                - parameters
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: >-
+                  #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
+          description: OK
+      summary: Get suggestions
   /api/exception_lists:
     delete:
       operationId: DeleteExceptionList
@@ -4978,154 +5491,6 @@ paths:
       summary: Sync machine learning saved objects
       tags:
         - ml
-  /api/note:
-    delete:
-      operationId: DeleteNote
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              oneOf:
-                - nullable: true
-                  type: object
-                  properties:
-                    noteId:
-                      type: string
-                  required:
-                    - noteId
-                - type: object
-                  properties:
-                    noteIds:
-                      items:
-                        type: string
-                      nullable: true
-                      type: array
-                  required:
-                    - noteIds
-        description: The id of the note to delete.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-          description: Indicates the note was successfully deleted.
-      summary: Deletes a note from a timeline.
-      tags:
-        - 'access:securitySolution'
-    get:
-      description: Gets notes
-      operationId: GetNotes
-      parameters:
-        - in: query
-          name: documentIds
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Solution_Timeline_API_DocumentIds'
-        - in: query
-          name: page
-          schema:
-            nullable: true
-            type: number
-        - in: query
-          name: perPage
-          schema:
-            nullable: true
-            type: number
-        - in: query
-          name: search
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: sortField
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: sortOrder
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: filter
-          schema:
-            nullable: true
-            type: string
-      responses:
-        '200':
-          description: Indicates the requested notes were returned.
-      summary: Get all notes for a given document.
-      tags:
-        - 'access:securitySolution'
-    patch:
-      operationId: PersistNoteRoute
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                eventDataView:
-                  nullable: true
-                  type: string
-                eventIngested:
-                  nullable: true
-                  type: string
-                eventTimestamp:
-                  nullable: true
-                  type: string
-                note:
-                  $ref: '#/components/schemas/Security_Solution_Timeline_API_BareNote'
-                noteId:
-                  nullable: true
-                  type: string
-                overrideOwner:
-                  nullable: true
-                  type: boolean
-                version:
-                  nullable: true
-                  type: string
-              required:
-                - note
-        description: The note to persist or update along with additional metadata.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistNote:
-                        type: object
-                        properties:
-                          code:
-                            type: number
-                          message:
-                            type: string
-                          note:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_Note
-                        required:
-                          - code
-                          - message
-                          - note
-                    required:
-                      - persistNote
-                required:
-                  - data
-          description: Indicates the note was successfully created.
-      summary: Persists a note to a timeline.
-      tags:
-        - 'access:securitySolution'
   /api/osquery/live_queries:
     get:
       operationId: OsqueryFindLiveQueries
@@ -5407,61 +5772,16 @@ paths:
                   #/components/schemas/Security_Solution_Osquery_API_DefaultSuccessResponse
           description: OK
       summary: Update saved query
-  /api/pinned_event:
-    patch:
-      operationId: PersistPinnedEventRoute
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                eventId:
-                  type: string
-                pinnedEventId:
-                  nullable: true
-                  type: string
-                timelineId:
-                  type: string
-              required:
-                - eventId
-                - timelineId
-        description: The pinned event to persist or update along with additional metadata.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistPinnedEventOnTimeline:
-                        allOf:
-                          - $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_PinnedEvent
-                          - type: object
-                            properties:
-                              code:
-                                type: number
-                              message:
-                                type: string
-                    required:
-                      - persistPinnedEventOnTimeline
-                required:
-                  - data
-          description: Indicate the event was successfully pinned in the timeline.
-      summary: Persists a pinned event to a timeline.
-      tags:
-        - 'access:securitySolution'
   /api/saved_objects/_export:
     post:
       description: >
         Retrieve sets of saved objects that you want to import into Kibana.
 
         You must include `type` or `objects` in the request body.
+
+
+        Exported saved objects are not backwards compatible and cannot be
+        imported into an older version of Kibana.
 
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting
@@ -5527,7 +5847,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Serverless_saved_objects_400_response'
           description: Bad request.
-      summary: Export saved objects in the default space
+      summary: Export saved objects
       tags:
         - saved objects
   /api/saved_objects/_import:
@@ -5653,7 +5973,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Serverless_saved_objects_400_response'
           description: Bad request.
-      summary: Import saved objects in the default space
+      summary: Import saved objects
       tags:
         - saved objects
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
@@ -6266,774 +6586,6 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-  /api/timeline:
-    delete:
-      operationId: DeleteTimelines
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                savedObjectIds:
-                  items:
-                    type: string
-                  type: array
-                searchIds:
-                  description: >-
-                    Saved search ids that should be deleted alongside the
-                    timelines
-                  items:
-                    type: string
-                  type: array
-              required:
-                - savedObjectIds
-        description: The ids of the timelines or timeline templates to delete.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      deleteTimeline:
-                        type: boolean
-                    required:
-                      - deleteTimeline
-                required:
-                  - data
-          description: Indicates the timeline was successfully deleted.
-      summary: Deletes one or more timelines or timeline templates.
-      tags:
-        - 'access:securitySolution'
-    get:
-      operationId: GetTimeline
-      parameters:
-        - description: The ID of the template timeline to retrieve
-          in: query
-          name: template_timeline_id
-          schema:
-            type: string
-        - description: The ID of the timeline to retrieve
-          in: query
-          name: id
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      getOneTimeline:
-                        $ref: >-
-                          #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        nullable: true
-                    required:
-                      - getOneTimeline
-                required:
-                  - data
-          description: Indicates that the (template) timeline was found and returned.
-      summary: >-
-        Get an existing saved timeline or timeline template. This API is used to
-        retrieve an existing saved timeline or timeline template.
-      tags:
-        - 'access:securitySolution'
-    patch:
-      description: >-
-        Updates an existing timeline. This API is used to update the title,
-        description, date range, pinned events, pinned queries, and/or pinned
-        saved queries of an existing timeline.
-      operationId: PatchTimeline
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                timeline:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Timeline_API_SavedTimeline
-                timelineId:
-                  nullable: true
-                  type: string
-                version:
-                  nullable: true
-                  type: string
-              required:
-                - timelineId
-                - version
-                - timeline
-        description: The timeline updates along with the timeline ID and version.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
-          description: >-
-            Indicates that the draft timeline was successfully created. In the
-            event the user already has a draft timeline, the existing draft
-            timeline is cleared and returned.
-        '405':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-          description: >-
-            Indicates that the user does not have the required access to create
-            a draft timeline.
-      summary: Updates an existing timeline.
-      tags:
-        - 'access:securitySolution'
-    post:
-      operationId: CreateTimelines
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                status:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Timeline_API_TimelineStatus
-                  nullable: true
-                templateTimelineId:
-                  nullable: true
-                  type: string
-                templateTimelineVersion:
-                  nullable: true
-                  type: number
-                timeline:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Timeline_API_SavedTimeline
-                timelineId:
-                  nullable: true
-                  type: string
-                timelineType:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Timeline_API_TimelineType
-                  nullable: true
-                version:
-                  nullable: true
-                  type: string
-              required:
-                - timeline
-        description: >-
-          The required timeline fields used to create a new timeline along with
-          optional fields that will be created if not provided.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                    required:
-                      - persistTimeline
-                required:
-                  - data
-          description: Indicates the timeline was successfully created.
-        '405':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-          description: Indicates that there was an error in the timeline creation.
-      summary: Creates a new timeline.
-      tags:
-        - 'access:securitySolution'
-  /api/timeline/_draft:
-    get:
-      operationId: GetDraftTimelines
-      parameters:
-        - in: query
-          name: timelineType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Solution_Timeline_API_TimelineType'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
-          description: Indicates that the draft timeline was successfully retrieved.
-        '403':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status_code:
-                    type: number
-          description: >-
-            If a draft timeline was not found and we attempted to create one, it
-            indicates that the user does not have the required permissions to
-            create a draft timeline.
-        '409':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status_code:
-                    type: number
-          description: >-
-            This should never happen, but if a draft timeline was not found and
-            we attempted to create one, it indicates that there is already a
-            draft timeline with the given timelineId.
-      summary: >-
-        Retrieves the draft timeline for the current user. If the user does not
-        have a draft timeline, an empty timeline is returned.
-      tags:
-        - 'access:securitySolution'
-    post:
-      description: >
-        Retrieves a clean draft timeline. If a draft timeline does not exist, it
-        is created and returned.
-      operationId: CleanDraftTimelines
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                timelineType:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Timeline_API_TimelineType
-              required:
-                - timelineType
-        description: >-
-          The type of timeline to create. Valid values are `default` and
-          `template`.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistTimeline:
-                        type: object
-                        properties:
-                          timeline:
-                            $ref: >-
-                              #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        required:
-                          - timeline
-                    required:
-                      - persistTimeline
-                required:
-                  - data
-          description: >-
-            Indicates that the draft timeline was successfully created. In the
-            event the user already has a draft timeline, the existing draft
-            timeline is cleared and returned.
-        '403':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status_code:
-                    type: number
-          description: >-
-            Indicates that the user does not have the required permissions to
-            create a draft timeline.
-        '409':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status_code:
-                    type: number
-          description: >-
-            Indicates that there is already a draft timeline with the given
-            timelineId.
-      summary: Retrieves a draft timeline or timeline template.
-      tags:
-        - 'access:securitySolution'
-  /api/timeline/_export:
-    post:
-      operationId: ExportTimelines
-      parameters:
-        - description: The name of the file to export
-          in: query
-          name: file_name
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                ids:
-                  items:
-                    type: string
-                  nullable: true
-                  type: array
-        description: The ids of the timelines to export
-        required: true
-      responses:
-        '200':
-          content:
-            application/ndjson; Elastic-Api-Version=2023-10-31:
-              schema:
-                description: NDJSON of the exported timelines
-                type: string
-          description: Indicates the timelines were successfully exported
-        '400':
-          content:
-            application/ndjson; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-          description: Indicates that the export size limit was exceeded
-      summary: Exports timelines as an NDJSON file
-      tags:
-        - 'access:securitySolution'
-  /api/timeline/_favorite:
-    patch:
-      operationId: PersistFavoriteRoute
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                templateTimelineId:
-                  nullable: true
-                  type: string
-                templateTimelineVersion:
-                  nullable: true
-                  type: number
-                timelineId:
-                  nullable: true
-                  type: string
-                timelineType:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Timeline_API_TimelineType
-                  nullable: true
-              required:
-                - timelineId
-                - templateTimelineId
-                - templateTimelineVersion
-                - timelineType
-        description: The required fields used to favorite a (template) timeline.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistFavorite:
-                        $ref: >-
-                          #/components/schemas/Security_Solution_Timeline_API_FavoriteTimelineResponse
-                    required:
-                      - persistFavorite
-                required:
-                  - data
-          description: Indicates the favorite status was successfully updated.
-        '403':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-          description: >-
-            Indicates the user does not have the required permissions to persist
-            the favorite status.
-      summary: Persists a given users favorite status of a timeline.
-      tags:
-        - 'access:securitySolution'
-  /api/timeline/_import:
-    post:
-      operationId: ImportTimelines
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                file:
-                  allOf:
-                    - $ref: >-
-                        #/components/schemas/Security_Solution_Timeline_API_Readable
-                    - type: object
-                      properties:
-                        hapi:
-                          type: object
-                          properties:
-                            filename:
-                              type: string
-                            headers:
-                              type: object
-                            isImmutable:
-                              enum:
-                                - 'true'
-                                - 'false'
-                              type: string
-                          required:
-                            - filename
-                            - headers
-                      required:
-                        - hapi
-        description: The timelines to import as a readable stream.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
-                required:
-                  - data
-          description: Indicates the import of timelines was successful.
-        '400':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  id:
-                    type: string
-                  statusCode:
-                    type: number
-          description: >-
-            Indicates the import of timelines was unsuccessful because of an
-            invalid file extension.
-        '404':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  statusCode:
-                    type: number
-          description: >-
-            Indicates that we were unable to locate the saved object client
-            necessary to handle the import.
-        '409':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  id:
-                    type: string
-                  statusCode:
-                    type: number
-          description: Indicates the import of timelines was unsuccessful.
-      summary: Imports timelines.
-      tags:
-        - 'access:securitySolution'
-  /api/timeline/_prepackaged:
-    post:
-      operationId: InstallPrepackedTimelines
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=2023-10-31:
-            schema:
-              type: object
-              properties:
-                prepackagedTimelines:
-                  items:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_SavedTimeline
-                  type: array
-                timelinesToInstall:
-                  items:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_ImportTimelines
-                    nullable: true
-                  type: array
-                timelinesToUpdate:
-                  items:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_ImportTimelines
-                    nullable: true
-                  type: array
-              required:
-                - timelinesToInstall
-                - timelinesToUpdate
-                - prepackagedTimelines
-        description: The timelines to install or update.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: >-
-                      #/components/schemas/Security_Solution_Timeline_API_ImportTimelineResult
-                required:
-                  - data
-          description: Indicates the installation of prepackaged timelines was successful.
-        '500':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-          description: >-
-            Indicates the installation of prepackaged timelines was
-            unsuccessful.
-      summary: Installs prepackaged timelines.
-      tags:
-        - 'access:securitySolution'
-  /api/timeline/resolve:
-    get:
-      operationId: ResolveTimeline
-      parameters:
-        - description: The ID of the template timeline to resolve
-          in: query
-          name: template_timeline_id
-          schema:
-            type: string
-        - description: The ID of the timeline to resolve
-          in: query
-          name: id
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      getOneTimeline:
-                        $ref: >-
-                          #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        nullable: true
-                    required:
-                      - getOneTimeline
-                required:
-                  - data
-          description: The (template) timeline has been found
-        '400':
-          description: The request is missing parameters
-        '404':
-          description: The (template) timeline was not found
-      summary: Get an existing saved timeline or timeline template.
-      tags:
-        - 'access:securitySolution'
-  /api/timelines:
-    get:
-      operationId: GetTimelines
-      parameters:
-        - description: >-
-            If true, only timelines that are marked as favorites by the user are
-            returned.
-          in: query
-          name: only_user_favorite
-          schema:
-            enum:
-              - 'true'
-              - 'false'
-            nullable: true
-            type: string
-        - in: query
-          name: timeline_type
-          schema:
-            $ref: '#/components/schemas/Security_Solution_Timeline_API_TimelineType'
-            nullable: true
-        - in: query
-          name: sort_field
-          schema:
-            $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_SortFieldTimeline
-        - in: query
-          name: sort_order
-          schema:
-            enum:
-              - asc
-              - desc
-            type: string
-        - in: query
-          name: page_size
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: page_index
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: search
-          schema:
-            nullable: true
-            type: string
-        - in: query
-          name: status
-          schema:
-            $ref: '#/components/schemas/Security_Solution_Timeline_API_TimelineStatus'
-            nullable: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      customTemplateTimelineCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      timelines:
-                        items:
-                          $ref: >-
-                            #/components/schemas/Security_Solution_Timeline_API_TimelineResponse
-                        type: array
-                      totalCount:
-                        type: number
-                    required:
-                      - timelines
-                      - totalCount
-                      - defaultTimelineCount
-                      - templateTimelineCount
-                      - favoriteCount
-                      - elasticTemplateTimelineCount
-                      - customTemplateTimelineCount
-                required:
-                  - data
-          description: Indicates that the (template) timelines were found and returned.
-        '400':
-          content:
-            'application:json; Elastic-Api-Version=2023-10-31':
-              schema:
-                type: object
-                properties:
-                  body:
-                    type: string
-                  statusCode:
-                    type: number
-          description: Bad request. The user supplied invalid data.
-      summary: >-
-        This API is used to retrieve a list of existing saved timelines or
-        timeline templates.
-      tags:
-        - 'access:securitySolution'
   '/s/{spaceId}/api/observability/slos':
     get:
       description: >
@@ -7172,8 +6724,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
-      servers:
-        - url: 'https://localhost:5601'
       summary: Create an SLO
       tags:
         - slo
@@ -7214,8 +6764,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
-      servers:
-        - url: 'https://localhost:5601'
       summary: Batch delete rollup and summary data
       tags:
         - slo
@@ -7479,221 +7027,6 @@ paths:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
       summary: Enable an SLO
-      tags:
-        - slo
-  '/s/{spaceId}/api/saved_objects/_export':
-    post:
-      description: >
-        Retrieves sets of saved objects that you want to import into Kibana.
-
-        You must include `type` or `objects` in the request body.
-
-
-        NOTE: The `savedObjects.maxImportExportSize` configuration setting
-        limits the number of saved objects which may be exported.
-
-
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      operationId: exportSavedObjects
-      parameters:
-        - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
-        - $ref: '#/components/parameters/Serverless_saved_objects_space_id'
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=0.1:
-            examples:
-              exportSavedObjectsRequest:
-                $ref: >-
-                  #/components/examples/Serverless_saved_objects_export_objects_request
-            schema:
-              $ref: >-
-                #/components/schemas/Serverless_saved_objects_export_objects_request
-        required: true
-      responses:
-        '200':
-          content:
-            application/x-ndjson; Elastic-Api-Version=0.1:
-              examples:
-                exportSavedObjectsResponse:
-                  $ref: >-
-                    #/components/examples/Serverless_saved_objects_export_objects_response
-              schema:
-                additionalProperties: true
-                type: object
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json; Elastic-Api-Version=0.1:
-              schema:
-                $ref: '#/components/schemas/Serverless_saved_objects_400_response'
-          description: Bad request.
-      summary: Export saved objects
-      tags:
-        - saved objects
-  '/s/{spaceId}/api/saved_objects/_import':
-    post:
-      description: >
-        Creates sets of Kibana saved objects from a file created by the export
-        API.
-
-        Saved objects can be imported only into the same version, a newer minor
-        on the same major, or the next major. Exported saved objects are not
-        backwards compatible and cannot be imported into an older version of
-        Kibana.
-
-
-        This functionality is in technical preview and may be changed or removed
-        in a future release. Elastic will work to fix any issues, but features
-        in technical preview are not subject to the support SLA of official GA
-        features.
-      operationId: importSavedObjects
-      parameters:
-        - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
-        - $ref: '#/components/parameters/Serverless_saved_objects_space_id'
-        - $ref: '#/components/parameters/Serverless_saved_objects_compatibility_mode'
-        - $ref: '#/components/parameters/Serverless_saved_objects_create_new_copies'
-        - $ref: '#/components/parameters/Serverless_saved_objects_overwrite'
-      requestBody:
-        content:
-          multipart/form-data; Elastic-Api-Version=0.1:
-            examples:
-              importObjectsRequest:
-                $ref: >-
-                  #/components/examples/Serverless_saved_objects_import_objects_request
-            schema:
-              $ref: >-
-                #/components/schemas/Serverless_saved_objects_import_objects_request
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=0.1:
-              examples:
-                importObjectsResponse:
-                  $ref: >-
-                    #/components/examples/Serverless_saved_objects_import_objects_response
-              schema:
-                $ref: >-
-                  #/components/schemas/Serverless_saved_objects_200_import_objects_response
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json; Elastic-Api-Version=0.1:
-              schema:
-                $ref: '#/components/schemas/Serverless_saved_objects_400_response'
-          description: Bad request.
-      summary: Import saved objects
-      tags:
-        - saved objects
-  '/s/{spaceId}/internal/observability/slos/_definitions':
-    get:
-      description: >
-        You must have the `read` privileges for the **SLOs** feature in the
-        **Observability** section of the Kibana feature privileges.
-      operationId: getDefinitionsOp
-      parameters:
-        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
-        - $ref: '#/components/parameters/SLOs_space_id'
-        - description: >-
-            Indicates if the API returns only outdated SLO or all SLO
-            definitions
-          example: true
-          in: query
-          name: includeOutdatedOnly
-          schema:
-            type: boolean
-        - description: Filters the SLOs by name
-          example: my service availability
-          in: query
-          name: search
-          schema:
-            type: string
-        - description: 'The page to use for pagination, must be greater or equal than 1'
-          example: 1
-          in: query
-          name: page
-          schema:
-            type: number
-        - description: Number of SLOs returned by page
-          example: 100
-          in: query
-          name: perPage
-          schema:
-            default: 100
-            maximum: 1000
-            type: integer
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
-          description: Successful request
-        '400':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_400_response'
-          description: Bad request
-        '401':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_401_response'
-          description: Unauthorized response
-        '403':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
-      summary: Get the SLO definitions
-      tags:
-        - slo
-  '/s/{spaceId}/internal/observability/slos/_historical_summary':
-    post:
-      description: >
-        You must have the `read` privileges for the **SLOs** feature in the
-        **Observability** section of the Kibana feature privileges.
-      operationId: historicalSummaryOp
-      parameters:
-        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
-        - $ref: '#/components/parameters/SLOs_space_id'
-      requestBody:
-        content:
-          application/json; Elastic-Api-Version=1.0:
-            schema:
-              $ref: '#/components/schemas/SLOs_historical_summary_request'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_historical_summary_response'
-          description: Successful request
-        '400':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_400_response'
-          description: Bad request
-        '401':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_401_response'
-          description: Unauthorized response
-        '403':
-          content:
-            application/json; Elastic-Api-Version=1.0:
-              schema:
-                $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
-      summary: Get a historical summary for SLOs
       tags:
         - slo
 components:
@@ -9526,55 +8859,12 @@ components:
       required: false
       schema:
         type: boolean
-    Serverless_saved_objects_compatibility_mode:
-      description: >
-        Applies various adjustments to the saved objects that are being imported
-        to maintain compatibility between different Kibana versions. Use this
-        option only if you encounter issues with imported saved objects. NOTE:
-        This option cannot be used with the `createNewCopies` option.
-      in: query
-      name: compatibilityMode
-      required: false
-      schema:
-        type: boolean
-    Serverless_saved_objects_create_new_copies:
-      description: >
-        Creates copies of saved objects, regenerates each object ID, and resets
-        the origin. When used, potential conflict errors are avoided. NOTE: This
-        option cannot be used with the `overwrite` and `compatibilityMode`
-        options.
-      in: query
-      name: createNewCopies
-      required: false
-      schema:
-        type: boolean
     Serverless_saved_objects_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
       name: kbn-xsrf
       required: true
       schema:
-        type: string
-    Serverless_saved_objects_overwrite:
-      description: >
-        Overwrites saved objects when they already exist. When used, potential
-        conflict errors are automatically resolved by overwriting the
-        destination object. NOTE: This option cannot be used with the
-        `createNewCopies` option.
-      in: query
-      name: overwrite
-      required: false
-      schema:
-        type: boolean
-    Serverless_saved_objects_space_id:
-      description: >-
-        An identifier for the space. If `/s/` and the identifier are omitted
-        from the path, the default space is used.
-      in: path
-      name: spaceId
-      required: true
-      schema:
-        example: default
         type: string
     SLOs_kbn_xsrf:
       description: Cross-site request forgery protection
@@ -17230,7 +16520,6 @@ components:
           $ref: >-
             #/components/schemas/Security_Solution_Detections_API_RuleActionParams
       required:
-        - group
         - id
         - params
     Security_Solution_Detections_API_NormalizedRuleError:
@@ -18195,7 +17484,6 @@ components:
           $ref: '#/components/schemas/Security_Solution_Detections_API_NonEmptyString'
       required:
         - action_type_id
-        - group
         - id
         - params
     Security_Solution_Detections_API_RuleActionAlertsFilter:
@@ -20718,6 +20006,414 @@ components:
         - type
         - message
         - actionPath
+    Security_Solution_Endpoint_Management_API_AgentId:
+      description: Agent ID
+      type: string
+    Security_Solution_Endpoint_Management_API_AgentIds:
+      minLength: 1
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          maxItems: 50
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+    Security_Solution_Endpoint_Management_API_AlertIds:
+      description: A list of alerts ids.
+      items:
+        $ref: >-
+          #/components/schemas/Security_Solution_Endpoint_Management_API_NonEmptyString
+      minItems: 1
+      type: array
+    Security_Solution_Endpoint_Management_API_AuditLogRequestParams:
+      type: object
+      properties:
+        agent_id:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_AgentId
+    Security_Solution_Endpoint_Management_API_AuditLogRequestQuery:
+      type: object
+      properties:
+        end_date:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_EndDate
+        page:
+          $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Page'
+        page_size:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_PageSize
+        start_date:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_StartDate
+    Security_Solution_Endpoint_Management_API_CaseIds:
+      description: Case IDs to be updated (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    Security_Solution_Endpoint_Management_API_Command:
+      description: The command to be executed (cannot be an empty string)
+      enum:
+        - isolate
+        - unisolate
+        - kill-process
+        - suspend-process
+        - running-processes
+        - get-file
+        - execute
+        - upload
+      minLength: 1
+      type: string
+    Security_Solution_Endpoint_Management_API_Commands:
+      items:
+        $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Command'
+      type: array
+    Security_Solution_Endpoint_Management_API_Comment:
+      description: Optional comment
+      type: string
+    Security_Solution_Endpoint_Management_API_DetailsRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+    Security_Solution_Endpoint_Management_API_EndDate:
+      description: End date
+      type: string
+    Security_Solution_Endpoint_Management_API_EndpointActionListRequestQuery:
+      type: object
+      properties:
+        agentIds:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_AgentIds
+        commands:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_Commands
+        endDate:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_EndDate
+        page:
+          $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Page'
+        pageSize:
+          default: 10
+          description: Number of items per page
+          maximum: 10000
+          minimum: 1
+          type: integer
+        startDate:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_StartDate
+        types:
+          $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Types'
+        userIds:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_UserIds
+        withOutputs:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_WithOutputs
+    Security_Solution_Endpoint_Management_API_EndpointIds:
+      description: List of endpoint IDs (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    Security_Solution_Endpoint_Management_API_ExecuteActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                command:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Command
+                timeout:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Timeout
+              required:
+                - command
+          required:
+            - parameters
+    Security_Solution_Endpoint_Management_API_FileDownloadRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+        file_id:
+          type: string
+      required:
+        - action_id
+        - file_id
+    Security_Solution_Endpoint_Management_API_FileInfoRequestParams:
+      type: object
+      properties:
+        action_id:
+          type: string
+        file_id:
+          type: string
+      required:
+        - action_id
+        - file_id
+    Security_Solution_Endpoint_Management_API_FileUploadActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        - type: object
+          properties:
+            file:
+              format: binary
+              type: string
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  default: false
+                  type: boolean
+          required:
+            - parameters
+            - file
+    Security_Solution_Endpoint_Management_API_GetFileActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+              required:
+                - path
+          required:
+            - parameters
+    Security_Solution_Endpoint_Management_API_ListRequestQuery:
+      type: object
+      properties:
+        hostStatuses:
+          items:
+            enum:
+              - healthy
+              - offline
+              - updating
+              - inactive
+              - unenrolled
+            type: string
+          type: array
+        kuery:
+          nullable: true
+          type: string
+        page:
+          default: 0
+          description: Page number
+          minimum: 0
+          type: integer
+        pageSize:
+          default: 10
+          description: Number of items per page
+          maximum: 10000
+          minimum: 1
+          type: integer
+        sortDirection:
+          enum:
+            - asc
+            - desc
+          nullable: true
+          type: string
+        sortField:
+          enum:
+            - enrolled_at
+            - metadata.host.hostname
+            - host_status
+            - metadata.Endpoint.policy.applied.name
+            - metadata.Endpoint.policy.applied.status
+            - metadata.host.os.name
+            - metadata.host.ip
+            - metadata.agent.version
+            - last_checkin
+          type: string
+      required:
+        - hostStatuses
+    Security_Solution_Endpoint_Management_API_NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    Security_Solution_Endpoint_Management_API_Page:
+      default: 1
+      description: Page number
+      minimum: 1
+      type: integer
+    Security_Solution_Endpoint_Management_API_PageSize:
+      default: 10
+      description: Number of items per page
+      maximum: 100
+      minimum: 1
+      type: integer
+    Security_Solution_Endpoint_Management_API_Parameters:
+      description: Optional parameters object
+      type: object
+    Security_Solution_Endpoint_Management_API_ProcessActionSchemas:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      minimum: 1
+                      type: integer
+                - type: object
+                  properties:
+                    entity_id:
+                      minLength: 1
+                      type: string
+          required:
+            - parameters
+    Security_Solution_Endpoint_Management_API_ProtectionUpdatesNoteResponse:
+      type: object
+      properties:
+        note:
+          type: string
+    Security_Solution_Endpoint_Management_API_ScanActionRequestBody:
+      allOf:
+        - type: object
+          properties:
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                path:
+                  type: string
+              required:
+                - path
+          required:
+            - parameters
+    Security_Solution_Endpoint_Management_API_StartDate:
+      description: Start date
+      type: string
+    Security_Solution_Endpoint_Management_API_SuccessResponse:
+      type: object
+      properties: {}
+    Security_Solution_Endpoint_Management_API_Timeout:
+      description: The maximum timeout value in milliseconds (optional)
+      minimum: 1
+      type: integer
+    Security_Solution_Endpoint_Management_API_Type:
+      enum:
+        - automated
+        - manual
+      type: string
+    Security_Solution_Endpoint_Management_API_Types:
+      items:
+        $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Type'
+      maxLength: 2
+      minLength: 1
+      type: array
+    Security_Solution_Endpoint_Management_API_UserIds:
+      description: User IDs
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
+    Security_Solution_Endpoint_Management_API_WithOutputs:
+      description: With Outputs
+      oneOf:
+        - items:
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        - minLength: 1
+          type: string
     Security_Solution_Entity_Analytics_API_AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -21944,561 +21640,6 @@ components:
     Security_Solution_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Solution_Osquery_API_Version'
       nullable: true
-    Security_Solution_Timeline_API_BareNote:
-      type: object
-      properties:
-        created:
-          nullable: true
-          type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          nullable: true
-          type: string
-        note:
-          nullable: true
-          type: string
-        timelineId:
-          nullable: true
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-      required:
-        - timelineId
-    Security_Solution_Timeline_API_ColumnHeaderResult:
-      type: object
-      properties:
-        aggregatable:
-          type: boolean
-        category:
-          type: string
-        columnHeaderType:
-          type: string
-        description:
-          type: string
-        example:
-          oneOf:
-            - type: string
-            - type: number
-        id:
-          type: string
-        indexes:
-          items:
-            type: string
-          type: array
-        name:
-          type: string
-        placeholder:
-          type: string
-        searchable:
-          type: boolean
-        type:
-          type: string
-    Security_Solution_Timeline_API_DataProviderResult:
-      type: object
-      properties:
-        and:
-          items:
-            $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_DataProviderResult
-          type: array
-        enabled:
-          type: boolean
-        excluded:
-          type: boolean
-        id:
-          type: string
-        kqlQuery:
-          type: string
-        name:
-          type: string
-        queryMatch:
-          $ref: '#/components/schemas/Security_Solution_Timeline_API_QueryMatchResult'
-        type:
-          $ref: '#/components/schemas/Security_Solution_Timeline_API_DataProviderType'
-    Security_Solution_Timeline_API_DataProviderType:
-      description: >-
-        The type of data provider to create. Valid values are `default` and
-        `template`.
-      enum:
-        - default
-        - template
-      type: string
-    Security_Solution_Timeline_API_DocumentIds:
-      oneOf:
-        - items:
-            type: string
-          type: array
-        - type: string
-    Security_Solution_Timeline_API_FavoriteTimelineResponse:
-      type: object
-      properties:
-        code:
-          nullable: true
-          type: number
-        favorite:
-          items:
-            $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_FavoriteTimelineResult
-          type: array
-        message:
-          nullable: true
-          type: string
-        savedObjectId:
-          type: string
-        templateTimelineId:
-          nullable: true
-          type: string
-        templateTimelineVersion:
-          nullable: true
-          type: number
-        timelineType:
-          $ref: '#/components/schemas/Security_Solution_Timeline_API_TimelineType'
-        version:
-          type: string
-      required:
-        - savedObjectId
-        - version
-    Security_Solution_Timeline_API_FavoriteTimelineResult:
-      type: object
-      properties:
-        favoriteDate:
-          nullable: true
-          type: number
-        fullName:
-          nullable: true
-          type: string
-        userName:
-          nullable: true
-          type: string
-    Security_Solution_Timeline_API_FilterTimelineResult:
-      type: object
-      properties:
-        exists:
-          type: boolean
-        match_all:
-          type: string
-        meta:
-          type: object
-          properties:
-            alias:
-              type: string
-            controlledBy:
-              type: string
-            disabled:
-              type: boolean
-            field:
-              type: string
-            formattedValue:
-              type: string
-            index:
-              type: string
-            key:
-              type: string
-            negate:
-              type: boolean
-            params:
-              type: string
-            type:
-              type: string
-            value:
-              type: string
-        missing:
-          type: string
-        query:
-          type: string
-        range:
-          type: string
-        script:
-          type: string
-    Security_Solution_Timeline_API_ImportTimelineResult:
-      type: object
-      properties:
-        errors:
-          items:
-            type: object
-            properties:
-              error:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status_code:
-                    type: number
-              id:
-                type: string
-          type: array
-        success:
-          type: boolean
-        success_count:
-          type: number
-        timelines_installed:
-          type: number
-        timelines_updated:
-          type: number
-    Security_Solution_Timeline_API_ImportTimelines:
-      allOf:
-        - $ref: '#/components/schemas/Security_Solution_Timeline_API_SavedTimeline'
-        - type: object
-          properties:
-            eventNotes:
-              items:
-                $ref: '#/components/schemas/Security_Solution_Timeline_API_BareNote'
-              nullable: true
-              type: array
-            globalNotes:
-              items:
-                $ref: '#/components/schemas/Security_Solution_Timeline_API_BareNote'
-              nullable: true
-              type: array
-            pinnedEventIds:
-              items:
-                type: string
-              nullable: true
-              type: array
-            savedObjectId:
-              nullable: true
-              type: string
-            version:
-              nullable: true
-              type: string
-    Security_Solution_Timeline_API_Note:
-      allOf:
-        - $ref: '#/components/schemas/Security_Solution_Timeline_API_BareNote'
-        - type: object
-          properties:
-            noteId:
-              type: string
-            version:
-              type: string
-    Security_Solution_Timeline_API_PinnedEvent:
-      type: object
-      properties:
-        created:
-          nullable: true
-          type: number
-        createdBy:
-          nullable: true
-          type: string
-        eventId:
-          type: string
-        pinnedEventId:
-          type: string
-        timelineId:
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-        version:
-          type: string
-      required:
-        - eventId
-        - pinnedEventId
-        - timelineId
-        - version
-    Security_Solution_Timeline_API_QueryMatchResult:
-      type: object
-      properties:
-        displayField:
-          type: string
-        displayValue:
-          type: string
-        field:
-          type: string
-        operator:
-          type: string
-        value:
-          type: string
-    Security_Solution_Timeline_API_Readable:
-      type: object
-      properties:
-        _data:
-          additionalProperties: true
-          type: object
-        _encoding:
-          type: string
-        _events:
-          additionalProperties: true
-          type: object
-        _eventsCount:
-          type: number
-        _maxListeners:
-          additionalProperties: true
-          type: object
-        _position:
-          type: number
-        _read:
-          additionalProperties: true
-          type: object
-        _readableState:
-          additionalProperties: true
-          type: object
-        readable:
-          type: boolean
-    Security_Solution_Timeline_API_RowRendererId:
-      enum:
-        - alert
-        - alerts
-        - auditd
-        - auditd_file
-        - library
-        - netflow
-        - plain
-        - registry
-        - suricata
-        - system
-        - system_dns
-        - system_endgame_process
-        - system_file
-        - system_fim
-        - system_security_event
-        - system_socket
-        - threat_match
-        - zeek
-      type: string
-    Security_Solution_Timeline_API_SavedTimeline:
-      type: object
-      properties:
-        columns:
-          $ref: >-
-            #/components/schemas/Security_Solution_Timeline_API_ColumnHeaderResult
-          nullable: true
-        created:
-          nullable: true
-          type: number
-        createdBy:
-          nullable: true
-          type: string
-        dataProviders:
-          items:
-            $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_DataProviderResult
-          nullable: true
-          type: array
-        dataViewId:
-          nullable: true
-          type: string
-        dateRange:
-          nullable: true
-          type: object
-          properties:
-            end:
-              oneOf:
-                - type: string
-                - type: number
-            start:
-              oneOf:
-                - type: string
-                - type: number
-        description:
-          nullable: true
-          type: string
-        eqlOptions:
-          nullable: true
-          type: object
-          properties:
-            eventCategoryField:
-              type: string
-            tiebreakerField:
-              type: string
-            timestampField:
-              type: string
-        eventType:
-          nullable: true
-          type: string
-        excludedRowRendererIds:
-          items:
-            $ref: '#/components/schemas/Security_Solution_Timeline_API_RowRendererId'
-          nullable: true
-          type: array
-        favorite:
-          items:
-            $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_FavoriteTimelineResult
-          nullable: true
-          type: array
-        filters:
-          items:
-            $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_FilterTimelineResult
-          nullable: true
-          type: array
-        indexNames:
-          items:
-            type: string
-          nullable: true
-          type: array
-        kqlMode:
-          nullable: true
-          type: string
-        kqlQuery:
-          $ref: >-
-            #/components/schemas/Security_Solution_Timeline_API_SerializedFilterQueryResult
-          nullable: true
-        savedQueryId:
-          nullable: true
-          type: string
-        savedSearchId:
-          nullable: true
-          type: string
-        sort:
-          $ref: '#/components/schemas/Security_Solution_Timeline_API_Sort'
-          nullable: true
-        status:
-          enum:
-            - active
-            - draft
-            - immutable
-          nullable: true
-          type: string
-        templateTimelineId:
-          nullable: true
-          type: string
-        templateTimelineVersion:
-          nullable: true
-          type: number
-        timelineType:
-          $ref: '#/components/schemas/Security_Solution_Timeline_API_TimelineType'
-          nullable: true
-        title:
-          nullable: true
-          type: string
-        updated:
-          nullable: true
-          type: number
-        updatedBy:
-          nullable: true
-          type: string
-    Security_Solution_Timeline_API_SerializedFilterQueryResult:
-      type: object
-      properties:
-        filterQuery:
-          type: object
-          properties:
-            kuery:
-              type: object
-              properties:
-                expression:
-                  type: string
-                kind:
-                  type: string
-            serializedQuery:
-              type: string
-    Security_Solution_Timeline_API_Sort:
-      type: object
-      properties:
-        columnId:
-          nullable: true
-          type: string
-        columnType:
-          nullable: true
-          type: string
-        sortDirection:
-          nullable: true
-          type: string
-    Security_Solution_Timeline_API_SortFieldTimeline:
-      description: The field to sort the timelines by.
-      enum:
-        - title
-        - description
-        - updated
-        - created
-      type: string
-    Security_Solution_Timeline_API_TimelineResponse:
-      allOf:
-        - $ref: '#/components/schemas/Security_Solution_Timeline_API_SavedTimeline'
-        - type: object
-          properties:
-            eventIdToNoteIds:
-              items:
-                $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
-              type: array
-            noteIds:
-              items:
-                type: string
-              type: array
-            notes:
-              items:
-                $ref: '#/components/schemas/Security_Solution_Timeline_API_Note'
-              type: array
-            pinnedEventIds:
-              items:
-                type: string
-              type: array
-            pinnedEventsSaveObject:
-              items:
-                $ref: >-
-                  #/components/schemas/Security_Solution_Timeline_API_PinnedEvent
-              type: array
-            savedObjectId:
-              type: string
-            version:
-              type: string
-          required:
-            - savedObjectId
-            - version
-    Security_Solution_Timeline_API_TimelineStatus:
-      description: >-
-        The status of the timeline. Valid values are `active`, `draft`, and
-        `immutable`.
-      enum:
-        - active
-        - draft
-        - immutable
-      type: string
-    Security_Solution_Timeline_API_TimelineType:
-      description: >-
-        The type of timeline to create. Valid values are `default` and
-        `template`.
-      enum:
-        - default
-        - template
-      type: string
-    Serverless_saved_objects_200_import_objects_response:
-      type: object
-      properties:
-        errors:
-          description: >
-            Indicates the import was unsuccessful and specifies the objects that
-            failed to import.
-
-
-            NOTE: One object may result in multiple errors, which requires
-            separate steps to resolve. For instance, a `missing_references`
-            error and conflict error.
-          items:
-            type: object
-          type: array
-        success:
-          description: >
-            Indicates when the import was successfully completed. When set to
-            false, some objects may not have been created. For additional
-            information, refer to the `errors` and `successResults` properties.
-          type: boolean
-        successCount:
-          description: Indicates the number of successfully imported records.
-          type: integer
-        successResults:
-          description: >
-            Indicates the objects that are successfully imported, with any
-            metadata if applicable.
-
-
-            NOTE: Objects are created only when all resolvable errors are
-            addressed, including conflicts and missing references. If objects
-            are created as new copies, each entry in the `successResults` array
-            includes a `destinationId` attribute.
-          items:
-            type: object
-          type: array
     Serverless_saved_objects_400_response:
       title: Bad request
       type: object
@@ -22517,40 +21658,6 @@ components:
         - error
         - message
         - statusCode
-    Serverless_saved_objects_export_objects_request:
-      type: object
-      properties:
-        excludeExportDetails:
-          default: false
-          description: Do not add export details entry at the end of the stream.
-          type: boolean
-        includeReferencesDeep:
-          description: Includes all of the referenced objects in the exported objects.
-          type: boolean
-        objects:
-          description: A list of objects to export.
-          items:
-            type: object
-          type: array
-        type:
-          description: >-
-            The saved object types to include in the export. Use `*` to export
-            all the types.
-          oneOf:
-            - type: string
-            - items:
-                type: string
-              type: array
-    Serverless_saved_objects_import_objects_request:
-      type: object
-      properties:
-        file:
-          description: >
-            A file exported using the export API. NOTE: The
-            `savedObjects.maxImportExportSize` configuration setting limits the
-            number of saved objects which may be included in this file.
-            Similarly, the `savedObjects.maxImportPayloadBytes` setting limits
-            the overall size of the file that can be imported.
     SLOs_400_response:
       title: Bad request
       type: object
@@ -22797,25 +21904,6 @@ components:
           type: string
       title: FilterMeta
       type: object
-    SLOs_find_slo_definitions_response:
-      description: |
-        A paginated response of SLO definitions matching the query.
-      properties:
-        page:
-          example: 2
-          type: number
-        perPage:
-          example: 100
-          type: number
-        results:
-          items:
-            $ref: '#/components/schemas/SLOs_slo_definition_response'
-          type: array
-        total:
-          example: 123
-          type: number
-      title: Find SLO definitions response
-      type: object
     SLOs_find_slo_response:
       description: |
         A paginated response of SLOs matching the query.
@@ -22834,36 +21922,6 @@ components:
           example: 34
           type: number
       title: Find SLO response
-      type: object
-    SLOs_historical_summary_request:
-      title: Historical summary request
-      type: object
-      properties:
-        list:
-          description: The list of SLO identifiers to get the historical summary for
-          items:
-            example: 8853df00-ae2e-11ed-90af-09bb6422b258
-            type: string
-          type: array
-      required:
-        - list
-    SLOs_historical_summary_response:
-      additionalProperties:
-        items:
-          type: object
-          properties:
-            date:
-              example: '2022-01-01T00:00:00.000Z'
-              type: string
-            errorBudget:
-              $ref: '#/components/schemas/SLOs_error_budget'
-            sliValue:
-              example: 0.9836
-              type: number
-            status:
-              $ref: '#/components/schemas/SLOs_summary_status'
-        type: array
-      title: Historical summary response
       type: object
     SLOs_indicator_properties_apm_availability:
       description: Defines properties for the APM availability indicator type
@@ -23789,67 +22847,16 @@ components:
       title: Update SLO request
       type: object
   securitySchemes:
-    BasicAuth:
-      scheme: basic
-      type: http
-    Kibana_HTTP_APIs_basicAuth:
-      scheme: basic
-      type: http
-    Machine_learning_APIs_apiKeyAuth:
-      in: header
-      name: ApiKey
-      type: apiKey
-    Security_AI_Assistant_API_BasicAuth:
-      scheme: basic
-      type: http
-    Security_Solution_Detections_API_BasicAuth:
-      scheme: basic
-      type: http
-    Security_Solution_Entity_Analytics_API_BasicAuth:
-      scheme: basic
-      type: http
-    Security_Solution_Exceptions_API_BasicAuth:
-      scheme: basic
-      type: http
-    Security_Solution_Lists_API_BasicAuth:
-      scheme: basic
-      type: http
-    Security_Solution_Osquery_API_BasicAuth:
-      scheme: basic
-      type: http
-    Security_Solution_Timeline_API_BasicAuth:
-      scheme: basic
-      type: http
-    Serverless_saved_objects_apiKeyAuth:
+    apiKeyAuth:
       description: >
-        Serverless APIs support only key-based authentication. You must create
-        an API key and use the encoded value in the request header. For example:
-        'Authorization: ApiKey base64AccessApiKey'.
+        These APIs use key-based authentication. You must create an API key and
+        use the encoded value in the request header. For example:
+        `Authorization: ApiKey base64AccessApiKey`
       in: header
       name: Authorization
       type: apiKey
-    SLOs_apiKeyAuth:
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-      in: header
-      name: Authorization
-      type: apiKey
-    SLOs_basicAuth:
-      scheme: basic
-      type: http
 security:
-  - BasicAuth: []
-  - Kibana_HTTP_APIs_basicAuth: []
-  - Machine_learning_APIs_apiKeyAuth: []
-  - Serverless_saved_objects_apiKeyAuth: []
-  - SLOs_basicAuth: []
-  - SLOs_apiKeyAuth: []
-  - Security_Solution_Detections_API_BasicAuth: []
-  - Security_Solution_Entity_Analytics_API_BasicAuth: []
-  - Security_Solution_Timeline_API_BasicAuth: []
-  - Security_Solution_Lists_API_BasicAuth: []
-  - Security_Solution_Exceptions_API_BasicAuth: []
-  - Security_AI_Assistant_API_BasicAuth: []
-  - Security_Solution_Osquery_API_BasicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: system
   - description: Connector APIs enable you to create and manage connectors.

@@ -32,59 +32,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
     ],
     outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.serverless.bundled.yaml`,
     options: {
-      mergedSpecInfo: {
-        title: 'Kibana Serverless',
-        description: `**Technical preview**  
-
-    This functionality is in technical preview and may be changed or removed in
-    a future release.
-
-    Elastic will work to fix any issues, but features in technical preview are
-    not subject to the support SLA of official GA features.
-
-
-    The Kibana REST APIs for Elastic serverless enable you to manage resources
-
-    such as connectors, data views, and saved objects. The API calls are
-
-    stateless. Each request that you make happens in isolation from other calls
-
-    and must include all of the necessary information for Kibana to fulfill the
-
-    request. API requests return JSON output, which is a format that is
-
-    machine-readable and works well for automation.
-
-
-    To interact with Kibana APIs, use the following operations:
-
-
-    - GET: Fetches the information.
-
-    - POST: Adds new information.
-
-    - PUT: Updates the existing information.
-
-    - DELETE: Removes the information.
-
-
-    You can prepend any Kibana API endpoint with \`kbn:\` and run the request in
-
-    **Dev Tools → Console**. For example:
-
-
-    \`\`\`
-
-    GET kbn:/api/data_views
-
-    \`\`\``,
-        version: '1.0.2',
-        license: {
-          name: 'Elastic License 2.0',
-          url: 'https://www.elastic.co/licensing/elastic-license',
-        },
-        contact: { name: 'Kibana Team' },
-      },
+      prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.yaml`,
     },
   });
 })();
