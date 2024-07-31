@@ -1234,7 +1234,7 @@ describe('Response actions history', () => {
                           command === 'get-file'
                             ? 'ra_get-file_error_not-found'
                             : command === 'scan'
-                            ? 'ra_scan_error_scan_invalid-input'
+                            ? 'ra_scan_error_invalid-input'
                             : 'non_existing_code_for_test',
                       },
                     },
@@ -1389,7 +1389,7 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_not-found'
                         : command === 'scan'
-                        ? 'ra_scan_error_scan_invalid-input'
+                        ? 'ra_scan_error_invalid-input'
                         : 'non_existing_code_for_test',
                     content: undefined,
                   },
@@ -1401,7 +1401,7 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_invalid-input'
                         : command === 'scan'
-                        ? 'ra_scan_error_scan_invalid-input'
+                        ? 'ra_scan_error_invalid-input'
                         : 'non_existing_code_for_test',
                     content: undefined,
                   },
