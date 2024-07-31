@@ -152,8 +152,11 @@ export function deleteTestSuiteFactory(
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
-      const testAgent = user ? supertest.auth(user.username, user.password) : supertest;
+      let testAgent: SupertestWithoutAuthProviderType;
       describeFn(description, () => {
+        before(() => {
+          testAgent = user ? supertest.auth(user.username, user.password) : supertest;
+        });
         beforeEach(async () => {
           await esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'

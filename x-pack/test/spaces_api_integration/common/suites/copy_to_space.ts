@@ -12,6 +12,7 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportAmbiguousConflictError,
 } from '@kbn/core/server';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
@@ -793,11 +794,12 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
       description: string,
       { user, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
     ) => {
-      const testAgent = user
-        ? supertestWithoutAuth.auth(user.username, user.password)
-        : supertestWithoutAuth;
+      let testAgent: SupertestWithoutAuthProviderType;
       describeFn(description, () => {
         before(async () => {
+          testAgent = user
+            ? supertestWithoutAuth.auth(user.username, user.password)
+            : supertestWithoutAuth;
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
 

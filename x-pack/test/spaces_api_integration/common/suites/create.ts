@@ -81,8 +81,11 @@ export function createTestSuiteFactory(
   const makeCreateTest =
     (describeFn: DescribeFn) =>
     (description: string, { user, spaceId, tests }: CreateTestDefinition) => {
-      const testAgent = user ? supertest.auth(user.username, user.password) : supertest;
+      let testAgent: SupertestWithoutAuthProviderType;
       describeFn(description, () => {
+        before(() => {
+          testAgent = user ? supertest.auth(user.username, user.password) : supertest;
+        });
         beforeEach(() =>
           esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'

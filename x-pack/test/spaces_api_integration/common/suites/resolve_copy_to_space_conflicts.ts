@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { CopyResponse } from '@kbn/spaces-plugin/server/lib/copy_to_spaces';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -505,10 +506,13 @@ export function resolveCopyToSpaceConflictsSuite(context: FtrProviderContext) {
       description: string,
       { user, spaceId = DEFAULT_SPACE_ID, tests }: ResolveCopyToSpaceTestDefinition
     ) => {
+      let testAgent: SupertestWithoutAuthProviderType;
       describeFn(description, () => {
-        const testAgent = user
-          ? supertestWithoutAuth.auth(user.username, user.password)
-          : supertestWithoutAuth;
+        before(() => {
+          testAgent = user
+            ? supertestWithoutAuth.auth(user.username, user.password)
+            : supertestWithoutAuth;
+        });
         before(() => {
           // test data only allows for the following spaces as the copy origin
           expect(['default', 'space_1']).to.contain(spaceId);
