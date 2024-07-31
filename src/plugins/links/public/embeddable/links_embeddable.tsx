@@ -175,21 +175,18 @@ export const getLinksEmbeddableFactory = () => {
             savedObjectId$.next(undefined);
           },
           onEdit: async () => {
-            try {
-              const { openEditorFlyout } = await import('../editor/open_editor_flyout');
-              const newState = await openEditorFlyout({
-                initialState: api.snapshotRuntimeState(),
-                parentDashboard: parentApi,
-              });
-              if (newState) {
-                links$.next(newState.links);
-                layout$.next(newState.layout);
-                defaultPanelTitle.next(newState.defaultPanelTitle);
-                defaultPanelDescription.next(newState.defaultPanelDescription);
-                savedObjectId$.next(newState.savedObjectId);
-              }
-            } catch {
-              // do nothing, user cancelled
+            const { openEditorFlyout } = await import('../editor/open_editor_flyout');
+            const newState = await openEditorFlyout({
+              initialState: api.snapshotRuntimeState(),
+              parentDashboard: parentApi,
+            });
+
+            if (newState) {
+              links$.next(newState.links);
+              layout$.next(newState.layout);
+              defaultPanelTitle.next(newState.defaultPanelTitle);
+              defaultPanelDescription.next(newState.defaultPanelDescription);
+              savedObjectId$.next(newState.savedObjectId);
             }
           },
         },
