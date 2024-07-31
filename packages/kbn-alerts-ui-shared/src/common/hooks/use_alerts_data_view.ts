@@ -96,7 +96,7 @@ export const useAlertsDataView = ({
   useEffect(() => {
     if (isIndexNamesError || isFieldsError || isVirtualDataViewError) {
       toasts.addDanger(
-        i18n.translate('alertsUIShared.hooks.useAlertDataView.useAlertDataMessage', {
+        i18n.translate('alertsUIShared.hooks.useAlertDataView.fetchErrorMessage', {
           defaultMessage: 'Unable to load alert data view',
         })
       );
