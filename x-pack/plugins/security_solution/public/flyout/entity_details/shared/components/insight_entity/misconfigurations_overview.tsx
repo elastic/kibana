@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useLatestFindings } from '@kbn/cloud-security-posture-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
 
 export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) => {
@@ -43,14 +44,14 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
     if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
     return [
       {
-        key: 'passed',
+        key: 'Passed findings',
         count: passedFindingsStats,
-        color: 'green',
+        color: euiThemeVars.euiColorSuccess,
       },
       {
-        key: 'failed',
+        key: 'Failed findings',
         count: failedFindingsStats,
-        color: 'red',
+        color: euiThemeVars.euiColorVis9,
       },
     ];
   };
