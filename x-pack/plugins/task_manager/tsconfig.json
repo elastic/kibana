@@ -25,9 +25,7 @@
     "@kbn/alerting-state-types",
     "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
-    "@kbn/core-lifecycle-server",
-    "@kbn/serverless",
-    "@kbn/cloud-plugin"
+    "@kbn/core-lifecycle-server"
   ],
   "exclude": ["target/**/*"]
 }
