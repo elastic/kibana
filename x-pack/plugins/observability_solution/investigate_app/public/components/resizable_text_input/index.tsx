@@ -65,7 +65,7 @@ export function ResizableTextInput({ disabled, value, onChange, onSubmit, placeh
       inputRef={textAreaRef}
       placeholder={placeholder}
       resize="vertical"
-      rows={1}
+      rows={4}
       value={value}
       onChange={handleChange}
       onKeyDown={(event) => {

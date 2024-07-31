@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
@@ -34,10 +33,12 @@ export function createStatusOverviewPanelAction(): UiActionsActionDefinition<Emb
     order: 30,
     getIconType: () => 'online',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      const { compatibilityCheck } = await import('./compatibility_check');
+      return compatibilityCheck(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      const { compatibilityCheck } = await import('./compatibility_check');
+      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       try {
         embeddable.addNewPanel({
           panelType: SYNTHETICS_OVERVIEW_EMBEDDABLE,

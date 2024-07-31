@@ -21,7 +21,7 @@ import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../typ
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
-import { SelectButton } from './data_table_document_selection';
+import { SelectButton, SelectAllButton } from './data_table_document_selection';
 import {
   defaultTimeColumnWidth,
   ROWS_HEIGHT_OPTIONS,
@@ -74,15 +74,7 @@ const select = {
   id: SELECT_ROW,
   width: DEFAULT_CONTROL_COLUMN_WIDTH,
   rowCellRender: SelectButton,
-  headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('unifiedDataTable.selectColumnHeader', {
-          defaultMessage: 'Select column',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
+  headerCellRender: SelectAllButton,
 };
 
 export function getLeadControlColumns(canSetExpandedDoc: boolean) {
