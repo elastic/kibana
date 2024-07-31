@@ -66,13 +66,12 @@ export const getRangesliderControlFactory = (
         value$.next(nextValue);
       }
 
-      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
+      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
         {
           step: step$,
-          value: value$,
         },
         controlGroupApi,
         services
