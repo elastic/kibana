@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PopoverBadge } from './popover_badge';
+import { PopoverBadge } from '../popover_badge';
 
-export const NotAvailableEnvironment = () => {
+export function NotAvailableEnvironment() {
   return (
     <PopoverBadge
       title={i18n.translate('xpack.apm.servicesTable.notAvailableEnv.title', {
@@ -39,4 +39,4 @@ export const NotAvailableEnvironment = () => {
       }
     />
   );
-};
+}

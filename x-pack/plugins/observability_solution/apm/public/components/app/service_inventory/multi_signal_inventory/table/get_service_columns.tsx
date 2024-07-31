@@ -11,6 +11,7 @@ import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
@@ -32,13 +33,14 @@ import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn } from '../../../../shared/managed_table';
-import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_metrics';
+import { NotAvailableApmMetrics } from '../../../../shared/not_available_popover/not_available_apm_metrics';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
-import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { isApmSignal, isLogsSignal } from '../../../../../utils/get_signal_type';
 import { ColumnHeader } from './column_header';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { NotAvailableLogsMetrics } from '../../../../shared/not_available_popover/not_available_log_metrics';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
@@ -205,9 +207,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName }) => {
-        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
+      render: (_, { metrics, serviceName, signalTypes }) => {
+        if (isLogsSignal(signalTypes) && isEmpty(metrics.logRate)) {
+          return <NotAvailableLogsMetrics />;
+        }
 
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
         return (
           <ListMetric
             isLoading={false}
@@ -254,7 +259,11 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName }) => {
+      render: (_, { metrics, serviceName, signalTypes }) => {
+        if (isLogsSignal(signalTypes) && isEmpty(metrics.logErrorRate)) {
+          return <NotAvailableLogsMetrics />;
+        }
+
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
 
         return (
