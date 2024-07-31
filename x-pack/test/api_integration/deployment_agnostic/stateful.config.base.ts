@@ -20,7 +20,7 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
     const svlSharedConfig = await readConfigFile(
       // TBD: create base config with SAML auth for stateful
-      require.resolve('../../../test_serverless/shared/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
 
     return {
