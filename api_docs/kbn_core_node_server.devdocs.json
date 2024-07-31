@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-node-server",
-        "id": "def-common.NodeInfo",
+        "id": "def-server.NodeInfo",
         "type": "Interface",
         "tags": [],
         "label": "NodeInfo",
@@ -35,7 +27,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-common.NodeInfo.roles",
+            "id": "def-server.NodeInfo.roles",
             "type": "Object",
             "tags": [],
             "label": "roles",
@@ -45,9 +37,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-node-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-common.NodeRoles",
+                "section": "def-server.NodeRoles",
                 "text": "NodeRoles"
               }
             ],
@@ -60,7 +52,7 @@
       },
       {
         "parentPluginId": "@kbn/core-node-server",
-        "id": "def-common.NodeRoles",
+        "id": "def-server.NodeRoles",
         "type": "Interface",
         "tags": [],
         "label": "NodeRoles",
@@ -73,7 +65,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-common.NodeRoles.backgroundTasks",
+            "id": "def-server.NodeRoles.backgroundTasks",
             "type": "boolean",
             "tags": [],
             "label": "backgroundTasks",
@@ -86,7 +78,7 @@
           },
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-common.NodeRoles.ui",
+            "id": "def-server.NodeRoles.ui",
             "type": "boolean",
             "tags": [],
             "label": "ui",
@@ -99,7 +91,7 @@
           },
           {
             "parentPluginId": "@kbn/core-node-server",
-            "id": "def-common.NodeRoles.migrator",
+            "id": "def-server.NodeRoles.migrator",
             "type": "boolean",
             "tags": [],
             "label": "migrator",
@@ -114,6 +106,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []
