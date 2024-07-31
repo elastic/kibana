@@ -123,18 +123,14 @@ export default function enterSpaceFunctionalTests({
     it('allows user to navigate to different space with default route preserving url hash and search', async () => {
       const spaceId = 'another-space';
 
-      const config = await kibanaServer.savedObjects.get({
-        id: stripVersionQualifier(await kibanaServer.version.get()),
-        type: 'config',
-      });
-
-      await kibanaServer.savedObjects.update({
-        id: config.id,
-        type: config.type,
-        attributes: {
+      await kibanaServer.uiSettings.replace(
+        {
           defaultRoute: '/app/management/kibana/objects?initialQuery=type:(visualization)#/view',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
         },
-      });
+        { space: 'another-space' }
+      );
 
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
@@ -172,6 +168,15 @@ export default function enterSpaceFunctionalTests({
 
     it('falls back to the default home page if provided next route is malformed', async () => {
       const spaceId = 'another-space';
+
+      await kibanaServer.uiSettings.replace(
+        {
+          defaultRoute: '/app/canvas',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
+        },
+        { space: 'another-space' }
+      );
 
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
