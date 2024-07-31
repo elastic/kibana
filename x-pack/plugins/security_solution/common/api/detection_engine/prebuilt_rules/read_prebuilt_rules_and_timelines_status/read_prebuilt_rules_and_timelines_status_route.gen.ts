@@ -16,10 +16,10 @@
 
 import { z } from 'zod';
 
-export type GetPrebuiltRulesAndTimelinesStatusResponse = z.infer<
-  typeof GetPrebuiltRulesAndTimelinesStatusResponse
+export type ReadPrebuiltRulesAndTimelinesStatusResponse = z.infer<
+  typeof ReadPrebuiltRulesAndTimelinesStatusResponse
 >;
-export const GetPrebuiltRulesAndTimelinesStatusResponse = z
+export const ReadPrebuiltRulesAndTimelinesStatusResponse = z
   .object({
     /**
      * The total number of custom rules

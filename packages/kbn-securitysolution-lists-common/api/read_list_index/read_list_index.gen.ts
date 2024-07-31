@@ -17,8 +17,8 @@
 
 import { z } from 'zod';
 
-export type GetListIndexResponse = z.infer<typeof GetListIndexResponse>;
-export const GetListIndexResponse = z.object({
+export type ReadListIndexResponse = z.infer<typeof ReadListIndexResponse>;
+export const ReadListIndexResponse = z.object({
   list_index: z.boolean(),
   list_item_index: z.boolean(),
 });

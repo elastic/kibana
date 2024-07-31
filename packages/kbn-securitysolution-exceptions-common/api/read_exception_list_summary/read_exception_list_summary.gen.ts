@@ -23,10 +23,10 @@ import {
   ExceptionNamespaceType,
 } from '../model/exception_list_common.gen';
 
-export type GetExceptionListSummaryRequestQuery = z.infer<
-  typeof GetExceptionListSummaryRequestQuery
+export type ReadExceptionListSummaryRequestQuery = z.infer<
+  typeof ReadExceptionListSummaryRequestQuery
 >;
-export const GetExceptionListSummaryRequestQuery = z.object({
+export const ReadExceptionListSummaryRequestQuery = z.object({
   /**
    * Exception list's identifier generated upon creation
    */
@@ -41,12 +41,12 @@ export const GetExceptionListSummaryRequestQuery = z.object({
    */
   filter: z.string().optional(),
 });
-export type GetExceptionListSummaryRequestQueryInput = z.input<
-  typeof GetExceptionListSummaryRequestQuery
+export type ReadExceptionListSummaryRequestQueryInput = z.input<
+  typeof ReadExceptionListSummaryRequestQuery
 >;
 
-export type GetExceptionListSummaryResponse = z.infer<typeof GetExceptionListSummaryResponse>;
-export const GetExceptionListSummaryResponse = z.object({
+export type ReadExceptionListSummaryResponse = z.infer<typeof ReadExceptionListSummaryResponse>;
+export const ReadExceptionListSummaryResponse = z.object({
   windows: z.number().int().min(0).optional(),
   linux: z.number().int().min(0).optional(),
   macos: z.number().int().min(0).optional(),
