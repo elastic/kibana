@@ -6,11 +6,11 @@
  */
 
 import axios from 'axios';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
-} from '../../../../common/saved_objects/private_locations';
+} from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {

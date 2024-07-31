@@ -20,6 +20,7 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
+  formatESQLColumns,
   getTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,

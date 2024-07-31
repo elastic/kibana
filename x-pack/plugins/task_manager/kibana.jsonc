@@ -11,8 +11,6 @@
       "task_manager"
     ],
     "optionalPlugins": [
-      "cloud",
-      "serverless",
       "usageCollection"
     ]
   }
