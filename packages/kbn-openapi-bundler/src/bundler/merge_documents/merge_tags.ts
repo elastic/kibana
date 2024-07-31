@@ -20,7 +20,7 @@ export function mergeTags(
   const merged = mergeArrays(tagsArrayOfArrays);
 
   if (merged.length === 0) {
-    return undefined;
+    return;
   }
 
   // To streamline API endpoints categorization it's expected that
