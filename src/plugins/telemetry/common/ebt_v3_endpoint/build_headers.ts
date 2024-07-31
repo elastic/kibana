@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { BuildShipperHeaders } from '@elastic/ebt/shippers/elastic_v3/common';
+import type {
+  BuildShipperHeaders
+} from '@elastic/ebt/shippers/elastic_v3/common';
 
 /**
  * Returns the headers to send to the Remote Telemetry Service.

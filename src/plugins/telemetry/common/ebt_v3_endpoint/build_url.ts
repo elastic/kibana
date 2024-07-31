@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { BuildShipperUrlOptions, BuildShipperUrl } from '@elastic/ebt/shippers/elastic_v3/common';
+import type {
+  BuildShipperUrlOptions,
+  BuildShipperUrl,
+} from '@elastic/ebt/shippers/elastic_v3/common';
 
 /**
  * Builds the URL for the V3 API.

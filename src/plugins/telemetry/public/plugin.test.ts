@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+/* eslint-disable dot-notation */
 import { of } from 'rxjs';
 import { ElasticV3BrowserShipper } from '@elastic/ebt/shippers/elastic_v3/browser';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -13,9 +13,10 @@ import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
+import { buildShipperHeaders } from '../common/ebt_v3_endpoint';
 import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';
+
 
 describe('TelemetryPlugin', () => {
   let screenshotMode: ScreenshotModePluginSetup;
