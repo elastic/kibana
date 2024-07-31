@@ -2965,14 +2965,6 @@ components:
       required:
         - type
         - is_customized
-    FieldPickVersionValues:
-      enum:
-        - BASE
-        - CURRENT
-        - TARGET
-        - MERGED
-        - RESOLVED
-      type: string
     FindRulesSortField:
       enum:
         - created_at
@@ -4246,6 +4238,13 @@ components:
         - summary
         - results
         - errors
+    PickVersionValues:
+      enum:
+        - BASE
+        - CURRENT
+        - TARGET
+        - MERGED
+      type: string
     PlatformErrorResponse:
       type: object
       properties:
@@ -5222,13 +5221,6 @@ components:
         - $ref: '#/components/schemas/MachineLearningRulePatchProps'
         - $ref: '#/components/schemas/NewTermsRulePatchProps'
         - $ref: '#/components/schemas/EsqlRulePatchProps'
-    RulePickVersionValues:
-      enum:
-        - BASE
-        - CURRENT
-        - TARGET
-        - MERGED
-      type: string
     RulePreviewLogs:
       type: object
       properties:
@@ -5322,367 +5314,767 @@ components:
           type: object
           properties:
             anomaly_threshold:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/AnomalyThreshold'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/AnomalyThreshold'
+                  required:
+                    - pick_version
+                    - resolved_value
             building_block_type:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/BuildingBlockType'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/BuildingBlockType'
+                  required:
+                    - pick_version
+                    - resolved_value
             data_view_id:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/DataViewId'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/DataViewId'
+                  required:
+                    - pick_version
+                    - resolved_value
             description:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleDescription'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleDescription'
+                  required:
+                    - pick_version
+                    - resolved_value
             exceptions_list:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleExceptionList'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleExceptionList'
+                  required:
+                    - pick_version
+                    - resolved_value
             false_positives:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleFalsePositiveArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleFalsePositiveArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             filters:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleFilterArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleFilterArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             from:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleIntervalFrom'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleIntervalFrom'
+                  required:
+                    - pick_version
+                    - resolved_value
             history_window_start:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/HistoryWindowStart'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/HistoryWindowStart'
+                  required:
+                    - pick_version
+                    - resolved_value
             index:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/IndexPatternArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/IndexPatternArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             interval:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleInterval'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleInterval'
+                  required:
+                    - pick_version
+                    - resolved_value
             language:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/QueryLanguage'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/QueryLanguage'
+                  required:
+                    - pick_version
+                    - resolved_value
             machine_learning_job_id:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/MachineLearningJobId'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/MachineLearningJobId'
+                  required:
+                    - pick_version
+                    - resolved_value
             max_signals:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/MaxSignals'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/MaxSignals'
+                  required:
+                    - pick_version
+                    - resolved_value
             name:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleName'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleName'
+                  required:
+                    - pick_version
+                    - resolved_value
             new_terms_fields:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/NewTermsFields'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/NewTermsFields'
+                  required:
+                    - pick_version
+                    - resolved_value
             note:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/InvestigationGuide'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/InvestigationGuide'
+                  required:
+                    - pick_version
+                    - resolved_value
             query:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleQuery'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleQuery'
+                  required:
+                    - pick_version
+                    - resolved_value
             references:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleReferenceArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleReferenceArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             related_integrations:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RelatedIntegrationArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RelatedIntegrationArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             required_fields:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RequiredFieldArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RequiredFieldArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             risk_score:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RiskScore'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RiskScore'
+                  required:
+                    - pick_version
+                    - resolved_value
             risk_score_mapping:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RiskScoreMapping'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RiskScoreMapping'
+                  required:
+                    - pick_version
+                    - resolved_value
             rule_name_override:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleNameOverride'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleNameOverride'
+                  required:
+                    - pick_version
+                    - resolved_value
             saved_id:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/SavedQueryId'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/SavedQueryId'
+                  required:
+                    - pick_version
+                    - resolved_value
             setup:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/SetupGuide'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/SetupGuide'
+                  required:
+                    - pick_version
+                    - resolved_value
             severity:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/Severity'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/Severity'
+                  required:
+                    - pick_version
+                    - resolved_value
             severity_mapping:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/SeverityMapping'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/SeverityMapping'
+                  required:
+                    - pick_version
+                    - resolved_value
             tags:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/RuleTagArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/RuleTagArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/ThreatArray'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/ThreatArray'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat_filters:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/ThreatFilters'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/ThreatFilters'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat_index:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/ThreatIndex'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/ThreatIndex'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat_indicator_path:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/ThreatIndicatorPath'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/ThreatIndicatorPath'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat_language:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/KqlQueryLanguage'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/KqlQueryLanguage'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat_mapping:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/ThreatMapping'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/ThreatMapping'
+                  required:
+                    - pick_version
+                    - resolved_value
             threat_query:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/ThreatQuery'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/ThreatQuery'
+                  required:
+                    - pick_version
+                    - resolved_value
             timeline_id:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/TimelineTemplateId'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/TimelineTemplateId'
+                  required:
+                    - pick_version
+                    - resolved_value
             timeline_title:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/TimelineTemplateTitle'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/TimelineTemplateTitle'
+                  required:
+                    - pick_version
+                    - resolved_value
             timestamp_override:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/TimestampOverride'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/TimestampOverride'
+                  required:
+                    - pick_version
+                    - resolved_value
             timestamp_override_fallback_disabled:
-              type: object
-              properties:
-                pick_version:
-                  $ref: '#/components/schemas/FieldPickVersionValues'
-                resolved_value:
-                  $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
-              required:
-                - pick_version
+              oneOf:
+                - type: object
+                  properties:
+                    pick_version:
+                      $ref: '#/components/schemas/PickVersionValues'
+                  required:
+                    - pick_version
+                - type: object
+                  properties:
+                    pick_version:
+                      enum:
+                        - RESOLVED
+                      type: string
+                    resolved_value:
+                      $ref: '#/components/schemas/TimestampOverrideFallbackDisabled'
+                  required:
+                    - pick_version
+                    - resolved_value
         pick_version:
-          $ref: '#/components/schemas/RulePickVersionValues'
+          $ref: '#/components/schemas/PickVersionValues'
         revision:
           type: number
         rule_id:
@@ -7392,7 +7784,7 @@ components:
             - ALL_RULES
           type: string
         pick_version:
-          $ref: '#/components/schemas/RulePickVersionValues'
+          $ref: '#/components/schemas/PickVersionValues'
       required:
         - mode
     UpgradeSpecificRulesRequest:
@@ -7403,7 +7795,7 @@ components:
             - SPECIFIC_RULES
           type: string
         pick_version:
-          $ref: '#/components/schemas/RulePickVersionValues'
+          $ref: '#/components/schemas/PickVersionValues'
         rules:
           items:
             $ref: '#/components/schemas/RuleUpgradeSpecifier'
