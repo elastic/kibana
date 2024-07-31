@@ -10,15 +10,15 @@ import type { HttpSetup } from '@kbn/core/public';
 
 export async function fetchAlertIndexNames({
   http,
-  features,
+  ruleTypeIds,
 }: {
   http: HttpSetup;
-  features: string;
+  ruleTypeIds: string;
 }): Promise<string[]> {
   const { index_name: indexNamesStr = [] } = await http.get<{ index_name: string[] }>(
     `${BASE_RAC_ALERTS_API_PATH}/index`,
     {
-      query: { features },
+      query: { ruleTypeIds },
     }
   );
   return indexNamesStr;
