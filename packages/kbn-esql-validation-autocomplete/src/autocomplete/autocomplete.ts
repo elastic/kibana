@@ -1625,6 +1625,22 @@ async function getOptionArgsSuggestions(
         );
       }
     }
+
+    // If it's a complete expression then propose some final suggestions
+    if (
+      (!nodeArgType &&
+        option.name === 'by' &&
+        option.args.length &&
+        !isNewExpression &&
+        !isAssignment(lastArg)) ||
+      (isAssignment(lastArg) && isAssignmentComplete(lastArg))
+    ) {
+      suggestions.push(
+        ...getFinalSuggestions({
+          comma: optionDef?.signature.multipleParams ?? option.name === 'by',
+        })
+      );
+    }
   }
 
   if (optionDef) {

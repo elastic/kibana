@@ -39,23 +39,33 @@ export const topItemsHandlerFactory =
     requestBody,
     responseStream,
     stateHandler,
+    version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
-    fieldCandidates,
+    keywordFieldCandidates,
     textFieldCandidates,
   }: {
-    fieldCandidates: string[];
+    keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let fieldCandidatesCount = fieldCandidates.length;
+    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
 
     // This will store the combined count of detected log patterns and keywords
     let fieldValuePairsCount = 0;
 
+    if (version === '3') {
+      const overridesRemainingTextFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'3'>)
+        .overrides?.remainingTextFieldCandidates;
+
+      if (Array.isArray(overridesRemainingTextFieldCandidates)) {
+        textFieldCandidates.push(...overridesRemainingTextFieldCandidates);
+      }
+    }
+
     const topCategories: SignificantItem[] = [];
 
     topCategories.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+      ...(requestBody.overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
       ) ?? [])
     );
@@ -82,32 +92,51 @@ export const topItemsHandlerFactory =
     const topTerms: SignificantItem[] = [];
 
     topTerms.push(
-      ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
         (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
       ) ?? [])
     );
 
-    const fieldsToSample = new Set<string>();
-
-    let remainingFieldCandidates: string[];
+    let remainingKeywordFieldCandidates: string[];
     let loadingStepSizeTopTerms = PROGRESS_STEP_P_VALUES;
 
-    if (requestBody.overrides?.remainingFieldCandidates) {
-      fieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
-      remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
-      fieldCandidatesCount = fieldCandidates.length;
-      loadingStepSizeTopTerms =
-        LOADED_FIELD_CANDIDATES +
-        PROGRESS_STEP_P_VALUES -
-        (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
-    } else {
-      remainingFieldCandidates = fieldCandidates;
+    if (version === '2') {
+      const overridesRemainingFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'2'>)
+        .overrides?.remainingFieldCandidates;
+
+      if (Array.isArray(overridesRemainingFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+        loadingStepSizeTopTerms =
+          LOADED_FIELD_CANDIDATES +
+          PROGRESS_STEP_P_VALUES -
+          (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+    } else if (version === '3') {
+      const overridesRemainingKeywordFieldCandidates = (
+        requestBody as AiopsLogRateAnalysisSchema<'3'>
+      ).overrides?.remainingKeywordFieldCandidates;
+
+      if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
+        keywordFieldCandidatesCount = keywordFieldCandidates.length;
+        loadingStepSizeTopTerms =
+          LOADED_FIELD_CANDIDATES +
+          PROGRESS_STEP_P_VALUES -
+          (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
     }
 
-    logDebugMessage('Fetch p-values.');
+    logDebugMessage('Fetch top items.');
 
     const topTermsQueue = queue(async function (fieldCandidate: string) {
-      stateHandler.loaded((1 / fieldCandidatesCount) * loadingStepSizeTopTerms, false);
+      stateHandler.loaded((1 / keywordFieldCandidatesCount) * loadingStepSizeTopTerms, false);
 
       let fetchedTopTerms: Awaited<ReturnType<typeof fetchTopTerms>>;
 
@@ -129,14 +158,12 @@ export const topItemsHandlerFactory =
         return;
       }
 
-      remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
+      remainingKeywordFieldCandidates = remainingKeywordFieldCandidates.filter(
+        (d) => d !== fieldCandidate
+      );
 
       if (fetchedTopTerms.length > 0) {
-        fetchedTopTerms.forEach((d) => {
-          fieldsToSample.add(d.fieldName);
-        });
         topTerms.push(...fetchedTopTerms);
-
         responseStream.push(addSignificantItems(fetchedTopTerms));
       }
 
@@ -154,12 +181,12 @@ export const topItemsHandlerFactory =
               },
             }
           ),
-          remainingFieldCandidates,
+          remainingKeywordFieldCandidates,
         })
       );
     }, MAX_CONCURRENT_QUERIES);
 
-    topTermsQueue.push(fieldCandidates, (err) => {
+    topTermsQueue.push(keywordFieldCandidates, (err) => {
       if (err) {
         logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
         responseStream.pushError(`Failed to fetch p-values.`);
