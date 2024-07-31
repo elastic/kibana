@@ -17,7 +17,6 @@ import { buildShipperHeaders } from '../common/ebt_v3_endpoint';
 import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';
 
-
 describe('TelemetryPlugin', () => {
   let screenshotMode: ScreenshotModePluginSetup;
   let home: HomePublicPluginSetup;
