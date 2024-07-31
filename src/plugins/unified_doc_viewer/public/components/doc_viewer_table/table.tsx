@@ -9,6 +9,7 @@
 import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,8 @@ import {
   EuiText,
   EuiCallOut,
   useResizeObserver,
+  EuiSwitch,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -72,6 +75,7 @@ const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 const SEARCH_TEXT = 'discover:searchText';
+const HIDE_NULL_VALUES = 'discover:hideNullValues';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
 const GRID_COLUMN_FIELD_VALUE = 'value';
@@ -149,6 +153,9 @@ export const DocViewerTable = ({
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
   );
+  const [areNullValuesHidden, setAreNullValuesHidden] = useLocalStorage(HIDE_NULL_VALUES, false);
+
+  const { euiTheme } = useEuiTheme();
 
   const flattened = hit.flattened;
   const shouldShowFieldHandler = useMemo(
@@ -265,17 +272,18 @@ export const DocViewerTable = ({
         if (!shouldShowFieldHandler(curFieldName)) {
           return acc;
         }
-
-        if (pinnedFields.includes(curFieldName)) {
+        const shouldHideNullValue = areNullValuesHidden && flattened[curFieldName] == null;
+        if (pinnedFields.includes(curFieldName) && !shouldHideNullValue) {
           acc.pinnedItems.push(fieldToItem(curFieldName, true));
         } else {
           const fieldMapping = mapping(curFieldName);
           if (
-            !searchText?.trim() ||
-            fieldNameWildcardMatcher(
-              { name: curFieldName, displayName: fieldMapping?.displayName },
-              searchText
-            )
+            (!searchText?.trim() ||
+              fieldNameWildcardMatcher(
+                { name: curFieldName, displayName: fieldMapping?.displayName },
+                searchText
+              )) &&
+            !shouldHideNullValue
           ) {
             // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName, false));
@@ -356,6 +364,13 @@ export const DocViewerTable = ({
       },
     ],
     [fieldCellActions, fieldValueCellActions, containerWidth]
+  );
+
+  const onHideNullValuesChange = useCallback(
+    (e) => {
+      setAreNullValuesHidden(e.target.checked);
+    },
+    [setAreNullValuesHidden]
   );
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
@@ -492,6 +507,23 @@ export const DocViewerTable = ({
         <>
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              align-self: end;
+              padding-bottom: ${euiTheme.size.s};
+            `}
+          >
+            <EuiSwitch
+              label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                defaultMessage: 'Hide fields with null values',
+              })}
+              checked={areNullValuesHidden ?? false}
+              onChange={onHideNullValuesChange}
+              compressed
+              data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+            />
           </EuiFlexItem>
           <EuiFlexItem
             grow={Boolean(containerHeight)}
