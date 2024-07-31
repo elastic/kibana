@@ -17,6 +17,12 @@ describe('Custom no data page', () => {
     });
   });
 
+  after(() => {
+    cy.updateAdvancedSettings({
+      'observability:entityCentricExperience': false,
+    });
+  });
+
   it('shows the default no data screen when entity centric experience is disabled ', () => {
     cy.visitKibana('/app/apm');
     cy.contains('Welcome to Elastic Observability!');
