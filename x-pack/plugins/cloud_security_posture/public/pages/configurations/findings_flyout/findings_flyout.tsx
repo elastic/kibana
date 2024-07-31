@@ -85,8 +85,7 @@ const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.pagin
   defaultMessage: 'Finding navigation',
 });
 
-// eslint-disable-next-line prettier/prettier
-type FindingsTab = (typeof tabs)[number];
+type FindingsTab = typeof tabs[number];
 
 export const EMPTY_VALUE = '-';
 
