@@ -20,14 +20,15 @@ export interface MiniHistogramAgg extends estypes.AggregationsSingleBucketAggreg
   };
 }
 
-export const HISTOGRAM_AGG_PREFIX = 'histogram_';
+export const MINI_HISTOGRAM_AGG_PREFIX = 'mini_histogram_';
+export const MINI_HISTOGRAM_BAR_TARGET = 20;
 
 export const getMiniHistogramAgg = (params: AiopsLogRateAnalysisSchema) => {
   return {
     mini_histogram: {
       histogram: {
         field: params.timeFieldName,
-        interval: (params.end - params.start) / 19,
+        interval: (params.end - params.start) / (MINI_HISTOGRAM_BAR_TARGET - 1),
         min_doc_count: 0,
         extended_bounds: {
           min: params.start,
@@ -44,7 +45,7 @@ export const getMiniHistogramDataFromAggResponse = (
   index: number
 ): SignificantItemHistogramItem[] =>
   overallTimeSeries.map((o) => {
-    const current = aggReponse[`${HISTOGRAM_AGG_PREFIX}${index}`].mini_histogram.buckets.find(
+    const current = aggReponse[`${MINI_HISTOGRAM_AGG_PREFIX}${index}`].mini_histogram.buckets.find(
       (d1) => d1.key_as_string === o.key_as_string
     ) ?? {
       doc_count: 0,

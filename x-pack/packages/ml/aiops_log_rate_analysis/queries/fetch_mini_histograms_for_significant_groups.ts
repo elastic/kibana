@@ -25,7 +25,7 @@ import { getHistogramQuery } from './get_histogram_query';
 import {
   getMiniHistogramDataFromAggResponse,
   getMiniHistogramAgg,
-  HISTOGRAM_AGG_PREFIX,
+  MINI_HISTOGRAM_AGG_PREFIX,
   type MiniHistogramAgg,
 } from './mini_histogram_utils';
 
@@ -45,7 +45,7 @@ export const fetchMiniHistogramsForSignificantGroups = async (
   const histogramAggs = significantGroups.reduce<
     Record<string, estypes.AggregationsAggregationContainer>
   >((aggs, significantGroup, index) => {
-    aggs[`${HISTOGRAM_AGG_PREFIX}${index}`] = {
+    aggs[`${MINI_HISTOGRAM_AGG_PREFIX}${index}`] = {
       filter: {
         bool: { filter: getGroupFilter(significantGroup) },
       },

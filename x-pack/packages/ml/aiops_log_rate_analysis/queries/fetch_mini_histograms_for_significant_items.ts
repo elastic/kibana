@@ -26,7 +26,7 @@ import { getHistogramQuery } from './get_histogram_query';
 import {
   getMiniHistogramDataFromAggResponse,
   getMiniHistogramAgg,
-  HISTOGRAM_AGG_PREFIX,
+  MINI_HISTOGRAM_AGG_PREFIX,
   type MiniHistogramAgg,
 } from './mini_histogram_utils';
 
@@ -65,7 +65,7 @@ export const fetchMiniHistogramsForSignificantItems = async (
       throw new Error('Invalid significant item type.');
     }
 
-    aggs[`${HISTOGRAM_AGG_PREFIX}${index}`] = {
+    aggs[`${MINI_HISTOGRAM_AGG_PREFIX}${index}`] = {
       filter,
       aggs: getMiniHistogramAgg(params),
     };
