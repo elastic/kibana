@@ -9634,7 +9634,9 @@
     },
     {
       "query": "from a_index | eval CEIL(23::doubla)",
-      "error": [],
+      "error": [
+        "Argument of [ceil] must be [double], found value [23::doubla] type [doubla]"
+      ],
       "warning": []
     },
     {

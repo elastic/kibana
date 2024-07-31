@@ -1654,7 +1654,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval CEIL(23::double)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::DOUBLE)', []);
       testErrorsAndWarnings('from a_index | eval CEIL(23::doubla)', [
-        'Argument of [ceil] must be [double], found value [23::doubla] type [doubla]"',
+        'Argument of [ceil] must be [double], found value [23::doubla] type [doubla]',
       ]);
 
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
