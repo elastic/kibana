@@ -43,9 +43,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     'cspSecurity',
   ]);
 
-  describe('Data Views', function () {
+  describe('Data Views', async function () {
     this.tags(['cloud_security_posture_data_views', 'cloud_security_posture_spaces']);
-    const cspSecurity = pageObjects.cspSecurity;
 
     before(async () => {
       await cspSecurity.createRoles();
@@ -66,19 +65,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('Verify data view is created once user reach the findings page - default space', async () => {
-      const soClient = await kibanaServer.savedObjects;
-      await pageObjects.common.navigateToApp('home');
-
       const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
-      const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
+      const idDataViewExists = await getDataViewSafe(
+        kibanaServer.savedObjects,
+        expectedDataViewId,
+        'default'
+      );
       expect(idDataViewExists).to.be(false);
 
-      const findings = pageObjects.findings;
       await findings.navigateToLatestVulnerabilitiesPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        soClient,
+        kibanaServer.savedObjects,
         expectedDataViewId,
         'default'
       );
@@ -86,11 +85,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('Verify data view is created once user reach the dashboard page - default space', async () => {
-      await pageObjects.common.navigateToApp('home');
-
-      const soClient = await kibanaServer.savedObjects;
       const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
-      const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
+      const idDataViewExists = await getDataViewSafe(
+        kibanaServer.savedObjects,
+        expectedDataViewId,
+        'default'
+      );
       expect(idDataViewExists).to.be(false);
 
       const cspDashboard = pageObjects.cloudPostureDashboard;
@@ -98,7 +98,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        soClient,
+        kibanaServer.savedObjects,
         expectedDataViewId,
         'default'
       );
@@ -111,17 +111,20 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.spaceSelector.openSpacesNav();
       await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
       await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
-      const soClient = await kibanaServer.savedObjects;
+
       const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
-      const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
+      const idDataViewExists = await getDataViewSafe(
+        kibanaServer.savedObjects,
+        expectedDataViewId,
+        TEST_SPACE
+      );
 
       expect(idDataViewExists).to.be(false);
 
-      const findings = pageObjects.findings;
       await findings.navigateToLatestFindingsPage(TEST_SPACE);
       await pageObjects.header.waitUntilLoadingHasFinished();
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        soClient,
+        kibanaServer.savedObjects,
         expectedDataViewId,
         TEST_SPACE
       );
@@ -136,9 +139,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.spaceSelector.openSpacesNav();
       await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
       await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
-      const soClient = await kibanaServer.savedObjects;
       const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
-      const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, TEST_SPACE);
+      const idDataViewExists = await getDataViewSafe(
+        kibanaServer.savedObjects,
+        expectedDataViewId,
+        TEST_SPACE
+      );
 
       expect(idDataViewExists).to.be(false);
 
@@ -146,7 +152,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
       await pageObjects.header.waitUntilLoadingHasFinished();
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        soClient,
+        kibanaServer.savedObjects,
         expectedDataViewId,
         TEST_SPACE
       );
@@ -158,9 +164,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('home');
       await cspSecurity.logout();
       await cspSecurity.login('csp_read_user');
-      const soClient = await kibanaServer.savedObjects;
       const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
-      const idDataViewExists = await getDataViewSafe(soClient, expectedDataViewId, 'default');
+      const idDataViewExists = await getDataViewSafe(
+        kibanaServer.savedObjects,
+        expectedDataViewId,
+        'default'
+      );
 
       expect(idDataViewExists).to.be(false);
 
@@ -168,7 +177,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await cspDashboard.navigateToComplianceDashboardPage();
       await pageObjects.header.waitUntilLoadingHasFinished();
       const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-        soClient,
+        kibanaServer.savedObjects,
         expectedDataViewId,
         'default'
       );

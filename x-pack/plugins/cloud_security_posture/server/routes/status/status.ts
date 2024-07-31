@@ -52,7 +52,6 @@ import {
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
-import { setupCdrDataViews } from '../../saved_objects/data_views';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 240;
@@ -402,14 +401,6 @@ export const defineGetCspStatusRoute = (
               },
             });
           }
-          await setupCdrDataViews(
-            cspContext.esClient.asInternalUser,
-            cspContext.internalSoClient,
-            cspContext.spaces,
-            cspContext.dataViews,
-            request,
-            cspContext.logger
-          );
           const status: CspSetupStatus = await getCspStatus({
             ...cspContext,
             esClient: cspContext.esClient.asCurrentUser,

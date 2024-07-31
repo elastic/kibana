@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { type CoreSetup, type Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE, STATUS_ROUTE_PATH } from '../../common/constants';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -22,7 +23,7 @@ import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
-import { migrateCdrDataViews } from '../saved_objects/data_views';
+import { setupCdrDataViews } from '../saved_objects/data_views';
 
 /**
  * 1. Registers routes
@@ -47,21 +48,27 @@ export function setupRoutes({
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
 
-  core
-    .getStartServices()
-    .then(([coreStart]) => {
-      const soClient = coreStart.savedObjects.createInternalRepository();
-      void migrateCdrDataViews(soClient, logger); // Marking the promise as ignored
-    })
-    .catch((err) => {
-      logger.error(`Failed to migrate CDR data views: ${err}`);
-    });
+  core.http.registerOnPreRouting(async (request, response, toolkit) => {
+    // if (request.url.pathname === '/internal/cloud_security_posture/status') {
+    if (request.url.pathname === STATUS_ROUTE_PATH) {
+      try {
+        const [coreStart, startDeps] = await core.getStartServices();
+        const esClient = coreStart.elasticsearch.client.asInternalUser;
+        const soClient = coreStart.savedObjects.createInternalRepository();
+        const spaces = startDeps.spaces?.spacesService;
+        const dataViews = startDeps.dataViews;
+        await setupCdrDataViews(esClient, soClient, spaces, dataViews, request, logger);
+      } catch (err) {
+        logger.error(`Failed to create CDR data views: ${err}`);
+      }
+    }
+    return toolkit.next();
+  });
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,
     async (context, request) => {
-      const [{ savedObjects }, { security, fleet, spaces, dataViews }] =
-        await core.getStartServices();
+      const [, { security, fleet }] = await core.getStartServices();
       const coreContext = await context.core;
       await fleet.fleetSetupCompleted();
 
@@ -86,9 +93,6 @@ export function setupRoutes({
         packagePolicyService: fleet.packagePolicyService,
         packageService: fleet.packageService,
         isPluginInitialized,
-        spaces: spaces?.spacesService,
-        dataViews,
-        internalSoClient: savedObjects.createInternalRepository(),
       };
     }
   );
