@@ -76,7 +76,7 @@ export const runSaveToLibrary = async (
         });
         return { id };
       } catch (error) {
-        reject();
+        reject(error);
         return { error };
       }
     };

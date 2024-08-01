@@ -43,7 +43,7 @@ export const getActionsColumns = ({
 }): Array<EuiTableActionsColumnType<object>> => {
   const createTimelineFromTemplate = {
     name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
-    icon: 'timeline' as typeof ICON_TYPES[number],
+    icon: 'timeline' as (typeof ICON_TYPES)[number],
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
@@ -62,7 +62,7 @@ export const getActionsColumns = ({
 
   const createTemplateFromTimeline = {
     name: i18n.CREATE_TEMPLATE_FROM_TIMELINE,
-    icon: 'visText' as typeof ICON_TYPES[number],
+    icon: 'visText' as (typeof ICON_TYPES)[number],
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
@@ -81,7 +81,7 @@ export const getActionsColumns = ({
 
   const openAsDuplicateColumn = {
     name: i18n.OPEN_AS_DUPLICATE,
-    icon: 'copy' as typeof ICON_TYPES[number],
+    icon: 'copy' as (typeof ICON_TYPES)[number],
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
@@ -98,7 +98,7 @@ export const getActionsColumns = ({
 
   const openAsDuplicateTemplateColumn = {
     name: i18n.OPEN_AS_DUPLICATE_TEMPLATE,
-    icon: 'copy' as typeof ICON_TYPES[number],
+    icon: 'copy' as (typeof ICON_TYPES)[number],
     onClick: ({ savedObjectId }: OpenTimelineResult) => {
       onOpenTimeline({
         duplicate: true,
@@ -115,7 +115,7 @@ export const getActionsColumns = ({
 
   const exportTimelineAction = {
     name: i18n.EXPORT_SELECTED,
-    icon: 'exportAction' as typeof ICON_TYPES[number],
+    icon: 'exportAction' as (typeof ICON_TYPES)[number],
     type: 'icon',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);
@@ -130,7 +130,7 @@ export const getActionsColumns = ({
 
   const deleteTimelineColumn = {
     name: i18n.DELETE_SELECTED,
-    icon: 'trash' as typeof ICON_TYPES[number],
+    icon: 'trash' as (typeof ICON_TYPES)[number],
     type: 'icon',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (onOpenDeleteTimelineModal != null) onOpenDeleteTimelineModal(selectedTimeline);
@@ -144,7 +144,7 @@ export const getActionsColumns = ({
 
   const createRuleFromTimeline = {
     name: i18n.CREATE_RULE_FROM_TIMELINE,
-    icon: 'indexEdit' as typeof ICON_TYPES[number],
+    icon: 'indexEdit' as (typeof ICON_TYPES)[number],
     type: 'icon',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (onCreateRule != null && selectedTimeline.savedObjectId)
@@ -165,7 +165,7 @@ export const getActionsColumns = ({
 
   const createRuleFromTimelineCorrelation = {
     name: i18n.CREATE_RULE_FROM_TIMELINE_CORRELATION,
-    icon: 'indexEdit' as typeof ICON_TYPES[number],
+    icon: 'indexEdit' as (typeof ICON_TYPES)[number],
     type: 'icon',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (onCreateRuleFromEql != null && selectedTimeline.savedObjectId)

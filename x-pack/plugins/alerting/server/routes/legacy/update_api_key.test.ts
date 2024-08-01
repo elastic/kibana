@@ -38,7 +38,7 @@ describe('updateApiKeyRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_update_api_key"`);
 
-    rulesClient.updateApiKey.mockResolvedValueOnce();
+    rulesClient.updateRuleApiKey.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -52,8 +52,8 @@ describe('updateApiKeyRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.updateApiKey).toHaveBeenCalledTimes(1);
-    expect(rulesClient.updateApiKey.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.updateRuleApiKey).toHaveBeenCalledTimes(1);
+    expect(rulesClient.updateRuleApiKey.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -72,7 +72,7 @@ describe('updateApiKeyRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.updateApiKey.mockRejectedValue(
+    rulesClient.updateRuleApiKey.mockRejectedValue(
       new RuleTypeDisabledError('Fail', 'license_invalid')
     );
 

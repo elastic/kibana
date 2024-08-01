@@ -1276,6 +1276,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'Github',
     }),
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
@@ -1400,6 +1404,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
     },
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
@@ -2566,7 +2574,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
     },
@@ -2868,7 +2876,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
       [FeatureName.INCREMENTAL_SYNC]: {
@@ -2969,7 +2977,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('searchConnectors.nativeConnectors.notion.name', {
       defaultMessage: 'Notion',
     }),
@@ -3098,6 +3111,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       defaultMessage: 'OneDrive',
     }),
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
         enabled: true,
       },
@@ -3864,7 +3881,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     features: {
       [FeatureName.SYNC_RULES]: {
-        advanced: { enabled: false },
+        advanced: { enabled: true },
         basic: { enabled: true },
       },
     },
@@ -4013,7 +4030,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: false,
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
     }),
@@ -4021,6 +4043,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   salesforce: {
     features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
@@ -4636,6 +4662,45 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
   },
   sharepoint_server: {
     configuration: {
+      authentication: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.DROPDOWN,
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.sharepoint_server.configuration.authentication',
+          {
+            defaultMessage: 'Authentication',
+          }
+        ),
+        options: [
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_server.options.basicLabel',
+              {
+                defaultMessage: 'Basic',
+              }
+            ),
+            value: 'basic_auth',
+          },
+          {
+            label: i18n.translate(
+              'searchConnectors.nativeConnectors.sharepoint_server.options.ntlmLabel',
+              {
+                defaultMessage: 'NTLM',
+              }
+            ),
+            value: 'ntlm_auth',
+          },
+        ],
+        order: 1,
+        required: true,
+        sensitive: false,
+        tooltip: null,
+        type: FieldType.STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'basic_auth',
+      },
       username: {
         default_value: null,
         depends_on: [],
@@ -4647,7 +4712,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 1,
+        order: 2,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -4667,7 +4732,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 2,
+        order: 3,
         required: true,
         sensitive: true,
         tooltip: '',
@@ -4687,7 +4752,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 3,
+        order: 4,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -4707,7 +4772,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: '',
@@ -4722,7 +4787,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -4742,7 +4807,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 6,
+        order: 7,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -4757,7 +4822,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 7,
+        order: 8,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -4772,7 +4837,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 8,
+        order: 9,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
@@ -4787,7 +4852,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 9,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -4816,7 +4881,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
@@ -4847,7 +4912,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 11,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: i18n.translate(
