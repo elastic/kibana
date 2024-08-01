@@ -294,8 +294,25 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   dataView={selectedDataView}
                   onSelectField={(field) => {
                     setEditorState({ ...editorState, fieldName: field.name });
-                    setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
 
+                    /**
+                     * make sure that the new field is compatible with the selected control type and, if it's not,
+                     * reset the selected control type to the **first** compatible control type
+                     */
+                    const newCompatibleControlTypes =
+                      fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
+                    if (
+                      selectedControlType &&
+                      !newCompatibleControlTypes.includes(selectedControlType)
+                    ) {
+                      setSelectedControlType(
+                        fieldRegistry?.[field.name]?.compatibleControlTypes[0]
+                      );
+                    }
+
+                    /**
+                     * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
+                     */
                     const newDefaultTitle = field.displayName ?? field.name;
                     setDefaultPanelTitle(newDefaultTitle);
                     const currentTitle = editorState.title;
@@ -376,7 +393,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* )} */}
           </EuiDescribedFormGroup>
           {CustomSettingsComponent}
-          {/* {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null} */}
           {initialState.controlId && (
             <>
               <EuiSpacer size="l" />
