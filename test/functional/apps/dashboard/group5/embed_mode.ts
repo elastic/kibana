@@ -126,7 +126,8 @@ export default function ({
           'dashboard_embed_mode_scrolling',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        // expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0.002);
       });
     });
 
