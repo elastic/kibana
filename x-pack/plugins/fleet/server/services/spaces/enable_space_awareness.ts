@@ -66,6 +66,7 @@ export async function enableSpaceAwarenessMigration() {
   // Update Settings SO
   await saveSettings(soClient, {
     use_space_awareness: true,
+    use_space_awareness_migration_started_at: null,
   });
 }
 

@@ -18,5 +18,5 @@ export interface Settings extends BaseSettings {
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
   use_space_awareness?: boolean;
-  use_space_awareness_migration_started_at?: string;
+  use_space_awareness_migration_started_at?: string | null;
 }

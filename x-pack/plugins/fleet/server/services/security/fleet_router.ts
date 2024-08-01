@@ -35,6 +35,8 @@ import {
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
+import { getSettings } from '../settings';
+import { appContextService } from '..';
 
 function withDefaultPublicAccess<Method extends RouteMethod>(
   options: FleetVersionedRouteConfig<Method>
@@ -82,6 +84,31 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
       logger.info(`User does not have required fleet authz to access path: ${request.route.path}`);
       return response.forbidden();
     }
+
+    // No need to check for EPM requests
+    if (request.route.path.includes('api/fleet')) {
+      if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
+        const settings = await getSettings(appContextService.getInternalUserSOClient()).catch(
+          () => {
+            // TODO handle not found
+          }
+        );
+
+        if (
+          // Move condition to an helper
+          settings?.use_space_awareness_migration_started_at &&
+          new Date(settings?.use_space_awareness_migration_started_at).getTime() >
+            Date.now() - 60 * 60 * 100
+        ) {
+          return response.conflict({
+            body: {
+              message: 'Space awareness migration pending',
+            },
+          });
+        }
+      }
+    }
+
     return handler(context, request, response);
   };
 
