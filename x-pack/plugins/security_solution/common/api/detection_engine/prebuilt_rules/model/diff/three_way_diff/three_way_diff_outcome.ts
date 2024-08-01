@@ -83,9 +83,9 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
  * NOTE: uses order agnostic comparison for nested array fields (e.g. `index`)
  */
 export const determineDiffOutcomeForDataSource = (
-  baseVersion: RuleDataSource | MissingVersion,
-  currentVersion: RuleDataSource,
-  targetVersion: RuleDataSource
+  baseVersion: RuleDataSource | undefined | MissingVersion,
+  currentVersion: RuleDataSource | undefined,
+  targetVersion: RuleDataSource | undefined
 ): ThreeWayDiffOutcome => {
   const isBaseVersionMissing = baseVersion === MissingVersion;
 
@@ -152,6 +152,6 @@ export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolea
 };
 
 const isIndexPatternDataSourceType = (
-  version: RuleDataSource
+  version: RuleDataSource | undefined
 ): version is Extract<RuleDataSource, { type: DataSourceType.index_patterns }> =>
-  version.type === DataSourceType.index_patterns;
+  version !== undefined && version.type === DataSourceType.index_patterns;

@@ -23,8 +23,8 @@ import {
 import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
 export const dataSourceDiffAlgorithm = (
-  versions: ThreeVersionsOf<RuleDataSource>
-): ThreeWayDiff<RuleDataSource> => {
+  versions: ThreeVersionsOf<RuleDataSource | undefined>
+): ThreeWayDiff<RuleDataSource | undefined> => {
   const {
     base_version: baseVersion,
     current_version: currentVersion,
@@ -60,14 +60,14 @@ export const dataSourceDiffAlgorithm = (
 
 interface MergeResult {
   mergeOutcome: ThreeWayMergeOutcome;
-  mergedVersion: RuleDataSource;
+  mergedVersion: RuleDataSource | undefined;
   conflict: ThreeWayDiffConflict;
 }
 
 interface MergeArgs {
   baseVersion: RuleDataSource | undefined;
-  currentVersion: RuleDataSource;
-  targetVersion: RuleDataSource;
+  currentVersion: RuleDataSource | undefined;
+  targetVersion: RuleDataSource | undefined;
   diffOutcome: ThreeWayDiffOutcome;
 }
 
@@ -78,8 +78,12 @@ const mergeVersions = ({
   diffOutcome,
 }: MergeArgs): MergeResult => {
   const dedupedBaseVersion = baseVersion ? getDedupedDataSourceVersion(baseVersion) : baseVersion;
-  const dedupedCurrentVersion = getDedupedDataSourceVersion(currentVersion);
-  const dedupedTargetVersion = getDedupedDataSourceVersion(targetVersion);
+  const dedupedCurrentVersion = currentVersion
+    ? getDedupedDataSourceVersion(currentVersion)
+    : currentVersion;
+  const dedupedTargetVersion = targetVersion
+    ? getDedupedDataSourceVersion(targetVersion)
+    : targetVersion;
 
   switch (diffOutcome) {
     // Scenario -AA is treated as scenario AAA:
@@ -103,7 +107,9 @@ const mergeVersions = ({
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       if (
+        dedupedCurrentVersion &&
         dedupedCurrentVersion.type === DataSourceType.index_patterns &&
+        dedupedTargetVersion &&
         dedupedTargetVersion.type === DataSourceType.index_patterns
       ) {
         const baseVersionToMerge =
