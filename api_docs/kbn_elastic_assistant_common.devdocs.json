@@ -4205,7 +4205,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; readonly assistantBedrockChat: false; }"
+          "{ readonly assistantKnowledgeBaseByDefault: false; readonly assistantModelEvaluation: false; readonly assistantBedrockChat: true; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
