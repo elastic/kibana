@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ERROR_USER_NOT_AUTHORIZED } from '@kbn/entityManager-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
 import {
   EuiButtonIcon,
@@ -22,15 +21,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { EntityManagerUnauthorizedError } from '@kbn/entityManager-plugin/public';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
-  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
+  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useLocalStorage<boolean | undefined>(
+    'apm.isFeedbackModalVisible',
+    undefined
+  );
+
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
 
   const {
@@ -53,7 +58,9 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
 
   const handleRestoreView = async () => {
     setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.classic);
-    setsIsFeedbackModalVisible(true);
+    if (isFeedbackModalVisible === undefined) {
+      setsIsFeedbackModalVisible(true);
+    }
   };
 
   const handleEnablement = async () => {
@@ -77,16 +84,16 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
         }
         refetch();
       } else {
-        if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
-          setIsLoading(false);
-          setsIsUnauthorizedModalVisible(true);
-          return;
-        }
-
         throw new Error(response.message);
       }
     } catch (error) {
       setIsLoading(false);
+
+      if (error instanceof EntityManagerUnauthorizedError) {
+        setsIsUnauthorizedModalVisible(true);
+        return;
+      }
+
       const err = error as Error | IHttpFetchError<ResponseErrorBody>;
       notifications.toasts.danger({
         title: i18n.translate('xpack.apm.eemEnablement.errorTitle', {

@@ -90,6 +90,7 @@ export const streamGraph = async ({
         runName: DEFAULT_ASSISTANT_GRAPH_ID,
         tags: traceOptions?.tags ?? [],
         version: 'v2',
+        streamMode: 'values',
       },
       llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
     );
