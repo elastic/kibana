@@ -13,6 +13,7 @@ import { EuiInputPopover } from '@elastic/eui';
 import {
   apiHasParentApi,
   apiPublishesDataLoading,
+  getUnchangingComparator,
   getViewModeSubject,
   useBatchedPublishingSubjects,
   ViewMode,
@@ -185,7 +186,7 @@ export const getTimesliderControlFactory = (
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi(initialState);
+      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
@@ -242,6 +243,7 @@ export const getTimesliderControlFactory = (
         },
         {
           ...defaultControl.comparators,
+          width: getUnchangingComparator(),
           ...timeRangePercentage.comparators,
           isAnchored: [isAnchored$, setIsAnchored],
         }
