@@ -18,7 +18,41 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.durationSchemaWithMinimum",
+        "type": "Function",
+        "tags": [],
+        "label": "durationSchemaWithMinimum",
+        "description": [],
+        "signature": [
+          "(minimumMinutes: number) => Zod.ZodEffects<Zod.ZodString, string, string>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.durationSchemaWithMinimum.$1",
+            "type": "number",
+            "tags": [],
+            "label": "minimumMinutes",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/common.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [
       {
@@ -43,7 +77,7 @@
         "label": "EntityDefinition",
         "description": [],
         "signature": [
-          "{ id: string; type: string; version: string; name: string; history: { interval: moment.Duration; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: moment.Duration | undefined; backfillFrequency?: string | undefined; } | undefined; }; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: boolean; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "{ id: string; type: string; version: string; name: string; history: { interval: string; settings: { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }; timestampField: string; }; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: boolean; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -236,7 +270,7 @@
         "label": "durationSchema",
         "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodString, moment.Duration, string>"
+          "Zod.ZodString"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/schema/common.ts",
         "deprecated": false,
@@ -291,7 +325,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>, \"many\">>; staticFields: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; managed: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; history: Zod.ZodObject<{ timestampField: Zod.ZodString; interval: Zod.ZodEffects<Zod.ZodEffects<Zod.ZodString, moment.Duration, string>, moment.Duration, string>; settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; backfillSyncDelay: Zod.ZodOptional<Zod.ZodString>; backfillLookbackPeriod: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodString, moment.Duration, string>>; backfillFrequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: moment.Duration | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { interval: moment.Duration; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: moment.Duration | undefined; backfillFrequency?: string | undefined; } | undefined; }, { interval: string; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; }>; latest: Zod.ZodOptional<Zod.ZodObject<{ settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; } | undefined; }, { settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; } | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; version: string; name: string; history: { interval: moment.Duration; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: moment.Duration | undefined; backfillFrequency?: string | undefined; } | undefined; }; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: boolean; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>, \"many\">>; staticFields: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; managed: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; history: Zod.ZodObject<{ timestampField: Zod.ZodString; interval: Zod.ZodEffects<Zod.ZodString, string, string>; settings: Zod.ZodEffects<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; frequency: Zod.ZodOptional<Zod.ZodString>; backfillSyncDelay: Zod.ZodOptional<Zod.ZodString>; backfillLookbackPeriod: Zod.ZodOptional<Zod.ZodString>; backfillFrequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>, { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined>; }, \"strip\", Zod.ZodTypeAny, { interval: string; settings: { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }; timestampField: string; }, { interval: string; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; }>; latest: Zod.ZodOptional<Zod.ZodObject<{ settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; } | undefined; }, { settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; } | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; version: string; name: string; history: { interval: string; settings: { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }; timestampField: string; }; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: boolean; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -299,7 +333,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; limit: number; source: string; } | { source: string; destination: string; limit: number; })[] | undefined; latest?: { settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; } | undefined; } | undefined; staticFields?: Record<string, string> | undefined; }, { id: string; type: string; version: string; name: string; history: { interval: string; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; }; indexPatterns: string[]; identityFields: (string | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; limit: number; source: string; } | { source: string; destination: string; limit: number; })[] | undefined; latest?: { settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; } | undefined; } | undefined; staticFields?: Record<string, string> | undefined; }, { id: string; type: string; version: string; name: string; history: { interval: string; timestampField: string; settings?: { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined; }; indexPatterns: string[]; identityFields: (string | { field: string; optional: boolean; })[]; displayNameTemplate: string; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -370,6 +404,21 @@
           "Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-entities-schema/src/rest_spec/get.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/entities-schema",
+        "id": "def-common.historySettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "historySettingsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodEffects<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; frequency: Zod.ZodOptional<Zod.ZodString>; backfillSyncDelay: Zod.ZodOptional<Zod.ZodString>; backfillLookbackPeriod: Zod.ZodOptional<Zod.ZodString>; backfillFrequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>, { lookbackPeriod: string; frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; syncDelay?: string | undefined; syncField?: string | undefined; lookbackPeriod?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined>"
+        ],
+        "path": "x-pack/packages/kbn-entities-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
