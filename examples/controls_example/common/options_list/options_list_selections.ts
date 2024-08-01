@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DataControlApi, DefaultDataControlState } from '../types';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
-export const RANGE_SLIDER_CONTROL_TYPE = 'rangeSlider';
+export type OptionsListSelection = string | number;
 
-export type RangeValue = [string, string];
-
-export interface RangesliderControlState extends DefaultDataControlState {
-  value?: RangeValue;
-  step?: number;
-}
-
-export type RangesliderControlApi = DataControlApi;
+export const getSelectionAsFieldType = (
+  field: DataViewField,
+  key: string
+): OptionsListSelection => {
+  const storeAsNumber = field.type === 'number' || field.type === 'date';
+  return storeAsNumber ? +key : key;
+};
