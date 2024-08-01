@@ -17,7 +17,7 @@ function range(start: number, end: number) {
 }
 
 export const MAX_PARTITIONS = 256;
-const CACHE_INTERVAL = 10000;
+export const CACHE_INTERVAL = 10000;
 
 export class TaskPartitioner {
   private readonly allPartitions: number[];

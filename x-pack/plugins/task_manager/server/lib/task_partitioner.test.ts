@@ -9,7 +9,7 @@ import {
   createDiscoveryServiceMock,
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
-import { TaskPartitioner } from './task_partitioner';
+import { CACHE_INTERVAL, TaskPartitioner } from './task_partitioner';
 
 const POD_NAME = 'test-pod';
 
@@ -79,19 +79,16 @@ describe('getPartitions()', () => {
 
   test('correctly caches the partitions on 10 second interval ', async () => {
     const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
-    await taskPartitioner.getPartitions();
-    jest.advanceTimersByTime(3000);
+    const shorterInterval = CACHE_INTERVAL / 2;
 
     await taskPartitioner.getPartitions();
-    jest.advanceTimersByTime(3000);
 
+    jest.advanceTimersByTime(shorterInterval);
     await taskPartitioner.getPartitions();
-    jest.advanceTimersByTime(3000);
 
+    jest.advanceTimersByTime(shorterInterval);
     await taskPartitioner.getPartitions();
-    jest.advanceTimersByTime(3000);
 
-    await taskPartitioner.getPartitions();
     expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(2);
   });
 });
