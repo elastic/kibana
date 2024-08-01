@@ -41,4 +41,8 @@ export type {
   RoleTemplate,
   RoleMapping,
   RoleMappingRule,
+  RoleMappingAllRule,
+  RoleMappingAnyRule,
+  RoleMappingExceptRule,
+  RoleMappingFieldRule,
 } from './role_mapping';

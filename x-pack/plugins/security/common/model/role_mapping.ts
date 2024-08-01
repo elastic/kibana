@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-interface RoleMappingAnyRule {
+export interface RoleMappingAnyRule {
   any: RoleMappingRule[];
 }
 
-interface RoleMappingAllRule {
+export interface RoleMappingAllRule {
   all: RoleMappingRule[];
 }
 
-interface RoleMappingFieldRule {
+export interface RoleMappingFieldRule {
   field: Record<string, any>;
 }
 
-interface RoleMappingExceptRule {
+export interface RoleMappingExceptRule {
   except: RoleMappingRule;
 }
 

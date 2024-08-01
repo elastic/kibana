@@ -27,7 +27,12 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { MappingInfoPanel } from './mapping_info_panel';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { validateRoleMappingForSave } from './services/role_mapping_validation';
-import type { RoleMapping, RoleMappingRule } from '../../../../common';
+import type {
+  RoleMapping,
+  RoleMappingAllRule,
+  RoleMappingAnyRule,
+  RoleMappingRule,
+} from '../../../../common';
 import type { RolesAPIClient } from '../../roles';
 import type { SecurityFeaturesAPIClient } from '../../security_features';
 import {
@@ -214,6 +219,14 @@ export class EditRoleMappingPage extends Component<Props, State> {
     );
   };
 
+  private isRoleMappingAnyRule = (obj: unknown): obj is RoleMappingAnyRule => {
+    return typeof obj === 'object' && obj !== null && 'any' in obj && Array.isArray(obj.any);
+  };
+
+  private isRoleMappingAllRule = (obj: unknown): obj is RoleMappingAllRule => {
+    return typeof obj === 'object' && obj !== null && 'all' in obj && Array.isArray(obj.all);
+  };
+
   private checkEmptyAnyAllMappings = (obj: RoleMappingRule) => {
     const arrToCheck: RoleMappingRule[] = [obj];
 
@@ -222,14 +235,21 @@ export class EditRoleMappingPage extends Component<Props, State> {
       if (typeof currentObj === 'object' && currentObj !== null) {
         for (const key in currentObj) {
           if (Object.hasOwn(currentObj, key)) {
-            const value: unknown = currentObj[key as keyof RoleMappingRule];
-            if ((key === 'any' || key === 'all') && Array.isArray(value)) {
-              if (value.length === 0) {
+            if (this.isRoleMappingAnyRule(currentObj)) {
+              if (currentObj.any.length === 0) {
                 return true;
               }
-              arrToCheck.push(...value);
-            } else if (typeof value === 'object' && value !== null) {
-              arrToCheck.push(value as RoleMappingRule);
+              arrToCheck.push(...currentObj.any);
+            } else if (this.isRoleMappingAllRule(currentObj)) {
+              if (currentObj.all.length === 0) {
+                return true;
+              }
+              arrToCheck.push(...currentObj.all);
+            } else if (
+              typeof currentObj[key as keyof RoleMappingRule] === 'object' &&
+              currentObj[key as keyof RoleMappingRule] !== null
+            ) {
+              arrToCheck.push(currentObj[key as keyof RoleMappingRule] as RoleMappingRule);
             }
           }
         }
