@@ -142,6 +142,7 @@ export async function fetchEsQuery({
   const anyShardFailures = checkForShardFailures(searchResult);
   if (anyShardFailures && ruleResultService) {
     ruleResultService.addLastRunWarning(anyShardFailures);
+    ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
   }
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;

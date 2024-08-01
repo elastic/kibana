@@ -87,6 +87,7 @@ export async function fetchSearchSourceQuery({
   const anyShardFailures = checkForShardFailures(searchResult);
   if (anyShardFailures && ruleResultService) {
     ruleResultService.addLastRunWarning(anyShardFailures);
+    ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
   }
 
   const link = await generateLink(

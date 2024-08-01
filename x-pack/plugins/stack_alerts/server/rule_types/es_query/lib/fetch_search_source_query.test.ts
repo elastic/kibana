@@ -510,6 +510,9 @@ describe('fetchSearchSourceQuery', () => {
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
         `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
       );
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
+        `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+      );
     });
 
     it('should bubble up CCS errors stored in the _clusters field of the search result', async () => {
@@ -615,6 +618,9 @@ describe('fetchSearchSourceQuery', () => {
       });
 
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+        `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+      );
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
         `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
       );
     });
