@@ -123,7 +123,14 @@ as a failure and no download will be available. Can be specified as a number of 
 [[reporting-capture-settings]]
 === PNG/PDF settings
 
-To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugin which manages a headless browser that captures screenshots from {kib}. The following settings control the capturing process.
+[NOTE]
+============
+include::../user/reporting/reporting-pdf-limitations.asciidoc[]
+============
+
+To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugin which manages a headless browser that captures screenshots from {kib}.
+
+The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` {ess-icon}::
 Specify the {time-units}[time] to allow the Reporting browser to wait for the "Loading..." screen to dismiss
@@ -254,27 +261,14 @@ The `file:` protocol is always denied, even if no network policy is configured.
 [[reporting-csv-settings]]
 === CSV settings
 
+[NOTE]
+============
+include::../user/reporting/reporting-csv-limitations.asciidoc[]
+============
+
 [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
 The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large
 exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
-
-[NOTE]
-============
-We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in
-external tools, but it's not intended for bulk export or to backup {es} data. If you need to export more than
-250 MB of CSV, rather than increasing `xpack.reporting.csv.maxSizeBytes`, please use filters to create multiple
-smaller reports, or extract the data you need directly from {es}.
-
-The following deployment configurations may lead to failed report jobs or incomplete reports:
-
-* Any shard needed for search is unavailable.
-* Data is stored on slow storage tiers.
-* Network latency between nodes is high.
-* {ccs-cap} is used.
-
-To export large amounts of data we recommend using {es} APIs directly. See {ref}/point-in-time-api.html[Point
-in time API], or {ref}/sql-rest-format.html#_csv[SQL with CSV response data format].
-============
 
 `xpack.reporting.csv.scroll.size`::
 Number of documents retrieved from {es} for each scroll iteration during a CSV export. Defaults to `500`.
