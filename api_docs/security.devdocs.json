@@ -5951,10 +5951,6 @@
               "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
             },
             {
-              "plugin": "observabilityOnboarding",
-              "path": "x-pack/plugins/observability_solution/observability_onboarding/server/routes/flow/route.ts"
-            },
-            {
               "plugin": "synthetics",
               "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
