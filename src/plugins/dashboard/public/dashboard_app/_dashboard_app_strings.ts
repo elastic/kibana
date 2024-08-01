@@ -32,6 +32,20 @@ export const dashboardManagedBadge = {
     }),
 };
 
+export const managedText = i18n.translate('dashboard.managedContentBadge.text', {
+  defaultMessage: 'Managed',
+});
+
+export const text = dashboardManagedBadge.getText();
+
+export const buttonText = i18n.translate('dashboard.managedContentPopoverFooterText', {
+  defaultMessage: 'Duplicate this dashboard',
+});
+
+export const cancelButtonText = i18n.translate('dashboard.managedContentPopoverFooterCancelText', {
+  defaultMessage: 'Cancel',
+});
+
 /**
  * @param title {string} the current title of the dashboard
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.

@@ -27,13 +27,14 @@ describe('Internal dashboard top nav', () => {
       return <></>;
     }
   };
+
   beforeEach(() => {
     setMockedPresentationUtilServices();
     pluginServices.getServices().data.query.filterManager.getFilters = jest
       .fn()
       .mockReturnValue([]);
     // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
-    // @ts-ignore
+    // @ts-ignore type issue with the mockTopNav for this test suite
     pluginServices.getServices().navigation.TopNavMenu = ({ badges }: TopNavMenuProps) =>
       mockTopNav(badges);
   });
@@ -47,6 +48,7 @@ describe('Internal dashboard top nav', () => {
 
     expect(component.queryByText('Managed')).toBeNull();
   });
+
   it('should render the managed badge when the dashboard is managed', async () => {
     const container = buildMockDashboard();
     container.dispatch.setManaged(true);

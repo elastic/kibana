@@ -9,19 +9,17 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
-  EuiPopoverFooter,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { DashboardAPI } from '../..';
 import { DashboardRedirect } from '../../dashboard_container/types';
-import { dashboardManagedBadge } from '../_dashboard_app_strings';
+import { buttonText, dashboardManagedBadge, text } from '../_dashboard_app_strings';
 
 interface ManagedPopoverProps {
   dashboard: DashboardAPI;
@@ -32,32 +30,19 @@ export const ManagedPopover = ({ dashboard, redirectTo }: ManagedPopoverProps) =
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const text = dashboardManagedBadge.getText();
-  const buttonText = i18n.translate('dashboard.managedContentPopoverFooterText', {
-    defaultMessage: 'Duplicate this dashboard',
-  });
-  const cancelButtonText = i18n.translate('dashboard.managedContentPopoverFooterCancelText', {
-    defaultMessage: 'Cancel',
-  });
+  const { badgeText, title, iconType } = getManagedContentBadge(dashboardManagedBadge.getText());
 
   const button = (
     <EuiButton
-      color="primary"
-      iconType="glasses"
-      fill
       size="s"
-      aria-label={i18n.translate('dashboard.managedContentBadge.text', {
-        defaultMessage: 'Managed',
-      })}
-      onClick={() => {
-        setIsPopoverOpen(!isPopoverOpen);
-      }}
+      fill
+      color="primary"
+      iconType={iconType}
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      data-test-subj={getManagedContentBadge(dashboardManagedBadge.getText())['data-test-subj']}
+      aria-label={title}
     >
-      <EuiText size="s">
-        {i18n.translate('dashboard.managedContentBadge.text', {
-          defaultMessage: 'Managed',
-        })}
-      </EuiText>
+      {badgeText}
     </EuiButton>
   );
 
@@ -80,33 +65,22 @@ export const ManagedPopover = ({ dashboard, redirectTo }: ManagedPopoverProps) =
           {text}
         </EuiText>
       </EuiFlexItem>
-      <EuiPopoverFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              size="s"
-              disabled={isLoading}
-              fill
-              aria-label={buttonText}
-              onClick={() => {
-                setIsLoading(true);
-                dashboard.duplicate(redirectTo);
-                setIsLoading(false);
-              }}
-              data-test-subj="managedContentPopoverDuplicateButton"
-            >
-              {isLoading && <EuiLoadingSpinner size="m" />}
-              <EuiText size="s">{buttonText}</EuiText>
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty aria-label={cancelButtonText} onClick={() => setIsPopoverOpen(false)}>
-              <EuiText size="s">{cancelButtonText}</EuiText>
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverFooter>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          disabled={isLoading}
+          aria-label={buttonText}
+          onClick={() => {
+            setIsLoading(true);
+            dashboard.duplicate(redirectTo);
+            setIsLoading(false);
+          }}
+          data-test-subj="managedContentPopoverDuplicateButton"
+        >
+          {isLoading && <EuiLoadingSpinner size="m" />}
+          <EuiText size="s">{buttonText}</EuiText>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiPopover>
   );
 };
