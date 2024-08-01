@@ -94,21 +94,13 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     }
 
     this.savedObjects = savedObjects.createInternalRepository();
-    if (config.usageCounters.enabled) {
-      const usageCountersStart = this.usageCountersService.start({ savedObjects });
+    const usageCountersStart = config.usageCounters.enabled
+      ? this.usageCountersService.start({ savedObjects })
+      : this.usageCountersService.stop();
 
-      return {
-        search: usageCountersStart.search,
-      };
-    } else {
-      // call stop() to complete observers.
-      this.usageCountersService.stop();
-      return {
-        search: () => {
-          throw new Error('Usage Counters are not enabled.');
-        },
-      };
-    }
+    return {
+      search: usageCountersStart.search,
+    };
   }
 
   public stop() {

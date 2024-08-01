@@ -151,9 +151,13 @@ export class UsageCountersService {
     };
   };
 
-  public stop = () => {
+  public stop = (): UsageCountersServiceStart => {
     this.stop$.next();
     this.stop$.complete();
+
+    return {
+      search: this.search,
+    };
   };
 
   private storeDate$(
