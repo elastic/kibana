@@ -37,8 +37,8 @@ export const handleStreamResponse = async ({
   });
 
   async function pushStreamUpdate() {
-    const { done, value }: { done: boolean; value?: Uint8Array } = await reader.read();
     try {
+      const { done, value }: { done: boolean; value?: Uint8Array } = await reader.read();
       if (done || abortController.signal.aborted) {
         end();
         return;
@@ -55,14 +55,20 @@ export const handleStreamResponse = async ({
       push(decodedValue);
 
       pushStreamUpdate();
-    } catch (e) {
-      logger.error(`Error occurred while pushing the next chunk: ${e.toString()}`);
+    } catch (error) {
+      logger.error(`Error occurred while pushing the next chunk: ${error.toString()}`);
       end();
       abortController.abort();
+      throw error;
     }
   }
 
-  pushStreamUpdate();
+  try {
+    pushStreamUpdate();
+  } catch (error) {
+    logger.error('Failed to push stream update', error);
+    throw error;
+  }
 
   return response.ok(responseWithHeaders);
 };
