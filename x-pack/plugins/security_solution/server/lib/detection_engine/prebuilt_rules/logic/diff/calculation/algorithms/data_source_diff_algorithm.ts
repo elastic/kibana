@@ -5,37 +5,34 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
+  RuleDataSource,
   ThreeVersionsOf,
   ThreeWayDiff,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  determineOrderAgnosticDiffOutcome,
   determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
-  MissingVersion,
-  ThreeWayDiffConflict,
   ThreeWayMergeOutcome,
+  MissingVersion,
+  DataSourceType,
+  ThreeWayDiffConflict,
+  determineDiffOutcomeForDataSource,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { mergeDedupedArrays } from './helpers';
+import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
-/**
- * Diff algorithm used for arrays of scalar values (eg. numbers, strings, booleans, etc.)
- *
- * NOTE: Diffing logic will be agnostic to array order
- */
-export const scalarArrayDiffAlgorithm = <TValue>(
-  versions: ThreeVersionsOf<TValue[]>
-): ThreeWayDiff<TValue[]> => {
+export const dataSourceDiffAlgorithm = (
+  versions: ThreeVersionsOf<RuleDataSource>
+): ThreeWayDiff<RuleDataSource> => {
   const {
     base_version: baseVersion,
     current_version: currentVersion,
     target_version: targetVersion,
   } = versions;
 
-  const diffOutcome = determineOrderAgnosticDiffOutcome(baseVersion, currentVersion, targetVersion);
+  const diffOutcome = determineDiffOutcomeForDataSource(baseVersion, currentVersion, targetVersion);
+
   const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
   const hasBaseVersion = baseVersion !== MissingVersion;
@@ -61,28 +58,28 @@ export const scalarArrayDiffAlgorithm = <TValue>(
   };
 };
 
-interface MergeResult<TValue> {
+interface MergeResult {
   mergeOutcome: ThreeWayMergeOutcome;
-  mergedVersion: TValue[];
+  mergedVersion: RuleDataSource;
   conflict: ThreeWayDiffConflict;
 }
 
-interface MergeArgs<TValue> {
-  baseVersion: TValue[] | undefined;
-  currentVersion: TValue[];
-  targetVersion: TValue[];
+interface MergeArgs {
+  baseVersion: RuleDataSource | undefined;
+  currentVersion: RuleDataSource;
+  targetVersion: RuleDataSource;
   diffOutcome: ThreeWayDiffOutcome;
 }
 
-const mergeVersions = <TValue>({
+const mergeVersions = ({
   baseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
-}: MergeArgs<TValue>): MergeResult<TValue> => {
-  const dedupedBaseVersion = uniq(baseVersion);
-  const dedupedCurrentVersion = uniq(currentVersion);
-  const dedupedTargetVersion = uniq(targetVersion);
+}: MergeArgs): MergeResult => {
+  const dedupedBaseVersion = baseVersion ? getDedupedDataSourceVersion(baseVersion) : baseVersion;
+  const dedupedCurrentVersion = getDedupedDataSourceVersion(currentVersion);
+  const dedupedTargetVersion = getDedupedDataSourceVersion(targetVersion);
 
   switch (diffOutcome) {
     // Scenario -AA is treated as scenario AAA:
@@ -93,31 +90,48 @@ const mergeVersions = <TValue>({
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
       return {
         conflict: ThreeWayDiffConflict.NONE,
-        mergedVersion: dedupedCurrentVersion,
         mergeOutcome: ThreeWayMergeOutcome.Current,
+        mergedVersion: dedupedCurrentVersion,
       };
 
-    case ThreeWayDiffOutcome.StockValueCanUpdate: {
+    case ThreeWayDiffOutcome.StockValueCanUpdate:
       return {
         conflict: ThreeWayDiffConflict.NONE,
-        mergedVersion: dedupedTargetVersion,
         mergeOutcome: ThreeWayMergeOutcome.Target,
+        mergedVersion: dedupedTargetVersion,
       };
-    }
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      const merged = mergeDedupedArrays(
-        dedupedBaseVersion,
-        dedupedCurrentVersion,
-        dedupedTargetVersion
-      );
+      if (
+        dedupedCurrentVersion.type === DataSourceType.index_patterns &&
+        dedupedTargetVersion.type === DataSourceType.index_patterns
+      ) {
+        const baseVersionToMerge =
+          dedupedBaseVersion && dedupedBaseVersion.type === DataSourceType.index_patterns
+            ? dedupedBaseVersion.index_patterns
+            : [];
+
+        return {
+          conflict: ThreeWayDiffConflict.SOLVABLE,
+          mergeOutcome: ThreeWayMergeOutcome.Merged,
+          mergedVersion: {
+            type: DataSourceType.index_patterns,
+            index_patterns: mergeDedupedArrays(
+              baseVersionToMerge,
+              dedupedCurrentVersion.index_patterns,
+              dedupedTargetVersion.index_patterns
+            ),
+          },
+        };
+      }
 
       return {
-        conflict: ThreeWayDiffConflict.SOLVABLE,
-        mergedVersion: merged,
-        mergeOutcome: ThreeWayMergeOutcome.Merged,
+        conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+        mergeOutcome: ThreeWayMergeOutcome.Current,
+        mergedVersion: dedupedCurrentVersion,
       };
     }
+
     // Scenario -AB is treated as scenario ABC, but marked as
     // SOLVABLE, and returns the target version as the merged version
     // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
