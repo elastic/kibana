@@ -35,7 +35,7 @@ export class LocalShipper implements IShipper {
   };
 
   public optIn = () => {
-    // required
+    // This shipper doesn't need to update anything internal on optIn changes
   };
   public flush = async () => {
     // This shipper doesn't hold any queues. Nothing to flush in this method.
