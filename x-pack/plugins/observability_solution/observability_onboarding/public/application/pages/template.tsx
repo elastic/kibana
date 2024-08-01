@@ -9,7 +9,7 @@ import { EuiPageTemplate, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { Footer } from '../footer/footer';
-import { Header } from '../header/header_section';
+import { Header } from '../header';
 
 interface TemplateProps {
   customHeader?: React.ReactNode;

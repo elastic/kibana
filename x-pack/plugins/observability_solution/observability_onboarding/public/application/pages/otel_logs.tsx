@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { PageTemplate } from './template';
-import { CustomHeader } from '../header/custom_header';
+import { CustomHeader } from '../header';
 import { OtelLogsPanel } from '../quickstart_flows/otel_logs';
 
 export const OtelLogsPage = () => (
