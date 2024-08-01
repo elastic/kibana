@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AlertsTypeData } from './types';
+import type { AlertsByRuleData } from './types';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
@@ -27,63 +27,21 @@ export const mockAlertsData = {
     hits: [],
   },
   aggregations: {
-    alertsByType: {
+    alertsByRule: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
         {
           key: 'Test rule 1',
           doc_count: 537,
-          ruleByEventType: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'info',
-                doc_count: 406,
-              },
-              {
-                key: 'creation',
-                doc_count: 131,
-              },
-            ],
-          },
         },
         {
           key: 'Test rule 2',
           doc_count: 27,
-          ruleByEventType: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'info',
-                doc_count: 19,
-              },
-              {
-                key: 'creation',
-                doc_count: 8,
-              },
-            ],
-          },
         },
         {
           key: 'Test rule 3',
           doc_count: 25,
-          ruleByEventType: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              {
-                key: 'info',
-                doc_count: 19,
-              },
-              {
-                key: 'denied',
-                doc_count: 6,
-              },
-            ],
-          },
         },
       ],
     },
@@ -108,7 +66,7 @@ export const mockAlertsEmptyData = {
     hits: [],
   },
   aggregations: {
-    alertsByType: {
+    alertsByRule: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [],
@@ -134,27 +92,18 @@ export const query = {
     },
   },
   aggs: {
-    alertsByType: {
+    alertsByRule: {
       terms: {
         field: 'kibana.alert.rule.name',
         size: 1000,
-      },
-      aggs: {
-        ruleByEventType: {
-          terms: {
-            field: 'event.type',
-            size: 1000,
-          },
-        },
       },
     },
   },
   runtime_mappings: undefined,
 };
 
-export const parsedAlerts: AlertsTypeData[] = [
-  { rule: 'Test rule 1', type: 'Detection', value: 537, color: '#D36086' },
-  { rule: 'Test rule 2', type: 'Detection', value: 27, color: '#D36086' },
-  { rule: 'Test rule 3', type: 'Detection', value: 19, color: '#D36086' },
-  { rule: 'Test rule 3', type: 'Prevention', value: 6, color: '#54B399' },
+export const parsedAlerts: AlertsByRuleData[] = [
+  { rule: 'Test rule 1', value: 537 },
+  { rule: 'Test rule 2', value: 27 },
+  { rule: 'Test rule 3', value: 25 },
 ];

@@ -8,10 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import type { BrowserField } from '../../../containers/source';
-import { FieldValueCell } from './field_value_cell';
-import { TestProviders } from '../../../mock';
-import type { EventFieldsData } from '../types';
+import type { BrowserField } from '@kbn/timelines-plugin/common';
+import type { EventFieldsData } from '../../../../common/components/event_details/types';
+import { TableFieldValueCell } from './table_field_value_cell';
+import { TestProviders } from '../../../../common/mock';
 
 const contextId = 'test';
 
@@ -31,12 +31,12 @@ const hostIpData: EventFieldsData = {
 };
 const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', 'fe80::4001:aff:fec8:32'];
 
-describe('FieldValueCell', () => {
+describe('TableFieldValueCell', () => {
   describe('common behavior', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <FieldValueCell
+          <TableFieldValueCell
             contextId={contextId}
             data={hostIpData}
             eventId={eventId}
@@ -46,7 +46,7 @@ describe('FieldValueCell', () => {
       );
     });
 
-    test('it formats multiple values such that each value is displayed on a single line', () => {
+    it('should format multiple values such that each value is displayed on a single line', () => {
       expect(screen.getByTestId(`event-field-${hostIpData.field}`).className).toContain('column');
     });
   });
@@ -55,7 +55,7 @@ describe('FieldValueCell', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <FieldValueCell
+          <TableFieldValueCell
             contextId={contextId}
             data={hostIpData}
             eventId={eventId}
@@ -66,16 +66,10 @@ describe('FieldValueCell', () => {
       );
     });
 
-    test('it renders each of the expected values when `fieldFromBrowserField` is undefined', () => {
+    it('should render each of the expected values when `fieldFromBrowserField` is undefined', () => {
       hostIpValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
       });
-    });
-
-    test('it renders values formatted as plain text (without `eventFieldsTable__fieldValue` formatting)', () => {
-      expect(screen.getByTestId(`event-field-${hostIpData.field}`).firstChild).not.toHaveClass(
-        'eventFieldsTable__fieldValue'
-      );
     });
   });
 
@@ -105,7 +99,7 @@ describe('FieldValueCell', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <FieldValueCell
+          <TableFieldValueCell
             contextId={contextId}
             data={messageData}
             eventId={eventId}
@@ -116,11 +110,11 @@ describe('FieldValueCell', () => {
       );
     });
 
-    test('it renders special formatting for the `message` field', () => {
+    it('should render special formatting for the `message` field', () => {
       expect(screen.getByTestId('event-field-message')).toBeInTheDocument();
     });
 
-    test('it renders the expected message value', () => {
+    it('should render the expected message value', () => {
       messageValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
       });
@@ -139,7 +133,7 @@ describe('FieldValueCell', () => {
     beforeEach(() => {
       render(
         <TestProviders>
-          <FieldValueCell
+          <TableFieldValueCell
             contextId={contextId}
             data={hostIpData}
             eventId={eventId}
@@ -150,23 +144,17 @@ describe('FieldValueCell', () => {
       );
     });
 
-    test('it renders values formatted with the expected class', () => {
-      expect(screen.getByTestId(`event-field-${hostIpData.field}`).firstChild).toHaveClass(
-        'eventFieldsTable__fieldValue'
-      );
-    });
-
-    test('it aligns items at the start of the group to prevent content from stretching (by default)', () => {
+    it('should align items at the start of the group to prevent content from stretching (by default)', () => {
       expect(screen.getByTestId(`event-field-${hostIpData.field}`).className).toContain(
         'flexStart'
       );
     });
 
-    test('it renders link buttons for each of the host ip addresses', () => {
+    it('should render link buttons for each of the host ip addresses', () => {
       expect(screen.getAllByRole('button').length).toBe(hostIpValues.length);
     });
 
-    test('it renders each of the expected values when `fieldFromBrowserField` is provided', () => {
+    it('should render each of the expected values when `fieldFromBrowserField` is provided', () => {
       hostIpValues.forEach((value) => {
         expect(screen.getByText(value)).toBeInTheDocument();
       });
