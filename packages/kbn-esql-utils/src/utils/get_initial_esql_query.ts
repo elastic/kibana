@@ -5,11 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 /**
- * Builds an ES|QL query for the provided index or index pattern
- * @param indexOrIndexPattern
+ * Builds an ES|QL query for the provided dataView
+ * If there is @timestamp field in the index, we don't add the WHERE clause
+ * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
+ * @param dataView
  */
-export function getInitialESQLQuery(indexOrIndexPattern: string): string {
-  return `FROM ${indexOrIndexPattern} | LIMIT 10`;
+export function getInitialESQLQuery(dataView: DataView): string {
+  const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
+  const timeFieldName = dataView?.timeFieldName;
+  const filterByTimeParams =
+    !hasAtTimestampField && timeFieldName
+      ? ` | WHERE ${timeFieldName} >= ?start AND ${timeFieldName} <= ?end`
+      : '';
+  return `FROM ${dataView.getIndexPattern()}${filterByTimeParams} | LIMIT 10`;
 }

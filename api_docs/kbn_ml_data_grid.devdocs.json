@@ -829,9 +829,9 @@
           "(e: unknown, toastNotifications: ",
           {
             "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
+            "section": "def-public.IToasts",
             "text": "IToasts"
           },
           ") => void"
@@ -869,9 +869,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
+                "section": "def-public.IToasts",
                 "text": "IToasts"
               }
             ],
@@ -2515,9 +2515,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.TimeRange",
+                "section": "def-public.TimeRange",
                 "text": "TimeRange"
               },
               " | undefined"

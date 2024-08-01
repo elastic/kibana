@@ -37,7 +37,6 @@ export interface ClaimOwnershipResult {
     tasksUpdated: number;
     tasksConflicted: number;
     tasksClaimed: number;
-    tasksLeftUnclaimed?: number;
   };
   docs: ConcreteTaskInstance[];
   timing?: TaskTiming;
@@ -62,12 +61,13 @@ export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn 
   return claimAvailableTasksDefault;
 }
 
-export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {
+export function getEmptyClaimOwnershipResult() {
   return {
     stats: {
       tasksUpdated: 0,
       tasksConflicted: 0,
       tasksClaimed: 0,
+      tasksRejected: 0,
     },
     docs: [],
   };
