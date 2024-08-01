@@ -15,6 +15,7 @@ import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../common';
 import { getLensCaseAttachment } from './utils';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { convertToAbsoluteTimeRange } from './convert_to_absolute_time_range';
 
 interface Props {
   lensApi: LensApi;
@@ -30,14 +31,17 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
 
   const timeRange = useStateFromPublishingSubject(lensApi.timeRange$);
   const parentTimeRange = useStateFromPublishingSubject(lensApi.parentApi?.timeRange$);
+  const absoluteTimeRange = convertToAbsoluteTimeRange(timeRange);
+  const absoluteParentTimeRange = convertToAbsoluteTimeRange(parentTimeRange);
 
   const attachments = useMemo(() => {
-    const appliedTimeRange = timeRange ?? parentTimeRange;
+    const appliedTimeRange = absoluteTimeRange ?? absoluteParentTimeRange;
     const attributes = lensApi.getFullAttributes();
     return !attributes || !appliedTimeRange
       ? []
       : [getLensCaseAttachment({ attributes, timeRange: appliedTimeRange })];
-  }, [lensApi, timeRange, parentTimeRange]);
+  }, [lensApi, absoluteTimeRange, absoluteParentTimeRange]);
+
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });
   }, [attachments, modal]);
