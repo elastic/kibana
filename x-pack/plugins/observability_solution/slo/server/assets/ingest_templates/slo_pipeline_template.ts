@@ -55,12 +55,13 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
       set: {
         description: 'Generated the instanceId field based on the groupings field',
         field: 'slo.instanceId',
-        value: [slo.groupBy].flat().includes(ALL_VALUE)
-          ? ALL_VALUE
-          : [slo.groupBy]
-              .flat()
-              .map((field) => `{{{slo.groupings.${field}}}}`)
-              .join(','),
+        value:
+          [slo.groupBy].flat().includes(ALL_VALUE) || [slo.groupBy].flat().length === 0
+            ? ALL_VALUE
+            : [slo.groupBy]
+                .flat()
+                .map((field) => `{{{slo.groupings.${field}}}}`)
+                .join(','),
       },
     },
   ],
