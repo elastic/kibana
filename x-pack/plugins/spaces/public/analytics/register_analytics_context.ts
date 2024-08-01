@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 
-import type { AnalyticsClient } from '@kbn/ebt/client';
+import type { AnalyticsClient } from '@kbn/core-analytics-browser';
 
 import type { SolutionView, Space } from '../../common';
 
