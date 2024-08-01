@@ -74,7 +74,7 @@ export function SimpleBurnRate({ slo, duration, lastRefreshTime }: Props) {
     <EuiStat
       title={i18n.translate('xpack.slo.burnRates.value', {
         defaultMessage: '{value}x',
-        values: { value: burnRate.burnRate },
+        values: { value: numeral(burnRate.burnRate).format('0.00') },
       })}
       textAlign="left"
       isLoading={isLoading}
