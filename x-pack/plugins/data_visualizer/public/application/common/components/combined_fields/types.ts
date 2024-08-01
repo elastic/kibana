@@ -10,6 +10,4 @@ export interface CombinedField {
   delimiter?: string;
   combinedFieldName: string;
   fieldNames: string[];
-  addCombinedFieldsToMappings?: (mappings: any) => {};
-  addCombinedFieldsToPipeline?: (pipeline: any) => {};
 }

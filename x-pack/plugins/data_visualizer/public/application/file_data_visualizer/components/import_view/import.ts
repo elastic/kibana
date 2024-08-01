@@ -83,7 +83,6 @@ export async function importData(props: Props, config: Config, setState: (state:
   });
 
   let success = true;
-  // const createPipeline = pipelineString !== '' && pipelineId === null;
 
   let settings = {};
   let mappings = {};
