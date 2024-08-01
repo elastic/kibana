@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler, useState } from 'react';
+import React, { type FC, type MouseEventHandler, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
@@ -18,6 +18,7 @@ import {
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiPopover,
+  EuiSearchBar,
   EuiTitle,
 } from '@elastic/eui';
 import {
@@ -64,6 +65,7 @@ import { useTableSettings } from './use_table_settings';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
+import type { ListingPageUrlState } from '../../transform_management_section';
 
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
@@ -85,25 +87,28 @@ function getItemIdToExpandedRowMap(
 interface TransformListProps {
   isLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  pageState: ListingPageUrlState;
   transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
   transformsStatsLoading: boolean;
+  updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
 
 export const TransformList: FC<TransformListProps> = ({
   isLoading,
   onCreateTransform,
+  pageState,
   transformNodes,
   transforms,
   transformsLoading,
   transformsStatsLoading,
+  updatePageState,
 }) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 
   const [query, setQuery] = useState<Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]>();
-
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -122,7 +127,9 @@ export const TransformList: FC<TransformListProps> = ({
 
   const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
-    transforms
+    transforms,
+    pageState,
+    updatePageState
   );
 
   const { columns, modals: singleActionModals } = useColumns(
@@ -133,7 +140,18 @@ export const TransformList: FC<TransformListProps> = ({
     transformsStatsLoading
   );
 
-  const searchError = query?.error ? query?.error.message : undefined;
+  useEffect(
+    function setStateFromUrl() {
+      if (pageState && pageState.queryText) {
+        const queryFromPageState = EuiSearchBar.Query.parse(pageState.queryText);
+        if (queryFromPageState) {
+          setQuery({ queryText: pageState.queryText, query: queryFromPageState, error: null });
+        }
+      }
+    },
+    [pageState]
+  );
+
   const clauses = query?.query?.ast?.clauses ?? [];
   const filteredTransforms =
     clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
@@ -317,14 +335,20 @@ export const TransformList: FC<TransformListProps> = ({
     </EuiFlexGroup>
   );
 
+  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+    setQuery(search);
+    updatePageState({ queryText: search.queryText });
+  };
+
   const search = {
     toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
     toolsRight,
-    onChange: setQuery,
+    onChange: handleSearchOnChange,
     box: {
       incremental: true,
     },
     filters: transformFilters,
+    query: query?.queryText,
   };
 
   const selection = {
@@ -349,7 +373,7 @@ export const TransformList: FC<TransformListProps> = ({
         allowNeutralSort={false}
         className="transform__TransformTable"
         columns={columns}
-        error={searchError}
+        error={query?.error?.message}
         items={filteredTransforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}

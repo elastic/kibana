@@ -20,6 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 
 import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
@@ -28,6 +30,7 @@ import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
 import { useEnabledFeatures } from '../../serverless_context';
 import { needsReauthorization } from '../../common/reauthorization_utils';
 import { TRANSFORM_STATE } from '../../../../common/constants';
+import { TRANSFORM_LIST_COLUMN } from '../../common';
 
 import {
   useDocumentationLinks,
@@ -49,6 +52,28 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
+
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+  showPerPageOptions?: boolean;
+}
+
+interface PageUrlState {
+  pageKey: string;
+  pageUrlState: ListingPageUrlState;
+}
+
+const getDefaultTransformListState = (): ListingPageUrlState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: TRANSFORM_LIST_COLUMN.ID,
+  sortDirection: 'asc',
+  showPerPageOptions: true,
+});
 
 const ErrorMessageCallout: FC<{
   text: JSX.Element;
@@ -78,6 +103,10 @@ export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
   const { dataViewEditor } = useAppDependencies();
+  const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
+    'transform',
+    getDefaultTransformListState()
+  );
 
   const deleteTransforms = useDeleteTransforms();
 
@@ -346,6 +375,8 @@ export const TransformManagement: FC = () => {
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
                   transformsStatsLoading={transformsStatsLoading}
+                  pageState={transformPageState}
+                  updatePageState={setTransformPageState}
                 />
               )}
               <TransformAlertFlyoutWrapper />
@@ -380,7 +411,9 @@ export const TransformManagementSection: FC = () => {
 
   return (
     <CapabilitiesWrapper requiredCapabilities={'canGetTransform'}>
-      <TransformManagement />
+      <UrlStateProvider>
+        <TransformManagement />
+      </UrlStateProvider>
     </CapabilitiesWrapper>
   );
 };
