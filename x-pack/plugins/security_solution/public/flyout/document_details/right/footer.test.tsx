@@ -6,127 +6,57 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FlyoutFooter } from './footer';
+import { PanelFooter } from './footer';
 import { TestProviders } from '../../../common/mock';
-import { TimelineId } from '../../../../common/types/timeline';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { KibanaServices, useKibana } from '../../../common/lib/kibana';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-
-const ecsData: Ecs = {
-  _id: '1',
-  agent: { type: ['blah'] },
-  kibana: {
-    alert: {
-      workflow_status: ['open'],
-      rule: {
-        parameters: {},
-        uuid: ['testId'],
-      },
-    },
-  },
-};
-
-const mockAlertDetailsDataWithIsObject = mockAlertDetailsData.map((detail) => {
-  return {
-    ...detail,
-    isObjectArray: false,
-  };
-}) as TimelineEventsDetailsItem[];
-
-jest.mock('../../../common/components/endpoint/host_isolation');
-jest.mock('../../../common/components/endpoint/responder');
-
-jest.mock(
-  '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
-  () => {
-    return {
-      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
-        loading: false,
-        isIsolated: false,
-        agentStatus: 'healthy',
-      }),
-    };
-  }
-);
-
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
-}));
-
-jest.mock('../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
-}));
+import { mockContextValue } from '../shared/mocks/mock_context';
+import { DocumentDetailsContext } from '../shared/context';
+import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
+import { useKibana } from '../../../common/lib/kibana';
+import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
+import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 
 jest.mock('../../../common/lib/kibana');
-
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
-}));
-jest.mock('../../../cases/components/use_insert_timeline');
-
+jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions');
 jest.mock(
-  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
-  () => {
-    return {
-      useInvestigateInTimeline: jest.fn().mockReturnValue({
-        investigateInTimelineActionItems: [<div />],
-        investigateInTimelineAlertClick: () => {},
-      }),
-    };
-  }
+  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock('../../../detections/components/alerts_table/actions');
-jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
+jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 
-const defaultProps = {
-  scopeId: TimelineId.test,
-  loadingEventDetails: false,
-  detailsEcsData: ecsData,
-  isHostIsolationPanelOpen: false,
-  handleOnEventClosed: jest.fn(),
-  onAddIsolationStatusClick: jest.fn(),
-  detailsData: mockAlertDetailsDataWithIsObject,
-  refetchFlyoutData: jest.fn(),
-};
+describe('PanelFooter', () => {
+  it('should not render the take action dropdown if preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
+          <PanelFooter isPreview={true} />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
 
-describe('event details footer component', () => {
-  beforeEach(() => {
-    const coreStartMock = coreMock.createStart();
-    (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
+    expect(queryByTestId(FLYOUT_FOOTER_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render the take action dropdown', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
-          search: {
-            searchStrategyClient: jest.fn(),
-          },
-          query: jest.fn(),
-        },
-        cases: mockCasesContract(),
-        application: {
-          ...coreStartMock.application,
-          capabilities: {
-            ...coreStartMock.application.capabilities,
-            siem: {
-              crudEndpointExceptions: true,
-            },
-          },
+        osquery: {
+          isOsqueryAvailable: jest.fn(),
         },
       },
     });
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  test('it renders the take action dropdown', () => {
+    (useAlertExceptionActions as jest.Mock).mockReturnValue({ exceptionActionItems: [] });
+    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      investigateInTimelineActionItems: [],
+    });
+    (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
+
     const wrapper = render(
       <TestProviders>
-        <FlyoutFooter {...defaultProps} />
+        <DocumentDetailsContext.Provider value={mockContextValue}>
+          <PanelFooter isPreview={false} />
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
-    expect(wrapper.getByTestId('take-action-dropdown-btn')).toBeTruthy();
+    expect(wrapper.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
   });
 });

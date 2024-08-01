@@ -27,6 +27,7 @@ import {
   ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
   ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
 } from '../../../../common/components/toolbar/bulk_actions/translations';
+import { FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID } from '../test_ids';
 
 jest.mock('../../../../common/components/endpoint/host_isolation');
 jest.mock('../../../../common/components/endpoint/responder');
@@ -126,7 +127,9 @@ describe('take action dropdown', () => {
         <TakeActionDropdown {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="take-action-dropdown-btn"]').exists()).toBeTruthy();
+    expect(
+      wrapper.find(`[data-test-subj="${FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID}"]`).exists()
+    ).toBeTruthy();
   });
 
   test('should render takeActionButton with correct text', () => {
@@ -135,9 +138,9 @@ describe('take action dropdown', () => {
         <TakeActionDropdown {...defaultProps} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="take-action-dropdown-btn"]').first().text()).toEqual(
-      'Take action'
-    );
+    expect(
+      wrapper.find(`[data-test-subj="${FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID}"]`).first().text()
+    ).toEqual('Take action');
   });
 
   describe('should render take action items', () => {
@@ -149,7 +152,9 @@ describe('take action dropdown', () => {
           <TakeActionDropdown {...defaultProps} />
         </TestProviders>
       );
-      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
     });
     test('should render "Add to existing case"', async () => {
       await waitFor(() => {
@@ -319,7 +324,9 @@ describe('take action dropdown', () => {
           <TakeActionDropdown {...defaultProps} />
         </TestProviders>
       );
-      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      wrapper
+        .find(`button[data-test-subj="${FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID}"]`)
+        .simulate('click');
 
       return wrapper;
     };

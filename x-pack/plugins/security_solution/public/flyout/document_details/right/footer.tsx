@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { find } from 'lodash/fp';
+import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import type { Status } from '../../../../common/api/detection_engine';
 import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { TakeActionDropdown } from './components/take_action_dropdown';
@@ -180,7 +181,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
 
   return (
     <>
-      <StyledEuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
+      <StyledEuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             {dataAsNestedObject && (
@@ -236,3 +237,5 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
     </>
   );
 };
+
+PanelFooter.displayName = 'PanelFooter';
