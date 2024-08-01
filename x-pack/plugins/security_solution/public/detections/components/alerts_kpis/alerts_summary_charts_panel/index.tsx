@@ -13,7 +13,7 @@ import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { SeverityLevelPanel } from '../severity_level_panel';
-import { AlertsByTypePanel } from '../alerts_by_type_panel';
+import { AlertsByRulePanel } from '../alerts_by_rule_panel';
 import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 import type { AddFilterProps } from '../common/types';
@@ -97,7 +97,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
             />
           </StyledFlexItem>
           <StyledFlexItem>
-            <AlertsByTypePanel
+            <AlertsByRulePanel
               filters={filters}
               query={query}
               signalIndexName={signalIndexName}
