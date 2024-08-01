@@ -43,6 +43,7 @@ import {
   nonNullable,
   getColumnExists,
   findPreviousWord,
+  noCaseCompare,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -1526,7 +1527,7 @@ async function getOptionArgsSuggestions(
           innerText
         );
 
-        if (isNewExpression || findPreviousWord(innerText) === 'WITH') {
+        if (isNewExpression || noCaseCompare(findPreviousWord(innerText), 'WITH')) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
         }
 
