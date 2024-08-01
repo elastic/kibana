@@ -80,9 +80,7 @@ const CompatibleControlTypesComponent = ({
   const dataControlFactories = useMemo(() => {
     return getAllControlTypes()
       .map((type) => getControlFactory(type))
-      .filter((factory) => {
-        return isDataControlFactory(factory);
-      })
+      .filter((factory) => isDataControlFactory(factory))
       .sort(
         (
           { order: orderA = 0, getDisplayName: getDisplayNameA },
@@ -302,12 +300,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     const newCompatibleControlTypes =
                       fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
                     if (
-                      selectedControlType &&
-                      !newCompatibleControlTypes.includes(selectedControlType)
+                      !selectedControlType ||
+                      !newCompatibleControlTypes.includes(selectedControlType!)
                     ) {
-                      setSelectedControlType(
-                        fieldRegistry?.[field.name]?.compatibleControlTypes[0]
-                      );
+                      setSelectedControlType(newCompatibleControlTypes[0]);
                     }
 
                     /**
