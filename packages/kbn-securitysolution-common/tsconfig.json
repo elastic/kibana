@@ -11,7 +11,13 @@
     "**/*.ts",
     "**/*.tsx"
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/unified-data-table",
+    "@kbn/discover-utils",
+    "@kbn/expandable-flyout",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+  ],
   "exclude": [
     "target/**/*",
   ]

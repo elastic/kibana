@@ -93,7 +93,8 @@
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/securitysolution-common"
   ],
   "exclude": ["target/**/*"]
 }
