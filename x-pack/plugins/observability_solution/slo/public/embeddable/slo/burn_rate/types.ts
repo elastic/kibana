@@ -5,25 +5,24 @@
  * 2.0.
  */
 import {
-  SerializedTitles,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
-} from '@kbn/presentation-publishing';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { Subject } from 'rxjs';
-import {
-  type CoreStart,
-  IUiSettingsClient,
   ApplicationStart,
+  IUiSettingsClient,
   NotificationsStart,
+  type CoreStart,
 } from '@kbn/core/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import {
+  PublishesPanelTitle,
+  PublishesWritablePanelTitle,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
+import { Subject } from 'rxjs';
 
 export interface EmbeddableProps {
   sloId: string;
   sloInstanceId: string;
   duration: string;
   reloadSubject?: Subject<boolean>;
-  onRenderComplete?: () => void;
 }
 
 interface BurnRateCustomInput {

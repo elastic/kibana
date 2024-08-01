@@ -16,13 +16,7 @@ import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import { EmbeddableProps } from './types';
 
-export function BurnRate({
-  sloId,
-  sloInstanceId,
-  duration,
-  onRenderComplete,
-  reloadSubject,
-}: EmbeddableProps) {
+export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: EmbeddableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
@@ -32,14 +26,6 @@ export function BurnRate({
     sloId,
     instanceId: sloInstanceId,
   });
-
-  useEffect(() => {
-    if (!onRenderComplete) return;
-
-    if (!isLoading) {
-      onRenderComplete();
-    }
-  }, [isLoading, onRenderComplete]);
 
   useEffect(() => {
     reloadSubject?.subscribe(() => {
@@ -119,7 +105,7 @@ export function BurnRate({
                     onClick={() => setShowAllGroups(true)}
                     onClickAriaLabel={i18n.translate(
                       'xpack.slo.burnRateEmbeddable.moreInstanceAriaLabel',
-                      { defaultMessage: 'Show more instances' }
+                      { defaultMessage: 'Show more' }
                     )}
                   >
                     <FormattedMessage
