@@ -19,18 +19,18 @@ interface KibanaGridRowProps {
   rowIndex: number;
   gridRow: GridRow;
   activePanelId: string | undefined;
-  targetedGridIndex: number | undefined;
+  targetRowIndex: number | undefined;
   runtimeSettings: RuntimeGridSettings;
   setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
 }
 
 export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
   (
-    { rowIndex, gridRow, setInteractionEvent, activePanelId, runtimeSettings, targetedGridIndex },
+    { rowIndex, gridRow, setInteractionEvent, activePanelId, runtimeSettings, targetRowIndex },
     gridRef
   ) => {
     const { gutterSize, columnCount, rowHeight } = runtimeSettings;
-    const isGridTargeted = activePanelId && targetedGridIndex === rowIndex;
+    const isGridTargeted = activePanelId && targetRowIndex === rowIndex;
 
     // calculate row count based on the number of rows needed to fit all panels
     const rowCount = useMemo(() => {
@@ -70,21 +70,16 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
           {Object.values(gridRow).map((gridData) => (
             <KibanaGridElement
               activePanelId={activePanelId}
-              onResizeStart={(id, shift) => {
-                setInteractionEvent({
-                  mouseToOriginOffset: shift,
-                  originRowIndex: rowIndex,
-                  type: 'resize',
-                  id,
-                });
-              }}
-              onDragStart={(id, shift) => {
-                setInteractionEvent({
-                  mouseToOriginOffset: shift,
-                  originRowIndex: rowIndex,
-                  type: 'drag',
-                  id,
-                });
+              setInteractionEvent={(partialInteractionEvent) => {
+                if (partialInteractionEvent) {
+                  setInteractionEvent({
+                    ...partialInteractionEvent,
+                    targetRowIndex: rowIndex,
+                    originRowIndex: rowIndex,
+                  });
+                  return;
+                }
+                setInteractionEvent();
               }}
               gridData={gridData}
               key={gridData.id}

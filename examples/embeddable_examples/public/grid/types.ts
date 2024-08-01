@@ -68,14 +68,28 @@ export interface PanelInteractionEvent {
   id: string;
 
   /**
-   * The index of the grid row this panel interaction started in.
+   * The index of the grid row this panel interaction is targeting.
+   */
+  targetRowIndex: number;
+
+  /**
+   * The index of the grid row this panel interaction started on.
    */
   originRowIndex: number;
 
   /**
-   * stores an offset which can be used to translate the mouse position
-   *  in the drag event to the origin point of the panel: (top left in a
-   * drag operation, bottom right in a resize operation)
+   * The pixel rect of the panel being interacted with.
    */
-  mouseToOriginOffset: PixelCoordinate;
+  panelDiv: HTMLDivElement;
+
+  /**
+   * The pixel offsets from where the mouse was at drag start to the
+   * edges of the panel
+   */
+  mouseOffsets: {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+  };
 }

@@ -9,23 +9,45 @@
 import { EuiIcon, EuiPanel, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useRef } from 'react';
-import { GridData, PixelCoordinate } from './types';
+import React, { useCallback, useRef } from 'react';
+import { GridData, PanelInteractionEvent } from './types';
 
 export const KibanaGridElement = ({
   gridData,
-  onDragStart,
   activePanelId,
-  onResizeStart,
+  setInteractionEvent,
 }: {
   gridData: GridData;
   activePanelId: string | undefined;
-  onDragStart: (id: string, shift: PixelCoordinate) => void;
-  onResizeStart: (id: string, shift: PixelCoordinate) => void;
+  setInteractionEvent: (
+    interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex' | 'originRowIndex'>
+  ) => void;
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const ghostRef = useRef<HTMLDivElement>(null);
   const thisPanelActive = activePanelId === gridData.id;
+
+  const interactionStart = useCallback(
+    (type: 'drag' | 'resize', e: React.DragEvent) => {
+      if (!panelRef.current || !ghostRef.current) return;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.dropEffect = 'move';
+      e.dataTransfer.setDragImage(ghostRef.current, 0, 0);
+      const panelRect = panelRef.current.getBoundingClientRect();
+      setInteractionEvent({
+        type,
+        id: gridData.id,
+        panelDiv: panelRef.current,
+        mouseOffsets: {
+          top: e.clientY - panelRect.top,
+          left: e.clientX - panelRect.left,
+          right: e.clientX - panelRect.right,
+          bottom: e.clientY - panelRect.bottom,
+        },
+      });
+    },
+    [gridData.id, setInteractionEvent]
+  );
 
   return (
     <div
@@ -86,14 +108,7 @@ export const KibanaGridElement = ({
             justify-content: center;
             align-items: center;
           `}
-          onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.dropEffect = 'move';
-            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
-            const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().left;
-            const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().top;
-            onDragStart(gridData.id, { x: shiftX, y: shiftY });
-          }}
+          onDragStart={(e: React.DragEvent<HTMLDivElement>) => interactionStart('drag', e)}
         >
           <EuiIcon type="grabOmnidirectional" />
         </div>
@@ -101,14 +116,7 @@ export const KibanaGridElement = ({
         <div
           draggable="true"
           className="resizeHandle"
-          onDragStart={(e) => {
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.dropEffect = 'move';
-            e.dataTransfer.setDragImage(ghostRef.current!, 0, 0);
-            const shiftX = e.clientX - panelRef.current!.getBoundingClientRect().right;
-            const shiftY = e.clientY - panelRef.current!.getBoundingClientRect().bottom;
-            onResizeStart(gridData.id, { x: shiftX, y: shiftY });
-          }}
+          onDragStart={(e) => interactionStart('resize', e)}
           css={css`
             right: 0;
             bottom: 0;
