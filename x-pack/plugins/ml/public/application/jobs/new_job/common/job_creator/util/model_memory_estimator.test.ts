@@ -10,8 +10,8 @@ import { useFakeTimers } from 'sinon';
 import type { CalculatePayload } from './model_memory_estimator';
 import { modelMemoryEstimatorProvider } from './model_memory_estimator';
 import type { JobValidator } from '../../job_validator';
-import type { JobCreator } from '../job_creator';
 import type { MlApiServices } from '../../../../../services/ml_api_service';
+import type { JobCreator } from '../job_creator';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../../../services/ml_api_service', () => {

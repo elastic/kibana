@@ -574,7 +574,7 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   return path;
 }
 
-// This is to retain the singleton behavior of the previous direct instantion and export.
+// This is to retain the singleton behavior of the previous direct instantiation and export.
 let mlJobService;
 export const mlJobServiceFactory = (toastNotificationService, mlApiServices) => {
   if (mlJobService) return mlJobService;

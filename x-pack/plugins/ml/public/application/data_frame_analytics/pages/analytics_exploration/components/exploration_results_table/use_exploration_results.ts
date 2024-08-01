@@ -45,7 +45,6 @@ export const useExplorationResults = (
   dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: estypes.QueryDslQueryContainer
-  // toastNotifications: CoreSetup['notifications']['toasts']
 ): UseIndexDataReturnType => {
   const {
     services: {

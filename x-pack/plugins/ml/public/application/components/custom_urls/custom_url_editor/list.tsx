@@ -29,7 +29,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
 
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
@@ -71,9 +71,9 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     services: {
       http,
       data: { dataViews },
-      mlServices: { mlApiServices: ml },
     },
   } = useMlKibana();
+  const ml = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 

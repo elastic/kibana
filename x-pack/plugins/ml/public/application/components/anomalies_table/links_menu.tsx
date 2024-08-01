@@ -52,7 +52,7 @@ import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 
-import { mlJobServiceFactory } from '../../services/job_service';
+import { useMlJobService } from '../../services/job_service';
 import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
@@ -62,7 +62,6 @@ import { useMlApiContext, useMlKibana } from '../../contexts/kibana';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
-import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 
 const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
 const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
@@ -111,11 +110,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   } = kibana;
   const { getDataViewById, getDataViewIdFromName } = useMlIndexUtils();
   const ml = useMlApiContext();
-
-  const mlJobService = useMemo(() => {
-    return mlJobServiceFactory(toastNotificationServiceProvider(toasts), ml);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const mlJobService = useMlJobService();
 
   const job = useMemo(() => {
     if (props.selectedJob !== undefined) return props.selectedJob;

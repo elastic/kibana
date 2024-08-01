@@ -7,9 +7,8 @@
 
 import { get } from 'lodash';
 
-import type { MlApiServices } from '../../../../services/ml_api_service';
-
 import { escapeForElasticsearchQuery } from '../../../../util/string_utils';
+import type { MlApiServices } from '../../../../services/ml_api_service';
 
 interface SplitFieldWithValue {
   name: string;

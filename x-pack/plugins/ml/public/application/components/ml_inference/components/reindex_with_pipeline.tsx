@@ -29,7 +29,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { debounce } from 'lodash';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
@@ -82,10 +82,10 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       application: { capabilities },
       share,
       data,
-      mlServices: { mlApiServices: ml },
       docLinks: { links },
     },
   } = useMlKibana();
+  const ml = useMlApiContext();
   const { getIndices, reindexWithPipeline, hasPrivileges } = ml;
 
   const { displayErrorToast } = useToastNotificationService();
