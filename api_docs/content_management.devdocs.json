@@ -1846,9 +1846,9 @@
               ", savedObject: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindResult",
+                "section": "def-server.SavedObjectsFindResult",
                 "text": "SavedObjectsFindResult"
               },
               "<TSavedObjectAttributes>) => T"
@@ -1888,9 +1888,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindResult",
+                    "section": "def-server.SavedObjectsFindResult",
                     "text": "SavedObjectsFindResult"
                   },
                   "<TSavedObjectAttributes>"
@@ -1947,9 +1947,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               }
             ],
