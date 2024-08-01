@@ -9,22 +9,32 @@
 import { EuiHorizontalRule, EuiTitle, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { forwardRef } from 'react';
-import { useMemo } from 'react';
-import { KibanaGridElement } from './grid_layout_element';
-import { getGridBackgroundCSS } from './grid_layout_utils';
-import { GridRow, PanelInteractionEvent, RuntimeGridSettings } from './types';
+import React, { forwardRef, useMemo } from 'react';
+import { GridPanel } from './grid_panel';
+import { GridRowData, PanelInteractionEvent, RuntimeGridSettings } from './types';
 
-interface KibanaGridRowProps {
-  rowIndex: number;
-  gridRow: GridRow;
-  activePanelId: string | undefined;
-  targetRowIndex: number | undefined;
-  runtimeSettings: RuntimeGridSettings;
-  setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
-}
+const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
+const getGridBackgroundCSS = (settings: RuntimeGridSettings) => {
+  const { gutterSize, columnPixelWidth, rowHeight } = settings;
+  return css`
+    background-position: top -${gutterSize / 2}px left -${gutterSize / 2}px;
+    background-size: ${columnPixelWidth + gutterSize}px ${rowHeight + gutterSize}px;
+    background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
+      linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
+  `;
+};
 
-export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
+export const GridRow = forwardRef<
+  HTMLDivElement,
+  {
+    rowIndex: number;
+    gridRow: GridRowData;
+    activePanelId: string | undefined;
+    targetRowIndex: number | undefined;
+    runtimeSettings: RuntimeGridSettings;
+    setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
+  }
+>(
   (
     { rowIndex, gridRow, setInteractionEvent, activePanelId, runtimeSettings, targetRowIndex },
     gridRef
@@ -54,12 +64,12 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
             width: 100%;
             display: grid;
             gap: ${gutterSize}px;
+            justify-items: stretch;
             grid-template-columns: repeat(
               ${columnCount},
               calc((100% - ${gutterSize * (columnCount - 1)}px) / ${columnCount})
             );
             grid-template-rows: repeat(${rowCount}, ${rowHeight}px);
-            justify-items: stretch;
             background-color: ${isGridTargeted
               ? transparentize(euiThemeVars.euiColorSuccess, 0.05)
               : 'transparent'};
@@ -68,7 +78,9 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
           `}
         >
           {Object.values(gridRow).map((gridData) => (
-            <KibanaGridElement
+            <GridPanel
+              key={gridData.id}
+              panelData={gridData}
               activePanelId={activePanelId}
               setInteractionEvent={(partialInteractionEvent) => {
                 if (partialInteractionEvent) {
@@ -81,8 +93,6 @@ export const KibanaGridRow = forwardRef<HTMLDivElement, KibanaGridRowProps>(
                 }
                 setInteractionEvent();
               }}
-              gridData={gridData}
-              key={gridData.id}
             />
           ))}
         </div>

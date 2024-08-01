@@ -10,14 +10,14 @@ import { EuiIcon, EuiPanel, transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useRef } from 'react';
-import { GridData, PanelInteractionEvent } from './types';
+import { GridPanelData, PanelInteractionEvent } from './types';
 
-export const KibanaGridElement = ({
-  gridData,
+export const GridPanel = ({
+  panelData: gridData,
   activePanelId,
   setInteractionEvent,
 }: {
-  gridData: GridData;
+  panelData: GridPanelData;
   activePanelId: string | undefined;
   setInteractionEvent: (
     interactionData?: Omit<PanelInteractionEvent, 'targetRowIndex' | 'originRowIndex'>

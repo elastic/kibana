@@ -6,20 +6,7 @@
  * Side Public License, v 1.
  */
 
-export interface PixelCoordinate {
-  x: number;
-  y: number;
-}
-
-/**
- * A simple pixel rectangle, defined by a top-left origin and a width and height.
- */
-export interface PixelRect {
-  pixelOrigin: PixelCoordinate;
-  pixelWidth: number;
-  pixelHeight: number;
-}
-
+import { BehaviorSubject } from 'rxjs';
 export interface GridCoordinate {
   column: number;
   row: number;
@@ -30,15 +17,15 @@ export interface GridRect extends GridCoordinate {
   height: number;
 }
 
-export interface GridData extends GridRect {
+export interface GridPanelData extends GridRect {
   id: string;
 }
 
-export interface GridRow {
-  [key: string]: GridData;
+export interface GridRowData {
+  [key: string]: GridPanelData;
 }
 
-export type GridLayout = GridRow[];
+export type GridLayout = GridRowData[];
 
 export interface GridSettings {
   gutterSize: number;
@@ -52,6 +39,22 @@ export interface GridSettings {
  * the containing element.
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
+
+export interface GridLayoutStateManager {
+  hideDragPreview: () => void;
+  updatePreviewElement: (rect: {
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
+  }) => void;
+
+  gridLayout$: BehaviorSubject<GridLayout>;
+  runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+  rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
+  dragPreviewRef: React.MutableRefObject<HTMLDivElement | null>;
+  interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
+}
 
 /**
  * The information required to start a panel interaction.
