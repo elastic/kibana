@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQLNumberLiteral } from '../types';
+import { ESQLDecimalLiteral, ESQLIntegerLiteral, ESQLNumericLiteralType } from '../types';
 import { AstNodeParserFields, AstNodeTemplate } from './types';
 
 export class Builder {
@@ -25,16 +25,20 @@ export class Builder {
   });
 
   /**
-   * Constructs a number literal node.
+   * Constructs a integer literal node.
    */
   public static readonly numericLiteral = (
-    template: Omit<AstNodeTemplate<ESQLNumberLiteral>, 'literalType' | 'name'>
-  ): ESQLNumberLiteral => {
-    const node: ESQLNumberLiteral = {
+    template: Omit<
+      AstNodeTemplate<ESQLIntegerLiteral | ESQLDecimalLiteral>,
+      'literalType' | 'name'
+    >,
+    type: ESQLNumericLiteralType = 'integer'
+  ): ESQLIntegerLiteral | ESQLDecimalLiteral => {
+    const node: ESQLIntegerLiteral | ESQLDecimalLiteral = {
       ...template,
       ...Builder.parserFields(template),
       type: 'literal',
-      literalType: 'number',
+      literalType: type,
       name: template.value.toString(),
     };
 
