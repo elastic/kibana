@@ -12,48 +12,65 @@ import type { Observable } from 'rxjs';
 
 /**
  * The evaluation context to use when retrieving the flags.
+ *
+ * We use multi-context so that we can apply segmentation rules at different levels (`organization`/`kibana`).
+ * * `organization` includes any information that is common to all the projects/deployments in an organization. An example is the in_trial status.
+ * * The `kibana` context includes all the information that identifies a project/deployment. Examples are version, offering, and has_data.
+ * Kind helps us specify which sub-context should receive the new attributes.
+ * If no `kind` is provided, it defaults to `kibana`.
+ *
+ * @example Providing properties for both contexts
+ * {
+ *   kind: 'multi',
+ *   organization: {
+ *     key: 1234,
+ *     in_trial: true,
+ *   },
+ *   kibana: {
+ *     key: 12345567890,
+ *     version: 8.15.0,
+ *     buildHash: 'ffffffffaaaaaaaa',
+ *   },
+ * }
+ *
+ * @example Appending context to the organization sub-context
+ * {
+ *   kind: 'organization',
+ *   key: 1234,
+ *   in_trial: true,
+ * }
+ *
+ * @example Appending context to the `kibana` sub-context
+ * {
+ *   key: 12345567890,
+ *   version: 8.15.0,
+ *   buildHash: 'ffffffffaaaaaaaa',
+ *   }
+ * }
+ *
  * @public
  */
-export type EvaluationContext = OpenFeatureEvaluationContext & {
-  /**
-   * We use multi-context so that we can apply segmentation rules at different levels (`organization`/`kibana`).
-   * * `organization` includes any information that it's common to all the projects/deployments in an organization. An example is the in_trial status.
-   * * The `kibana` context includes all the information that identifies a project/deployment. Examples are version, offering, and has_data.
-   * Kind helps us specify which sub-context should receive the new attributes.
-   * If no `kind` is provided, it defaults to `kibana`.
-   * @public
-   *
-   * @example Providing properties for both contexts
-   * {
-   *   kind: 'multi',
-   *   organization: {
-   *     key: 1234,
-   *     in_trial: true,
-   *   },
-   *   kibana: {
-   *     key: 12345567890,
-   *     version: 8.15.0,
-   *     buildHash: 'ffffffffaaaaaaaa',
-   *   },
-   * }
-   *
-   * @example Appending context to the organization sub-context
-   * {
-   *   kind: 'organization',
-   *   key: 1234,
-   *   in_trial: true,
-   * }
-   *
-   * @example Appending context to the `kibana` sub-context
-   * {
-   *   key: 12345567890,
-   *   version: 8.15.0,
-   *   buildHash: 'ffffffffaaaaaaaa',
-   *   }
-   * }
-   */
-  kind?: 'multi' | 'organization' | 'kibana';
-};
+export type EvaluationContext =
+  | {
+      /**
+       * Multi-context format. The sub-contexts are provided in their nested properties.
+       */
+      kind: 'multi';
+      /**
+       * The Elastic Cloud organization-specific context.
+       */
+      organization?: OpenFeatureEvaluationContext;
+      /**
+       * The deployment/project-specific context.
+       */
+      kibana?: OpenFeatureEvaluationContext;
+    }
+  | (OpenFeatureEvaluationContext & {
+      /**
+       * The sub-context that it's updated. Defaults to `kibana`.
+       */
+      kind?: 'organization' | 'kibana';
+    });
 
 /**
  * Setup contract of the Feature Flags Service
