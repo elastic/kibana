@@ -44,7 +44,7 @@ export const getOptionsListControlFactory = (
 ): DataControlFactory<OptionsListControlState, OptionsListControlApi> => {
   return {
     type: OPTIONS_LIST_CONTROL_TYPE,
-    order: 10, // should always be first, since this is the most popular control
+    order: 3, // should always be first, since this is the most popular control
     getIconType: () => 'editorChecklist',
     getDisplayName: OptionsListStrings.control.getDisplayName,
     isFieldCompatible: (field) => {
