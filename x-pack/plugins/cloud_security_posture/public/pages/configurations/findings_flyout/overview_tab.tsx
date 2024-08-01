@@ -32,7 +32,7 @@ import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import {
-  CisKubernetesIcons,
+  BenchmarkIcons,
   CodeBlock,
   CspFlyoutMarkdown,
   EMPTY_VALUE,
@@ -92,7 +92,7 @@ const getDetailsList = (
     }),
     description:
       data.rule?.benchmark?.id && data.rule?.benchmark?.name ? (
-        <CisKubernetesIcons
+        <BenchmarkIcons
           benchmarkId={data.rule?.benchmark?.id}
           benchmarkName={data.rule?.benchmark?.name}
         />

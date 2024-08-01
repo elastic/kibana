@@ -11,12 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
-import {
-  CisKubernetesIcons,
-  CspFlyoutMarkdown,
-  EMPTY_VALUE,
-  RuleNameLink,
-} from './findings_flyout';
+import { BenchmarkIcons, CspFlyoutMarkdown, EMPTY_VALUE, RuleNameLink } from './findings_flyout';
 
 export const getRuleList = (
   rule?: CspFinding['rule'],
@@ -77,7 +72,7 @@ export const getRuleList = (
     }),
     description:
       rule?.benchmark?.id && rule?.benchmark?.name ? (
-        <CisKubernetesIcons benchmarkId={rule.benchmark.id} benchmarkName={rule.benchmark.name} />
+        <BenchmarkIcons benchmarkId={rule.benchmark.id} benchmarkName={rule.benchmark.name} />
       ) : (
         EMPTY_VALUE
       ),

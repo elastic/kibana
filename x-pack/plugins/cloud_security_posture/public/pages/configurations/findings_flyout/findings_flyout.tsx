@@ -105,7 +105,7 @@ export const CspFlyoutMarkdown: React.FC<PropsOf<typeof EuiMarkdownFormat>> = (p
   <EuiMarkdownFormat textSize="s" {...props} />
 );
 
-export const CisKubernetesIcons = ({
+export const BenchmarkIcons = ({
   benchmarkId,
   benchmarkName,
 }: {
@@ -197,6 +197,8 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
+const isNativeCspFinding = (finding: CspFinding) => finding.data_stream.dataset === CSP_DATASET;
+
 const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
   const { euiTheme } = useEuiTheme();
   const datasetDisplayName = getDatasetDisplayName(finding.data_stream.dataset);
@@ -213,7 +215,7 @@ const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
         <span style={{ color: euiTheme.colors.text }}>
           <FormattedMessage
             id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {datasource}"
+            defaultMessage="Some fields are not provided by {datasource}"
             values={{
               datasource: datasetDisplayName || 'the data source',
             }}
@@ -277,7 +279,7 @@ export const FindingsRuleFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
-        {['overview', 'rule'].includes(tab.id) && (
+        {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
           <div style={{ marginBottom: 16 }}>
             <MissingFieldsCallout finding={finding} />
           </div>

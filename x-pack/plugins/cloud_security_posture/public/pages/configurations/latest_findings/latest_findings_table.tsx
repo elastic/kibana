@@ -60,9 +60,8 @@ const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabe
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
-    if (!finding?.result?.evaluation) return <></>;
 
-    return <CspEvaluationBadge type={finding.result.evaluation} />;
+    return <CspEvaluationBadge type={finding.result?.evaluation} />;
   },
   'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
