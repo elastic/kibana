@@ -132,9 +132,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should hide fields with null values ', async function () {
         // id is null
-        await PageObjects.discover.findFieldByNameInDocViewer('id');
+        await PageObjects.discover.findFieldByNameInDocViewer('machine');
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
         });
         const hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await hideNullValuesSwitch.click();
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 1;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
     });
