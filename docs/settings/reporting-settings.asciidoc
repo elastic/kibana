@@ -63,7 +63,7 @@ xpack.reporting.encryptionKey: "something_secret"
 === Security settings
 
 Reporting has two forms of access control: each user can only access their own reports,
-and custom roles determine who has privilege to generate reports. When Reporting is configured with
+and custom roles determine who has the privilege to generate reports. When Reporting is configured with
 <<kibana-privileges, {kib} application privileges>>, you can control the spaces and applications where users
 are allowed to generate reports.
 
@@ -113,12 +113,12 @@ reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.
 security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionKey`>>.
 
 `xpack.reporting.queue.pollInterval`::
-Specifies the {time-units}[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
+Specifies the {time-units}[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as a number of milliseconds. Defaults to `3s`.
 
 [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}::
 {time-units}[How long] each worker has to produce a report. If your machine is slow or under heavy load, you
 might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked
-as a failure and no download will be available. Can be specified as number of milliseconds. Defaults to `4m`.
+as a failure and no download will be available. Can be specified as a number of milliseconds. Defaults to `4m`.
 
 [float]
 [[reporting-capture-settings]]
@@ -179,9 +179,9 @@ settings that allow the headless browser to connect to {kib} through a proxy, ra
 [NOTE]
 ============
 The `xpack.reporting.kibanaServer` settings are optional. Take caution when editing these settings. Adding
-these settings can cause the {report-features} to fail. If report fail,
-inspect the server logs. The full {kib} URL that Reporting is attempting to
-  open is logged during report execution.
+these settings can cause the PDF/PNG {report-features} to fail. If reports fail, inspect the server logs and
+pay attention to errors regarding the headless browser being unable to connect to the server. The full {kib}
+URL that Reporting is attempting to open is logged during report execution.
 ============
 
 `xpack.reporting.kibanaServer.port`:: The port for accessing {kib}.port`>> value.
@@ -257,7 +257,7 @@ The `file:` protocol is always denied, even if no network policy is configured.
 
 [[xpack-reporting-csv]] `xpack.reporting.csv.maxSizeBytes` {ess-icon}::
 The maximum {byte-units}[byte size] of a CSV file before being truncated. This setting exists to prevent large
-exports from causing performance and storage issues. Can be specified as number of bytes. Defaults to `250mb`.
+exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
 
 [NOTE]
 ============
@@ -289,7 +289,7 @@ Amount of {time-units}[time] allowed before {kib} cleans the scroll context duri
 
 [NOTE]
 ============
-If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as is possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
+If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
 ============
 
 `xpack.reporting.csv.scroll.strategy`::
