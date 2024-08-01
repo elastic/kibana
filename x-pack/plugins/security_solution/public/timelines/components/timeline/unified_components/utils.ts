@@ -13,20 +13,32 @@ import { GRID_STYLE } from '@kbn/unified-data-table/src/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { getEventTypeRowClassName } from './data_table/get_event_type_row_classname';
 
-interface TransformTimelineItemToUnifiedRows {
-  events: TimelineItem[];
-  dataView: DataView;
-}
+type TransformTimelineItemToUnifiedRows =
+  | {
+      events: TimelineItem[];
+      dataView: DataView;
+      isTextBasedQuery: false;
+    }
+  | {
+      events: DataTableRecord;
+      dataView: DataView;
+      isTextBasedQuery: true;
+    };
 
 export interface TransformTimelineItemToUnifiedRowsReturn {
-  tableRows: Array<DataTableRecord & TimelineItem>;
+  tableRows: Array<DataTableRecord & TimelineItem> | DataTableRecord;
   tableStylesOverride: EuiDataGridStyle;
 }
 
 export function transformTimelineItemToUnifiedRows(
   args: TransformTimelineItemToUnifiedRows
 ): TransformTimelineItemToUnifiedRowsReturn {
-  const { events, dataView } = args;
+  const { events, dataView, isTextBasedQuery } = args;
+
+  if (isTextBasedQuery) {
+    return { tableRows: events, tableStylesOverride: GRID_STYLE };
+  }
+
   const rowClasses: EuiDataGridStyle['rowClasses'] = {};
   const unifiedDataTableRows = events.map(({ _id, _index, ecs, data }, index) => {
     const _source = ecs as unknown as Record<string, unknown>;

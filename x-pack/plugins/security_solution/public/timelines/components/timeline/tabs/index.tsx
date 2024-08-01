@@ -167,9 +167,9 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             {unifiedComponentsInTimelineDisabled ? (
-              <UnifiedEsqlTab timelineId={timelineId} />
-            ) : (
               <EsqlTab timelineId={timelineId} />
+            ) : (
+              <UnifiedEsqlTab timelineId={timelineId} />
             )}
           </HideShowContainer>
         )}

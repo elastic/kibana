@@ -148,13 +148,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     // TODO: Test just passing events instead of the transform util for the text based query
     const { tableRows, tableStylesOverride } = useMemo(
-      () =>
-        isTextBasedQuery
-          ? {
-              ...transformTimelineItemToUnifiedRows({ events, dataView }),
-              tableStylesOverride: undefined,
-            }
-          : transformTimelineItemToUnifiedRows({ events, dataView }),
+      () => transformTimelineItemToUnifiedRows({ events, dataView, isTextBasedQuery }),
       [events, dataView, isTextBasedQuery]
     );
 
