@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/inference-plugin",
-  "owner": "@elastic/core",
+  "owner": "@elastic/kibana-core",
   "plugin": {
     "id": "inference",
     "server": true,
