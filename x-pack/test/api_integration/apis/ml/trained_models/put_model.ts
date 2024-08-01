@@ -15,8 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/189637
-  describe.skip('PUT trained_models', () => {
+  describe('PUT trained_models', function () {
     before(async () => {
       await ml.api.initSavedObjects();
       await ml.testResources.setKibanaTimeZoneToUTC();
