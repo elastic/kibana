@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import React from 'react';
 import backgroundImageUrl from './background.svg';
-import { Header } from './header';
 
-export function HeaderSection() {
+export function Header() {
   return (
     <EuiPageTemplate.Section
       paddingSize="xl"
@@ -26,7 +33,26 @@ export function HeaderSection() {
       restrictWidth
     >
       <EuiSpacer size="xl" />
-      <Header />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
+            <h1>
+              <FormattedMessage
+                id="xpack.observability_onboarding.experimentalOnboardingFlow.addObservabilityDataTitleLabel"
+                defaultMessage="Add Observability data"
+              />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.observability_onboarding.experimentalOnboardingFlow.startIngestingDataIntoTextLabel"
+              defaultMessage="Start ingesting Observability data into Elastic. Return to this page at any time by clicking Add data."
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem />
+      </EuiFlexGroup>
     </EuiPageTemplate.Section>
   );
 }

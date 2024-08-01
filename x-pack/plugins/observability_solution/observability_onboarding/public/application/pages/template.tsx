@@ -9,7 +9,7 @@ import { EuiPageTemplate, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { Footer } from '../footer/footer';
-import { HeaderSection } from '../header/header_section';
+import { Header } from '../header/header_section';
 
 interface TemplateProps {
   customHeader?: React.ReactNode;
@@ -22,7 +22,7 @@ export const PageTemplate: React.FC<TemplateProps> = ({ children, customHeader }
         padding-top: 0px !important;
       `}
     >
-      {!!customHeader ? customHeader : <HeaderSection />}
+      {!!customHeader ? customHeader : <Header />}
       <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
         {children}
       </EuiPageTemplate.Section>

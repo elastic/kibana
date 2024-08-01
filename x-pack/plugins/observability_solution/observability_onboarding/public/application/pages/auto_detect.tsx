@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { PageTemplate } from './template';
-import { CustomHeaderSection } from '../header/custom_header';
+import { CustomHeader } from '../header/custom_header';
 import { AutoDetectPanel } from '../quickstart_flows/auto_detect';
 
 export const AutoDetectPage = () => (
   <PageTemplate
     customHeader={
-      <CustomHeaderSection
+      <CustomHeader
         euiIconType="consoleApp"
         headlineCopy={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.system.text',

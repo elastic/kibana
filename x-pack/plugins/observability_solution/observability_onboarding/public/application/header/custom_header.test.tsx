@@ -8,12 +8,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { Wrapper } from '../shared/test_wrapper';
-import { CustomHeaderSection } from './custom_header';
+import { CustomHeader } from './custom_header';
 
 describe('CustomHeaderSection', () => {
   it('should render the section for logo text', () => {
     const { getByText } = render(
-      <CustomHeaderSection
+      <CustomHeader
         logo="kubernetes"
         headlineCopy="Setting up Kubernetes with Elastic Agent"
         captionCopy="This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host"
@@ -33,7 +33,7 @@ describe('CustomHeaderSection', () => {
 
   it('should render the section for euiIconType text', () => {
     const { getByText, container } = render(
-      <CustomHeaderSection
+      <CustomHeader
         euiIconType="consoleApp"
         headlineCopy="Auto-detect logs and metrics"
         captionCopy="This installation scans your host and auto-detects log and metric files."

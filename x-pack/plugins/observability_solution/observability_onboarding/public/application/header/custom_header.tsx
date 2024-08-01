@@ -15,19 +15,22 @@ import {
   useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import { BackButton } from '../shared/back_button';
 import { LogoIcon } from '../shared/logo_icon';
-import type { CustomHeaderSection } from './types';
+import type { SupportedLogo } from '../shared/logo_icon';
 
-export function CustomHeaderSection({
-  euiIconType,
-  logo,
-  headlineCopy,
-  captionCopy,
-}: CustomHeaderSection) {
+interface Props {
+  logo?: SupportedLogo;
+  euiIconType?: EuiIconType;
+  headlineCopy: string;
+  captionCopy: string;
+}
+
+export function CustomHeader({ euiIconType, logo, headlineCopy, captionCopy }: Props) {
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
   return (
