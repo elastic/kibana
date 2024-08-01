@@ -68,7 +68,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.logs.chart.logsErrorRate', {
-        defaultMessage: 'Log Error Rate',
+        defaultMessage: 'Log Error %',
       }),
     },
   ];
@@ -80,7 +80,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
           <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.apm.logErrorRate', {
-                defaultMessage: 'Log error rate',
+                defaultMessage: 'Log error %',
               })}
             </h2>
           </EuiTitle>
