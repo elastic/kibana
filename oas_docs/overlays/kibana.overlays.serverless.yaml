@@ -4,6 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+  # Clean up server definitions
   - target: '$.servers.*'
     description: Remove all servers so we can add our own.
     remove: true
@@ -14,6 +15,11 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
+  # Remove operation-level security definitions
+  - target: "$.paths['/api/status']['get'].security"
+    description: Remove system security definitions
+    remove: true
+  # Add a document-level security definition
   - target: '$.components.securitySchemes'
     description: Add an API key security scheme
     update:
@@ -27,4 +33,8 @@ actions:
     update:
       security:
         - apiKeyAuth: []
-
+  # Mark all operations as beta
+  - target: '$.paths[*][*]'
+    description: Add x-beta
+    update:
+      x-beta: true
