@@ -207,25 +207,25 @@
           "(api: Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTimeRange",
+            "section": "def-public.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesFilters",
+            "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
           " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<",
@@ -247,17 +247,17 @@
           " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasParentApi",
+            "section": "def-public.HasParentApi",
             "text": "HasParentApi"
           },
           "<Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUnifiedSearch",
+            "section": "def-public.PublishesUnifiedSearch",
             "text": "PublishesUnifiedSearch"
           },
           ">>>, options: ",
@@ -293,25 +293,25 @@
               "Partial<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesTimeRange",
+                "section": "def-public.PublishesTimeRange",
                 "text": "PublishesTimeRange"
               },
               " & ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesFilters",
+                "section": "def-public.PublishesFilters",
                 "text": "PublishesFilters"
               },
               " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishingSubject",
+                "section": "def-public.PublishingSubject",
                 "text": "PublishingSubject"
               },
               "<",
@@ -333,17 +333,17 @@
               " | undefined>; } & ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.HasParentApi",
+                "section": "def-public.HasParentApi",
                 "text": "HasParentApi"
               },
               "<Partial<",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishesUnifiedSearch",
+                "section": "def-public.PublishesUnifiedSearch",
                 "text": "PublishesUnifiedSearch"
               },
               ">>>"
@@ -604,9 +604,9 @@
               "((dashboardId?: string | undefined) => ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.EmbeddableAppContext",
+                "section": "def-public.EmbeddableAppContext",
                 "text": "EmbeddableAppContext"
               },
               ") | undefined"
@@ -829,33 +829,33 @@
           " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.HasType",
+            "section": "def-public.HasType",
             "text": "HasType"
           },
           "<\"dashboard\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesTimeRange",
+            "section": "def-public.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesFilters",
+            "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
           " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
+            "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
           "<",
@@ -877,17 +877,17 @@
           " | undefined>; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
+            "section": "def-public.PublishesPanelTitle",
             "text": "PublishesPanelTitle"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesSavedObjectId",
+            "section": "def-public.PublishesSavedObjectId",
             "text": "PublishesSavedObjectId"
           },
           ">"
