@@ -81,7 +81,7 @@ export const getSearchControlFactory = (
     buildControl: async (initialState, buildApi, uuid, parentApi) => {
       const searchString = new BehaviorSubject<string | undefined>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
-        initialState.searchTechnique
+        initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
       );
       const editorStateManager = { searchTechnique };
 
@@ -122,6 +122,7 @@ export const getSearchControlFactory = (
             searchTechnique,
             (newTechnique: SearchControlTechniques | undefined) =>
               searchTechnique.next(newTechnique),
+            (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
           ],
           searchString: [
             searchString,
@@ -143,7 +144,7 @@ export const getSearchControlFactory = (
           if (currentDataView && currentField) {
             if (newSearchString) {
               api.setOutputFilter(
-                currentSearchTechnnique === 'match' || currentSearchTechnnique === undefined
+                currentSearchTechnnique === 'match'
                   ? {
                       query: { match: { [currentField]: { query: newSearchString } } },
                       meta: { index: currentDataView.id },
