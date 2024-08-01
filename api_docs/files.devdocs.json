@@ -5403,6 +5403,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/files/index.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/files/index.test.ts"
             }
           ],
           "children": [
