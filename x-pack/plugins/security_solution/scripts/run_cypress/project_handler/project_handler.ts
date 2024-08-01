@@ -47,6 +47,11 @@ export interface Credentials {
   password: string;
 }
 
+export enum Environment {
+  Production = 'prod',
+  QA = 'qa',
+}
+
 export class ProjectHandler {
   private readonly DEFAULT_ERROR_MSG: string =
     'The method needs to be overriden when the class is inherited!';
