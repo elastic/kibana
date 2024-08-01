@@ -45,5 +45,5 @@ function getVersionedOutputFilePath(outputFilePath: string, version: string): st
 
   const filename = basename(outputFilePath);
 
-  return outputFilePath.replace(filename, `${version}-${filename}`);
+  return outputFilePath.replace(filename, `${version}_${filename}`);
 }

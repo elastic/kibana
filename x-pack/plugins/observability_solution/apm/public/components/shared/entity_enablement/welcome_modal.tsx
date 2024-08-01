@@ -95,7 +95,7 @@ export function Welcome({
           <p>
             {i18n.translate('xpack.apm.welcome.body', {
               defaultMessage:
-                'You can now see services detected from logs alongside services instrumented with APM our new service inventory so you can view all of your services in a single place.',
+                'You can now see services detected from logs alongside your APM-instrumented services in a single inventory so you can view all of your services in one place.',
             })}
           </p>
         </EuiText>

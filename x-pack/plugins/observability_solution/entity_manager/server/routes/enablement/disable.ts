@@ -9,7 +9,6 @@ import { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
 import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../../lib/auth';
-import { ERROR_USER_NOT_AUTHORIZED } from '../../../common/errors';
 import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_entity_definition';
 import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
@@ -33,10 +32,8 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const canDisable = await canDisableEntityDiscovery(esClient);
         if (!canDisable) {
-          return res.ok({
+          return res.forbidden({
             body: {
-              success: false,
-              reason: ERROR_USER_NOT_AUTHORIZED,
               message:
                 'Current Kibana user does not have the required permissions to disable entity discovery',
             },
