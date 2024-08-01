@@ -1,11 +1,11 @@
 openapi: 3.0.0
 info:
   title: Perform Rule Upgrade API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/detection_engine/rules/prebuilt/_perform_upgrade:
+  /internal/detection_engine/prebuilt_rules/upgrade/_perform:
     post:
-      x-labels: [ess]
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PerformRuleUpgrade
       summary: Perform rule upgrade
@@ -32,6 +32,12 @@ components:
   schemas:
     PickVersionValues:
       type: string
+      description: |
+        The version of the rule (or a specific field within a rule) to use for the upgrade.
+        BASE - The version of a rule authored by Elastic as it is installed from the Prebuilt Security Detection Rules package, with no user customizations.
+        CURRENT - The version of a rule as it is currently installed on the system. Consists of the base version of the rule plus all user customizations.
+        TARGET - The updated version of a rule as it is distributed in the next version of the Prebuilt Security Detection Rules package.
+        MERGED - The output version of a rule (or any of its fields) as a three way merge of the base, current, and target versions. This option is not always possible: if the three way merge results in a conflict which can't be automatically solved, the update will be rejected.
       enum: [BASE, CURRENT, TARGET, MERGED]
 
     RuleUpgradeSpecifier:
@@ -42,10 +48,13 @@ components:
         - version
       properties:
         rule_id:
+          description: Rule's unique identifier. Should match the rule's signature ID returned from the Review Rule Upgrade API endpoint.
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
         revision:
+          description: Rule's current revision number. Should match the rule's revision number returned from the Review Rule Upgrade API endpoint.
           type: number
         version:
+          description: The number of the version to which the rule is being upgraded to. Should match the rule's version number returned from the Review Rule Upgrade API endpoint.
           $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleVersion'
         pick_version:
           $ref: '#/components/schemas/PickVersionValues'
