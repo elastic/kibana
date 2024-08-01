@@ -56,7 +56,7 @@ export function AddLayerButton({
     icon,
     disabled,
     toolTipContent,
-  }: typeof supportedLayers[0]) => {
+  }: (typeof supportedLayers)[0]) => {
     return {
       panel: AddLayerPanelType.selectAnnotationMethod,
       toolTipContent,
@@ -83,7 +83,7 @@ export function AddLayerButton({
     icon,
     disabled,
     toolTipContent,
-  }: typeof supportedLayers[0]) => {
+  }: (typeof supportedLayers)[0]) => {
     return {
       panel: AddLayerPanelType.selectVisualizationType,
       toolTipContent,

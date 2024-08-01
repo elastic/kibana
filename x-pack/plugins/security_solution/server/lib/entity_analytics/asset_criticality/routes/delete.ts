@@ -8,6 +8,10 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  DeleteAssetCriticalityRecordRequestQuery,
+  InternalDeleteAssetCriticalityRecordRequestQuery,
+} from '../../../../../common/api/entity_analytics';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
@@ -16,7 +20,6 @@ import {
   ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
-import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -26,7 +29,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 type DeleteHandler = (
   context: SecuritySolutionRequestHandlerContext,
   request: {
-    query: DeleteAssetCriticalityRecord;
+    query: DeleteAssetCriticalityRecordRequestQuery;
   },
   response: KibanaResponseFactory
 ) => Promise<IKibanaResponse>;
@@ -88,7 +91,7 @@ export const assetCriticalityInternalDeleteRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecord),
+            query: buildRouteValidationWithZod(InternalDeleteAssetCriticalityRecordRequestQuery),
           },
         },
       },
@@ -113,7 +116,7 @@ export const assetCriticalityPublicDeleteRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecord),
+            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecordRequestQuery),
           },
         },
       },

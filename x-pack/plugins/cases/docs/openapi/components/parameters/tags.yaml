@@ -8,5 +8,4 @@ schema:
       items:
         type: string
       maxItems: 100
-      examples:
-        - [ tag-1 ]
+example: tag-1

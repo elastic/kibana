@@ -7,10 +7,7 @@
     "id": "reporting",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "reporting"
-    ],
+    "configPath": ["xpack", "reporting"],
     "requiredPlugins": [
       "data",
       "discover",
@@ -22,18 +19,9 @@
       "taskManager",
       "screenshotMode",
       "share",
-      "features",
+      "features"
     ],
-    "optionalPlugins": [
-      "security",
-      "spaces",
-      "usageCollection",
-      "screenshotting",
-    ],
-    "requiredBundles": [
-      "embeddable",
-      "esUiShared",
-      "kibanaReact"
-    ]
+    "optionalPlugins": ["security", "spaces", "usageCollection", "screenshotting"],
+    "requiredBundles": ["embeddable", "esUiShared", "kibanaReact"]
   }
 }
