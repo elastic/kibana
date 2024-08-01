@@ -250,7 +250,7 @@ export const cli = () => {
       const environment = process.env.ENVIRONMENT ?? : 'qa';
 
       const PROXY_URL = process.env.PROXY_URL;
-      const PROXY_SECRET = process.env.PROXY_SECRET || undefined;
+      const PROXY_SECRET = process.env.PROXY_SECRET;
       const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID || undefined;
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
