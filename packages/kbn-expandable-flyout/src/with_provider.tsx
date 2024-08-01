@@ -8,13 +8,17 @@
 
 import React from 'react';
 import { ComponentType } from 'react';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { ExpandableFlyoutContextProviderProps } from './context';
+import { ExpandableFlyoutProvider } from './provider';
 
-export const withExpandableFlyoutProvider = <T extends {}>(Components: ComponentType<T>) => {
+export const withExpandableFlyoutProvider = <T extends {}>(
+  Component: ComponentType<T>,
+  expandableProviderProps?: ExpandableFlyoutContextProviderProps
+) => {
   return (props: T) => {
     return (
-      <ExpandableFlyoutProvider>
-        <Components {...props} />
+      <ExpandableFlyoutProvider {...(expandableProviderProps ?? {})}>
+        <Component {...props} />
       </ExpandableFlyoutProvider>
     );
   };

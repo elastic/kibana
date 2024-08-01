@@ -7,4 +7,4 @@
  */
 
 export * from './button';
-export * from './with_flyout';
+export * from './with_expandable_flyout';

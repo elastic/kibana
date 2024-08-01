@@ -9,19 +9,22 @@
 import React, { useCallback, useMemo } from 'react';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { PropsWithChildren } from 'react';
-import { ExpandableFlyoutProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import {
+  ExpandableFlyout,
+  type ExpandableFlyoutProps,
+  useExpandableFlyoutApi,
+  withExpandableFlyoutProvider,
+} from '@kbn/expandable-flyout';
 import { HostRightPanel, HostRightPanelProps } from '../../../flyout/panels';
-import { DiscoverFlyout } from '../../../flyout';
 import { HostDetailsButton } from './button';
-import { withExpandableFlyoutProvider } from '../../../common';
 
 const HostCellWithFlyoutRendererComp = React.memo(function HostCellWithFlyoutRendererComp(
   props: PropsWithChildren<DataGridCellValueElementProps>
 ) {
   const hostName = getFieldValue(props.row, 'host.name');
 
-  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const onClick = useCallback(() => {
     openFlyout({
@@ -47,7 +50,7 @@ const HostCellWithFlyoutRendererComp = React.memo(function HostCellWithFlyoutRen
 
   return (
     <>
-      <DiscoverFlyout panels={panels} />
+      <ExpandableFlyout registeredPanels={panels} paddingSize="none" />
       <HostDetailsButton onClick={onClick}>{hostName}</HostDetailsButton>
     </>
   );
