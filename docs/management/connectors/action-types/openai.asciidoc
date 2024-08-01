@@ -40,6 +40,13 @@ OpenAI connectors have the following configuration properties:
 
 Name:: The name of the connector.
 OpenAI provider:: The OpenAI API provider, either OpenAI or Azure OpenAI.
+
+[NOTE]
+====
+Elastic provides no official support for connecting to a private LLM, except
+when using [Elastic Security’s built-in AI tools](https://www.elastic.co/guide/en/security/current/ai-for-security.html).
+====
+
 URL:: The OpenAI request URL.
 Default model:: (optional) The default model to use for requests. This option is available only when the provider is `OpenAI`.
 API key:: The OpenAI or Azure OpenAI API key for authentication.
