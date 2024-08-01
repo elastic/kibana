@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { z } from '@kbn/zod';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { EndpointOf, ReturnOf, RouteRepositoryClient } from '@kbn/server-route-repository-utils';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 
@@ -239,7 +240,7 @@ assertType<ReturnOf<TestRepository, 'GET /internal/endpoint_returning_kibana_res
 
 // RouteRepositoryClient
 
-type TestClient = RouteRepositoryClient<TestRepository, { timeout: number }>;
+type TestClient = RouteRepositoryClient<TestRepository, HttpFetchOptions & { timeout: number }>;
 
 const client: TestClient = {} as any;
 
@@ -260,17 +261,17 @@ client('GET /internal/endpoint_without_params', {
 });
 
 // It requires params for routes with a params codec
+// @ts-expect-error property 'serviceName' is missing in type '{}'
 client('GET /internal/endpoint_with_params', {
   params: {
-    // @ts-expect-error property 'serviceName' is missing in type '{}'
     path: {},
   },
   timeout: 1,
 });
 
+// @ts-expect-error property 'serviceName' is missing in type '{}'
 client('GET /internal/endpoint_with_params_zod', {
   params: {
-    // @ts-expect-error property 'serviceName' is missing in type '{}'
     path: {},
   },
   timeout: 1,
@@ -294,10 +295,10 @@ client('GET /internal/endpoint_with_optional_params', {
   },
 });
 
+// @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
 client('GET /internal/endpoint_with_optional_params_zod', {
   timeout: 1,
   params: {
-    // @ts-expect-error Object literal may only specify known properties, and 'path' does not exist in type
     path: '',
   },
 });

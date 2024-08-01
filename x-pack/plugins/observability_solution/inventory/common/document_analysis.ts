@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-export interface EntityTypeDefinition {
-  type: string;
-  label: string;
-  icon: string;
-  count: number;
-}
-
-export interface EntityDefinition {
-  type: string;
-  field: string;
-  filter?: string;
-  index: string[];
+export interface DocumentAnalysis {
+  total: number;
+  sampled: number;
+  fields: Array<{
+    name: string;
+    types: string[];
+    cardinality: number | null;
+    values: Array<string | number | boolean>;
+    empty: boolean;
+  }>;
 }

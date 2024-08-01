@@ -8,6 +8,8 @@ import * as t from 'io-ts';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { InventoryPageTemplate } from '../components/inventory_page_template';
+import { DatasetView } from '../components/dataset_view';
+import { DatasetAnalysisView } from '../components/dataset_analysis_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -21,12 +23,28 @@ const inventoryRoutes = {
       </InventoryPageTemplate>
     ),
     children: {
-      '/': {
+      '/updates': {
         element: <></>,
       },
-      '/datasets': {
+      '/dataset/analyze': {
+        element: <DatasetAnalysisView />,
+        params: t.type({
+          query: t.type({
+            indexPatterns: t.string,
+          }),
+        }),
+      },
+      '/dataset': {
+        element: <DatasetView />,
+      },
+      '/{type}': {
         element: <></>,
-        params: t.partial({}),
+        params: t.type({
+          path: t.type({ type: t.string }),
+        }),
+      },
+      '/': {
+        element: <></>,
       },
     },
   },

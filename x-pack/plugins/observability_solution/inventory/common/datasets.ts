@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-export interface EntityTypeDefinition {
-  type: string;
-  label: string;
-  icon: string;
-  count: number;
+export enum DatasetType {
+  dataStream = 'dataStream',
+  alias = 'alias',
 }
 
-export interface EntityDefinition {
-  type: string;
-  field: string;
-  filter?: string;
-  index: string[];
+export interface Dataset {
+  type: DatasetType;
+  name: string;
+  creation_date: number | null;
 }

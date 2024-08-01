@@ -31,6 +31,9 @@
     "@kbn/i18n",
     "@kbn/deeplinks-observability",
     "@kbn/entityManager-plugin",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/server-route-repository-utils",
+    "@kbn/data-views-plugin"
   ]
 }

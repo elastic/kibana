@@ -17,6 +17,35 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { EntityTypeDefinition } from '../../../common/entities';
+import { useInventoryRouter } from '../../hooks/use_inventory_router';
+
+export function EntityTypeListItem({
+  href,
+  icon,
+  label,
+  count,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+  count: number;
+}) {
+  return (
+    <EuiLink data-test-subj="inventoryEntityTypeListBaseLink" href={href}>
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon size="s" type={icon} />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiText size="s">{label}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{count}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiLink>
+  );
+}
 
 export function EntityTypeListBase({
   definitions,
@@ -27,6 +56,7 @@ export function EntityTypeListBase({
   definitions?: EntityTypeDefinition[];
   error?: Error;
 }) {
+  const router = useInventoryRouter();
   if (loading) {
     return <EuiLoadingSpinner size="s" />;
   }
@@ -35,19 +65,13 @@ export function EntityTypeListBase({
     <EuiFlexGroup direction="column" gutterSize="s">
       {definitions?.map((definition) => {
         return (
-          <EuiLink data-test-subj="inventoryEntityTypeListBaseLink" href={definition.type}>
-            <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon size="s" type={definition.icon} />
-              </EuiFlexItem>
-              <EuiFlexItem grow>
-                <EuiText size="s">{definition.label}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{definition.count}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiLink>
+          <EntityTypeListItem
+            key={definition.type}
+            href={router.link('/{type}', { path: { type: definition.type } })}
+            icon={definition.icon}
+            count={definition.count}
+            label={definition.label}
+          />
         );
       })}
     </EuiFlexGroup>

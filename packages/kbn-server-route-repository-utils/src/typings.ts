@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
+import { Observable } from 'rxjs';
 import { RequiredKeys } from 'utility-types';
 
 type PathMaybeOptional<T extends { path: Record<string, any> }> = RequiredKeys<
@@ -194,13 +195,21 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends Record<string, any> = DefaultClientOptions
-> = <TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
+  TAdditionalClientOptions extends HttpFetchOptions & {
+    asEventSourceStream?: boolean;
+  } = DefaultClientOptions
+> = <
+  TEndpoint extends Extract<keyof TServerRouteRepository, string>,
+  TParamsArgs extends MaybeOptionalArgs<ClientRequestParamsOf<TServerRouteRepository, TEndpoint>>,
+  TClientArgs extends MaybeOptionalArgs<TAdditionalClientOptions>
+>(
   endpoint: TEndpoint,
-  ...args: MaybeOptionalArgs<
-    ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
-  >
-) => Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
+  ...args: TParamsArgs & TClientArgs
+) => TClientArgs extends [{ asEventSourceStream: true }]
+  ? ReturnOf<TServerRouteRepository, TEndpoint> extends Observable<infer TObservable>
+    ? Observable<TObservable>
+    : Observable<unknown>
+  : Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
 
 export type DefaultClientOptions = HttpFetchOptions;
 

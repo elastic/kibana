@@ -7,6 +7,9 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { mapValues } from 'lodash';
+import { registerServerRoutes } from './routes/register_routes';
+import { InventoryRouteHandlerResources } from './routes/types';
 import type {
   ConfigSchema,
   InventoryServerSetup,
@@ -33,6 +36,25 @@ export class InventoryPlugin
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryServerStart>,
     pluginsSetup: InventorySetupDependencies
   ): InventoryServerSetup {
+    const startServicesPromise = coreSetup
+      .getStartServices()
+      .then(([_coreStart, pluginsStart]) => pluginsStart);
+
+    registerServerRoutes({
+      core: coreSetup,
+      logger: this.logger,
+      dependencies: {
+        plugins: mapValues(pluginsSetup, (value, key) => {
+          return {
+            start: () =>
+              startServicesPromise.then(
+                (startServices) => startServices[key as keyof typeof startServices]
+              ),
+            setup: () => value,
+          };
+        }) as unknown as InventoryRouteHandlerResources['plugins'],
+      },
+    });
     return {};
   }
 

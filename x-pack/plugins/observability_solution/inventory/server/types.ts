@@ -8,16 +8,25 @@ import type {
   EntityManagerServerPluginStart,
   EntityManagerServerPluginSetup,
 } from '@kbn/entityManager-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type {
+  DataViewsServerPluginSetup,
+  DataViewsServerPluginStart,
+} from '@kbn/data-views-plugin/server';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
 export interface InventorySetupDependencies {
   entityManager: EntityManagerServerPluginSetup;
+  inference: InferenceServerSetup;
+  dataViews: DataViewsServerPluginSetup;
 }
 
 export interface InventoryStartDependencies {
   entityManager: EntityManagerServerPluginStart;
+  inference: InferenceServerStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export interface InventoryServerSetup {}

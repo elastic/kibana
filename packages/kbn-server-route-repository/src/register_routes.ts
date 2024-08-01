@@ -21,9 +21,11 @@ import {
 } from '@kbn/server-route-repository-utils';
 import { isZod } from '@kbn/zod';
 import { merge } from 'lodash';
+import { isObservable } from 'rxjs';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { makeZodValidationObject } from './make_zod_validation_object';
+import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -88,6 +90,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
         if (isKibanaResponse(result)) {
           return result;
+        } else if (isObservable(result)) {
+          return response.ok({ body: observableIntoEventSourceStream(result) });
         } else {
           const body = result || {};
           return response.ok({ body });

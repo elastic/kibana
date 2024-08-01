@@ -9,7 +9,9 @@
     "configPath": ["xpack", "inventory"],
     "requiredPlugins": [
       "observabilityShared",
-      "entityManager"
+      "entityManager",
+      "inference",
+      "dataViews"
     ],
     "requiredBundles": [
       "kibanaReact"

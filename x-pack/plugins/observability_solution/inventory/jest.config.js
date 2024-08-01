@@ -10,6 +10,7 @@ module.exports = {
   rootDir: '../../../..',
   roots: [
     '<rootDir>/x-pack/plugins/observability_solution/inventory/public',
+    '<rootDir>/x-pack/plugins/observability_solution/inventory/common',
     '<rootDir>/x-pack/plugins/observability_solution/inventory/server',
   ],
   setupFiles: [
@@ -17,7 +18,7 @@ module.exports = {
   ],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/inventory/{public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/observability_solution/inventory/{public,common,server}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

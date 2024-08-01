@@ -10,12 +10,9 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { Logger } from '@kbn/logging';
 import type { InventorySetupDependencies, InventoryStartDependencies } from '../types';
 
-export type InventoryRequestHandlerContext = Omit<
-  CustomRequestHandlerContext<{
-    licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
-  }>,
-  'core' | 'resolve'
->;
+export type InventoryRequestHandlerContext = CustomRequestHandlerContext<{
+  licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
+}>;
 
 export interface InventoryRouteHandlerResources {
   request: KibanaRequest;
