@@ -163,6 +163,8 @@ export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
   'data'
 > & { data: Array<SentinelOneActivityRecord<TData>> };
 
-export type SentinelOneIsolateHostParams = TypeOf<typeof SentinelOneIsolateHostParamsSchema>;
+export type SentinelOneIsolateHostParams = Partial<
+  Mutable<TypeOf<typeof SentinelOneIsolateHostParamsSchema>>
+>;
 
 export type SentinelOneActionParams = TypeOf<typeof SentinelOneActionParamsSchema>;

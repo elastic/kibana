@@ -49,6 +49,7 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
 import { AGENT_ID } from './highlighted_fields_config';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

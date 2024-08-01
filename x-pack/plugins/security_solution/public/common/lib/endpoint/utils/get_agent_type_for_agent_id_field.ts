@@ -19,7 +19,7 @@ export const getAgentTypeForAgentIdField = (agentIdEcsField: string): ResponseAc
     RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
   )) {
     if (fieldValues.includes(agentIdEcsField)) {
-      return fieldAgentType;
+      return fieldAgentType as ResponseActionAgentType;
     }
   }
   return 'endpoint';

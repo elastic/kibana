@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
@@ -204,10 +206,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Sends actions to SentinelOne directly (via Connector)
    * @private
    */
-  private async sendAction<TResponse = unknown, TParams = object>(
-    actionType: SUB_ACTION,
-    actionParams: TParams
-  ): Promise<ActionTypeExecutorResult<TResponse>> {
+  private async sendAction<
+    TResponse = unknown,
+    TParams extends Record<string, any> = Record<string, any>
+  >(actionType: SUB_ACTION, actionParams: TParams): Promise<ActionTypeExecutorResult<TResponse>> {
     const executeOptions: Parameters<typeof this.connectorActionsClient.execute>[0] = {
       params: {
         subAction: actionType,

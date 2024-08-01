@@ -47,7 +47,7 @@ export const getHostPlatform = (
       fieldValue = get(data, field, '').toLowerCase();
     }
 
-    if (SUPPORTED_HOST_OS_TYPE.includes(fieldValue)) {
+    if (SUPPORTED_HOST_OS_TYPE.includes(fieldValue as Platform)) {
       platform = fieldValue;
       break;
     }
