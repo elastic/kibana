@@ -38,7 +38,6 @@
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
     "@kbn/cloud-experiments-plugin",
-    "@kbn/ebt",
   ],
   "exclude": [
     "target/**/*",
