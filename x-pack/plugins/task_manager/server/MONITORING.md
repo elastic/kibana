@@ -50,7 +50,7 @@ The root `timestamp` is the time in which the summary was exposed (either to the
 Follow this step-by-step guide to make sense of the stats: https://www.elastic.co/guide/en/kibana/master/task-manager-troubleshooting.html#task-manager-diagnosing-root-cause
 
 #### The Configuration Section
-The `configuration` section summarizes Task Manager's current configuration, including dynamic configurations which change over time, such as `poll_interval` and `capacity` which adjust in reaction to changing load on the system.
+The `configuration` section summarizes Task Manager's current configuration, including dynamic configurations which change over time, such as `poll_interval` and `max_workers` which adjust in reaction to changing load on the system.
 
 These are "Hot" stats which are updated whenever a change happens in the configuration.
 
@@ -69,8 +69,8 @@ The `runtime` tracks Task Manager's performance as it runs, making note of task 
 These include:
   - The time it takes a task to run (p50, p90, p95 & p99, using a configurable running average window, `50` by default)
   - The average _drift_ that tasks experience (p50, p90, p95 & p99, using the same configurable running average window as above). Drift tells us how long after a task's scheduled a task typically executes.
-  - The average _load_ (p50, p90, p95 & p99, using the same configurable running average window as above). Load tells us what percentage of capacity is in use at the end of each polling cycle.
-  - The polling rate (the timestamp of the last time a polling cycle completed), the polling health stats (number of version clashes and mismatches) and the result [`No tasks | Filled task pool | Unexpectedly ran out of capacity`] frequency the past 50 polling cycles (using the same window size as the one used for running averages)
+  - The average _load_ (p50, p90, p95 & p99, using the same configurable running average window as above). Load tells us what percentage of workers is in use at the end of each polling cycle.
+  - The polling rate (the timestamp of the last time a polling cycle completed), the polling health stats (number of version clashes and mismatches) and the result [`No tasks | Filled task pool | Unexpectedly ran out of workers`] frequency the past 50 polling cycles (using the same window size as the one used for running averages)
   - The `Success | Retry | Failure ratio` by task type. This is different than the workload stats which tell you what's in the queue, but ca't keep track of retries and of non recurring tasks as they're wiped off the index when completed.
 
 These are "Hot" stats which are updated reactively as Tasks are executed and interacted with.

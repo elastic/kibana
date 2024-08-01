@@ -9,6 +9,7 @@
 import { firstValueFrom, Subject } from 'rxjs';
 import { createEsqlDataSource } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
+import { SolutionType } from './profiles/root_profile';
 import { createContextAwarenessMocks } from './__mocks__';
 
 jest.mock('../utils/add_log');
@@ -220,10 +221,12 @@ describe('ProfilesManager', () => {
 
   it('should cancel existing data source profile resolution when another is triggered', async () => {
     const context = await mocks.dataSourceProfileProviderMock.resolve({
+      rootContext: { solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     const newContext = await mocks.dataSourceProfileProviderMock.resolve({
+      rootContext: { solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
