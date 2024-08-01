@@ -24,6 +24,7 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { SideNavComponent } from './side_navigation';
+import { registerNavigationEventTypes } from './analytics';
 
 export class NavigationPublicPlugin
   implements
@@ -43,7 +44,9 @@ export class NavigationPublicPlugin
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(_core: CoreSetup): NavigationPublicSetup {
+  public setup(core: CoreSetup): NavigationPublicSetup {
+    registerNavigationEventTypes(core);
+
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry

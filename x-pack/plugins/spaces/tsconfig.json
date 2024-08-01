@@ -38,6 +38,7 @@
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
     "@kbn/core-feature-flags-browser",
+    "@kbn/core-analytics-browser"
   ],
   "exclude": [
     "target/**/*",

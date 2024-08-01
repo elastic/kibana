@@ -79,7 +79,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetSearchInput: '[placeholder="Filter data sets"]',
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
-    superDatePickerApplyButton: '.euiQuickSelect__applyButton',
+    superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
   };
 
   const testSubjectSelectors = {

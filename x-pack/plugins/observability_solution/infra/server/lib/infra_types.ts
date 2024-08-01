@@ -18,13 +18,11 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
-import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 
 export interface InfraDomainLibs {
-  fields: InfraFieldsDomain;
   logEntries: ILogsSharedLogEntriesDomain;
   metrics: InfraMetricsDomain;
 }

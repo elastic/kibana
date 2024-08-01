@@ -50,27 +50,36 @@ import type { Observable } from 'rxjs';
  *
  * @public
  */
-export type EvaluationContext =
-  | {
-      /**
-       * Multi-context format. The sub-contexts are provided in their nested properties.
-       */
-      kind: 'multi';
-      /**
-       * The Elastic Cloud organization-specific context.
-       */
-      organization?: OpenFeatureEvaluationContext;
-      /**
-       * The deployment/project-specific context.
-       */
-      kibana?: OpenFeatureEvaluationContext;
-    }
-  | (OpenFeatureEvaluationContext & {
-      /**
-       * The sub-context that it's updated. Defaults to `kibana`.
-       */
-      kind?: 'organization' | 'kibana';
-    });
+export type EvaluationContext = MultiContextEvaluationContext | SingleContextEvaluationContext;
+
+/**
+ * Multi-context format. The sub-contexts are provided in their nested properties.
+ * @public
+ */
+export type MultiContextEvaluationContext = OpenFeatureEvaluationContext & {
+  /**
+   * Static `multi` string
+   */
+  kind: 'multi';
+  /**
+   * The Elastic Cloud organization-specific context.
+   */
+  organization?: OpenFeatureEvaluationContext;
+  /**
+   * The deployment/project-specific context.
+   */
+  kibana?: OpenFeatureEvaluationContext;
+};
+
+/**
+ * Single Context format. If `kind` is not specified, it applies to the `kibana` sub-context.
+ */
+export type SingleContextEvaluationContext = OpenFeatureEvaluationContext & {
+  /**
+   * The sub-context that it's updated. Defaults to `kibana`.
+   */
+  kind?: 'organization' | 'kibana';
+};
 
 /**
  * Setup contract of the Feature Flags Service

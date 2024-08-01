@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const modelId = '.elser_model_2';
 
   // FLAKY: https://github.com/elastic/kibana/issues/189333
+  // Failing: See https://github.com/elastic/kibana/issues/189333
   describe.skip('Inference endpoints', function () {
     after(async () => {
       try {
@@ -53,9 +54,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(inferenceEndpoints).to.be.ok();
       expect(
         inferenceEndpoints.some(
-          (endpoint: InferenceAPIConfigResponse) => endpoint.model_id === inferenceId
+          (endpoint: InferenceAPIConfigResponse) => endpoint.inference_id === inferenceId
         )
-      ).to.be(true);
+      ).to.eql(true, `${inferenceId} not found in the GET _inference/_all response`);
     });
     it('can delete inference endpoint', async () => {
       log.debug(`Deleting inference endpoint`);

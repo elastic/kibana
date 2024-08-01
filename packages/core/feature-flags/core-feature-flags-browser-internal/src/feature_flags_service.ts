@@ -13,6 +13,7 @@ import type {
   EvaluationContext,
   FeatureFlagsSetup,
   FeatureFlagsStart,
+  MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-browser';
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
@@ -34,7 +35,7 @@ export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
   private isProviderReadyPromise?: Promise<void>;
-  private context: EvaluationContext = { kind: 'multi' };
+  private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
 
   constructor(core: CoreContext) {
@@ -173,8 +174,10 @@ export class FeatureFlagsService {
     // If no kind provided, default to the project|deployment level.
     const { kind = 'kibana', ...rest } = contextToAppend;
     // Format the context to fulfill the expected multi-context structure
-    const formattedContextToAppend: EvaluationContext =
-      kind !== 'multi' ? { kind: 'multi', [kind]: rest } : contextToAppend;
+    const formattedContextToAppend: MultiContextEvaluationContext =
+      kind === 'multi'
+        ? (contextToAppend as MultiContextEvaluationContext)
+        : { kind: 'multi', [kind]: rest };
 
     // Merge the formatted context to append to the global context, and set it in the OpenFeature client.
     this.context = deepMerge(this.context, formattedContextToAppend);

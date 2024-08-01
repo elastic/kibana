@@ -584,6 +584,36 @@ export class DataGridService extends FtrService {
     await checkbox.click();
   }
 
+  public async getNumberOfSelectedRows() {
+    const label = await this.find.byCssSelector(
+      '[data-test-subj=unifiedDataTableSelectionBtn] .euiNotificationBadge'
+    );
+    return Number(await label.getVisibleText());
+  }
+
+  public async getNumberOfSelectedRowsOnCurrentPage() {
+    const selectedRows = await this.find.allByCssSelector(
+      '.euiDataGridRow [data-gridcell-column-id="select"] .euiCheckbox__input:checked'
+    );
+    return selectedRows.length;
+  }
+
+  public async toggleSelectAllRowsOnCurrentPage() {
+    const checkbox = await this.testSubjects.find('selectAllDocsOnPageToggle');
+
+    await checkbox.click();
+  }
+
+  public async selectAllRows() {
+    const button = await this.testSubjects.find('dscGridSelectAllDocs');
+
+    await button.click();
+  }
+
+  public async isSelectedRowsMenuVisible() {
+    return await this.testSubjects.exists('unifiedDataTableSelectionBtn');
+  }
+
   public async openSelectedRowsMenu() {
     await this.testSubjects.click('unifiedDataTableSelectionBtn');
     await this.retry.try(async () => {
@@ -591,11 +621,22 @@ export class DataGridService extends FtrService {
     });
   }
 
+  public async closeSelectedRowsMenu() {
+    await this.testSubjects.click('unifiedDataTableSelectionBtn');
+    await this.retry.try(async () => {
+      return !(await this.testSubjects.exists('unifiedDataTableSelectionMenu'));
+    });
+  }
+
   public async compareSelectedButtonExists() {
-    return await this.testSubjects.exists('unifiedDataTableCompareSelectedDocuments');
+    await this.openSelectedRowsMenu();
+    const exists = await this.testSubjects.exists('unifiedDataTableCompareSelectedDocuments');
+    await this.closeSelectedRowsMenu();
+    return exists;
   }
 
   public async clickCompareSelectedButton() {
+    await this.openSelectedRowsMenu();
     await this.testSubjects.click('unifiedDataTableCompareSelectedDocuments');
   }
 

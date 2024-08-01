@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { EvaluationContext, FeatureFlagsSetup, FeatureFlagsStart } from './src/types';
+export type {
+  EvaluationContext,
+  MultiContextEvaluationContext,
+  SingleContextEvaluationContext,
+  FeatureFlagsSetup,
+  FeatureFlagsStart,
+} from './src/types';

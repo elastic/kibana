@@ -22,7 +22,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
@@ -45,7 +44,6 @@ export interface ObservabilityOnboardingPluginSetupDeps {
   discover: DiscoverSetup;
   share: SharePluginSetup;
   fleet: FleetSetup;
-  security: SecurityPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -57,7 +55,6 @@ export interface ObservabilityOnboardingPluginStartDeps {
   discover: DiscoverStart;
   share: SharePluginStart;
   fleet: FleetStart;
-  security: SecurityPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
 }
