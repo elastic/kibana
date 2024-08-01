@@ -124,13 +124,13 @@ export async function fetchEsQuery({
     }),
   });
 
-  logger.debug(
+  logger.info(
     () => `es query rule ${ES_QUERY_ID}:${ruleId} "${name}" query - ${JSON.stringify(sortedQuery)}`
   );
 
   const { body: searchResult } = await esClient.search(sortedQuery, { meta: true });
 
-  logger.debug(
+  logger.info(
     () =>
       ` es query rule ${ES_QUERY_ID}:${ruleId} "${name}" result - ${JSON.stringify(searchResult)}`
   );

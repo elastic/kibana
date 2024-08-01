@@ -72,11 +72,13 @@ export async function fetchSearchSourceQuery({
   );
 
   const searchRequestBody: unknown = searchSource.getSearchRequestBody();
-  logger.debug(
+  logger.info(
     () => `search source query rule (${ruleId}) query: ${JSON.stringify(searchRequestBody)}`
   );
 
   const searchResult = await searchSource.fetch();
+
+  logger.info(() => ` search source query rule ${ruleId} result - ${JSON.stringify(searchResult)}`);
 
   // result against CCS indices will return success response with errors nested within the _shards field
   // look for these errors and bubble them up
