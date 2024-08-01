@@ -17,7 +17,6 @@ export async function generateFleetServiceToken(
   kibanaApiClient: KibanaAPIClient
 ) {
   try {
-    // Send the saved objects to Kibana using the _import API
     const response = await kibanaApiClient.sendRequest({
       method: 'post',
       url: 'api/fleet/service_tokens',
