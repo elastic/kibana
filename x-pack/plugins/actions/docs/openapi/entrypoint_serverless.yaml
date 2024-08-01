@@ -3,6 +3,7 @@ info:
   title: Connectors
   description: OpenAPI schema for connectors in Serverless projects
   version: '0.2'
+  x-implementation-version: '2023-10-31'
   contact:
     name: Connectors Team
   license:

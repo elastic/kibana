@@ -3,6 +3,7 @@ info:
   title: Connectors
   description: OpenAPI schema for Connectors endpoints
   version: '0.2'
+  x-implementation-version: '2023-10-31'
   contact:
     name: Connectors Team
   license:
@@ -14,7 +15,7 @@ tags:
 servers:
   - url: /
 paths:
-# Default space
+  # Default space
   '/api/actions/connector':
     $ref: 'paths/api@actions@connector.yaml'
   '/api/actions/connector/{connectorId}':
@@ -25,7 +26,7 @@ paths:
     $ref: paths/api@actions@connectors.yaml
   '/api/actions/connector_types':
     $ref: paths/api@actions@connector_types.yaml
-# Deprecated endpoints:
+  # Deprecated endpoints:
   '/api/actions/action/{actionId}':
     $ref: 'paths/api@actions@action@{actionid}.yaml'
   '/api/actions':
@@ -35,24 +36,24 @@ paths:
   '/api/actions/action/{actionId}/_execute':
     $ref: 'paths/api@actions@action@{actionid}@_execute.yaml'
 # Non-default space
-  # '/s/{spaceId}/api/actions/connector':
-  #   $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'
-  # '/s/{spaceId}/api/actions/connector/{connectorId}':
-  #   $ref: 'paths/s@{spaceid}@api@actions@connector@{connectorid}.yaml'
-  # '/s/{spaceId}/api/actions/connectors':
-  #   $ref: paths/s@{spaceid}@api@actions@connectors.yaml
-  # '/s/{spaceId}/api/actions/connector_types':
-  #   $ref: paths/s@{spaceid}@api@actions@connector_types.yaml
-  # '/s/{spaceId}/api/actions/connector/{connectorId}/_execute':
-  #   $ref: paths/s@{spaceid}@api@actions@connector@{connectorid}@_execute.yaml
-  # '/s/{spaceId}/api/actions/action/{actionId}':
-  #   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
-  # '/s/{spaceId}/api/actions':
-  #   $ref: 'paths/s@{spaceid}@api@actions.yaml'
-  # '/s/{spaceId}/api/actions/list_action_types':
-  #   $ref: 'paths/s@{spaceid}@api@actions@list_action_types.yaml'
-  # '/s/{spaceId}/api/actions/action/{actionId}/_execute':
-  #   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}@_execute.yaml'
+# '/s/{spaceId}/api/actions/connector':
+#   $ref: 'paths/s@{spaceid}@api@actions@connector.yaml'
+# '/s/{spaceId}/api/actions/connector/{connectorId}':
+#   $ref: 'paths/s@{spaceid}@api@actions@connector@{connectorid}.yaml'
+# '/s/{spaceId}/api/actions/connectors':
+#   $ref: paths/s@{spaceid}@api@actions@connectors.yaml
+# '/s/{spaceId}/api/actions/connector_types':
+#   $ref: paths/s@{spaceid}@api@actions@connector_types.yaml
+# '/s/{spaceId}/api/actions/connector/{connectorId}/_execute':
+#   $ref: paths/s@{spaceid}@api@actions@connector@{connectorid}@_execute.yaml
+# '/s/{spaceId}/api/actions/action/{actionId}':
+#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}.yaml'
+# '/s/{spaceId}/api/actions':
+#   $ref: 'paths/s@{spaceid}@api@actions.yaml'
+# '/s/{spaceId}/api/actions/list_action_types':
+#   $ref: 'paths/s@{spaceid}@api@actions@list_action_types.yaml'
+# '/s/{spaceId}/api/actions/action/{actionId}/_execute':
+#   $ref: 'paths/s@{spaceid}@api@actions@action@{actionid}@_execute.yaml'
 # components:
 #   securitySchemes:
 #     basicAuth:
