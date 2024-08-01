@@ -18,23 +18,10 @@ import type { BrowserFields } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
-import * as i18n from './translations';
 import {
   AGENT_STATUS_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
-
-/**
- * Defines the behavior of the search input that appears above the table of data
- */
-export const search = {
-  box: {
-    incremental: true,
-    placeholder: i18n.PLACEHOLDER,
-    schema: true,
-    'data-test-subj': 'search-input',
-  },
-};
 
 /**
  * An item rendered in the table
