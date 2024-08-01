@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, combineLatest, filter, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
@@ -54,9 +54,7 @@ export function initSelectionsManager(
         'filters$',
         apiPublishesFilters,
         []
-      ).subscribe((newFilters) => {
-        unpublishedFilters$.next(newFilters);
-      })
+      ).subscribe((newFilters) => unpublishedFilters$.next(newFilters))
     );
 
     subscriptions.push(
@@ -91,11 +89,11 @@ export function initSelectionsManager(
         controlGroupApi.autoApplySelections$,
         unpublishedFilters$,
         unpublishedTimeslice$,
-      ])
-        .pipe(filter(([autoApplySelections]) => autoApplySelections))
-        .subscribe(() => {
+      ]).subscribe(([autoApplySelections]) => {
+        if (autoApplySelections) {
           applySelections();
-        })
+        }
+      })
     );
   });
 
