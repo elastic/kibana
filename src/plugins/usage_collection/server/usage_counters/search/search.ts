@@ -23,7 +23,7 @@ import type {
   UsageCountersSearchParams,
   UsageCountersSearchResult,
 } from '../types';
-import { usageCountersSearchParamsToKueryFilter } from './search_utils';
+import { usageCountersSearchParamsToKueryFilter } from '../common/kuery_utils';
 
 export async function searchUsageCounters(
   repository: ISavedObjectsRepository,

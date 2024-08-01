@@ -15,26 +15,15 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-jest.mock('../saved_objects', () => ({
-  ...jest.requireActual('../saved_objects'),
-  // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
-  isSavedObjectOlderThan: jest.fn(),
-}));
-
 import {
-  isSavedObjectOlderThan,
   serializeCounterKey,
   UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from '../rollups/constants';
-import type { GetUsageCounter } from '../types';
 import { rollUsageCountersIndices } from '../rollups/rollups';
 import { type CounterAttributes, createCounters, toCounterMetric } from './counter_utils';
-
-const isSavedObjectOlderThanMock = isSavedObjectOlderThan as jest.MockedFunction<
-  typeof isSavedObjectOlderThan
->;
+import type { IUsageCounter } from '../usage_counter';
 
 const CUSTOM_RETENTION = 90;
 
@@ -46,7 +35,7 @@ const RECENT_YMD = RECENT.format('YYYYMMDD');
 const OLD_ISO = OLD.toISOString();
 const RECENT_ISO = RECENT.toISOString();
 
-const CUSTOM_OLD = moment(NOW).subtract(CUSTOM_RETENTION + 1, 'days');
+const CUSTOM_OLD = moment(NOW).subtract(CUSTOM_RETENTION + 2, 'days');
 const CUSTOM_RECENT = moment(NOW).subtract(USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS - 1, 'days');
 const CUSTOM_OLD_YMD = CUSTOM_OLD.format('YYYYMMDD');
 const CUSTOM_RECENT_YMD = CUSTOM_RECENT.format('YYYYMMDD');
@@ -76,7 +65,7 @@ const RECENT_COUNTERS = ALL_COUNTERS.filter(
 describe('usage-counters', () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
-  let usageCounters: GetUsageCounter;
+  let getRegisteredUsageCounters: () => IUsageCounter[];
   let internalRepository: ISavedObjectsRepository;
   let logger: Logger;
 
@@ -88,20 +77,21 @@ describe('usage-counters', () => {
     esServer = await startES();
     root = createRootWithCorePlugins();
 
-    usageCounters = {
-      getUsageCounterByDomainId: jest.fn().mockImplementation((domainId: string) => {
-        let retentionPeriodDays = USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS;
-        if (domainId.startsWith('testCounter|retention_')) {
-          const daysString = domainId.split('_').pop();
-          retentionPeriodDays = Number(daysString!);
-        }
-
-        return {
-          retentionPeriodDays,
-          incrementCounter: jest.fn(),
-        };
-      }),
-    };
+    getRegisteredUsageCounters = () => [
+      {
+        domainId: 'testCounter|domain1',
+        incrementCounter: jest.fn(),
+      },
+      {
+        domainId: 'testCounter|domain2',
+        incrementCounter: jest.fn(),
+      },
+      {
+        domainId: `testCounter|retention_${CUSTOM_RETENTION}`,
+        retentionPeriodDays: 90,
+        incrementCounter: jest.fn(),
+      },
+    ];
 
     await root.preboot();
     await root.setup();
@@ -131,16 +121,12 @@ describe('usage-counters', () => {
         .sort()
     ).toEqual(ALL_COUNTERS);
 
-    isSavedObjectOlderThanMock.mockImplementation(({ doc, numberOfDays }) => {
-      // here we ensure we have been called with the custom retention period
-      if (numberOfDays === CUSTOM_RETENTION) {
-        return doc.updated_at === CUSTOM_OLD_ISO;
-      } else {
-        return doc.updated_at === OLD_ISO;
-      }
+    await rollUsageCountersIndices({
+      logger,
+      getRegisteredUsageCounters,
+      internalRepository,
+      now: moment(NOW),
     });
-
-    await rollUsageCountersIndices({ logger, usageCounters, internalRepository });
 
     // check only recent counters are present
     const afterRollup = await internalRepository.find<UsageCountersSavedObjectAttributes>({

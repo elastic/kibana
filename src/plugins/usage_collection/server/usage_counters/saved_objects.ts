@@ -124,20 +124,3 @@ export const storeCounter = async ({ metric, soRepository }: StoreCounterParams)
     }
   );
 };
-
-export function isSavedObjectOlderThan({
-  numberOfDays,
-  startDate,
-  doc,
-}: {
-  numberOfDays: number;
-  startDate: moment.Moment | string | number;
-  doc: Pick<SavedObject, 'updated_at'>;
-}): boolean {
-  const { updated_at: updatedAt } = doc;
-  const today = moment(startDate).startOf('day');
-  const updateDay = moment(updatedAt).startOf('day');
-
-  const diffInDays = today.diff(updateDay, 'days');
-  return diffInDays > numberOfDays;
-}

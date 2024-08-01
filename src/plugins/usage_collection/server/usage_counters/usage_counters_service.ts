@@ -139,9 +139,7 @@ export class UsageCountersService {
     // we start a regular, timer-based cleanup
     registerUsageCountersRollups({
       logger: this.logger,
-      usageCounters: {
-        getUsageCounterByDomainId: this.getUsageCounterByDomainId,
-      },
+      getRegisteredUsageCounters: () => Array.from(this.counterSets.values()),
       internalRepository: this.repository,
       pluginStop$: this.stop$,
     });
@@ -194,8 +192,8 @@ export class UsageCountersService {
     return counterSet;
   };
 
-  private getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
-    return this.counterSets.get(type);
+  private getUsageCounterByDomainId = (domainId: string): IUsageCounter | undefined => {
+    return this.counterSets.get(domainId);
   };
 
   private mergeCounters = (

@@ -13,8 +13,6 @@ import type { UsageCounters } from '../../common';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
 import { type UsageCountersSavedObjectAttributes, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '..';
 
-import { isSavedObjectOlderThan } from './saved_objects';
-
 describe('counterKey', () => {
   test('#serializeCounterKey returns a serialized string that omits default namespace', () => {
     const result = serializeCounterKey({
@@ -115,41 +113,3 @@ export const createMockSavedObjectDoc = (
     version: 'WzI5LDFd',
     score: 0,
   } as SavedObjectsFindResult<UsageCountersSavedObjectAttributes>);
-
-describe('isSavedObjectOlderThan', () => {
-  it(`returns true if doc is older than x days`, () => {
-    const numberOfDays = 1;
-    const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(2, 'days'), 'some-id', 'testDomain');
-    const result = isSavedObjectOlderThan({
-      numberOfDays,
-      startDate,
-      doc,
-    });
-    expect(result).toBe(true);
-  });
-
-  it(`returns false if doc is exactly x days old`, () => {
-    const numberOfDays = 1;
-    const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id', 'testDomain');
-    const result = isSavedObjectOlderThan({
-      numberOfDays,
-      startDate,
-      doc,
-    });
-    expect(result).toBe(false);
-  });
-
-  it(`returns false if doc is younger than x days`, () => {
-    const numberOfDays = 2;
-    const startDate = moment().format();
-    const doc = createMockSavedObjectDoc(moment().subtract(1, 'days'), 'some-id', 'testDomain');
-    const result = isSavedObjectOlderThan({
-      numberOfDays,
-      startDate,
-      doc,
-    });
-    expect(result).toBe(false);
-  });
-});

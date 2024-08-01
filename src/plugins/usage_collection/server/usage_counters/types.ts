@@ -17,17 +17,14 @@ export interface CreateUsageCounterParams {
   retentionPeriodDays?: number;
 }
 
-export interface GetUsageCounter {
+/**
+ * Provides the necessary tools to create and incremement Usage Counters
+ */
+export interface UsageCountersServiceSetup {
   /**
    * Returns a usage counter by domainId
    */
   getUsageCounterByDomainId: (domainId: string) => UsageCounter | undefined;
-}
-
-/**
- * Provides the necessary tools to create and incremement Usage Counters
- */
-export interface UsageCountersServiceSetup extends GetUsageCounter {
   /**
    * Registers a usage counter to collect daily aggregated plugin counter events
    */
@@ -52,6 +49,8 @@ export interface UsageCountersSearchFilters {
   namespace?: string;
   /** ISO date string to limit search results: get counters that are more recent than the provided date (if specified) */
   from?: string;
+  /** ISO date string to limit search results: get counters that are older than the provided date (if specified) */
+  to?: string;
   /** Return counters from a given source only. Optional, both 'ui' and 'server' counters will be returned if omitted */
   source?: 'server' | 'ui';
 }

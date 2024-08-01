@@ -22,6 +22,10 @@ export interface UsageCounterParams {
  */
 export interface IUsageCounter {
   /**
+   * Defines a domainId (aka a namespace) under which multiple counters can be stored
+   */
+  domainId: string;
+  /**
    * Defines custom retention period for the counters under this domain.
    * This is the number of days worth of counters that must be kept in the system indices.
    * See USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS for default value
@@ -35,7 +39,7 @@ export interface IUsageCounter {
 }
 
 export class UsageCounter implements IUsageCounter {
-  private domainId: string;
+  public readonly domainId: string;
   private counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
   public readonly retentionPeriodDays?: number | undefined;
 

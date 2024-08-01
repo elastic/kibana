@@ -13,17 +13,27 @@ import type { UsageCountersSearchFilters } from '../types';
 export function usageCountersSearchParamsToKueryFilter(
   params: Omit<UsageCountersSearchFilters, 'namespace'>
 ): KueryNode {
-  const { domainId, counterName, counterType, from, source } = params;
+  const { domainId, counterName, counterType, source, from, to } = params;
 
   const isFilters = filtersToKueryNodes({ domainId, counterName, counterType, source });
+  // add a date range filters
   if (from) {
-    // add a date range filter
     isFilters.push(
       nodeTypes.function.buildNode(
         'range',
         `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.updated_at`,
         'gte',
         from
+      )
+    );
+  }
+  if (to) {
+    isFilters.push(
+      nodeTypes.function.buildNode(
+        'range',
+        `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.updated_at`,
+        'lte',
+        to
       )
     );
   }
