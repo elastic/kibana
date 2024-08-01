@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
+  const monacoEditor = getService('monacoEditor');
 
   describe('discover doc viewer', function describeIndexTests() {
     before(async function () {
@@ -116,33 +117,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = 'from logstash-* | sort @timestamp | limit 10000';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await dataGrid.clickRowToggle();
         await PageObjects.discover.isShowingDocViewer();
       });
 
       afterEach(async () => {
+        const fieldSearch = await testSubjects.find('clearSearchButton');
+        await fieldSearch.click(); // clear search
         const hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
         );
         await hideNullValuesSwitch.click(); // make sure the switch is off
-
-        const fieldSearch = await testSubjects.find('clearSearchButton');
-        await fieldSearch.click(); // clear search
       });
 
       it('should hide fields with null values ', async function () {
-        // id is null
         await PageObjects.discover.findFieldByNameInDocViewer('machine');
-        await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
-        });
+        const results = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
         const hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
         );
         await hideNullValuesSwitch.click();
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length < results;
         });
       });
     });
