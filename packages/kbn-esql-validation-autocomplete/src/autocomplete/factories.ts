@@ -130,7 +130,7 @@ export function getSuggestionCommandDefinition(
 
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
-  advanceCursorAndOpenSuggestions: boolean = false
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
     const description = field.metadata?.description;
@@ -138,7 +138,10 @@ export const buildFieldsDefinitionsWithMetadata = (
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
-      text: getSafeInsertText(field.name) + (advanceCursorAndOpenSuggestions ? ' ' : ''),
+      text:
+        getSafeInsertText(field.name) +
+        (options?.addComma ? ',' : '') +
+        (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
       documentation: description
@@ -151,7 +154,7 @@ ${description}`,
         : undefined,
       // If there is a description, it is a field from ECS, so it should be sorted to the top
       sortText: description ? '1D' : 'D',
-      command: advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+      command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
 };
@@ -207,11 +210,14 @@ export const buildConstantsDefinitions = (
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
-  advanceCursorAndOpenSuggestions: boolean = false
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] =>
   userConstants.map((label) => ({
     label,
-    text: advanceCursorAndOpenSuggestions ? `${label} ` : label,
+    text:
+      label +
+      (options?.addComma ? ',' : '') +
+      (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
     kind: 'Constant',
     detail:
       detail ??
@@ -219,7 +225,7 @@ export const buildConstantsDefinitions = (
         defaultMessage: `Constant`,
       }),
     sortText: sortText ?? 'A',
-    command: advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
+    command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
 export const buildValueDefinitions = (
@@ -365,21 +371,39 @@ export function getUnitDuration(unit: number = 1) {
  * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
  * definition property...
  */
-export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
+export function getCompatibleLiterals(
+  commandName: string,
+  types: string[],
+  names?: string[],
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.includes('number')) {
     if (commandName === 'limit') {
       // suggest 10/100/1000 for limit
-      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, true));
+      suggestions.push(
+        ...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
+          advanceCursorAndOpenSuggestions: true,
+        })
+      );
     }
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
-    suggestions.push(...buildConstantsDefinitions(getUnitDuration(1))); // i.e. 1 year
+    suggestions.push(
+      ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options)
+    ); // i.e. 1 year
   }
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
-    suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
+    suggestions.push(
+      ...buildConstantsDefinitions(
+        timeUnitsToSuggest.map(({ name }) => name),
+        undefined,
+        undefined,
+        options
+      )
+    ); // i.e. year, month, ...
   }
   if (types.includes('string')) {
     if (names) {
@@ -390,25 +414,31 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
             [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
             i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
               defaultMessage: 'A pattern string',
-            })
+            }),
+            undefined,
+            options
           )
         );
       } else {
-        suggestions.push(...buildConstantsDefinitions(['string'], ''));
+        suggestions.push(...buildConstantsDefinitions(['string'], '', undefined, options));
       }
     }
   }
   return suggestions;
 }
 
-export function getDateLiterals() {
+export function getDateLiterals(options?: {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}) {
   return [
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
       i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
         defaultMessage: 'Named parameter',
       }),
-      '1A'
+      '1A',
+      options
     ),
     {
       label: i18n.translate(

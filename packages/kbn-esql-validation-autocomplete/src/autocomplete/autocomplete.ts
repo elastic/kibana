@@ -101,7 +101,7 @@ type GetDataStreamsForIntegrationFn = (
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[],
-  advanceCursorAndOpenSuggestions?: boolean
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
 ) => Promise<SuggestionRawDefinition[]>;
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -317,10 +317,10 @@ function getFieldsByTypeRetriever(
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
       ignored: string[] = [],
-      advanceCursorAndOpenSuggestions = false
+      options
     ) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, advanceCursorAndOpenSuggestions);
+      return buildFieldsDefinitionsWithMetadata(fields, options);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -799,7 +799,11 @@ async function getExpressionSuggestionsByType(
     // if the definition includes a list of constants, suggest them
     if (argDef.values) {
       // ... | <COMMAND> ... <suggest enums>
-      suggestions.push(...buildConstantsDefinitions(argDef.values, undefined, undefined, true));
+      suggestions.push(
+        ...buildConstantsDefinitions(argDef.values, undefined, undefined, {
+          advanceCursorAndOpenSuggestions: true,
+        })
+      );
     }
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
     if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
@@ -1063,6 +1067,37 @@ function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote
   }));
 }
 
+// function getVariableSuggestions(types: string[], variables: Map<string, ESQLVariable[]>) {
+//   const filteredVariablesByType: string[] = [];
+//   for (const variable of variables.values()) {
+//     if (types.includes('any') || types.includes(variable[0].type)) {
+//       filteredVariablesByType.push(variable[0].name);
+//     }
+//   }
+//   // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+//   // avg( numberField ) => avg_numberField_
+//   // const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
+//   // if (
+//   //   filteredVariablesByType.length &&
+//   //   filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+//   // ) {
+//   // for (const variable of filteredVariablesByType) {
+//   // remove backticks if present
+//   // const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
+//   //   ? variable.slice(1, variable.length - 1)
+//   //   : variable;
+//   // const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
+//   // const index = filteredFieldsByType.findIndex(
+//   //   ({ label }) => underscoredName === label || `_${underscoredName}_` === label
+//   // );
+//   // if (index >= 0) {
+//   //   filteredFieldsByType.splice(index);
+//   // }
+//   // }
+//   // }
+//   return buildVariablesDefinitions(filteredVariablesByType);
+// }
+
 /**
  * TODO — split this into distinct functions, one for fields, one for functions, one for literals
  */
@@ -1092,7 +1127,9 @@ async function getFieldsOrFunctionsSuggestions(
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
-      ? getFieldsByType(types, ignoreFields, commandName === 'sort')
+      ? getFieldsByType(types, ignoreFields, {
+          advanceCursorAndOpenSuggestions: commandName === 'sort',
+        })
       : [])) as SuggestionRawDefinition[],
     functions
   );
@@ -1193,6 +1230,8 @@ async function getFunctionArgsSuggestions(
       ? refSignature.minParams - 1 > argIndex
       : false);
 
+  const shouldAddComma = hasMoreMandatoryArgs && fnDefinition.type !== 'builtin';
+
   const suggestedConstants = Array.from(
     new Set(
       fnDefinition.signatures.reduce<string[]>((acc, signature) => {
@@ -1215,11 +1254,11 @@ async function getFunctionArgsSuggestions(
   if (suggestedConstants.length) {
     return buildValueDefinitions(suggestedConstants).map((suggestion) => ({
       ...suggestion,
-      text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', suggestion.text),
+      text: addCommaIf(shouldAddComma, suggestion.text),
     }));
   }
 
-  const suggestions = [];
+  const suggestions: SuggestionRawDefinition[] = [];
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
@@ -1305,28 +1344,47 @@ async function getFunctionArgsSuggestions(
       return Array.from(new Set(paramDefs.map(({ type }) => type)));
     };
 
+    // Literals
     suggestions.push(
-      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs))
+      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs)).map(
+        (suggestion) => ({
+          ...suggestion,
+          text: addCommaIf(shouldAddComma, suggestion.text),
+        })
+      )
     );
 
+    // Fields
     suggestions.push(
-      ...(await getFieldsOrFunctionsSuggestions(
-        getTypesFromParamDefs(paramDefsWhichSupportFields),
+      ...pushItUpInTheList(
+        await getFieldsByType(getTypesFromParamDefs(paramDefsWhichSupportFields), [], {
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+        }),
+        true
+      )
+    );
+
+    // Functions
+    suggestions.push(
+      ...getCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        getFieldsByType,
-        {
-          functions: true,
-          fields: true,
-          variables: variablesExcludingCurrentCommandOnes,
-        },
-        // do not repropose the same function as arg
-        // i.e. avoid cases like abs(abs(abs(...))) with suggestions
-        {
-          ignoreFn: fnToIgnore,
-        }
-      ))
+        getTypesFromParamDefs(paramDefsWhichSupportFields),
+        fnToIgnore
+      ).map((suggestion) => ({
+        ...suggestion,
+        text: addCommaIf(shouldAddComma, suggestion.text),
+      }))
     );
+
+    if (getTypesFromParamDefs(paramDefsWhichSupportFields).includes('date'))
+      suggestions.push(
+        ...getDateLiterals({
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+        })
+      );
   }
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
@@ -1335,18 +1393,10 @@ async function getFunctionArgsSuggestions(
       if (isLiteralItem(arg) && arg.literalType === 'number') {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            ['time_literal_unit'],
-            command.name,
-            option?.name,
-            getFieldsByType,
-            {
-              functions: false,
-              fields: false,
-              variables: variablesExcludingCurrentCommandOnes,
-              literals: true,
-            }
-          ))
+          ...getCompatibleLiterals(command.name, ['time_literal_unit'], undefined, {
+            addComma: shouldAddComma,
+            advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          })
         );
       }
     }
@@ -1355,24 +1405,9 @@ async function getFunctionArgsSuggestions(
       // suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);
     }
-    // if there are other arguments in the function, inject automatically a comma after each suggestion
-    return suggestions.map((suggestion) =>
-      suggestion !== commaCompleteItem
-        ? {
-            ...suggestion,
-            text:
-              hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
-                ? `${suggestion.text},`
-                : suggestion.text,
-          }
-        : suggestion
-    );
   }
 
-  return suggestions.map(({ text, ...rest }) => ({
-    ...rest,
-    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && text !== '', text),
-  }));
+  return suggestions;
 }
 
 async function getListArgsSuggestions(
