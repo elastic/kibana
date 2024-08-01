@@ -11,7 +11,7 @@ export const MAX_FILE_SIZE = '100MB';
 export const MAX_FILE_SIZE_BYTES = 524288000; // 500MB
 export const ABSOLUTE_MAX_FILE_SIZE_BYTES = 1073741274; // 1GB
 export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
-export const MAX_TIKA_FILE_SIZE_BYTES = 104857600; // 100MB
+export const MAX_TIKA_FILE_SIZE_BYTES = 62914560; // 60MB
 
 // Value to use in the Elasticsearch index mapping meta data to identify the
 // index as having been created by the ML File Data Visualizer.
