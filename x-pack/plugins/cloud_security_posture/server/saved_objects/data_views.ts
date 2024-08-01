@@ -30,9 +30,7 @@ const DEFAULT_SPACE_ID = 'default';
 const getDataViewSafe = async (
   soClient: ISavedObjectsRepository,
   currentSpaceId: string,
-  currentSpaceDataViewId: string,
-  indexPattern: string,
-  logger: Logger
+  currentSpaceDataViewId: string
 ): Promise<SavedObject<DataViewAttributes> | undefined> => {
   try {
     const dataView = await soClient.get<DataViewAttributes>(
