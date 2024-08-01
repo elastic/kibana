@@ -99,7 +99,8 @@ type GetDataStreamsForIntegrationFn = (
 ) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
-  ignored?: string[]
+  ignored?: string[],
+  advanceCursorAndOpenSuggestions?: boolean
 ) => Promise<SuggestionRawDefinition[]>;
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -306,12 +307,19 @@ export async function suggest(
   return [];
 }
 
-function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
+function getFieldsByTypeRetriever(
+  queryString: string,
+  resourceRetriever?: ESQLCallbacks
+): { getFieldsByType: GetFieldsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   return {
-    getFieldsByType: async (expectedType: string | string[] = 'any', ignored: string[] = []) => {
+    getFieldsByType: async (
+      expectedType: string | string[] = 'any',
+      ignored: string[] = [],
+      advanceCursorAndOpenSuggestions = false
+    ) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields);
+      return buildFieldsDefinitionsWithMetadata(fields, advanceCursorAndOpenSuggestions);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -790,7 +798,7 @@ async function getExpressionSuggestionsByType(
     // if the definition includes a list of constants, suggest them
     if (argDef.values) {
       // ... | <COMMAND> ... <suggest enums>
-      suggestions.push(...buildConstantsDefinitions(argDef.values));
+      suggestions.push(...buildConstantsDefinitions(argDef.values, undefined, undefined, true));
     }
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
     if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
@@ -1082,7 +1090,9 @@ async function getFieldsOrFunctionsSuggestions(
   } = {}
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
-    (await (fields ? getFieldsByType(types, ignoreFields) : [])) as SuggestionRawDefinition[],
+    (await (fields
+      ? getFieldsByType(types, ignoreFields, commandName === 'sort')
+      : [])) as SuggestionRawDefinition[],
     functions
   );
 

@@ -337,17 +337,17 @@ describe('autocomplete', () => {
 
   describe('sort', () => {
     testSuggestions('from a | sort ', [
-      ...getFieldNamesByType('any'),
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
     ]);
-    testSuggestions('from a | sort stringField ', ['ASC', 'DESC', ',', '| ']);
-    testSuggestions('from a | sort stringField desc ', ['NULLS FIRST', 'NULLS LAST', ',', '| ']);
+    testSuggestions('from a | sort stringField ', ['ASC ', 'DESC ', ',', '| ']);
+    testSuggestions('from a | sort stringField desc ', ['NULLS FIRST ', 'NULLS LAST ', ',', '| ']);
     // @TODO: improve here
     // testSuggestions('from a | sort stringField desc ', ['first', 'last']);
   });
 
   describe('limit', () => {
-    testSuggestions('from a | limit ', ['10', '100', '1000']);
+    testSuggestions('from a | limit ', ['10 ', '100 ', '1000 ']);
     testSuggestions('from a | limit 4 ', ['| ']);
   });
 
@@ -1144,19 +1144,24 @@ describe('autocomplete', () => {
       'FROM index1 | SORT f',
       [
         ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-        ...getFieldNamesByType('any'),
+        ...getFieldNamesByType('any').map((field) => `${field} `),
       ],
       undefined,
       20
     );
 
     // SORT field order
-    testSuggestions('FROM index1 | SORT stringField a', ['ASC', 'DESC', ',', '| '], undefined, 32);
+    testSuggestions(
+      'FROM index1 | SORT stringField a',
+      ['ASC ', 'DESC ', ',', '| '],
+      undefined,
+      32
+    );
 
     // SORT field order nulls
     testSuggestions(
       'FROM index1 | SORT stringField ASC n',
-      ['NULLS FIRST', 'NULLS LAST', ',', '| '],
+      ['NULLS FIRST ', 'NULLS LAST ', ',', '| '],
       undefined,
       36
     );
@@ -1319,7 +1324,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM a | SORT ',
       [
-        ...getFieldNamesByType('any'),
+        ...getFieldNamesByType('any').map((field) => `${field} `),
         ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
       ].map(attachTriggerCommand),
       undefined,

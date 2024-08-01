@@ -129,7 +129,8 @@ export function getSuggestionCommandDefinition(
 }
 
 export const buildFieldsDefinitionsWithMetadata = (
-  fields: ESQLRealField[]
+  fields: ESQLRealField[],
+  advanceCursorAndOpenSuggestions: boolean = false
 ): SuggestionRawDefinition[] => {
   return fields.map((field) => {
     const description = field.metadata?.description;
@@ -137,7 +138,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
-      text: getSafeInsertText(field.name),
+      text: getSafeInsertText(field.name) + (advanceCursorAndOpenSuggestions ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
       documentation: description
@@ -150,6 +151,7 @@ ${description}`,
         : undefined,
       // If there is a description, it is a field from ECS, so it should be sorted to the top
       sortText: description ? '1D' : 'D',
+      command: advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   });
 };
