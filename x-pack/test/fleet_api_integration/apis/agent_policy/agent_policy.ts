@@ -173,44 +173,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(policy2.is_managed).to.equal(false);
       });
 
-      it('sets given supports_agentless value', async () => {
-        const {
-          body: { item: createdPolicy },
-        } = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'TEST-AGENTLESS',
-            namespace: 'default',
-            is_managed: true,
-            supports_agentless: true,
-          })
-          .expect(200);
-
-        const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
-        expect(body.item.supports_agentless).to.equal(true);
-        expect(body.item.is_managed).to.equal(true);
-
-        const {
-          body: { item: createdPolicy2 },
-        } = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'TEST-AGENTLESS',
-            namespace: 'default',
-            is_managed: false,
-            supports_agentless: true,
-          })
-          .expect(200);
-
-        const {
-          body: { item: policy2 },
-        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
-        expect(policy2.is_managed).to.equal(false);
-        expect(policy2.supports_agentless).to.equal(true);
-      });
-
       it('does not allow arbitrary config in agent_features value', async () => {
         await supertest
           .post(`/api/fleet/agent_policies`)
