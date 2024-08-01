@@ -11,8 +11,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { omit } from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getInitialESQLQuery, ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
+import { DataSourceType } from '../../../../../common/data_sources';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -58,6 +61,54 @@ export const getTopNavLinks = ({
       });
     },
     testId: 'discoverAlertsButton',
+  };
+
+  const esqLToggle = {
+    id: 'esql',
+    label: isEsqlMode
+      ? i18n.translate('discover.localMenu.localMenu.switchToClassicTitle', {
+          defaultMessage: 'Switch to classic',
+        })
+      : i18n.translate('discover.localMenu.localMenu.tryESQLTitle', {
+          defaultMessage: 'Try ES|QL',
+        }),
+    emphasize: true,
+    iconType: 'editorRedo',
+    description: isEsqlMode
+      ? i18n.translate('discover.localMenu.localMenu.switchToClassicTitle', {
+          defaultMessage: 'Switch to classic',
+        })
+      : i18n.translate('discover.localMenu.tryESQLDescription', {
+          defaultMessage: 'Try ES|QL',
+        }),
+    fill: false,
+    color: 'text',
+    run: () => {
+      if (dataView) {
+        if (isEsqlMode) {
+          state.appState.update({
+            query: {
+              language: 'kuery',
+              query: '',
+            },
+            dataSource: {
+              type: DataSourceType.DataView,
+              dataViewId: dataView.id ?? '',
+            },
+          });
+        } else {
+          const queryString = getInitialESQLQuery(dataView?.getIndexPattern());
+          state.appState.update({
+            query: { esql: queryString },
+            dataSource: {
+              type: DataSourceType.Esql,
+            },
+          });
+          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
+        }
+      }
+    },
+    testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
   };
 
   const newSearch = {
@@ -225,6 +276,10 @@ export const getTopNavLinks = ({
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
+
+  if (services.uiSettings.get(ENABLE_ESQL)) {
+    entries.push({ data: esqLToggle, order: 0 });
+  }
 
   if (!defaultMenu?.newItem?.disabled) {
     entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });

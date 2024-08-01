@@ -75,9 +75,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   allowQueryCancellation,
   hideTimeFilterInfo,
   hideQueryHistory,
-  isHelpMenuOpen,
   hasOutline,
-  setIsHelpMenuOpen,
 }: TextBasedLanguagesEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -490,20 +488,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [esqlCallbacks]
   );
 
-  const helpMenuPopoverProps = useMemo(() => {
-    if (setIsHelpMenuOpen) {
-      return {
-        isHelpMenuOpen: isHelpMenuOpen ?? false,
-        setIsHelpMenuOpen,
-      };
-    }
-
-    return {
-      isHelpMenuOpen: isLanguagePopoverOpen,
-      setIsHelpMenuOpen: setIsLanguagePopoverOpen,
-    };
-  }, [isHelpMenuOpen, isLanguagePopoverOpen, setIsHelpMenuOpen]);
-
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -718,8 +702,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideHistoryComponent}
         refetchHistoryItems={refetchHistoryItems}
-        isHelpMenuOpen={helpMenuPopoverProps.isHelpMenuOpen}
-        setIsHelpMenuOpen={helpMenuPopoverProps.setIsHelpMenuOpen}
+        isHelpMenuOpen={isLanguagePopoverOpen}
+        setIsHelpMenuOpen={setIsLanguagePopoverOpen}
       />
       <ResizableButton
         onMouseDownResizeHandler={onMouseDownResizeHandler}

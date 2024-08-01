@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiHorizontalRule,
-  EuiButton,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   useEuiTheme,
@@ -24,10 +23,8 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerPropsExtended } from './data_view_picker';
@@ -36,7 +33,6 @@ import type { TextBasedLanguagesTransitionModalProps } from './text_languages_tr
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
-import { ESQLMenuPopover } from './esql_menu_popover';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
@@ -74,7 +70,6 @@ export function ChangeDataView({
   onDataViewCreated,
   trigger,
   selectableProps,
-  textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
@@ -82,7 +77,6 @@ export function ChangeDataView({
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
-  openESQLInlineDocs,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -95,9 +89,7 @@ export function ChangeDataView({
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
-    kibana.services;
-  const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
+  const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
 
   const styles = changeDataViewStyles({
     fullWidth: trigger.fullWidth,
@@ -296,15 +288,6 @@ export function ChangeDataView({
     setIsTextLangTransitionModalDismissed(true);
   }, [storage]);
 
-  const onTextBasedSubmit = useCallback(
-    (q: AggregateQuery) => {
-      onTextLangQuerySubmit?.(q);
-      setPopoverIsOpen(false);
-      reportUiCounter?.(METRIC_TYPE.CLICK, `esql:unified_search_clicked`);
-    },
-    [onTextLangQuerySubmit, reportUiCounter]
-  );
-
   const cleanup = useCallback(
     (shouldDismissModal: boolean) => {
       setIsTextLangTransitionModalVisible(false);
@@ -365,22 +348,6 @@ export function ChangeDataView({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         {!isTextBasedLangSelected && (
           <>
-            {textBasedLanguages?.length && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="editorRedo"
-                  color="text"
-                  onClick={() => {
-                    onTextBasedSubmit({ esql: getInitialESQLQuery(trigger.title!) });
-                  }}
-                  data-test-subj="select-text-based-language-btn"
-                >
-                  {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-                    defaultMessage: 'Try ES|QL',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
                 <EuiFlexItem
@@ -418,30 +385,6 @@ export function ChangeDataView({
               </EuiFlexGroup>
             </EuiFlexItem>
           </>
-        )}
-        {isTextBasedLangSelected && (
-          <ESQLMenuPopover
-            onDataViewSwitch={() => {
-              const showTransitionModal =
-                !isTextLangTransitionModalDismissed && shouldShowTextBasedLanguageTransitionModal;
-
-              if (showTransitionModal) {
-                setIsTextLangTransitionModalVisible(true);
-              } else {
-                setIsTextBasedLangSelected(false);
-                // clean up the Text based language query
-                onTextLangQuerySubmit?.({
-                  language: 'kuery',
-                  query: '',
-                });
-                if (selectedDataViewId) {
-                  onChangeDataView(selectedDataViewId);
-                }
-                setTriggerLabel(trigger.label);
-              }
-            }}
-            openESQLInlineDocs={openESQLInlineDocs}
-          />
         )}
       </EuiFlexGroup>
 

@@ -90,10 +90,6 @@ export interface DataViewPickerProps {
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
-  /**
-   * Opens the ESQL inline docs
-   */
-  openESQLInlineDocs?: () => void;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
@@ -125,7 +121,6 @@ export const DataViewPicker = ({
   shouldShowTextBasedLanguageTransitionModal,
   onCreateDefaultAdHocDataView,
   isDisabled,
-  openESQLInlineDocs,
 }: DataViewPickerPropsExtended) => {
   return (
     <ChangeDataView
@@ -146,7 +141,6 @@ export const DataViewPicker = ({
       textBasedLanguage={textBasedLanguage}
       shouldShowTextBasedLanguageTransitionModal={shouldShowTextBasedLanguageTransitionModal}
       isDisabled={isDisabled}
-      openESQLInlineDocs={openESQLInlineDocs}
     />
   );
 };

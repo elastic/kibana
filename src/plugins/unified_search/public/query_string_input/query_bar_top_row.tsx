@@ -235,7 +235,6 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
-    const [isESQLInlineDocsOpen, setIsESQLInlineDocsOpen] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -642,7 +641,6 @@ export const QueryBarTopRow = React.memo(
             textBasedLanguage={textBasedLanguage}
             onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
             isDisabled={props.isDisabled}
-            openESQLInlineDocs={() => setIsESQLInlineDocsOpen(true)}
           />
         </EuiFlexItem>
       );
@@ -754,8 +752,6 @@ export const QueryBarTopRow = React.memo(
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
-            isHelpMenuOpen={isESQLInlineDocsOpen}
-            setIsHelpMenuOpen={setIsESQLInlineDocsOpen}
           />
         )
       );

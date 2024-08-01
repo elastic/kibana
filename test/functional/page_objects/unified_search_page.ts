@@ -44,7 +44,6 @@ export class UnifiedSearchPageObject extends FtrService {
   }
 
   public async switchToDataViewMode() {
-    await this.testSubjects.click('esql-menu-button');
     await this.testSubjects.click('switch-to-dataviews');
     await this.testSubjects.click('unifiedSearch_switch_noSave');
   }
