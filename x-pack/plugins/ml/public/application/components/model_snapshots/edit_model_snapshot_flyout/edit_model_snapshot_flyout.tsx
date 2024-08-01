@@ -30,8 +30,7 @@ import type {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../../common/types/anomaly_detection_jobs';
-import { ml } from '../../../services/ml_api_service';
-import { useNotifications } from '../../../contexts/kibana';
+import { useMlApiContext, useNotifications } from '../../../contexts/kibana';
 
 interface Props {
   snapshot: ModelSnapshot;
@@ -40,6 +39,7 @@ interface Props {
 }
 
 export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout }) => {
+  const ml = useMlApiContext();
   const { toasts } = useNotifications();
   const [description, setDescription] = useState(snapshot.description);
   const [retain, setRetain] = useState(snapshot.retain);

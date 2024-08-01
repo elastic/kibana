@@ -9,12 +9,13 @@ import { from } from 'rxjs';
 import { map } from 'rxjs';
 
 import type { MlFieldFormatService } from '../../services/field_format_service';
-import { mlJobService } from '../../services/job_service';
+import type { MlJobService } from '../../services/job_service';
 
 import { EXPLORER_ACTION } from '../explorer_constants';
 import { createJobs } from '../explorer_utils';
 
 export function jobSelectionActionCreator(
+  mlJobService: MlJobService,
   mlFieldFormatService: MlFieldFormatService,
   selectedJobIds: string[]
 ) {

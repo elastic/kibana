@@ -7,11 +7,11 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { useMlApiContext } from '../../../../../contexts/kibana';
 import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { ml } from '../../../../../services/ml_api_service';
 import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { SkipValidationButton } from './skip_validatoin';
@@ -24,6 +24,8 @@ const idFilterList = [
 ];
 
 export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+  const ml = useMlApiContext();
+
   const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 

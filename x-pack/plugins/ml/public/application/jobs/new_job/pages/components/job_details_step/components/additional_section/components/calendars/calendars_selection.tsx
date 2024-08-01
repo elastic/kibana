@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { ml } from '../../../../../../../../../services/ml_api_service';
 import { PLUGIN_ID } from '../../../../../../../../../../../common/constants/app';
 import type { Calendar } from '../../../../../../../../../../../common/types/calendars';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
@@ -33,6 +32,7 @@ export const CalendarsSelection: FC = () => {
   const {
     services: {
       application: { getUrlForApp },
+      mlServices: { mlApiServices: ml },
     },
   } = useMlKibana();
 

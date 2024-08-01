@@ -30,7 +30,6 @@ import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
 import { ItemsGrid } from '../../../components/items_grid';
 import { isValidFilterListId, saveFilterList } from './utils';
-import { ml } from '../../../services/ml_api_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { getDocLinks } from '../../../util/dependency_cache';
@@ -116,6 +115,7 @@ export class EditFilterListUI extends Component {
   };
 
   loadFilterList = (filterId) => {
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     ml.filters
       .filters({ filterId })
       .then((filter) => {

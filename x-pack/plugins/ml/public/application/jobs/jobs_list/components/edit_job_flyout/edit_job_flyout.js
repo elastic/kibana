@@ -30,7 +30,6 @@ import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
-import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
@@ -203,6 +202,8 @@ export class EditJobFlyoutUI extends Component {
         jobDetails.jobModelMemoryLimit
       ).message;
     }
+
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
 
     if (jobDetails.jobGroups !== undefined) {
       jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;

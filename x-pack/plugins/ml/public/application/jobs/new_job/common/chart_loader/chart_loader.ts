@@ -11,10 +11,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Field, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
-import { ml } from '../../../../services/ml_api_service';
-import { mlResultsService } from '../../../../services/results_service';
+import { mlResultsServiceProvider } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
+import type { MlApiServices } from '../../../../services/ml_api_service';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -28,17 +28,28 @@ const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class ChartLoader {
   protected _dataView: DataView;
+  protected _mlApiServices: MlApiServices;
+
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  private _newJobLineChart = memoizeOne(ml.jobs.newJobLineChart, eq);
-  private _newJobPopulationsChart = memoizeOne(ml.jobs.newJobPopulationsChart, eq);
-  private _getEventRateData = memoizeOne(mlResultsService.getEventRateData, eq);
-  private _getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
+  private _newJobLineChart;
+  private _newJobPopulationsChart;
+  private _getEventRateData;
+  private _getCategoryFields;
 
-  constructor(indexPattern: DataView, query: object) {
+  constructor(mlApiServices: MlApiServices, indexPattern: DataView, query: object) {
+    this._mlApiServices = mlApiServices;
     this._dataView = indexPattern;
     this._query = query;
+
+    this._newJobLineChart = memoizeOne(mlApiServices.jobs.newJobLineChart, eq);
+    this._newJobPopulationsChart = memoizeOne(mlApiServices.jobs.newJobPopulationsChart, eq);
+    this._getEventRateData = memoizeOne(
+      mlResultsServiceProvider(mlApiServices).getEventRateData,
+      eq
+    );
+    this._getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
 
     if (typeof indexPattern.timeFieldName === 'string') {
       this._timeFieldName = indexPattern.timeFieldName;
@@ -155,6 +166,7 @@ export class ChartLoader {
     indicesOptions?: IndicesOptions
   ): Promise<string[]> {
     const { results } = await this._getCategoryFields(
+      this._mlApiServices,
       this._dataView.getIndexPattern(),
       field.name,
       10,

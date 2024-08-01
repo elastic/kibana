@@ -12,7 +12,6 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
-import { ml } from '../../../services/ml_api_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
@@ -40,6 +39,7 @@ export class CalendarsListUI extends Component {
   }
 
   loadCalendars = async () => {
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     this.setState({ loading: true });
 
     try {
@@ -82,10 +82,12 @@ export class CalendarsListUI extends Component {
   };
 
   deleteCalendars = () => {
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
+    const toasts = this.props.kibana.services.notifications.toasts;
     const { selectedForDeletion } = this.state;
 
     this.closeDestroyModal();
-    deleteCalendars(selectedForDeletion, this.loadCalendars);
+    deleteCalendars(ml, toasts, selectedForDeletion, this.loadCalendars);
   };
 
   addRequiredFieldsToList = (calendarsList = []) => {

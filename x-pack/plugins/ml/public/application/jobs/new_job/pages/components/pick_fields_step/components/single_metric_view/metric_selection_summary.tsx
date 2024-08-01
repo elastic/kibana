@@ -13,7 +13,7 @@ import type { Results, ModelItem, Anomaly } from '../../../../../common/results_
 import type { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 const DTR_IDX = 0;
 
@@ -25,6 +25,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
     chartInterval,
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
 
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
@@ -71,7 +72,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
           setLineChartData(resp);
         }
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartData({});
       }
       setLoadingData(false);

@@ -48,8 +48,9 @@ export declare interface MlJobService {
   detectorsByJob: Record<string, any>;
 }
 
-export const mlJobService: MlJobService;
 export const mlJobServiceFactory: (
-  toastNotificationServiceOverride?: ToastNotificationService,
-  mlOverride?: MlApiServices
+  toastNotificationService: ToastNotificationService,
+  mlApiServices: MlApiServices
 ) => MlJobService;
+
+export const useMlJobService: () => MlJobService;

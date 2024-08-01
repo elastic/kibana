@@ -6,18 +6,32 @@
  */
 
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+import type { MlJobService } from '../../../services/job_service';
 
-export function stopDatafeeds(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
-export function closeJobs(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
+export function stopDatafeeds(
+  mlJobService: MlJobService,
+  jobs: Array<{ id: string }>,
+  callback?: () => void
+): Promise<void>;
+export function closeJobs(
+  mlJobService: MlJobService,
+  jobs: Array<{ id: string }>,
+  callback?: () => void
+): Promise<void>;
 export function deleteJobs(
+  mlJobService: MlJobService,
   jobs: Array<{ id: string }>,
   deleteUserAnnotations?: boolean,
   deleteAlertingRules?: boolean,
   callback?: () => void
 ): Promise<void>;
 export function resetJobs(
+  mlJobService: MlJobService,
   jobIds: string[],
   deleteUserAnnotations?: boolean,
   callback?: () => void
 ): Promise<void>;
-export function loadFullJob(jobId: string): Promise<CombinedJobWithStats>;
+export function loadFullJob(
+  mlJobService: MlJobService,
+  jobId: string
+): Promise<CombinedJobWithStats>;

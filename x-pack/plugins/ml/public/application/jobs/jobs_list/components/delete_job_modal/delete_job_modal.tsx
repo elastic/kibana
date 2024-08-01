@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { deleteJobs } from '../utils';
 import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
+import { useMlJobService } from '../../../../services/job_service';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const mlJobService = useMlJobService();
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);
@@ -83,6 +85,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const deleteJob = useCallback(() => {
     setDeleting(true);
     deleteJobs(
+      mlJobService,
       jobIds.map((id) => ({ id })),
       deleteUserAnnotations,
       deleteAlertingRules
@@ -92,6 +95,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
       closeModal();
       refreshJobs();
     }, BLOCKED_JOBS_REFRESH_INTERVAL_MS);
+    // exclude mlJobservice from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {

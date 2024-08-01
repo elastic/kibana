@@ -9,10 +9,8 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ApplicationStart,
-  HttpStart,
   I18nStart,
   DocLinksStart,
-  ToastsStart,
   ChromeRecentlyAccessed,
 } from '@kbn/core/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -22,11 +20,9 @@ export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
   docLinks: DocLinksStart | null;
-  toastNotifications: ToastsStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
   fieldFormats: FieldFormatsStart | null;
   application: ApplicationStart | null;
-  http: HttpStart | null;
   i18n: I18nStart | null;
   maps: MapsStartApi | null;
 }
@@ -35,11 +31,9 @@ const cache: DependencyCache = {
   timefilter: null,
   config: null,
   docLinks: null,
-  toastNotifications: null,
   recentlyAccessed: null,
   fieldFormats: null,
   application: null,
-  http: null,
   i18n: null,
   maps: null,
 };
@@ -48,11 +42,9 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.timefilter = deps.timefilter || null;
   cache.config = deps.config || null;
   cache.docLinks = deps.docLinks || null;
-  cache.toastNotifications = deps.toastNotifications || null;
   cache.recentlyAccessed = deps.recentlyAccessed || null;
   cache.fieldFormats = deps.fieldFormats || null;
   cache.application = deps.application || null;
-  cache.http = deps.http || null;
   cache.i18n = deps.i18n || null;
 }
 
@@ -68,13 +60,6 @@ export function getDocLinks() {
     throw new Error("docLinks hasn't been initialized");
   }
   return cache.docLinks;
-}
-
-export function getToastNotifications() {
-  if (cache.toastNotifications === null) {
-    throw new Error("toast notifications haven't been initialized");
-  }
-  return cache.toastNotifications;
 }
 
 export function getUiSettings() {
@@ -103,13 +88,6 @@ export function getApplication() {
     throw new Error("application hasn't been initialized");
   }
   return cache.application;
-}
-
-export function getHttp() {
-  if (cache.http === null) {
-    throw new Error("http hasn't been initialized");
-  }
-  return cache.http;
 }
 
 export function getI18n() {

@@ -20,6 +20,7 @@ import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobServiceFactory } from '../../../services/job_service';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
@@ -209,20 +210,24 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+  const toastNotificationService = useToastNotificationService();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
-    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
+    privileges: () =>
+      checkCreateJobsCapabilitiesResolver(mlApiServices, redirectToJobsManagementPage),
     jobCaps: () =>
       loadNewJobCapabilities(
         index,
         savedSearchId,
+        mlApiServices,
         dataViewsService,
         savedSearchService,
         ANOMALY_DETECTOR
       ),
-    existingJobsAndGroups: () => mlJobServiceFactory(undefined, mlApiServices).getJobAndGroupIds(),
+    existingJobsAndGroups: () =>
+      mlJobServiceFactory(toastNotificationService, mlApiServices).getJobAndGroupIds(),
   });
 
   return (

@@ -9,10 +9,9 @@ import { useMemo } from 'react';
 import { resultsServiceRxProvider } from './result_service_rx';
 import { resultsServiceProvider } from './results_service';
 import type { MlApiServices } from '../ml_api_service';
-import { ml } from '../ml_api_service';
 import { useMlKibana } from '../../contexts/kibana';
 
-export type MlResultsService = typeof mlResultsService;
+export type MlResultsService = ReturnType<typeof mlResultsServiceProvider>;
 
 type Time = string;
 export interface ModelPlotOutputResults {
@@ -23,8 +22,6 @@ export interface CriteriaField {
   fieldName: string;
   fieldValue: any;
 }
-
-export const mlResultsService = mlResultsServiceProvider(ml);
 
 export function mlResultsServiceProvider(mlApiServices: MlApiServices) {
   return {

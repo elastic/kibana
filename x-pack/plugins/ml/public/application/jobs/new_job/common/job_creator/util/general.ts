@@ -25,28 +25,30 @@ import type {
   Datafeed,
   Detector,
 } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { NavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import { mlJobService } from '../../../../../services/job_service';
+import type { MlJobService } from '../../../../../services/job_service';
 import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
-const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
-  let field = newJobCapsService.getFieldById(id);
-  // if no field could be found it may be a pretend field, like mlcategory or a script field
-  if (field === null) {
-    if (id === MLCATEGORY) {
-      field = mlCategory;
-    } else if (additionalFields.length) {
-      field = additionalFields.find((f) => f.id === id) || null;
+const getFieldByIdFactory =
+  (newJobCapsService: NewJobCapsService, additionalFields: Field[]) => (id: string) => {
+    let field = newJobCapsService.getFieldById(id);
+    // if no field could be found it may be a pretend field, like mlcategory or a script field
+    if (field === null) {
+      if (id === MLCATEGORY) {
+        field = mlCategory;
+      } else if (additionalFields.length) {
+        field = additionalFields.find((f) => f.id === id) || null;
+      }
     }
-  }
-  return field;
-};
+    return field;
+  };
 
 // populate the detectors with Field and Agg objects loaded from the job capabilities service
 export function getRichDetectors(
+  newJobCapsService: NewJobCapsService,
   job: Job,
   datafeed: Datafeed,
   additionalFields: Field[],
@@ -54,7 +56,7 @@ export function getRichDetectors(
 ) {
   const detectors = advanced ? getDetectorsAdvanced(job, datafeed) : getDetectors(job, datafeed);
 
-  const getFieldById = getFieldByIdFactory(additionalFields);
+  const getFieldById = getFieldByIdFactory(newJobCapsService, additionalFields);
 
   return detectors.map((d) => {
     let field = null;
@@ -235,6 +237,7 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
 }
 
 export function stashJobForCloning(
+  mlJobService: MlJobService,
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
   includeTimeRange: boolean = false,
@@ -259,39 +262,53 @@ export function stashJobForCloning(
 }
 
 export function convertToMultiMetricJob(
+  mlJobService: MlJobService,
   jobCreator: JobCreatorType,
   navigateToPath: NavigateToPath
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashJobForCloning(jobCreator, true, true);
+  stashJobForCloning(mlJobService, jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
 }
 
-export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function convertToAdvancedJob(
+  mlJobService: MlJobService,
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToPath
+) {
   jobCreator.createdBy = null;
-  stashJobForCloning(jobCreator, true, true);
+  stashJobForCloning(mlJobService, jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
 }
 
-export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function resetAdvancedJob(
+  mlJobService: MlJobService,
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToPath
+) {
   jobCreator.createdBy = null;
-  stashJobForCloning(jobCreator, true, false);
+  stashJobForCloning(mlJobService, jobCreator, true, false);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
-export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function resetJob(
+  mlJobService: MlJobService,
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToPath
+) {
   jobCreator.jobId = '';
-  stashJobForCloning(jobCreator, true, true);
+  stashJobForCloning(mlJobService, jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function advancedStartDatafeed(
+  mlJobService: MlJobService,
   jobCreator: JobCreatorType | null,
   navigateToPath: NavigateToPath
 ) {
   if (jobCreator !== null) {
-    stashJobForCloning(jobCreator, false, false);
+    stashJobForCloning(mlJobService, jobCreator, false, false);
   }
   navigateToPath('/jobs');
 }

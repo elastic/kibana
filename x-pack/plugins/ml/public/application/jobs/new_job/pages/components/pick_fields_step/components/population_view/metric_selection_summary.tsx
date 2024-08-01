@@ -17,7 +17,7 @@ import type { Results, ModelItem, Anomaly } from '../../../../../common/results_
 import type { LineChartData } from '../../../../../common/chart_loader';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 type DetectorFieldValues = Record<number, string[]>;
 
@@ -29,6 +29,7 @@ export const PopulationDetectorsSummary: FC = () => {
     chartInterval,
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
+  const toastNotificationService = useToastNotificationService();
 
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
@@ -91,7 +92,7 @@ export const PopulationDetectorsSummary: FC = () => {
 
         setLineChartsData(resp);
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartsData({});
       }
       setLoadingData(false);

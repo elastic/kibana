@@ -13,9 +13,8 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
 import type { DeepReadonly } from '../../../../../../../common/types/common';
-import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
@@ -50,6 +49,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       data: { dataViews },
     },
   } = useMlKibana();
+  const ml = useMlApiContext();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 

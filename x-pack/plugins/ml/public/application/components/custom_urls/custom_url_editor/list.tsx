@@ -71,6 +71,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     services: {
       http,
       data: { dataViews },
+      mlServices: { mlApiServices: ml },
     },
   } = useMlKibana();
   const { displayErrorToast } = useToastNotificationService();
@@ -160,7 +161,14 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
 
     if (index < customUrls.length) {
       try {
-        const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
+        const testUrl = await getTestUrl(
+          ml,
+          job,
+          customUrl,
+          timefieldName,
+          undefined,
+          isPartialDFAJob
+        );
         openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
       } catch (error) {
         displayErrorToast(

@@ -16,7 +16,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
-import { mlJobService } from '../../../services/job_service';
+import { useMlJobService } from '../../../services/job_service';
 import type {
   CombinedJob,
   Detector,
@@ -105,6 +105,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
       },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const selectedJob: CombinedJob | MlJob = useMemo(
     () => job ?? mlJobService.getJob(selectedJobId),
@@ -128,7 +129,6 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
     return getControlsForDetector(
       selectedDetectorIndex,
       selectedEntities,
-      selectedJobId,
       selectedJob as CombinedJob
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

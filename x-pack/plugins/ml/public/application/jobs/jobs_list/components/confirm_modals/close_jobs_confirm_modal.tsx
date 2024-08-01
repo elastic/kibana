@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
+import { useMlJobService } from '../../../../services/job_service';
 import { closeJobs } from '../utils';
 import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';
 
@@ -37,6 +38,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
   unsetShowFunction,
   refreshJobs,
 }) => {
+  const mlJobService = useMlJobService();
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToReset, setJobsToReset] = useState<MlSummaryJob[]>([]);
@@ -113,7 +115,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
 
             <EuiButton
               onClick={() => {
-                closeJobs(jobsToReset, refreshJobs);
+                closeJobs(mlJobService, jobsToReset, refreshJobs);
                 closeModal();
               }}
               fill

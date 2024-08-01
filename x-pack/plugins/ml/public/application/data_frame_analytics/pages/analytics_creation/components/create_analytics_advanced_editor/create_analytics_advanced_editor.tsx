@@ -14,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import { useNotifications } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
+import { useMlApiContext, useNotifications } from '../../../../../contexts/kibana';
 import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
@@ -25,6 +24,7 @@ const EditorComponent = dynamic(async () => ({
 }));
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
+  const ml = useMlApiContext();
   const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 

@@ -6,8 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpStart } from '@kbn/core/public';
-import { getHttp } from '../util/dependency_cache';
+import type { HttpFetchOptionsWithPath, HttpFetchOptions, HttpSetup } from '@kbn/core/public';
 
 function getResultHeaders(headers: HeadersInit) {
   return {
@@ -49,24 +48,13 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
 }
 
 /**
- * Function for making HTTP requests to Kibana's backend.
- * Wrapper for Kibana's HttpHandler.
- *
- * @deprecated use {@link HttpService} instead
- */
-export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
-  const { path, fetchOptions } = getFetchOptions(options);
-  return getHttp().fetch<T>(path, fetchOptions);
-}
-
-/**
  * ML Http Service
  */
 export class HttpService {
   public getLoadingCount$: Observable<number>;
 
-  constructor(private httpStart: HttpStart) {
-    this.getLoadingCount$ = httpStart.getLoadingCount$();
+  constructor(private httpSetup: HttpSetup) {
+    this.getLoadingCount$ = httpSetup.getLoadingCount$();
   }
 
   /**
@@ -97,7 +85,7 @@ export class HttpService {
         signal,
       };
 
-      this.httpStart
+      this.httpSetup
         .fetch<T>(input, perSubscriberInit)
         .then((response) => {
           abortable = false;
@@ -126,7 +114,7 @@ export class HttpService {
    */
   public async http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
     const { path, fetchOptions } = getFetchOptions(options);
-    return this.httpStart.fetch<T>(path, fetchOptions);
+    return this.httpSetup.fetch<T>(path, fetchOptions);
   }
 
   /**

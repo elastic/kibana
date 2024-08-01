@@ -63,10 +63,9 @@ import { SelectSeverity } from '../components/controls/select_severity/select_se
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
-import { ml } from '../services/ml_api_service';
 import { forecastServiceFactory } from '../services/forecast_service';
 import { timeSeriesExplorerServiceFactory } from '../util/time_series_explorer_service';
-import { mlJobService } from '../services/job_service';
+import { mlJobServiceFactory } from '../services/job_service';
 import { mlResultsServiceProvider } from '../services/results_service';
 
 import {
@@ -147,6 +146,16 @@ export class TimeSeriesExplorer extends React.Component {
   mlResultsService;
   mlIndexUtils;
 
+  constructor(props) {
+    super(props);
+
+    // Initialize mlJobService using mlJobServiceFactory
+    this.mlJobService = mlJobServiceFactory(
+      props.toastNotificationService,
+      this.context.kibana.services.mlServices.mlApiServices
+    );
+  }
+
   /**
    * Returns field names that don't have a selection yet.
    */
@@ -226,7 +235,7 @@ export class TimeSeriesExplorer extends React.Component {
 
   getFocusAggregationInterval(selection) {
     const { selectedJobId } = this.props;
-    const selectedJob = mlJobService.getJob(selectedJobId);
+    const selectedJob = this.mlJobService.getJob(selectedJobId);
 
     // Calculate the aggregation interval for the focus chart.
     const bounds = { min: moment(selection.from), max: moment(selection.to) };
@@ -245,7 +254,7 @@ export class TimeSeriesExplorer extends React.Component {
     const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
       this.props;
     const { modelPlotEnabled } = this.state;
-    const selectedJob = mlJobService.getJob(selectedJobId);
+    const selectedJob = this.mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
       return;
     }
@@ -301,9 +310,11 @@ export class TimeSeriesExplorer extends React.Component {
       tableSeverity,
       functionDescription,
     } = this.props;
+    const mlJobService = this.mlJobService;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
+    const ml = this.context.kibana.services.mlServices.mlApiServices;
     return ml.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
@@ -372,6 +383,7 @@ export class TimeSeriesExplorer extends React.Component {
   };
 
   loadSingleMetricData = (fullRefresh = true) => {
+    const mlJobService = this.mlJobService;
     const {
       autoZoomDuration,
       bounds,
@@ -676,7 +688,7 @@ export class TimeSeriesExplorer extends React.Component {
   loadForJobId(jobId) {
     const { appStateHandler, selectedDetectorIndex } = this.props;
 
-    const selectedJob = mlJobService.getJob(jobId);
+    const selectedJob = this.mlJobService.getJob(jobId);
 
     if (selectedJob === undefined) {
       return;
@@ -715,6 +727,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   componentDidMount() {
+    const mlJobService = this.mlJobService;
     const { mlApiServices } = this.context.services.mlServices;
     this.mlResultsService = mlResultsServiceProvider(mlApiServices);
     this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
@@ -843,7 +856,7 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentDidUpdate(previousProps) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
-      const selectedJob = mlJobService.getJob(this.props.selectedJobId);
+      const selectedJob = this.mlJobService.getJob(this.props.selectedJobId);
       this.contextChartSelectedInitCallDone = false;
       getDataViewsAndIndicesWithGeoFields(
         [selectedJob],
@@ -931,6 +944,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   render() {
+    const mlJobService = this.mlJobService;
     const {
       autoZoomDuration,
       bounds,

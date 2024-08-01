@@ -37,7 +37,6 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
 import { memoryInputValidator } from '../../../../../../../common/util/validators';
@@ -70,10 +69,10 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   } = useMlKibana();
   const { refresh } = useRefreshAnalyticsList();
 
-  const mlApiServices = useMlApiContext();
+  const ml = useMlApiContext();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = mlApiServices;
+  } = ml;
 
   const toastNotificationService = useToastNotificationService();
 

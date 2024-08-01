@@ -19,7 +19,7 @@ import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
 import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
-import { mlJobService } from '../../../services/job_service';
+import { useMlJobService } from '../../../services/job_service';
 import { useForecastService } from '../../../services/forecast_service';
 import { useTimeSeriesExplorerService } from '../../../util/time_series_explorer_service';
 import { APP_STATE_ACTION } from '../../../timeseriesexplorer/timeseriesexplorer_constants';
@@ -51,6 +51,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       data: { dataViews: dataViewsService },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
   const { toasts } = useNotifications();
   const mlForecastService = useForecastService();
   const toastNotificationService = useToastNotificationService();
@@ -204,6 +205,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       jobsWithTimeRange,
       selectedJobIds,
       setGlobalState,
+      mlJobService,
       toasts,
       getJobSelection
     );

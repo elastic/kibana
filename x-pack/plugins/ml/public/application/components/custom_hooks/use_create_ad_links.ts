@@ -11,7 +11,7 @@ import {
   ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,
 } from '../../../../common/constants/settings';
-import { mlJobService } from '../../services/job_service';
+import { useMlJobService } from '../../services/job_service';
 
 export const useCreateADLinks = () => {
   const {
@@ -19,6 +19,7 @@ export const useCreateADLinks = () => {
       http: { basePath },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const useUserTimeSettings = useUiSettings().get(ANOMALY_DETECTION_ENABLE_TIME_RANGE);
   const userTimeSettings = useUiSettings().get(ANOMALY_DETECTION_DEFAULT_TIME_RANGE);

@@ -6,13 +6,15 @@
  */
 
 import PropTypes from 'prop-types';
-
 import React, { Component } from 'react';
+
+import { context } from '@kbn/kibana-react-plugin/public';
+
 import { RecognizedResult } from './recognized_result';
 
-import { ml } from '../../services/ml_api_service';
-
 export class DataRecognizer extends Component {
+  static contextType = context;
+
   constructor(props) {
     super(props);
 
@@ -27,6 +29,7 @@ export class DataRecognizer extends Component {
   }
 
   componentDidMount() {
+    const ml = this.context.services.mlServices.mlApiServices;
     // once the mount is complete, call the recognize endpoint to see if the index format is known to us,
     ml.recognizeIndex({ indexPatternTitle: this.indexPattern.title })
       .then((resp) => {

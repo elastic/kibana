@@ -42,12 +42,12 @@ import {
   replaceTokensInDFAUrlValue,
   isValidLabel,
 } from '../../../util/custom_url_utils';
-import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { isAnomalyDetectionJob } from '../../../../../common/types/anomaly_detection_jobs';
 import type { TimeRangeType } from './constants';
+import type { MlApiServices } from '../../../services/ml_api_service';
 
 export interface TimeRange {
   type: TimeRangeType;
@@ -426,7 +426,11 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
+async function getAnomalyDetectionJobTestUrl(
+  ml: MlApiServices,
+  job: Job,
+  customUrl: MlUrlConfig
+): Promise<string> {
   const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
@@ -516,6 +520,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
 }
 
 async function getDataFrameAnalyticsTestUrl(
+  ml: MlApiServices,
   job: DataFrameAnalyticsConfig,
   customUrl: MlKibanaUrlConfig,
   timeFieldName: string | null,
@@ -589,6 +594,7 @@ async function getDataFrameAnalyticsTestUrl(
 }
 
 export function getTestUrl(
+  ml: MlApiServices,
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlUrlConfig,
   timeFieldName: string | null,
@@ -597,6 +603,7 @@ export function getTestUrl(
 ) {
   if (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) {
     return getDataFrameAnalyticsTestUrl(
+      ml,
       job as DataFrameAnalyticsConfig,
       customUrl,
       timeFieldName,
@@ -605,5 +612,5 @@ export function getTestUrl(
     );
   }
 
-  return getAnomalyDetectionJobTestUrl(job, customUrl);
+  return getAnomalyDetectionJobTestUrl(ml, job, customUrl);
 }

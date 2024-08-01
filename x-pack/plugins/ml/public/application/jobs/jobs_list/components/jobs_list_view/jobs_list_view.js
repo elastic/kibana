@@ -8,7 +8,8 @@
 import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { ml } from '../../../../services/ml_api_service';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
 import { JobDetails } from '../job_details';
@@ -39,7 +40,7 @@ import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 
 let blockingJobsRefreshTimeout = null;
 
-export class JobsListView extends Component {
+export class JobsListViewUI extends Component {
   constructor(props) {
     super(props);
 
@@ -316,6 +317,7 @@ export class JobsListView extends Component {
       this.setState({ loading: true });
     }
 
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
     try {
       let jobsAwaitingNodeCount = 0;
@@ -378,6 +380,7 @@ export class JobsListView extends Component {
       return;
     }
 
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     const { jobs } = await ml.jobs.blockingJobTasks();
     const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
     const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
@@ -552,3 +555,5 @@ export class JobsListView extends Component {
     return <div>{this.renderJobsListComponents()}</div>;
   }
 }
+
+export const JobsListView = withKibana(JobsListViewUI);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
@@ -25,8 +26,9 @@ import {
   TOP_CLASSES,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlApiContext } from '../../contexts/kibana';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
-import { ml } from '../ml_api_service';
+import type { MlApiServices } from '../ml_api_service';
 
 // Keep top nested field and remove all <nested_field>.* fields
 export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {
@@ -59,13 +61,21 @@ export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPattern
   return fields;
 }
 
-class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
+export class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
+  private _mlApiService: MlApiServices;
+
+  constructor(mlApiService: MlApiServices) {
+    super();
+    this._mlApiService = mlApiService;
+  }
+
   public async initializeFromDataVIew(dataView: DataView) {
     try {
-      const resp: NewJobCapsResponse = await ml.dataFrameAnalytics.newJobCapsAnalytics(
-        dataView.getIndexPattern(),
-        dataView.type === DataViewType.ROLLUP
-      );
+      const resp: NewJobCapsResponse =
+        await this._mlApiService.dataFrameAnalytics.newJobCapsAnalytics(
+          dataView.getIndexPattern(),
+          dataView.type === DataViewType.ROLLUP
+        );
 
       const allFields = removeNestedFieldChildren(resp, dataView.getIndexPattern());
 
@@ -216,4 +226,8 @@ class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
   }
 }
 
-export const newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics();
+export const useNewJobCapsServiceAnalytics = () => {
+  const mlApiService = useMlApiContext();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => new NewJobCapsServiceAnalytics(mlApiService), []);
+};

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ml } from '../../../services/ml_api_service';
 
 import { CalendarsList } from './calendars_list';
 
@@ -36,23 +35,26 @@ jest.mock('../../../capabilities/get_capabilities', () => ({
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
 }));
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    calendars: () => {
-      return Promise.resolve([]);
-    },
-    delete: jest.fn(),
-  },
-}));
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, memo: (x) => x };
 });
 
+const mockCalendars = jest.fn(() => Promise.resolve([]));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (node) => {
-    return node;
+  withKibana: (type) => {
+    const EnhancedType = (props) => {
+      return React.createElement(type, {
+        ...props,
+        kibana: {
+          services: {
+            mlServices: { mlApiServices: { calendars: mockCalendars } },
+          },
+        },
+      });
+    };
+    return EnhancedType;
   },
 }));
 
@@ -120,10 +122,9 @@ const props = {
 
 describe('CalendarsList', () => {
   test('loads calendars on mount', () => {
-    ml.calendars = jest.fn(() => []);
     shallowWithIntl(<CalendarsList {...props} />);
 
-    expect(ml.calendars).toHaveBeenCalled();
+    expect(mockCalendars).toHaveBeenCalled();
   });
 
   test('Renders calendar list with calendars', () => {

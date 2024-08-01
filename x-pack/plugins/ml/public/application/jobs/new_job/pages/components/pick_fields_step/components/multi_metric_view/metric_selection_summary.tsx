@@ -14,7 +14,7 @@ import type { Results, ModelItem, Anomaly } from '../../../../../common/results_
 import type { LineChartData } from '../../../../../common/chart_loader';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
   const {
@@ -23,8 +23,8 @@ export const MultiMetricDetectorsSummary: FC = () => {
     resultsLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
   const jobCreator = jc as MultiMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
 
   const [lineChartsData, setLineChartsData] = useState<LineChartData>({});
   const [loadingData, setLoadingData] = useState(false);
@@ -52,7 +52,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
           );
           setFieldValues(tempFieldValues);
         } catch (error) {
-          getToastNotificationService().displayErrorToast(error);
+          toastNotificationService.displayErrorToast(error);
         }
       }
     })();
@@ -60,6 +60,8 @@ export const MultiMetricDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // skip toastNotificationService from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartLoader, resultsLoader, jobCreator]);
 
   useEffect(() => {
@@ -87,7 +89,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartsData({});
       }
       setLoadingData(false);

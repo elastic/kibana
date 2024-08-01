@@ -7,11 +7,12 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { mlJobService } from '../../../../services/job_service';
+import type { MlJobService } from '../../../../services/job_service';
 import type { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
+  mlJobService: MlJobService,
   dataViewsService: DataViewsContract,
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']

@@ -15,7 +15,8 @@ import {
   type RocCurveItem,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { useMlApiContext } from '../../../../../contexts/kibana';
 
 import type { ResultsSearchQuery } from '../../../../common/analytics';
 import { isClassificationEvaluateResponse } from '../../../../common/analytics';
@@ -39,6 +40,8 @@ export const useRocCurve = (
   searchQuery: ResultsSearchQuery,
   columns: string[]
 ) => {
+  const mlApiServices = useMlApiContext();
+  const newJobCapsServiceAnalytics = useNewJobCapsServiceAnalytics();
   const classificationClasses = columns.filter(
     (d) => d !== ACTUAL_CLASS_ID && d !== OTHER_CLASS_ID
   );
@@ -74,6 +77,7 @@ export const useRocCurve = (
       for (let i = 0; i < classificationClasses.length; i++) {
         const rocCurveClassName = classificationClasses[i];
         const evalData = await loadEvalData({
+          mlApiServices,
           isTraining: isTrainingFilter(searchQuery, resultsField),
           index: jobConfig.dest.index,
           dependentVariable,

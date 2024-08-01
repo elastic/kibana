@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { useMemo } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -14,8 +16,9 @@ import {
   EVENT_RATE_FIELD_ID,
 } from '@kbn/ml-anomaly-utils';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import { useMlApiContext } from '../../contexts/kibana';
 import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
-import { ml, type MlApiServices } from '../ml_api_service';
+import type { MlApiServices } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
 export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
@@ -185,4 +188,8 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   fields.splice(0, 0, eventRateField);
 }
 
-export const newJobCapsService = new NewJobCapsService(ml);
+export const useNewJobCapsService = () => {
+  const mlApiService = useMlApiContext();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => new NewJobCapsService(mlApiService), []);
+};

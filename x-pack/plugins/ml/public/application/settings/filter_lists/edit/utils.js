@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
-import { ml } from '../../../services/ml_api_service';
 
 export function isValidFilterListId(id) {
   //  Filter List ID requires the same format as a Job ID, therefore isJobIdValid can be used
@@ -41,7 +40,7 @@ export function saveFilterList(filterId, description, items, loadedFilterList) {
   });
 }
 
-export function addFilterList(filterId, description, items) {
+export function addFilterList(mlApiServices, filterId, description, items) {
   const filterWithIdExistsErrorMessage = i18n.translate(
     'xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage',
     {
@@ -54,13 +53,13 @@ export function addFilterList(filterId, description, items) {
 
   return new Promise((resolve, reject) => {
     // First check the filterId isn't already in use by loading the current list of filters.
-    ml.filters
+    mlApiServices.filters
       .filtersStats()
       .then((filterLists) => {
         const savedFilterIds = filterLists.map((filterList) => filterList.filter_id);
         if (savedFilterIds.indexOf(filterId) === -1) {
           // Save the new filter.
-          ml.filters
+          mlApiServices.filters
             .addFilter(filterId, description, items)
             .then((newFilter) => {
               resolve(newFilter);
@@ -80,14 +79,14 @@ export function addFilterList(filterId, description, items) {
   });
 }
 
-export function updateFilterList(loadedFilterList, description, items) {
+export function updateFilterList(mlApiServices, loadedFilterList, description, items) {
   return new Promise((resolve, reject) => {
     // Get items added and removed from loaded filter.
     const loadedItems = loadedFilterList.items;
     const addItems = items.filter((item) => loadedItems.includes(item) === false);
     const removeItems = loadedItems.filter((item) => items.includes(item) === false);
 
-    ml.filters
+    mlApiServices.filters
       .updateFilter(loadedFilterList.filter_id, description, addItems, removeItems)
       .then((updatedFilter) => {
         resolve(updatedFilter);

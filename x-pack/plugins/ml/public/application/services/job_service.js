@@ -13,27 +13,17 @@ import { validateTimeRange, TIME_FORMAT } from '@kbn/ml-date-utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 
 import { isWebUrl } from '../util/url_utils';
+import { useMlApiContext } from '../contexts/kibana';
 
-import { ml } from './ml_api_service';
-import { getToastNotificationService } from './toast_notification_service';
+import { useToastNotificationService } from './toast_notification_service';
 
 let jobs = [];
 let datafeedIds = {};
 
 class JobService {
-  // The overrides allow the use of JobService in contexts where
-  // the dependency cache is not available, for example when embedding
-  // the Single Metric Viewer chart. Note we cannot set the members here
-  // already based on the dependency cache because they will not be
-  // initialized yet. So this wouldn't work:
-  //
-  // this.ml = mlOverride ?? ml;
-  //
-  // That's why we have the getters like getMl() below to only access them
-  // when the methods of this class are being called.
-  constructor(toastNotificationServiceOverride, mlOverride) {
-    this.toastNotificationService = toastNotificationServiceOverride;
-    this.ml = mlOverride;
+  constructor(toastNotificationService, ml) {
+    this.toastNotificationService = toastNotificationService;
+    this.ml = ml;
 
     // tempJobCloningObjects -> used to pass a job object between the job management page and
     // and the advanced wizard.
@@ -59,14 +49,6 @@ class JobService {
     this.jobDescriptions = {};
     this.detectorsByJob = {};
     this.customUrlsByJob = {};
-  }
-
-  getMl() {
-    return this.ml ?? ml;
-  }
-
-  getToastNotificationService() {
-    return this.toastNotificationService ?? getToastNotificationService();
   }
 
   loadJobs() {
@@ -592,6 +574,17 @@ function createResultsUrl(jobIds, start, end, resultsPage, mode = 'absolute') {
   return path;
 }
 
-export const mlJobService = new JobService();
-export const mlJobServiceFactory = (toastNotificationServiceOverride, mlOverride) =>
-  new JobService(toastNotificationServiceOverride, mlOverride);
+// This is to retain the singleton behavior of the previous direct instantion and export.
+let mlJobService;
+export const mlJobServiceFactory = (toastNotificationService, mlApiServices) => {
+  if (mlJobService) return mlJobService;
+
+  mlJobService = new JobService(toastNotificationService, mlApiServices);
+  return mlJobService;
+};
+
+export const useMlJobService = () => {
+  const toastNotificationService = useToastNotificationService();
+  const mlApiServices = useMlApiContext();
+  return mlJobServiceFactory(toastNotificationService, mlApiServices);
+};

@@ -19,7 +19,7 @@ import { useMlKibana } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { mlJobService } from '../../../services/job_service';
+import { useMlJobService } from '../../../services/job_service';
 import { getDateFormatTz } from '../../../explorer/explorer_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
@@ -59,6 +59,7 @@ const PageWrapper: FC<PageProps> = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),

@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiButton,
@@ -24,7 +25,6 @@ import {
 
 import { cloneDeep } from 'lodash';
 
-import { ml } from '../../../../../services/ml_api_service';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
@@ -54,7 +54,7 @@ function createSelectedGroups(jobs, groups) {
   return selectedGroups;
 }
 
-export class GroupSelector extends Component {
+export class GroupSelectorUI extends Component {
   static propTypes = {
     jobs: PropTypes.array.isRequired,
     allJobIds: PropTypes.array.isRequired,
@@ -88,6 +88,7 @@ export class GroupSelector extends Component {
     if (this.state.isPopoverOpen) {
       this.closePopover();
     } else {
+      const ml = this.props.kibana.services.mlServices.mlApiServices;
       ml.jobs
         .groups()
         .then((groups) => {
@@ -153,6 +154,7 @@ export class GroupSelector extends Component {
     }
 
     const tempJobs = newJobs.map((j) => ({ jobId: j.id, groups: j.newGroups }));
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     ml.jobs
       .updateGroups(tempJobs)
       .then((resp) => {
@@ -271,3 +273,5 @@ export class GroupSelector extends Component {
     );
   }
 }
+
+export const GroupSelector = withKibana(GroupSelectorUI);

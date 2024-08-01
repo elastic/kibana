@@ -97,7 +97,7 @@ const App: FC<AppProps> = ({
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
 
@@ -165,10 +165,8 @@ export const renderApp = (
     fieldFormats: deps.fieldFormats,
     config: coreStart.uiSettings!,
     docLinks: coreStart.docLinks!,
-    toastNotifications: coreStart.notifications.toasts,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     application: coreStart.application,
-    http: coreStart.http,
     maps: deps.maps,
   });
 

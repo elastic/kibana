@@ -12,12 +12,12 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import type { LineChartData } from '../../../../../common/chart_loader';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
+import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -31,8 +31,9 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     chartLoader,
     chartInterval,
   } = useContext(JobCreatorContext);
-
   const jobCreator = jc as MultiMetricJobCreator;
+  const toastNotificationService = useToastNotificationService();
+  const newJobCapsService = useNewJobCapsService();
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
@@ -121,7 +122,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         )
         .then(setFieldValues)
         .catch((error) => {
-          getToastNotificationService().displayErrorToast(error);
+          toastNotificationService.displayErrorToast(error);
         });
     } else {
       setFieldValues([]);
@@ -154,7 +155,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationService.displayErrorToast(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

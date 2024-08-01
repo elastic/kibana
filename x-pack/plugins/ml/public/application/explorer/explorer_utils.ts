@@ -39,8 +39,7 @@ import {
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { ml } from '../services/ml_api_service';
-import { mlJobService } from '../services/job_service';
+import type { MlJobService } from '../services/job_service';
 import { getUiSettings } from '../util/dependency_cache';
 
 import type { SwimlaneType } from './explorer_constants';
@@ -53,6 +52,7 @@ import {
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlResultsService } from '../services/results_service';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
+import type { MlApiServices } from '../services/ml_api_service';
 
 export interface ExplorerJob {
   id: string;
@@ -239,7 +239,7 @@ export async function loadFilteredTopInfluencers(
   )) as any[];
 }
 
-export function getInfluencers(selectedJobs: any[]): string[] {
+export function getInfluencers(mlJobService: MlJobService, selectedJobs: any[]): string[] {
   const influencers: string[] = [];
   selectedJobs.forEach((selectedJob) => {
     const job = mlJobService.getJob(selectedJob.id);
@@ -258,7 +258,7 @@ export function getDateFormatTz(): string {
   return dateFormatTz;
 }
 
-export function getFieldsByJob() {
+export function getFieldsByJob(mlJobService: MlJobService) {
   return mlJobService.jobs.reduce(
     (reducedFieldsByJob, job) => {
       // Add the list of distinct by, over, partition and influencer fields for each job.
@@ -353,6 +353,7 @@ export function getSelectionJobIds(
 }
 
 export function loadOverallAnnotations(
+  mlApiServices: MlApiServices,
   selectedJobs: ExplorerJob[],
   bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
@@ -361,7 +362,7 @@ export function loadOverallAnnotations(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      ml.annotations.getAnnotations$({
+      mlApiServices.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -407,6 +408,7 @@ export function loadOverallAnnotations(
 }
 
 export function loadAnnotationsTableData(
+  mlApiServices: MlApiServices,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   bounds: Required<TimeRangeBounds>
@@ -416,7 +418,7 @@ export function loadAnnotationsTableData(
 
   return new Promise((resolve) => {
     lastValueFrom(
-      ml.annotations.getAnnotations$({
+      mlApiServices.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
@@ -465,6 +467,8 @@ export function loadAnnotationsTableData(
 }
 
 export async function loadAnomaliesTableData(
+  mlApiServices: MlApiServices,
+  mlJobService: MlJobService,
   selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
   dateFormatTz: string,
@@ -479,7 +483,7 @@ export async function loadAnomaliesTableData(
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve, reject) => {
-    ml.results
+    mlApiServices.results
       .getAnomaliesTableData(
         jobIds,
         [],

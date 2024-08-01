@@ -14,12 +14,11 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
-import { ml } from '../../../../../services/ml_api_service';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
 import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
 import { AdditionalSection } from './additional_section';
@@ -43,6 +42,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks, notifications },
   } = useMlKibana();
+  const ml = useMlApiContext();
 
   const canCreateDataView = useCanCreateDataView();
   const { dataViewAvailableTimeFields, onTimeFieldChanged } = useDataViewTimeFields({

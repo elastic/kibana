@@ -320,7 +320,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   } {
     setDependencyCache({
       docLinks: core.docLinks!,
-      http: core.http,
       i18n: core.i18n,
     });
 

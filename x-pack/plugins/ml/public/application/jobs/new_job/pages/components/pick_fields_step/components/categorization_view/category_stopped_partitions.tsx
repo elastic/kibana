@@ -13,12 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { switchMap, takeWhile, tap } from 'rxjs';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { useMlApiContext } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
-import { ml } from '../../../../../../../services/ml_api_service';
 
 const NUMBER_OF_PREVIEW = 5;
 export const CategoryStoppedPartitions: FC = () => {
+  const ml = useMlApiContext();
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);
@@ -62,6 +63,8 @@ export const CategoryStoppedPartitions: FC = () => {
         setStoppedPartitionsError(error.message);
       }
     }
+    // skipping the ml service from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreator.jobId]);
 
   useEffect(() => {

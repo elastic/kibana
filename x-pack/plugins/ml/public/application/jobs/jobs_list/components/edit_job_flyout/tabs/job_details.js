@@ -17,12 +17,13 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 
-import { ml } from '../../../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+
 import { tabColor } from '../../../../../../../common/util/group_color_utils';
 
-export class JobDetails extends Component {
+export class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
@@ -41,6 +42,7 @@ export class JobDetails extends Component {
   }
 
   componentDidMount() {
+    const ml = this.props.kibana.services.mlServices.mlApiServices;
     // load groups to populate the select options
     ml.jobs
       .groups()
@@ -259,10 +261,12 @@ export class JobDetails extends Component {
     );
   }
 }
-JobDetails.propTypes = {
+JobDetailsUI.propTypes = {
   datafeedRunning: PropTypes.bool.isRequired,
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,
   setJobDetails: PropTypes.func.isRequired,
 };
+
+export const JobDetails = withKibana(JobDetailsUI);

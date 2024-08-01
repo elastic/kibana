@@ -9,5 +9,4 @@ export type { ToastNotificationService } from './toast_notification_service';
 export {
   toastNotificationServiceProvider,
   useToastNotificationService,
-  getToastNotificationService,
 } from './toast_notification_service';
