@@ -4,5 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
-export * from './adapter_types';
+export const ALERTS_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.alertRuleChartTitle',
+  {
+    defaultMessage: 'Alerts by name',
+  }
+);

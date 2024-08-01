@@ -12,8 +12,7 @@ import type { UseAlerts, UseAlertsQueryProps } from './use_summary_chart_data';
 import { useSummaryChartData, getAlertsQuery } from './use_summary_chart_data';
 import * as aggregations from './aggregations';
 import * as severityMock from '../severity_level_panel/mock_data';
-import * as alertTypeMock from '../alerts_by_type_panel/mock_type_data';
-import * as alertRuleMock from '../alerts_by_type_panel/mock_rule_data';
+import * as alertRuleMock from '../alerts_by_rule_panel/mock_rule_data';
 import * as alertsGroupingMock from '../alerts_progress_bar_panel/mock_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
@@ -64,25 +63,6 @@ describe('getAlertsQuery', () => {
         aggregations: aggregations.severityAggregations,
       })
     ).toEqual(severityMock.query);
-  });
-
-  test('it returns the expected alerts by type query', () => {
-    expect(
-      getAlertsQuery({
-        from,
-        to,
-        additionalFilters,
-        aggregations: aggregations.alertTypeAggregations,
-      })
-    ).toEqual(alertTypeMock.query);
-    expect(
-      getAlertsQuery({
-        from,
-        to,
-        additionalFilters,
-        aggregations: aggregations.alertRuleAggregations,
-      })
-    ).toEqual(alertRuleMock.query);
   });
 
   test('it returns the expected alerts by grouping query', () => {
@@ -192,28 +172,9 @@ describe('get summary charts data', () => {
       jest.clearAllMocks();
       mockDateNow.mockReturnValue(dateNow);
       mockUseQueryAlerts.mockReturnValue(defaultUseQueryAlertsReturn);
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    });
-    it('should return correct default values when alertsTypeChartsEnabled is true', () => {
-      const { result } = renderUseSummaryChartData({
-        aggregations: aggregations.alertTypeAggregations,
-      });
-
-      expect(result.current).toEqual({
-        items: [],
-        isLoading: false,
-        updatedAt: dateNow,
-      });
-
-      expect(mockUseQueryAlerts).toBeCalledWith({
-        query: alertTypeMock.query,
-        indexName: 'signal-alerts',
-        skip: false,
-        queryName: ALERTS_QUERY_NAMES.COUNT,
-      });
     });
 
-    it('should return correct default values when alertsTypeChartsEnabled is false', () => {
+    it('should return correct default values', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       const { result } = renderUseSummaryChartData({
         aggregations: aggregations.alertRuleAggregations,
@@ -233,23 +194,7 @@ describe('get summary charts data', () => {
       });
     });
 
-    it('should return parsed alerts by type items  when alertsTypeChartsEnabled is true', () => {
-      mockUseQueryAlerts.mockReturnValue({
-        ...defaultUseQueryAlertsReturn,
-        data: alertTypeMock.mockAlertsData,
-      });
-
-      const { result } = renderUseSummaryChartData({
-        aggregations: aggregations.alertTypeAggregations,
-      });
-      expect(result.current).toEqual({
-        items: alertTypeMock.parsedAlerts,
-        isLoading: false,
-        updatedAt: dateNow,
-      });
-    });
-
-    it('should return parsed alerts by type items  when alertsTypeChartsEnabled is false', () => {
+    it('should return parsed alerts by type items', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       mockUseQueryAlerts.mockReturnValue({
         ...defaultUseQueryAlertsReturn,

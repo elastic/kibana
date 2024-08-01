@@ -6,16 +6,6 @@
  */
 import type { BucketItem } from '../../../../../common/search_strategy/security_solution/cti';
 
-export type AlertType = 'Detection' | 'Prevention';
-
-export interface AlertsByTypeAgg {
-  alertsByType: {
-    doc_count_error_upper_bound: number;
-    sum_other_doc_count: number;
-    buckets: RuleBucket[];
-  };
-}
-
 export interface AlertsByRuleAgg {
   alertsByRule: {
     doc_count_error_upper_bound: number;
@@ -24,21 +14,7 @@ export interface AlertsByRuleAgg {
   };
 }
 
-interface RuleBucket {
-  key: string;
-  doc_count: number;
-  ruleByEventType?: RuleByEventType;
-}
-
-interface RuleByEventType {
-  doc_count_error_upper_bound: number;
-  sum_other_doc_count: number;
-  buckets: BucketItem[];
-}
-
-export interface AlertsTypeData {
+export interface AlertsByRuleData {
   rule: string;
-  type: AlertType;
   value: number;
-  color: string;
 }

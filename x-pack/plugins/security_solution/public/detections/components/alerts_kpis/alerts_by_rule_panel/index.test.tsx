@@ -7,7 +7,7 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { AlertsByTypePanel } from '.';
+import { AlertsByRulePanel } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -16,7 +16,7 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-describe('Alert by type panel', () => {
+describe('Alert by rule panel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
     skip: false,
@@ -30,11 +30,11 @@ describe('Alert by type panel', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByTypePanel {...defaultProps} />
+          <AlertsByRulePanel {...defaultProps} />
         </TestProviders>
       );
       expect(
-        container.querySelector('[data-test-subj="alerts-by-type-panel"]')
+        container.querySelector('[data-test-subj="alerts-by-rule-panel"]')
       ).toBeInTheDocument();
     });
   });
@@ -43,7 +43,7 @@ describe('Alert by type panel', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByTypePanel {...defaultProps} />
+          <AlertsByRulePanel {...defaultProps} />
         </TestProviders>
       );
       expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
@@ -54,21 +54,21 @@ describe('Alert by type panel', () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByTypePanel {...defaultProps} />
+          <AlertsByRulePanel {...defaultProps} />
         </TestProviders>
       );
       expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
     });
   });
 
-  test('renders alert by type chart', async () => {
+  test('renders alert by rule chart', async () => {
     await act(async () => {
       const { container } = render(
         <TestProviders>
-          <AlertsByTypePanel {...defaultProps} />
+          <AlertsByRulePanel {...defaultProps} />
         </TestProviders>
       );
-      expect(container.querySelector('[data-test-subj="alerts-by-type"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-test-subj="alerts-by-rule"]')).toBeInTheDocument();
     });
   });
 });

@@ -9,32 +9,27 @@ import { EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
-import { AlertsByType } from './alerts_by_type';
+import { AlertsByRule } from './alerts_by_rule';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
-import {
-  alertTypeAggregations,
-  alertRuleAggregations,
-} from '../alerts_summary_charts_panel/aggregations';
-import { getIsAlertsTypeData } from './helpers';
+import { alertRuleAggregations } from '../alerts_summary_charts_panel/aggregations';
+import { getIsAlertsByRuleData } from './helpers';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 
-export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
+export const AlertsByRulePanel: React.FC<ChartsPanelProps> = ({
   filters,
   query,
   signalIndexName,
   runtimeMappings,
   skip,
 }) => {
-  const isAlertTypeEnabled = useIsExperimentalFeatureEnabled('alertTypeEnabled');
   const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 
   const { items, isLoading } = useSummaryChartData({
-    aggregations: isAlertTypeEnabled ? alertTypeAggregations : alertRuleAggregations,
+    aggregations: alertRuleAggregations,
     filters,
     query,
     signalIndexName,
@@ -42,23 +37,23 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
     skip,
     uniqueQueryId,
   });
-  const data = useMemo(() => (getIsAlertsTypeData(items) ? items : []), [items]);
+  const data = useMemo(() => (getIsAlertsByRuleData(items) ? items : []), [items]);
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder hasShadow={false} data-test-subj="alerts-by-type-panel">
+      <EuiPanel hasBorder hasShadow={false} data-test-subj="alerts-by-rule-panel">
         <HeaderSection
           id={uniqueQueryId}
-          inspectTitle={isAlertTypeEnabled ? i18n.ALERTS_TYPE_TITLE : i18n.ALERTS_RULE_TITLE}
+          inspectTitle={i18n.ALERTS_RULE_TITLE}
           outerDirection="row"
-          title={isAlertTypeEnabled ? i18n.ALERTS_TYPE_TITLE : i18n.ALERTS_RULE_TITLE}
+          title={i18n.ALERTS_RULE_TITLE}
           titleSize="xs"
           hideSubtitle
         />
-        <AlertsByType data={data} isLoading={isLoading} />
+        <AlertsByRule data={data} isLoading={isLoading} />
       </EuiPanel>
     </InspectButtonContainer>
   );
 };
 
-AlertsByTypePanel.displayName = 'AlertsByTypePanel';
+AlertsByRulePanel.displayName = 'AlertsByRulePanel';
