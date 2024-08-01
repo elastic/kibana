@@ -122,6 +122,7 @@ export function getSampleDashboardInput(
     executionContext: {
       type: 'dashboard',
     },
+    expandedPanelId: undefined,
     ...overrides,
   };
 }

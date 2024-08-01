@@ -81,7 +81,7 @@ function getLocatorParams({
 
   const {
     componentState: { lastSavedId },
-    explicitInput: { panels, query, viewMode },
+    explicitInput: { panels, query, viewMode, expandedPanelId },
   } = container.getState();
 
   return {
@@ -102,6 +102,6 @@ function getLocatorParams({
     panels: lastSavedId
       ? undefined
       : (convertPanelMapToSavedPanels(panels) as DashboardLocatorParams['panels']),
-    expandedPanelId: container.getExpandedPanelId(),
+    expandedPanelId,
   };
 }

@@ -134,9 +134,4 @@ export type DashboardLocatorParams = Partial<
    * Control group input
    */
   controlGroupInput?: SerializableControlGroupInput;
-
-  /**
-   * Panel Id of the expaned panel if relevant
-   */
-  expandedPanelId?: string;
 };

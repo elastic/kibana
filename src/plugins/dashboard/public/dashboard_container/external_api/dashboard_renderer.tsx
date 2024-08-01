@@ -215,6 +215,7 @@ const ParentClassController = ({
 
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
+      // add logic to have the maximized panel be part of the url here?
     } else {
       parentDiv.classList.remove('dshDashboardViewportWrapper');
     }

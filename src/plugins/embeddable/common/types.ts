@@ -73,7 +73,7 @@ export type EmbeddableInput = {
   executionContext?: KibanaExecutionContext;
 
   /**
-   * Flag what maximized panels should be respected in url
+   * Flag maximized panels should be respected in url if it's maximized
    */
   expandedPanelId?: string;
 };
