@@ -13,11 +13,11 @@ import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"
 const TranslationsLowercase = {
   CPUUsageTotal: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageTotalText', {
-    defaultMessage: 'CPU usage (total)',
+    defaultMessage: 'CPU usage',
   }),
 
-  CPUUsage: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
-    defaultMessage: 'CPU usage (user/system)',
+  CPUUsageLegacy: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageLegacyText', {
+    defaultMessage: 'CPU usage (legacy)',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
@@ -110,8 +110,8 @@ export const toMetricOpt = (
       };
     case 'cpu':
       return {
-        text: Translations.CPUUsage,
-        textLC: TranslationsLowercase.CPUUsage,
+        text: Translations.CPUUsageLegacy,
+        textLC: TranslationsLowercase.CPUUsageLegacy,
         value: 'cpu',
       };
     case 'memory':
