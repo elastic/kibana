@@ -26,7 +26,8 @@ interface IDispatchAction {
 export type IDispatchFunction = Dispatch<IDispatchAction>;
 
 export interface IMetaState {
-  selectedTabId: string | null;
+  defaultSelectedTabId: string;
+  selectedTabId: string;
 }
 
 type IReducer<S> = (state: S, action: IDispatchAction) => S;
@@ -52,7 +53,8 @@ const createStateContext = once(<T extends Array<ITabDeclaration<Record<string, 
     tabs: [],
     state: {
       meta: {
-        selectedTabId: null,
+        defaultSelectedTabId: '',
+        selectedTabId: '',
       },
     },
     dispatch: () => {},
@@ -104,6 +106,7 @@ export function ModalContextProvider<T extends Array<ITabDeclaration<Record<stri
   const initialModalState = useRef<IModalInstanceContext['state']>({
     // instantiate state with default meta information
     meta: {
+      defaultSelectedTabId,
       selectedTabId: defaultSelectedTabId,
     },
   });
