@@ -48,7 +48,7 @@ export const ConfigSchema = schema.object({
         // have custom solution but admins would be unable to change the navigation solution if the
         // UI/APIs are disabled.
         if (rawValue === false) {
-          return 'Feature visibility can only be disabled on serverless';
+          return 'Solution visibility can only be disabled on serverless';
         }
       },
       defaultValue: true,
