@@ -54,7 +54,7 @@ export const handleStreamResponse = async ({
 
       push(decodedValue);
 
-      pushStreamUpdate();
+      void pushStreamUpdate();
     } catch (error) {
       logger.error(`Error occurred while pushing the next chunk: ${error.toString()}`);
       end();
@@ -64,7 +64,7 @@ export const handleStreamResponse = async ({
   }
 
   try {
-    pushStreamUpdate();
+    void pushStreamUpdate();
   } catch (error) {
     logger.error('Failed to push stream update', error);
     throw error;
