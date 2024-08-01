@@ -21,7 +21,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -77,7 +77,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -135,7 +135,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -172,7 +172,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -228,7 +228,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             // 0 active tasks at this moment in time, so no owners identifiable
             owner_ids: 0,
@@ -285,7 +285,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 3,
             overdue_non_recurring: 0,
@@ -347,7 +347,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
@@ -428,7 +428,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
@@ -510,7 +510,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -578,7 +578,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -643,7 +643,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -708,7 +708,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -784,7 +784,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -862,7 +862,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
+          { max_workers: 10, poll_interval: 3000 },
           {
             overdue: undefined,
             owner_ids: 1,
@@ -949,8 +949,7 @@ function mockStats(
       status: HealthStatus.OK,
       timestamp: new Date().toISOString(),
       value: {
-        capacity: { config: 10, as_cost: 20, as_workers: 10 },
-        claim_strategy: 'default',
+        max_workers: 0,
         poll_interval: 0,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
@@ -970,19 +969,16 @@ function mockStats(
       timestamp: new Date().toISOString(),
       value: {
         count: 4,
-        cost: 8,
         task_types: {
-          actions_telemetry: { count: 2, cost: 4, status: { idle: 2 } },
-          alerting_telemetry: { count: 1, cost: 2, status: { idle: 1 } },
-          session_cleanup: { count: 1, cost: 2, status: { idle: 1 } },
+          actions_telemetry: { count: 2, status: { idle: 2 } },
+          alerting_telemetry: { count: 1, status: { idle: 1 } },
+          session_cleanup: { count: 1, status: { idle: 1 } },
         },
         schedule: [],
         overdue: 0,
-        overdue_cost: 0,
         overdue_non_recurring: 0,
         estimated_schedule_density: [],
         non_recurring: 20,
-        non_recurring_cost: 40,
         owner_ids: 2,
         capacity_requirements: {
           per_minute: 150,

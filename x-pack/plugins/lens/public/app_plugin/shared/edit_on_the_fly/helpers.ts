@@ -10,12 +10,14 @@ import {
   getESQLResults,
   formatESQLColumns,
 } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { getTime } from '@kbn/data-plugin/common';
+import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -26,6 +28,21 @@ export interface ESQLDataGridAttrs {
   dataView: DataView;
   columns: DatatableColumn[];
 }
+
+const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+  const kqlQuery = queryService.queryString.getQuery();
+  const filters = queryService.filterManager.getFilters();
+  const timeFilter =
+    queryService.timefilter.timefilter.getTime() &&
+    getTime(undefined, queryService.timefilter.timefilter.getTime(), {
+      fieldName: timeFieldName,
+    });
+
+  return buildEsQuery(undefined, kqlQuery || [], [
+    ...(filters ?? []),
+    ...(timeFilter ? [timeFilter] : []),
+  ]);
+};
 
 export const getGridAttrs = async (
   query: AggregateQuery,
@@ -38,18 +55,20 @@ export const getGridAttrs = async (
     return adHoc.name === indexPattern;
   });
 
-  const [results, dataView] = await Promise.all([
-    getESQLResults({
-      esqlQuery: query.esql,
-      search: deps.data.search.search,
-      signal: abortController?.signal,
-      dropNullColumns: true,
-      timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
-    }),
-    dataViewSpec
-      ? deps.dataViews.create(dataViewSpec)
-      : getESQLAdHocDataview(query.esql, deps.dataViews),
-  ]);
+  const dataView = dataViewSpec
+    ? await deps.dataViews.create(dataViewSpec)
+    : await getESQLAdHocDataview(query.esql, deps.dataViews);
+
+  const filter = getDSLFilter(deps.data.query, dataView.timeFieldName);
+
+  const results = await getESQLResults({
+    esqlQuery: query.esql,
+    search: deps.data.search.search,
+    signal: abortController?.signal,
+    filter,
+    dropNullColumns: true,
+    timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+  });
 
   const columns = formatESQLColumns(results.response.columns);
 
