@@ -10,10 +10,13 @@ import { monaco, ParsedRequest } from '@kbn/monaco';
 import { constructUrl } from '../../../../../lib/es';
 import { MetricsTracker } from '../../../../../types';
 import type { DevToolsVariable } from '../../../../components';
-import type { EditorRequest } from '../types';
-import { urlVariableTemplateRegex, dataVariableTemplateRegex } from './constants';
+import type { EditorRequest, AdjustedParsedRequest } from '../types';
+import {
+  urlVariableTemplateRegex,
+  dataVariableTemplateRegex,
+  startsWithMethodRegex,
+} from './constants';
 import { removeTrailingWhitespaces } from './tokens_utils';
-import { AdjustedParsedRequest } from '../types';
 
 /*
  * This function stringifies and normalizes the parsed request:
@@ -105,8 +108,20 @@ export const getRequestEndLineNumber = (
       const nextRequestStartLine = model.getPositionAt(nextRequest.startOffset).lineNumber;
       endLineNumber = nextRequestStartLine - 1;
     } else {
-      // if there is no next request, take the last line of the model
-      endLineNumber = model.getLineCount();
+      // if there is no next request, find the end of the text or the line that starts with a method
+      let nextLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber + 1;
+      let nextLineContent: string;
+      while (nextLineNumber <= model.getLineCount()) {
+        nextLineContent = model.getLineContent(nextLineNumber).trim();
+        if (nextLineContent.match(startsWithMethodRegex)) {
+          // found a line that starts with a method, stop iterating
+          break;
+        }
+        nextLineNumber++;
+      }
+      // nextLineNumber is now either the line with a method or 1 line after the end of the text
+      // set the end line for this request to the line before nextLineNumber
+      endLineNumber = nextLineNumber - 1;
     }
   }
   // if the end line is empty, go up to find the first non-empty line

@@ -9,11 +9,13 @@
 import {
   getAutoIndentedRequests,
   getCurlRequest,
+  getRequestEndLineNumber,
   replaceRequestVariables,
   stringifyRequest,
   trackSentRequests,
 } from './requests_utils';
 import { MetricsTracker } from '../../../../../types';
+import { monaco, ParsedRequest } from '@kbn/monaco';
 
 describe('requests_utils', () => {
   const dataObjects = [
@@ -364,6 +366,80 @@ describe('requests_utils', () => {
       );
 
       expect(formattedData).toBe(requestText);
+    });
+  });
+
+  describe('getRequestEndLineNumber', () => {
+    const parsedRequest: ParsedRequest = {
+      startOffset: 1,
+      method: 'GET',
+      url: '_search',
+    };
+    it('detects the end of the request when there is a line that starts with a method (next not parsed request)', () => {
+      /*
+       * Mocking the model to return these 6 lines of text
+       * 1. GET /_search
+       * 2. {
+       * 3. empty
+       * 4. empty
+       * 5. POST _search
+       * 6. empty
+       */
+      const model = {
+        getLineCount: () => 6,
+        getLineContent: (lineNumber: number) => {
+          switch (lineNumber) {
+            case 1:
+              return 'GET /_search';
+            case 2:
+              return '{';
+            case 3:
+            case 4:
+              return '';
+            case 5:
+              return 'POST _search';
+            case 6:
+              return '';
+          }
+        },
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+      const index = 0;
+      const parsedRequests = [parsedRequest];
+
+      const result = getRequestEndLineNumber(parsedRequest, model, index, parsedRequests);
+      expect(result).toEqual(2);
+    });
+
+    it('detects the end of the request when the text ends', () => {
+      /*
+       * Mocking the model to return these 4 lines of text
+       * 1. GET /_search
+       * 2. {
+       * 3.   {
+       * 4. empty
+       */
+      const model = {
+        getLineCount: () => 4,
+        getLineContent: (lineNumber: number) => {
+          switch (lineNumber) {
+            case 1:
+              return 'GET /_search';
+            case 2:
+              return '{';
+            case 3:
+              return '  {';
+            case 4:
+              return '';
+          }
+        },
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+      const index = 0;
+      const parsedRequests = [parsedRequest];
+
+      const result = getRequestEndLineNumber(parsedRequest, model, index, parsedRequests);
+      expect(result).toEqual(3);
     });
   });
 });
