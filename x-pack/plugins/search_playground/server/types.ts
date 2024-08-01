@@ -6,7 +6,7 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { CloudStart } from '@kbn/cloud-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
@@ -16,7 +16,7 @@ export interface SearchPlaygroundPluginStart {}
 
 export interface SearchPlaygroundPluginStartDependencies {
   actions: ActionsPluginStartContract;
-  cloud?: CloudSetup;
+  cloud?: CloudStart;
 }
 
 export * from '../common/types';

@@ -56,7 +56,7 @@ export const handleStreamResponse = async ({
 
       pushStreamUpdate();
     } catch (e) {
-      logger.error(`There was an error: ${e.toString()}`);
+      logger.error(`Error occurred while pushing the next chunk: ${e.toString()}`);
       end();
       abortController.abort();
     }

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+// adapted from @kbn/ml-response-stream with the following changes:
+// - removed gzip compression
+// - removed support for ndjson
+// - improved the cloud proxy buffer to work for our use case (works for newline string chunks vs ndjson only)
+
 import type { Logger } from '@kbn/core/server';
 
 import { PassThrough } from 'stream';

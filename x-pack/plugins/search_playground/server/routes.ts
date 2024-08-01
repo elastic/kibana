@@ -155,7 +155,7 @@ export function defineRoutes({
           stream,
           response,
           request,
-          isCloud: cloud?.isCloudEnabled,
+          isCloud: cloud?.isCloudEnabled ?? false,
         });
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
