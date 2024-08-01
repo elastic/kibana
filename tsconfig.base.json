@@ -746,8 +746,6 @@
       "@kbn/docs-utils/*": ["packages/kbn-docs-utils/*"],
       "@kbn/dom-drag-drop": ["packages/kbn-dom-drag-drop"],
       "@kbn/dom-drag-drop/*": ["packages/kbn-dom-drag-drop/*"],
-      "@kbn/ebt": ["packages/analytics/ebt"],
-      "@kbn/ebt/*": ["packages/analytics/ebt/*"],
       "@kbn/ebt-tools": ["packages/kbn-ebt-tools"],
       "@kbn/ebt-tools/*": ["packages/kbn-ebt-tools/*"],
       "@kbn/ecs-data-quality-dashboard": ["x-pack/packages/security-solution/ecs_data_quality_dashboard"],
