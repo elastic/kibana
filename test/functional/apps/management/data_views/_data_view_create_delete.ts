@@ -158,6 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('edit index pattern', () => {
       it('on edit click', async () => {
+        await testSubjects.click('detail-link-logstash-*');
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
         await retry.try(async () => {
