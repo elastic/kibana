@@ -6360,6 +6360,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/server-route-repository-client@link:packages/kbn-server-route-repository-client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/server-route-repository-utils@link:packages/kbn-server-route-repository-utils":
   version "0.0.0"
   uid ""
