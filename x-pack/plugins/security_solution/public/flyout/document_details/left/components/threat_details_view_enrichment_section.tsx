@@ -72,29 +72,32 @@ const InlineBlock = styled.div`
 
 export interface EnrichmentSectionProps {
   /**
-   *
+   * The enrichments to display
    */
   enrichments: CtiEnrichment[] | undefined;
   /**
-   *
+   * The type of enrichment (InvestigationTime or IndicatorMatchRule)
    */
   type?: ENRICHMENT_TYPES;
   /**
-   *
+   * Whether the enrichments are loading
    */
   loading?: boolean;
   /**
-   *
+   * The data-test-subj to apply to the component
    */
   dataTestSubj?: string;
   /**
-   *
+   * The children to render
    */
   children?: React.ReactNode;
 }
 
 /**
- *
+ * Displays the enrichments in multiple accordions when data has loaded.
+ * While data is loading, it renders a skeleton.
+ * If no data is found, it displays a message.
+ * Also allows to render a component passed from the parent (currently used to render a range picker).
  */
 export const EnrichmentSection = memo(
   ({ enrichments, type, loading, dataTestSubj, children }: EnrichmentSectionProps) => {

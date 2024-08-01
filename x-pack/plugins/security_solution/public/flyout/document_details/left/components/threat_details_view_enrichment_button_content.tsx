@@ -29,11 +29,23 @@ const OverflowContainer = styled.div`
 `;
 
 export interface EnrichmentButtonContentProps {
+  /**
+   * The field name of the enrichment (default to an empty string)
+   */
   field?: string;
+  /**
+   * The feed name of the enrichment (default to an empty string)
+   */
   feedName?: string;
+  /**
+   * The value of the enrichment (default to an empty string)
+   */
   value?: string;
 }
 
+/**
+ * Displays the content of the button rendered in the accordion
+ */
 export const EnrichmentButtonContent = memo(
   ({ field = '', feedName = '', value = '' }: EnrichmentButtonContentProps) => {
     const title = `${field} ${value}${feedName ? ` ${FEED_NAME_PREPOSITION} ${feedName}` : ''}`;

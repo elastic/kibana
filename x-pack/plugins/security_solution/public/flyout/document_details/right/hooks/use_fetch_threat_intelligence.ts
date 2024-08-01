@@ -16,7 +16,7 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from '../../shared/utils/threat_intelligence';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
+import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 export interface UseThreatIntelligenceParams {
@@ -76,7 +76,7 @@ export const useFetchThreatIntelligence = ({
   );
 
   // api call to retrieve all documents that match the eventFields
-  const { result: response, loading } = useInvestigationTimeEnrichment(eventFields);
+  const { result: response, loading } = useInvestigationTimeEnrichment({ eventFields });
 
   // combine existing enrichment and enrichment from the api response
   // also removes the investigation-time enrichments if the exact indicator already exists

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
@@ -45,23 +45,23 @@ const REFRESH = i18n.translate('xpack.securitySolution.flyout.threatIntelligence
 
 export interface RangePickerProps {
   /**
-   *
+   * The range of the picker
    */
   range: { to: string; from: string };
   /**
-   *
+   * Set the range of the picker
    */
   setRange: ({ to, from }: { to: string; from: string }) => void;
   /**
-   *
+   * Whether the picker is loading
    */
   loading: boolean;
 }
 
 /**
- *
+ * A component that allows the user to select a range of dates for enrichment
  */
-export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRange, loading }) => {
+export const EnrichmentRangePicker = memo(({ range, setRange, loading }: RangePickerProps) => {
   const [startDate, setStartDate] = useState<moment.Moment | null>(
     range.from === DEFAULT_EVENT_ENRICHMENT_FROM ? moment().subtract(30, 'd') : moment(range.from)
   );
@@ -124,4 +124,6 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRa
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
+
+EnrichmentRangePicker.displayName = 'EnrichmentRangePicker';

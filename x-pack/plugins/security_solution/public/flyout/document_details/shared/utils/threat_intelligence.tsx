@@ -8,6 +8,7 @@
 import { groupBy, isObject } from 'lodash';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { ThreatDetailsRow } from '../../left/components/threat_details_view_enrichment_accordion';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
 import { isValidEventField } from '../../../../../common/search_strategy';
 import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
@@ -26,7 +27,7 @@ import {
 } from '../../../../../common/cti/constants';
 
 const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
-  'xpack.securitySolution.flyout.threat-intelligence.investigationEnrichmentObjectValuesNotRendered',
+  'xpack.securitySolution.flyout.threatIntelligence.investigationEnrichmentObjectValuesNotRendered',
   {
     defaultMessage:
       'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
@@ -180,9 +181,7 @@ export const getFirstSeen = (enrichment: CtiEnrichment): number => {
 /**
  * Builds the threat details items for the summary table
  */
-export const buildThreatDetailsItems = (
-  enrichment: CtiEnrichment
-): Array<{ title: string; description: { fieldName: string; value: unknown } }> =>
+export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetailsRow[] =>
   Object.keys(enrichment)
     .sort()
     .map((field) => {
@@ -195,5 +194,5 @@ export const buildThreatDetailsItems = (
         value = NESTED_OBJECT_VALUES_NOT_RENDERED;
       }
 
-      return { title, description: { fieldName: field, value } };
+      return { title, description: { fieldName: field, value: value as string } };
     });

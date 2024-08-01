@@ -13,13 +13,13 @@ import { getFirstSeen } from '../../shared/utils/threat_intelligence';
 
 export interface EnrichmentAccordionGroupProps {
   /**
-   *
+   * Enrichment data
    */
   enrichments: CtiEnrichment[];
 }
 
 /**
- *
+ * Displays multiple accordions that each show the enrichment data
  */
 export const EnrichmentAccordionGroup = memo(({ enrichments }: EnrichmentAccordionGroupProps) => (
   <>
