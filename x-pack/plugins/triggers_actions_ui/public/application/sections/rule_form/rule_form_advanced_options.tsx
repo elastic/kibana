@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,12 +24,10 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiLoadingSpinner,
+  EuiLink,
 } from '@elastic/eui';
 import { RuleSettingsFlappingInputs } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_inputs';
-import {
-  RuleSettingsFlappingMessage,
-  flappingOffMessage,
-} from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
+import { RuleSettingsFlappingMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-plugin/common';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
 
@@ -65,6 +63,28 @@ const flappingOverrideConfiguration = i18n.translate(
   }
 );
 
+const flappingExternalLinkLabel = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingExternalLinkLabel',
+  {
+    defaultMessage: "What's this?",
+  }
+);
+
+const flappingFormRowLabel = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleForm.flappingLabel',
+  {
+    defaultMessage: 'Alert flapping detection',
+  }
+);
+
+const flappingIconTipDescription = i18n.translate(
+  'xpack.triggersActionsUI.ruleFormAdvancedOptions.flappingIconTipDescription',
+  {
+    defaultMessage:
+      'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts.',
+  }
+);
+
 const clampFlappingValues = (flapping: RuleSpecificFlappingProperties) => {
   return {
     ...flapping,
@@ -86,10 +106,12 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
   const {
     alertDelay,
     flappingSettings,
-    enabledFlapping = false,
+    enabledFlapping = true,
     onAlertDelayChange,
     onFlappingChange,
   } = props;
+
+  const cachedFlappingSettings = useRef<RuleSpecificFlappingProperties>();
 
   const isDesktop = useIsWithinMinBreakpoint('xl');
 
@@ -109,18 +131,26 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
     [onAlertDelayChange]
   );
 
+  const internalOnFlappingChange = useCallback(
+    (flapping: RuleSpecificFlappingProperties) => {
+      const clampedValue = clampFlappingValues(flapping);
+      onFlappingChange(clampedValue);
+      cachedFlappingSettings.current = clampedValue;
+    },
+    [onFlappingChange]
+  );
+
   const onLookBackWindowChange = useCallback(
     (value: number) => {
       if (!flappingSettings) {
         return;
       }
-      const newSettings = {
+      internalOnFlappingChange({
         ...flappingSettings,
         lookBackWindow: value,
-      };
-      onFlappingChange(clampFlappingValues(newSettings));
+      });
     },
-    [flappingSettings, onFlappingChange]
+    [flappingSettings, internalOnFlappingChange]
   );
 
   const onStatusChangeThresholdChange = useCallback(
@@ -128,13 +158,12 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
       if (!flappingSettings) {
         return;
       }
-      const newSettings = {
+      internalOnFlappingChange({
         ...flappingSettings,
         statusChangeThreshold: value,
-      };
-      onFlappingChange(clampFlappingValues(newSettings));
+      });
     },
-    [flappingSettings, onFlappingChange]
+    [flappingSettings, internalOnFlappingChange]
   );
 
   const onFlappingToggle = useCallback(() => {
@@ -142,12 +171,13 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
       return;
     }
     if (flappingSettings) {
-      onFlappingChange(null);
-      return;
+      cachedFlappingSettings.current = flappingSettings;
+      return onFlappingChange(null);
     }
+    const initialFlappingSettings = cachedFlappingSettings.current || spaceFlappingSettings;
     onFlappingChange({
-      lookBackWindow: spaceFlappingSettings.lookBackWindow,
-      statusChangeThreshold: spaceFlappingSettings.statusChangeThreshold,
+      lookBackWindow: initialFlappingSettings.lookBackWindow,
+      statusChangeThreshold: initialFlappingSettings.statusChangeThreshold,
     });
   }, [spaceFlappingSettings, flappingSettings, onFlappingChange]);
 
@@ -171,17 +201,26 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
             <EuiBadge color={enabled ? 'success' : 'default'}>
               {enabled ? flappingOnLabel : flappingOffLabel}
             </EuiBadge>
-            {flappingSettings && (
-              <EuiBadge color={enabled ? 'primary' : 'hollow'}>{flappingOverrideLabel}</EuiBadge>
+            {flappingSettings && enabled && (
+              <EuiBadge color="primary">{flappingOverrideLabel}</EuiBadge>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              compressed
-              checked={!!flappingSettings}
-              label={flappingOverrideConfiguration}
-              onChange={onFlappingToggle}
-            />
+            {enabled && (
+              <EuiSwitch
+                data-test-subj="ruleFormAdvancedOptionsOverrideSwitch"
+                compressed
+                checked={!!flappingSettings}
+                label={flappingOverrideConfiguration}
+                onChange={onFlappingToggle}
+              />
+            )}
+            {!enabled && (
+              // TODO: Add the help link here
+              <EuiLink href="" target="_blank">
+                {flappingExternalLinkLabel}
+              </EuiLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         {flappingSettings && (
@@ -211,23 +250,9 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
   }, [flappingSettings, onLookBackWindowChange, onStatusChangeThresholdChange]);
 
   const flappingFormMessage = useMemo(() => {
-    if (!spaceFlappingSettings) {
+    if (!spaceFlappingSettings || !spaceFlappingSettings.enabled) {
       return null;
     }
-
-    if (!spaceFlappingSettings.enabled) {
-      return (
-        <EuiSplitPanel.Inner
-          color="subdued"
-          style={{
-            borderTop: euiTheme.border.thin,
-          }}
-        >
-          {flappingOffMessage}
-        </EuiSplitPanel.Inner>
-      );
-    }
-
     const settingsToUse = flappingSettings || spaceFlappingSettings;
     return (
       <EuiSplitPanel.Inner
@@ -245,7 +270,7 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
   }, [spaceFlappingSettings, flappingSettings, euiTheme]);
 
   return (
-    <EuiPanel color="subdued" hasShadow={false}>
+    <EuiPanel color="subdued" hasShadow={false} data-test-subj="ruleFormAdvancedOptions">
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           <EuiFormRow
@@ -288,13 +313,18 @@ export const RuleFormAdvancedOptions = (props: RuleFormAdvancedOptionsProps) => 
           </EuiFormRow>
         </EuiFlexItem>
         {isInitialLoading && <EuiLoadingSpinner />}
-        {spaceFlappingSettings && (
+        {spaceFlappingSettings && enabledFlapping && (
           <EuiFlexItem grow={false}>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.flappingLabel', {
-                defaultMessage: 'Alert flapping detection',
-              })}
+              label={
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>{flappingFormRowLabel}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip content={flappingIconTipDescription} position="top" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               data-test-subj="alertFlappingFormRow"
               display="rowCompressed"
             >

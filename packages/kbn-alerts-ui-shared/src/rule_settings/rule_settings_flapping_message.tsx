@@ -42,7 +42,7 @@ export const RuleSettingsFlappingMessage = (props: RuleSettingsFlappingMessagePr
   const { lookBackWindow, statusChangeThreshold } = props;
 
   return (
-    <EuiText size="s">
+    <EuiText size="s" data-test-subj="ruleSettingsFlappingMessage">
       <FormattedMessage
         id="alertsUIShared.ruleSettingsFlappingMessage.flappingSettingsDescription"
         defaultMessage="An alert is flapping if it changes status at least {statusChangeThreshold} in the last {lookBackWindow}."
