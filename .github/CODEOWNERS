@@ -768,6 +768,7 @@ packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 packages/kbn-securitysolution-rules @elastic/security-detection-engine
 packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 packages/kbn-securitysolution-utils @elastic/security-detection-engine
+packages/kbn-securitysolution-common @elastic/security-threat-hunting-investigations
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/obs-knowledge-team
 x-pack/plugins/serverless @elastic/appex-sharedux
