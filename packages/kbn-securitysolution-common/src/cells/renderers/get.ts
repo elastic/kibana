@@ -5,16 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { HostCellWithFlyoutRenderer } from './host';
 
-const RENDERERS = {
-  'host.name': HostCellWithFlyoutRenderer,
-} as const;
-
-interface GetRendererArgs {
-  fieldName: keyof typeof RENDERERS;
-}
-
-export const getDiscoverCellRenderer = (args: GetRendererArgs) => {
-  return RENDERERS[args.fieldName];
-};
+export * from './discover';

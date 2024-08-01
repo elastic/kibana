@@ -19,8 +19,10 @@ import {
 import { HostRightPanel, HostRightPanelProps } from '../../../flyout/panels';
 import { HostDetailsButton } from './button';
 
+export type HostCellWithFlyoutRendererProps = PropsWithChildren<DataGridCellValueElementProps>;
+
 const HostCellWithFlyoutRendererComp = React.memo(function HostCellWithFlyoutRendererComp(
-  props: PropsWithChildren<DataGridCellValueElementProps>
+  props: HostCellWithFlyoutRendererProps
 ) {
   const hostName = getFieldValue(props.row, 'host.name');
 
@@ -50,7 +52,11 @@ const HostCellWithFlyoutRendererComp = React.memo(function HostCellWithFlyoutRen
 
   return (
     <>
-      <ExpandableFlyout registeredPanels={panels} paddingSize="none" />
+      <ExpandableFlyout
+        data-test-subj="host-name-flyout"
+        registeredPanels={panels}
+        paddingSize="none"
+      />
       <HostDetailsButton onClick={onClick}>{hostName}</HostDetailsButton>
     </>
   );
