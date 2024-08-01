@@ -57,6 +57,7 @@ export interface DashboardContainerInput extends EmbeddableInput {
   title: string;
   tags: string[];
   viewMode: ViewMode;
+  expandedPanelId?: string;
   description?: string;
   isEmbeddedExternally?: boolean;
   executionContext: KibanaExecutionContext;

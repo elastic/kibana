@@ -81,6 +81,9 @@ export const loadAndRemoveDashboardState = (
     ..._.omit(rawAppStateInUrl, ['panels', 'query']),
     ...(panelsMap ? { panels: panelsMap } : {}),
     ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
+    ...(rawAppStateInUrl.expandedPanelId
+      ? { expandedPanelId: rawAppStateInUrl.expandedPanelId }
+      : {}),
   };
 
   return partialState;

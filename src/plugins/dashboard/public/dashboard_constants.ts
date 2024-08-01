@@ -38,6 +38,10 @@ export function createDashboardListingFilterUrl(filter: string | undefined) {
   return filter ? `${LANDING_PAGE_PATH}?filter="${filter}"` : LANDING_PAGE_PATH;
 }
 
+export function createDashboardExpandedPanelUrl(id?: string, expandedPanelId?: string) {
+  return `${getFullEditPath(id)}&${DASHBOARD_STATE_STORAGE_KEY}=(panelId:${expandedPanelId})`;
+}
+
 // ------------------------------------------------------------------
 // Telemetry & Events
 // ------------------------------------------------------------------
@@ -95,7 +99,7 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   executionContext: {
     type: 'dashboard',
   },
-
+  expandedPanelId: undefined,
   // options
   useMargins: true,
   syncColors: false,

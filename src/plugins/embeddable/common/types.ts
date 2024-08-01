@@ -71,6 +71,11 @@ export type EmbeddableInput = {
   syncTooltips?: boolean;
 
   executionContext?: KibanaExecutionContext;
+
+  /**
+   * Flag what maximized panels should be respected in url
+   */
+  expandedPanelId?: string;
 };
 
 export interface PanelState<

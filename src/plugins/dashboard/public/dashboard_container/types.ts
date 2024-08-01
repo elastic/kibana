@@ -26,7 +26,13 @@ export type DashboardReduxState = ReduxEmbeddableState<
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
-  | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
+  | {
+      destination: 'dashboard';
+      id?: string;
+      useReplace?: boolean;
+      editMode?: boolean;
+      expandedPanelId?: string;
+    }
   | { destination: 'listing'; filter?: string; useReplace?: boolean };
 
 export type DashboardStateFromSaveModal = Pick<
@@ -128,4 +134,9 @@ export type DashboardLocatorParams = Partial<
    * Control group input
    */
   controlGroupInput?: SerializableControlGroupInput;
+
+  /**
+   * Panel Id of the expaned panel if relevant
+   */
+  expandedPanelId?: string;
 };

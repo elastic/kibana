@@ -107,6 +107,7 @@ export interface InheritedChildInput {
   syncCursor?: boolean;
   syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
+  expandedPanelId?: string;
 }
 
 type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
@@ -386,6 +387,7 @@ export class DashboardContainer
       query,
       filters,
       viewMode,
+      expandedPanelId,
       timeRange,
       timeslice,
       syncColors,
@@ -414,6 +416,7 @@ export class DashboardContainer
       syncColors,
       syncCursor,
       viewMode,
+      expandedPanelId,
       query,
       id,
       // do not pass any time information from dashboard to panel when panel has custom time range

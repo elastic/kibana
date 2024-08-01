@@ -37,6 +37,11 @@ export interface EmbeddableContainerSettings {
    * Initialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs.
    */
   childIdInitializeOrder?: string[];
+
+  /**
+   * If true, the container will store expanded panel in the URL and allow sharing to the dashboard with the panel expanded.
+   */
+  showExpandedPanel?: boolean;
 }
 
 export interface IContainer<

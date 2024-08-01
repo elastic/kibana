@@ -82,6 +82,8 @@ export async function mountApp({
       path = redirectTo.id ? createDashboardEditUrl(redirectTo.id) : CREATE_NEW_DASHBOARD_URL;
       if (redirectTo.editMode) {
         state = { viewMode: ViewMode.EDIT };
+      } else if (redirectTo.expandedPanelId) {
+        state = { expandedPanelId: redirectTo.expandedPanelId };
       }
     } else {
       path = createDashboardListingFilterUrl(redirectTo.filter);

@@ -102,5 +102,6 @@ function getLocatorParams({
     panels: lastSavedId
       ? undefined
       : (convertPanelMapToSavedPanels(panels) as DashboardLocatorParams['panels']),
+    expandedPanelId: container.getExpandedPanelId(),
   };
 }
