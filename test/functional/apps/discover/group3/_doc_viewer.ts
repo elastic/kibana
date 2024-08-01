@@ -11,7 +11,13 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'header',
+    'unifiedFieldList',
+  ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
@@ -104,8 +110,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('hide null values switch', function () {
+    describe('hide null values switch - ES|QL mode', function () {
       beforeEach(async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await dataGrid.clickRowToggle();
         await PageObjects.discover.isShowingDocViewer();
       });
@@ -121,10 +131,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should hide fields with null values ', async function () {
-        // _ignored is null
-        await PageObjects.discover.findFieldByNameInDocViewer('_i');
+        // id is null
+        await PageObjects.discover.findFieldByNameInDocViewer('id');
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
         const hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
@@ -132,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await hideNullValuesSwitch.click();
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 1;
         });
       });
     });

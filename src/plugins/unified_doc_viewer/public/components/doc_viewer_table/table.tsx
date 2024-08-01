@@ -139,11 +139,13 @@ export const DocViewerTable = ({
   columnsMeta,
   hit,
   dataView,
+  textBasedHits,
   filter,
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
+  const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -272,7 +274,8 @@ export const DocViewerTable = ({
         if (!shouldShowFieldHandler(curFieldName)) {
           return acc;
         }
-        const shouldHideNullValue = areNullValuesHidden && flattened[curFieldName] == null;
+        const shouldHideNullValue =
+          areNullValuesHidden && flattened[curFieldName] == null && isEsqlMode;
         if (shouldHideNullValue) {
           return acc;
         }
@@ -510,23 +513,25 @@ export const DocViewerTable = ({
           <EuiFlexItem grow={false}>
             <EuiSpacer size="s" />
           </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              align-self: end;
-              padding-bottom: ${euiTheme.size.s};
-            `}
-          >
-            <EuiSwitch
-              label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                defaultMessage: 'Hide fields with null values',
-              })}
-              checked={areNullValuesHidden ?? false}
-              onChange={onHideNullValuesChange}
-              compressed
-              data-test-subj="unifiedDocViewerHideNullValuesSwitch"
-            />
-          </EuiFlexItem>
+          {isEsqlMode && (
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                align-self: end;
+                padding-bottom: ${euiTheme.size.s};
+              `}
+            >
+              <EuiSwitch
+                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                  defaultMessage: 'Hide fields with null values',
+                })}
+                checked={areNullValuesHidden ?? false}
+                onChange={onHideNullValuesChange}
+                compressed
+                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem
             grow={Boolean(containerHeight)}
             css={css`
