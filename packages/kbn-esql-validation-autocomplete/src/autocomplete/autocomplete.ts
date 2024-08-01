@@ -1164,11 +1164,7 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
-  // could also be in stats (bucket) but our autocomplete is not great yet
-  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
-
   const suggestions = filteredFieldsByType.concat(
-    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
@@ -1346,11 +1342,11 @@ async function getFunctionArgsSuggestions(
 
     // Literals
     suggestions.push(
-      ...getCompatibleLiterals(command.name, getTypesFromParamDefs(constantOnlyParamDefs)).map(
-        (suggestion) => ({
-          ...suggestion,
-          text: addCommaIf(shouldAddComma, suggestion.text),
-        })
+      ...getCompatibleLiterals(
+        command.name,
+        getTypesFromParamDefs(constantOnlyParamDefs),
+        undefined,
+        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
       )
     );
 
@@ -1378,7 +1374,11 @@ async function getFunctionArgsSuggestions(
       }))
     );
 
-    if (getTypesFromParamDefs(paramDefsWhichSupportFields).includes('date'))
+    // could also be in stats (bucket) but our autocomplete is not great yet
+    if (
+      getTypesFromParamDefs(paramDefsWhichSupportFields).includes('date') &&
+      ['where', 'eval'].includes(command.name)
+    )
       suggestions.push(
         ...getDateLiterals({
           addComma: shouldAddComma,

@@ -65,7 +65,7 @@ describe('autocomplete.suggest', () => {
           getSources: jest.fn().mockResolvedValue(dataSources),
         };
 
-        await assertSuggestions('from /', [], { callbacks: cb });
+        await assertSuggestions('from /', expectedSuggestions, { callbacks: cb });
         await assertSuggestions('FROM /', expectedSuggestions, { callbacks: cb });
         await assertSuggestions('FROM a,/', expectedSuggestions, { callbacks: cb });
         await assertSuggestions('from a, /', expectedSuggestions, { callbacks: cb });

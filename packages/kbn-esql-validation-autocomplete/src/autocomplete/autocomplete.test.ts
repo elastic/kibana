@@ -662,7 +662,7 @@ describe('autocomplete', () => {
     );
     // test that comma is correctly added to the suggestions if minParams is not reached yet
     testSuggestions('from a | eval a=concat( ', [
-      ...getFieldNamesByType('string').map((v) => `${v},`),
+      ...getFieldNamesByType('string').map((v) => `${v}, `),
       ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
         'concat',
       ]).map((v) => ({ ...v, text: `${v.text},` })),
@@ -690,7 +690,7 @@ describe('autocomplete', () => {
     );
     // test that comma is correctly added to the suggestions if minParams is not reached yet
     testSuggestions('from a | eval a=cidr_match( ', [
-      ...getFieldNamesByType('ip').map((v) => `${v},`),
+      ...getFieldNamesByType('ip').map((v) => `${v}, `),
       ...getFunctionSignaturesByReturnType('eval', 'ip', { scalar: true }, undefined, [
         'cidr_match',
       ]).map((v) => ({ ...v, text: `${v.text},` })),
@@ -1219,7 +1219,7 @@ describe('autocomplete', () => {
     );
   });
 
-  describe.skip('advancing the cursor and opening the suggestion menu automatically ✨', () => {
+  describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
     const attachTriggerCommand = (
       s: string | PartialSuggestionWithText
     ): PartialSuggestionWithText =>

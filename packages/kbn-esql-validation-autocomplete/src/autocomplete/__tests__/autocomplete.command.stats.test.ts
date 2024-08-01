@@ -74,7 +74,7 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats by bucket(/', [
-          ...getFieldNamesByType(['number', 'date']).map((field) => `${field},`),
+          ...getFieldNamesByType(['number', 'date']).map((field) => `${field}, `),
           ...getFunctionSignaturesByReturnType('eval', ['date', 'number'], { scalar: true }).map(
             (s) => ({ ...s, text: `${s.text},` })
           ),
