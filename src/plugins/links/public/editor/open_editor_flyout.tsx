@@ -62,7 +62,7 @@ export async function openEditorFlyout({
       ? parentDashboard.savedObjectId.value
       : undefined;
 
-  return new Promise<LinksRuntimeState | undefined>((resolve, reject) => {
+  return new Promise<LinksRuntimeState | undefined>((resolve) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
 
     const closeEditorFlyout = (editorFlyout: OverlayRef) => {
@@ -116,7 +116,7 @@ export async function openEditorFlyout({
     };
 
     const onCancel = () => {
-      reject();
+      resolve(undefined);
       closeEditorFlyout(editorFlyout);
     };
 
@@ -148,8 +148,5 @@ export async function openEditorFlyout({
     if (overlayTracker) {
       overlayTracker.openOverlay(editorFlyout);
     }
-  }).catch(() => {
-    // on reject (i.e. on cancel), don't do anything
-    return undefined;
   });
 }
