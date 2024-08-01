@@ -99,6 +99,7 @@ export class ConsoleUIPlugin
             element,
             autocompleteInfo: this.autocompleteInfo,
             isMonacoEnabled,
+            isDevMode: this.ctx.env.mode.dev,
           });
         },
       });
@@ -125,6 +126,7 @@ export class ConsoleUIPlugin
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
       dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
+    const isDevMode = this.ctx.env.mode.dev;
 
     const consoleStart: ConsolePluginStart = {};
     const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
@@ -146,6 +148,7 @@ export class ConsoleUIPlugin
           },
           alternateView: this._embeddableConsole.alternateView,
           isMonacoEnabled,
+          isDevMode,
           getConsoleHeight: this._embeddableConsole.getConsoleHeight.bind(this._embeddableConsole),
           setConsoleHeight: this._embeddableConsole.setConsoleHeight.bind(this._embeddableConsole),
         });
