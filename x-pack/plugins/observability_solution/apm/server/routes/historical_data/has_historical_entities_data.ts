@@ -19,7 +19,7 @@ export async function hasEntitiesData(entitiesESClient: EntitiesESClient, logger
   };
 
   try {
-    const resp = await entitiesESClient.search('has_historical_entities_data', params);
+    const resp = await entitiesESClient.searchLatest('has_historical_entities_data', params);
     return resp.hits.total.value > 0;
   } catch (error) {
     if (
