@@ -363,6 +363,14 @@
       "matchBaseBranches": ["main"],
       "labels": ["Team:ML", "release_note:skip", "backport:all-open"],
       "enabled": true
+    },
+    {
+      "groupName": "re2js",
+      "matchDepNames": ["re2js"],
+      "reviewers": ["team:visualizations", "dej611"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:all-open", "Team:Visualizations"],
+      "enabled": true
     }
   ]
 }

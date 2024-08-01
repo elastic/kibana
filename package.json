@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.14.2",
+  "version": "8.14.4",
   "branch": "8.14",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.13.1",
+    "node": "20.15.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -900,7 +900,7 @@
     "@langchain/community": "^0.0.44",
     "@langchain/core": "^0.1.53",
     "@langchain/openai": "^0.0.25",
-    "@launchdarkly/node-server-sdk": "^9.4.5",
+    "@launchdarkly/node-server-sdk": "^9.4.6",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
     "@loaders.gl/shapefile": "^3.4.7",
@@ -1059,7 +1059,7 @@
     "mustache": "^2.3.2",
     "node-fetch": "^2.6.7",
     "node-forge": "^1.3.1",
-    "nodemailer": "^6.9.9",
+    "nodemailer": "^6.9.14",
     "normalize-path": "^3.0.0",
     "object-hash": "^1.3.1",
     "object-path-immutable": "^3.1.1",
@@ -1084,7 +1084,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2": "1.20.9",
+    "re2js": "0.4.1",
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-diff-view": "^3.2.0",
@@ -1534,7 +1534,7 @@
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",
-    "apidoc-markdown": "^7.3.0",
+    "apidoc-markdown": "^7.3.2",
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",
     "axe-core": "^4.8.2",

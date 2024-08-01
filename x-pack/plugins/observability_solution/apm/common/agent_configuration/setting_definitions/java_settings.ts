@@ -49,7 +49,7 @@ export const javaSettings: RawSettingDefinition[] = [
   {
     key: 'circuit_breaker_enabled',
     label: i18n.translate('xpack.apm.agentConfig.circuitBreakerEnabled.label', {
-      defaultMessage: 'Cirtcuit breaker enabled',
+      defaultMessage: 'Circuit breaker enabled',
     }),
     type: 'boolean',
     category: 'Circuit-Breaker',

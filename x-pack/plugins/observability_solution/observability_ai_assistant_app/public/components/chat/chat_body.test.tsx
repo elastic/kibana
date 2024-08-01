@@ -39,7 +39,7 @@ describe('<ChatBody>', () => {
           role: 'assistant',
           function_call: {
             name: 'context',
-            arguments: '{"queries":[],"categories":[]}',
+            arguments: '{}',
             trigger: 'assistant',
           },
           content: '',
@@ -87,7 +87,7 @@ describe('<ChatBody>', () => {
           role: 'assistant',
           function_call: {
             name: 'context',
-            arguments: '{"queries":[],"categories":[]}',
+            arguments: '{}',
             trigger: 'assistant',
           },
           content: '',

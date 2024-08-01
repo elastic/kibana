@@ -72,7 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await dataViews.isAdHoc()).to.be(true);
   };
 
-  describe('lens ad hoc data view tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/164623
+  describe.skip('lens ad hoc data view tests', () => {
     it('should allow building a chart based on ad hoc data view', async () => {
       await setupAdHocDataView();
       await PageObjects.lens.configureDimension({

@@ -27,9 +27,5 @@ export function getContextFunctionRequestIfNeeded(
 
   return createFunctionRequestMessage({
     name: 'context',
-    args: {
-      queries: [],
-      categories: [],
-    },
   });
 }
