@@ -38,7 +38,7 @@ export class LocalShipper implements IShipper {
     // required
   };
   public flush = async () => {
-    // required
+    // This shipper doesn't hold any queues. Nothing to flush in this method.
   };
   public shutdown = () => {
     // This shipper doesn't hold any internal queues or instantiated properties. No need to clean up anything in this method.
