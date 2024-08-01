@@ -8299,7 +8299,7 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
-    "agentUUID": Object {
+    "agentId": Object {
       "flags": Object {
         "error": [Function],
       },
@@ -8423,7 +8423,7 @@ Object {
       ],
       "type": "string",
     },
-    "agentUUID": Object {
+    "agentId": Object {
       "flags": Object {
         "error": [Function],
       },

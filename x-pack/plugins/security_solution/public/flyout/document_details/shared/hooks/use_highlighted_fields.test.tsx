@@ -150,6 +150,7 @@ describe('useHighlightedFields', () => {
   });
 
   it('should return sentinelone agent id field if data is s1 alert', () => {
+    const agentIdField = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0];
     const hookResult = renderHook(() =>
       useHighlightedFields({
         dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
@@ -161,18 +162,14 @@ describe('useHighlightedFields', () => {
             isObjectArray: false,
           },
           {
-            category: parseEcsFieldPath(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0])
-              .category,
-            field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0],
+            category: parseEcsFieldPath(agentIdField).category,
+            field: agentIdField,
             values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
             originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
             isObjectArray: false,
           },
         ]),
-        investigationFields: [
-          'agent.status',
-          RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0],
-        ],
+        investigationFields: ['agent.status', agentIdField],
       })
     );
 
@@ -180,7 +177,7 @@ describe('useHighlightedFields', () => {
       'kibana.alert.rule.type': {
         values: ['query'],
       },
-      'observer.serial_number': {
+      [agentIdField]: {
         values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
       },
     });
