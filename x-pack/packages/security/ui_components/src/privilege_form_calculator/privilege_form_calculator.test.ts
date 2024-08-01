@@ -9,9 +9,9 @@ import {
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
+import type { Role } from '@kbn/security-plugin-types-common';
 
 import { PrivilegeFormCalculator } from './privilege_form_calculator';
-import type { Role } from '@kbn/security-plugin-types-common';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {

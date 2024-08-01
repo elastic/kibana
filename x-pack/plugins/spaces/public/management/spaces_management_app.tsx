@@ -44,6 +44,7 @@ export const spacesManagementApp = Object.freeze({
     config,
     eventTracker,
     getRolesAPIClient,
+    getPrivilegesAPIClient,
   }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
@@ -155,6 +156,7 @@ export const spacesManagementApp = Object.freeze({
               getRolesAPIClient={getRolesAPIClient}
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
+              getPrivilegesAPIClient={getPrivilegesAPIClient}
             />
           );
         };
