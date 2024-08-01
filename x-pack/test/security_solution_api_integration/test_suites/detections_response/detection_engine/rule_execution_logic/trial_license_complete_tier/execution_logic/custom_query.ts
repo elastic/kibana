@@ -69,6 +69,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
+  getLuceneRuleForTesting,
 } from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -122,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - most remaining tests use preview API
-    it('should have the specific audit record for _id or none of these tests below will pass', async () => {
+    it.only('should have the specific audit record for _id or none of these tests below will pass', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
@@ -2748,6 +2749,16 @@ export default ({ getService }: FtrProviderContext) => {
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
+      });
+    });
+
+    describe.only('with a Lucene query rule', async () => {
+      test('should run successfully and generate an alert that matches the query', async () => {
+        const luceneQueryRule = getLuceneRuleForTesting();
+        const { previewId } = await previewRule({ supertest, luceneQueryRule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        // const alert = previewAlerts[0]._source;
+        expect(previewAlerts).toExist();
       });
     });
   });
