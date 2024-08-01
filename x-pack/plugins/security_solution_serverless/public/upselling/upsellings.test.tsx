@@ -11,11 +11,11 @@ import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { upsellingPages } from './upsellings';
 
 describe('upsellingPages', () => {
-  it('registers the Attack discovery page with the assistant PLI', () => {
+  it('registers the Attack discovery page with the Attack discovery PLI', () => {
     const attackDiscoveryPage = upsellingPages.find(
       ({ pageName }) => pageName === SecurityPageName.attackDiscovery
     );
 
-    expect(attackDiscoveryPage?.pli).toEqual(ProductFeatureKey.assistant);
+    expect(attackDiscoveryPage?.pli).toEqual(ProductFeatureKey.attackDiscovery);
   });
 });

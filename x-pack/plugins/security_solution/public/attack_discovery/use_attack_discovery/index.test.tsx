@@ -10,7 +10,6 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 import { renderHook, act } from '@testing-library/react-hooks';
 import React from 'react';
 
-import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { useKibana } from '../../common/lib/kibana';
 import { usePollApi } from '../hooks/use_poll_api';
 import { useAttackDiscovery } from '.';
@@ -233,50 +232,6 @@ describe('useAttackDiscovery', () => {
     expect(result.current.failureReason).toEqual('something bad');
     expect(result.current.isLoading).toBe(false);
     expect(result.current.lastUpdated).toEqual(null);
-  });
-
-  describe('when hasAssistantPrivilege is false', () => {
-    beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: false, // <--- hasAssistantPrivilege is false
-        isAssistantEnabled: true,
-      });
-
-      renderHook(() => useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId }));
-    });
-
-    afterEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-    });
-
-    it('does NOT call pollApi when hasAssistantPrivilege is false', () => {
-      expect(mockPollApi.pollApi).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when isAssistantEnabled is false', () => {
-    beforeEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: false, // <--- isAssistantEnabled is false
-      });
-
-      renderHook(() => useAttackDiscovery({ connectorId: 'test-id', setLoadingConnectorId }));
-    });
-
-    afterEach(() => {
-      (useAssistantAvailability as jest.Mock).mockReturnValue({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-      });
-    });
-
-    it('does NOT call pollApi when isAssistantEnabled is false', () => {
-      expect(mockPollApi.pollApi).not.toHaveBeenCalled();
-    });
   });
 
   describe('when zero connectors are configured', () => {

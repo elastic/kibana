@@ -79,7 +79,7 @@ export const upsellingPages: UpsellingPages = [
   },
   {
     pageName: SecurityPageName.attackDiscovery,
-    pli: ProductFeatureKey.assistant,
+    pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
   },
 ];

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ATTACK_DISCOVERY } from '../app/translations';
 import {
-  ASSISTANT_FEATURE_ID,
+  ATTACK_DISCOVERY_FEATURE_ID,
   ATTACK_DISCOVERY_PATH,
   SecurityPageName,
   SERVER_APP_ID,
@@ -17,7 +17,7 @@ import {
 import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
-  capabilities: [[`${SERVER_APP_ID}.show`, `${ASSISTANT_FEATURE_ID}.ai-assistant`]], // This is an AND condition via the nested array
+  capabilities: [[`${SERVER_APP_ID}.show`, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`]], // This is an AND condition via the nested array
   globalNavPosition: 4,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.attackDiscovery', {

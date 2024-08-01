@@ -24,7 +24,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { getErrorToastText } from '../pages/helpers';
 import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../pages/translations';
 import { getGenAiConfig, getRequestBody } from './helpers';
-import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 
 export interface UseAttackDiscovery {
   alertsContextCount: number | null;
@@ -78,8 +77,6 @@ export const useAttackDiscovery = ({
   // get alerts index pattern and allow lists from the assistant context:
   const { alertsIndexPattern, knowledgeBase, traceOptions } = useAssistantContext();
 
-  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
-
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
   const [generationIntervals, setGenerationIntervals] = React.useState<GenerationInterval[]>([]);
@@ -116,9 +113,7 @@ export const useAttackDiscovery = ({
       connectorId != null &&
       connectorId !== '' &&
       aiConnectors != null &&
-      aiConnectors.length > 0 &&
-      hasAssistantPrivilege &&
-      isAssistantEnabled
+      aiConnectors.length > 0
     ) {
       pollApi();
       setLoadingConnectorId?.(connectorId);
@@ -130,15 +125,7 @@ export const useAttackDiscovery = ({
       setGenerationIntervals([]);
       setPollStatus(null);
     }
-  }, [
-    aiConnectors,
-    connectorId,
-    hasAssistantPrivilege,
-    isAssistantEnabled,
-    pollApi,
-    setLoadingConnectorId,
-    setPollStatus,
-  ]);
+  }, [aiConnectors, connectorId, pollApi, setLoadingConnectorId, setPollStatus]);
 
   useEffect(() => {
     if (pollStatus === 'running') {
