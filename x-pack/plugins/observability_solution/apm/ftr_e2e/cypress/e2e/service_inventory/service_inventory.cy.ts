@@ -103,7 +103,6 @@ describe('Service inventory', () => {
 
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(mainAliasNames);
-      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
