@@ -582,8 +582,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'system.core.steal.pct',
           'system.cpu.nice.pct',
           'system.cpu.idle.pct',
-          'system.cpu.iowait.pct',
-          'system.cpu.irq.pct',
         ];
 
         for (const field of fields) {
