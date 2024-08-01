@@ -577,7 +577,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
         myMetrics = containerSnapshotMetricTypes;
         break;
     }
-    return myMetrics.map(toMetricOpt);
+    return myMetrics.map((myMetric) => toMetricOpt(myMetric, props.nodeType));
   }, [props.nodeType]);
 
   return (
@@ -776,6 +776,8 @@ const metricUnit: Record<string, { label: string }> = {
   memory: { label: '%' },
   rx: { label: 'bits/s' },
   tx: { label: 'bits/s' },
+  rxV2: { label: 'bits/s' },
+  txV2: { label: 'bits/s' },
   logRate: { label: '/s' },
   diskIOReadBytes: { label: 'bytes/s' },
   diskIOWriteBytes: { label: 'bytes/s' },
