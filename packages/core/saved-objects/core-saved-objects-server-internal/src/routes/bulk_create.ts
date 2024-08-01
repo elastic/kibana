@@ -37,6 +37,7 @@ export const registerBulkCreateRoute = (
         summary: `Create saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
+        deprecated: true,
       },
       validate: {
         query: schema.object({
