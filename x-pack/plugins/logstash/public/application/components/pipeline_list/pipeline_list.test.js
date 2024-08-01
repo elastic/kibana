@@ -35,6 +35,7 @@ describe('PipelineList component', () => {
         isClusterInfoAvailable: getIsClusterInfoAvailable(true),
         deleteSelectedPipelines: getDeleteSelectedPipelines(true),
       },
+      isServerless: false,
       isReadOnly: false,
       licenseService: {
         checkValidity: () => Promise.resolve(),

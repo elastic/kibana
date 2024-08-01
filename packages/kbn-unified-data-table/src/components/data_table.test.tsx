@@ -691,7 +691,7 @@ describe('UnifiedDataTable', () => {
       // additional controls become available after selecting a document
       act(() => {
         component
-          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
           .first()
           .simulate('change');
       });
@@ -767,17 +767,28 @@ describe('UnifiedDataTable', () => {
       );
     };
 
-    const getSelectedDocumentsButton = () => screen.queryByRole('button', { name: /Selected/ });
+    const getSelectedDocumentsButton = () => screen.queryByTestId('unifiedDataTableSelectionBtn');
 
     const selectDocument = (document: EsHitRecord) =>
       userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
 
-    const getCompareDocumentsButton = () => screen.queryByRole('button', { name: /Compare/ });
+    const openSelectedRowsMenu = async () => {
+      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+      await screen.findAllByText('Clear selection');
+    };
+
+    const closeSelectedRowsMenu = async () => {
+      userEvent.click(await screen.findByTestId('unifiedDataTableSelectionBtn'));
+    };
+
+    const getCompareDocumentsButton = () =>
+      screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
 
     const goToComparisonMode = async () => {
       selectDocument(esHitsMock[0]);
       selectDocument(esHitsMock[1]);
-      userEvent.click(getCompareDocumentsButton()!);
+      await openSelectedRowsMenu();
+      userEvent.click(await screen.findByTestId('unifiedDataTableCompareSelectedDocuments'));
       await screen.findByText('Comparing 2 documents');
     };
 
@@ -796,22 +807,28 @@ describe('UnifiedDataTable', () => {
     const getCellValues = () =>
       Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
 
-    it('should not allow comparison if less than 2 documents are selected', () => {
+    it('should not allow comparison if less than 2 documents are selected', async () => {
       renderDataTable({ enableComparisonMode: true });
       expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
       selectDocument(esHitsMock[0]);
       expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      await openSelectedRowsMenu();
       expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+      await closeSelectedRowsMenu();
       selectDocument(esHitsMock[1]);
       expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      await openSelectedRowsMenu();
       expect(getCompareDocumentsButton()).toBeInTheDocument();
+      await closeSelectedRowsMenu();
     });
 
-    it('should not allow comparison if comparison mode is disabled', () => {
+    it('should not allow comparison if comparison mode is disabled', async () => {
       renderDataTable({ enableComparisonMode: false });
       selectDocument(esHitsMock[0]);
       selectDocument(esHitsMock[1]);
+      await openSelectedRowsMenu();
       expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+      await closeSelectedRowsMenu();
     });
 
     it('should allow comparison if 2 or more documents are selected and comparison mode is enabled', async () => {
