@@ -30,7 +30,7 @@ import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
-} from './mocks/data_control_mocks';
+} from './mocks/factory_mocks';
 import { ControlFactory } from '../types';
 import { DataControlApi, DefaultDataControlState } from './types';
 

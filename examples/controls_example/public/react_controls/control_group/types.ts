@@ -63,6 +63,7 @@ export type ControlGroupApi = PresentationContainer &
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     getLastSavedControlState: (controlUuid: string) => object;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
   };
 
