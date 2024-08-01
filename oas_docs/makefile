@@ -14,7 +14,7 @@
 # permission is obtained from Elasticsearch B.V.
 
 .PHONY: api-docs
-api-docs: ## Generate kibana.serverless.yaml and kibana.yaml
+api-docs: ## Generate kibana.yaml
 	@npx @redocly/cli join "kibana.info.yaml" "../x-pack/plugins/alerting/docs/openapi/bundled.yaml" "../x-pack/plugins/observability_solution/apm/docs/openapi/apm.yaml"  "../x-pack/plugins/cases/docs/openapi/bundled.yaml" "../x-pack/plugins/actions/docs/openapi/bundled.yaml" "../src/plugins/data_views/docs/openapi/bundled.yaml" "../x-pack/plugins/ml/common/openapi/ml_apis.yaml" "../packages/core/saved-objects/docs/openapi/bundled.yaml"  "bundle.json" -o "output/kibana.yaml" --prefix-components-with-info-prop title
 
 .PHONY: api-docs-stateful
