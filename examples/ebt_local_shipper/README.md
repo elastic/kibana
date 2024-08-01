@@ -1,7 +1,7 @@
 ## EBT local shipper
 
 This example plugin registers a local shipper that indexes all the EBT events in the local Elasticsearch.
-The intention is to make it easier for developers to explore their events without having to wait for our _long_ ingestion pipelines. 
+The intention is to allow developers to bypass ingestion pipelines and explore their events locally. 
 
 The target indices are:
 - `ebt-kibana-browser` for all events generated in the browser
