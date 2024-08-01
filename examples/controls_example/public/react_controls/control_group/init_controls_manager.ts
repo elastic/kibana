@@ -12,7 +12,7 @@ import {
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
