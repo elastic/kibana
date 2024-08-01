@@ -77,7 +77,7 @@ type SelectableEntry = EuiSelectableOption<{
   icon?: IconType;
 }>;
 
-const MAX_LIST_HEIGHT = 296;
+const MAX_LIST_HEIGHT = 324;
 const ENTRY_HEIGHT = 52;
 
 function computeListHeight(list: SelectableEntry[], maxHeight: number): number {

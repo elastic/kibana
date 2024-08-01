@@ -25,7 +25,6 @@ export const IconChartGaugeCircle = ({ title, titleId, ...props }: Omit<EuiIconP
         fillRule="evenodd"
         clipRule="evenodd"
         d="M7.5 1C3.91015 1 1 3.91015 1 7.5C1 11.0899 3.91015 14 7.5 14C11.0899 14 14 11.0899 14 7.5C14 3.91015 11.0899 1 7.5 1ZM0 7.5C0 3.35786 3.35786 0 7.5 0C11.6421 0 15 3.35786 15 7.5C15 11.6421 11.6421 15 7.5 15C3.35786 15 0 11.6421 0 7.5Z"
-        fill="#343741"
       />
     </svg>
   );

@@ -35,12 +35,12 @@ interface PartitionChartMeta {
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
-      value: SharedPieLayerState['categoryDisplay'];
-      inputDisplay: string;
+      id: SharedPieLayerState['categoryDisplay'];
+      label: string;
     }>;
     numberOptions: Array<{
-      value: SharedPieLayerState['numberDisplay'];
-      inputDisplay: string;
+      id: SharedPieLayerState['numberDisplay'];
+      label: string;
     }>;
     emptySizeRatioOptions?: Array<{
       id: string;
@@ -59,57 +59,57 @@ interface PartitionChartMeta {
 
 const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
-    value: CategoryDisplay.DEFAULT,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showCategoriesLabel', {
-      defaultMessage: 'Inside or outside',
+    id: CategoryDisplay.HIDE,
+    label: i18n.translate('xpack.lens.pieChart.categoriesHideLabel', {
+      defaultMessage: 'Hide',
     }),
   },
   {
-    value: CategoryDisplay.INSIDE,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.fitInsideOnlyLabel', {
-      defaultMessage: 'Inside only',
+    id: CategoryDisplay.INSIDE,
+    label: i18n.translate('xpack.lens.pieChart.categoriesInsideOnlyLabel', {
+      defaultMessage: 'Inside',
     }),
   },
   {
-    value: CategoryDisplay.HIDE,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
-      defaultMessage: 'Hide labels',
+    id: CategoryDisplay.DEFAULT,
+    label: i18n.translate('xpack.lens.pieChart.autoCategoriesLabel', {
+      defaultMessage: 'Auto',
     }),
   },
 ];
 
 const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
-    value: CategoryDisplay.DEFAULT,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
-      defaultMessage: 'Show labels',
+    id: CategoryDisplay.HIDE,
+    label: i18n.translate('xpack.lens.pieChart.hideTreemapCategoriesLabel', {
+      defaultMessage: 'Hide',
     }),
   },
   {
-    value: CategoryDisplay.HIDE,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
-      defaultMessage: 'Hide labels',
+    id: CategoryDisplay.DEFAULT,
+    label: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
+      defaultMessage: 'Show',
     }),
   },
 ];
 
 const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
   {
-    value: NumberDisplay.HIDDEN,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
-      defaultMessage: 'Hide from chart',
+    id: NumberDisplay.HIDDEN,
+    label: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
+      defaultMessage: 'Hide',
     }),
   },
   {
-    value: NumberDisplay.PERCENT,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showPercentValuesLabel', {
-      defaultMessage: 'Show percent',
+    id: NumberDisplay.VALUE,
+    label: i18n.translate('xpack.lens.pieChart.integerLabel', {
+      defaultMessage: 'Integer',
     }),
   },
   {
-    value: NumberDisplay.VALUE,
-    inputDisplay: i18n.translate('xpack.lens.pieChart.showFormatterValuesLabel', {
-      defaultMessage: 'Show value',
+    id: NumberDisplay.PERCENT,
+    label: i18n.translate('xpack.lens.pieChart.percentageLabel', {
+      defaultMessage: 'Percentage',
     }),
   },
 ];

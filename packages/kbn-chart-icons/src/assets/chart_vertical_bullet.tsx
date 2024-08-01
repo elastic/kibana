@@ -29,7 +29,6 @@ export const IconChartVerticalBullet = ({
         fillRule="evenodd"
         clipRule="evenodd"
         d="M0 7.5C0 7.22386 0.223858 7 0.5 7H15.5C15.7761 7 16 7.22386 16 7.5V9.5C16 9.77614 15.7761 10 15.5 10C15.2239 10 15 9.77614 15 9.5V8H1V9.5C1 9.77614 0.776142 10 0.5 10C0.223858 10 0 9.77614 0 9.5V7.5Z"
-        fill="#343741"
       />
     </svg>
   );

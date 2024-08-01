@@ -91,7 +91,7 @@ export const CHART_SWITCH_OPTIONS = {
   },
 };
 
-// todo: remvoe
+// todo: remove
 export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
   [GaugeShapes.HORIZONTAL_BULLET]: {
     id: GaugeShapes.HORIZONTAL_BULLET,
@@ -154,13 +154,13 @@ export const gaugeShapes = [
 
 export const bulletTypes = [
   {
-    ...CHART_NAMES.horizontalBullet,
+    id: CHART_NAMES.horizontalBullet.id,
     label: i18n.translate('xpack.lens.gauge.bullet.orientantionHorizontal', {
       defaultMessage: 'Horizontal',
     }),
   },
   {
-    ...CHART_NAMES.verticalBullet,
+    id: CHART_NAMES.verticalBullet.id,
     label: i18n.translate('xpack.lens.gauge.bullet.orientantionVertical', {
       defaultMessage: 'Vertical',
     }),

@@ -16,6 +16,9 @@ import {
   EuiHorizontalRule,
   EuiComboBox,
   EuiIcon,
+  EuiFieldNumber,
+  EuiButton,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
@@ -24,7 +27,7 @@ import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/con
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { EmptySizeRatios, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
-import { LegendDisplay } from '../../../common/constants';
+import { LegendDisplay, NumberDisplay } from '../../../common/constants';
 import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
@@ -66,6 +69,10 @@ const legendOptions: Array<{
     }),
   },
 ];
+
+const PANEL_STYLE = {
+  width: '500px',
+};
 
 const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.donutHole', {
   defaultMessage: 'Donut hole',
@@ -183,73 +190,17 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     frame.datasourceLayers
   ).truncateText;
 
+  const showExistencePopover = emptySizeRatioOptions?.length && selectedOption;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
-          defaultMessage: 'Labels',
-        })}
-        isDisabled={Boolean(isToolbarPopoverDisabled)}
-        type="labels"
-        groupPosition="left"
-        buttonDataTestSubj="lnsLabelsButton"
-      >
-        {categoryOptions.length ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
-              defaultMessage: 'Position',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiSuperSelect
-              compressed
-              valueOfSelected={layer.categoryDisplay}
-              options={categoryOptions}
-              onChange={onCategoryDisplayChange}
-            />
-          </EuiFormRow>
-        ) : null}
-
-        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.numberLabels', {
-              defaultMessage: 'Values',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiSuperSelect
-              compressed
-              valueOfSelected={layer.numberDisplay}
-              options={numberOptions}
-              onChange={onNumberDisplayChange}
-            />
-          </EuiFormRow>
-        ) : null}
-
-        {numberOptions.length + categoryOptions.length ? <EuiHorizontalRule margin="s" /> : null}
-
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
-            defaultMessage: 'Maximum decimal places for percent',
-          })}
-          fullWidth
-          display="rowCompressed"
-        >
-          <DecimalPlaceSlider
-            value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-            setValue={onPercentDecimalsChange}
-          />
-        </EuiFormRow>
-      </ToolbarPopover>
-      {emptySizeRatioOptions?.length && selectedOption ? (
+      {showExistencePopover ? (
         <ToolbarPopover
-          title={i18n.translate('xpack.lens.pieChart.visualOptionsLabel', {
-            defaultMessage: 'Visual options',
+          title={i18n.translate('xpack.lens.pieChart.appearanceLabel', {
+            defaultMessage: 'Appearance',
           })}
           type="visualOptions"
-          groupPosition="center"
+          groupPosition="left"
           buttonDataTestSubj="lnsVisualOptionsButton"
         >
           <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
@@ -274,6 +225,68 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           </EuiFormRow>
         </ToolbarPopover>
       ) : null}
+      <ToolbarPopover
+        title={i18n.translate('xpack.lens.pieChart.titlesAndTextLabel', {
+          defaultMessage: 'Titles and text',
+        })}
+        isDisabled={Boolean(isToolbarPopoverDisabled)}
+        type="labels"
+        groupPosition={showExistencePopover ? 'center' : 'left'}
+        buttonDataTestSubj="lnsLabelsButton"
+        panelStyle={PANEL_STYLE}
+      >
+        {categoryOptions.length ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+              defaultMessage: 'Slice labels',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+                defaultMessage: 'Slice labels',
+              })}
+              options={categoryOptions}
+              idSelected={layer.categoryDisplay}
+              onChange={onCategoryDisplayChange}
+              buttonSize="compressed"
+              isFullWidth
+            />
+          </EuiFormRow>
+        ) : null}
+
+        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
+          <>
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                defaultMessage: 'Slice values',
+              })}
+              fullWidth
+              display="columnCompressed"
+            >
+              <EuiButtonGroup
+                legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                  defaultMessage: 'Slice values',
+                })}
+                options={numberOptions}
+                idSelected={layer.numberDisplay}
+                onChange={onNumberDisplayChange}
+                buttonSize="compressed"
+                isFullWidth
+              />
+            </EuiFormRow>
+            {layer.numberDisplay === NumberDisplay.PERCENT && (
+              <EuiFormRow label=" " fullWidth display="columnCompressed">
+                <DecimalPlaceInput
+                  value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+                  setValue={onPercentDecimalsChange}
+                />
+              </EuiFormRow>
+            )}
+          </>
+        ) : null}
+      </ToolbarPopover>
       <LegendSettingsPopover<PartitionLegendValue>
         legendOptions={legendOptions}
         mode={layer.legendDisplay}
@@ -305,7 +318,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 }
 
-const DecimalPlaceSlider = ({
+const DecimalPlaceInput = ({
   value,
   setValue,
 }: {
@@ -320,12 +333,14 @@ const DecimalPlaceSlider = ({
     { allowFalsyValue: true }
   );
   return (
-    <EuiRange
+    <EuiFieldNumber
       data-test-subj="indexPattern-dimension-formatDecimals"
       value={inputValue}
       min={0}
       max={10}
-      showInput
+      prepend={i18n.translate('xpack.lens.pieChart.decimalPlaces', {
+        defaultMessage: 'Decimal places',
+      })}
       compressed
       onChange={(e) => {
         handleInputChange(Number(e.currentTarget.value));
