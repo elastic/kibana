@@ -17,7 +17,7 @@ import {
   AveragedStat,
   calculateRunningAverage,
   createRunningAveragedStat,
-} from './task_run_calculators';
+} from './task_run_calcultors';
 import { HealthStatus } from './monitoring_stats_stream';
 
 export interface EphemeralTaskStat extends JsonObject {
@@ -35,7 +35,7 @@ export interface SummarizedEphemeralTaskStat extends JsonObject {
 export function createEphemeralTaskAggregator(
   ephemeralTaskLifecycle: EphemeralTaskLifecycle,
   runningAverageWindowSize: number,
-  capacity: number
+  maxWorkers: number
 ): AggregatedStatProvider<EphemeralTaskStat> {
   const ephemeralTaskRunEvents$ = ephemeralTaskLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent))
@@ -70,7 +70,7 @@ export function createEphemeralTaskAggregator(
     map(([tasksRanSincePreviousQueueSize, ephemeralQueueSize]) => ({
       queuedTasks: ephemeralQueuedTasksQueue(ephemeralQueueSize),
       executionsPerCycle: ephemeralQueueExecutionsPerCycleQueue(tasksRanSincePreviousQueueSize),
-      load: ephemeralTaskLoadQueue(calculateWorkerLoad(capacity, tasksRanSincePreviousQueueSize)),
+      load: ephemeralTaskLoadQueue(calculateWorkerLoad(maxWorkers, tasksRanSincePreviousQueueSize)),
     })),
     startWith({
       queuedTasks: [],
