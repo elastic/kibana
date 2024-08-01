@@ -111,6 +111,7 @@ export const uiQueryParams: (
         'isolate',
         'unisolate',
         'activity_log',
+        'defend_insights',
       ];
 
       for (const key of keys) {

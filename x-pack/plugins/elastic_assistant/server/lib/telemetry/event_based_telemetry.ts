@@ -259,6 +259,100 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+export const DEFEND_INSIGHT_SUCCESS_EVENT: EventTypeOpts<{
+  actionTypeId: string;
+  eventsContextCount: number;
+  insightsGenerated: number;
+  durationMs: number;
+  model?: string;
+  provider?: string;
+}> = {
+  eventType: 'defend_insight_success',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    eventsContextCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of events sent as context to the LLM',
+        optional: false,
+      },
+    },
+    insightsGenerated: {
+      type: 'integer',
+      _meta: {
+        description: 'Quantity of Defend insights generated',
+        optional: false,
+      },
+    },
+    durationMs: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of request in ms',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const DEFEND_INSIGHT_ERROR_EVENT: EventTypeOpts<{
+  actionTypeId: string;
+  errorMessage: string;
+  model?: string;
+  provider?: string;
+}> = {
+  eventType: 'defend_insight_error',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message from Elasticsearch',
+      },
+    },
+
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
@@ -266,4 +360,6 @@ export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   INVOKE_ASSISTANT_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
   ATTACK_DISCOVERY_ERROR_EVENT,
+  DEFEND_INSIGHT_SUCCESS_EVENT,
+  DEFEND_INSIGHT_ERROR_EVENT,
 ];

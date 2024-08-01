@@ -29,6 +29,7 @@ import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
+import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -236,6 +237,7 @@ export class AIAssistantService {
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName('component-template-anonymization-fields'),
       attackDiscovery: getResourceName('component-template-attack-discovery'),
+      defendInsights: getResourceName('component-template-defend-insights'),
     },
     aliases: {
       conversations: getResourceName('conversations'),
@@ -243,6 +245,7 @@ export class AIAssistantService {
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName('anonymization-fields'),
       attackDiscovery: getResourceName('attack-discovery'),
+      defendInsights: getResourceName('defend-insights'),
     },
     indexPatterns: {
       conversations: getResourceName('conversations*'),
@@ -250,6 +253,7 @@ export class AIAssistantService {
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName('anonymization-fields*'),
       attackDiscovery: getResourceName('attack-discovery*'),
+      defendInsights: getResourceName('defend-insights*'),
     },
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
@@ -257,6 +261,7 @@ export class AIAssistantService {
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName('index-template-anonymization-fields'),
       attackDiscovery: getResourceName('index-template-attack-discovery'),
+      defendInsights: getResourceName('index-template-defend-insights'),
     },
     pipelines: {
       knowledgeBase: getResourceName('ingest-pipeline-knowledge-base'),
@@ -374,6 +379,25 @@ export class AIAssistantService {
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
+      kibanaVersion: this.options.kibanaVersion,
+      spaceId: opts.spaceId,
+    });
+  }
+
+  public async createDefendInsightsDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<DefendInsightsDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new DefendInsightsDataClient({
+      logger: this.options.logger.get('defendInsights'),
+      currentUser: opts.currentUser,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      indexPatternsResourceName: this.resourceNames.aliases.defendInsights,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
     });

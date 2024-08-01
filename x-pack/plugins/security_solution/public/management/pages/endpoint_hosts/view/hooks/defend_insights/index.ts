@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './hooks';
-export * from './use_endpoint_action_items';
-export * from './defend_insights';
+export * from './use_defend_insights';
+export * from './use_polling';

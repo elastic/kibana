@@ -102,7 +102,13 @@ export interface EndpointIndexUIQueryParams {
   /** Direction of sorting */
   sort_direction?: 'asc' | 'desc';
   /** show the policy response or host details */
-  show?: 'policy_response' | 'activity_log' | 'details' | 'isolate' | 'unisolate';
+  show?:
+    | 'policy_response'
+    | 'activity_log'
+    | 'details'
+    | 'isolate'
+    | 'unisolate'
+    | 'defend_insights';
   /** Query text from search bar*/
   admin_query?: string;
 }

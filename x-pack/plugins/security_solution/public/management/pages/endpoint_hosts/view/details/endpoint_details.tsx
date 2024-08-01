@@ -26,6 +26,7 @@ import {
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 import { EndpointDetailsContent } from './endpoint_details_content';
+import { DefendInsightsFlyout } from './components/defend_insights_flyout';
 
 export const EndpointDetails = memo(() => {
   const toasts = useToasts();
@@ -122,6 +123,8 @@ export const EndpointDetails = memo(() => {
         </EuiFlyoutBody>
       ) : (
         <>
+          {show === 'defend_insights' && <DefendInsightsFlyout hostMeta={hostInfo.metadata} />}
+
           {(show === 'details' || show === 'activity_log') && (
             <EndpointDetailsFlyoutTabs
               hostname={hostInfo.metadata.host.hostname}

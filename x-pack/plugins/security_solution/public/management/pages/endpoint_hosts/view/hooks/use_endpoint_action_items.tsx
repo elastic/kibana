@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowResponder } from '../../../../hooks';
@@ -74,6 +75,11 @@ export const useEndpointActionItems = (
       ...currentUrlParams,
       selected_endpoint: endpointId,
     });
+    const endpointInsightPath = getEndpointDetailsPath({
+      name: 'endpointInsight',
+      ...currentUrlParams,
+      selected_endpoint: endpointId,
+    });
 
     const isolationActions = [];
 
@@ -115,7 +121,25 @@ export const useEndpointActionItems = (
       });
     }
 
+    const generateDefendInsight = {
+      'data-test-subj': 'generateDefendInsight',
+      icon: 'compute',
+      key: 'defendInsight',
+      navigateAppId: APP_UI_ID,
+      navigateOptions: {
+        path: endpointInsightPath,
+      },
+      href: getAppUrl({ path: endpointInsightPath }),
+      children: (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.actions.generateDefendInsight"
+          defaultMessage="Generate Defend insights"
+        />
+      ),
+    };
+
     return [
+      generateDefendInsight,
       ...isolationActions,
       ...(canAccessResponseConsole
         ? [

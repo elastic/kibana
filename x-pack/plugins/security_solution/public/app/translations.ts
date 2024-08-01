@@ -175,3 +175,17 @@ export const PROTECTION_UPDATES = i18n.translate(
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
+
+export const ERROR_GENERATING_DEFEND_INSIGHTS = i18n.translate(
+  'xpack.securitySolution.defendInsights.errorGeneratingDefendInsightsToastTitle',
+  {
+    defaultMessage: 'Error generating Defend insights',
+  }
+);
+
+export const CONNECTOR_ERROR = i18n.translate(
+  'xpack.securitySolution.defendInsights.errorConnector',
+  {
+    defaultMessage: 'No connector selected, select a connector to use Defend insights',
+  }
+);

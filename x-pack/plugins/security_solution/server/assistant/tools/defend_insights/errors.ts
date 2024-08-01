@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './hooks';
-export * from './use_endpoint_action_items';
-export * from './defend_insights';
+export class InvalidDefendInsightTypeError extends Error {
+  constructor() {
+    super('Invalid DefendInsightType');
+  }
+}

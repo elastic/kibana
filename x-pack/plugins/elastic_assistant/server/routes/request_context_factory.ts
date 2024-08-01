@@ -102,6 +102,15 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
+      getDefendInsightsDataClient: memoize(() => {
+        const currentUser = getCurrentUser();
+        return this.assistantService.createDefendInsightsDataClient({
+          spaceId: getSpaceId(),
+          logger: this.logger,
+          currentUser,
+        });
+      }),
+
       getAIAssistantPromptsDataClient: memoize(() => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
