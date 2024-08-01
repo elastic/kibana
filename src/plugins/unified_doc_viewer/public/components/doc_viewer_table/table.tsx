@@ -273,17 +273,19 @@ export const DocViewerTable = ({
           return acc;
         }
         const shouldHideNullValue = areNullValuesHidden && flattened[curFieldName] == null;
-        if (pinnedFields.includes(curFieldName) && !shouldHideNullValue) {
+        if (shouldHideNullValue) {
+          return acc;
+        }
+        if (pinnedFields.includes(curFieldName)) {
           acc.pinnedItems.push(fieldToItem(curFieldName, true));
         } else {
           const fieldMapping = mapping(curFieldName);
           if (
-            (!searchText?.trim() ||
-              fieldNameWildcardMatcher(
-                { name: curFieldName, displayName: fieldMapping?.displayName },
-                searchText
-              )) &&
-            !shouldHideNullValue
+            !searchText?.trim() ||
+            fieldNameWildcardMatcher(
+              { name: curFieldName, displayName: fieldMapping?.displayName },
+              searchText
+            )
           ) {
             // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName, false));
