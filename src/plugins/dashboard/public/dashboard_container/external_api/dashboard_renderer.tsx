@@ -26,6 +26,7 @@ import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/publi
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
@@ -41,6 +42,7 @@ import {
   buildApiFromDashboardContainer,
   DashboardAPI,
 } from './dashboard_api';
+import { createDashboardExpandedPanelUrl } from '../../dashboard_constants';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
@@ -48,10 +50,21 @@ export interface DashboardRendererProps {
   dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner, locator }, ref) => {
+  (
+    {
+      savedObjectId,
+      getCreationOptions,
+      dashboardRedirect,
+      showPlainSpinner,
+      locator,
+      kbnUrlStateStorage,
+    },
+    ref
+  ) => {
     const dashboardRoot = useRef(null);
     const dashboardViewport = useRef(null);
     const [loading, setLoading] = useState(true);
@@ -187,6 +200,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
             <ParentClassController
               viewportRef={dashboardViewport.current}
               dashboard={dashboardContainer}
+              kbnUrlStateStorage={kbnUrlStateStorage}
             />
           )}
         {renderDashboardContents()}
@@ -203,9 +217,11 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 const ParentClassController = ({
   dashboard,
   viewportRef,
+  kbnUrlStateStorage,
 }: {
   dashboard: DashboardContainer;
   viewportRef: HTMLDivElement;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
 }) => {
   const maximizedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
 
@@ -215,10 +231,45 @@ const ParentClassController = ({
 
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
-      // add logic to have the maximized panel be part of the url here?
+      // add logic to have the maximized panel be part of the url here
+      // need to find the current url in the browser
+      const currentUrlRisonBeginningIndex = window.location.href.indexOf('/view/');
+      const currentUrlRisonEndingIndex = window.location.href.indexOf('?');
+      const dashboardId = window.location.href.substring(
+        currentUrlRisonBeginningIndex + 6,
+        currentUrlRisonEndingIndex
+      );
+      console.log('currentUrl', window.location.href);
+      console.log('dashboardId', dashboardId);
+      // the following is the dashboard id?
+      // http://localhost:5601/bzr/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(filters:!())
+      // need to add the panelId to the url
+      const panelInUrl = createDashboardExpandedPanelUrl(dashboardId, maximizedPanelId);
+
+      // need to replaceUrlHashQuery
+
+      // update it in kbnUrlControls?
+
+      // need the _g filters and etc
+      // console.log('dashboard.id', kbnUrlStateStorage);
+      // const fullEditPath = getFullPath(dashboard.locator?.getRedirectUrl());
+      // console.log('full edit path', fullEditPath);
+      // const newUrl = `${fullEditPath}&${DASHBOARD_STATE_STORAGE_KEY}=(panelId:${maximizedPanelId})`;
+      // console.log('newUrl', newUrl);
+      // const nextUrl = replaceUrlHashQuery(newUrl, (query) => {
+      //   delete query[DASHBOARD_STATE_STORAGE_KEY];
+      //   return query;
+      // });
+      // kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
     } else {
       parentDiv.classList.remove('dshDashboardViewportWrapper');
     }
-  }, [maximizedPanelId, viewportRef.parentElement]);
+  }, [
+    dashboard,
+    kbnUrlStateStorage,
+    kbnUrlStateStorage.kbnUrlControls,
+    maximizedPanelId,
+    viewportRef.parentElement,
+  ]);
   return null;
 };

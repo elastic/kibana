@@ -228,6 +228,7 @@ export function DashboardApp({
             savedObjectId={savedDashboardId}
             showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}
+            kbnUrlStateStorage={kbnUrlStateStorage}
           />
         </>
       )}

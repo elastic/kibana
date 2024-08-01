@@ -40,21 +40,9 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
 export const persistableControlGroupInputKeys: Array<
   keyof Pick<
     ControlGroupInput,
-    | 'panels'
-    | 'chainingSystem'
-    | 'controlStyle'
-    | 'ignoreParentSettings'
-    | 'showApplySelections'
-    | 'expandedPanelId'
+    'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings' | 'showApplySelections'
   >
-> = [
-  'panels',
-  'chainingSystem',
-  'controlStyle',
-  'ignoreParentSettings',
-  'showApplySelections',
-  'expandedPanelId',
-];
+> = ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings', 'showApplySelections'];
 export type PersistableControlGroupInput = Pick<
   ControlGroupInput,
   (typeof persistableControlGroupInputKeys)[number]
