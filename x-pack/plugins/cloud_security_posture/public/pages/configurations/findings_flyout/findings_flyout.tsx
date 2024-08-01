@@ -215,7 +215,7 @@ const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
         <span style={{ color: euiTheme.colors.text }}>
           <FormattedMessage
             id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields are not provided by {datasource}"
+            defaultMessage="Some fields not provided by {datasource}"
             values={{
               datasource: datasetDisplayName || 'the data source',
             }}
