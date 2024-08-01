@@ -89,7 +89,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 
-const CONTROL_COLUMN_IDS_DEFAULT = [OPEN_DETAILS, SELECT_ROW];
+const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 
 export type SortOrder = [string, string];
 

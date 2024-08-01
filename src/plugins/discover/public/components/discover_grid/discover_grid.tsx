@@ -11,12 +11,8 @@ import {
   renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
-  SELECT_ROW,
-  OPEN_DETAILS,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
-
-const REORDERED_CONTROL_COLUMN_IDS = [SELECT_ROW, OPEN_DETAILS];
 
 /**
  * Customized version of the UnifiedDataTable
@@ -47,14 +43,6 @@ export const DiscoverGrid: React.FC<UnifiedDataTableProps> = ({
       renderCustomToolbar={renderCustomToolbar}
       getRowIndicator={getRowIndicator}
       rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-      // TODO: remove after controls are swapped permanently https://github.com/elastic/kibana/issues/186808
-      // By default we still render [expand, select] controls
-      // The following line would swap to [select, expand] controls only if some additional controls are provided
-      controlColumnIds={
-        !props.controlColumnIds && rowAdditionalLeadingControls
-          ? REORDERED_CONTROL_COLUMN_IDS
-          : props.controlColumnIds
-      }
       {...props}
     />
   );
