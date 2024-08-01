@@ -43,8 +43,7 @@ OpenAI provider:: The OpenAI API provider, either OpenAI or Azure OpenAI.
 
 [NOTE]
 ====
-Elastic provides no official support for connecting to a private LLM, except
-when using [Elastic Security’s built-in AI tools](https://www.elastic.co/guide/en/security/current/ai-for-security.html).
+Elastic supports connecting to a private LLM only when it is used with [Elastic Security’s built-in AI tools](https://www.elastic.co/guide/en/security/current/ai-for-security.html).
 ====
 
 URL:: The OpenAI request URL.
