@@ -211,6 +211,7 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
           <ResponseActionFileDownloadLink
             action={action}
             canAccessFileDownloadLink={true}
+            showPasscode={false}
             data-test-subj={testId('download')}
           />
         ) : (
@@ -227,6 +228,7 @@ const SentinelOneRunningProcessesResults = memo<SentinelOneRunningProcessesResul
                     action={action}
                     agentId={id}
                     canAccessFileDownloadLink={canGetRunningProcesses}
+                    showPasscode={false}
                     data-test-subj={testId('download')}
                   />
                 </HostProcessesAccordion>
