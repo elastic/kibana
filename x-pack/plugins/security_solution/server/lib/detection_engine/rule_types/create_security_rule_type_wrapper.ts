@@ -364,13 +364,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               lists: params.exceptionsList,
             });
 
-            const alertTimestampOverride = isPreview || startedAtOverridden ? startedAt : undefined;
+            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
               ruleExecutionLogger,
-              experimentalFeatures,
-              alertTimestampOverride
+              experimentalFeatures
             );
 
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
