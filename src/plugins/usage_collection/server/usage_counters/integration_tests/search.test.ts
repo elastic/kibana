@@ -19,6 +19,7 @@ import { serializeCounterKey, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../..';
 import { type CounterAttributes, createCounters, toCounterMetric } from './counter_utils';
 import type { UsageCounterSnapshot } from '../types';
 import { searchUsageCounters } from '../search';
+import { orderBy } from 'lodash';
 
 // domainId, counterName, counterType, source, count, namespace?
 const FIRST_DAY_COUNTERS: CounterAttributes[] = [
@@ -78,7 +79,9 @@ describe('usage-counters#search', () => {
   describe('namespace agnostic search', () => {
     it('returns counters in the default namespace', async () => {
       const dashboardsNoNamespace = await searchUsageCounters(internalRepository, {
-        domainId: 'dashboards',
+        filters: {
+          domainId: 'dashboards',
+        },
       });
 
       expect(
@@ -88,11 +91,12 @@ describe('usage-counters#search', () => {
       ).toEqual(true);
 
       expectToMatchKeys(dashboardsNoNamespace.counters, [
-        'dashboards:list:viewed:ui',
-        'dashboards:someGlobalServerCounter:count:server',
-        'dashboards:someGlobalUiCounter:count:ui',
+        'dashboards:list:viewed:ui - 513 hits',
+        'dashboards:someGlobalServerCounter:count:server - 57 hits',
+        'dashboards:someGlobalUiCounter:count:ui - 29 hits',
       ]);
 
+      // check that the daily records are sorted descendingly
       expect(
         dashboardsNoNamespace.counters.find(
           ({ counterName }) => counterName === 'someGlobalUiCounter'
@@ -115,8 +119,10 @@ describe('usage-counters#search', () => {
   describe('namespace search', () => {
     it('returns all counters that match namespace', async () => {
       const dashboardsFirstNamespace = await searchUsageCounters(internalRepository, {
-        domainId: 'dashboards',
-        namespace: 'first',
+        filters: {
+          domainId: 'dashboards',
+          namespace: 'first',
+        },
       });
       expect(
         dashboardsFirstNamespace.counters.every(
@@ -124,31 +130,18 @@ describe('usage-counters#search', () => {
         )
       ).toEqual(true);
       expectToMatchKeys(dashboardsFirstNamespace.counters, [
-        'first:dashboards:aDashboardId:consoleErrors:ui',
-        'first:dashboards:aDashboardId:edited:server',
-        'first:dashboards:aDashboardId:viewed:server',
+        'first:dashboards:aDashboardId:viewed:server - 21 hits',
+        'first:dashboards:aDashboardId:edited:server - 11 hits',
+        'first:dashboards:aDashboardId:consoleErrors:ui - 7 hits',
       ]);
-      expect(
-        dashboardsFirstNamespace.counters.find(({ counterType }) => counterType === 'edited')!
-          .records
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "count": 6,
-            "updatedAt": "2024-07-02T10:00:00.000Z",
-          },
-          Object {
-            "count": 5,
-            "updatedAt": "2024-07-01T10:00:00.000Z",
-          },
-        ]
-      `);
     });
 
     it('does not return counters that belong to other namespaces', async () => {
       const someDomainSecondNamespace = await searchUsageCounters(internalRepository, {
-        domainId: 'someDomain',
-        namespace: 'second',
+        filters: {
+          domainId: 'someDomain',
+          namespace: 'second',
+        },
       });
       expect(someDomainSecondNamespace.counters).toEqual([]);
     });
@@ -157,11 +150,13 @@ describe('usage-counters#search', () => {
   describe('specific counter search', () => {
     it('allows searching for specific counters (name + type) on specific namespaces', async () => {
       const dashboardsByName = await searchUsageCounters(internalRepository, {
-        domainId: 'dashboards',
-        counterName: 'aDashboardId',
-        counterType: 'viewed',
-        source: 'server',
-        namespace: 'second',
+        filters: {
+          domainId: 'dashboards',
+          counterName: 'aDashboardId',
+          counterType: 'viewed',
+          source: 'server',
+          namespace: 'second',
+        },
       });
 
       expect(
@@ -175,20 +170,8 @@ describe('usage-counters#search', () => {
         )
       ).toEqual(true);
       expectToMatchKeys(dashboardsByName.counters, [
-        'second:dashboards:aDashboardId:viewed:server',
+        'second:dashboards:aDashboardId:viewed:server - 201 hits',
       ]);
-      expect(dashboardsByName.counters[0].records).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "count": 101,
-            "updatedAt": "2024-07-02T10:00:00.000Z",
-          },
-          Object {
-            "count": 100,
-            "updatedAt": "2024-07-01T10:00:00.000Z",
-          },
-        ]
-      `);
     });
   });
 
@@ -196,8 +179,10 @@ describe('usage-counters#search', () => {
     it('allow searching for counters that are more recent than the given date', async () => {
       const from = moment('2024-07-03T00:00:00.000Z');
       const dashboardsFrom = await searchUsageCounters(internalRepository, {
-        domainId: 'dashboards',
-        from: '2024-07-03T00:00:00.000Z',
+        filters: {
+          domainId: 'dashboards',
+          from: '2024-07-03T00:00:00.000Z',
+        },
       });
 
       expect(
@@ -209,18 +194,37 @@ describe('usage-counters#search', () => {
       ).toEqual(true);
 
       expectToMatchKeys(dashboardsFrom.counters, [
-        'dashboards:someGlobalServerCounter:count:server',
-        'dashboards:someGlobalUiCounter:count:ui',
+        'dashboards:someGlobalServerCounter:count:server - 29 hits',
+        'dashboards:someGlobalUiCounter:count:ui - 15 hits',
       ]);
-      expect(dashboardsFrom.counters.find(({ source }) => source === 'ui')!.records)
-        .toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "count": 15,
-            "updatedAt": "2024-07-03T10:00:00.000Z",
-          },
-        ]
-      `);
+    });
+  });
+
+  describe('PIT search', () => {
+    it('allows retrieving all counters in batches', async () => {
+      const allDashboards = await searchUsageCounters(internalRepository, {
+        filters: {
+          domainId: 'dashboards',
+          namespace: '*',
+        },
+        options: {
+          // we are forcing the logic to perform lots of requests to ES
+          // each of them retrieving just a single result, just for the sake of testing
+          perPage: 1,
+        },
+      });
+
+      expectToMatchKeys(allDashboards.counters, [
+        'dashboards:list:viewed:ui - 513 hits',
+        'second:dashboards:aDashboardId:viewed:server - 201 hits',
+        'second:dashboards:aDashboardId:edited:server - 101 hits',
+        'dashboards:someGlobalServerCounter:count:server - 57 hits',
+        'dashboards:someGlobalUiCounter:count:ui - 29 hits',
+        'first:dashboards:aDashboardId:viewed:server - 21 hits',
+        'second:dashboards:aDashboardId:consoleErrors:ui - 19 hits',
+        'first:dashboards:aDashboardId:edited:server - 11 hits',
+        'first:dashboards:aDashboardId:consoleErrors:ui - 7 hits',
+      ]);
     });
   });
 
@@ -260,9 +264,10 @@ function expectToMatchKeys(counters: UsageCounterSnapshot[], keys: string[]) {
 
   // the counter snapshots do not include a single date. We match a date agnostic key
   expect(
-    counters
-      .map(serializeCounterKey)
-      .map((key) => key.substring(0, key.length - 9)) // remove :YYYYMMDD suffix
-      .sort()
+    orderBy(
+      counters.map((counter) => ({ ...counter, key: serializeCounterKey(counter) })),
+      ['count', 'key'],
+      ['desc', 'asc']
+    ).map(({ key, count }) => `${key.substring(0, key.length - 9)} - ${count} hits`)
   ).toEqual(keys);
 }

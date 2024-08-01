@@ -8,11 +8,11 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { usageCountersSearchParamsToKueryFilter } from './search_utils';
-import type { UsageCountersSearchParams } from '../types';
+import type { UsageCountersSearchFilters } from '../types';
 
 describe('usageCountersSearchParamsToKueryFilter', () => {
   it('creates a Kuery function with the provided search arguments', () => {
-    const params: Omit<UsageCountersSearchParams, 'namespace'> = {
+    const params: Omit<UsageCountersSearchFilters, 'namespace'> = {
       domainId: 'foo',
       counterName: 'bar',
       counterType: 'count',

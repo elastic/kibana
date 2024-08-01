@@ -35,6 +35,13 @@ export interface UsageCountersServiceSetup extends GetUsageCounter {
 }
 
 export interface UsageCountersSearchParams {
+  /** A set of filters to limit the results of the search operation */
+  filters: UsageCountersSearchFilters;
+  /** A set of options to modify the behavior of the search operation */
+  options?: UsageCountersSearchOptions;
+}
+
+export interface UsageCountersSearchFilters {
   /** The domainId used to create the Counter API */
   domainId: string;
   /** The name of the counter. Optional, will return all counters in the same domainId that match the rest of filters if omitted */
@@ -49,14 +56,9 @@ export interface UsageCountersSearchParams {
   source?: 'server' | 'ui';
 }
 
-/**
- * Miscellaneous options to configure the search operation
- */
 export interface UsageCountersSearchOptions {
-  /** Number of results to return for the given search request. Defaults to 100 */
+  /** Number of counters to retrieve per page, when querying ES (defaults to 100) */
   perPage?: number;
-  /** Page offset (1-N), when retrieving results that span across multiple pages. Defaults to 1 */
-  page?: number;
 }
 
 /**
@@ -75,24 +77,23 @@ export interface UsageCountersSearchResult {
 export interface UsageCounterSnapshot extends UsageCounters.v1.AbstractCounter {
   /** List of daily records captured for this counter */
   records: UsageCounterRecord[];
+  /** Number of events captured (adds up all records) */
+  count: number;
 }
 
 /**
  * Number of events counted on a given day
  */
 export interface UsageCounterRecord {
-  /** Number of events captured */
-  count: number;
   /** Date where the counter was last updated */
   updatedAt: string;
+  /** Number of events captured on that day */
+  count: number;
 }
 
 /**
  * Interface to allow searching for persisted usage-counters
  */
 export interface UsageCountersServiceStart {
-  search: (
-    params: UsageCountersSearchParams,
-    options?: UsageCountersSearchOptions
-  ) => Promise<UsageCountersSearchResult>;
+  search: (params: UsageCountersSearchParams) => Promise<UsageCountersSearchResult>;
 }

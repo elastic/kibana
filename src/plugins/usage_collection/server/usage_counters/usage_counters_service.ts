@@ -21,7 +21,6 @@ import type { UsageCounters } from '../../common';
 import type {
   UsageCountersServiceSetup,
   UsageCountersServiceStart,
-  UsageCountersSearchOptions,
   UsageCountersSearchParams,
   UsageCountersSearchResult,
   CreateUsageCounterParams,
@@ -224,13 +223,12 @@ export class UsageCountersService {
   };
 
   private search = async (
-    params: UsageCountersSearchParams,
-    options: UsageCountersSearchOptions = {}
+    params: UsageCountersSearchParams
   ): Promise<UsageCountersSearchResult> => {
     if (!this.repository) {
       throw new Error('Cannot search before this service is started. Please call start() first.');
     }
 
-    return await searchUsageCounters(this.repository, params, options);
+    return await searchUsageCounters(this.repository, params);
   };
 }

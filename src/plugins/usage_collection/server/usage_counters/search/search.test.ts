@@ -20,22 +20,20 @@ describe('searchUsageCounters', () => {
   it('calls repository.find() with the right params', async () => {
     internalRepository.find.mockResolvedValueOnce({
       page: 1,
-      per_page: 1000,
+      per_page: 100,
       total: 8,
       saved_objects: [],
     });
 
-    await searchUsageCounters(
-      internalRepository,
-      {
+    await searchUsageCounters(internalRepository, {
+      filters: {
         domainId: 'foo',
         counterName: 'bar',
         counterType: 'count',
         from: '2024-07-03T10:00:00.000Z',
         source: 'server',
       },
-      { page: 2, perPage: 999 }
-    );
+    });
 
     expect(internalRepository.find).toHaveBeenCalledTimes(1);
     expect(internalRepository.find.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -127,13 +125,10 @@ describe('searchUsageCounters', () => {
           "function": "and",
           "type": "function",
         },
-        "page": 2,
-        "perPage": 999,
-        "searchFields": Array [
-          "usage-counter",
-        ],
-        "sortField": "updated_at",
-        "sortOrder": "desc",
+        "perPage": 100,
+        "pit": Object {
+          "id": "some_pit_id",
+        },
         "type": "usage-counter",
       }
     `);
@@ -147,11 +142,12 @@ describe('searchUsageCounters', () => {
       saved_objects: mockedUsageCounters,
     });
 
-    const res = await searchUsageCounters(internalRepository, { domainId: 'foo' });
+    const res = await searchUsageCounters(internalRepository, { filters: { domainId: 'foo' } });
 
     expect(res.counters).toMatchInlineSnapshot(`
       Array [
         Object {
+          "count": 153,
           "counterName": "bar",
           "counterType": "count",
           "domainId": "foo",

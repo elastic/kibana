@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { orderBy } from 'lodash';
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ISavedObjectsRepository,
   SavedObjectsFindOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import {
   serializeCounterKey,
@@ -17,7 +20,6 @@ import {
 } from '../saved_objects';
 import type {
   UsageCounterSnapshot,
-  UsageCountersSearchOptions,
   UsageCountersSearchParams,
   UsageCountersSearchResult,
 } from '../types';
@@ -25,58 +27,84 @@ import { usageCountersSearchParamsToKueryFilter } from './search_utils';
 
 export async function searchUsageCounters(
   repository: ISavedObjectsRepository,
-  params: UsageCountersSearchParams,
-  options: UsageCountersSearchOptions = {}
+  params: UsageCountersSearchParams
 ): Promise<UsageCountersSearchResult> {
-  const { namespace: filterNamespace } = params;
-  const { perPage = 100, page = 1 } = options;
+  const { filters, options = {} } = params;
+  const { namespace: filterNamespace } = filters;
 
-  const filter = usageCountersSearchParamsToKueryFilter(params);
-
-  const findParams: SavedObjectsFindOptions = {
+  const baseFindParams: SavedObjectsFindOptions = {
     ...(filterNamespace && { namespaces: [filterNamespace] }),
     type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    sortField: 'updated_at',
-    sortOrder: 'desc',
-    filter,
-    searchFields: [USAGE_COUNTERS_SAVED_OBJECT_TYPE],
-    perPage,
-    page,
+    filter: usageCountersSearchParamsToKueryFilter(filters),
+    perPage: options.perPage || 100,
   };
-  const res = await repository.find<UsageCountersSavedObjectAttributes>(findParams);
 
+  // create a PIT to perform consecutive searches
+  const pit = await repository.openPointInTimeForType(USAGE_COUNTERS_SAVED_OBJECT_TYPE);
+  // create a data structure to store/aggregate all counters
   const countersMap = new Map<string, UsageCounterSnapshot>();
-  res.saved_objects.forEach(({ attributes, updated_at: updatedAt, namespaces }) => {
-    const namespace = namespaces?.[0];
-    const key = serializeCounterKey({ ...attributes, namespace });
+  // the current offset for the iterative search
+  let searchAfter: SortResults | undefined;
 
-    let counterSnapshot = countersMap.get(key);
+  do {
+    const findParams: SavedObjectsFindOptions = {
+      ...baseFindParams,
+      pit,
+      ...(searchAfter && { searchAfter }),
+    };
 
-    if (!counterSnapshot) {
-      counterSnapshot = {
-        domainId: attributes.domainId,
-        counterName: attributes.counterName,
-        counterType: attributes.counterType,
-        source: attributes.source,
-        ...(namespace && namespaces?.[0] && { namespace: namespaces[0] }),
-        records: [
-          {
-            updatedAt: updatedAt!,
-            count: attributes.count,
-          },
-        ],
-      };
+    // this is where the actual search call is performed
+    const res = await repository.find<UsageCountersSavedObjectAttributes>(findParams);
+    res.saved_objects.forEach((result) => processResult(countersMap, result));
+    searchAfter = res.saved_objects.pop()?.sort;
+  } while (searchAfter);
 
-      countersMap.set(key, counterSnapshot!);
-    } else {
-      counterSnapshot.records.push({
-        updatedAt: updatedAt!,
-        count: attributes.count,
-      });
-    }
-  });
+  await repository.closePointInTime(pit.id);
+
+  const counters = Array.from(countersMap.values());
+
+  // sort daily counters descending
+  counters.forEach(
+    (snapshot) => (snapshot.records = orderBy(snapshot.records, 'updatedAt', 'desc'))
+  );
 
   return {
-    counters: Array.from(countersMap.values()),
+    counters,
   };
+}
+
+function processResult(
+  countersMap: Map<string, UsageCounterSnapshot>,
+  result: SavedObjectsFindResult<UsageCountersSavedObjectAttributes>
+) {
+  const { attributes, updated_at: updatedAt, namespaces } = result;
+  const namespace = namespaces?.[0];
+  const key = serializeCounterKey({ ...attributes, namespace });
+
+  let counterSnapshot = countersMap.get(key);
+
+  if (!counterSnapshot) {
+    counterSnapshot = {
+      domainId: attributes.domainId,
+      counterName: attributes.counterName,
+      counterType: attributes.counterType,
+      source: attributes.source,
+      ...(namespace && namespaces?.[0] && { namespace: namespaces[0] }),
+      records: [
+        {
+          updatedAt: updatedAt!,
+          count: attributes.count,
+        },
+      ],
+      count: attributes.count,
+    };
+
+    countersMap.set(key, counterSnapshot!);
+  } else {
+    counterSnapshot.records.push({
+      updatedAt: updatedAt!,
+      count: attributes.count,
+    });
+    counterSnapshot.count += attributes.count;
+  }
 }
