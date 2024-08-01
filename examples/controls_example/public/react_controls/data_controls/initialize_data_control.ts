@@ -27,6 +27,10 @@ export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
   state: DefaultDataControlState,
+  /**
+   * `This state manager` should only include the state that the data control editor is
+   * responsible for managing
+   */
   editorStateManager: ControlStateManager<EditorState>,
   controlGroup: ControlGroupApi,
   services: {
