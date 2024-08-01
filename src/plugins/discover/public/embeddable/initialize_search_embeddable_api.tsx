@@ -85,14 +85,21 @@ export const initializeSearchEmbeddableApi = async (
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
 
+  const defaultHeaderRowHeight = DEFAULT_HEADER_ROW_HEIGHT_LINES;
+  const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
+  const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
+  const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
+
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
   const grid$ = new BehaviorSubject<DiscoverGridSettings | undefined>(initialState.grid);
-  const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
-  const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
-  const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
+  const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
+  const rowsPerPage$ = new BehaviorSubject<number | undefined>(
+    initialState.rowsPerPage ?? defaultRowsPerPage
+  );
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
+  const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
   /**
@@ -111,10 +118,6 @@ export const initializeSearchEmbeddableApi = async (
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
-
-  const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
-  const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
-  const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -190,7 +193,7 @@ export const initializeSearchEmbeddableApi = async (
       headerRowHeight: [
         headerRowHeight$,
         (value) => headerRowHeight$.next(value),
-        (a, b) => (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
+        (a, b) => (a ?? defaultHeaderRowHeight) === (b ?? defaultHeaderRowHeight),
       ],
 
       /** The following can't currently be changed from the dashboard */
