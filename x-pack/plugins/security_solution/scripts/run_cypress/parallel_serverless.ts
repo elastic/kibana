@@ -247,7 +247,7 @@ const getProductTypes = (
 export const cli = () => {
   run(
     async (context) => {
-      const environment = process.env.ENVIRONMENT ? `${process.env.ENVIRONMENT}` : 'qa';
+      const environment = process.env.ENVIRONMENT ?? : 'qa';
 
       const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
       const PROXY_SECRET = process.env.PROXY_SECRET || undefined;
