@@ -431,12 +431,12 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.find('discoverDocTableFooter');
   }
 
-  public async isShowingDocViewer() {
-    return await this.testSubjects.exists('kbnDocViewer');
+  public isShowingDocViewer() {
+    return this.dataGrid.isShowingDocViewer();
   }
 
-  public async clickDocViewerTab(id: string) {
-    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${id}`);
+  public clickDocViewerTab(id: string) {
+    return this.dataGrid.clickDocViewerTab(id);
   }
 
   public async expectSourceViewerToExist() {

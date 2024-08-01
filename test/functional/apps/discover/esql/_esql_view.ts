@@ -46,12 +46,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('test', () => {
+    describe('ES|QL in Discover', () => {
       it('should render esql view correctly', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -93,7 +97,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
       });
 
+      it('should not render the histogram for indices with no @timestamp field', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from kibana_sample_data_flights | limit 10`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        // I am not rendering the histogram for indices with no @timestamp field
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(false);
+      });
+
+      it('should render the histogram for indices with no @timestamp field when the ?start, ?end params are in the query', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?start and timestamp <= ?end`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        const fromTime = 'Apr 10, 2018 @ 00:00:00.000';
+        const toTime = 'Nov 15, 2018 @ 00:00:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+        expect(await testSubjects.exists('TextBasedLangEditor')).to.be(true);
+        expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+      });
+
       it('should perform test query correctly', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.selectTextBaseLang();
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
 

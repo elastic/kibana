@@ -9,18 +9,11 @@ import { initializePathScript, cleanScript } from './ingest_pipeline_script_proc
 
 describe('Ingest Pipeline script processor helpers', () => {
   describe('initializePathScript', () => {
-    it('initializes a single depth field', () => {
-      expect(initializePathScript('someField')).toMatchInlineSnapshot(`
-        "
-
-                if (ctx.someField == null) {
-                    ctx.someField = new HashMap();
-                }
-              "
-      `);
+    it('skips initializing a single depth field', () => {
+      expect(initializePathScript('someField')).toMatchInlineSnapshot(`""`);
     });
 
-    it('initializes a multi depth field', () => {
+    it('initializes a multi depth field, skipping the last segment', () => {
       expect(initializePathScript('some.nested.field')).toMatchInlineSnapshot(`
         "
 
@@ -31,11 +24,6 @@ describe('Ingest Pipeline script processor helpers', () => {
 
                 if (ctx.some.nested == null) {
                     ctx.some.nested = new HashMap();
-                }
-              
-
-                if (ctx.some.nested.field == null) {
-                    ctx.some.nested.field = new HashMap();
                 }
               "
       `);
@@ -140,17 +128,11 @@ describe('Ingest Pipeline script processor helpers', () => {
           if (ctx.some == null) {
             ctx.some = new HashMap();
           }
-          if (ctx.some.whatever == null) {
-            ctx.some.whatever = new HashMap();
-          }
           if (ctx.some == null) {
             ctx.some = new HashMap();
           }
           if (ctx.some.else == null) {
             ctx.some.else = new HashMap();
-          }
-          if (ctx.some.else.whatever == null) {
-            ctx.some.else.whatever = new HashMap();
           }
           ctx.some.thing.else = whatever;
           if (nothing) {

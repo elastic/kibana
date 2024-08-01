@@ -13,6 +13,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
+import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { isSolutionNavEnabled } from './experiments';
@@ -49,6 +50,7 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
+  private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
   private readonly config: ConfigType;
@@ -73,6 +75,9 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       hasOnlyDefaultSpace,
     };
 
+    registerSpacesEventTypes(core);
+    this.eventTracker = new EventTracker(core.analytics);
+
     this.solutionNavExperiment = core
       .getStartServices()
       .then(([, { cloud, cloudExperiments }]) => isSolutionNavEnabled(cloud, cloudExperiments))
@@ -82,7 +87,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         return false;
       });
 
-    if (!this.isServerless) {
+    // Only skip setup of space selector and management service if serverless and only one space is allowed
+    if (!(this.isServerless && hasOnlyDefaultSpace)) {
       const getRolesAPIClient = async () => {
         const { security } = await core.plugins.onSetup<{ security: SecurityPluginStart }>(
           'security'
@@ -108,6 +114,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           config: this.config,
           getRolesAPIClient,
           solutionNavExperiment: this.solutionNavExperiment,
+          eventTracker: this.eventTracker,
         });
       }
 
@@ -118,12 +125,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
+
     return { hasOnlyDefaultSpace };
   }
 
   public start(core: CoreStart) {
-    if (!this.isServerless) {
-      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment);
+    // Only skip spaces navigation if serverless and only one space is allowed
+    if (!(this.isServerless && this.config.maxSpaces === 1)) {
+      initSpacesNavControl(this.spacesManager, core, this.solutionNavExperiment, this.eventTracker);
     }
 
     return this.spacesApi;

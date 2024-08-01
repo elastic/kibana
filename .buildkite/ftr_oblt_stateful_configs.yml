@@ -1,0 +1,51 @@
+disabled:
+  # Cypress configs, for now these are still run manually
+  - x-pack/plugins/observability_solution/observability_onboarding/e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_solution/observability_onboarding/e2e/ftr_config_runner.ts
+  - x-pack/plugins/observability_solution/observability_onboarding/e2e/ftr_config.ts
+  - x-pack/plugins/observability_solution/apm/ftr_e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_solution/apm/ftr_e2e/ftr_config_run.ts
+  - x-pack/plugins/observability_solution/apm/ftr_e2e/ftr_config.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_open.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_runner.ts
+  - x-pack/plugins/observability_solution/profiling/e2e/ftr_config.ts
+
+  #FTR configs
+  - x-pack/plugins/observability_solution/uptime/e2e/config.ts
+
+  # Elastic Synthetics configs
+  - x-pack/plugins/observability_solution/uptime/e2e/uptime/synthetics_run.ts
+  - x-pack/plugins/observability_solution/synthetics/e2e/config.ts
+  - x-pack/plugins/observability_solution/synthetics/e2e/synthetics/synthetics_run.ts
+  - x-pack/plugins/observability_solution/exploratory_view/e2e/synthetics_run.ts
+  - x-pack/plugins/observability_solution/ux/e2e/synthetics_run.ts
+  - x-pack/plugins/observability_solution/slo/e2e/synthetics_run.ts
+
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test/alerting_api_integration/observability/config.ts
+  - x-pack/test/api_integration/apis/logs_ui/config.ts
+  - x-pack/test/api_integration/apis/metrics_ui/config.ts
+  - x-pack/test/api_integration/apis/osquery/config.ts
+  - x-pack/test/api_integration/apis/synthetics/config.ts
+  - x-pack/test/api_integration/apis/slos/config.ts
+  - x-pack/test/api_integration/apis/uptime/config.ts
+  - x-pack/test/api_integration/apis/entity_manager/config.ts
+  - x-pack/test/apm_api_integration/basic/config.ts
+  - x-pack/test/apm_api_integration/cloud/config.ts
+  - x-pack/test/apm_api_integration/rules/config.ts
+  - x-pack/test/apm_api_integration/trial/config.ts
+  - x-pack/test/dataset_quality_api_integration/basic/config.ts
+  - x-pack/test/functional/apps/observability_logs_explorer/config.ts
+  - x-pack/test/functional/apps/dataset_quality/config.ts
+  - x-pack/test/functional/apps/slo/embeddables/config.ts
+  - x-pack/test/functional/apps/uptime/config.ts
+  - x-pack/test/observability_api_integration/basic/config.ts
+  - x-pack/test/observability_api_integration/trial/config.ts
+  - x-pack/test/observability_functional/with_rac_write.config.ts
+  - x-pack/test/observability_onboarding_api_integration/basic/config.ts
+  - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
+  - x-pack/test/observability_ai_assistant_api_integration/enterprise/config.ts
+  - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
+  - x-pack/test/profiling_api_integration/cloud/config.ts
+  - x-pack/test/functional/apps/apm/config.ts

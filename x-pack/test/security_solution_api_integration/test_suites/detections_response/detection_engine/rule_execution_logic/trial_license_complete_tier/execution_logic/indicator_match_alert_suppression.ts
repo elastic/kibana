@@ -211,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const createdRule = await createRule(supertest, log, rule);
           const alerts = await getOpenAlerts(supertest, log, es, createdRule);
-          expect(alerts.hits.hits.length).toEqual(1);
+          expect(alerts.hits.hits).toHaveLength(1);
 
           // suppression start equal to alert timestamp
           const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];

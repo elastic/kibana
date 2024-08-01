@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
@@ -86,21 +87,25 @@ export function AiAssistantSelectionPage() {
                   </>
                 ) : null}
                 <p>
-                  {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkDescription',
-                    { defaultMessage: 'For more info, see our' }
-                  )}{' '}
-                  <EuiLink
-                    data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
-                    external
-                    target="_blank"
-                    href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
-                  >
-                    {i18n.translate(
-                      'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkLabel',
-                      { defaultMessage: 'documentation' }
-                    )}
-                  </EuiLink>
+                  <FormattedMessage
+                    id="aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkDescription"
+                    defaultMessage="For more info, see our {documentation}."
+                    values={{
+                      documentation: (
+                        <EuiLink
+                          data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
+                          external
+                          target="_blank"
+                          href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
+                        >
+                          {i18n.translate(
+                            'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkLabel',
+                            { defaultMessage: 'documentation' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
                 </p>
                 <EuiButton
                   iconType="gear"
@@ -151,21 +156,25 @@ export function AiAssistantSelectionPage() {
                   </>
                 ) : null}
                 <p>
-                  {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription',
-                    { defaultMessage: 'For more info, see our' }
-                  )}{' '}
-                  <EuiLink
-                    data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
-                    external
-                    target="_blank"
-                    href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
-                  >
-                    {i18n.translate(
-                      'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
-                      { defaultMessage: 'documentation' }
-                    )}
-                  </EuiLink>
+                  <FormattedMessage
+                    id="aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription"
+                    defaultMessage="For more info, see our {documentation}."
+                    values={{
+                      documentation: (
+                        <EuiLink
+                          data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
+                          external
+                          target="_blank"
+                          href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                        >
+                          {i18n.translate(
+                            'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
+                            { defaultMessage: 'documentation' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
                 </p>
                 <EuiButton
                   data-test-subj="pluginsAiAssistantSelectionPageButton"

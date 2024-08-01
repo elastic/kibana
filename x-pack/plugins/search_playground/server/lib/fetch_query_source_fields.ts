@@ -164,11 +164,20 @@ const isFieldInIndex = (
   );
 };
 
+const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fields'] => {
+  const entries = Object.entries(fields);
+
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+
+  return Object.fromEntries(entries);
+};
+
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
   aggMappingDocs: Array<{ index: string; doc: SearchResponse; mapping: IndicesGetMappingResponse }>
 ): IndicesQuerySourceFields => {
-  const { fields, indices: indexOrIndices } = fieldCapsResponse;
+  const { indices: indexOrIndices } = fieldCapsResponse;
+  const fields = sortFields(fieldCapsResponse.fields);
   const indices = Array.isArray(indexOrIndices) ? indexOrIndices : [indexOrIndices];
 
   const indexModelIdFields = aggMappingDocs.map<IndexFieldModel>((aggDoc) => {

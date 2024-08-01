@@ -6,7 +6,12 @@
  */
 
 import { IndicesQuerySourceFields } from '../types';
-import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from './create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+  getIndicesWithNoSourceFields,
+} from './create_query';
 
 describe('create_query', () => {
   const sourceFields = { index1: [], index2: [] };
@@ -963,6 +968,30 @@ describe('create_query', () => {
       expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
         'search-search-labs': ['non_suggested_field'],
       });
+    });
+  });
+
+  describe('getIndicesWithNoSourceFields', () => {
+    it('should return undefined if all indices have source fields', () => {
+      const fieldDescriptors: IndicesQuerySourceFields = {
+        empty_index: {
+          elser_query_fields: [],
+          dense_vector_query_fields: [],
+          bm25_query_fields: [],
+          source_fields: [],
+          skipped_fields: 0,
+          semantic_fields: [],
+        },
+        non_empty_index: {
+          elser_query_fields: [],
+          dense_vector_query_fields: [],
+          bm25_query_fields: ['field2'],
+          source_fields: ['field1'],
+          skipped_fields: 0,
+          semantic_fields: [],
+        },
+      };
+      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toBe('empty_index');
     });
   });
 });

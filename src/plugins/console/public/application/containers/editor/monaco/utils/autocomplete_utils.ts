@@ -43,10 +43,6 @@ export const getDocumentationLinkFromAutocomplete = (
 ) => {
   // get the url parts from the request url
   const { urlPathTokens } = parseUrl(request.url);
-  // remove the last token, if it's empty
-  if (!urlPathTokens[urlPathTokens.length - 1]) {
-    urlPathTokens.pop();
-  }
   // add the end of url token
   urlPathTokens.push(END_OF_URL_TOKEN);
   const { endpoint } = populateContextForMethodAndUrl(request.method, urlPathTokens);
@@ -127,9 +123,11 @@ export const getUrlPathCompletionItems = (
 
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
-  // remove the last token that is either empty if the url has like "_search/" as the last char
-  // or it's a word that need to be replaced with autocomplete suggestions like "_search/s"
-  urlPathTokens.pop();
+  // if the line ends with /, then we use all url path tokens for autocomplete suggestions
+  // otherwise, we want to ignore the last token
+  if (!lineContent.trim().endsWith('/')) {
+    urlPathTokens.pop();
+  }
   const { autoCompleteSet } = populateContextForMethodAndUrl(method, urlPathTokens);
 
   const wordUntilPosition = model.getWordUntilPosition(position);
@@ -338,7 +336,16 @@ const getInsertText = (
   }
   let insertText = '';
   if (typeof name === 'string') {
-    insertText = bodyContent.endsWith('"') ? '' : '"';
+    const bodyContentLines = bodyContent.split('\n');
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1];
+    const incompleteFieldRegex = /.*"[^"]*$/;
+    if (incompleteFieldRegex.test(currentContentLine)) {
+      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+      insertText = '';
+    } else {
+      // The cursor is at the beginning of a field so the insert text should start with a quote
+      insertText = '"';
+    }
     if (insertValue && insertValue !== '{' && insertValue !== '[') {
       insertText += `${insertValue}"`;
     } else {

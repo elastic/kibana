@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Result');
         });
 
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.existOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Record #0');
         });
       });
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.missingOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.missingOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be('Document');
         });
 
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
           await testSubjects.existOrFail('docViewerTab-doc_view_table');
           await testSubjects.existOrFail('docViewerTab-doc_view_source');
-          await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
+          await testSubjects.existOrFail('docViewerTab-doc_view_example');
           expect(await testSubjects.getVisibleText('docViewerRowDetailsTitle')).to.be(
             'Record #my-example-logs::XdQFDpABfGznVC1bCHLo::'
           );

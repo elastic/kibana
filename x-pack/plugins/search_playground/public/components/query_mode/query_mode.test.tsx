@@ -51,6 +51,16 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
         index1: ['field1'],
         index2: ['field1'],
       },
+      [ChatFormFields.elasticsearchQuery]: {
+        retriever: {
+          rrf: {
+            retrievers: [
+              { standard: { query: { multi_match: { query: '{query}', fields: ['field1'] } } } },
+              { standard: { query: { multi_match: { query: '{query}', fields: ['field1'] } } } },
+            ],
+          },
+        },
+      },
     },
   });
   return <FormProvider {...methods}>{children}</FormProvider>;

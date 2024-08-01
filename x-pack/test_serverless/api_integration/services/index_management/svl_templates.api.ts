@@ -7,7 +7,7 @@
 
 import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
 import { API_BASE_PATH } from './constants';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+import { RoleCredentials } from '../../../shared/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlTemplatesApi({ getService }: FtrProviderContext) {
@@ -16,8 +16,11 @@ export function SvlTemplatesApi({ getService }: FtrProviderContext) {
 
   let templatesCreated: Array<{ name: string; isLegacy?: boolean }> = [];
 
-  const getAllTemplates = (internalReqHeader: InternalRequestHeader, roleAuthc: RoleCredentials) =>
-    supertestWithoutAuth.get(`${API_BASE_PATH}/index_templates`).set(roleAuthc.apiKeyHeader);
+  const getAllTemplates = (roleAuthc: RoleCredentials) =>
+    supertestWithoutAuth
+      .get(`${API_BASE_PATH}/index_templates`)
+      .set(svlCommonApi.getInternalRequestHeader())
+      .set(roleAuthc.apiKeyHeader);
 
   const getOneTemplate = (name: string, isLegacy: boolean = false) =>
     supertestWithoutAuth.get(`${API_BASE_PATH}/index_templates/${name}?legacy=${isLegacy}`);

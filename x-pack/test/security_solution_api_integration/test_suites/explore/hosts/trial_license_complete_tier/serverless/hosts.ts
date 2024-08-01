@@ -16,8 +16,8 @@ import {
   FirstLastSeenStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';
@@ -37,12 +37,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('hosts', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('Make sure that we get Hosts Table data', async () => {

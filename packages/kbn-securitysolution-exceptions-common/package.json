@@ -5,6 +5,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "openapi:generate": "node scripts/openapi_generate"
+    "openapi:generate": "node scripts/openapi_generate",
+    "openapi:bundle": "node scripts/openapi_bundle"
   }
 }

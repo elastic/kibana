@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldDescription } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldPopoverHeaderProps {
@@ -33,6 +34,9 @@ export interface FieldPopoverHeaderProps {
   onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
+  services?: {
+    fieldsMetadata?: FieldsMetadataPublicStart;
+  };
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -46,6 +50,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onAddFilter,
   onEditField,
   onDeleteField,
+  services,
 }) => {
   if (!field) {
     return null;
@@ -153,12 +158,20 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {field.customDescription ? (
-        <>
-          <EuiSpacer size="xs" />
-          <FieldDescription field={field} />
-        </>
-      ) : null}
+      <FieldDescription
+        field={field}
+        Wrapper={FieldDescriptionWrapper}
+        fieldsMetadataService={services?.fieldsMetadata}
+      />
+    </>
+  );
+};
+
+const FieldDescriptionWrapper: React.FC = ({ children }) => {
+  return (
+    <>
+      <EuiSpacer size="xs" />
+      {children}
     </>
   );
 };

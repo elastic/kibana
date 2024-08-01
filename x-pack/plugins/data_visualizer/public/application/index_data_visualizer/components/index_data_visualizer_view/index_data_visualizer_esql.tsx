@@ -48,6 +48,7 @@ import type {
 } from '../../embeddables/grid_embeddable/types';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
@@ -115,7 +116,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         if (!indexPattern) return;
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
-          indexPattern,
+          query.esql,
           currentDataView
         );
 
@@ -144,7 +145,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       sessionId: undefined,
       visibleFieldNames: undefined,
       allowEditDataView: true,
-      id: 'esql_data_visualizer',
+      id: FieldStatsComponentType.EsqlDataVisualizer,
       indexPattern,
       esql: true,
     };
@@ -265,7 +266,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           onTextLangQuerySubmit={onTextLangQuerySubmit}
           expandCodeEditor={expandCodeEditor}
           isCodeEditorExpanded={true}
-          detectTimestamp={true}
+          detectedTimestamp={currentDataView?.timeFieldName}
           hideMinimizeButton={true}
           hideRunQueryText={false}
           isLoading={queryHistoryStatus ?? false}

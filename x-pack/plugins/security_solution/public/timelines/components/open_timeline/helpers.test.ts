@@ -350,6 +350,7 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         columns: defaultUdtHeaders,
+        excludedRowRendererIds: [],
       });
     });
 
@@ -500,6 +501,7 @@ describe('helpers', () => {
         timelineType: TimelineType.template,
         title: 'Awesome Timeline',
         columns: defaultUdtHeaders,
+        excludedRowRendererIds: [],
       });
     });
 
