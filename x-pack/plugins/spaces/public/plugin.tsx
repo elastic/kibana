@@ -12,6 +12,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 
+import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from './analytics';
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
@@ -46,6 +47,7 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
+  private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
   private config: ConfigType;
@@ -76,6 +78,8 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         allowSolutionVisibility: false,
       };
     }
+    registerSpacesEventTypes(core);
+    this.eventTracker = new EventTracker(core.analytics);
 
     // Only skip setup of space selector and management service if serverless and only one space is allowed
     if (!(this.isServerless && hasOnlyDefaultSpace)) {
@@ -103,6 +107,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
           spacesManager: this.spacesManager,
           config: this.config,
           getRolesAPIClient,
+          eventTracker: this.eventTracker,
         });
       }
 
@@ -113,13 +118,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
+
     return { hasOnlyDefaultSpace };
   }
 
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(this.spacesManager, core, this.config);
+      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
 
     return this.spacesApi;

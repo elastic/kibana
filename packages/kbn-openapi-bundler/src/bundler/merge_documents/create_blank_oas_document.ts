@@ -10,12 +10,32 @@ import { OpenAPIV3 } from 'openapi-types';
 
 export function createBlankOpenApiDocument(
   oasVersion: string,
-  info: OpenAPIV3.InfoObject
+  overrides?: Partial<OpenAPIV3.Document>
 ): OpenAPIV3.Document {
   return {
     openapi: oasVersion,
-    info,
-    servers: [
+    info: overrides?.info ?? {
+      title: 'Merged OpenAPI specs',
+      version: 'not specified',
+    },
+    paths: overrides?.paths ?? {},
+    components: {
+      schemas: overrides?.components?.schemas,
+      responses: overrides?.components?.responses,
+      parameters: overrides?.components?.parameters,
+      examples: overrides?.components?.examples,
+      requestBodies: overrides?.components?.requestBodies,
+      headers: overrides?.components?.headers,
+      securitySchemes: overrides?.components?.securitySchemes ?? {
+        BasicAuth: {
+          type: 'http',
+          scheme: 'basic',
+        },
+      },
+      links: overrides?.components?.links,
+      callbacks: overrides?.components?.callbacks,
+    },
+    servers: overrides?.servers ?? [
       {
         url: 'http://{kibana_host}:{port}',
         variables: {
@@ -28,19 +48,12 @@ export function createBlankOpenApiDocument(
         },
       },
     ],
-    security: [
+    security: overrides?.security ?? [
       {
         BasicAuth: [],
       },
     ],
-    paths: {},
-    components: {
-      securitySchemes: {
-        BasicAuth: {
-          type: 'http',
-          scheme: 'basic',
-        },
-      },
-    },
+    tags: overrides?.tags,
+    externalDocs: overrides?.externalDocs,
   };
 }

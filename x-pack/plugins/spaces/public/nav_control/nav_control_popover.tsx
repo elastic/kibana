@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
 import type { Space } from '../../common';
+import type { EventTracker } from '../analytics';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -38,6 +39,7 @@ interface Props {
   serverBasePath: string;
   theme: WithEuiThemeProps['theme'];
   allowSolutionVisibility: boolean;
+  eventTracker: EventTracker;
 }
 
 interface State {
@@ -103,6 +105,7 @@ class NavControlPopoverUI extends Component<Props, State> {
           navigateToUrl={this.props.navigateToUrl}
           activeSpace={this.state.activeSpace}
           allowSolutionVisibility={this.props.allowSolutionVisibility}
+          eventTracker={this.props.eventTracker}
         />
       );
     }

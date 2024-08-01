@@ -10,6 +10,7 @@ import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/publ
 import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 
 import { spacesManagementApp } from './spaces_management_app';
+import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
@@ -20,6 +21,7 @@ interface SetupDeps {
   spacesManager: SpacesManager;
   config: ConfigType;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
+  eventTracker: EventTracker;
 }
 
 export class ManagementService {
@@ -31,6 +33,7 @@ export class ManagementService {
     spacesManager,
     config,
     getRolesAPIClient,
+    eventTracker,
   }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
       spacesManagementApp.create({
@@ -38,6 +41,7 @@ export class ManagementService {
         spacesManager,
         config,
         getRolesAPIClient,
+        eventTracker,
       })
     );
   }

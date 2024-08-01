@@ -21,9 +21,11 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      specInfo: {
-        title: 'Security AI Assistant API (Elastic Cloud Serverless)',
-        description: 'Manage and interact with Security Assistant resources.',
+      prototypeDocument: {
+        info: {
+          title: 'Security AI Assistant API (Elastic Cloud Serverless)',
+          description: 'Manage and interact with Security Assistant resources.',
+        },
       },
     },
   });
@@ -36,9 +38,11 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      specInfo: {
-        title: 'Security AI Assistant API (Elastic Cloud & self-hosted)',
-        description: 'Manage and interact with Security Assistant resources.',
+      prototypeDocument: {
+        info: {
+          title: 'Security AI Assistant API (Elastic Cloud & self-hosted)',
+          description: 'Manage and interact with Security Assistant resources.',
+        },
       },
     },
   });

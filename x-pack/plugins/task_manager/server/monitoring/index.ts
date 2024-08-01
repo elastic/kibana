@@ -18,7 +18,6 @@ import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
 import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
-import { TaskTypeDictionary } from '../task_type_dictionary';
 
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {
@@ -28,20 +27,27 @@ export {
   createMonitoringStatsStream,
 } from './monitoring_stats_stream';
 
-export interface CreateMonitoringStatsOpts {
-  taskStore: TaskStore;
-  elasticsearchAndSOAvailability$: Observable<boolean>;
-  config: TaskManagerConfig;
-  managedConfig: ManagedConfiguration;
-  logger: Logger;
-  adHocTaskCounter: AdHocTaskCounter;
-  taskDefinitions: TaskTypeDictionary;
-  taskPollingLifecycle?: TaskPollingLifecycle;
-  ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
-}
-
 export function createMonitoringStats(
-  opts: CreateMonitoringStatsOpts
+  taskStore: TaskStore,
+  elasticsearchAndSOAvailability$: Observable<boolean>,
+  config: TaskManagerConfig,
+  managedConfig: ManagedConfiguration,
+  logger: Logger,
+  adHocTaskCounter: AdHocTaskCounter,
+  taskPollingLifecycle?: TaskPollingLifecycle,
+  ephemeralTaskLifecycle?: EphemeralTaskLifecycle
 ): Observable<MonitoringStats> {
-  return createMonitoringStatsStream(createAggregators(opts));
+  return createMonitoringStatsStream(
+    createAggregators(
+      taskStore,
+      elasticsearchAndSOAvailability$,
+      config,
+      managedConfig,
+      logger,
+      adHocTaskCounter,
+      taskPollingLifecycle,
+      ephemeralTaskLifecycle
+    ),
+    config
+  );
 }
