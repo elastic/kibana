@@ -72,9 +72,7 @@ export const installDataView = async (
     const doesDataViewExist = await getDataViewSafe(
       soClient,
       currentSpaceId,
-      currentSpaceDataViewId,
-      indexPattern,
-      logger
+      currentSpaceDataViewId
     );
 
     if (doesDataViewExist) return;
