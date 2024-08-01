@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
@@ -20,6 +20,7 @@ import { FILE_FORMATS } from '../../../../../common/constants';
 import type { ResultLinks } from '../../../../../common/app';
 import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { CombinedField } from '../combined_fields/types';
 
 type LinkType = 'file' | 'index';
 
@@ -53,6 +54,7 @@ interface Props {
   showFilebeatFlyout(): void;
   getAdditionalLinks?: GetAdditionalLinks;
   resultLinks?: ResultLinks;
+  combinedFields: CombinedField[];
 }
 
 interface GlobalState {
@@ -71,6 +73,7 @@ export const ResultsLinks: FC<Props> = ({
   showFilebeatFlyout,
   getAdditionalLinks,
   resultLinks,
+  combinedFields,
 }) => {
   const {
     services: {
@@ -218,6 +221,10 @@ export const ResultsLinks: FC<Props> = ({
     }
   }
 
+  const hasSemanticTextField = useMemo(() => {
+    return combinedFields.some(({ mappingType }) => mappingType === 'semantic_text');
+  }, [combinedFields]);
+
   return (
     <EuiFlexGroup gutterSize="l">
       {createDataView && discoverLink && (
@@ -286,7 +293,7 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      {results.format === FILE_FORMATS.TIKA ? ( // !!!!!! can we detect that a semantic field has been created?
+      {results.format === FILE_FORMATS.TIKA && hasSemanticTextField ? (
         <EuiFlexItem>
           <EuiCard
             hasBorder
