@@ -17,7 +17,7 @@ import type { Observable } from 'rxjs';
 export type EvaluationContext = OpenFeatureEvaluationContext & {
   /**
    * We use multi-context so that we can apply segmentation rules at different levels (`organization`/`kibana`).
-   * * `organization` includes any information that it's common to all the projects/deployments in an organization. An example is the in_trial status.
+   * * `organization` includes any information that is common to all the projects/deployments in an organization. An example is the in_trial status.
    * * The `kibana` context includes all the information that identifies a project/deployment. Examples are version, offering, and has_data.
    * Kind helps us specify which sub-context should receive the new attributes.
    * If no `kind` is provided, it defaults to `kibana`.
