@@ -219,12 +219,16 @@ export class EditRoleMappingPage extends Component<Props, State> {
     );
   };
 
+  private isObject = (record?: any): record is object => {
+    return typeof record === 'object' && record !== null;
+  };
+
   private isRoleMappingAnyRule = (obj: unknown): obj is RoleMappingAnyRule => {
-    return typeof obj === 'object' && obj !== null && 'any' in obj && Array.isArray(obj.any);
+    return this.isObject(obj) && 'any' in obj && Array.isArray(obj.any);
   };
 
   private isRoleMappingAllRule = (obj: unknown): obj is RoleMappingAllRule => {
-    return typeof obj === 'object' && obj !== null && 'all' in obj && Array.isArray(obj.all);
+    return this.isObject(obj) && 'all' in obj && Array.isArray(obj.all);
   };
 
   private checkEmptyAnyAllMappings = (obj: RoleMappingRule) => {
@@ -232,7 +236,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
     while (arrToCheck.length > 0) {
       const currentObj = arrToCheck.pop();
-      if (typeof currentObj === 'object' && currentObj !== null) {
+      if (this.isObject(obj)) {
         for (const key in currentObj) {
           if (Object.hasOwn(currentObj, key)) {
             if (this.isRoleMappingAnyRule(currentObj)) {
