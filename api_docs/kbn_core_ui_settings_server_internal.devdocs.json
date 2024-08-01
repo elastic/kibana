@@ -342,17 +342,17 @@
               "(factory: ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.ConfigDeprecationFactory",
+                "section": "def-server.ConfigDeprecationFactory",
                 "text": "ConfigDeprecationFactory"
               },
               ") => ",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.ConfigDeprecation",
+                "section": "def-server.ConfigDeprecation",
                 "text": "ConfigDeprecation"
               },
               "[]"
@@ -372,9 +372,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.ConfigDeprecationFactory",
+                    "section": "def-server.ConfigDeprecationFactory",
                     "text": "ConfigDeprecationFactory"
                   }
                 ],
