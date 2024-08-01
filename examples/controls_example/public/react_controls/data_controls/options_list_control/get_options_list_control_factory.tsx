@@ -7,8 +7,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 import deepEqual from 'react-fast-compare';
+import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
@@ -19,16 +19,15 @@ import {
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import {
   getSelectionAsFieldType,
   OptionsListSelection,
 } from '../../../../common/options_list/options_list_selections';
+import { isValidSearch } from '../../../../common/options_list/suggestions_searching';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
-import { OptionsListStrings } from './options_list_strings';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
@@ -37,6 +36,7 @@ import {
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
+import { OptionsListStrings } from './options_list_strings';
 import { OptionsListControlApi, OptionsListControlState } from './types';
 
 export const getOptionsListControlFactory = (

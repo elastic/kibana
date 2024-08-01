@@ -18,7 +18,7 @@ import {
 
 import { OptionsListSuccessResponse } from '@kbn/controls-plugin/common/options_list/types';
 
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
+import { isValidSearch } from '../../../../common/options_list/suggestions_searching';
 import { ControlFetchContext } from '../../control_group/control_fetch';
 import { ControlStateManager } from '../../types';
 import { DataControlServices } from '../types';

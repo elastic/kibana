@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isValidSearch } from './is_valid_search';
+import { isValidSearch } from './suggestions_searching';
 
 describe('test validity of search strings', () => {
   describe('number field', () => {
