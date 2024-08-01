@@ -55,12 +55,9 @@ export class JSONParsingDetectionRule {
   private buildPipelineProcessors(): IngestProcessorContainer[] {
     return [
       {
-        json: {
-          if: "ctx.message.startsWith('{')",
-          field: MESSAGE_FIELD,
-          ignore_failure: true,
-          add_to_root: true,
-          add_to_root_conflict_strategy: 'replace',
+        pipeline: {
+          name: 'logs@json-pipeline',
+          ignore_missing_pipeline: true,
         },
       },
     ];

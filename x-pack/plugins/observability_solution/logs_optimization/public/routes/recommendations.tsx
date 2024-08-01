@@ -13,6 +13,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -261,7 +262,7 @@ const JSONParsingRecommendation = ({
   onApplyRecommendation: ApplyRecommendationHandler;
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { usePipelineSimulator } = services;
+  const { http, usePipelineSimulator } = services;
 
   const { simulation, simulate } = usePipelineSimulator();
 
@@ -269,6 +270,10 @@ const JSONParsingRecommendation = ({
     simulation?.docs[0]?.processor_results.at(-1).doc._source,
     null,
     2
+  );
+
+  const jsonPipelineLink = http.basePath.prepend(
+    '/app/management/ingest/ingest_pipelines?pipeline=logs@json-pipeline'
   );
 
   const [pipeline, setPipeline] = useState(() =>
@@ -349,6 +354,31 @@ const JSONParsingRecommendation = ({
                   values: {
                     targetField: <EuiCode>{recommendation.detection.targetField}</EuiCode>,
                     sourceField: <EuiCode>{recommendation.detection.sourceField}</EuiCode>,
+                  },
+                }
+              )}
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText>
+              {i18n.translate(
+                'app_not_found_in_i18nrc.jSONParsingRecommendation.weWillApplyATextLabel',
+                {
+                  defaultMessage:
+                    'We will apply a processor that uses the existing {pipeline} managed pipeline to parse the message. {learnMore}.',
+                  values: {
+                    pipeline: <EuiCode>logs@json-pipeline</EuiCode>,
+                    learnMore: (
+                      <EuiLink
+                        data-test-subj="logsOptimizationJSONParsingRecommendationLearnMoreLink"
+                        href={jsonPipelineLink}
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'app_not_found_in_i18nrc.jSONParsingRecommendation.learnMoreLinkLabel',
+                          { defaultMessage: 'Learn more' }
+                        )}
+                      </EuiLink>
+                    ),
                   },
                 }
               )}
