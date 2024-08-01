@@ -66,8 +66,7 @@ const serviceDashboardsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (resources): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
-    const { context, params, request } = resources;
-    const coreContext = await context.core;
+    const { context, params } = resources;
     const { start, end, checkFor } = params.query;
 
     const { serviceName } = params.path;
@@ -83,10 +82,7 @@ const serviceDashboardsRoute = createApmServerRoute({
     });
 
     if (checkFor === 'entities') {
-      const entitiesESClient = await createEntitiesESClient({
-        request,
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-      });
+      const entitiesESClient = await createEntitiesESClient(resources);
 
       const entitiesWithDashboards = await getEntitiesWithDashboards({
         entitiesESClient,

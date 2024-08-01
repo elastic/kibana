@@ -31,7 +31,8 @@
       "maps",
       "uiActions",
       "logsDataAccess",
-      "entityManager"
+      "entityManager",
+      "entitiesDataAccess"
     ],
     "optionalPlugins": [
       "actions",

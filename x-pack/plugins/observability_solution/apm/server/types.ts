@@ -58,6 +58,10 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
+import {
+  EntitiesDataAccessPluginSetup,
+  EntitiesDataAccessPluginStart,
+} from '@kbn/entities-data-access-plugin/server';
 import { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -90,6 +94,7 @@ export interface APMPluginSetupDependencies {
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
+  entitiesDataAccess: EntitiesDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -117,4 +122,5 @@ export interface APMPluginStartDependencies {
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
+  entitiesDataAccess: EntitiesDataAccessPluginStart;
 }

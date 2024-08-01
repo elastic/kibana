@@ -35,13 +35,9 @@ const servicesEntitiesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<EntityServicesResponse> {
-    const { context, params, request } = resources;
-    const coreContext = await context.core;
+    const { params } = resources;
 
-    const entitiesESClient = await createEntitiesESClient({
-      request,
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-    });
+    const entitiesESClient = await createEntitiesESClient(resources);
 
     const { start, end, kuery, environment } = params.query;
 
