@@ -42,9 +42,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string
   ): Promise<MetricsSourceStatus> => {
-    const [metricIndicesExistSettled, indexFieldsSettled] = await Promise.allSettled([
+    const [metricIndicesExistSettled] = await Promise.allSettled([
       libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-      libs.fields.getFields(requestContext, sourceId, 'METRICS'),
     ]);
 
     /**
@@ -54,16 +53,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       ? metricIndicesExistSettled.value
       : defaultStatus.metricIndicesExist;
     const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(
-      indexFieldsSettled,
       metricIndicesExistSettled
     );
 
     /**
      * Report gracefully handled rejections
      */
-    if (!isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)) {
-      logger.error(indexFieldsSettled.reason);
-    }
     if (!isFulfilled<boolean>(metricIndicesExistSettled)) {
       logger.error(metricIndicesExistSettled.reason);
     }
