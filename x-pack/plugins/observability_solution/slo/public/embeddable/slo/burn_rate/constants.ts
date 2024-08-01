@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './use_event_enrichment';
-export * from './use_investigation_enrichment';
+export const SLO_BURN_RATE_EMBEDDABLE_ID = 'SLO_BURN_RATE_EMBEDDABLE';
+export const ADD_BURN_RATE_ACTION_ID = 'CREATE_SLO_BURN_RATE_EMBEDDABLE';

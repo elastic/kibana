@@ -6,6 +6,11 @@
  */
 
 import { groupBy, isObject } from 'lodash';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { ThreatDetailsRow } from '../../left/components/threat_details_view_enrichment_accordion';
+import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
+import { isValidEventField } from '../../../../../common/search_strategy';
 import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
@@ -20,19 +25,33 @@ import {
   MATCHED_TYPE,
   FEED_NAME,
 } from '../../../../../common/cti/constants';
-import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import type {
-  CtiEnrichment,
-  CtiEnrichmentIdentifiers,
-  EventFields,
-} from '../../../../../common/search_strategy/security_solution/cti';
-import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
-import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import * as i18n from './translations';
 
-export const isInvestigationTimeEnrichment = (type: string | undefined) =>
+const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
+  'xpack.securitySolution.flyout.threatIntelligence.investigationEnrichmentObjectValuesNotRendered',
+  {
+    defaultMessage:
+      'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
+  }
+);
+
+/**
+ *  Retrieves the first element of the given array.
+ *
+ * @param array the array to retrieve a value from
+ * @returns the first element of the array, or undefined if the array is undefined
+ */
+const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = (array) =>
+  array ? array[0] : undefined;
+
+/**
+ * Returns true if the enrichment type is 'investigation_time'
+ */
+export const isInvestigationTimeEnrichment = (type: string | undefined): boolean =>
   type === ENRICHMENT_TYPES.InvestigationTime;
 
+/**
+ * Parses existing enrichments from the timeline data
+ */
 export const parseExistingEnrichments = (
   data: TimelineEventsDetailsItem[]
 ): TimelineEventsDetailsItem[][] => {
@@ -62,12 +81,18 @@ export const parseExistingEnrichments = (
   );
 };
 
+/**
+ * Converts timeline data to a CtiEnrichment object
+ */
 export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): CtiEnrichment =>
   data.reduce<CtiEnrichment>((acc, item) => {
     acc[item.field] = item.originalValue;
     return acc;
   }, {});
 
+/**
+ * Extracts the first value from an enrichment field
+ */
 export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
   getFirstElement(enrichment[field]) as string | undefined;
 
@@ -82,7 +107,18 @@ export const getShimmedIndicatorValue = (enrichment: CtiEnrichment, field: strin
   getEnrichmentValue(enrichment, `threatintel.${field}`) ||
   getEnrichmentValue(enrichment, `threat.${field}`);
 
-export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichmentIdentifiers => ({
+/**
+ * Extracts the identifiers from an enrichment
+ */
+export const getEnrichmentIdentifiers = (
+  enrichment: CtiEnrichment
+): {
+  id: string | undefined;
+  field: string | undefined;
+  value: string | undefined;
+  type: string | undefined;
+  feedName: string | undefined;
+} => ({
   id: getEnrichmentValue(enrichment, MATCHED_ID),
   field: getEnrichmentValue(enrichment, MATCHED_FIELD),
   value: getEnrichmentValue(enrichment, MATCHED_ATOMIC),
@@ -90,6 +126,9 @@ export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichme
   feedName: getShimmedIndicatorValue(enrichment, FEED_NAME),
 });
 
+/**
+ * Returns a string composed of the id and the field for the enrichment
+ */
 const buildEnrichmentId = (enrichment: CtiEnrichment): string => {
   const { id, field } = getEnrichmentIdentifiers(enrichment);
   return `${id}${field}`;
@@ -116,6 +155,9 @@ export const filterDuplicateEnrichments = (enrichments: CtiEnrichment[]): CtiEnr
   );
 };
 
+/**
+ * Returns the fields from the enrichments
+ */
 export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFields =>
   items.reduce<EventFields>((fields, item) => {
     if (isValidEventField(item.field)) {
@@ -127,26 +169,19 @@ export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFi
     return fields;
   }, {});
 
+/**
+ * Returns the first seen date from the enrichment
+ */
 export const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRST_SEEN);
   const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
 
-export interface ThreatDetailsRow {
-  title: string;
-  description: {
-    fieldName: string;
-    value: string;
-  };
-}
-
-interface ThreatDetailItem {
-  title: string;
-  description: { fieldName: string; value: unknown };
-}
-
-export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetailItem[] =>
+/**
+ * Builds the threat details items for the summary table
+ */
+export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetailsRow[] =>
   Object.keys(enrichment)
     .sort()
     .map((field) => {
@@ -156,8 +191,8 @@ export const buildThreatDetailsItems = (enrichment: CtiEnrichment): ThreatDetail
 
       let value = getFirstElement(enrichment[field]);
       if (isObject(value)) {
-        value = i18n.NESTED_OBJECT_VALUES_NOT_RENDERED;
+        value = NESTED_OBJECT_VALUES_NOT_RENDERED;
       }
 
-      return { title, description: { fieldName: field, value } };
+      return { title, description: { fieldName: field, value: value as string } };
     });

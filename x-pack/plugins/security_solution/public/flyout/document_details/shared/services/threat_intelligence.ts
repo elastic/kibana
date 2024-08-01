@@ -7,19 +7,28 @@
 
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { CtiQueries } from '../../../../../common/api/search_strategy';
+import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy';
 import type { EventEnrichmentRequestOptionsInput } from '../../../../../common/api/search_strategy';
-import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy/security_solution/cti';
-import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';
 
 type GetEventEnrichmentProps = Omit<EventEnrichmentRequestOptionsInput, 'factoryQueryType'> & {
+  /**
+   * The data plugin start
+   */
   data: DataPublicPluginStart;
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
   signal: AbortSignal;
 };
 
-export const getEventEnrichment = ({
+/**
+ * API call to retrieve the enrichments for a set of fields
+ */
+const getEventEnrichment = ({
   data,
   defaultIndex,
   eventFields,
@@ -41,7 +50,13 @@ export const getEventEnrichment = ({
     }
   );
 
-export const getEventEnrichmentComplete = (
+/**
+ * Returns the enrichments for a set of fields, excluding the running response
+ */
+const getEventEnrichmentComplete = (
   props: GetEventEnrichmentProps
 ): Observable<CtiEventEnrichmentStrategyResponse> =>
   getEventEnrichment(props).pipe(filter((response) => !isRunningResponse(response)));
+
+export const useEventEnrichmentComplete = () =>
+  useObservable(withOptionalSignal(getEventEnrichmentComplete));

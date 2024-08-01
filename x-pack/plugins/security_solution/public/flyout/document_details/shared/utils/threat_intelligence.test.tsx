@@ -13,7 +13,7 @@ import {
   parseExistingEnrichments,
   getEnrichmentIdentifiers,
   buildThreatDetailsItems,
-} from './helpers';
+} from './threat_intelligence';
 
 describe('parseExistingEnrichments', () => {
   it('returns an empty array if data is empty', () => {

@@ -9,26 +9,67 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty, isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
-
-import { InputsModelId } from '../../../store/inputs/constants';
-import type { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
+import { i18n } from '@kbn/i18n';
+import { useEventEnrichmentComplete } from '../services/threat_intelligence';
+import type {
+  CtiEventEnrichmentStrategyResponse,
+  EventFields,
+} from '../../../../../common/search_strategy';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../../common/cti/constants';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useKibana } from '../../../lib/kibana';
-import { inputsActions } from '../../../store/actions';
-import * as i18n from './translations';
-import { useEventEnrichmentComplete } from '.';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { inputsActions } from '../../../../common/store/actions';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
+
+const INVESTIGATION_ENRICHMENT_REQUEST_ERROR = i18n.translate(
+  'xpack.securitySolution.flyout.threatIntelligence.requestError',
+  {
+    defaultMessage: `An error occurred while requesting threat intelligence`,
+  }
+);
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
 const noEnrichments = { enrichments: [] };
 
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
-export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
+export interface UseInvestigationTimeEnrichmentProps {
+  /**
+   * The event fields to fetch enrichment for
+   */
+  eventFields: EventFields;
+}
+
+export interface UseInvestigationTimeEnrichmentResult {
+  /**
+   * The result of the enrichment
+   */
+  result: CtiEventEnrichmentStrategyResponse | undefined | typeof noEnrichments;
+  /**
+   * The range of the query
+   */
+  range: { from: string; to: string };
+  /**
+   * Function to set the range of the query
+   */
+  setRange: (range: { from: string; to: string }) => void;
+  /**
+   * Whether the enrichment is loading
+   */
+  loading: boolean;
+}
+
+/**
+ * Hook to fetch the enrichment for a set of event fields.
+ * Holds the range of the query.
+ * Returns the result of the enrichment, the range of the query, the function to set it and the loading state.
+ */
+export const useInvestigationTimeEnrichment = ({
+  eventFields,
+}: UseInvestigationTimeEnrichmentProps): UseInvestigationTimeEnrichmentResult => {
   const { addError } = useAppToasts();
   const { data, uiSettings } = useKibana().services;
   const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -67,7 +108,7 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
 
   useEffect(() => {
     if (error) {
-      addError(error, { title: i18n.INVESTIGATION_ENRICHMENT_REQUEST_ERROR });
+      addError(error, { title: INVESTIGATION_ENRICHMENT_REQUEST_ERROR });
     }
   }, [addError, error]);
 

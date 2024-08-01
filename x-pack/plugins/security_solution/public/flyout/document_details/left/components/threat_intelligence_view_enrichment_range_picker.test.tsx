@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-
-import { TestProviders } from '../../../mock';
-import { EnrichmentRangePicker } from './enrichment_range_picker';
+import { TestProviders } from '../../../../common/mock';
+import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
+import {
+  THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID,
+  THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID,
+} from './test_ids';
 
 describe('EnrichmentRangePicker', () => {
   const setRangeSpy = jest.fn();
@@ -27,8 +30,12 @@ describe('EnrichmentRangePicker', () => {
       </TestProviders>
     );
 
-    expect(wrapper.exists('[data-test-subj="enrichment-query-range-picker"]')).toEqual(true);
-    expect(wrapper.exists('[data-test-subj="enrichment-button"]')).toEqual(true);
+    expect(
+      wrapper.exists(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID}"]`)
+    ).toEqual(true);
+    expect(
+      wrapper.exists(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}"]`)
+    ).toEqual(true);
   });
 
   it('invokes setRange', () => {
@@ -42,7 +49,10 @@ describe('EnrichmentRangePicker', () => {
       .find('input.start-picker')
       .first()
       .simulate('change', { target: { value: '08/10/2019 06:29 PM' } });
-    wrapper.find('[data-test-subj="enrichment-button"]').hostNodes().simulate('click');
+    wrapper
+      .find(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}"]`)
+      .hostNodes()
+      .simulate('click');
 
     expect(setRangeSpy).toHaveBeenCalled();
   });

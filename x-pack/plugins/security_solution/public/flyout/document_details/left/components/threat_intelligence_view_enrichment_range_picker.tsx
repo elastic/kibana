@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
@@ -15,19 +15,53 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import * as i18n from './translations';
+import { i18n } from '@kbn/i18n';
+import {
+  THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID,
+  THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID,
+} from './test_ids';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../../common/cti/constants';
 
+const ENRICHMENT_LOOKBACK_START_DATE = i18n.translate(
+  'xpack.securitySolution.flyout.threatIntelligence.enrichmentQueryStartDate',
+  {
+    defaultMessage: 'Start date',
+  }
+);
+
+const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
+  'xpack.securitySolution.flyout.threatIntelligence.enrichmentQueryEndDate',
+  {
+    defaultMessage: 'End date',
+  }
+);
+
+const REFRESH = i18n.translate('xpack.securitySolution.flyout.threatIntelligence.refresh', {
+  defaultMessage: 'Refresh',
+});
+
 export interface RangePickerProps {
+  /**
+   * The range of the picker
+   */
   range: { to: string; from: string };
+  /**
+   * Set the range of the picker
+   */
   setRange: ({ to, from }: { to: string; from: string }) => void;
+  /**
+   * Whether the picker is loading
+   */
   loading: boolean;
 }
 
-export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRange, loading }) => {
+/**
+ * A component that allows the user to select a range of dates for enrichment
+ */
+export const EnrichmentRangePicker = memo(({ range, setRange, loading }: RangePickerProps) => {
   const [startDate, setStartDate] = useState<moment.Moment | null>(
     range.from === DEFAULT_EVENT_ENRICHMENT_FROM ? moment().subtract(30, 'd') : moment(range.from)
   );
@@ -50,7 +84,7 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRa
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiDatePickerRange
-          data-test-subj="enrichment-query-range-picker"
+          data-test-subj={THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID}
           startDateControl={
             <EuiDatePicker
               className="start-picker"
@@ -59,7 +93,7 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRa
               startDate={startDate}
               endDate={endDate}
               isInvalid={!isValid}
-              aria-label={i18n.ENRICHMENT_LOOKBACK_START_DATE}
+              aria-label={ENRICHMENT_LOOKBACK_START_DATE}
               showTimeSelect
             />
           }
@@ -71,7 +105,7 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRa
               startDate={startDate}
               endDate={endDate}
               isInvalid={!isValid}
-              aria-label={i18n.ENRICHMENT_LOOKBACK_END_DATE}
+              aria-label={ENRICHMENT_LOOKBACK_END_DATE}
               showTimeSelect
             />
           }
@@ -82,12 +116,14 @@ export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRa
           iconType={'refresh'}
           onClick={onButtonClick}
           isLoading={loading}
-          data-test-subj={'enrichment-button'}
+          data-test-subj={THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}
           isDisabled={!isValid}
         >
-          {i18n.REFRESH}
+          {REFRESH}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
+
+EnrichmentRangePicker.displayName = 'EnrichmentRangePicker';
