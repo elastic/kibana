@@ -29,6 +29,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
 
 const createDataView = () => {
   const id = 'test-id';
@@ -70,12 +71,13 @@ const defaultParams: OnlySearchSourceRuleParams = {
 };
 
 const logger = loggerMock.create();
+const mockRuleResultService = publicRuleResultServiceMock.create();
 
 describe('fetchSearchSourceQuery', () => {
   const dataViewMock = createDataView();
 
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -477,21 +479,143 @@ describe('fetchSearchSourceQuery', () => {
       // const searchSourceInstance = createSearchSourceMock({}, response);
       searchSourceCommonMock.createLazy.mockResolvedValueOnce(searchSourceInstanceMock);
 
-      await expect(() =>
-        fetchSearchSourceQuery({
-          ruleId: 'abc',
-          params: defaultParams,
-          // @ts-expect-error
-          services: {
-            logger,
-            searchSourceClient: searchSourceCommonMock,
+      await fetchSearchSourceQuery({
+        ruleId: 'abc',
+        params: defaultParams,
+        services: {
+          logger,
+          searchSourceClient: searchSourceCommonMock,
+          ruleResultService: mockRuleResultService,
+          share: {
+            url: {
+              // @ts-expect-error
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
           },
-          spacePrefix: '',
-          dateStart: new Date().toISOString(),
-          dateEnd: new Date().toISOString(),
-        })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting."`
+          dataViews: {
+            ...dataViewPluginMocks.createStartContract(),
+            create: async (spec: DataViewSpec) =>
+              new DataView({ spec, fieldFormats: fieldFormatsMock }),
+          },
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+        `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+      );
+    });
+
+    it('should bubble up CCS errors stored in the _clusters field of the search result', async () => {
+      const response = {
+        took: 6,
+        timed_out: false,
+        num_reduce_phases: 0,
+        _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+        _clusters: {
+          total: 1,
+          successful: 0,
+          skipped: 1,
+          running: 0,
+          partial: 0,
+          failed: 0,
+          details: {
+            test: {
+              status: 'skipped',
+              indices: '.kibana-event-log*',
+              timed_out: false,
+              failures: [
+                {
+                  shard: -1,
+                  index: null,
+                  reason: {
+                    type: 'search_phase_execution_exception',
+                    reason: 'all shards failed',
+                    phase: 'query',
+                    grouped: true,
+                    failed_shards: [
+                      {
+                        shard: 0,
+                        index: 'test:.ds-.kibana-event-log-ds-2024.07.31-000001',
+                        node: 'X1aMu4BpQR-7PHi-bEI8Fw',
+                        reason: {
+                          type: 'illegal_argument_exception',
+                          reason:
+                            "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                        },
+                      },
+                    ],
+                    caused_by: {
+                      type: '',
+                      reason:
+                        "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                      caused_by: {
+                        type: 'illegal_argument_exception',
+                        reason:
+                          "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+        hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+      };
+
+      (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(dataViewMock)
+      );
+      (searchSourceInstanceMock.setField as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(undefined)
+      );
+      (searchSourceInstanceMock.createChild as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(searchSourceInstanceMock)
+      );
+      (searchSourceInstanceMock.fetch as jest.Mock).mockImplementationOnce(
+        jest.fn().mockReturnValue(response)
+      );
+
+      // const searchSourceInstance = createSearchSourceMock({}, response);
+      searchSourceCommonMock.createLazy.mockResolvedValueOnce(searchSourceInstanceMock);
+
+      await fetchSearchSourceQuery({
+        ruleId: 'abc',
+        params: defaultParams,
+        services: {
+          logger,
+          searchSourceClient: searchSourceCommonMock,
+          ruleResultService: mockRuleResultService,
+          share: {
+            url: {
+              // @ts-expect-error
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          },
+          dataViews: {
+            ...dataViewPluginMocks.createStartContract(),
+            create: async (spec: DataViewSpec) =>
+              new DataView({ spec, fieldFormats: fieldFormatsMock }),
+          },
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
+        `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
       );
     });
   });

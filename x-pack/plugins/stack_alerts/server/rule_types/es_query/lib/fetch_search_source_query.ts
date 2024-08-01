@@ -24,9 +24,10 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
-import { parseShardFailures } from '../util';
+import { checkForShardFailures } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -39,6 +40,7 @@ export interface FetchSearchSourceQueryOpts {
     searchSourceClient: ISearchStartSearchSource;
     share: SharePluginStart;
     dataViews: DataViewsContract;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
@@ -54,7 +56,7 @@ export async function fetchSearchSourceQuery({
   dateStart,
   dateEnd,
 }: FetchSearchSourceQueryOpts) {
-  const { logger, searchSourceClient } = services;
+  const { logger, searchSourceClient, ruleResultService } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
   const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
@@ -80,9 +82,12 @@ export async function fetchSearchSourceQuery({
 
   logger.info(() => ` search source query rule ${ruleId} result - ${JSON.stringify(searchResult)}`);
 
-  // result against CCS indices will return success response with errors nested within the _shards field
-  // look for these errors and bubble them up
-  parseShardFailures(searchResult);
+  // result against CCS indices will return success response with errors nested within
+  // the _shards or _clusters field; look for these errors and bubble them up
+  const anyShardFailures = checkForShardFailures(searchResult);
+  if (anyShardFailures && ruleResultService) {
+    ruleResultService.addLastRunWarning(anyShardFailures);
+  }
 
   const link = await generateLink(
     initialSearchSource,

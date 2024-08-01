@@ -7,7 +7,7 @@
 
 import { OnlyEsQueryRuleParams } from './types';
 import { Comparator } from '../../../common/comparator_types';
-import { getParsedQuery, parseShardFailures } from './util';
+import { getParsedQuery, checkForShardFailures } from './util';
 
 describe('es_query utils', () => {
   const defaultProps = {
@@ -50,9 +50,9 @@ describe('es_query utils', () => {
   });
 
   describe('parseShardFailures', () => {
-    it('should throw error if any failures in the shard response', () => {
-      expect(() =>
-        parseShardFailures({
+    it('should return error message if any failures in the shard response', () => {
+      expect(
+        checkForShardFailures({
           took: 16,
           timed_out: false,
           _shards: {
@@ -73,23 +73,17 @@ describe('es_query utils', () => {
               },
             ],
           },
-          hits: {
-            total: {
-              value: 0,
-              relation: 'eq',
-            },
-            max_score: 0,
-            hits: [],
-          },
+          _clusters: { total: 1, successful: 1, running: 0, partial: 0, failed: 0, skipped: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
         })
-      ).toThrow(
+      ).toEqual(
         `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
       );
     });
 
-    it('should throw error with default error message if malformed error', () => {
-      expect(() =>
-        parseShardFailures({
+    it('should return default error message if malformed error', () => {
+      expect(
+        checkForShardFailures({
           took: 16,
           timed_out: false,
           _shards: {
@@ -106,19 +100,13 @@ describe('es_query utils', () => {
               },
             ],
           },
-          hits: {
-            total: {
-              value: 0,
-              relation: 'eq',
-            },
-            max_score: 0,
-            hits: [],
-          },
+          _clusters: { total: 1, successful: 1, running: 0, partial: 0, failed: 0, skipped: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
         })
-      ).toThrow(`Search failed due shard exception.`);
+      ).toEqual(`Search returned partial results due to shard failures.`);
 
-      expect(() =>
-        parseShardFailures({
+      expect(
+        checkForShardFailures({
           took: 16,
           timed_out: false,
           _shards: { total: 51, successful: 48, skipped: 48, failed: 3, failures: [] },
@@ -131,15 +119,135 @@ describe('es_query utils', () => {
             hits: [],
           },
         })
-      ).toThrow(`Search failed due shard exception.`);
+      ).toEqual(`Search returned partial results due to shard failures.`);
     });
 
-    it('should not throw error if no failures', () => {
+    it('should return error if any skipped clusters with failures', () => {
       expect(
-        parseShardFailures({
+        checkForShardFailures({
+          took: 6,
+          timed_out: false,
+          num_reduce_phases: 0,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: {
+            total: 1,
+            successful: 0,
+            skipped: 1,
+            running: 0,
+            partial: 0,
+            failed: 0,
+            details: {
+              test: {
+                status: 'skipped',
+                indices: '.kibana-event-log*',
+                timed_out: false,
+                failures: [
+                  {
+                    shard: -1,
+                    // @ts-expect-error
+                    index: null,
+                    reason: {
+                      type: 'search_phase_execution_exception',
+                      reason: 'all shards failed',
+                      phase: 'query',
+                      grouped: true,
+                      failed_shards: [
+                        {
+                          shard: 0,
+                          index: 'test:.ds-.kibana-event-log-ds-2024.07.31-000001',
+                          node: 'X1aMu4BpQR-7PHi-bEI8Fw',
+                          reason: {
+                            type: 'illegal_argument_exception',
+                            reason:
+                              "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                          },
+                        },
+                      ],
+                      caused_by: {
+                        type: '',
+                        reason:
+                          "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                        caused_by: {
+                          type: 'illegal_argument_exception',
+                          reason:
+                            "Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.",
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+        })
+      ).toEqual(
+        `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+      );
+    });
+
+    it('should return default error message if malformed skipped cluster error', () => {
+      expect(
+        checkForShardFailures({
+          took: 6,
+          timed_out: false,
+          num_reduce_phases: 0,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: {
+            total: 1,
+            successful: 0,
+            skipped: 1,
+            running: 0,
+            partial: 0,
+            failed: 0,
+            details: {
+              test: {
+                status: 'skipped',
+                indices: '.kibana-event-log*',
+                timed_out: false,
+                failures: [],
+              },
+            },
+          },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+        })
+      ).toEqual(`Search returned partial results due to skipped cluster errors.`);
+
+      expect(
+        checkForShardFailures({
+          took: 6,
+          timed_out: false,
+          num_reduce_phases: 0,
+          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          _clusters: {
+            total: 1,
+            successful: 0,
+            skipped: 1,
+            running: 0,
+            partial: 0,
+            failed: 0,
+            details: {
+              test: {
+                status: 'skipped',
+                indices: '.kibana-event-log*',
+                timed_out: false,
+                // @ts-expect-error
+                failures: [{ shard: -1 }],
+              },
+            },
+          },
+          hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
+        })
+      ).toEqual(`Search returned partial results due to skipped cluster errors.`);
+    });
+
+    it('should return undefined if no failures', () => {
+      expect(
+        checkForShardFailures({
           took: 16,
           timed_out: false,
           _shards: { total: 51, successful: 51, skipped: 51, failed: 0, failures: [] },
+          _clusters: { total: 1, successful: 1, running: 0, partial: 0, failed: 0, skipped: 0 },
           hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
         })
       ).toBeUndefined();
