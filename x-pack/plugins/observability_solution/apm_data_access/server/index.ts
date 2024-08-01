@@ -86,6 +86,11 @@ export type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
   ApmDataAccessServices,
+  ApmDataAccessServicesParams,
+  APMEventClientConfig,
+  APMEventESSearchRequest,
+  APMLogEventESSearchRequest,
+  DocumentSourcesRequest,
 } from './types';
 
 export { APMEventClient } from './lib/helpers';

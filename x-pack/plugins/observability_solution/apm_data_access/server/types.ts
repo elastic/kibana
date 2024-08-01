@@ -14,7 +14,15 @@ export interface ApmDataAccessPluginSetup {
   getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   getServices: typeof getServices;
 }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApmDataAccessPluginStart {}
 
 export type ApmDataAccessServices = ReturnType<typeof getServices>;
+export type { ApmDataAccessServicesParams } from './services/get_services';
+export type { DocumentSourcesRequest } from './services/get_document_sources';
+export type {
+  APMEventClientConfig,
+  APMEventESSearchRequest,
+  APMLogEventESSearchRequest,
+} from './lib/helpers';

@@ -18,7 +18,7 @@ const QUERY_INDEX = {
   DURATION_SUMMARY_NOT_SUPPORTED: 1,
 } as const;
 
-export interface DocumentSorcesRequest {
+export interface DocumentSourcesRequest {
   apmEventClient: APMEventClient;
   start: number;
   end: number;

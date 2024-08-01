@@ -20,7 +20,7 @@ import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 
-export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/helpers';
+export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/utils';
 
 export async function getHasTransactionsEvents({
   start,

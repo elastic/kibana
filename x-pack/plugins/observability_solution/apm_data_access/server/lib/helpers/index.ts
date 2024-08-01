@@ -7,7 +7,12 @@
 
 export { getDocumentTypeFilterForServiceDestinationStatistics } from './spans/get_is_using_service_destination_metrics';
 export { getBackwardCompatibleDocumentTypeFilter } from './transactions';
-export { APMEventClient } from './create_es_client/create_apm_event_client';
+export {
+  APMEventClient,
+  type APMEventESSearchRequest,
+  type APMEventClientConfig,
+  type APMLogEventESSearchRequest,
+} from './create_es_client/create_apm_event_client';
 
 export {
   callAsyncWithDebug,

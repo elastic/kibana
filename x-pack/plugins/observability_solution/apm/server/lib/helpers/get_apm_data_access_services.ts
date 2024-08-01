@@ -14,9 +14,8 @@ export async function getApmDataAccessServices({
 }: {
   apmEventClient: APMEventClient;
 } & Pick<MinimalAPMRouteHandlerResources, 'plugins'>): Promise<ApmDataAccessServices> {
-  const apmDataAccessPlugin = await plugins.apmDataAccess;
-
-  return apmDataAccessPlugin.setup.getServices({
+  const { apmDataAccess } = plugins;
+  return apmDataAccess.setup.getServices({
     apmEventClient,
   });
 }

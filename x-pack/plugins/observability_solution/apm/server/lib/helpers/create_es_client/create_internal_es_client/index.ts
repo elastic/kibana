@@ -14,7 +14,7 @@ import {
   getDebugBody,
   getDebugTitle,
   cancelEsRequestOnAbort,
-} from '@kbn/apm-data-access-plugin/server/helpers';
+} from '@kbn/apm-data-access-plugin/server/utils';
 import {
   type APMRouteHandlerResources,
   inspectableEsQueriesMap,

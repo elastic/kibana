@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import type { ApmDocumentType } from './document_type';
+import type { RollupInterval } from './rollup';
 
 type AnyApmDocumentType =
   | ApmDocumentType.ServiceTransactionMetric
