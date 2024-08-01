@@ -61,6 +61,8 @@ then click image:images/stackManagement-indexPatterns-pinRuntimeField-7.15.png[I
 
 . Click *Create field*.
 
+WARNING: Runtime fields created against a data view are not applied to the underlying index mapping in Elasticsearch.
+
 [float]
 [[runtime-field-examples]]
 ==== Runtime field examples
