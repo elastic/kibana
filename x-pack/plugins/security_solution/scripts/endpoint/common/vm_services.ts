@@ -239,7 +239,7 @@ const createVagrantVm = async ({
 
   try {
     const vagrantUpResponse = (
-      await execa.command(`vagrant up`, {
+      await execa.command(`vagrant up --debug`, {
         env: {
           VAGRANT_DISABLE_VBOXSYMLINKCREATE: '1',
           VAGRANT_CWD,
