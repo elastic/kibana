@@ -44,7 +44,19 @@ export interface FindFileStructureResponse {
   };
   sample_start: string;
   num_messages_analyzed: number;
-  mappings: Mappings;
+  mappings: {
+    properties: {
+      [fieldName: string]: {
+        // including all possible Elasticsearch types
+        // since find_file_structure API can be enhanced to include new fields in the future
+        type: Exclude<
+          ES_FIELD_TYPES,
+          ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
+        >;
+        format?: string;
+      };
+    };
+  };
   ingest_pipeline: IngestPipeline;
   quote: string;
   delimiter: string;
@@ -129,20 +141,6 @@ export interface IngestPipeline {
   processors: any[];
   isManaged?: boolean;
   name?: string;
-}
-
-export interface Mappings {
-  properties: {
-    [fieldName: string]: {
-      // including all possible Elasticsearch types
-      // since find_file_structure API can be enhanced to include new fields in the future
-      type: Exclude<
-        ES_FIELD_TYPES,
-        ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
-      >;
-      format?: string;
-    };
-  };
 }
 
 export interface PreviewTikaResponse {
