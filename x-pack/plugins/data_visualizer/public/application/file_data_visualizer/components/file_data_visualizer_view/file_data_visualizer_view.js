@@ -31,6 +31,7 @@ import {
 import { analyzeTikaFile } from './tika_analyzer';
 
 import { MODE } from './constants';
+import { FileSizeChecker } from './file_size_check';
 import { isTikaType } from '../../../../../common/utils/tika_utils';
 
 export class FileDataVisualizerView extends Component {
@@ -43,7 +44,6 @@ export class FileDataVisualizerView extends Component {
       fileContents: '',
       data: [],
       base64Data: '',
-      fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
       serverError: null,
@@ -63,8 +63,6 @@ export class FileDataVisualizerView extends Component {
     this.originalSettings = {
       linesToSample: DEFAULT_LINES_TO_SAMPLE,
     };
-
-    this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
   }
 
   async componentDidMount() {
@@ -88,7 +86,6 @@ export class FileDataVisualizerView extends Component {
         fileName: '',
         fileContents: '',
         data: [],
-        fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
         fileCouldNotBeReadPermissionError: false,
@@ -105,7 +102,8 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size <= this.maxFileUploadBytes) {
+    this.fileSizeChecker = new FileSizeChecker(this.props.fileUpload, file);
+    if (this.fileSizeChecker.check()) {
       try {
         const { data, fileContents } = await readFile(file);
         console.log(file.type);
@@ -113,7 +111,6 @@ export class FileDataVisualizerView extends Component {
           this.setState({
             data,
             fileName: file.name,
-            fileSize: file.size,
           });
 
           await this.analyzeTika(data);
@@ -122,7 +119,6 @@ export class FileDataVisualizerView extends Component {
             data,
             fileContents,
             fileName: file.name,
-            fileSize: file.size,
           });
           await this.analyzeFile(fileContents);
         }
@@ -139,7 +135,6 @@ export class FileDataVisualizerView extends Component {
         loading: false,
         fileTooLarge: true,
         fileName: file.name,
-        fileSize: file.size,
       });
     }
   }
@@ -286,7 +281,6 @@ export class FileDataVisualizerView extends Component {
       fileContents,
       data,
       fileName,
-      fileSize,
       fileTooLarge,
       fileCouldNotBeRead,
       serverError,
@@ -315,9 +309,7 @@ export class FileDataVisualizerView extends Component {
 
             {loading && <LoadingPanel />}
 
-            {fileTooLarge && (
-              <FileTooLarge fileSize={fileSize} maxFileSize={this.maxFileUploadBytes} />
-            )}
+            {fileTooLarge && <FileTooLarge fileSizeChecker={this.fileSizeChecker} />}
 
             {fileCouldNotBeRead && loading === false && (
               <>

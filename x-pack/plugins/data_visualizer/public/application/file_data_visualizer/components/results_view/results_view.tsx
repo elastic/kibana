@@ -125,12 +125,14 @@ export const ResultsView: FC<Props> = ({
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => showExplanationFlyout()} disabled={disableButtons}>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.resultsView.analysisExplanationButtonLabel"
-                  defaultMessage="Analysis explanation"
-                />
-              </EuiButtonEmpty>
+              {results.format !== FILE_FORMATS.TIKA ? (
+                <EuiButtonEmpty onClick={() => showExplanationFlyout()} disabled={disableButtons}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.resultsView.analysisExplanationButtonLabel"
+                    defaultMessage="Analysis explanation"
+                  />
+                </EuiButtonEmpty>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

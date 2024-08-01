@@ -13,7 +13,12 @@ import type {
   FindFileStructureResponse,
   PreviewTikaResponse,
 } from '../../common/types';
-import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
+import type {
+  getMaxBytes,
+  getMaxBytesFormatted,
+  getMaxTikaBytes,
+  getMaxTikaBytesFormatted,
+} from '../importer/get_max_bytes';
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
@@ -23,6 +28,8 @@ export interface FileUploadStartApi {
   importerFactory: typeof importerFactory;
   getMaxBytes: typeof getMaxBytes;
   getMaxBytesFormatted: typeof getMaxBytesFormatted;
+  getMaxTikaBytes: typeof getMaxTikaBytes;
+  getMaxTikaBytesFormatted: typeof getMaxTikaBytesFormatted;
   hasImportPermission: typeof hasImportPermission;
   checkIndexExists: typeof checkIndexExists;
   getTimeFieldRange: typeof getTimeFieldRange;
