@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import execa from 'execa';
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import * as path from 'path';
 import { CliOptions } from '../types';
 import { KibanaAPIClient } from './kibana_api_client';
@@ -66,7 +65,7 @@ export async function enrollAgent(
     }
   });
 
-  execa(
+  spawnSync(
     'docker',
     [
       'run',
