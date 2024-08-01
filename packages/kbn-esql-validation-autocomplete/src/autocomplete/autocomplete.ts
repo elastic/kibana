@@ -1248,10 +1248,10 @@ async function getFunctionArgsSuggestions(
   );
 
   if (suggestedConstants.length) {
-    return buildValueDefinitions(suggestedConstants).map((suggestion) => ({
-      ...suggestion,
-      text: addCommaIf(shouldAddComma, suggestion.text),
-    }));
+    return buildValueDefinitions(suggestedConstants, {
+      addComma: hasMoreMandatoryArgs,
+      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+    });
   }
 
   const suggestions: SuggestionRawDefinition[] = [];

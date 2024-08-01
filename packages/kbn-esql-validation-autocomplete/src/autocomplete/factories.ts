@@ -230,17 +230,18 @@ export const buildConstantsDefinitions = (
 
 export const buildValueDefinitions = (
   values: string[],
-  detail?: string
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] =>
   values.map((value) => ({
     label: `"${value}"`,
-    text: `"${value}"`,
-    detail:
-      detail ??
-      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
-        defaultMessage: 'Literal value',
-      }),
+    text: `"${value}"${options?.addComma ? ',' : ''}${
+      options?.advanceCursorAndOpenSuggestions ? ' ' : ''
+    }`,
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+      defaultMessage: 'Literal value',
+    }),
     kind: 'Value',
+    command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
