@@ -9,4 +9,3 @@
 export * from './common/components';
 export * from './common/test_ids';
 export { HostRightPanel } from './panels';
-export * from './discover_flyout';
