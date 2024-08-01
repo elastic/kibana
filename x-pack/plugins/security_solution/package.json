@@ -31,6 +31,7 @@
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
     "openapi:bundle:detections": "node scripts/openapi/bundle_detections",
+    "openapi:bundle:timeline": "node scripts/openapi/bundle_timeline",
     "openapi:bundle:entity-analytics": "node scripts/openapi/bundle_entity_analytics",
     "openapi:bundle:endpoint-management": "node scripts/openapi/bundle_endpoint_management"
   }
