@@ -10,12 +10,16 @@ import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { LogsOverviewAIAssistant } from './logs_overview_ai_assistant';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
+
+export type LogsOverviewProps = DocViewRenderProps & {
+  renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+};
 
 export function LogsOverview({
   columns,
@@ -24,9 +28,11 @@ export function LogsOverview({
   filter,
   onAddColumn,
   onRemoveColumn,
-}: DocViewRenderProps) {
+  renderAIAssistant,
+}: LogsOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
+  const LogsOverviewAIAssistant = renderAIAssistant;
 
   return (
     <FieldActionsProvider
@@ -40,7 +46,7 @@ export function LogsOverview({
       <EuiHorizontalRule margin="xs" />
       <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
       <LogsOverviewDegradedFields rawDoc={hit.raw} />
-      <LogsOverviewAIAssistant doc={hit} />
+      {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
     </FieldActionsProvider>
   );
 }

@@ -87,6 +87,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
             ? undefined
             : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
               systemPromptSelectorOption[0]?.label;
+
         onSystemPromptSelectionChange(newSystemPrompt);
       },
       [onSystemPromptSelectionChange, resetSettings, systemPrompts]

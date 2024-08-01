@@ -8,13 +8,15 @@
 
 import React, { useEffect } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
@@ -63,23 +65,22 @@ export const getSearchControlFactory = ({
         (field.spec.esTypes ?? []).includes('text')
       );
     },
-    CustomOptionsComponent: ({ stateManager }) => {
-      const searchTechnique = useStateFromPublishingSubject(stateManager.searchTechnique);
-
+    CustomOptionsComponent: ({ currentState, updateState }) => {
+      const searchTechnique = currentState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE;
       return (
         <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
           <EuiRadioGroup
             options={allSearchOptions}
-            idSelected={searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE}
+            idSelected={searchTechnique}
             onChange={(id) => {
               const newSearchTechnique = id as SearchControlTechniques;
-              stateManager.searchTechnique.next(newSearchTechnique);
+              updateState({ searchTechnique: newSearchTechnique });
             }}
           />
         </EuiFormRow>
       );
     },
-    buildControl: (initialState, buildApi, uuid, parentApi) => {
+    buildControl: async (initialState, buildApi, uuid, parentApi) => {
       const searchString = new BehaviorSubject<string | undefined>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
@@ -177,10 +178,14 @@ export const getSearchControlFactory = ({
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(distinctUntilChanged(deepEqual))
+        .pipe(skip(1))
         .subscribe(() => {
           searchString.next(undefined);
         });
+
+      if (initialState.searchString?.length) {
+        await dataControl.untilFiltersInitialized();
+      }
 
       return {
         api,
@@ -188,7 +193,7 @@ export const getSearchControlFactory = ({
          * The `controlPanelClassNamess` prop is necessary because it contains the class names from the generic
          * ControlPanel that are necessary for styling
          */
-        Component: (controlPanelClassNames) => {
+        Component: ({ className: controlPanelClassName }) => {
           const currentSearch = useStateFromPublishingSubject(searchString);
 
           useEffect(() => {
@@ -202,7 +207,10 @@ export const getSearchControlFactory = ({
 
           return (
             <EuiFieldSearch
-              {...controlPanelClassNames}
+              className={controlPanelClassName}
+              css={css`
+                height: calc(${euiThemeVars.euiButtonHeight} - 2px) !important;
+              `}
               incremental={true}
               isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}

@@ -15,12 +15,17 @@ import {
   DataSourceProfileProviderParams,
 } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
+import { getRowIndicatorProvider } from './accessors';
+import { getCellRenderers } from './accessors';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
-  profile: {},
+  profile: {
+    getRowIndicatorProvider,
+    getCellRenderers,
+  },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 

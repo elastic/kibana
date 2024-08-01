@@ -85,7 +85,7 @@ export interface ControlFactory<
     ) => ControlApi,
     uuid: string,
     parentApi: ControlGroupApi
-  ) => { api: ControlApi; Component: React.FC<{}> };
+  ) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
 
 export type ControlStateManager<State extends object = object> = {
@@ -96,5 +96,6 @@ export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
   PropsType extends {} = { className: string }
 > {
+  uuid: string;
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }

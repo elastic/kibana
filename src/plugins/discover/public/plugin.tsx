@@ -20,13 +20,14 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
-import { SearchEmbeddableFactory } from './embeddable';
-import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
+import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
@@ -58,6 +59,7 @@ import {
   RootProfileService,
 } from './context_awareness';
 import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
+import { deserializeState } from './embeddable/utils/serialization_utils';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -368,7 +370,40 @@ export class DiscoverPlugin
       return this.getDiscoverServices(coreStart, deps, profilesManager);
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
-    plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+    plugins.embeddable.registerReactEmbeddableSavedObject<SavedSearchAttributes>({
+      onAdd: async (container, savedObject) => {
+        const services = await getDiscoverServicesInternal();
+        const initialState = await deserializeState({
+          serializedState: {
+            rawState: { savedObjectId: savedObject.id },
+            references: savedObject.references,
+          },
+          discoverServices: services,
+        });
+        container.addNewPanel({
+          panelType: SEARCH_EMBEDDABLE_TYPE,
+          initialState,
+        });
+      },
+      embeddableType: SEARCH_EMBEDDABLE_TYPE,
+      savedObjectType: SavedSearchType,
+      savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
+        defaultMessage: 'Saved search',
+      }),
+      getIconForSavedObject: () => 'discoverApp',
+    });
+
+    plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+      const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
+        getStartServices(),
+        getDiscoverServicesInternal(),
+        import('./embeddable/get_search_embeddable_factory'),
+      ]);
+
+      return getSearchEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
+    });
   }
 }

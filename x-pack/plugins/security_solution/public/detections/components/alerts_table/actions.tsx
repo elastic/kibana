@@ -499,6 +499,7 @@ const createThresholdTimeline = async (
       notes: null,
       timeline: {
         ...timelineDefaults,
+        excludedRowRendererIds: [],
         columns: templateValues.columns ?? timelineDefaults.columns,
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
@@ -655,6 +656,7 @@ const createNewTermsTimeline = async (
       timeline: {
         ...timelineDefaults,
         columns: templateValues.columns ?? timelineDefaults.columns,
+        excludedRowRendererIds: [],
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
         dataProviders: templateValues.dataProviders ?? dataProviders,
@@ -824,6 +826,7 @@ const createSuppressedTimeline = async (
       notes: null,
       timeline: {
         ...timelineDefaults,
+        excludedRowRendererIds: [],
         columns: templateValues.columns ?? timelineDefaults.columns,
         description: `_id: ${alertDoc._id}`,
         filters: allFilters,
@@ -906,6 +909,7 @@ export const sendBulkEventsToTimelineAction = async (
     notes: null,
     timeline: {
       ...timelineDefaults,
+      excludedRowRendererIds: [],
       dataProviders,
       id: TimelineId.active,
       indexNames: [],
@@ -1050,6 +1054,7 @@ export const sendAlertToTimelineAction = async ({
             from,
             timeline: {
               ...timeline,
+              excludedRowRendererIds: [],
               title: '',
               timelineType: TimelineType.default,
               templateTimelineId: null,
@@ -1126,6 +1131,7 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
+        excludedRowRendererIds: [],
         dataProviders,
         id: TimelineId.active,
         indexNames: [],

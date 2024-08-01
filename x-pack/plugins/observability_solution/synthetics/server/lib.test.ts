@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { UptimeEsClient } from './lib';
+import { SyntheticsEsClient } from './lib';
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-describe('UptimeEsClient', () => {
-  let uptimeEsClient: UptimeEsClient;
+describe('SyntheticsEsClient', () => {
+  let syntheticsEsClient: SyntheticsEsClient;
   const savedObjectsClient = savedObjectsClientMock.create();
   const esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
 
   beforeEach(() => {
-    uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient);
+    syntheticsEsClient = new SyntheticsEsClient(savedObjectsClient, esClient);
   });
 
   afterEach(() => {
@@ -32,7 +32,7 @@ describe('UptimeEsClient', () => {
         },
       };
 
-      const result = await uptimeEsClient.search({
+      const result = await syntheticsEsClient.search({
         body: {
           query: {
             match_all: {},
@@ -69,7 +69,7 @@ describe('UptimeEsClient', () => {
       const mockError = new Error('Search error');
       esClient.search.mockRejectedValueOnce(mockError);
 
-      await expect(uptimeEsClient.search(mockSearchParams)).rejects.toThrow(mockError);
+      await expect(syntheticsEsClient.search(mockSearchParams)).rejects.toThrow(mockError);
       expect(esClient.search).toHaveBeenCalledWith(
         {
           index: 'synthetics-*',
@@ -86,7 +86,7 @@ describe('UptimeEsClient', () => {
         index: 'example',
       };
 
-      const result = await uptimeEsClient.count(mockCountParams);
+      const result = await syntheticsEsClient.count(mockCountParams);
 
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
       expect(result).toEqual({
@@ -110,30 +110,30 @@ describe('UptimeEsClient', () => {
       const mockError = new Error('Count error');
       esClient.count.mockRejectedValueOnce(mockError);
 
-      await expect(uptimeEsClient.count(mockCountParams)).rejects.toThrow(mockError);
+      await expect(syntheticsEsClient.count(mockCountParams)).rejects.toThrow(mockError);
       expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
     });
   });
 
   describe('getInspectEnabled', () => {
     it('should return false if uiSettings is not available', async () => {
-      const result = await uptimeEsClient.getInspectEnabled();
+      const result = await syntheticsEsClient.getInspectEnabled();
 
       expect(result).toBe(false);
     });
 
     it('should return the value from uiSettings if available', async () => {
       const mockUiSettings = uiSettingsServiceMock.createClient();
-      uptimeEsClient.uiSettings = {
+      syntheticsEsClient.uiSettings = {
         client: mockUiSettings,
       } as any;
 
       // @ts-expect-error
       mockUiSettings.get.mockReturnValue(true);
 
-      await uptimeEsClient.getInspectEnabled();
+      await syntheticsEsClient.getInspectEnabled();
 
-      expect(uptimeEsClient.isInspectorEnabled).toBe(true);
+      expect(syntheticsEsClient.isInspectorEnabled).toBe(true);
       expect(mockUiSettings.get).toHaveBeenCalledWith('observability:enableInspectEsQueries');
     });
   });

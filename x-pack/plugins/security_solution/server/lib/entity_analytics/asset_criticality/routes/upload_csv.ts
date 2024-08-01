@@ -9,7 +9,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/api/entity_analytics';
+import type { UploadAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream } from '../../../../types';
@@ -106,7 +106,7 @@ export const assetCriticalityPublicCSVUploadRoute = (
           );
 
           // type assignment here to ensure that the response body stays in sync with the API schema
-          const resBody: AssetCriticalityBulkUploadResponse = { errors, stats };
+          const resBody: UploadAssetCriticalityRecordsResponse = { errors, stats };
 
           const [eventType, event] = createAssetCriticalityProcessedFileEvent({
             startTime: start,

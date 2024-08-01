@@ -52,7 +52,7 @@ export const getInventoryModelAggregations = (
     Partial<
       Record<
         InfraAssetMetricType,
-        typeof inventoryModel.metrics.snapshot[keyof typeof inventoryModel.metrics.snapshot]
+        (typeof inventoryModel.metrics.snapshot)[keyof typeof inventoryModel.metrics.snapshot]
       >
     >
   >(

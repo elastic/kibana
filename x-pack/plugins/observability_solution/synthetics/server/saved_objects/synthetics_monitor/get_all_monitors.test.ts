@@ -23,7 +23,7 @@ describe('processMonitors', () => {
 
   const serverMock: SyntheticsServerSetup = {
     logger,
-    uptimeEsClient: mockEsClient,
+    syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
     config: {
       service: {

@@ -8,13 +8,13 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { DeleteAssetCriticalityRecordRequestQuery } from '../../../../../common/api/entity_analytics';
 import {
   ASSET_CRITICALITY_PUBLIC_URL,
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
-import { DeleteAssetCriticalityRecord } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -38,7 +38,7 @@ export const assetCriticalityPublicDeleteRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecord),
+            query: buildRouteValidationWithZod(DeleteAssetCriticalityRecordRequestQuery),
           },
         },
       },

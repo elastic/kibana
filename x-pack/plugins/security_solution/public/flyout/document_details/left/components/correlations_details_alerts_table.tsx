@@ -15,7 +15,6 @@ import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID } from './test_ids';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
@@ -81,7 +80,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -133,7 +132,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
                 <AlertPreviewButton
                   id={row.id as string}
                   indexName={row.index as string}
-                  data-test-subj={CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID}
+                  data-test-subj={`${dataTestSubj}AlertPreviewButton`}
                   scopeId={scopeId}
                 />
               ),
@@ -210,7 +209,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [isPreviewEnabled, scopeId]
+    [isPreviewEnabled, scopeId, dataTestSubj]
   );
 
   return (

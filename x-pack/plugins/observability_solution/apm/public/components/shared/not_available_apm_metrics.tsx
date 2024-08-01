@@ -6,13 +6,20 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PopoverBadge } from './popover_badge';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../context/kibana_context/use_kibana';
+import { ApmPluginStartDeps, ApmServices } from '../../plugin';
+import { AddApmData } from './add_data_buttons/buttons';
 
-export const NotAvailableApmMetrics = () => {
-  const { core } = useApmPluginContext();
+export function NotAvailableApmMetrics() {
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+
+  function handleClick() {
+    services.telemetry.reportEntityInventoryAddData({
+      view: 'add_apm_n/a',
+    });
+  }
   return (
     <PopoverBadge
       title={i18n.translate('xpack.apm.servicesTable.notAvailableApmMetrics.title', {
@@ -22,16 +29,7 @@ export const NotAvailableApmMetrics = () => {
         defaultMessage:
           'Understand key metrics like transaction latency, throughput and error rate by instrumenting your service with APM.',
       })}
-      footer={
-        <EuiButton
-          data-test-subj="apmServicesNotAvailableMetricsButton"
-          href={core.http.basePath.prepend('/app/apm/tutorial')}
-        >
-          {i18n.translate('xpack.apm.servicesTable.notAvailableApmMetrics.footer', {
-            defaultMessage: 'Add APM',
-          })}
-        </EuiButton>
-      }
+      footer={<AddApmData data-test-subj="apmAddDataNotAvailable" onClick={handleClick} />}
     />
   );
-};
+}

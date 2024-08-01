@@ -42,10 +42,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('compression', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('against an application page', () => {
       compressionSuite('/app/kibana');

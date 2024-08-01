@@ -42,7 +42,7 @@ export const samlAuthentication = async (
         },
         rolesFilename
       );
-      return sessionManager.getSessionCookieForRole(role);
+      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE

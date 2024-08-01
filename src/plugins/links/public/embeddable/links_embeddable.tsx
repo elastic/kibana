@@ -74,9 +74,10 @@ export const getLinksEmbeddableFactory = () => {
       const { title, description } = serializedState.rawState;
 
       if (linksSerializeStateIsByReference(state)) {
-        const attributes = await deserializeLinksSavedObject(state);
+        const linksSavedObject = await linksClient.get(state.savedObjectId);
+        const runtimeState = await deserializeLinksSavedObject(linksSavedObject.item);
         return {
-          ...attributes,
+          ...runtimeState,
           title,
           description,
         };

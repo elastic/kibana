@@ -14,7 +14,8 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 export function ServiceInventory() {
-  const { isEntityManagerEnabled, isEnablementPending } = useEntityManagerEnablementContext();
+  const { isEnablementPending, isEntityCentricExperienceViewEnabled } =
+    useEntityManagerEnablementContext();
 
   const {
     query: { serviceGroup },
@@ -35,7 +36,7 @@ export function ServiceInventory() {
     );
   }
 
-  return isEntityManagerEnabled && isEmpty(serviceGroup) ? (
+  return isEntityCentricExperienceViewEnabled && isEmpty(serviceGroup) ? (
     <MultiSignalInventory />
   ) : (
     <ApmServiceInventory />

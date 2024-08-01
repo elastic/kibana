@@ -9,4 +9,3 @@
 export { linksClient } from './links_content_management_client';
 export { checkForDuplicateTitle } from './duplicate_title_check';
 export { runSaveToLibrary } from './save_to_library';
-export { loadFromLibrary } from './load_from_library';

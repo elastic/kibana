@@ -6,13 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import type {
   InfraCustomDashboard,
   InfraSavedCustomDashboard,
@@ -22,7 +20,6 @@ import {
   InfraCustomDashboardRT,
   InfraDeleteCustomDashboardsResponseBodyRT,
 } from '../../../../common/http_api/custom_dashboards_api';
-import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 
 type ActionType = 'create' | 'update' | 'delete';
 const errorMessages: Record<ActionType, string> = {
@@ -36,14 +33,6 @@ const errorMessages: Record<ActionType, string> = {
     defaultMessage: 'Error while deleting linked dashboards',
   }),
 };
-
-const decodeResponse = (response: any) => {
-  return pipe(
-    InfraCustomDashboardRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
-};
-
 export const useUpdateCustomDashboard = () => {
   const { services } = useKibanaContextForPlugin();
   const { notifications } = useKibana();
@@ -81,7 +70,7 @@ export const useUpdateCustomDashboard = () => {
           }
         );
 
-        return decodeResponse(rawResponse);
+        return decodeOrThrow(InfraCustomDashboardRT)(rawResponse);
       },
       onResolve: (response) => response,
       onReject: (e: Error | unknown) => onError((e as Error)?.message),
@@ -103,13 +92,6 @@ export const useUpdateCustomDashboard = () => {
 export const useDeleteCustomDashboard = () => {
   const { services } = useKibanaContextForPlugin();
   const { notifications } = useKibana();
-
-  const decodeDeleteResponse = (response: any) => {
-    return pipe(
-      InfraDeleteCustomDashboardsResponseBodyRT.decode(response),
-      fold(throwErrors(createPlainError), identity)
-    );
-  };
 
   const onError = useCallback(
     (errorMessage: string) => {
@@ -140,7 +122,7 @@ export const useDeleteCustomDashboard = () => {
           }
         );
 
-        return decodeDeleteResponse(rawResponse);
+        return decodeOrThrow(InfraDeleteCustomDashboardsResponseBodyRT)(rawResponse);
       },
       onResolve: (response) => response,
       onReject: (e: Error | unknown) => onError((e as Error)?.message),
@@ -191,7 +173,7 @@ export const useCreateCustomDashboard = () => {
           }),
         });
 
-        return decodeResponse(rawResponse);
+        return decodeOrThrow(InfraCustomDashboardRT)(rawResponse);
       },
       onResolve: (response) => response,
       onReject: (e: Error | unknown) => onError((e as Error)?.message),

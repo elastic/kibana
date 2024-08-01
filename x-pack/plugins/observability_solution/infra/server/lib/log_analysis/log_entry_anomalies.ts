@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormat, IdFormatByJobType } from '../../../common/http_api/latest';
 import {
   AnomaliesSort,
@@ -21,7 +22,6 @@ import {
   Pagination,
 } from '../../../common/log_analysis';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
   InfraPluginRequestHandlerContext,
   InfraRequestHandlerContext,

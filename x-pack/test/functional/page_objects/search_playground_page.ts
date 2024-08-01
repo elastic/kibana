@@ -19,11 +19,46 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     await testSubjects.click('saveButton');
   };
 
+  const SESSION_KEY = 'search_playground_session';
+
   return {
+    session: {
+      async clearSession(): Promise<void> {
+        await browser.setLocalStorageItem(SESSION_KEY, '{}');
+      },
+
+      async setSession(): Promise<void> {
+        await browser.setLocalStorageItem(
+          SESSION_KEY,
+          JSON.stringify({
+            prompt: 'You are a fireman in london that helps answering question-answering tasks.',
+          })
+        );
+      },
+
+      async expectSession(): Promise<void> {
+        const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
+        const state = JSON.parse(session);
+        expect(state.prompt).to.be('You are an assistant for question-answering tasks.');
+        expect(state.doc_size).to.be(3);
+        expect(state.elasticsearch_query).eql({
+          retriever: {
+            standard: { query: { multi_match: { query: '{query}', fields: ['baz'] } } },
+          },
+        });
+      },
+    },
     PlaygroundStartChatPage: {
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
+      },
+
+      async expectPlaygroundLLMConnectorOptionsExists() {
+        await testSubjects.existOrFail('create-connector-flyout');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gen-ai-card');
       },
 
       async expectPlaygroundStartChatPageIndexButtonExists() {
@@ -83,6 +118,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async navigateToChatPage() {
         await selectIndex();
         await testSubjects.existOrFail('chatPage');
+      },
+
+      async expectPromptToBe(text: string) {
+        await testSubjects.existOrFail('instructionsPrompt');
+        const instructionsPromptElement = await testSubjects.find('instructionsPrompt');
+        const promptInstructions = await instructionsPromptElement.getVisibleText();
+        expect(promptInstructions).to.contain(text);
       },
 
       async expectChatWindowLoaded() {
@@ -146,6 +188,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(code.replace(/ /g, '')).to.be(
           '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
         );
+
+        await testSubjects.click('chatMode');
       },
 
       async expectEditContextOpens() {
@@ -156,6 +200,16 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const fields = await testSubjects.findAll('contextField');
 
         expect(fields.length).to.be(1);
+      },
+
+      async expectSaveFieldsBetweenModes() {
+        await testSubjects.click('queryMode');
+        await testSubjects.existOrFail('field-baz-true');
+        await testSubjects.click('field-baz-true');
+        await testSubjects.existOrFail('field-baz-false');
+        await testSubjects.click('chatMode');
+        await testSubjects.click('queryMode');
+        await testSubjects.existOrFail('field-baz-false');
       },
     },
   };

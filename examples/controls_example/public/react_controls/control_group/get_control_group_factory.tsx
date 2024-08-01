@@ -8,7 +8,6 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -22,32 +21,25 @@ import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
-  apiPublishesFilters,
-  apiPublishesTimeslice,
   PublishesDataViews,
-  PublishesFilters,
-  PublishesTimeslice,
-  PublishingSubject,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-
-import { EuiFlexGroup } from '@elastic/eui';
-import { ControlRenderer } from '../control_renderer';
-import { DefaultControlApi } from '../types';
+import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
-import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
+import { deserializeControlGroup } from './serialization_utils';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
-import { dataControlFetch$ } from './data_control_fetch';
+import { ControlGroup } from './components/control_group';
+import { initSelectionsManager } from './selections_manager';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -62,19 +54,21 @@ export const getControlGroupEmbeddableFactory = (services: {
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi, setApi) => {
       const {
-        initialChildControlState: childControlState,
+        initialChildControlState,
         defaultControlGrow,
         defaultControlWidth,
-        labelPosition,
+        labelPosition: initialLabelPosition,
         chainingSystem,
         autoApplySelections,
         ignoreParentSettings,
       } = initialState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
-      const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-      const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+      const controlsManager = initControlsManager(initialChildControlState);
+      const selectionsManager = initSelectionsManager({
+        ...controlsManager.api,
+        autoApplySelections$,
+      });
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
       const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
@@ -87,7 +81,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
       );
       const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
-        labelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
+        initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
 
       /** TODO: Handle loading; loading should be true if any child is loading */
@@ -105,17 +99,19 @@ export const getControlGroupEmbeddableFactory = (services: {
         undefined
       );
 
-      const controlOrder = new BehaviorSubject<Array<{ id: string; order: number; type: string }>>(
-        Object.keys(childControlState)
-          .map((key) => ({
-            id: key,
-            order: childControlState[key].order,
-            type: childControlState[key].type,
-          }))
-          .sort((a, b) => (a.order > b.order ? 1 : -1))
-      );
       const api = setApi({
-        dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
+        ...controlsManager.api,
+        ...selectionsManager.api,
+        controlFetch$: (controlUuid: string) =>
+          controlFetch$(
+            chaining$(
+              controlUuid,
+              chainingSystem$,
+              controlsManager.controlsInOrder$,
+              controlsManager.api.children$
+            ),
+            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
+          ),
         ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
@@ -127,9 +123,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           return {} as unknown as ControlGroupRuntimeState;
         },
         dataLoading: dataLoading$,
-        children$: children$ as PublishingSubject<{
-          [key: string]: unknown;
-        }>,
         onEdit: async () => {
           openEditControlGroupFlyout(
             api,
@@ -147,81 +140,27 @@ export const getControlGroupEmbeddableFactory = (services: {
           i18n.translate('controls.controlGroup.displayName', {
             defaultMessage: 'Controls',
           }),
-        getSerializedStateForChild: (childId) => {
-          return { rawState: childControlState[childId] };
-        },
         serializeState: () => {
-          return serializeControlGroup(
-            children$.getValue(),
-            controlOrder.getValue().map(({ id }) => id),
-            {
-              labelPosition: labelPosition$.getValue(),
+          const { panelsJSON, references } = controlsManager.serializeControls();
+          return {
+            rawState: {
               chainingSystem: chainingSystem$.getValue(),
-              autoApplySelections: autoApplySelections$.getValue(),
-              ignoreParentSettings: ignoreParentSettings$.getValue(),
-            }
-          );
-        },
-        getPanelCount: () => {
-          return (Object.keys(children$.getValue()) ?? []).length;
-        },
-        addNewPanel: (panel) => {
-          // TODO: Add a new child control
-          return Promise.resolve(undefined);
-        },
-        removePanel: (panelId) => {
-          // TODO: Remove a child control
-        },
-        replacePanel: async (panelId, newPanel) => {
-          // TODO: Replace a child control
-          return Promise.resolve(panelId);
+              controlStyle: labelPosition$.getValue(), // Rename "labelPosition" to "controlStyle"
+              showApplySelections: !autoApplySelections$.getValue(),
+              ignoreParentSettingsJSON: JSON.stringify(ignoreParentSettings$.getValue()),
+              panelsJSON,
+            },
+            references,
+          };
         },
         grow,
         width,
-        filters$,
         dataViews,
         labelPosition: labelPosition$,
-        timeslice$,
-      });
-
-      /**
-       * Subscribe to all children's output filters, combine them, and output them
-       * TODO: If `autoApplySelections` is false, publish to "unpublishedFilters" instead
-       * and only output to filters$ when the apply button is clicked.
-       *       OR
-       *       Always publish to "unpublishedFilters" and publish them manually on click
-       *       (when `autoApplySelections` is false) or after a small debounce (when false)
-       *       See: https://github.com/elastic/kibana/pull/182842#discussion_r1624929511
-       * - Note: Unsaved changes of control group **should** take into consideration the
-       *         output filters,  but not the "unpublishedFilters"
-       */
-      const outputFiltersSubscription = combineCompatibleChildrenApis<PublishesFilters, Filter[]>(
-        api,
-        'filters$',
-        apiPublishesFilters,
-        []
-      ).subscribe((newFilters) => filters$.next(newFilters));
-
-      const childrenTimesliceSubscription = combineCompatibleChildrenApis<
-        PublishesTimeslice,
-        [number, number] | undefined
-      >(
-        api,
-        'timeslice$',
-        apiPublishesTimeslice,
-        undefined,
-        // flatten method
-        (values) => {
-          // control group should never allow multiple timeslider controls
-          // returns first timeslider control value
-          return values.length === 0 ? undefined : values[0];
-        }
-      ).subscribe((timeslice) => {
-        timeslice$.next(timeslice);
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
-      const childDataViewsSubscription = combineCompatibleChildrenApis<
+      const childrenDataViewsSubscription = combineCompatibleChildrenApis<
         PublishesDataViews,
         DataView[]
       >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
@@ -231,33 +170,26 @@ export const getControlGroupEmbeddableFactory = (services: {
       return {
         api,
         Component: () => {
-          const controlsInOrder = useStateFromPublishingSubject(controlOrder);
+          const [hasUnappliedSelections, labelPosition] = useBatchedPublishingSubjects(
+            selectionsManager.hasUnappliedSelections$,
+            labelPosition$
+          );
 
           useEffect(() => {
             return () => {
-              outputFiltersSubscription.unsubscribe();
-              childDataViewsSubscription.unsubscribe();
-              childrenTimesliceSubscription.unsubscribe();
+              selectionsManager.cleanup();
+              childrenDataViewsSubscription.unsubscribe();
             };
           }, []);
 
           return (
-            <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
-              {controlsInOrder.map(({ id, type }) => (
-                <ControlRenderer
-                  key={id}
-                  maybeId={id}
-                  type={type}
-                  getParentApi={() => api}
-                  onApiAvailable={(controlApi) => {
-                    children$.next({
-                      ...children$.getValue(),
-                      [id]: controlApi,
-                    });
-                  }}
-                />
-              ))}
-            </EuiFlexGroup>
+            <ControlGroup
+              applySelections={selectionsManager.applySelections}
+              controlGroupApi={api}
+              controlsManager={controlsManager}
+              hasUnappliedSelections={hasUnappliedSelections}
+              labelPosition={labelPosition}
+            />
           );
         },
       };

@@ -7,7 +7,7 @@
 
 import { get, isNumber } from 'lodash';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { InfraFormatterType } from '../../../../lib/lib';
+import { InfraFormatterType } from '../../../../common/inventory/types';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInputRT,

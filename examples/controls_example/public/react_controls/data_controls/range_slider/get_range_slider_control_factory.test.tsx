@@ -7,19 +7,22 @@
  */
 
 import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
+
 import { estypes } from '@elastic/elasticsearch';
-import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, first, of, skip } from 'rxjs';
-import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
-import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { ControlApiRegistration } from '../../types';
-import { RangesliderControlApi, RangesliderControlState } from './types';
-import { StateComparators } from '@kbn/presentation-publishing';
+import { TimeRange } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+
+import { ControlFetchContext } from '../../control_group/control_fetch';
+import { ControlGroupApi } from '../../control_group/types';
+import { ControlApiRegistration } from '../../types';
+import { getRangesliderControlFactory } from './get_range_slider_control_factory';
+import { RangesliderControlApi, RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -31,7 +34,7 @@ describe('RangesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = {
-    dataControlFetch$: new BehaviorSubject<DataControlFetchContext>({}),
+    controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
     ignoreParentSettings$: new BehaviorSubject(undefined),
     parentApi: dashboardApi,
   } as unknown as ControlGroupApi;
@@ -62,7 +65,7 @@ describe('RangesliderControlApi', () => {
   // @ts-ignore
   mockDataViews.get = async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
-      throw new Error(`Simulated error: no data view found for id ${id}`);
+      throw new Error(`no data view found for id ${id}`);
     }
     return {
       id,
@@ -110,9 +113,9 @@ describe('RangesliderControlApi', () => {
     };
   }
 
-  describe('filters$', () => {
-    test('should not set filters$ when value is not provided', (done) => {
-      const { api } = factory.buildControl(
+  describe('on initialize', () => {
+    test('should not set filters$ when value is not provided', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataView',
           fieldName: 'myFieldName',
@@ -121,14 +124,11 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toBeUndefined();
-        done();
-      });
+      expect(api.filters$.value).toBeUndefined();
     });
 
-    test('should set filters$ when value is provided', (done) => {
-      const { api } = factory.buildControl(
+    test('should set filters$ when value is provided', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -138,31 +138,45 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
-        expect(filter).toEqual([
-          {
-            meta: {
-              field: 'myFieldName',
-              index: 'myDataViewId',
-              key: 'myFieldName',
-              params: {
+      expect(api.filters$.value).toEqual([
+        {
+          meta: {
+            field: 'myFieldName',
+            index: 'myDataViewId',
+            key: 'myFieldName',
+            params: {
+              gte: 5,
+              lte: 10,
+            },
+            type: 'range',
+          },
+          query: {
+            range: {
+              myFieldName: {
                 gte: 5,
                 lte: 10,
               },
-              type: 'range',
-            },
-            query: {
-              range: {
-                myFieldName: {
-                  gte: 5,
-                  lte: 10,
-                },
-              },
             },
           },
-        ]);
-        done();
-      });
+        },
+      ]);
+    });
+
+    test('should set blocking error when data view is not found', async () => {
+      const { api } = await factory.buildControl(
+        {
+          dataViewId: 'notGonnaFindMeDataView',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      expect(api.filters$.value).toBeUndefined();
+      expect(api.blockingError.value?.message).toEqual(
+        'no data view found for id notGonnaFindMeDataView'
+      );
     });
   });
 
@@ -171,7 +185,7 @@ describe('RangesliderControlApi', () => {
       totalResults = 0; // simulate no results by returning hits total of zero
       min = null; // simulate no results by returning min aggregation value of null
       max = null; // simulate no results by returning max aggregation value of null
-      const { Component } = factory.buildControl(
+      const { Component } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -181,7 +195,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         await findByTestId('range-slider-control-invalid-append-myControl1');
       });
@@ -190,7 +204,7 @@ describe('RangesliderControlApi', () => {
 
   describe('min max', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
-      const { Component } = factory.buildControl(
+      const { Component } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -199,7 +213,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi
       );
-      const { findByTestId } = render(<Component />);
+      const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         const minInput = await findByTestId('rangeSlider__lowerBoundFieldNumber');
         expect(minInput).toHaveAttribute('placeholder', String(DEFAULT_MIN));
@@ -210,8 +224,8 @@ describe('RangesliderControlApi', () => {
   });
 
   describe('step state', () => {
-    test('default value provided when state.step is undefined', () => {
-      const { api } = factory.buildControl(
+    test('default value provided when state.step is undefined', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -224,8 +238,8 @@ describe('RangesliderControlApi', () => {
       expect(serializedState.rawState.step).toBe(1);
     });
 
-    test('retains value from initial state', () => {
-      const { api } = factory.buildControl(
+    test('retains value from initial state', async () => {
+      const { api } = await factory.buildControl(
         {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
@@ -237,6 +251,55 @@ describe('RangesliderControlApi', () => {
       );
       const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
       expect(serializedState.rawState.step).toBe(1024);
+    });
+  });
+
+  describe('custom options component', () => {
+    test('defaults to step size of 1', async () => {
+      const CustomSettings = factory.CustomOptionsComponent!;
+      const component = render(
+        <CustomSettings
+          currentState={{}}
+          updateState={jest.fn()}
+          setControlEditorValid={jest.fn()}
+        />
+      );
+      expect(
+        component.getByTestId('rangeSliderControl__stepAdditionalSetting').getAttribute('value')
+      ).toBe('1');
+    });
+
+    test('validates step setting is greater than 0', async () => {
+      const setControlEditorValid = jest.fn();
+      const CustomSettings = factory.CustomOptionsComponent!;
+      const component = render(
+        <CustomSettings
+          currentState={{}}
+          updateState={jest.fn()}
+          setControlEditorValid={setControlEditorValid}
+        />
+      );
+
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: -1 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { value: '' },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 0 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(false);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 0.5 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(true);
+      fireEvent.change(component.getByTestId('rangeSliderControl__stepAdditionalSetting'), {
+        target: { valueAsNumber: 10 },
+      });
+      expect(setControlEditorValid).toBeCalledWith(true);
     });
   });
 });

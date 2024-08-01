@@ -198,6 +198,35 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
     });
 
+    it('throws if configuration has custom fields and template has no custom fields', () => {
+      expect(() =>
+        validateTemplatesCustomFieldsInRequest({
+          templates: [
+            {
+              key: 'template_key_1',
+              name: 'first template',
+              description: 'this is a first template value',
+              caseFields: null,
+            },
+          ],
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'foo',
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields added to template."`);
+    });
+
     it('throws for a single invalid type', () => {
       expect(() =>
         validateTemplatesCustomFieldsInRequest({

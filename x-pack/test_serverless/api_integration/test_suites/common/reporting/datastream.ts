@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Data Stream', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
 
       await esArchiver.load(archives.ecommerce.data);
@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports(roleAuthc, internalReqHeader);
       await esArchiver.unload(archives.ecommerce.data);
       await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('uses the datastream configuration', async () => {
