@@ -787,7 +787,7 @@ describe('autocomplete', () => {
               testSuggestions(
                 `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
                 suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
+                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
                       ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
@@ -807,7 +807,7 @@ describe('autocomplete', () => {
                   i ? ',' : ''
                 } )`,
                 suggestedConstants?.length
-                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
+                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
                       ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
@@ -1023,18 +1023,40 @@ describe('autocomplete', () => {
       10
     );
 
-    // function argument
-    testSuggestions(
-      'FROM kibana_sample_data_logs | EVAL TRIM(e)',
-      [
-        ...getFieldNamesByType('string'),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
-          'trim',
-        ]),
-      ],
-      undefined,
-      42
-    );
+    describe('function arguments', () => {
+      // function argument
+      testSuggestions(
+        'FROM kibana_sample_data_logs | EVAL TRIM(e)',
+        [
+          ...getFieldNamesByType('string'),
+          ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
+            'trim',
+          ]),
+        ],
+        undefined,
+        42
+      );
+
+      // subsequent function argument
+      const expectedDateDiff2ndArgSuggestions = [
+        TIME_PICKER_SUGGESTION,
+        ...TIME_SYSTEM_PARAMS.map((t) => `${t}, `),
+        ...getFieldNamesByType('date').map((name) => `${name}, `),
+        ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }).map((s) => ({
+          ...s,
+          text: `${s.text},`,
+        })),
+      ];
+      testSuggestions(
+        'FROM a | EVAL DATE_DIFF("day", )',
+        expectedDateDiff2ndArgSuggestions,
+        undefined,
+        31
+      );
+
+      // trigger character case for comparison
+      testSuggestions('FROM a | EVAL DATE_DIFF("day", )', expectedDateDiff2ndArgSuggestions, ' ');
+    });
 
     // FROM source
     testSuggestions('FROM k', ['index1 ', 'index2 '], undefined, 6, [
@@ -1254,29 +1276,69 @@ describe('autocomplete', () => {
       10
     );
 
-    // Function argument
-    const dateDiffFirstParamSuggestions =
-      evalFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0].params?.[0]
-        .literalSuggestions ?? [];
-    testSuggestions(
-      'FROM a | EVAL DATE_DIFF()',
-      dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand),
-      undefined,
-      24
-    );
+    describe('function arguments', () => {
+      // literalSuggestions parameter
+      const dateDiffFirstParamSuggestions =
+        evalFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0].params?.[0]
+          .literalSuggestions ?? [];
+      testSuggestions(
+        'FROM a | EVAL DATE_DIFF()',
+        dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand),
+        undefined,
+        24
+      );
 
-    testSuggestions(
-      'FROM a | EVAL ST_CONTAINS()',
-      dateDiffFirstParamSuggestions.map((s) => `${s}, `).map(attachTriggerCommand),
-      undefined,
-      26
-    );
+      // field parameter
 
-    testSuggestions(
-      'FROM a | EVAL DATE_TRUNC(2 )',
-      timeUnitsToSuggest.map((s) => `${s.name}, `).map(attachTriggerCommand),
-      ' '
-    );
+      const expectedStringSuggestionsWhenMoreArgsAreNeeded = [
+        ...getFieldNamesByType('string')
+          .map((field) => `${field}, `)
+          .map(attachTriggerCommand),
+        ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
+          'replace',
+        ]).map((s) => ({
+          ...s,
+          text: `${s.text},`,
+        })),
+      ];
+
+      testSuggestions(
+        'FROM a | EVAL REPLACE()',
+        expectedStringSuggestionsWhenMoreArgsAreNeeded,
+        undefined,
+        22
+      );
+
+      // subsequent parameter
+      testSuggestions(
+        'FROM a | EVAL REPLACE(stringField, )',
+        expectedStringSuggestionsWhenMoreArgsAreNeeded,
+        undefined,
+        35
+      );
+
+      // final parameter — should not advance!
+      testSuggestions(
+        'FROM a | EVAL REPLACE(stringField, stringField, )',
+        [
+          ...getFieldNamesByType('string').map((field) => ({ text: field, command: undefined })),
+          ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
+            'replace',
+          ]),
+        ],
+        undefined,
+        48
+      );
+
+      // Trigger character because this is how it will actually be... the user will press
+      // space-bar... this may change if we fix the tokenization of timespan literals
+      // such that "2 days" is a single monaco token
+      testSuggestions(
+        'FROM a | EVAL DATE_TRUNC(2 )',
+        [...timeUnitsToSuggest.map((s) => `${s.name}, `).map(attachTriggerCommand), ','],
+        ' '
+      );
+    });
 
     // PIPE (|)
     testSuggestions(

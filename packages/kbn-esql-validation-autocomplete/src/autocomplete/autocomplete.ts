@@ -185,8 +185,8 @@ function correctQuerySyntax(_query: string, context: EditorContext) {
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
     // monaco.editor.CompletionTriggerKind['Invoke'] === 0
     (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(query, query.length) || isComma(query.trimEnd()[query.trimEnd().length - 1])))
+    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
+    isComma(query.trimEnd()[query.trimEnd().length - 1])
   ) {
     query += EDITOR_MARKER;
   }
