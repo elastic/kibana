@@ -41,6 +41,6 @@ export class LocalShipper implements IShipper {
     // required
   };
   public shutdown = () => {
-    // required
+    // This shipper doesn't hold any internal queues or instantiated properties. No need to clean up anything in this method.
   };
 }
