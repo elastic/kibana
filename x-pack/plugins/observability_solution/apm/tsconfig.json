@@ -127,7 +127,8 @@
     "@kbn/shared-ux-page-no-data-config-types",
     "@kbn/react-hooks",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/apm-types"
   ],
   "exclude": [
     "target/**/*"

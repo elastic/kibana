@@ -130,15 +130,6 @@ export interface InfraSourceConfiguration
 /**
  * Source status
  */
-const SourceStatusFieldRuntimeType = rt.type({
-  name: rt.string,
-  type: rt.string,
-  searchable: rt.boolean,
-  aggregatable: rt.boolean,
-  displayable: rt.boolean,
-});
-
-export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeType>;
 
 export const SourceStatusRuntimeType = rt.type({
   logIndicesExist: rt.boolean,
