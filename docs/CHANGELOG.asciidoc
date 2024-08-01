@@ -229,6 +229,7 @@ Refer to https://github.com/elastic/kibana/issues/189394[#189394].
 
 *Impact* +
 The impact of this issue will vary depending on the purpose of your headers.
+For example, if you added an `ApiKey` authorization header, you might receive a `401` authorization error since it's no longer sent by the connector.
 
 *Workaround* +
 To work around this issue, enable the *Require authentication for this webhook* option, which is the `hasAuth` property in the API.
