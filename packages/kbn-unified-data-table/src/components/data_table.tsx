@@ -26,10 +26,10 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
-  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiHorizontalRule,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -961,15 +961,23 @@ export const UnifiedDataTable = ({
     [renderCustomToolbar, additionalControls]
   );
 
-  const showDisplaySelector = useMemo(() => {
-    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {
-      ...(showDensitySelector && { allowDensity: showDensitySelector }),
-    };
+  const showDisplaySelector = useMemo(():
+    | EuiDataGridToolBarVisibilityDisplaySelectorOptions
+    | undefined => {
+    if (
+      !onUpdateDataGridDensity &&
+      !onUpdateRowHeight &&
+      !onUpdateHeaderRowHeight &&
+      !onUpdateSampleSize
+    ) {
+      return;
+    }
 
-    if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
-      options.allowRowHeight = false;
-      options.allowResetButton = false;
-      options.additionalDisplaySettings = (
+    return {
+      allowDensity: Boolean(onUpdateDataGridDensity),
+      allowRowHeight: false,
+      allowResetButton: false,
+      additionalDisplaySettings: (
         <>
           {showDensitySelector ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
@@ -986,10 +994,8 @@ export const UnifiedDataTable = ({
             onChangeSampleSize={onUpdateSampleSize}
           />
         </>
-      );
-    }
-
-    return Object.keys(options).length ? options : undefined;
+      ),
+    };
   }, [
     headerRowHeight,
     headerRowHeightLines,
@@ -1005,6 +1011,7 @@ export const UnifiedDataTable = ({
     rowHeightLines,
     sampleSizeState,
     showDensitySelector,
+    onUpdateDataGridDensity,
   ]);
 
   const inMemory = useMemo(() => {
