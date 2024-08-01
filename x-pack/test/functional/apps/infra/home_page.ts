@@ -65,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
       );
 
-      it('renders an empty data promptand redirect onboarding page', async () => {
+      it('renders an empty data prompt and redirect onboarding page', async () => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.noDataPromptExists();
         await pageObjects.infraHome.noDataPromptAddDataClick();
