@@ -157,11 +157,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.navigateToApp('dashboard');
 
-      await kibanaServer.uiSettings.update({
-        ...defaultSettings,
-        'discover:sampleRowsPerPage': rowsPerPage,
-      });
-
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await dashboardAddPanel.clickOpenAddPanel();
