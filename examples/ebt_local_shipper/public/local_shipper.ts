@@ -35,7 +35,7 @@ export class LocalShipper implements IShipper {
   };
 
   public optIn = () => {
-    // Implemented because it's required, but we don't really care here.
+    // required
   };
   public flush = async () => {
     // Implemented because it's required, but we don't really care here.
