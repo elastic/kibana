@@ -106,6 +106,9 @@ export type {
   RouteValidatorFullConfigResponse,
   LazyValidator,
   RouteAccess,
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
 } from './src/router';
 export {
   validBodyOutput,

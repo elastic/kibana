@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { defineAuthzPOCRoutes } from './poc_examples';
 import { definePrivilegesRoutes } from './privileges';
 import { resetSessionPageRoutes } from './reset_session_page';
 import { defineRolesRoutes } from './roles';
@@ -14,6 +15,7 @@ import type { RouteDefinitionParams } from '..';
 export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
   // The reset session endpoint is registered with httpResources and should remain public in serverless
   resetSessionPageRoutes(params);
+  defineAuthzPOCRoutes(params);
 
   // By default, in the serverless environment privileges and permissions are managed internally and only
   // exposed to users and administrators via control plane UI, however, we will allow these routes to be registered

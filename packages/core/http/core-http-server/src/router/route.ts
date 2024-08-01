@@ -47,7 +47,10 @@ export interface AuthzEnabled {
   passThrough?: boolean;
 }
 
-export type AuthzDisabled = false;
+export interface AuthzDisabled {
+  enabled: false;
+  reason: string;
+}
 
 export type RouteAuthz = AuthzEnabled | AuthzDisabled;
 

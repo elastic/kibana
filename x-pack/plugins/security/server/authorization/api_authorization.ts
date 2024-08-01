@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import type {
+  AuthzDisabled,
+  AuthzEnabled,
+  HttpServiceSetup,
+  Logger,
+  RouteAuthz,
+} from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import { deepFreeze } from '@kbn/std';
+
+const isAuthzDisabled = (authz?: RouteAuthz): authz is AuthzDisabled => {
+  return (authz as AuthzDisabled)?.enabled === false;
+};
 
 export function initAPIAuthorization(
   http: HttpServiceSetup,
@@ -21,7 +31,18 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    const authz = request.route.options.authz;
+    console.log(request.route.options);
+
+    // @ts-ignore
+    if (isAuthzDisabled(request.route.options.authz)) {
+      logger.warn(
+        `Route authz is disabled for ${request.url.pathname}${request.url.search}": ${request.route.options.authz.reason}`
+      );
+
+      return toolkit.next();
+    }
+
+    const authz = request.route.options.authz as AuthzEnabled;
 
     /**
      * Please note, that this code was intended for POC demo purposes only and is not production-ready.
@@ -79,7 +100,7 @@ export function initAPIAuthorization(
       }
 
       if (authz.passThrough) {
-        Object.defineProperty(request, 'authzResponse', {
+        Object.defineProperty(request, 'authzResult', {
           value: deepFreeze(checkPrivilegesResponse.privileges.kibana),
           enumerable: false,
           configurable: false,

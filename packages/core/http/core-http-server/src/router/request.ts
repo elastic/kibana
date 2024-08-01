@@ -137,7 +137,7 @@ export interface KibanaRequest<
    */
   readonly isFakeRequest: boolean;
 
-  authzResponse?: any;
+  readonly authzResult?: any;
 
   /**
    * An internal request has access to internal routes.
