@@ -41,3 +41,8 @@ export const EntityAnalyticsPrivileges = z.object({
     }),
   }),
 });
+
+export type AssetCriticalityGetPrivilegesResponse = z.infer<
+  typeof AssetCriticalityGetPrivilegesResponse
+>;
+export const AssetCriticalityGetPrivilegesResponse = EntityAnalyticsPrivileges;
