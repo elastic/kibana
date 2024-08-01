@@ -928,7 +928,10 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/observability_solution/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
+      ],
       rules: {
         'react-hooks/exhaustive-deps': [
           'error',
@@ -944,6 +947,7 @@ module.exports = {
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
         'src/plugins/ai_assistant_management/**/*.tsx',
+        'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
