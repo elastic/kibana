@@ -35,18 +35,23 @@ import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
 
 import * as Constants from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
+import { errorToText } from '../../new_index/utils/error_to_text';
 import { connectorsBreadcrumbs } from '../connectors';
 
 import connectorsBackgroundImage from './assets/connector_logos_comp.png';
 
 import { ConfigurationStep } from './configuration_step';
+import { CreateConnectorLogic } from './create_connector_logic';
 import { DeploymentStep } from './deployment_step';
 import { FinishUpStep } from './finish_up_step';
 import { StartStep } from './start_step';
 
 export const CreateConnector: React.FC = () => {
+  const { apiReset, createConnector } = useActions(CreateConnectorLogic);
+  const { error, status } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
   const [selfManaged, setSelfManaged] = useState(false);
   const { connectorTypes } = useValues(KibanaLogic);
@@ -54,6 +59,9 @@ export const CreateConnector: React.FC = () => {
   const { fetchConnector } = useActions(ConnectorViewLogic);
   const [syncing, setSyncing] = useState(false);
   const { connector } = useValues(ConnectorViewLogic);
+
+  let isNative = true; // isNativeAvailable && isNativeProp
+  let serviceType = ''; // TODO: Review
 
   // mocked connector
   if (connector) {
@@ -150,6 +158,18 @@ export const CreateConnector: React.FC = () => {
           setNextStepEnabled={setDeploymentStepComplete}
           // TODO:
           connector={connector}
+          error={errorToText(error)}
+          onNameChange={() => {
+            apiReset();
+          }}
+          onSubmit={(name) =>
+            createConnector({
+              isNative,
+              language: null,
+              name,
+              serviceType,
+            })
+          }
         />
       ),
       status: startStepStatus,
@@ -237,6 +257,18 @@ export const CreateConnector: React.FC = () => {
           isNextStepEnabled={configurationStepComplete}
           setNextStepEnabled={setConfigurationStepComplete}
           connector={connector}
+          error={errorToText(error)}
+          onNameChange={() => {
+            apiReset();
+          }}
+          onSubmit={(name) =>
+            createConnector({
+              isNative,
+              language: null,
+              name,
+              serviceType,
+            })
+          }
         />
       ),
       status: startStepStatus,
@@ -344,6 +376,11 @@ export const CreateConnector: React.FC = () => {
     }
   }, [currentStep]);
 
+  useEffect(() => {
+    isNative = connectorSelected.isNative;
+    serviceType = connectorSelected.serviceType;
+  }, [connectorSelected]);
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -376,7 +413,7 @@ export const CreateConnector: React.FC = () => {
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
-              min-height: 600px;
+              min-height: 550px;
               border: 1px solid ${euiTheme.colors.lightShade};
             `}
           >
