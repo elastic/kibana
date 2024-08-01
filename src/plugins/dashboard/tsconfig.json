@@ -83,6 +83,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/recently-accessed",
+    "@kbn/managed-content-badge",
   ],
   "exclude": ["target/**/*"]
 }
