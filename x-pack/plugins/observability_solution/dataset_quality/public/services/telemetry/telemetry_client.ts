@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
   ITelemetryClient,
   DatasetDetailsEbtProps,
@@ -51,6 +51,13 @@ export class TelemetryClient implements ITelemetryClient {
   public trackDatasetDetailsNavigated = (eventProps: DatasetDetailsNavigatedEbtProps) => {
     this.datasetDetailsState = 'navigated';
     this.analytics.reportEvent(DatasetQualityTelemetryEventTypes.DETAILS_NAVIGATED, {
+      ...eventProps,
+      tracking_id: this.datasetDetailsTrackingId,
+    });
+  };
+
+  public trackDatasetDetailsBreakdownFieldChanged = (eventProps: DatasetDetailsEbtProps) => {
+    this.analytics.reportEvent(DatasetQualityTelemetryEventTypes.BREAKDOWN_FIELD_CHANGED, {
       ...eventProps,
       tracking_id: this.datasetDetailsTrackingId,
     });

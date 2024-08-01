@@ -24,7 +24,7 @@ import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
-  createOrUpdateConversationWithUserInput,
+  createConversationWithUserInput,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -148,30 +148,21 @@ export const chatCompleteRoute = (
             return transformedMessage;
           });
 
-          let updatedConversation: ConversationResponse | undefined | null;
-
-          // TODO: Remove non-graph persistence now that KB is enabled by default
-          if (!conversationId && request.body.persist && conversationsDataClient) {
-            updatedConversation = await createOrUpdateConversationWithUserInput({
-              actionsClient,
+          let newConversation: ConversationResponse | undefined | null;
+          if (conversationsDataClient && !conversationId && request.body.persist) {
+            newConversation = await createConversationWithUserInput({
               actionTypeId,
               connectorId,
               conversationId,
               conversationsDataClient,
               promptId: request.body.promptId,
-              logger,
               replacements: latestReplacements,
               newMessages: messages,
               model: request.body.model,
             });
-            if (updatedConversation == null) {
-              return assistantResponse.error({
-                body: `conversation id: "${conversationId}" not updated`,
-                statusCode: 400,
-              });
-            }
+
             // messages are anonymized by conversationsDataClient
-            messages = updatedConversation?.messages?.map((c) => ({
+            messages = newConversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
@@ -182,9 +173,9 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (updatedConversation?.id && conversationsDataClient) {
+            if (newConversation?.id && conversationsDataClient) {
               await appendAssistantMessageToConversation({
-                conversationId: updatedConversation?.id,
+                conversationId: newConversation?.id,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,
@@ -200,7 +191,7 @@ export const chatCompleteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
-            conversationId,
+            conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,
             logger,
@@ -208,7 +199,16 @@ export const chatCompleteRoute = (
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
-            request,
+            request: {
+              ...request,
+              // TODO: clean up after empty tools will be available to use
+              body: {
+                ...request.body,
+                replacements: {},
+                size: 10,
+                alertsIndexPattern: '.alerts-security.alerts-default',
+              },
+            },
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,

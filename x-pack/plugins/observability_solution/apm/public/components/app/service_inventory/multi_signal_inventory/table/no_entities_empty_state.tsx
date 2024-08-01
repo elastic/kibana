@@ -5,36 +5,48 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
-  EuiLink,
   EuiEmptyPrompt,
-  EuiImage,
-  EuiHorizontalRule,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiImage,
+  EuiLink,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { dashboardsLight } from '@kbn/shared-svg';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 import { useLocalStorage } from '../../../../../hooks/use_local_storage';
+import { ApmPluginStartDeps, ApmServices } from '../../../../../plugin';
+import { EntityInventoryAddDataParams } from '../../../../../services/telemetry';
 import {
-  AddApmAgent,
+  AddApmData,
   AssociateServiceLogs,
   CollectServiceLogs,
 } from '../../../../shared/add_data_buttons/buttons';
 
 export function NoEntitiesEmptyState() {
-  const { core } = useApmPluginContext();
-  const { basePath } = core.http;
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.uiNewExperienceCallout',
     false
   );
+
+  useEffectOnce(() => {
+    services.telemetry.reportEntityInventoryPageState({ state: 'empty_state' });
+  });
+
+  function reportButtonClick(journey: EntityInventoryAddDataParams['journey']) {
+    services.telemetry.reportEntityInventoryAddData({
+      view: 'empty_state',
+      journey,
+    });
+  }
 
   return (
     <EuiFlexGroup direction="column">
@@ -76,9 +88,22 @@ export function NoEntitiesEmptyState() {
           actions={
             <EuiFlexGroup responsive={false} wrap gutterSize="xl" direction="column">
               <EuiFlexGroup direction="row" gutterSize="xs">
-                <AddApmAgent basePath={basePath} />
-                <AssociateServiceLogs />
-                <CollectServiceLogs basePath={basePath} />
+                <AddApmData
+                  data-test-subj="apmAddDataEmptyState"
+                  onClick={() => {
+                    reportButtonClick('add_apm_agent');
+                  }}
+                />
+                <AssociateServiceLogs
+                  onClick={() => {
+                    reportButtonClick('associate_existing_service_logs');
+                  }}
+                />
+                <CollectServiceLogs
+                  onClick={() => {
+                    reportButtonClick('collect_new_service_logs');
+                  }}
+                />
               </EuiFlexGroup>
 
               {!userHasDismissedCallout && (

@@ -62,6 +62,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     ownerId: {
       type: 'keyword',
     },
+    partition: {
+      type: 'integer',
+    },
   },
 };
 

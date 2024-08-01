@@ -6,37 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
-import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { LogLevelBadge } from '@kbn/discover-utils';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 
-const badgeCss: CSSObject = {
-  marginTop: '-4px',
-  maxWidth: mathWithUnits(euiThemeVars.euiSize, (size) => size * 7.5),
-};
+const dataTestSubj = 'logLevelBadgeCell';
+const badgeCss: CSSObject = { marginTop: '-4px' };
 
 export const getLogLevelBadgeCell =
   (logLevelField: string) => (props: DataGridCellValueElementProps) => {
-    const { euiTheme } = useEuiTheme();
     const value = props.row.flattened[logLevelField];
 
     if (!value) {
-      return <span data-test-subj="logLevelBadgeCell-empty">-</span>;
-    }
-
-    const coalescedValue = getLogLevelCoalescedValue(value);
-    const color = coalescedValue ? getLogLevelColor(coalescedValue, euiTheme) : undefined;
-
-    if (!color || !coalescedValue) {
-      return <span data-test-subj="logLevelBadgeCell-unknown">{value}</span>;
+      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
     }
 
     return (
-      <EuiBadge color={color} data-test-subj={`logLevelBadgeCell-${coalescedValue}`} css={badgeCss}>
-        {value}
-      </EuiBadge>
+      <LogLevelBadge
+        logLevel={value}
+        fallback={<span data-test-subj={`${dataTestSubj}-unknown`}>{value}</span>}
+        data-test-subj={dataTestSubj}
+        css={badgeCss}
+      />
     );
   };

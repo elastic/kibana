@@ -33,7 +33,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         className: 'unifiedDataTable__cell--expanded',
       });
     } else {
-      setCellProps({ style: undefined });
+      setCellProps({ className: '' });
     }
   }, [expanded, current, setCellProps, isDarkMode]);
 

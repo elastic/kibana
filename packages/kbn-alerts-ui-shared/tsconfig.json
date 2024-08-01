@@ -39,9 +39,13 @@
     "@kbn/data-plugin",
     "@kbn/search-types",
     "@kbn/utility-types",
+    "@kbn/safer-lodash-set",
     "@kbn/core-application-browser",
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-ui-settings-browser",
   ]
 }

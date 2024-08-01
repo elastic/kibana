@@ -22,13 +22,6 @@ export enum FEATURE_FLAG_NAMES {
    */
   'security-solutions.add-integrations-url' = 'security-solutions.add-integrations-url',
   /**
-   * Used in the Security Solutions guided onboarding tour.
-   * Returns JSON corresponding to the tour guide  config as
-   * defined by type { GuideConfig } from '@kbn/guided-onboarding';
-   */
-  'security-solutions.guided-onboarding-content' = 'security-solutions.guided-onboarding-content',
-
-  /**
    * Used in cloud chat plugin to enable/disable the chat.
    * The expectation that the chat is enabled by default and the flag is used as a runtime kill switch.
    */

@@ -148,5 +148,29 @@ if (ctx.entity?.metadata?.sourceIndex != null) {
       "index_name_prefix": ".entities.v1.history.admin-console-services.",
     },
   },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-history@platform",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services@custom",
+    },
+  },
+  Object {
+    "pipeline": Object {
+      "ignore_missing_pipeline": true,
+      "name": "admin-console-services-history@custom",
+    },
+  },
 ]
 `;

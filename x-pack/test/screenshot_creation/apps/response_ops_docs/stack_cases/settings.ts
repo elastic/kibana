@@ -25,20 +25,20 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         1000
       );
       await testSubjects.click('common-flyout-cancel');
-      // await testSubjects.click('add-custom-field');
-      // await commonScreenshots.takeScreenshot(
-      //   'cases-custom-fields-add',
-      //   screenshotDirectories,
-      //   1400,
-      //   700
-      // );
-      // await testSubjects.setValue('custom-field-label-input', 'my-field');
-      // await testSubjects.click('common-flyout-save');
-      // await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories, 1400, 1024);
-      // await cases.navigation.navigateToApp();
-      // await testSubjects.click('createNewCaseBtn');
-      // await commonScreenshots.takeScreenshot('cases-create', screenshotDirectories, 1400, 1900);
-      // await testSubjects.click('create-case-cancel');
+      await testSubjects.click('add-custom-field');
+      await commonScreenshots.takeScreenshot(
+        'cases-custom-fields-add',
+        screenshotDirectories,
+        1400,
+        700
+      );
+      await testSubjects.setValue('custom-field-label-input', 'my-field');
+      await testSubjects.click('common-flyout-save');
+      await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories, 1400, 1024);
+      await cases.navigation.navigateToApp();
+      await testSubjects.click('createNewCaseBtn');
+      await commonScreenshots.takeScreenshot('cases-create', screenshotDirectories, 1400, 1900);
+      await testSubjects.click('create-case-cancel');
     });
   });
 }

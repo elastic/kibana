@@ -12,7 +12,6 @@
     "@kbn/es-query",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/securitysolution-ecs",
-    "@kbn/rule-registry-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/i18n",
     "@kbn/ui-theme",
@@ -20,6 +19,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/i18n-react",
     "@kbn/ui-actions-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin"
   ]
 }

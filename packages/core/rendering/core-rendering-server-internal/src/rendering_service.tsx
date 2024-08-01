@@ -42,6 +42,7 @@ import {
   getBrowserLoggingConfig,
 } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
+import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
@@ -121,7 +122,7 @@ export class RenderingService {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
     },
-    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
       renderOptions;
@@ -221,6 +222,7 @@ export class RenderingService {
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
     }
 
+    const apmConfig = getApmConfig(request.url.pathname);
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -249,6 +251,7 @@ export class RenderingService {
         logging: loggingConfig,
         env,
         clusterInfo,
+        apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
@@ -268,7 +271,6 @@ export class RenderingService {
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
-        vars: vars ?? {},
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
             const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);

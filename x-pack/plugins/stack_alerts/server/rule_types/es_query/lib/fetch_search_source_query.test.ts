@@ -7,6 +7,7 @@
 
 import { OnlySearchSourceRuleParams } from '../types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   updateSearchSource,
   generateLink,
@@ -63,6 +64,8 @@ const defaultParams: OnlySearchSourceRuleParams = {
   timeField: 'timeFieldNotFromDataView',
 };
 
+const logger = loggerMock.create();
+
 describe('fetchSearchSourceQuery', () => {
   const dataViewMock = createDataView();
 
@@ -90,7 +93,8 @@ describe('fetchSearchSourceQuery', () => {
         params,
         undefined,
         dateStart,
-        dateEnd
+        dateEnd,
+        logger
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -130,7 +134,8 @@ describe('fetchSearchSourceQuery', () => {
         params,
         '2020-02-09T23:12:41.941Z',
         dateStart,
-        dateEnd
+        dateEnd,
+        logger
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBe(true);
@@ -195,7 +200,8 @@ describe('fetchSearchSourceQuery', () => {
         params,
         '2020-01-09T22:12:41.941Z',
         dateStart,
-        dateEnd
+        dateEnd,
+        logger
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -235,7 +241,8 @@ describe('fetchSearchSourceQuery', () => {
         params,
         '2020-02-09T23:12:41.941Z',
         dateStart,
-        dateEnd
+        dateEnd,
+        logger
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(filterToExcludeHitsFromPreviousRun).toBe(null);
@@ -281,7 +288,8 @@ describe('fetchSearchSourceQuery', () => {
         params,
         '2020-02-09T23:12:41.941Z',
         dateStart,
-        dateEnd
+        dateEnd,
+        logger
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.track_total_hits).toBeUndefined();
@@ -337,6 +345,84 @@ describe('fetchSearchSourceQuery', () => {
         }
       `);
     });
+
+    it('should log if group by and top hits size is too large', async () => {
+      const params = {
+        ...defaultParams,
+        excludeHitsFromPreviousRun: false,
+        groupBy: 'top',
+        termField: 'host.name',
+        termSize: 10,
+        size: 200,
+      };
+
+      const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
+
+      const { dateStart, dateEnd } = getTimeRange();
+      const { searchSource } = await updateSearchSource(
+        searchSourceInstance,
+        dataViewMock,
+        params,
+        '2020-02-09T23:12:41.941Z',
+        dateStart,
+        dateEnd,
+        logger
+      );
+      const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.track_total_hits).toBeUndefined();
+      expect(searchRequest.size).toMatchInlineSnapshot(`0`);
+      expect(searchRequest.query).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "range": Object {
+                  "time": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2020-02-09T23:10:41.941Z",
+                    "lte": "2020-02-09T23:15:41.941Z",
+                  },
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        }
+      `);
+      expect(searchRequest.aggs).toMatchInlineSnapshot(`
+        Object {
+          "groupAgg": Object {
+            "aggs": Object {
+              "conditionSelector": Object {
+                "bucket_selector": Object {
+                  "buckets_path": Object {
+                    "compareValue": "_count",
+                  },
+                  "script": "params.compareValue < 0L",
+                },
+              },
+              "topHitsAgg": Object {
+                "top_hits": Object {
+                  "size": 100,
+                },
+              },
+            },
+            "terms": Object {
+              "field": "host.name",
+              "size": 10,
+            },
+          },
+          "groupAggCount": Object {
+            "stats_bucket": Object {
+              "buckets_path": "groupAgg._count",
+            },
+          },
+        }
+      `);
+      expect(logger.warn).toHaveBeenCalledWith('Top hits size is capped at 100');
+    });
   });
 
   describe('generateLink', () => {
@@ -352,7 +438,8 @@ describe('fetchSearchSourceQuery', () => {
         params,
         '2020-02-09T23:12:41.941Z',
         dateStart,
-        dateEnd
+        dateEnd,
+        logger
       );
 
       expect(filterToExcludeHitsFromPreviousRun).toMatchInlineSnapshot(`

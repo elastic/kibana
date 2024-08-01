@@ -3,7 +3,7 @@ info:
   title: Find list items API endpoint
   version: '2023-10-31'
 paths:
-  /api/lists/_find:
+  /api/lists/items/_find:
     get:
       x-labels: [serverless, ess]
       operationId: FindListItems

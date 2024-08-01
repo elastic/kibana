@@ -24,7 +24,7 @@ export const supportedFieldTypes = [
 export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
   supportedFieldTypes.includes(type as SupportedFieldType);
 
-export type SupportedFieldType = typeof supportedFieldTypes[number];
+export type SupportedFieldType = (typeof supportedFieldTypes)[number];
 
 export type FunctionParameterType =
   | SupportedFieldType

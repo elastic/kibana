@@ -22,7 +22,7 @@ import { chatCompleteRoute } from './chat_complete_route';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   appendAssistantMessageToConversation,
-  createOrUpdateConversationWithUserInput,
+  createConversationWithUserInput,
   langChainExecute,
 } from '../helpers';
 
@@ -139,7 +139,7 @@ describe('chatCompleteRoute', () => {
     jest.clearAllMocks();
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
     license.hasAtLeast.mockReturnValue(true);
-    (createOrUpdateConversationWithUserInput as jest.Mock).mockResolvedValue({ id: 'something' });
+    (createConversationWithUserInput as jest.Mock).mockResolvedValue({ id: 'something' });
     mockLangChainExecute.mockImplementation(
       async ({
         connectorId,

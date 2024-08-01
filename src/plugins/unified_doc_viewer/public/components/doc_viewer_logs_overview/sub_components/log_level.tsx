@@ -7,40 +7,19 @@
  */
 
 import React from 'react';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { CSSObject } from '@emotion/react';
 import { LogDocumentOverview } from '@kbn/discover-utils';
+import { LogLevelBadge } from '@kbn/discover-utils';
 
-const LEVEL_DICT = {
-  error: 'danger',
-  warn: 'warning',
-  info: 'primary',
-  debug: 'accent',
-} as const;
-
-type Level = keyof typeof LEVEL_DICT;
+const dataTestSubj = 'unifiedDocViewLogsOverviewLogLevel';
+const badgeCss: CSSObject = { maxWidth: '100px' };
 
 interface LogLevelProps {
   level: LogDocumentOverview['log.level'];
 }
 
 export function LogLevel({ level }: LogLevelProps) {
-  const { euiTheme } = useEuiTheme();
-
   if (!level) return null;
-  const colorName = LEVEL_DICT[level as Level];
-  const computedColor = colorName ? euiTheme.colors[colorName] : null;
 
-  return (
-    <EuiBadge
-      color="hollow"
-      css={css`
-        max-width: 100px;
-        ${computedColor ? `border: 2px solid ${computedColor};` : ''}
-      `}
-      data-test-subj="unifiedDocViewLogsOverviewLogLevel"
-    >
-      {level}
-    </EuiBadge>
-  );
+  return <LogLevelBadge logLevel={level} data-test-subj={dataTestSubj} css={badgeCss} />;
 }
