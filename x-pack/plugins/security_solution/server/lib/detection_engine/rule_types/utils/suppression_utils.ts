@@ -17,6 +17,7 @@ import {
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { SignalSourceHit } from '../types';
 
 export interface SuppressionTerm {
   field: string;
@@ -33,6 +34,7 @@ export const getSuppressionAlertFields = ({
   suppressionTerms,
   fallbackTimestamp,
   instanceId,
+  event,
 }: {
   fields: Record<string, string | number | null> | undefined;
   primaryTimestamp: string;
@@ -40,10 +42,16 @@ export const getSuppressionAlertFields = ({
   suppressionTerms: SuppressionTerm[];
   fallbackTimestamp: string;
   instanceId: string;
+  event?: SignalSourceHit;
 }) => {
+  console.error(
+    `primary timestamp: ${primaryTimestamp}, secondaryTimestamp: ${secondaryTimestamp}, fallbackTimestamp: ${fallbackTimestamp}`
+  );
+  console.error('WHAT ARE FIELDS', JSON.stringify(fields));
+  console.error('WHAT ARE EVENT', JSON.stringify(event));
   const suppressionTime = new Date(
-    get(fields, primaryTimestamp) ??
-      (secondaryTimestamp && get(fields, secondaryTimestamp)) ??
+    get(fields ?? event?._source, primaryTimestamp) ??
+      (secondaryTimestamp && get(fields ?? event?._source, secondaryTimestamp)) ??
       fallbackTimestamp
   );
 
@@ -55,6 +63,8 @@ export const getSuppressionAlertFields = ({
     [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
   };
 
+  console.error('WHAT ARE THE SUPPRESSION FIELDS', JSON.stringify(suppressionFields));
+
   return suppressionFields;
 };
 
@@ -64,13 +74,15 @@ export const getSuppressionAlertFields = ({
 export const getSuppressionTerms = ({
   alertSuppression,
   fields,
+  event,
 }: {
   fields: Record<string, unknown> | undefined;
   alertSuppression: AlertSuppressionCamel | undefined;
+  event: SignalSourceHit | undefined;
 }): SuppressionTerm[] => {
   const suppressedBy = alertSuppression?.groupBy ?? [];
 
-  const suppressedProps = pick(fields, suppressedBy) as Record<
+  const suppressedProps = pick(fields ?? event?._source, suppressedBy) as Record<
     string,
     string[] | number[] | undefined
   >;

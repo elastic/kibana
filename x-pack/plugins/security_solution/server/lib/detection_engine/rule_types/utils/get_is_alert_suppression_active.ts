@@ -28,11 +28,14 @@ export const getIsAlertSuppressionActive = async ({
   alertSuppression,
   isFeatureDisabled = false,
 }: GetIsAlertSuppressionActiveParams) => {
+  console.error('IS IT DISABLED', isFeatureDisabled);
   if (isFeatureDisabled) {
     return false;
   }
 
   const isAlertSuppressionConfigured = Boolean(alertSuppression?.groupBy?.length);
+
+  console.error('IS IT CONFIGURED', isAlertSuppressionConfigured);
 
   if (!isAlertSuppressionConfigured) {
     return false;
@@ -40,6 +43,8 @@ export const getIsAlertSuppressionActive = async ({
 
   const license = await firstValueFrom(licensing.license$);
   const hasPlatinumLicense = license.hasAtLeast('platinum');
+
+  console.error('hasPlatinumLicense?? ', hasPlatinumLicense);
 
   return hasPlatinumLicense;
 };

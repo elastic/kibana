@@ -22,6 +22,7 @@ import type {
 import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -40,6 +41,7 @@ export const bulkCreateWithSuppression = async <
   alertWithSuppression,
   ruleExecutionLogger,
   wrappedDocs,
+  buildingBlockAlerts,
   services,
   suppressionWindow,
   alertTimestampOverride,
@@ -50,6 +52,7 @@ export const bulkCreateWithSuppression = async <
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   wrappedDocs: Array<WrappedFieldsLatest<T>>;
+  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   services: RuleServices;
   suppressionWindow: string;
   alertTimestampOverride: Date | undefined;
@@ -92,6 +95,11 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
+  console.error(
+    'DO WRAPPED DOCS HAVE INSTANCE IDS',
+    wrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
+  );
+
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
     await alertWithSuppression(
       wrappedDocs.map((doc) => ({
@@ -99,11 +107,13 @@ export const bulkCreateWithSuppression = async <
         // `fields` should have already been merged into `doc._source`
         _source: doc._source,
       })),
+      // add building block alerts here when you get back
       suppressionWindow,
       enrichAlertsWrapper,
       alertTimestampOverride,
       isSuppressionPerRuleExecution,
-      maxAlerts
+      maxAlerts,
+      buildingBlockAlerts // do the same map as wrappedDocs
     );
 
   const end = performance.now();

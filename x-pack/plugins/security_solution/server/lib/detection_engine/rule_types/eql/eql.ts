@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
+import { partition } from 'lodash';
+
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -45,6 +47,11 @@ import type {
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import {
+  ALERT_ANCESTORS,
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_GROUP_ID,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -162,12 +169,45 @@ export const eqlExecutor = async ({
           newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
+        console.error('isAlertSuppressionActive??? ', isAlertSuppressionActive);
         if (isAlertSuppressionActive) {
           result.warningMessages.push(
             'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
           );
+
+          const candidateSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
+          // partition sequence alert from building block alerts
+          const [sequenceAlerts, buildingBlockAlerts] = partition(
+            candidateSignals,
+            (signal) => signal._source[ALERT_BUILDING_BLOCK_TYPE] == null
+          );
+          console.error(
+            'WHAT ARE THE NEW SIGNALS',
+            sequenceAlerts.map((alert) => alert._source['agent.name'])
+          );
+          await bulkCreateSuppressedAlertsInMemory({
+            enrichedEvents: sequenceAlerts,
+            buildingBlockAlerts,
+            skipWrapping: true,
+            toReturn: result,
+            wrapHits,
+            bulkCreate,
+            services,
+            buildReasonMessage: buildReasonMessageForEqlAlert,
+            ruleExecutionLogger,
+            tuple,
+            alertSuppression: completeRule.ruleParams.alertSuppression,
+            wrapSuppressedHits,
+            alertTimestampOverride,
+            alertWithSuppression,
+            experimentalFeatures,
+          });
+        } else {
+          newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
         }
-        newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
+        // once partitioned, we pass in the sequence alerts to check for suppression
+        // and then filter out the suppressable sequence alerts and the building
+        // block alerts associated with the suppressable sequence alerts.
       } else {
         throw new Error(
           'eql query response should have either `sequences` or `events` but had neither'

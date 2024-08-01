@@ -341,7 +341,8 @@ export type WrapHits = (
 
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
-  buildReasonMessage: BuildReasonMessage
+  buildReasonMessage: BuildReasonMessage,
+  skipGenerateId: boolean
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
 
 export type WrapSequences = (

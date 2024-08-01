@@ -7,6 +7,7 @@
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
@@ -49,10 +50,12 @@ export interface BulkCreateSuppressedAlertsParams
     | 'alertTimestampOverride'
   > {
   enrichedEvents: SignalSourceHit[];
+  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
   mergeSourceAndFields?: boolean;
   maxNumberOfAlertsMultiplier?: number;
+  skipWrapping?: boolean;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -61,6 +64,8 @@ export interface BulkCreateSuppressedAlertsParams
  */
 export const bulkCreateSuppressedAlertsInMemory = async ({
   enrichedEvents,
+  buildingBlockAlerts,
+  skipWrapping = false,
   toReturn,
   wrapHits,
   bulkCreate,
@@ -92,14 +97,26 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);
+    console.error('unsuppressible docs', unsuppressibleWrappedDocs.length);
     suppressibleEvents = partitionedEvents[0];
   }
 
-  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents, buildReasonMessage);
+  // refactor the below into a separate function
+  const suppressibleWrappedDocs = wrapSuppressedHits(
+    suppressibleEvents,
+    buildReasonMessage,
+    skipWrapping
+  );
+
+  console.error(
+    'SUPPRESSIBLE WRAPPED instance ids',
+    suppressibleWrappedDocs.map((doc) => doc._source[ALERT_INSTANCE_ID])
+  );
 
   return executeBulkCreateAlerts({
     suppressibleWrappedDocs,
     unsuppressibleWrappedDocs,
+    buildingBlockAlerts,
     toReturn,
     bulkCreate,
     services,
@@ -126,6 +143,7 @@ export interface ExecuteBulkCreateAlertsParams<T extends SuppressionFieldsLatest
   > {
   unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   suppressibleWrappedDocs: Array<WrappedFieldsLatest<T>>;
+  buildingBlockAlerts?: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
   maxNumberOfAlertsMultiplier?: number;
@@ -139,6 +157,7 @@ export const executeBulkCreateAlerts = async <
 >({
   unsuppressibleWrappedDocs,
   suppressibleWrappedDocs,
+  buildingBlockAlerts,
   toReturn,
   bulkCreate,
   services,
@@ -177,6 +196,7 @@ export const executeBulkCreateAlerts = async <
     alertWithSuppression,
     ruleExecutionLogger,
     wrappedDocs: suppressibleWrappedDocs,
+    buildingBlockAlerts,
     services,
     suppressionWindow,
     alertTimestampOverride,

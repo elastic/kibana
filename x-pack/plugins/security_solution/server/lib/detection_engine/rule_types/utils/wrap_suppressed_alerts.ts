@@ -47,6 +47,7 @@ export const wrapSuppressedAlerts = ({
   ruleExecutionLogger,
   publicBaseUrl,
   primaryTimestamp,
+  skipGenerateId = false,
   secondaryTimestamp,
 }: {
   events: SignalSourceHit[];
@@ -59,39 +60,43 @@ export const wrapSuppressedAlerts = ({
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
   primaryTimestamp: string;
+  skipGenerateId: boolean;
   secondaryTimestamp?: string;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
       fields: event.fields,
+      event,
     });
-
-    const id = generateId(
-      event._index,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      event._id!,
-      String(event._version),
-      `${spaceId}:${completeRule.alertId}`
-    );
+    let id = event._id;
+    let baseAlert: BaseFieldsLatest = event;
+    if (!skipGenerateId) {
+      id = generateId(
+        event._index,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        event._id!,
+        String(event._version),
+        `${spaceId}:${completeRule.alertId}`
+      );
+      baseAlert = buildBulkBody(
+        spaceId,
+        completeRule,
+        event,
+        mergeStrategy,
+        [],
+        true,
+        buildReasonMessage,
+        indicesToQuery,
+        alertTimestampOverride,
+        ruleExecutionLogger,
+        id,
+        publicBaseUrl
+      );
+    }
 
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
-
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
-      spaceId,
-      completeRule,
-      event,
-      mergeStrategy,
-      [],
-      true,
-      buildReasonMessage,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
-
+    console.error('INSTANCE ID', instanceId);
     return {
       _id: id,
       _index: '',
@@ -101,6 +106,7 @@ export const wrapSuppressedAlerts = ({
           primaryTimestamp,
           secondaryTimestamp,
           fields: event.fields,
+          event,
           suppressionTerms,
           fallbackTimestamp: baseAlert[TIMESTAMP],
           instanceId,

@@ -54,8 +54,10 @@ export const buildAlertGroupFromSequence = (
     return [];
   }
 
-  // The "building block" alerts start out as regular BaseFields. We'll add the group ID and index fields
-  // after creating the shell alert later on, since that's when the group ID is determined.
+  // The "building block" alerts start out as regular BaseFields.
+  // We'll add the group ID and index fields
+  // after creating the shell alert later on
+  // since that's when the group ID is determined.
   let baseAlerts: BaseFieldsLatest[] = [];
   try {
     baseAlerts = sequence.events.map((event) =>
