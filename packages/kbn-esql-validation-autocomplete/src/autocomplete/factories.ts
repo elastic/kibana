@@ -22,7 +22,8 @@ import {
 import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import type { ESQLRealField } from '../validation/types';
+import { ESQLRealField } from '../validation/types';
+import { isNumericType } from '../shared/esql_types';
 
 const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionDefinitions)
@@ -359,7 +360,7 @@ export function getUnitDuration(unit: number = 1) {
  */
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('number')) {
+  if (types.some(isNumericType)) {
     if (commandName === 'limit') {
       // suggest 10/100/1000 for limit
       suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));

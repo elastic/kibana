@@ -179,19 +179,30 @@ export interface ESQLList extends ESQLAstBaseItem {
   values: ESQLLiteral[];
 }
 
+export type ESQLNumericLiteralType = 'decimal' | 'integer';
+
 export type ESQLLiteral =
-  | ESQLNumberLiteral
+  | ESQLDecimalLiteral
+  | ESQLIntegerLiteral
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
   | ESQLParamLiteral<string>;
 
+// Exporting here to prevent TypeScript error TS4058
+// Return type of exported function has or is using name 'ESQLNumericLiteral' from external module
 // @internal
-export interface ESQLNumberLiteral extends ESQLAstBaseItem {
+export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ESQLAstBaseItem {
   type: 'literal';
-  literalType: 'number';
+  literalType: T;
   value: number;
 }
+// We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
+// @internal
+export type ESQLDecimalLiteral = ESQLNumericLiteral<'decimal'>;
+
+// @internal
+export type ESQLIntegerLiteral = ESQLNumericLiteral<'integer'>;
 
 // @internal
 export interface ESQLBooleanLiteral extends ESQLAstBaseItem {

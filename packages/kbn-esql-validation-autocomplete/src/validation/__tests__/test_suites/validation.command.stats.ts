@@ -15,15 +15,15 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
         test('no errors on correct usage', async () => {
           const { expectErrors } = await setup();
 
-          await expectErrors('from a_index | stats by stringField', []);
+          await expectErrors('from a_index | stats by textField', []);
           await expectErrors(
             `FROM index
-            | EVAL numberField * 3.281
-            | STATS avg_numberField = AVG(\`numberField * 3.281\`)`,
+            | EVAL doubleField * 3.281
+            | STATS avg_doubleField = AVG(\`doubleField * 3.281\`)`,
             []
           );
           await expectErrors(
-            `FROM index | STATS AVG(numberField) by round(numberField) + 1 | EVAL \`round(numberField) + 1\` / 2`,
+            `FROM index | STATS AVG(doubleField) by round(doubleField) + 1 | EVAL \`round(doubleField) + 1\` / 2`,
             []
           );
         });
@@ -40,18 +40,18 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
           test('no errors on correct usage', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('from a_index | stats avg(numberField) by 1', []);
-            await expectErrors('from a_index | stats count(`numberField`)', []);
+            await expectErrors('from a_index | stats avg(doubleField) by 1', []);
+            await expectErrors('from a_index | stats count(`doubleField`)', []);
             await expectErrors('from a_index | stats count(*)', []);
             await expectErrors('from a_index | stats count()', []);
             await expectErrors('from a_index | stats var0 = count(*)', []);
             await expectErrors('from a_index | stats var0 = count()', []);
-            await expectErrors('from a_index | stats var0 = avg(numberField), count(*)', []);
+            await expectErrors('from a_index | stats var0 = avg(doubleField), count(*)', []);
             await expectErrors(`from a_index | stats sum(case(false, 0, 1))`, []);
             await expectErrors(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
 
             // "or" must accept "null"
-            await expectErrors('from a_index | stats count(stringField == "a" or null)', []);
+            await expectErrors('from a_index | stats count(textField == "a" or null)', []);
           });
 
           test('sub-command can reference aggregated field', async () => {
@@ -59,9 +59,9 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
 
             for (const subCommand of ['keep', 'drop', 'eval']) {
               await expectErrors(
-                'from a_index | stats count(`numberField`) | ' +
+                'from a_index | stats count(`doubleField`) | ' +
                   subCommand +
-                  ' `count(``numberField``)` ',
+                  ' `count(``doubleField``)` ',
                 []
               );
             }
@@ -70,64 +70,64 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on agg and non-agg mix', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('from a_index | STATS sum( numberField ) + abs( numberField ) ', [
-              'Cannot combine aggregation and non-aggregation values in [STATS], found [sum(numberField)+abs(numberField)]',
+            await expectErrors('from a_index | STATS sum( doubleField ) + abs( doubleField ) ', [
+              'Cannot combine aggregation and non-aggregation values in [STATS], found [sum(doubleField)+abs(doubleField)]',
             ]);
-            await expectErrors('from a_index | STATS abs( numberField + sum( numberField )) ', [
-              'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(numberField+sum(numberField))]',
+            await expectErrors('from a_index | STATS abs( doubleField + sum( doubleField )) ', [
+              'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(doubleField+sum(doubleField))]',
             ]);
           });
 
           test('errors on each aggregation field, which does not contain at least one agg function', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('from a_index | stats numberField + 1', [
-              'At least one aggregation function required in [STATS], found [numberField+1]',
+            await expectErrors('from a_index | stats doubleField + 1', [
+              'At least one aggregation function required in [STATS], found [doubleField+1]',
             ]);
-            await expectErrors('from a_index | stats numberField + 1, stringField', [
-              'At least one aggregation function required in [STATS], found [numberField+1]',
-              'Expected an aggregate function or group but got [stringField] of type [FieldAttribute]',
+            await expectErrors('from a_index | stats doubleField + 1, textField', [
+              'At least one aggregation function required in [STATS], found [doubleField+1]',
+              'Expected an aggregate function or group but got [textField] of type [FieldAttribute]',
             ]);
-            await expectErrors('from a_index | stats numberField + 1, numberField + 2, count()', [
-              'At least one aggregation function required in [STATS], found [numberField+1]',
-              'At least one aggregation function required in [STATS], found [numberField+2]',
+            await expectErrors('from a_index | stats doubleField + 1, doubleField + 2, count()', [
+              'At least one aggregation function required in [STATS], found [doubleField+1]',
+              'At least one aggregation function required in [STATS], found [doubleField+2]',
             ]);
             await expectErrors(
-              'from a_index | stats numberField + 1, numberField + count(), count()',
-              ['At least one aggregation function required in [STATS], found [numberField+1]']
+              'from a_index | stats doubleField + 1, doubleField + count(), count()',
+              ['At least one aggregation function required in [STATS], found [doubleField+1]']
             );
-            await expectErrors('from a_index | stats 5 + numberField + 1', [
-              'At least one aggregation function required in [STATS], found [5+numberField+1]',
+            await expectErrors('from a_index | stats 5 + doubleField + 1', [
+              'At least one aggregation function required in [STATS], found [5+doubleField+1]',
             ]);
-            await expectErrors('from a_index | stats numberField + 1 by ipField', [
-              'At least one aggregation function required in [STATS], found [numberField+1]',
+            await expectErrors('from a_index | stats doubleField + 1 by ipField', [
+              'At least one aggregation function required in [STATS], found [doubleField+1]',
             ]);
           });
 
           test('errors when input is not an aggregate function', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('from a_index | stats numberField ', [
-              'Expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
+            await expectErrors('from a_index | stats doubleField ', [
+              'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
             ]);
           });
 
           test('various errors', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('from a_index | stats numberField=', [
+            await expectErrors('from a_index | stats doubleField=', [
               "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
-            await expectErrors('from a_index | stats numberField=5 by ', [
+            await expectErrors('from a_index | stats doubleField=5 by ', [
               "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
-            await expectErrors('from a_index | stats avg(numberField) by wrongField', [
+            await expectErrors('from a_index | stats avg(doubleField) by wrongField', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('from a_index | stats avg(numberField) by wrongField + 1', [
+            await expectErrors('from a_index | stats avg(doubleField) by wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('from a_index | stats avg(numberField) by var0 = wrongField + 1', [
+            await expectErrors('from a_index | stats avg(doubleField) by var0 = wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
             await expectErrors('from a_index | stats var0 = avg(fn(number)), count(*)', [
@@ -142,7 +142,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               'Using wildcards (*) in round is not allowed',
             ]);
             await expectErrors('from a_index | stats count(count(*))', [
-              `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
+              `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
             ]);
           });
         });
@@ -152,20 +152,20 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors(
-              'from a_index | stats avg(numberField), percentile(numberField, 50) by ipField',
+              'from a_index | stats avg(doubleField), percentile(doubleField, 50) by ipField',
               []
             );
             await expectErrors(
-              'from a_index | stats avg(numberField), percentile(numberField, 50) BY ipField',
+              'from a_index | stats avg(doubleField), percentile(doubleField, 50) BY ipField',
               []
             );
             await expectErrors(
-              'from a_index | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
+              'from a_index | stats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
               []
             );
             for (const op of ['+', '-', '*', '/', '%']) {
               await expectErrors(
-                `from a_index | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
+                `from a_index | stats avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
                 []
               );
             }
@@ -185,7 +185,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | stats count(* + 1) BY ipField', [
               "SyntaxError: no viable alternative at input 'count(* +'",
             ]);
-            await expectErrors('from a_index | stats count(* + round(numberField)) BY ipField', [
+            await expectErrors('from a_index | stats count(* + round(doubleField)) BY ipField', [
               "SyntaxError: no viable alternative at input 'count(* +'",
             ]);
           });
@@ -197,18 +197,18 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               'Using wildcards (*) in round is not allowed',
             ]);
             await expectErrors('from a_index | stats count(count(*)) BY ipField', [
-              `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
+              `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
             ]);
           });
 
           test('various errors', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('from a_index | stats avg(numberField) by percentile(numberField)', [
+            await expectErrors('from a_index | stats avg(doubleField) by percentile(doubleField)', [
               'STATS BY does not support function percentile',
             ]);
             await expectErrors(
-              'from a_index | stats avg(numberField) by stringField, percentile(numberField) by ipField',
+              'from a_index | stats avg(doubleField) by textField, percentile(doubleField) by ipField',
               [
                 "SyntaxError: mismatched input 'by' expecting <EOF>",
                 'STATS BY does not support function percentile',
@@ -220,34 +220,37 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             test('no errors', async () => {
               const { expectErrors } = await setup();
 
-              await expectErrors('from index | stats by bucket(dateField, pi(), "", "")', []);
               await expectErrors(
                 'from index | stats by bucket(dateField, 1 + 30 / 10, "", "")',
                 []
               );
               await expectErrors(
                 'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-                []
+                ['Argument of [bucket] must be [date], found value [concat("","")] type [keyword]']
               );
             });
 
             test('errors', async () => {
               const { expectErrors } = await setup();
 
+              await expectErrors('from index | stats by bucket(dateField, pi(), "", "")', [
+                'Argument of [bucket] must be [integer], found value [pi()] type [double]',
+              ]);
+
               await expectErrors(
-                'from index | stats by bucket(dateField, abs(numberField), "", "")',
-                ['Argument of [bucket] must be a constant, received [abs(numberField)]']
+                'from index | stats by bucket(dateField, abs(doubleField), "", "")',
+                ['Argument of [bucket] must be a constant, received [abs(doubleField)]']
               );
               await expectErrors(
-                'from index | stats by bucket(dateField, abs(length(numberField)), "", "")',
-                ['Argument of [bucket] must be a constant, received [abs(length(numberField))]']
+                'from index | stats by bucket(dateField, abs(length(doubleField)), "", "")',
+                ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
               );
               await expectErrors(
-                'from index | stats by bucket(dateField, numberField, stringField, stringField)',
+                'from index | stats by bucket(dateField, doubleField, textField, textField)',
                 [
-                  'Argument of [bucket] must be a constant, received [numberField]',
-                  'Argument of [bucket] must be a constant, received [stringField]',
-                  'Argument of [bucket] must be a constant, received [stringField]',
+                  'Argument of [bucket] must be a constant, received [doubleField]',
+                  'Argument of [bucket] must be a constant, received [textField]',
+                  'Argument of [bucket] must be a constant, received [textField]',
                 ]
               );
             });
@@ -269,11 +272,11 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | stats 5 + avg(numberField) ${builtinWrapping}`,
+                    `from a_index | stats 5 + avg(doubleField) ${builtinWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats 5 ${builtinWrapping} + avg(numberField)`,
+                    `from a_index | stats 5 ${builtinWrapping} + avg(doubleField)`,
                     []
                   );
                 });
@@ -281,16 +284,16 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                 test('errors', async () => {
                   const { expectErrors } = await setup();
 
-                  await expectErrors(`from a_index | stats 5 ${builtinWrapping} + numberField`, [
-                    `At least one aggregation function required in [STATS], found [5${builtinWrapping}+numberField]`,
+                  await expectErrors(`from a_index | stats 5 ${builtinWrapping} + doubleField`, [
+                    `At least one aggregation function required in [STATS], found [5${builtinWrapping}+doubleField]`,
                   ]);
-                  await expectErrors(`from a_index | stats 5 + numberField ${builtinWrapping}`, [
-                    `At least one aggregation function required in [STATS], found [5+numberField${builtinWrapping}]`,
+                  await expectErrors(`from a_index | stats 5 + doubleField ${builtinWrapping}`, [
+                    `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
                   ]);
                   await expectErrors(
-                    `from a_index | stats 5 + numberField ${builtinWrapping}, var0 = sum(numberField)`,
+                    `from a_index | stats 5 + doubleField ${builtinWrapping}, var0 = sum(doubleField)`,
                     [
-                      `At least one aggregation function required in [STATS], found [5+numberField${builtinWrapping}]`,
+                      `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
                     ]
                   );
                 });
@@ -304,31 +307,31 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} sum(numberField) ${closingWrapping}`,
+                    `from a_index | stats ${evalWrapping} sum(doubleField) ${closingWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} sum(numberField) ${closingWrapping} + ${evalWrapping} sum(numberField) ${closingWrapping}`,
+                    `from a_index | stats ${evalWrapping} sum(doubleField) ${closingWrapping} + ${evalWrapping} sum(doubleField) ${closingWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} sum(numberField + numberField) ${closingWrapping}`,
+                    `from a_index | stats ${evalWrapping} sum(doubleField + doubleField) ${closingWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
+                    `from a_index | stats ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} sum(numberField + round(numberField)) ${closingWrapping} + ${evalWrapping} sum(numberField + round(numberField)) ${closingWrapping}`,
+                    `from a_index | stats ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping} + ${evalWrapping} sum(doubleField + round(doubleField)) ${closingWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats sum(${evalWrapping} numberField ${closingWrapping} )`,
+                    `from a_index | stats sum(${evalWrapping} doubleField ${closingWrapping} )`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats sum(${evalWrapping} numberField ${closingWrapping} ) + sum(${evalWrapping} numberField ${closingWrapping} )`,
+                    `from a_index | stats sum(${evalWrapping} doubleField ${closingWrapping} ) + sum(${evalWrapping} doubleField ${closingWrapping} )`,
                     []
                   );
                 });
@@ -337,21 +340,21 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} numberField + sum(numberField) ${closingWrapping}`,
+                    `from a_index | stats ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}`,
                     [
-                      `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}numberField+sum(numberField)${closingWrapping}]`,
+                      `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]
                   );
                   await expectErrors(
-                    `from a_index | stats ${evalWrapping} numberField + sum(numberField) ${closingWrapping}, var0 = sum(numberField)`,
+                    `from a_index | stats ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var0 = sum(doubleField)`,
                     [
-                      `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}numberField+sum(numberField)${closingWrapping}]`,
+                      `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]
                   );
                   await expectErrors(
-                    `from a_index | stats var0 = ${evalWrapping} numberField + sum(numberField) ${closingWrapping}, var1 = sum(numberField)`,
+                    `from a_index | stats var0 = ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var1 = sum(doubleField)`,
                     [
-                      `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}numberField+sum(numberField)${closingWrapping}]`,
+                      `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
                     ]
                   );
                 });

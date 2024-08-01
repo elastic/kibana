@@ -11,14 +11,14 @@ import { supportedFieldTypes } from '../definitions/types';
 
 export const fields = [
   ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-  { name: 'any#Char$Field', type: 'number' },
-  { name: 'kubernetes.something.something', type: 'number' },
+  { name: 'any#Char$Field', type: 'double' },
+  { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },
 ];
 
 export const enrichFields = [
-  { name: 'otherField', type: 'string' },
-  { name: 'yetAnotherField', type: 'number' },
+  { name: 'otherField', type: 'text' },
+  { name: 'yetAnotherField', type: 'double' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -58,7 +58,7 @@ export function getCallbackMocks() {
         return unsupported_field;
       }
       if (/dissect|grok/.test(query)) {
-        return [{ name: 'firstWord', type: 'string' }];
+        return [{ name: 'firstWord', type: 'text' }];
       }
       return fields;
     }),
