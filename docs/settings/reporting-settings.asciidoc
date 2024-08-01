@@ -192,11 +192,11 @@ URL that Reporting is attempting to open is logged during report execution.
 
 [float]
 [[reporting-network-policy]]
-==== Network policy settings for Chromium headless browser
+==== Network policy settings for headless Chromium restrictions
 
-To generate PDF reports, *Reporting* uses the Chromium browser to fully load the {kib} page on the server. This potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a field formatted as an image, or to show an image in a Markdown visualization.
+To generate PDF reports, Reporting uses a headless Chromium browser to fully load the {kib} page on the server. This potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a field formatted as an image, or to show an image in a Markdown visualization.
 
-If the Chromium browser is asked to send a request that violates the network policy, *Reporting* stops processing the page before the request goes out, and the report is marked as a failure. Additional information about the event is in the {kib} server logs.
+If the headless Chromium browser is asked to send a request that violates the network policy, it will stop processing the page before the request goes out, and the report is marked as a failure. Additional information about the event is in the {kib} server logs.
 
 NOTE: {kib} installations are not designed to be publicly accessible over the internet. The Reporting network policy and other capabilities of the Elastic Stack security features do not change this condition.
 
@@ -204,7 +204,7 @@ NOTE: {kib} installations are not designed to be publicly accessible over the in
 Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown visualization can show an image from a remote server.
 
 `xpack.screenshotting.networkPolicy.enabled`::
-When `false`, disables the *Reporting* network policy. Defaults to `true`.
+When `false`, disables the headless browser network policy. Defaults to `true`.
 
 `xpack.screenshotting.networkPolicy.rules`::
 A policy is specified as an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol is not specified, the rule matches any host or protocol.
