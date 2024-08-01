@@ -34,6 +34,7 @@ import { SectionPanel } from './section_panel';
 import { SolutionView } from './solution_view';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
+import type { EventTracker } from '../../analytics';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { SpacesManager } from '../../spaces_manager';
@@ -58,6 +59,7 @@ interface Props {
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
   solutionNavExperiment?: Promise<boolean>;
+  eventTracker: EventTracker;
 }
 
 interface State {
@@ -470,13 +472,29 @@ export class ManageSpacePage extends Component<Props, State> {
     };
 
     let action;
-    if (this.editingExistingSpace()) {
-      action = this.props.spacesManager.updateSpace(params);
+    const isEditing = this.editingExistingSpace();
+    const { spacesManager, eventTracker } = this.props;
+
+    if (isEditing) {
+      action = spacesManager.updateSpace(params);
     } else {
-      action = this.props.spacesManager.createSpace(params);
+      action = spacesManager.createSpace(params);
     }
 
     this.setState({ saveInProgress: true });
+
+    const trackSpaceSolutionChange = () => {
+      const hasChangedSolution = this.state.originalSpace?.solution !== solution;
+
+      if (!hasChangedSolution || solution === undefined) return;
+
+      eventTracker.spaceSolutionChanged({
+        spaceId: id,
+        solution,
+        solutionPrev: this.state.originalSpace?.solution,
+        action: isEditing ? 'edit' : 'create',
+      });
+    };
 
     action
       .then(() => {
@@ -490,11 +508,15 @@ export class ManageSpacePage extends Component<Props, State> {
           )
         );
 
+        trackSpaceSolutionChange();
         this.backToSpacesList();
 
         if (requireRefresh) {
-          setTimeout(() => {
-            window.location.reload();
+          const flushAnalyticsEvents = window.__kbnAnalytics?.flush ?? (() => Promise.resolve());
+          flushAnalyticsEvents().then(() => {
+            setTimeout(() => {
+              window.location.reload();
+            });
           });
         }
       })

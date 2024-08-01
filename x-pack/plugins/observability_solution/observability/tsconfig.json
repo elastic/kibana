@@ -109,6 +109,7 @@
     "@kbn/slo-schema",
     "@kbn/license-management-plugin",
     "@kbn/observability-alerting-rule-utils",
+    "@kbn/core-ui-settings-server-mocks",
   ],
   "exclude": [
     "target/**/*"

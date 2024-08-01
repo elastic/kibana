@@ -17,7 +17,7 @@ export const MAX_COMPARISON_FIELDS = 250;
 export interface UseComparisonFieldsProps {
   dataView: DataView;
   selectedFieldNames: string[];
-  selectedDocs: string[];
+  selectedDocIds: string[];
   showAllFields: boolean;
   showMatchingValues: boolean;
   getDocById: (id: string) => DataTableRecord | undefined;
@@ -27,14 +27,14 @@ export interface UseComparisonFieldsProps {
 export const useComparisonFields = ({
   dataView,
   selectedFieldNames,
-  selectedDocs,
+  selectedDocIds,
   showAllFields,
   showMatchingValues,
   getDocById,
   additionalFieldGroups,
 }: UseComparisonFieldsProps) => {
   const { baseDoc, comparisonDocs } = useMemo(() => {
-    const [baseDocId, ...comparisonDocIds] = selectedDocs;
+    const [baseDocId, ...comparisonDocIds] = selectedDocIds;
 
     return {
       baseDoc: getDocById(baseDocId),
@@ -42,7 +42,7 @@ export const useComparisonFields = ({
         .map((docId) => getDocById(docId))
         .filter((doc): doc is DataTableRecord => Boolean(doc)),
     };
-  }, [getDocById, selectedDocs]);
+  }, [getDocById, selectedDocIds]);
 
   return useMemo(() => {
     let comparisonFields = convertFieldsToFallbackFields({

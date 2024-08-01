@@ -38,6 +38,7 @@
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
     "@kbn/cloud-experiments-plugin",
+    "@kbn/core-analytics-browser",
     "@kbn/security-plugin-types-common",
     "@kbn/core-application-browser",
     "@kbn/unsaved-changes-prompt",
