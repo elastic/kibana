@@ -1144,7 +1144,7 @@ class AgentPolicyService {
       };
 
       if (policy.unenroll_timeout) {
-        fleetServerPolicy.unenroll_timeout = policy.unenroll_timeout;
+        // TODO: if this is set, we need to schedule a task
       }
 
       acc.push(fleetServerPolicy);
