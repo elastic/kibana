@@ -171,7 +171,7 @@ export const getSavedObjectTypes = (
       name: AGENT_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: useSpaceAwareness ? 'multiple' : 'agnostic', // TEMP multiple until we address TODO
       management: {
         importableAndExportable: false,
       },
@@ -468,7 +468,7 @@ export const getSavedObjectTypes = (
       name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: useSpaceAwareness ? 'multiple' : 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -871,7 +871,7 @@ export const getSavedObjectTypes = (
       name: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: useSpaceAwareness ? 'multiple' : 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -884,7 +884,7 @@ export const getSavedObjectTypes = (
       name: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: true,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: useSpaceAwareness ? 'multiple' : 'agnostic',
       management: {
         importableAndExportable: false,
       },

@@ -49,6 +49,7 @@ import {
   FleetUnauthorizedError,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -218,7 +219,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
-  const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
+  const {
+    has_fleet_server: hasFleetServer,
+    force,
+    space_ids: spaceIds,
+    ...newPolicy
+  } = request.body;
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
@@ -262,12 +268,30 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, ...data } = request.body;
+  const { force, space_ids: spaceIds, ...data } = request.body;
 
-  const spaceId = fleetContext.spaceId;
+  let spaceId = fleetContext.spaceId;
+
   try {
+    // Detect space change, will need to updated after multiple space support
+    if (spaceIds?.length && spaceIds[0] !== spaceId) {
+      // TODO validate user access
+      // TODO update space
+      // await agentPolicyService.updateSpace(
+      console.log('TEST', spaceIds, spaceId);
+      await updateAgentPolicySpaces({
+        agentPolicyId: request.params.agentPolicyId,
+        currentSpaceId: spaceId,
+        newSpaceIds: spaceIds,
+      });
+
+      console.log('TATA', spaceIds, spaceId);
+
+      spaceId = spaceIds[0];
+    }
+
     const agentPolicy = await agentPolicyService.update(
-      soClient,
+      appContextService.getInternalUserSOClientForSpaceId(spaceId),
       esClient,
       request.params.agentPolicyId,
       data,
