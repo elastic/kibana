@@ -249,10 +249,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
                 return true;
               }
               arrToCheck.push(...currentObj.all);
-            } else if (
-              typeof currentObj[key as keyof RoleMappingRule] === 'object' &&
-              currentObj[key as keyof RoleMappingRule] !== null
-            ) {
+            } else if (this.isObject(currentObj[key as keyof RoleMappingRule])) {
               arrToCheck.push(currentObj[key as keyof RoleMappingRule] as RoleMappingRule);
             }
           }
