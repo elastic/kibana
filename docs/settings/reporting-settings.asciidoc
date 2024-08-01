@@ -24,8 +24,7 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 === Enable reporting
 
 [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}::
-When `true`, enables the {report-features}. Set this to `false` to disable {report-features} entirely. The
-default is `true`.
+When `true`, enables the {report-features}. Set this to `false` to disable {report-features} entirely. The default is `true`.
 
 [NOTE]
 ============
