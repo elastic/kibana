@@ -251,7 +251,7 @@ export const cli = () => {
 
       const PROXY_URL = process.env.PROXY_URL;
       const PROXY_SECRET = process.env.PROXY_SECRET;
-      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID || undefined;
+      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID;
 
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
       // This works for either local executions or fallback in case proxy service is unavailable.
