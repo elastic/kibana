@@ -11,19 +11,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
-import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  API_VERSIONS,
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
-} from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
-import { saveSettings } from '../../services/settings';
+import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -110,33 +105,7 @@ export const postEnableSpaceAwarenessHandler: FleetRequestHandler = async (
   response
 ) => {
   try {
-    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-
-    // TODO If settings SO already set => return
-
-    // Migration
-    // For every policy => create a new one (shortcut for POC do not write package policies)
-    const res = await soClient.find<any>({
-      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-      perPage: SO_SEARCH_LIMIT,
-    });
-
-    // Should probably check results
-    await soClient.bulkCreate<any>(
-      res.saved_objects.map((so) => ({
-        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-        id: so.id,
-        attributes: so.attributes,
-      })),
-      {
-        overwrite: true,
-      }
-    );
-
-    // Update Settings SO
-    await saveSettings(soClient, {
-      use_space_awareness: true,
-    });
+    await enableSpaceAwarenessMigration();
 
     return response.ok({
       body: {},

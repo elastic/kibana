@@ -22,7 +22,7 @@ import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_typ
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   installationStatuses,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
@@ -480,8 +480,8 @@ export const getPackageUsageStats = async ({
   pkgName: string;
 }): Promise<PackageUsageStats> => {
   const filter = normalizeKuery(
-    PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-    `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
+    LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`
   );
   const agentPolicyCount = new Set<string>();
   let page = 1;
@@ -491,7 +491,7 @@ export const getPackageUsageStats = async ({
     // using saved Objects client directly, instead of the `list()` method of `package_policy` service
     // in order to not cause a circular dependency (package policy service imports from this module)
     const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
-      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       perPage: 1000,
       page: page++,
       filter,
@@ -501,7 +501,7 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 

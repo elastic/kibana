@@ -12,7 +12,10 @@ import semverCoerce from 'semver/functions/coerce';
 import { uniqBy } from 'lodash';
 
 import type { AgentPolicy } from '../../../common/types';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../common/constants';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_PACKAGE,
+} from '../../../common/constants';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 import { packagePolicyService } from '../package_policy';
@@ -27,7 +30,7 @@ export const getFleetServerPolicies = async (
   soClient: SavedObjectsClientContract
 ): Promise<AgentPolicy[]> => {
   const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
-    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
+    kuery: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
     spaceId: '*',
   });
 

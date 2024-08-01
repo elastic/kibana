@@ -10,10 +10,14 @@ import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/serve
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
+
+import {
   OUTPUT_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -155,6 +159,7 @@ export const getSavedObjectTypes = (
           secret_storage_requirements_met: { type: 'boolean' },
           output_secret_storage_requirements_met: { type: 'boolean' },
           use_space_awareness: { type: 'boolean', index: false },
+          use_space_awareness_migration_started_at: { type: 'date', index: false },
         },
       },
       migrations: {
@@ -507,11 +512,11 @@ export const getSavedObjectTypes = (
         '8.0.0': migrateOutputToV800,
       },
     },
-    [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
-      name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+      name: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -698,6 +703,50 @@ export const getSavedObjectTypes = (
         '8.6.0': migratePackagePolicyToV860,
         '8.7.0': migratePackagePolicyToV870,
         '8.8.0': migratePackagePolicyToV880,
+      },
+    },
+    [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+      name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+          description: { type: 'text' },
+          namespace: { type: 'keyword' },
+          enabled: { type: 'boolean' },
+          is_managed: { type: 'boolean' },
+          policy_id: { type: 'keyword' },
+          policy_ids: { type: 'keyword' },
+          package: {
+            properties: {
+              name: { type: 'keyword' },
+              title: { type: 'keyword' },
+              version: { type: 'keyword' },
+              requires_root: { type: 'boolean' },
+            },
+          },
+          elasticsearch: {
+            dynamic: false,
+            properties: {},
+          },
+          vars: { type: 'flattened' },
+          inputs: {
+            dynamic: false,
+            properties: {},
+          },
+          secret_references: { properties: { id: { type: 'keyword' } } },
+          overrides: { type: 'flattened', index: false },
+          revision: { type: 'integer' },
+          updated_at: { type: 'date' },
+          updated_by: { type: 'keyword' },
+          created_at: { type: 'date' },
+          created_by: { type: 'keyword' },
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {

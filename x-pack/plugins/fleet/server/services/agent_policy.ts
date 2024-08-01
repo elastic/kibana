@@ -139,9 +139,11 @@ function normalizeKuery(savedObjectType: string, kuery: string) {
 class AgentPolicyService {
   private async getSavedObjectType() {
     // Probably use a cache here to avoid settings each time
-    const settings = await getSettings(appContextService.getInternalUserSOClient());
+    const settings = await getSettings(appContextService.getInternalUserSOClient()).catch((err) => {
+      // TODO handle 404
+    });
 
-    return settings.use_space_awareness
+    return settings?.use_space_awareness
       ? AGENT_POLICY_SAVED_OBJECT_TYPE
       : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;
   }

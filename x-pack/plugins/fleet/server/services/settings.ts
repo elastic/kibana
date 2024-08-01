@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsUpdateOptions } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
@@ -35,6 +35,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
 
   return {
     id: settingsSo.id,
+    version: settingsSo.version,
     ...settingsSo.attributes,
     fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
@@ -70,7 +71,8 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
 
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
-  newData: Partial<Omit<Settings, 'id'>>
+  newData: Partial<Omit<Settings, 'id'>>,
+  options?: SavedObjectsUpdateOptions<SettingsSOAttributes>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
   const data = { ...newData };
   if (data.fleet_server_hosts) {
@@ -89,7 +91,8 @@ export async function saveSettings(
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
-      data
+      data,
+      options
     );
 
     return {
