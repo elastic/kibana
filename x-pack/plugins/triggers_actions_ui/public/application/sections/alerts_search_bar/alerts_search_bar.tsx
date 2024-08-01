@@ -64,12 +64,15 @@ export function AlertsSearchBar({
   });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
-  const indexPatterns =
-    ruleTypeId && aadFields?.length
-      ? [{ title: ruleTypeId, fields: aadFields }]
-      : dataView
-      ? [dataView]
-      : null;
+  const indexPatterns = useMemo(
+    () =>
+      ruleTypeId && aadFields?.length
+        ? [{ title: ruleTypeId, fields: aadFields }]
+        : dataView
+        ? [dataView]
+        : null,
+    [aadFields, dataView, ruleTypeId]
+  );
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
@@ -54,12 +54,15 @@ export const AlertsSearchBar = ({
     toasts,
   });
 
-  const indexPatterns =
-    ruleTypeId && aadFields?.length
-      ? [{ title: ruleTypeId, fields: aadFields }]
-      : dataView
-      ? [dataView]
-      : null;
+  const indexPatterns = useMemo(
+    () =>
+      ruleTypeId && aadFields?.length
+        ? [{ title: ruleTypeId, fields: aadFields }]
+        : dataView
+        ? [dataView]
+        : null,
+    [aadFields, dataView, ruleTypeId]
+  );
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
