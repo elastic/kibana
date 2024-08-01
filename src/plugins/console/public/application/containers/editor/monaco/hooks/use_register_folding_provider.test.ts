@@ -18,8 +18,12 @@ describe('getFoldingRanges', () => {
   // 6        }""",
   // 7      "some_other_key": 123
   // 8    },
-  // 9    "outer_key_2": "{test"
-  // 10 }
+  // 9    "outer_key_2": [
+  // 10    1,
+  // 11    2,
+  // 12    3
+  // 13   ]
+  // 14 }
 
   const SAMPLE_INPUT = [
     'PUT /test/_doc/1',
@@ -30,15 +34,24 @@ describe('getFoldingRanges', () => {
     '      }""",',
     '    "some_other_key": 123',
     '  },',
-    '  "outer_key_2": "{test"',
-    '  }',
+    '  "outer_key_2": [',
+    '    1,',
+    '    2,',
+    '    3',
+    '  ]',
+    '}',
   ];
 
-  it('returns correct ranges', () => {
+  it('returns correct ranges for parentheses', () => {
     const expectedRanges = [
-      { start: 3, end: 8 },
-      { start: 2, end: 10 },
+      { start: 3, end: 7 },
+      { start: 2, end: 13 },
     ];
-    expect(getFoldingRanges(SAMPLE_INPUT)).toEqual(expectedRanges);
+    expect(getFoldingRanges(SAMPLE_INPUT, '{', '}')).toEqual(expectedRanges);
+  });
+
+  it('returns correct ranges for square brackets', () => {
+    const expectedRanges = [{ start: 9, end: 12 }];
+    expect(getFoldingRanges(SAMPLE_INPUT, '[', ']')).toEqual(expectedRanges);
   });
 });

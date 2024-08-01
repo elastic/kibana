@@ -9,28 +9,36 @@
 import { useRef } from 'react';
 import { monaco } from '@kbn/monaco';
 
-// The following regex's make sure that the parentheses are not between quotes
+const getOpeningLineRegex = (openingMarker: string) => {
+  // Opening parentheses can only be preceded by a colon or nothing
+  // This ensures that it's not between quotes
+  const regExStr = `^(.*:\\s*)?\\${openingMarker}$`;
+  return new RegExp(regExStr);
+};
 
-// Opening parentheses can only be preceded by a : character or nothing
-const OPEN_PAREN_REGEX = /(^.*:\s*|^){$/;
-// Closing parentheses can only be followed by a comma, another closing parenthesis, or nothing
-const CLOSE_PAREN_REGEX = /^}\s*(,|)$/;
+const getClosingLineRegex = (closingMarker: string) => {
+  // Closing marker can only be followed by a comma or nothing
+  // This ensures that it's not between quotes
+  const regExStr = `^\\${closingMarker}\\s*(,)?$`;
+  return new RegExp(regExStr);
+};
 
-export const getFoldingRanges = (lines: string[]) => {
+export const getFoldingRanges = (lines: string[], openingMarker: string, closingMarker: string) => {
   const ranges: monaco.languages.ProviderResult<monaco.languages.FoldingRange[]> = [];
   const stack: number[] = [];
+  const openingLineRegex = getOpeningLineRegex(openingMarker);
+  const closingLineRegex = getClosingLineRegex(closingMarker);
 
   for (let i = 0; i < lines.length; i++) {
     const lineContent = lines[i].trim();
-    const lineNumber = i + 1; // Line numbers start from 1 so we need to add 1 to the current index
-    if (OPEN_PAREN_REGEX.test(lineContent)) {
-      stack.push(lineNumber);
-    } else if (CLOSE_PAREN_REGEX.test(lineContent)) {
+    if (openingLineRegex.test(lineContent)) {
+      stack.push(i + 1); // Line numbers start from 1 so we need to add 1 to the current index
+    } else if (closingLineRegex.test(lineContent)) {
       const start = stack.pop();
       if (start) {
         ranges.push({
           start,
-          end: lineNumber,
+          end: i,
         });
       }
     }
@@ -49,7 +57,10 @@ export const useFoldingProvider = (langId: string) => {
 
   const registerFoldingProvider = () => {
     foldingProviderDisposable.current = monaco.languages.registerFoldingRangeProvider(langId, {
-      provideFoldingRanges: (model, token) => getFoldingRanges(model.getLinesContent()),
+      provideFoldingRanges: (model) => [
+        ...getFoldingRanges(model.getLinesContent(), '{', '}'),
+        ...getFoldingRanges(model.getLinesContent(), '[', ']'),
+      ],
     });
   };
 
