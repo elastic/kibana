@@ -28,9 +28,14 @@ import { useEntityManagerEnablementContext } from '../../../context/entity_manag
 import { FeedbackModal } from './feedback_modal';
 import { ServiceInventoryView } from '../../../context/entity_manager_context/entity_manager_context';
 import { Unauthorized } from './unauthorized_modal';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: string }) {
-  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useState(false);
+  const [isFeedbackModalVisible, setsIsFeedbackModalVisible] = useLocalStorage<boolean | undefined>(
+    'apm.isFeedbackModalVisible',
+    undefined
+  );
+
   const [isUnauthorizedModalVisible, setsIsUnauthorizedModalVisible] = useState(false);
 
   const {
@@ -53,7 +58,9 @@ export function EntityEnablement({ label, tooltip }: { label: string; tooltip?: 
 
   const handleRestoreView = async () => {
     setServiceInventoryViewLocalStorageSetting(ServiceInventoryView.classic);
-    setsIsFeedbackModalVisible(true);
+    if (isFeedbackModalVisible === undefined) {
+      setsIsFeedbackModalVisible(true);
+    }
   };
 
   const handleEnablement = async () => {
