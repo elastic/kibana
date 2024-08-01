@@ -221,8 +221,20 @@ export class MonacoEditorActionsProvider {
     } = context;
     const { toasts } = notifications;
     try {
-      const requests = await this.getRequests();
-      if (!requests.length) {
+      const allRequests = await this.getRequests();
+      // if any request doesnt have a method then we gonna treat it as a non-valid
+      // request
+      const requests = allRequests.filter((request) => request.method);
+
+      // If we do have requests but none have methods we are not sending the request
+      if (allRequests.length > 0 && !requests.length) {
+        toasts.addWarning(
+          i18n.translate('console.notification.monaco.error.nonSupportedRequest', {
+            defaultMessage: 'The selected request is not valid.',
+          })
+        );
+        return;
+      } else if (!requests.length) {
         toasts.add(
           i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
