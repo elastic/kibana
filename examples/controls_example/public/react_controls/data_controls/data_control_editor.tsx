@@ -83,7 +83,17 @@ const CompatibleControlTypesComponent = ({
       .filter((factory) => {
         return isDataControlFactory(factory);
       })
-      .sort(({ order: orderA = -1 }, { order: orderB = -1 }) => orderB - orderA);
+      .sort(
+        (
+          { order: orderA = 0, getDisplayName: getDisplayNameA },
+          { order: orderB = 0, getDisplayName: getDisplayNameB }
+        ) => {
+          const orderComparison = orderB - orderA; // sort descending by order
+          return orderComparison === 0
+            ? getDisplayNameA().localeCompare(getDisplayNameB()) // if equal order, compare display names
+            : orderComparison;
+        }
+      );
   }, []);
 
   return (

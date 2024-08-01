@@ -49,7 +49,6 @@ export const getSearchControlFactory = (
 ): DataControlFactory<SearchControlState, SearchControlApi> => {
   return {
     type: SEARCH_CONTROL_TYPE,
-    order: 3,
     getIconType: () => 'search',
     getDisplayName: () =>
       i18n.translate('controlsExamples.searchControl.displayName', { defaultMessage: 'Search' }),

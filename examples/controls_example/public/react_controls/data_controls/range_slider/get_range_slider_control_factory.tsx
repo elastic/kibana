@@ -29,7 +29,6 @@ export const getRangesliderControlFactory = (
 ): DataControlFactory<RangesliderControlState, RangesliderControlApi> => {
   return {
     type: RANGE_SLIDER_CONTROL_TYPE,
-    order: 2,
     getIconType: () => 'controlsHorizontal',
     getDisplayName: RangeSliderStrings.control.getDisplayName,
     isFieldCompatible: (field) => {
