@@ -38,7 +38,7 @@ export class LocalShipper implements IShipper {
     // required
   };
   public flush = async () => {
-    // Implemented because it's required, but we don't really care here.
+    // required
   };
   public shutdown = () => {
     // Implemented because it's required, but we don't really care here.
