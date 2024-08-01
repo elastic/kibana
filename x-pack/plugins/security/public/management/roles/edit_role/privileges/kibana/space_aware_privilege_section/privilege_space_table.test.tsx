@@ -12,11 +12,11 @@ import React from 'react';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import { createKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
+import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { PrivilegeDisplay } from './privilege_display';
 import { PrivilegeSpaceTable } from './privilege_space_table';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface TableRow {
   spaces: string[];

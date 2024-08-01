@@ -32,10 +32,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 import type { KibanaPrivileges, SecuredFeature } from '@kbn/security-role-management-model';
 
+import type { Role } from '@kbn/security-plugin-types-common';
+import type {
+  KibanaPrivileges,
+  SecuredFeature,
+} from '@kbn/security-plugin/public/management/roles/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTableCell } from '../feature_table_cell';
+import { FeatureTableCell } from './components/feature_table_cell';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {

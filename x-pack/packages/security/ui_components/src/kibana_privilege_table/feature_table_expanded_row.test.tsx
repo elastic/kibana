@@ -15,7 +15,7 @@ import {
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import type { Role } from '../../../../../../../common';
+import type { Role } from '@kbn/security-plugin-types-common';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {

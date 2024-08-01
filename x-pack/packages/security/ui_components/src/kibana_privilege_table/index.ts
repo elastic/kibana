@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { PrivilegeFormCalculator } from './privilege_form_calculator';
+export { FeatureTable } from './feature_table';
+export { FeatureTableCell } from './components';
