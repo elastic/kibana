@@ -11,11 +11,11 @@ import { ComponentType } from 'react';
 import { ExpandableFlyoutContextProviderProps } from './context';
 import { ExpandableFlyoutProvider } from './provider';
 
-export const withExpandableFlyoutProvider = <T extends {}>(
-  Component: ComponentType<T>,
+export const withExpandableFlyoutProvider = <Props extends {}>(
+  Component: ComponentType<Props>,
   expandableProviderProps?: ExpandableFlyoutContextProviderProps
 ) => {
-  return (props: T) => {
+  return (props: Props) => {
     return (
       <ExpandableFlyoutProvider {...(expandableProviderProps ?? {})}>
         <Component {...props} />
