@@ -8,6 +8,8 @@
 import { ActionGroup } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 
+export { SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE } from '@kbn/rule-data-utils';
+
 export type MonitorStatusActionGroup =
   | ActionGroup<'xpack.synthetics.alerts.actionGroups.monitorStatus'>
   | ActionGroup<'xpack.synthetics.alerts.actionGroups.tls'>;

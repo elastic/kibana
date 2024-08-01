@@ -12,9 +12,8 @@ import {
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { UPTIME_RULE_TYPES } from '@kbn/uptime-plugin/common/constants/uptime_alerts';
+import { UPTIME_RULE_TYPE_IDS, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
-import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import {
@@ -23,7 +22,7 @@ import {
 } from './saved_objects/synthetics_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
-const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
+const ruleTypes = [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS];
 
 const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
   ruleTypeId,

@@ -1201,6 +1201,7 @@ export class AlertsClient {
     if (isSiemRuleType(ruleTypeId)) {
       throw Boom.badRequest(`Security solution rule type is not supported`);
     }
+
     const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
     const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({

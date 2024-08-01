@@ -38,12 +38,12 @@ describe('getAlertsIndexRoute', () => {
           requestMock.create({
             method: 'get',
             path: `${BASE_RAC_ALERTS_API_PATH}/index`,
-            query: { features: 4 },
+            query: { ruleTypeIds: 4 },
           }),
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"4\\" supplied to \\"features\\"'"`
+        `"Request was rejected with message: 'Invalid value \\"4\\" supplied to \\"ruleTypeIds\\"'"`
       );
     });
 

@@ -30,7 +30,7 @@ export const useFetchAlertsFieldsQuery = (
 ) => {
   const { ruleTypeIds } = params;
 
-  const validRuleTypeIds = ruleTypeIds.filter(isSiemRuleType);
+  const validRuleTypeIds = ruleTypeIds.filter((ruleTypeId) => !isSiemRuleType(ruleTypeId));
 
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(ruleTypeIds)),

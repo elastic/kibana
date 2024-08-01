@@ -12,7 +12,7 @@ export const getReadIndexRequest = () =>
   requestMock.create({
     method: 'get',
     path: `${BASE_RAC_ALERTS_API_PATH}/index`,
-    query: { features: 'siem' },
+    query: { ruleTypeIds: 'siem' },
   });
 
 export const getReadRequest = () =>
