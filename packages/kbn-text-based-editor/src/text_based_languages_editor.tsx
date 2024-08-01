@@ -468,7 +468,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               undefined,
               abortController
             ).result;
-            const columns = table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
+            const columns =
+              table?.columns.map((c) => {
+                // Casting unsupported as unknown to avoid plethora of warnings
+                // Remove when addressed https://github.com/elastic/kibana/issues/189666
+                if (!c.meta.esType || c.meta.esType === 'unsupported')
+                  return { name: c.name, type: 'unknown' };
+                return { name: c.name, type: c.meta.esType };
+              }) || [];
             return await getRateLimitedColumnsWithMetadata(columns, fieldsMetadata);
           } catch (e) {
             // no action yet
