@@ -10,19 +10,17 @@ agentDestinationFolder = ENV["AGENT_DESTINATION_FOLDER"] || ''
 Vagrant.configure("2") do |config|
   config.vm.hostname = hostname
   config.vm.box = 'ubuntu/jammy64'
-  config.vm.box_check_update = false
+  config.vm.box_check_update = true
   config.vm.boot_timeout = 600
 
   config.vm.provider :virtualbox do |vb|
-    vb.memory = 8192
+    vb.memory = 4096
     vb.cpus = 2
   end
 
   config.vm.provider :vmware_desktop do |v, override|
     override.vm.box = "starboard/ubuntu-arm64-20.04.5"
-    override.vm.box_version = "20221120.20.40.0"
     override.vm.box_download_insecure = true
-    override.vm.network "private_network", type: "dhcp"
 
     v.ssh_info_public = true
     v.gui = true
