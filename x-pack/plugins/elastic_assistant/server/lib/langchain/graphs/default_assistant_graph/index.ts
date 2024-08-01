@@ -127,7 +127,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         streamRunnable: isStream,
       })
     : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
-    ? createToolCallingAgent({
+    ? await createToolCallingAgent({
         llm,
         tools,
         prompt:
