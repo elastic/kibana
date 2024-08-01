@@ -142,7 +142,7 @@
   font-size: $euiFontSizeS;
   font-weight: $euiFontWeightMedium;
   line-height: $euiLineHeight;
-  padding: 2px $euiSizeXS;
+  padding: calc($euiSizeXS / 2) $euiSizeXS;
   display: inline-block;
   border-radius: calc($euiBorderRadius / 2);
   white-space: nowrap;
