@@ -22,7 +22,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         query: buildRouteValidation(
           t.exact(
             t.type({
-              ruleTypeIds: t.array(t.string),
+              ruleTypeIds: t.union([t.string, t.array(t.string)]),
             })
           )
         ),
@@ -37,7 +37,9 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const alertsClient = await racContext.getAlertsClient();
         const { ruleTypeIds = [] } = request.query;
 
-        const onlyO11yRuleTypeIds = ruleTypeIds.filter((ruleTypeId) => !isSiemRuleType(ruleTypeId));
+        const onlyO11yRuleTypeIds = (
+          Array.isArray(ruleTypeIds) ? ruleTypeIds : [ruleTypeIds]
+        ).filter((ruleTypeId) => !isSiemRuleType(ruleTypeId));
 
         const o11yIndices =
           (onlyO11yRuleTypeIds

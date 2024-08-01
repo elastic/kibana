@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -37,6 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
@@ -52,15 +52,14 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.LOGS],
+            ruleTypeIds: ['logs.alert.document.count'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
         expect(result.rawResponse.hits.total).to.eql(5);
-        const consumers = result.rawResponse.hits.hits.map((hit) => {
-          return hit.fields?.['kibana.alert.rule.consumer'];
-        });
-        expect(consumers.every((consumer) => consumer === AlertConsumers.LOGS));
+
+        validateRuleTypeIds(result, ['logs.alert.document.count']);
       });
 
       it('should support pagination and sorting', async () => {
@@ -74,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.LOGS],
+            ruleTypeIds: ['logs.alert.document.count'],
             pagination: {
               pageSize: 2,
               pageIndex: 1,
@@ -89,15 +88,25 @@ export default ({ getService }: FtrProviderContext) => {
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
         expect(result.rawResponse.hits.total).to.eql(5);
         expect(result.rawResponse.hits.hits.length).to.eql(2);
+
         const first = result.rawResponse.hits.hits[0].fields?.['kibana.alert.evaluation.value'];
         const second = result.rawResponse.hits.hits[1].fields?.['kibana.alert.evaluation.value'];
+
         expect(first > second).to.be(true);
       });
     });
 
     describe('siem', () => {
+      const siemRuleTypeIds = [
+        'siem.indicatorRule',
+        'siem.thresholdRule',
+        'siem.eqlRule',
+        'siem.queryRule',
+      ];
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
@@ -121,15 +130,14 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.SIEM],
+            ruleTypeIds: siemRuleTypeIds,
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
         expect(result.rawResponse.hits.total).to.eql(50);
-        const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit.fields?.['kibana.alert.rule.consumer']
-        );
-        expect(consumers.every((consumer) => consumer === AlertConsumers.SIEM));
+
+        validateRuleTypeIds(result, siemRuleTypeIds);
       });
 
       it('should throw an error when trying to to search for more than just siem', async () => {
@@ -143,13 +151,14 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
+            ruleTypeIds: ['siem.indicatorRule', 'logs.alert.document.count'],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
         expect(result.statusCode).to.be(500);
         expect(result.message).to.be(
-          `The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple feature IDs and one of those IDs is SIEM.`
+          'The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple rule types with mixed authorization.'
         );
       });
 
@@ -166,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.SIEM],
+            ruleTypeIds: siemRuleTypeIds,
             runtimeMappings: {
               [runtimeFieldKey]: {
                 type: 'keyword',
@@ -178,18 +187,24 @@ export default ({ getService }: FtrProviderContext) => {
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
+
         expect(result.rawResponse.hits.total).to.eql(50);
+
         const runtimeFields = result.rawResponse.hits.hits.map(
           (hit) => hit.fields?.[runtimeFieldKey]
         );
+
         expect(runtimeFields.every((field) => field === runtimeFieldValue));
       });
     });
 
     describe('apm', () => {
+      const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       });
+
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
@@ -205,16 +220,15 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.APM],
+            ruleTypeIds: apmRuleTypeIds,
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           space: 'default',
         });
+
         expect(result.rawResponse.hits.total).to.eql(9);
-        const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit.fields?.['kibana.alert.rule.consumer']
-        );
-        expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
+
+        validateRuleTypeIds(result, apmRuleTypeIds);
       });
 
       it('should not by pass our RBAC authz filter with a should filter', async () => {
@@ -228,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.APM],
+            ruleTypeIds: apmRuleTypeIds,
             query: {
               bool: {
                 filter: [],
@@ -238,7 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
                       should: [
                         {
                           match: {
-                            'kibana.alert.rule.consumer': 'logs',
+                            'kibana.alert.rule.rule_type_id': 'logs.alert.document.count',
                           },
                         },
                       ],
@@ -254,11 +268,10 @@ export default ({ getService }: FtrProviderContext) => {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           space: 'default',
         });
+
         expect(result.rawResponse.hits.total).to.eql(9);
-        const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit.fields?.['kibana.alert.rule.consumer']
-        );
-        expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
+
+        validateRuleTypeIds(result, apmRuleTypeIds);
       });
 
       it('should return an empty response with must filter and our RBAC authz filter', async () => {
@@ -272,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.APM],
+            ruleTypeIds: apmRuleTypeIds,
             query: {
               bool: {
                 filter: [],
@@ -282,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
                       should: [
                         {
                           match: {
-                            'kibana.alert.rule.consumer': 'logs',
+                            'kibana.alert.rule.rule_type_id': 'logs.alert.document.count',
                           },
                         },
                       ],
@@ -298,6 +311,7 @@ export default ({ getService }: FtrProviderContext) => {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           space: 'default',
         });
+
         expect(result.rawResponse.hits.total).to.eql(0);
       });
 
@@ -312,7 +326,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [AlertConsumers.APM],
+            ruleTypeIds: apmRuleTypeIds,
             query: {
               bool: {
                 filter: [],
@@ -321,11 +335,11 @@ export default ({ getService }: FtrProviderContext) => {
                   {
                     bool: {
                       should: [
-                        {
+                        ...apmRuleTypeIds.map((apmRuleTypeId) => ({
                           match: {
-                            'kibana.alert.rule.consumer': 'apm',
+                            'kibana.alert.rule.rule_type_id': apmRuleTypeId,
                           },
-                        },
+                        })),
                       ],
                       minimum_should_match: 1,
                     },
@@ -338,11 +352,10 @@ export default ({ getService }: FtrProviderContext) => {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           space: 'default',
         });
+
         expect(result.rawResponse.hits.total).to.eql(9);
-        const consumers = result.rawResponse.hits.hits.map(
-          (hit) => hit.fields?.['kibana.alert.rule.consumer']
-        );
-        expect(consumers.every((consumer) => consumer === AlertConsumers.APM));
+
+        validateRuleTypeIds(result, apmRuleTypeIds);
       });
     });
 
@@ -358,7 +371,7 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaVersion,
           internalOrigin: 'Kibana',
           options: {
-            featureIds: [],
+            ruleTypeIds: [],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
@@ -366,4 +379,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
   });
+};
+
+const validateRuleTypeIds = (result: RuleRegistrySearchResponse, ruleTypeIdsToVerify: string[]) => {
+  const ruleTypeIds = result.rawResponse.hits.hits
+    .map((hit) => {
+      return hit.fields?.['kibana.alert.rule.rule_type_id'];
+    })
+    .flat();
+
+  expect(
+    ruleTypeIds.every((ruleTypeId) =>
+      ruleTypeIdsToVerify.some((ruleTypeIdToVerify) => ruleTypeIdToVerify === ruleTypeId)
+    )
+  ).to.eql(true);
 };

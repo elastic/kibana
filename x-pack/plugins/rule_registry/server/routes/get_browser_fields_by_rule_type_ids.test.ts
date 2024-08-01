@@ -6,7 +6,7 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_feature_id';
+import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_rule_type_ids';
 import { requestContextMock } from './__mocks__/request_context';
 import { getO11yBrowserFields } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';

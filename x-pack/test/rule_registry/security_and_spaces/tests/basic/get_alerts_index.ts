@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const getAPMIndexName = async (user: User, space: string, expectedStatusCode: number = 200) => {
     const resp = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=apm`)
+      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?ruleTypeIds=apm.error_rate`)
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(expectedStatusCode);
@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number = 200
   ) => {
     const resp = await supertestWithoutAuth
-      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?features=siem`)
+      .get(`${getSpaceUrlPrefix(space)}${ALERTS_INDEX_URL}?ruleTypeIds=siem.queryRule`)
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
       .expect(expectedStatusCode);
@@ -50,6 +50,11 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
+
+    before(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+    });
+
     describe('Users:', () => {
       it(`${obsOnlySpacesAll.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const indexNames = await getAPMIndexName(obsOnlySpacesAll, SPACE1);
