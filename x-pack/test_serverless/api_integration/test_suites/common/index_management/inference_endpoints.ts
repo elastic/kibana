@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(inferenceEndpoints).to.be.ok();
       expect(
         inferenceEndpoints.some(
-          (endpoint: InferenceAPIConfigResponse) => endpoint.model_id === inferenceId
+          (endpoint: InferenceAPIConfigResponse) => endpoint.inference_id === inferenceId
         )
       ).to.be(true);
     });
