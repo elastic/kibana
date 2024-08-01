@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { ManageSpacePage } from './manage_space_page';
+export { registerAnalyticsContext } from './register_analytics_context';
+
+export { EventTracker } from './event_tracker';
+
+export { registerSpacesEventTypes } from './register_event_types';
