@@ -31,8 +31,6 @@ export function initAPIAuthorization(
       return toolkit.next();
     }
 
-    console.log(request.route.options);
-
     // @ts-ignore
     if (isAuthzDisabled(request.route.options.authz)) {
       logger.warn(
@@ -74,9 +72,15 @@ export function initAPIAuthorization(
 
       for (const requiredPrivilege of authz.requiredPrivileges) {
         if (typeof requiredPrivilege === 'string' && !kibanaPrivileges[requiredPrivilege]) {
-          logger.warn(
-            `User not authorized for "${request.url.pathname}${request.url.search}": responding with 403`
+          const missingPrivileges = Object.keys(kibanaPrivileges).filter(
+            (key) => !kibanaPrivileges[key]
           );
+          logger.warn(
+            `User not authorized for "${request.url.pathname}${
+              request.url.search
+            }", responding with 403: missing privileges: ${missingPrivileges.join(', ')}`
+          );
+
           return response.forbidden();
         }
 
@@ -91,22 +95,26 @@ export function initAPIAuthorization(
             !allRequired.every((privilege) => kibanaPrivileges[privilege]) &&
             !anyRequired.some((privilege) => kibanaPrivileges[privilege])
           ) {
-            logger.warn(
-              `User not authorized for "${request.url.pathname}${request.url.search}": responding with 403`
+            const missingPrivileges = Object.keys(kibanaPrivileges).filter(
+              (key) => !kibanaPrivileges[key]
             );
+            logger.warn(
+              `User not authorized for "${request.url.pathname}${
+                request.url.search
+              }", responding with 403: missing privileges: ${missingPrivileges.join(', ')}`
+            );
+
             return response.forbidden();
           }
         }
       }
 
-      if (authz.passThrough) {
-        Object.defineProperty(request, 'authzResult', {
-          value: deepFreeze(checkPrivilegesResponse.privileges.kibana),
-          enumerable: false,
-          configurable: false,
-          writable: false,
-        });
-      }
+      Object.defineProperty(request, 'authzResult', {
+        value: deepFreeze(kibanaPrivileges),
+        enumerable: false,
+        configurable: false,
+        writable: false,
+      });
 
       return toolkit.next();
     }

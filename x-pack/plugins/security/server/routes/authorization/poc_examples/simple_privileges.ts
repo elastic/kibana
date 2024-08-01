@@ -12,6 +12,31 @@ import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
 export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionParams) {
   /**
+   * Check OAS authz description generated
+   * GET /api/oas?pathStartsWith=/api/security/authz_poc/authz_disabled
+   */
+  router.get(
+    {
+      path: '/api/security/authz_poc/authz_disabled',
+      authz: {
+        enabled: false,
+        reason: 'This route is opted out from authorization for demo purposes',
+      },
+      validate: false,
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        return response.ok({
+          body: {
+            authzResult: request.authzResult,
+          },
+        });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
+  );
+  /**
    * Requires both ManageSpaces AND TaskManager privileges.
    *
    * Check OAS authz description generated
@@ -22,8 +47,6 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
       path: '/api/security/authz_poc/simple_privileges_example_1',
       authz: {
         requiredPrivileges: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
-        // passes the authzResult to the handler
-        passThrough: true,
       },
       validate: false,
     },
@@ -62,7 +85,6 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
       try {
         return response.ok({
           body: {
-            // authzResult was not passed to the handler, so it is not available here
             authzResult: request.authzResult,
           },
         });
@@ -93,7 +115,6 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
       try {
         return response.ok({
           body: {
-            // authzResult was not passed to the handler, so it is not available here
             authzResult: request.authzResult,
           },
         });

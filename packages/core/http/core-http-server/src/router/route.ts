@@ -44,7 +44,6 @@ type Privileges = Array<Privilege | PrivilegeSet>;
 
 export interface AuthzEnabled {
   requiredPrivileges: Privileges;
-  passThrough?: boolean;
 }
 
 export interface AuthzDisabled {

@@ -32,8 +32,6 @@ export function defineOfferingPrivilegesExampleRoutes({ router }: RouteDefinitio
             allRequired: [ApiActionPermission.TaskManager],
           },
         ],
-        // passes the authzResult to the handler
-        passThrough: true,
       },
       validate: false,
     },
@@ -78,7 +76,6 @@ export function defineOfferingPrivilegesExampleRoutes({ router }: RouteDefinitio
       try {
         return response.ok({
           body: {
-            // authzResult was not passed to the handler, so it is not available here
             authzResult: request.authzResult,
           },
         });
@@ -112,7 +109,6 @@ export function defineOfferingPrivilegesExampleRoutes({ router }: RouteDefinitio
       try {
         return response.ok({
           body: {
-            // authzResult was not passed to the handler, so it is not available here
             authzResult: request.authzResult,
           },
         });

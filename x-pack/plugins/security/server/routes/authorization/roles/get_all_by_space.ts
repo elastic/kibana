@@ -30,7 +30,6 @@ export function defineGetAllRolesBySpaceRoutes({
             anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
           },
         ],
-        passThrough: true,
       },
       validate: {
         params: schema.object({ spaceId: schema.string({ minLength: 1 }) }),
