@@ -128,7 +128,6 @@ export const ChartSwitch = memo(function ChartSwitch({
   datasourceMap,
   layerId,
 }: ChartSwitchProps) {
-  console.log(visualizationMap);
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -294,7 +293,7 @@ export const ChartSwitch = memo(function ChartSwitch({
       const chartSwitchPositions: VisChartSwitchPosition[] = [];
       const deprecatedChartSwitchPositions: VisChartSwitchPosition[] = [];
       Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
-        const chartSwitchOptions = v.chartSwitchOptions || v.visualizationTypes;
+        const chartSwitchOptions = v.visualizationTypes;
         for (const visualizationType of chartSwitchOptions) {
           // todo: wildcard, fuzzy search add
           const isSearchMatch =
@@ -304,12 +303,6 @@ export const ChartSwitch = memo(function ChartSwitch({
             let typeId = visualizationType.id;
 
             if (visualizationType.subtypes) {
-              console.log(
-                '   visualizationType.getCompatibleSubtype(subVisualizationId)',
-                visualizationType,
-                subVisualizationId,
-                visualizationType.getCompatibleSubtype?.(subVisualizationId)
-              );
               typeId =
                 visualizationType.subtypes.find((subtype) => subtype === subVisualizationId) ||
                 visualizationType.getCompatibleSubtype?.(subVisualizationId) ||

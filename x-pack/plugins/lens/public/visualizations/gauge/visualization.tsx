@@ -23,14 +23,7 @@ import {
   getMinValue,
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
-import {
-  IconChartGaugeSemiCircle,
-  IconChartGaugeCircle,
-  IconChartGaugeArc,
-  IconChartHorizontalBullet,
-  IconChartGauge,
-  IconChartVerticalBullet,
-} from '@kbn/chart-icons';
+import { IconChartGauge } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
@@ -40,10 +33,9 @@ import type {
   Suggestion,
   UserMessage,
   Visualization,
-  VisualizationType,
 } from '../../types';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState, gaugeTitlesByType } from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
@@ -90,82 +82,6 @@ export const CHART_SWITCH_OPTIONS = {
     ],
   },
 };
-
-// todo: remove
-export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
-  [GaugeShapes.HORIZONTAL_BULLET]: {
-    id: GaugeShapes.HORIZONTAL_BULLET,
-    icon: IconChartHorizontalBullet,
-    label: gaugeTitlesByType.horizontalBullet,
-    showExperimentalBadge: true,
-    sortPriority: 7,
-    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-      defaultMessage: 'Show progress to a goal in linear or arced style.',
-    }),
-  },
-  [GaugeShapes.VERTICAL_BULLET]: {
-    id: GaugeShapes.VERTICAL_BULLET,
-    icon: IconChartVerticalBullet,
-    label: gaugeTitlesByType.verticalBullet,
-    showExperimentalBadge: true,
-    sortPriority: 7,
-    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-      defaultMessage: 'Show progress to a goal in linear or arced style.',
-    }),
-  },
-  [GaugeShapes.SEMI_CIRCLE]: {
-    id: GaugeShapes.SEMI_CIRCLE,
-    icon: IconChartGaugeSemiCircle,
-    label: gaugeTitlesByType.semiCircle,
-    showExperimentalBadge: true,
-    sortPriority: 7,
-    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-      defaultMessage: 'Show progress to a goal in linear or arced style.',
-    }),
-  },
-  [GaugeShapes.ARC]: {
-    id: GaugeShapes.ARC,
-    icon: IconChartGaugeArc,
-    label: gaugeTitlesByType.arc,
-    showExperimentalBadge: true,
-    sortPriority: 7,
-    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-      defaultMessage: 'Show progress to a goal in linear or arced style.',
-    }),
-  },
-  [GaugeShapes.CIRCLE]: {
-    id: GaugeShapes.CIRCLE,
-    icon: IconChartGaugeCircle,
-    label: gaugeTitlesByType.circle,
-    showExperimentalBadge: true,
-    sortPriority: 7,
-    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
-      defaultMessage: 'Show progress to a goal in linear or arced style.',
-    }),
-  },
-};
-
-export const gaugeShapes = [
-  CHART_NAMES.horizontalBullet,
-  CHART_NAMES.semiCircle,
-  CHART_NAMES.arc,
-  CHART_NAMES.circle,
-];
-
-export const bulletTypes = [
-  {
-    id: CHART_NAMES.horizontalBullet.id,
-    label: i18n.translate('xpack.lens.gauge.bullet.orientantionHorizontal', {
-      defaultMessage: 'Horizontal',
-    }),
-  },
-  {
-    id: CHART_NAMES.verticalBullet.id,
-    label: i18n.translate('xpack.lens.gauge.bullet.orientantionVertical', {
-      defaultMessage: 'Vertical',
-    }),
-  },
-];
 
 function computePaletteParams(params: CustomPaletteParams) {
   return {
@@ -268,14 +184,7 @@ export const getGaugeVisualization = ({
   paletteService,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
-  chartSwitchOptions: [CHART_SWITCH_OPTIONS[LENS_GAUGE_ID]],
-  visualizationTypes: [
-    CHART_NAMES[GaugeShapes.HORIZONTAL_BULLET],
-    CHART_NAMES[GaugeShapes.VERTICAL_BULLET],
-    CHART_NAMES[GaugeShapes.SEMI_CIRCLE],
-    CHART_NAMES[GaugeShapes.ARC],
-    CHART_NAMES[GaugeShapes.CIRCLE],
-  ],
+  visualizationTypes: [CHART_SWITCH_OPTIONS[LENS_GAUGE_ID]],
   getVisualizationTypeId(state) {
     return state.shape;
   },

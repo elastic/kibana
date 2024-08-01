@@ -699,8 +699,8 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationTypes } = await import('./visualizations/xy/types');
-        return visualizationTypes;
+        const { visualizationSubtypes } = await import('./visualizations/xy/types');
+        return visualizationSubtypes;
       },
 
       stateHelperApi: async () => {

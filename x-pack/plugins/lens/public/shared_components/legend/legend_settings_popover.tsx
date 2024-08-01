@@ -230,7 +230,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
   onNestedLegendChange = noop,
   legendStats = [],
   onLegendStatsChange = noop,
-  groupPosition = 'right',
+  groupPosition = 'none',
   maxLines,
   onMaxLinesChange = noop,
   shouldTruncate,

@@ -994,6 +994,8 @@ export interface VisualizationType {
    * Indicates if visualization is deprecated.
    */
   isDeprecated?: boolean;
+  subtypes?: string[];
+  getCompatibleSubtype?: (seriesType?: string) => string | undefined;
 }
 
 export interface VisualizationDisplayOptions {

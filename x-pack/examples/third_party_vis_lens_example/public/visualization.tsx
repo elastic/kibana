@@ -49,7 +49,7 @@ export const getRotatingNumberVisualization = ({
       id: 'rotatingNumber',
       icon: 'refresh',
       label: 'Rotating number',
-      groupLabel: 'Goal and single value',
+      description: 'A number that rotates',
       sortPriority: 3,
     },
   ],

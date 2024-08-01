@@ -6,22 +6,21 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { LegacyMetricState } from '../../../../common/types';
+import { TitlesAndTextOptionsPopover } from './titles_and_text_options_popover';
 
-import { AppearanceOptionsPopover } from './appearance_options_popover';
-
-export const MetricToolbar = memo(function MetricToolbar(
-  props: VisualizationToolbarProps<LegacyMetricState>
-) {
-  const { state, setState, frame } = props;
-
+export const MetricToolbar = memo(function MetricToolbar({
+  state,
+  setState,
+  frame,
+}: VisualizationToolbarProps<LegacyMetricState>) {
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <AppearanceOptionsPopover
+          <TitlesAndTextOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
@@ -31,5 +30,3 @@ export const MetricToolbar = memo(function MetricToolbar(
     </EuiFlexGroup>
   );
 });
-
-export const idPrefix = htmlIdGenerator()();

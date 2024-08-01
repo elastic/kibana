@@ -8,13 +8,25 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { BarOrientationSettings } from '../../../../shared_components/bar_orientation';
-import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
+import { SeriesStackingSetting } from '../../../../shared_components/series_layer_stacking';
+import { ToolbarPopover } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { XYState } from '../../types';
-import { hasHistogramSeries, isHorizontalChart } from '../../state_helpers';
+import { SeriesType, XYState } from '../../types';
+import {
+  flipSeriesType,
+  getBarSeriesLayers,
+  getUniqueSeriesTypes,
+  hasAreaSeries,
+  hasHistogramSeries,
+  hasNonBarSeries,
+  isAreaLayer,
+  isBarLayer,
+  isHorizontalChart,
+} from '../../state_helpers';
 import type { FramePublicAPI } from '../../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
@@ -40,6 +52,10 @@ function getValueLabelDisableReason({
   });
 }
 
+const PANEL_STYLE = {
+  width: 500,
+};
+
 export interface VisualOptionsPopoverProps {
   state: XYState;
   setState: (newState: XYState) => void;
@@ -56,68 +72,126 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
   );
 
-  const hasNonBarSeries = dataLayers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'line', 'area_percentage_stacked'].includes(seriesType)
-  );
-
-  const hasAreaSeries = dataLayers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
-  );
-
+  const isHasNonBarSeries = hasNonBarSeries(dataLayers);
   const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
 
-  const isValueLabelsEnabled = !hasNonBarSeries;
-  const isFittingEnabled = hasNonBarSeries && !isAreaPercentage;
-  const isCurveTypeEnabled = hasNonBarSeries || isAreaPercentage;
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
 
   const valueLabelsDisabledReason = getValueLabelDisableReason({
     isAreaPercentage,
     isHistogramSeries,
   });
-
-  const isDisabled = !isValueLabelsEnabled && !isFittingEnabled && !isCurveTypeEnabled;
-  console.log('MMMMMM', state.shape);
-  console.log(dataLayers, hasNonBarSeries);
-
   const isHorizontal = isHorizontalChart(state.layers);
-  const opposites = {
-    vertical: ['bar', 'bar_stacked', 'bar_percentage_stacked'],
-    horizontal: ['bar_horizontal', 'bar_horizontal_stacked', 'bar_horizontal_percentage_stacked'],
+
+  const isDisabled = !isFittingEnabled && !isCurveTypeEnabled && isHasNonBarSeries;
+
+  const barSeriesLayers = getBarSeriesLayers(dataLayers);
+
+  const getBarSeriesType = () => {
+    const barSeriesTypes = getUniqueSeriesTypes(barSeriesLayers);
+    return barSeriesTypes.length === 1 ? barSeriesTypes[0] : 'bar';
+  };
+
+  const areaSeriesLayers = dataLayers.filter(({ seriesType }) => seriesType.startsWith('area'));
+
+  const getAreaSeriesType = () => {
+    const seriesType = getUniqueSeriesTypes(areaSeriesLayers);
+    return seriesType.length === 1 ? seriesType[0] : 'area';
   };
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
       <ToolbarPopover
-        title={i18n.translate('xpack.lens.shared.visualOptionsLabel', {
-          defaultMessage: 'Visual options',
+        title={i18n.translate('xpack.lens.shared.appearanceLabel', {
+          defaultMessage: 'Appearance',
         })}
         type="visualOptions"
-        groupPosition="left"
+        groupPosition="none"
         buttonDataTestSubj="lnsVisualOptionsButton"
+        data-test-subj="lnsVisualOptionsPopover"
         isDisabled={isDisabled}
+        panelStyle={PANEL_STYLE}
       >
-        <BarOrientationSettings
-          isVisible={!hasNonBarSeries}
-          barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
-          onBarOrientationChange={(newMode) => {
-            let newSeriesType;
-            if (newMode === 'horizontal') {
-              const index = opposites.vertical.indexOf(state.layers[0].seriesType);
-              newSeriesType = opposites.horizontal[index];
-            } else {
-              const index = opposites.horizontal.indexOf(state.layers[0].seriesType);
-              newSeriesType = opposites.vertical[index];
-            }
-            // for each layer, change the series type
-            setState({
-              ...state,
-              layers: state.layers.map((layer) => ({
-                ...layer,
-                seriesType: newSeriesType,
-              })),
-            });
-          }}
-        />
+        {!isHasNonBarSeries && (
+          <BarOrientationSettings
+            barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
+            onBarOrientationChange={() => {
+              const newSeriesType = flipSeriesType(dataLayers[0].seriesType);
+              setState({
+                ...state,
+                layers: state.layers.map((layer) =>
+                  isBarLayer(layer)
+                    ? {
+                        ...layer,
+                        seriesType: newSeriesType,
+                      }
+                    : layer
+                ),
+              });
+            }}
+          />
+        )}
+
+        {barSeriesLayers.length > 1 && (
+          <>
+            <SeriesStackingSetting
+              seriesType={getBarSeriesType()}
+              onSeriesType={(newSeriesType: string) => {
+                setState({
+                  ...state,
+                  layers: state.layers.map((layer) =>
+                    isBarLayer(layer)
+                      ? {
+                          ...layer,
+                          seriesType: newSeriesType as SeriesType,
+                        }
+                      : layer
+                  ),
+                });
+              }}
+            />
+            <EuiHorizontalRule margin="s" />
+          </>
+        )}
+
+        {areaSeriesLayers.length > 1 && (
+          <SeriesStackingSetting
+            label={i18n.translate('xpack.lens.shared.areaStacking', {
+              defaultMessage: 'Area layer stacking',
+            })}
+            seriesType={getAreaSeriesType()}
+            onSeriesType={(newSeriesType: string) => {
+              setState({
+                ...state,
+                layers: state.layers.map((layer) =>
+                  isAreaLayer(layer)
+                    ? {
+                        ...layer,
+                        seriesType: newSeriesType as SeriesType,
+                      }
+                    : layer
+                ),
+              });
+            }}
+          />
+        )}
+        {hasAreaSeries(dataLayers) && (
+          <>
+            <FillOpacityOption
+              isFillOpacityEnabled={true}
+              value={state?.fillOpacity ?? 0.3}
+              onChange={(newValue) => {
+                setState({
+                  ...state,
+                  fillOpacity: newValue,
+                });
+              }}
+            />
+
+            <EuiHorizontalRule margin="s" />
+          </>
+        )}
         <LineCurveOption
           enabled={isCurveTypeEnabled}
           value={state?.curveType}
@@ -128,15 +202,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
             });
           }}
         />
-
-        <ValueLabelsSettings
-          isVisible={isValueLabelsEnabled}
-          valueLabels={state?.valueLabels ?? 'hide'}
-          onValueLabelChange={(newMode) => {
-            setState({ ...state, valueLabels: newMode });
-          }}
-        />
-
         <MissingValuesOptions
           isFittingEnabled={isFittingEnabled}
           fittingFunction={state?.fittingFunction}
@@ -150,17 +215,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
           }}
           onEndValueChange={(newVal) => {
             setState({ ...state, endValue: newVal });
-          }}
-        />
-
-        <FillOpacityOption
-          isFillOpacityEnabled={hasAreaSeries}
-          value={state?.fillOpacity ?? 0.3}
-          onChange={(newValue) => {
-            setState({
-              ...state,
-              fillOpacity: newValue,
-            });
           }}
         />
       </ToolbarPopover>

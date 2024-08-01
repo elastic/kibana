@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should switch to donut charts keeping all dimensions', async () => {
-      await PageObjects.lens.switchToVisualization('donut');
+      await PageObjects.lens.setDonutHoleSize('Large');
 
       expect(
         await testSubjects.exists('lnsPie_sliceByDimensionPanel > lns-empty-dimension')

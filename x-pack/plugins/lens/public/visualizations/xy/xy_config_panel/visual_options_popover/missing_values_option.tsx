@@ -36,7 +36,11 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
       {isFittingEnabled && (
         <>
           <EuiFormRow
+            helpText={i18n.translate('xpack.lens.xyChart.missingValuesHelpText', {
+              defaultMessage: 'Select how you wish to treat gaps in data.',
+            })}
             display="columnCompressed"
+            fullWidth
             label={
               <>
                 {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {

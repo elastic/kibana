@@ -22,8 +22,8 @@ import { css } from '@emotion/react';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import { SeriesType, XYState, chartSwitchOptions, visualizationTypes } from './types';
-import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
+import { SeriesType, XYState, visualizationTypes } from './types';
+import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
 import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
@@ -100,7 +100,7 @@ export function AddLayerButton({
 
   const horizontalOnly = isHorizontalChart(state.layers);
 
-  const availableVisTypes = chartSwitchOptions.filter(
+  const availableVisTypes = visualizationTypes.filter(
     (t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly
   );
 
@@ -220,6 +220,9 @@ export function AddLayerButton({
               items: availableVisTypes.map((t) => {
                 const firstLayerSubtype = getDataLayers(state.layers)?.[0]?.seriesType;
 
+                const canInitializeWithSubtype =
+                  t.subtypes?.includes(firstLayerSubtype) && !isPercentageSeries(firstLayerSubtype);
+
                 return {
                   renderItem: () => {
                     return (
@@ -233,9 +236,9 @@ export function AddLayerButton({
                             LayerTypes.DATA,
                             undefined,
                             undefined,
-                            t.subtypes.includes(firstLayerSubtype)
+                            canInitializeWithSubtype
                               ? firstLayerSubtype
-                              : (t.subtypes[0] as SeriesType)
+                              : (t.subtypes?.[0] as SeriesType)
                           );
                           toggleLayersChoice(false);
                         }}

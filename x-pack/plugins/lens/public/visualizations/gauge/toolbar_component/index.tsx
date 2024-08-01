@@ -13,15 +13,77 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GaugeLabelMajorMode, GaugeShape, GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import {
+  IconChartGaugeArcSimple,
+  IconChartGaugeCircleSimple,
+  IconChartGaugeSemiCircleSimple,
+  IconChartHorizontalBulletSimple,
+  IconChartVerticalBulletSimple,
+} from '@kbn/chart-icons';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
-import type { GaugeVisualizationState } from '../constants';
-import { CHART_NAMES, bulletTypes, gaugeShapes } from '../visualization';
+import { gaugeTitlesByType, type GaugeVisualizationState } from '../constants';
+
+const PREFIX = `lns_gaugeOrientation_`;
+export const bulletTypes = [
+  {
+    id: `${PREFIX}horizontalBullet`,
+    label: i18n.translate('xpack.lens.gauge.bullet.orientantionHorizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+  {
+    id: `${PREFIX}verticalBullet`,
+    label: i18n.translate('xpack.lens.gauge.bullet.orientantionVertical', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+];
+
+const CHART_NAMES: Record<GaugeShape, { id: string; icon: IconType; label: string }> = {
+  horizontalBullet: {
+    id: GaugeShapes.HORIZONTAL_BULLET,
+    icon: IconChartHorizontalBulletSimple,
+    label: i18n.translate('xpack.lens.gaugeLinear.gaugeLabel', {
+      defaultMessage: 'Linear',
+    }),
+  },
+  verticalBullet: {
+    id: GaugeShapes.VERTICAL_BULLET,
+    icon: IconChartVerticalBulletSimple,
+    label: i18n.translate('xpack.lens.gaugeLinear.gaugeLabel', {
+      defaultMessage: 'Linear',
+    }),
+  },
+  semiCircle: {
+    id: GaugeShapes.SEMI_CIRCLE,
+    icon: IconChartGaugeSemiCircleSimple,
+    label: gaugeTitlesByType.semiCircle,
+  },
+  arc: {
+    id: GaugeShapes.ARC,
+    icon: IconChartGaugeArcSimple,
+    label: gaugeTitlesByType.arc,
+  },
+  circle: {
+    id: GaugeShapes.CIRCLE,
+    icon: IconChartGaugeCircleSimple,
+    label: gaugeTitlesByType.circle,
+  },
+};
+
+const gaugeShapes = [
+  CHART_NAMES.horizontalBullet,
+  CHART_NAMES.semiCircle,
+  CHART_NAMES.arc,
+  CHART_NAMES.circle,
+];
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   return (
@@ -40,6 +102,7 @@ const AppearancePopover = (props: VisualizationToolbarProps<GaugeVisualizationSt
   const { state, setState } = props;
 
   const selectedOption = CHART_NAMES[state.shape];
+  const selectedBulletType = bulletTypes.find(({ id }) => id === `${PREFIX}${state.shape}`);
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.gauge.appearanceLabel', {
@@ -48,6 +111,7 @@ const AppearancePopover = (props: VisualizationToolbarProps<GaugeVisualizationSt
       type="visualOptions"
       buttonDataTestSubj="lnsVisualOptionsButton"
       panelClassName="lnsGaugeToolbar__popover"
+      data-test-subj="lnsVisualOptionsPopover"
     >
       <EuiFormRow
         fullWidth
@@ -78,24 +142,26 @@ const AppearancePopover = (props: VisualizationToolbarProps<GaugeVisualizationSt
         />
       </EuiFormRow>
       {(state.shape === GaugeShapes.HORIZONTAL_BULLET ||
-        state.shape === GaugeShapes.VERTICAL_BULLET) && (
-        <EuiFormRow fullWidth display="columnCompressed" label=" ">
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.gauge.bulletType', {
-              defaultMessage: 'Bullet type',
-            })}
-            data-test-subj="lens-gauge-bullet-type"
-            buttonSize="compressed"
-            options={bulletTypes}
-            idSelected={selectedOption.id}
-            onChange={(optionId) => {
-              const newBulletType = bulletTypes.find(({ id }) => id === optionId)!.id;
-              setState({ ...state, shape: newBulletType as GaugeShape });
-            }}
-          />
-        </EuiFormRow>
-      )}
+        state.shape === GaugeShapes.VERTICAL_BULLET) &&
+        selectedBulletType && (
+          <EuiFormRow fullWidth display="columnCompressed" label=" ">
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.gauge.bulletType', {
+                defaultMessage: 'Bullet type',
+              })}
+              data-test-subj="lens-gauge-bullet-type"
+              buttonSize="compressed"
+              options={bulletTypes}
+              idSelected={selectedBulletType.id}
+              onChange={(optionId) => {
+                const newBulletTypeWithPrefix = bulletTypes.find(({ id }) => id === optionId)!.id;
+                const newBulletType = newBulletTypeWithPrefix.replace(PREFIX, '');
+                setState({ ...state, shape: newBulletType as GaugeShape });
+              }}
+            />
+          </EuiFormRow>
+        )}
     </ToolbarPopover>
   );
 };
@@ -123,9 +189,10 @@ const TitlesAndTextPopover = (props: VisualizationToolbarProps<GaugeVisualizatio
       title={i18n.translate('xpack.lens.gauge.appearanceLabel', {
         defaultMessage: 'Titles and text',
       })}
-      type="textAndTitles"
-      buttonDataTestSubj="lnsVisualOptionsButton"
+      type="titlesAndText"
+      buttonDataTestSubj="lnsTextOptionsButton"
       panelClassName="lnsGaugeToolbar__popover"
+      data-test-subj="lnsTextOptionsPopover"
     >
       <EuiFormRow
         display="columnCompressed"

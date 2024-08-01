@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 
 type BarOrientation = 'vertical' | 'horizontal';
 
@@ -36,20 +36,14 @@ const barOrientationOptions: Array<{
 ];
 
 export interface BarOrientationProps {
-  isVisible?: boolean;
   barOrientation?: BarOrientation;
   onBarOrientationChange: (newMode: BarOrientation) => void;
 }
 
 export const BarOrientationSettings: FC<BarOrientationProps> = ({
-  isVisible = true,
   barOrientation = 'horizontal',
   onBarOrientationChange,
 }) => {
-  console.log('isVisible', isVisible);
-  if (!isVisible) {
-    return null;
-  }
   const label = i18n.translate('xpack.lens.shared.barOrientation', {
     defaultMessage: 'Bar orientation',
   });
@@ -58,11 +52,11 @@ export const BarOrientationSettings: FC<BarOrientationProps> = ({
     'bar_orientation_horizontal';
 
   return (
-    <EuiFormRow display="columnCompressed" label={label}>
+    <EuiFormRow display="columnCompressed" label={label} fullWidth>
       <EuiButtonGroup
         isFullWidth
         legend={label}
-        data-test-subj="lens-bar-orientation-btn"
+        data-test-subj="lns_barOrientation"
         buttonSize="compressed"
         options={barOrientationOptions}
         idSelected={isSelected}

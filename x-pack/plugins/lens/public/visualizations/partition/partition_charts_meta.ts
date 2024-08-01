@@ -148,46 +148,34 @@ const emptySizeRatioOptions: PartitionChartMeta['toolbarPopover']['emptySizeRati
   },
 ];
 
+const sharedPieDonutOptions: Omit<PartitionChartMeta, 'id'> = {
+  icon: IconChartPie,
+  label: i18n.translate('xpack.lens.pie.pielabel', {
+    defaultMessage: 'Pie',
+  }),
+  maxBuckets: 3,
+  toolbarPopover: {
+    categoryOptions,
+    numberOptions,
+    emptySizeRatioOptions,
+  },
+  legend: {
+    getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
+  },
+  sortPriority: 6,
+  description: i18n.translate('xpack.lens.pie.visualizationDescription', {
+    defaultMessage: 'Display proportions of a whole in a circular format.',
+  }),
+};
+
 export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
   pie: {
     id: 'pie',
-    icon: IconChartPie,
-    label: i18n.translate('xpack.lens.pie.pielabel', {
-      defaultMessage: 'Pie',
-    }),
-    maxBuckets: 3,
-    toolbarPopover: {
-      categoryOptions,
-      numberOptions,
-      emptySizeRatioOptions, // todo: change how it works!
-    },
-    legend: {
-      getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
-    },
-    sortPriority: 6,
-    description: i18n.translate('xpack.lens.pie.visualizationDescription', {
-      defaultMessage: 'Display proportions of a whole in a circular format.',
-    }),
+    ...sharedPieDonutOptions,
   },
   donut: {
     id: 'donut',
-    icon: IconChartPie,
-    label: i18n.translate('xpack.lens.pie.pielabel', {
-      defaultMessage: 'Pie',
-    }),
-    maxBuckets: 3,
-    toolbarPopover: {
-      categoryOptions,
-      numberOptions,
-      emptySizeRatioOptions, // todo: change how it works!
-    },
-    legend: {
-      getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
-    },
-    sortPriority: 6,
-    description: i18n.translate('xpack.lens.pie.visualizationDescription', {
-      defaultMessage: 'Display proportions of a whole in a circular format.',
-    }),
+    ...sharedPieDonutOptions,
   },
   waffle: {
     id: 'waffle',
@@ -252,7 +240,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
   },
 };
 
-export const chartSwitchOptions = [
+export const visualizationTypes = [
   {
     ...PartitionChartsMeta.pie,
     subtypes: ['pie', 'donut'],

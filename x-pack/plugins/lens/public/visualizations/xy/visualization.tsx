@@ -35,7 +35,6 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { DataLayerConfig } from '@kbn/expression-xy-plugin/common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -62,7 +61,6 @@ import type {
   Suggestion,
   UserMessage,
   AnnotationGroups,
-  VisualizationLayerWidgetProps,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
@@ -70,8 +68,8 @@ import {
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
+  visualizationSubtypes,
   visualizationTypes,
-  chartSwitchOptions,
 } from './types';
 import {
   getAnnotationLayerErrors,
@@ -172,14 +170,12 @@ export const getXyVisualization = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
-  visualizationTypes,
   getVisualizationTypeId(state, layerId) {
     const type = getVisualizationType(state, layerId);
-    console.log('getVisualizationTypeId', type);
     return type === 'mixed' ? type : type.id;
   },
 
-  chartSwitchOptions,
+  visualizationTypes,
 
   getLayerIds(state) {
     return getLayersByType(state).map((l) => l.layerId);
@@ -273,14 +269,30 @@ export const getXyVisualization = ({
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State, layerId?: string) {
+    const dataLayer = state.layers.find((l) => l.layerId === layerId);
+    if (dataLayer && !isDataLayer(dataLayer)) {
+      throw new Error('Cannot switch series type for non-data layer');
+    }
+    if (!dataLayer) {
+      return state;
+    }
+    // todo: test how they switch between percentage etc
+    const currentStackingType = stackingTypes.find(({ subtypes }) =>
+      subtypes.includes(dataLayer.seriesType)
+    );
+    const chosenTypeIndex = defaultSeriesTypesByIndex.indexOf(seriesType);
+
+    const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
+      seriesType) as SeriesType;
+
     return {
       ...state,
-      preferredSeriesType: seriesType as SeriesType,
+      preferredSeriesType: compatibleSeriesType,
       layers: layerId
         ? state.layers.map((layer) =>
-            layer.layerId === layerId ? { ...layer, seriesType: seriesType as SeriesType } : layer
+            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
           )
-        : state.layers.map((layer) => ({ ...layer, seriesType: seriesType as SeriesType })),
+        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
     };
   },
 
@@ -632,6 +644,14 @@ export const getXyVisualization = ({
         delete newLayer.splitAccessor;
         // as the palette is associated with the break down by dimension, remove it together with the dimension
         delete newLayer.palette;
+        // percentage chart doesn't make sense if there's no split dimension so we convert to bar
+        if (newLayer.seriesType === 'bar_percentage_stacked') {
+          newLayer.seriesType = 'bar';
+        } else if (newLayer.seriesType === 'bar_horizontal_percentage_stacked') {
+          newLayer.seriesType = 'bar_horizontal';
+        } else if (newLayer.seriesType === 'area_percentage_stacked') {
+          newLayer.seriesType = 'area';
+        }
       }
     }
     if (newLayer.accessors.includes(columnId)) {
@@ -1168,9 +1188,9 @@ function getVisualizationInfo(
 
     if (isDataLayer(layer)) {
       chartType = layer.seriesType;
-      const layerVisType = visualizationTypes.find((visType) => visType.id === chartType);
+      const layerVisType = visualizationSubtypes.find((visType) => visType.id === chartType);
       icon = layerVisType?.icon;
-      label = layerVisType?.fullLabel || layerVisType?.label;
+      label = layerVisType?.label;
 
       if (layer.xAccessor) {
         dimensions.push({
@@ -1327,16 +1347,28 @@ function getNotifiableFeatures(
   ];
 }
 
-const stackingTypes = [
+const defaultSeriesTypesByIndex = ['bar', 'area', 'bar_horizontal'];
+
+export const stackingTypes = [
   {
     type: 'stacked',
-    label: 'Stacked',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.stacked', {
+      defaultMessage: 'Stacked',
+    }),
     subtypes: ['bar_stacked', 'area_stacked', 'bar_horizontal_stacked'],
   },
-  { type: 'unstacked', label: 'Unstacked', subtypes: ['bar', 'area', 'bar_horizontal'] },
+  {
+    type: 'unstacked',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.unstacked', {
+      defaultMessage: 'Unstacked',
+    }),
+    subtypes: ['bar', 'area', 'bar_horizontal'],
+  },
   {
     type: 'percentage',
-    label: 'Percentage',
+    label: i18n.translate('xpack.lens.shared.barLayerStacking.percentage', {
+      defaultMessage: 'Percentage',
+    }),
     subtypes: [
       'bar_percentage_stacked',
       'area_percentage_stacked',

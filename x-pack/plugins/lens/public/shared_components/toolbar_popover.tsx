@@ -13,11 +13,10 @@ import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
-  labels: 'visText',
   values: 'number',
   list: 'list',
   visualOptions: 'brush',
-  textAndTitles: 'visText',
+  titlesAndText: 'visText',
 };
 
 export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
@@ -85,7 +84,9 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
         anchorPosition="downRight"
         {...euiPopoverProps}
       >
-        <EuiPopoverTitle>{title}</EuiPopoverTitle>
+        <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>
+          {title}
+        </EuiPopoverTitle>
         {children}
       </EuiPopover>
     </EuiFlexItem>

@@ -32,9 +32,9 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
       title={i18n.translate('xpack.lens.metric.toolbarTitlesText.label', {
         defaultMessage: 'Titles and text',
       })}
-      type="labels"
+      type="titlesAndText"
       groupPosition={groupPosition}
-      buttonDataTestSubj="lnsTitlesTextButton"
+      buttonDataTestSubj="lnsTextOptionsButton"
     >
       {!state.breakdownByAccessor && (
         <SubtitleOption

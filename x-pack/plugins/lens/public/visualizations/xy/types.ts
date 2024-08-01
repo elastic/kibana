@@ -179,17 +179,28 @@ export interface XYState {
 
 export type State = XYState;
 
-export const visualizationTypes: VisualizationType[] = [
+const barShared = {
+  sortPriority: 1,
+  description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+    defaultMessage: 'Compare categories or groups of data via bars.',
+  }),
+};
+
+const areaShared = {
+  sortPriority: 3,
+  description: i18n.translate('xpack.lens.area.visualizationDescription', {
+    defaultMessage: 'Compare distributions of cumulative data trends.',
+  }),
+};
+
+export const visualizationSubtypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: IconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar vertical',
     }),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
   },
   {
     id: 'bar_horizontal',
@@ -200,10 +211,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
       defaultMessage: 'Bar horizontal',
     }),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
   },
   {
     id: 'bar_stacked',
@@ -211,10 +219,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Bar vertical stacked',
     }),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
   },
   {
     id: 'bar_percentage_stacked',
@@ -222,10 +227,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Bar vertical percentage',
     }),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
   },
   {
     id: 'bar_horizontal_stacked',
@@ -236,10 +238,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
       defaultMessage: 'Bar horizontal stacked',
     }),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -253,10 +252,7 @@ export const visualizationTypes: VisualizationType[] = [
         defaultMessage: 'Bar horizontal percentage',
       }
     ),
-    sortPriority: 1,
-    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
-      defaultMessage: 'Compare categories or groups of data via bars.',
-    }),
+    ...barShared,
   },
   {
     id: 'area',
@@ -264,10 +260,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
-    sortPriority: 3,
-    description: i18n.translate('xpack.lens.area.visualizationDescription', {
-      defaultMessage: 'Compare distributions of cumulative data trends.',
-    }),
+    ...areaShared,
   },
   {
     id: 'area_stacked',
@@ -275,10 +268,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Area stacked',
     }),
-    sortPriority: 3,
-    description: i18n.translate('xpack.lens.area.visualizationDescription', {
-      defaultMessage: 'Compare distributions of cumulative data trends.',
-    }),
+    ...areaShared,
   },
   {
     id: 'area_percentage_stacked',
@@ -286,10 +276,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Area percentage',
     }),
-    sortPriority: 3,
-    description: i18n.translate('xpack.lens.area.visualizationDescription', {
-      defaultMessage: 'Compare distributions of cumulative data trends.',
-    }),
+    ...areaShared,
   },
   {
     id: 'line',
@@ -304,7 +291,7 @@ export const visualizationTypes: VisualizationType[] = [
   },
 ];
 
-export const chartSwitchOptions = [
+export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
     subtypes: [
@@ -313,7 +300,6 @@ export const chartSwitchOptions = [
       'bar_percentage_stacked',
       'bar_horizontal',
       'bar_horizontal_stacked',
-      'bar_horizontal_percentage_stacked',
       'bar_horizontal_percentage_stacked',
     ],
     icon: IconChartBar,
@@ -324,12 +310,12 @@ export const chartSwitchOptions = [
     description: i18n.translate('xpack.lens.bar.visualizationDescription', {
       defaultMessage: 'Compare categories or groups of data via bars.',
     }),
-    getCompatibleSubtype: (subtype: string) => {
-      if (subtype === 'area') {
+    getCompatibleSubtype: (seriesType?: string) => {
+      if (seriesType === 'area') {
         return 'bar';
-      } else if (subtype === 'area_stacked') {
+      } else if (seriesType === 'area_stacked') {
         return 'bar_stacked';
-      } else if (subtype === 'area_percentage_stacked') {
+      } else if (seriesType === 'area_percentage_stacked') {
         return 'bar_percentage_stacked';
       }
     },
@@ -345,12 +331,12 @@ export const chartSwitchOptions = [
       defaultMessage: 'Compare distributions of cumulative data trends.',
     }),
     subtypes: ['area', 'area_stacked', 'area_percentage_stacked'],
-    getCompatibleSubtype: (subtype: string) => {
-      if (subtype === 'bar') {
+    getCompatibleSubtype: (seriesType?: string) => {
+      if (seriesType === 'bar') {
         return 'area';
-      } else if (subtype === 'bar_stacked') {
+      } else if (seriesType === 'bar_stacked') {
         return 'area_stacked';
-      } else if (subtype === 'bar_percentage_stacked') {
+      } else if (seriesType === 'bar_percentage_stacked') {
         return 'area_percentage_stacked';
       }
     },

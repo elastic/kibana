@@ -95,15 +95,7 @@ describe('AddLayerButton', () => {
     clickAddLayer();
     clickVisualizationButton();
     await waitForSeriesOptions();
-    expect(getSeriesTypeOptions()).toEqual([
-      'Bar vertical',
-      'Bar vertical stacked',
-      'Bar vertical percentage',
-      'Area',
-      'Area stacked',
-      'Area percentage',
-      'Line',
-    ]);
+    expect(getSeriesTypeOptions()).toEqual(['Bar', 'Area', 'Line']);
   });
   it('calls addLayer with a proper series type when button is clicked', async () => {
     const {

@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await PageObjects.discover.chooseLensSuggestion('donut');
+      await PageObjects.discover.chooseLensSuggestion('pie');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
@@ -288,9 +288,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         keepOpen: true,
       });
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-      // click donut from suggestions
+      // click pie from suggestions
       await testSubjects.click('lensSuggestionsPanelToggleButton');
-      await testSubjects.click('lnsSuggestion-donut');
+      await testSubjects.click('lnsSuggestion-pie');
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 

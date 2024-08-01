@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { ValueLabelConfig } from '../../common/types';
 
 const valueLabelsOptions: Array<{
@@ -27,8 +27,8 @@ const valueLabelsOptions: Array<{
   {
     id: `value_labels_inside`,
     value: 'show',
-    label: i18n.translate('xpack.lens.shared.valueLabelsVisibility.inside', {
-      defaultMessage: 'Show',
+    label: i18n.translate('xpack.lens.shared.valueLabelsVisibility.show', {
+      defaultMessage: 'Show, if able',
     }),
     'data-test-subj': 'lns_valueLabels_inside',
   },
@@ -38,41 +38,33 @@ export interface VisualOptionsProps {
   isVisible?: boolean;
   valueLabels?: ValueLabelConfig;
   onValueLabelChange: (newMode: ValueLabelConfig) => void;
+  label?: string;
 }
+
+const defaultLabel = i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+  defaultMessage: 'Value labels',
+});
 
 export const ValueLabelsSettings: FC<VisualOptionsProps> = ({
   isVisible = true,
   valueLabels = 'hide',
   onValueLabelChange,
+  label = defaultLabel,
 }) => {
   if (!isVisible) {
     return null;
   }
-  const label = i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-    defaultMessage: 'Labels',
-  });
+
   const isSelected =
     valueLabelsOptions.find(({ value }) => value === valueLabels)?.id || 'value_labels_hide';
   return (
     <EuiFormRow
+      fullWidth
       display="columnCompressed"
-      label={
-        <span>
-          {label}{' '}
-          <EuiIconTip
-            color="subdued"
-            content={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityTooltip', {
-              defaultMessage: 'If there is not enough space, value labels might be hidden',
-            })}
-            iconProps={{
-              className: 'eui-alignTop',
-            }}
-            position="top"
-            size="s"
-            type="questionInCircle"
-          />
-        </span>
-      }
+      helpText={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityHelpText', {
+        defaultMessage: 'Values can only be shown if space is available.',
+      })}
+      label={label}
     >
       <EuiButtonGroup
         isFullWidth

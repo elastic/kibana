@@ -11,14 +11,11 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFormRow,
-  EuiSuperSelect,
-  EuiRange,
-  EuiHorizontalRule,
   EuiComboBox,
   EuiIcon,
   EuiFieldNumber,
-  EuiButton,
   EuiButtonGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
@@ -160,7 +157,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
 
   const onEmptySizeRatioChange = useCallback(
     ([option]) => {
-      console.log(option);
       if (option.value === 'none') {
         setState({ ...state, shape: 'pie', layers: [{ ...layer, emptySizeRatio: undefined }] });
       } else {
@@ -190,130 +186,133 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     frame.datasourceLayers
   ).truncateText;
 
-  const showExistencePopover = emptySizeRatioOptions?.length && selectedOption;
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      {showExistencePopover ? (
-        <ToolbarPopover
-          title={i18n.translate('xpack.lens.pieChart.appearanceLabel', {
-            defaultMessage: 'Appearance',
-          })}
-          type="visualOptions"
-          groupPosition="left"
-          buttonDataTestSubj="lnsVisualOptionsButton"
-        >
-          <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
-            <EuiComboBox
-              fullWidth
-              compressed
-              data-test-subj="lnsEmptySizeRatioOption"
-              aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
-                defaultMessage: 'Donut hole',
-              })}
-              onChange={onEmptySizeRatioChange}
-              isClearable={false}
-              options={emptySizeRatioOptions.map(({ id, label, icon }) => ({
-                value: id,
-                label,
-                prepend: icon ? <EuiIcon type={icon} /> : undefined,
-              }))}
-              selectedOptions={[{ value: selectedOption.id, label: selectedOption.label }]}
-              singleSelection={{ asPlainText: true }}
-              prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
-            />
-          </EuiFormRow>
-        </ToolbarPopover>
-      ) : null}
-      <ToolbarPopover
-        title={i18n.translate('xpack.lens.pieChart.titlesAndTextLabel', {
-          defaultMessage: 'Titles and text',
-        })}
-        isDisabled={Boolean(isToolbarPopoverDisabled)}
-        type="labels"
-        groupPosition={showExistencePopover ? 'center' : 'left'}
-        buttonDataTestSubj="lnsLabelsButton"
-        panelStyle={PANEL_STYLE}
-      >
-        {categoryOptions.length ? (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-              defaultMessage: 'Slice labels',
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {emptySizeRatioOptions?.length && selectedOption ? (
+        <EuiFlexItem grow={false}>
+          <ToolbarPopover
+            title={i18n.translate('xpack.lens.pieChart.appearanceLabel', {
+              defaultMessage: 'Appearance',
             })}
-            fullWidth
-            display="columnCompressed"
+            type="visualOptions"
+            buttonDataTestSubj="lnsVisualOptionsButton"
+            data-test-subj="lnsVisualOptionsPopover"
           >
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-                defaultMessage: 'Slice labels',
-              })}
-              options={categoryOptions}
-              idSelected={layer.categoryDisplay}
-              onChange={onCategoryDisplayChange}
-              buttonSize="compressed"
-              isFullWidth
-            />
-          </EuiFormRow>
-        ) : null}
-
-        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
-          <>
+            <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
+              <EuiComboBox
+                fullWidth
+                compressed
+                data-test-subj="lnsEmptySizeRatioOption"
+                aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
+                  defaultMessage: 'Donut hole',
+                })}
+                onChange={onEmptySizeRatioChange}
+                isClearable={false}
+                options={emptySizeRatioOptions.map(({ id, label, icon }) => ({
+                  value: id,
+                  label,
+                  prepend: icon ? <EuiIcon type={icon} /> : undefined,
+                }))}
+                selectedOptions={[{ value: selectedOption.id, label: selectedOption.label }]}
+                singleSelection={{ asPlainText: true }}
+                prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
+              />
+            </EuiFormRow>
+          </ToolbarPopover>
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <ToolbarPopover
+          title={i18n.translate('xpack.lens.pieChart.titlesAndTextLabel', {
+            defaultMessage: 'Titles and text',
+          })}
+          isDisabled={Boolean(isToolbarPopoverDisabled)}
+          type="titlesAndText"
+          panelStyle={PANEL_STYLE}
+        >
+          {categoryOptions.length ? (
             <EuiFormRow
-              label={i18n.translate('xpack.lens.pieChart.sliceValues', {
-                defaultMessage: 'Slice values',
+              label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+                defaultMessage: 'Slice labels',
               })}
               fullWidth
               display="columnCompressed"
             >
               <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
-                  defaultMessage: 'Slice values',
+                legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+                  defaultMessage: 'Slice labels',
                 })}
-                options={numberOptions}
-                idSelected={layer.numberDisplay}
-                onChange={onNumberDisplayChange}
+                options={categoryOptions}
+                idSelected={layer.categoryDisplay}
+                onChange={onCategoryDisplayChange}
                 buttonSize="compressed"
                 isFullWidth
               />
             </EuiFormRow>
-            {layer.numberDisplay === NumberDisplay.PERCENT && (
-              <EuiFormRow label=" " fullWidth display="columnCompressed">
-                <DecimalPlaceInput
-                  value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-                  setValue={onPercentDecimalsChange}
+          ) : null}
+
+          {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
+            <>
+              <EuiFormRow
+                label={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                  defaultMessage: 'Slice values',
+                })}
+                fullWidth
+                display="columnCompressed"
+              >
+                <EuiButtonGroup
+                  legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
+                    defaultMessage: 'Slice values',
+                  })}
+                  options={numberOptions}
+                  idSelected={layer.numberDisplay}
+                  onChange={onNumberDisplayChange}
+                  buttonSize="compressed"
+                  isFullWidth
                 />
               </EuiFormRow>
-            )}
-          </>
-        ) : null}
-      </ToolbarPopover>
-      <LegendSettingsPopover<PartitionLegendValue>
-        legendOptions={legendOptions}
-        mode={layer.legendDisplay}
-        onDisplayChange={onLegendDisplayChange}
-        legendStats={getLegendStats(layer, state.shape)}
-        allowedLegendStats={
-          PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
-            ? partitionLegendValues
-            : undefined
-        }
-        onLegendStatsChange={onLegendStatsChange}
-        position={layer.legendPosition}
-        onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch={
-          !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
-          layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
-        }
-        nestedLegend={Boolean(layer.nestedLegend)}
-        onNestedLegendChange={onNestedLegendChange}
-        shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
-        onTruncateLegendChange={onTruncateLegendChange}
-        maxLines={layer?.legendMaxLines}
-        onMaxLinesChange={onLegendMaxLinesChange}
-        legendSize={legendSize}
-        onLegendSizeChange={onLegendSizeChange}
-        showAutoLegendSizeOption={hadAutoLegendSize}
-      />
+              {layer.numberDisplay === NumberDisplay.PERCENT && (
+                <EuiFormRow label=" " fullWidth display="columnCompressed">
+                  <DecimalPlaceInput
+                    value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+                    setValue={onPercentDecimalsChange}
+                  />
+                </EuiFormRow>
+              )}
+            </>
+          ) : null}
+        </ToolbarPopover>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <LegendSettingsPopover<PartitionLegendValue>
+          groupPosition={'none'}
+          legendOptions={legendOptions}
+          mode={layer.legendDisplay}
+          onDisplayChange={onLegendDisplayChange}
+          legendStats={getLegendStats(layer, state.shape)}
+          allowedLegendStats={
+            PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
+              ? partitionLegendValues
+              : undefined
+          }
+          onLegendStatsChange={onLegendStatsChange}
+          position={layer.legendPosition}
+          onPositionChange={onLegendPositionChange}
+          renderNestedLegendSwitch={
+            !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
+            layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+          }
+          nestedLegend={Boolean(layer.nestedLegend)}
+          onNestedLegendChange={onNestedLegendChange}
+          shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
+          onTruncateLegendChange={onTruncateLegendChange}
+          maxLines={layer?.legendMaxLines}
+          onMaxLinesChange={onLegendMaxLinesChange}
+          legendSize={legendSize}
+          onLegendSizeChange={onLegendSizeChange}
+          showAutoLegendSizeOption={hadAutoLegendSize}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
