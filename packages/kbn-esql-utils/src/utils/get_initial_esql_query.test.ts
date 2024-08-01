@@ -75,7 +75,7 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | LIMIT 10');
   });
 
-  it('should append a where clause correctly if the dataview timeFieldName is different than @timestamp or if there is no @timestamp in the index fields', () => {
+  it('should append a where clause correctly if there is no @timestamp in the index fields', () => {
     const fields = [
       {
         name: '@custom_timestamp',
