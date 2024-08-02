@@ -21,14 +21,14 @@ import {
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 
-export const ACTION_CLONE_PANEL = 'clonePanel';
+export const ACTION_DUPLICATE_PANEL = 'duplicatePanel';
 
-export type ClonePanelActionApi = CanAccessViewMode &
+export type DuplicatePanelActionApi = CanAccessViewMode &
   HasUniqueId &
   HasParentApi<CanDuplicatePanels> &
   Partial<PublishesBlockingError>;
 
-const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
+const isApiCompatible = (api: unknown | null): api is DuplicatePanelActionApi =>
   Boolean(
     apiHasUniqueId(api) &&
       apiCanAccessViewMode(api) &&
@@ -36,9 +36,9 @@ const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
       apiCanDuplicatePanels(api.parentApi)
   );
 
-export class ClonePanelAction implements Action<EmbeddableApiContext> {
-  public readonly type = ACTION_CLONE_PANEL;
-  public readonly id = ACTION_CLONE_PANEL;
+export class DuplicatePanelAction implements Action<EmbeddableApiContext> {
+  public readonly type = ACTION_DUPLICATE_PANEL;
+  public readonly id = ACTION_DUPLICATE_PANEL;
   public order = 45;
 
   constructor() {}
