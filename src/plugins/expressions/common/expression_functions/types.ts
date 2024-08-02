@@ -113,12 +113,12 @@ export interface ExpressionFunctionDefinition<
  * Type to capture every possible expression function definition.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
-  string,
-  any,
-  Record<string, any>,
-  any
->;
+export type AnyExpressionFunctionDefinition = Omit<
+  ExpressionFunctionDefinition<string, any, Record<string, any>, any>,
+  'args'
+> & {
+  args: Record<string, any>; // cannot satisfy generic args for multi. TS cannot decern any[] from any in `T extends (infer U)[]`
+};
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
