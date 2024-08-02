@@ -60,7 +60,7 @@ interface BaseArgumentType<T> {
    */
   deprecated?: boolean;
   /** Help text for the Argument to be displayed in the Expression Editor */
-  help: string;
+  help?: string;
   /** Default options for the Argument */
   options?: T[];
   /**

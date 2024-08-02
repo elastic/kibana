@@ -85,7 +85,7 @@ export interface ExpressionFunctionDefinition<
    * Help text displayed in the Expression editor. This text should be
    * internationalized.
    */
-  help: string;
+  help?: string;
 
   /**
    * The actual implementation of the function.
