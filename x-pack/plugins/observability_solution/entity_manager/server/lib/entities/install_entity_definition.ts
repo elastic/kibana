@@ -75,45 +75,61 @@ export async function installEntityDefinition({
 
     validateDefinitionCanCreateValidTransformIds(definition);
 
-    // install scoped index template
-    await upsertTemplate({
-      esClient,
-      logger,
-      template: getEntitiesHistoryIndexTemplateConfig(definition.id),
+    const entityDefinition = await saveEntityDefinition(soClient, {
+      ...definition,
+      installStatus: 'installing',
+      installStartedAt: new Date().toISOString(),
     });
-    installState.indexTemplates.history = true;
-    await upsertTemplate({
-      esClient,
-      logger,
-      template: getEntitiesLatestIndexTemplateConfig(definition.id),
-    });
-    installState.indexTemplates.latest = true;
-
-    // install ingest pipelines
-    logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
-    await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
-    installState.ingestPipelines.history = true;
-    await createAndInstallLatestIngestPipeline(esClient, definition, logger);
-    installState.ingestPipelines.latest = true;
-
-    // install transforms
-    logger.debug(`Installing transforms for definition ${definition.id}`);
-    await createAndInstallHistoryTransform(esClient, definition, logger);
-    installState.transforms.history = true;
-    if (isBackfillEnabled(definition)) {
-      await createAndInstallHistoryBackfillTransform(esClient, definition, logger);
-      installState.transforms.backfill = true;
-    }
-    await createAndInstallLatestTransform(esClient, definition, logger);
-    installState.transforms.latest = true;
-
-    const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
+
+    logger.debug(`Installing index templates for definition ${definition.id}`);
+    await Promise.allSettled([
+      upsertTemplate({
+        esClient,
+        logger,
+        template: getEntitiesHistoryIndexTemplateConfig(definition.id),
+      }).then(() => (installState.indexTemplates.history = true)),
+      upsertTemplate({
+        esClient,
+        logger,
+        template: getEntitiesLatestIndexTemplateConfig(definition.id),
+      }).then(() => (installState.indexTemplates.latest = true)),
+    ]);
+
+    logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
+    await Promise.allSettled([
+      createAndInstallHistoryIngestPipeline(esClient, definition, logger).then(
+        () => (installState.ingestPipelines.history = true)
+      ),
+      createAndInstallLatestIngestPipeline(esClient, definition, logger).then(
+        () => (installState.ingestPipelines.latest = true)
+      ),
+    ]);
+
+    logger.debug(`Installing transforms for definition ${definition.id}`);
+    await Promise.allSettled([
+      createAndInstallHistoryTransform(esClient, definition, logger).then(
+        () => (installState.transforms.history = true)
+      ),
+      isBackfillEnabled(definition)
+        ? createAndInstallHistoryBackfillTransform(esClient, definition, logger).then(
+            () => (installState.transforms.backfill = true)
+          )
+        : Promise.resolve(),
+      createAndInstallLatestTransform(esClient, definition, logger).then(
+        () => (installState.transforms.latest = true)
+      ),
+    ]);
 
     return entityDefinition;
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
+
     // Clean up anything that was successful.
+    if (installState.definition) {
+      await deleteEntityDefinition(soClient, definition, logger);
+    }
+
     if (installState.ingestPipelines.history) {
       await deleteHistoryIngestPipeline(esClient, definition, logger);
     }
@@ -144,10 +160,6 @@ export async function installEntityDefinition({
         logger,
         name: getEntityLatestIndexTemplateV1(definition.id),
       });
-    }
-
-    if (installState.definition) {
-      await deleteEntityDefinition(soClient, definition, logger);
     }
 
     throw e;

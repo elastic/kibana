@@ -30,11 +30,19 @@ const assertHasCreatedDefinition = (
   esClient: ElasticsearchClient
 ) => {
   expect(soClient.create).toBeCalledTimes(1);
-  expect(soClient.create).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition, {
-    id: definition.id,
-    overwrite: true,
-    managed: definition.managed,
-  });
+  expect(soClient.create).toBeCalledWith(
+    SO_ENTITY_DEFINITION_TYPE,
+    {
+      ...definition,
+      installStatus: 'installing',
+      installStartedAt: expect.any(String),
+    },
+    {
+      id: definition.id,
+      overwrite: true,
+      managed: definition.managed,
+    }
+  );
 
   expect(esClient.indices.putIndexTemplate).toBeCalledTimes(2);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
