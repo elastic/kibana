@@ -9,6 +9,8 @@ import { isEmpty } from 'lodash';
 import type { QueryClient } from '@tanstack/react-query';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 import type { ValidationError, ValidationFunc } from '../../../shared_imports';
@@ -21,6 +23,7 @@ export type FieldType = 'string';
 
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
+  INVALID_SYNTAX = 'ERR_INVALID_SYNTAX',
   ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
 }
 
@@ -32,6 +35,31 @@ const constructValidationError = (error: Error) => {
       : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
     error,
   };
+};
+
+const constructSyntaxError = (error: Error) => {
+  return {
+    code: ERROR_CODES.INVALID_SYNTAX,
+    message: error?.message
+      ? i18n.esqlValidationErrorMessage(error.message)
+      : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
+    error,
+  };
+};
+
+const getEsqlSyntaxError = async (query: string): Promise<Error | undefined> => {
+  const { errors: validationErrors } = await validateQuery(query, getAstAndSyntaxErrors, {
+    // setting this to true, we don't want to validate the index / fields existence
+    ignoreOnMissingCallbacks: true,
+  });
+  for (const error of validationErrors) {
+    if ('severity' in error) {
+      return new Error(error.message);
+    } else if (error.text.startsWith('SyntaxError:')) {
+      return new Error(error.text);
+    }
+  }
+  return undefined;
 };
 
 /**
@@ -58,6 +86,12 @@ export const esqlValidator = async (
   }
 
   try {
+    // First, we wanna check for existing syntax errors and then proceed with other validations
+    const syntaxError = await getEsqlSyntaxError(query);
+    if (syntaxError) {
+      return constructSyntaxError(syntaxError);
+    }
+
     const queryClient = (customData.value as { queryClient: QueryClient | undefined })?.queryClient;
 
     const services = KibanaServices.get();
