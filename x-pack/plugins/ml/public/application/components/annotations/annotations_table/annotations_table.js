@@ -90,10 +90,8 @@ class AnnotationsTableUI extends Component {
       queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
       jobId:
-        Array.isArray(this.props.jobs) &&
-        this.props.jobs.length > 0 &&
-        this.props.jobs[0] !== undefined
-          ? this.props.jobs[0].job_id
+        Array.isArray(props.jobs) && props.jobs.length > 0 && props.jobs[0] !== undefined
+          ? props.jobs[0].job_id
           : undefined,
       datafeedFlyoutVisible: false,
       modelSnapshot: null,
@@ -104,8 +102,8 @@ class AnnotationsTableUI extends Component {
       sort: { field: 'timestamp', direction: 'asc' },
     };
     this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(this.props.kibana.services.notifications.toasts),
-      this.props.kibana.services.mlServices.mlApiServices
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      props.kibana.services.mlServices.mlApiServices
     );
   }
 

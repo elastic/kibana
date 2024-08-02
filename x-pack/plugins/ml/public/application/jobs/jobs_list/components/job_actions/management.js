@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
+  mlJobService,
   showEditJobFlyout,
   showDatafeedChartFlyout,
   showDeleteJobModal,
@@ -149,7 +150,7 @@ export function actionsMenuContent(
         return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
-        cloneJob(item.id);
+        cloneJob(mlJobService, item.id);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',

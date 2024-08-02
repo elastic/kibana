@@ -15,7 +15,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { getViewableDetectors } from '../../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
-import { useMlKibana, useNotifications } from '../../../contexts/kibana';
+import { useNotifications } from '../../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewJob } from '../../../../../common/util/job_utils';
 import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
@@ -28,7 +28,6 @@ import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesex
 import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
 import { useTableInterval } from '../../../components/controls/select_interval';
 import { useTableSeverity } from '../../../components/controls/select_severity';
-import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { useTimeSeriesExplorerUrlState } from '../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
 import type { TimeSeriesExplorerAppState } from '../../../../../common/types/locator';
 import { useJobSelectionFlyout } from '../../../contexts/ml/use_job_selection_flyout';
@@ -46,15 +45,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
-  const {
-    services: {
-      data: { dataViews: dataViewsService },
-    },
-  } = useMlKibana();
   const mlJobService = useMlJobService();
   const { toasts } = useNotifications();
   const mlForecastService = useForecastService();
-  const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
     useTimeSeriesExplorerUrlState();
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -296,8 +289,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
-        dataViewsService,
-        toastNotificationService,
         appStateHandler,
         autoZoomDuration,
         bounds,

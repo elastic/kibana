@@ -55,13 +55,13 @@ class JobService {
     return new Promise((resolve, reject) => {
       jobs = [];
       datafeedIds = {};
-      this.getMl()
+      this.ml
         .getJobs()
         .then((resp) => {
           jobs = resp.jobs;
 
           // load jobs stats
-          this.getMl()
+          this.ml
             .getJobStats()
             .then((statsResp) => {
               // merge jobs stats into jobs
@@ -132,14 +132,14 @@ class JobService {
 
   refreshJob(jobId) {
     return new Promise((resolve, reject) => {
-      this.getMl()
+      this.ml
         .getJobs({ jobId })
         .then((resp) => {
           if (resp.jobs && resp.jobs.length) {
             const newJob = resp.jobs[0];
 
             // load jobs stats
-            this.getMl()
+            this.ml
               .getJobStats({ jobId })
               .then((statsResp) => {
                 // merge jobs stats into jobs
@@ -205,13 +205,13 @@ class JobService {
     return new Promise((resolve, reject) => {
       const sId = datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined;
 
-      this.getMl()
+      this.ml
         .getDatafeeds(sId)
         .then((resp) => {
           const datafeeds = resp.datafeeds;
 
           // load datafeeds stats
-          this.getMl()
+          this.ml
             .getDatafeedStats()
             .then((statsResp) => {
               // merge datafeeds stats into datafeeds
@@ -245,7 +245,7 @@ class JobService {
     return new Promise((resolve, reject) => {
       const datafeedId = this.getDatafeedId(jobId);
 
-      this.getMl()
+      this.ml
         .getDatafeedStats({ datafeedId })
         .then((resp) => {
           // console.log('updateSingleJobCounts controller query response:', resp);
@@ -271,7 +271,7 @@ class JobService {
     }
 
     // return the promise chain
-    return this.getMl().addJob({ jobId: job.job_id, job }).then(func).catch(func);
+    return this.ml.addJob({ jobId: job.job_id, job }).then(func).catch(func);
   }
 
   cloneDatafeed(datafeed) {
@@ -295,18 +295,18 @@ class JobService {
   }
 
   openJob(jobId) {
-    return this.getMl().openJob({ jobId });
+    return this.ml.openJob({ jobId });
   }
 
   closeJob(jobId) {
-    return this.getMl().closeJob({ jobId });
+    return this.ml.closeJob({ jobId });
   }
 
   saveNewDatafeed(datafeedConfig, jobId) {
     const datafeedId = `datafeed-${jobId}`;
     datafeedConfig.job_id = jobId;
 
-    return this.getMl().addDatafeed({
+    return this.ml.addDatafeed({
       datafeedId,
       datafeedConfig,
     });
@@ -322,7 +322,7 @@ class JobService {
         end++;
       }
 
-      this.getMl()
+      this.ml
         .startDatafeed({
           datafeedId,
           start,
@@ -339,29 +339,29 @@ class JobService {
   }
 
   forceStartDatafeeds(dIds, start, end) {
-    return this.getMl().jobs.forceStartDatafeeds(dIds, start, end);
+    return this.ml.jobs.forceStartDatafeeds(dIds, start, end);
   }
 
   stopDatafeeds(dIds) {
-    return this.getMl().jobs.stopDatafeeds(dIds);
+    return this.ml.jobs.stopDatafeeds(dIds);
   }
 
   deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules) {
-    return this.getMl().jobs.deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules);
+    return this.ml.jobs.deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules);
   }
 
   closeJobs(jIds) {
-    return this.getMl().jobs.closeJobs(jIds);
+    return this.ml.jobs.closeJobs(jIds);
   }
 
   resetJobs(jIds, deleteUserAnnotations) {
-    return this.getMl().jobs.resetJobs(jIds, deleteUserAnnotations);
+    return this.ml.jobs.resetJobs(jIds, deleteUserAnnotations);
   }
 
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
-        this.getMl()
+        this.ml
           .validateDetector({ detector })
           .then((resp) => {
             resolve(resp);
@@ -414,7 +414,7 @@ class JobService {
 
   async getJobAndGroupIds() {
     try {
-      return await this.getMl().jobs.getAllJobAndGroupIds();
+      return await this.ml.jobs.getAllJobAndGroupIds();
     } catch (error) {
       return {
         jobIds: [],

@@ -613,13 +613,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    * @param callback to invoke after a state update.
    */
   getControlsForDetector = () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJobId, selectedJob } = this.props;
-    return getControlsForDetector(
-      selectedDetectorIndex,
-      selectedEntities,
-      selectedJobId,
-      selectedJob
-    );
+    const { selectedDetectorIndex, selectedEntities, selectedJob } = this.props;
+    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJob);
   };
 
   /**

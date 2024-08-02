@@ -37,6 +37,8 @@ import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_conf
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
+import { mlJobServiceFactory } from '../../../../services/job_service';
+import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -78,6 +80,11 @@ export class JobsListViewUI extends Component {
      * @private
      */
     this._isFiltersSet = false;
+
+    this.mlJobService = mlJobServiceFactory(
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      props.kibana.services.mlServices.mlApiServices
+    );
   }
 
   componentDidMount() {
@@ -99,7 +106,7 @@ export class JobsListViewUI extends Component {
   }
 
   openAutoStartDatafeedModal() {
-    const job = checkForAutoStartDatafeed();
+    const job = checkForAutoStartDatafeed(this.mlJobService);
     if (job !== undefined) {
       this.showStartDatafeedModal([job]);
     }

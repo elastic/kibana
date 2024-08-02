@@ -82,8 +82,8 @@ class RuleEditorFlyoutUI extends Component {
     this.canGetFilters = checkPermission('canGetFilters');
 
     this.mlJobService = mlJobServiceFactory(
-      toastNotificationServiceProvider(this.props.kibana.services.notifications.toasts),
-      this.props.kibana.services.mlServices.mlApiServices
+      toastNotificationServiceProvider(props.kibana.services.notifications.toasts),
+      props.kibana.services.mlServices.mlApiServices
     );
   }
 
