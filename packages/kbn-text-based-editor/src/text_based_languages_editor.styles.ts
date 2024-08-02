@@ -30,20 +30,13 @@ export const textBasedLanguageEditorStyles = (
       right: 0,
       zIndex: 4,
       height: `${editorHeight}px`,
-      border: hasOutline ? euiTheme.border.thin : 'none',
-      borderRadius: euiTheme.border.radius.small,
-      borderBottom: 'none',
     },
     resizableContainer: {
       display: 'flex',
       width: '100%',
       alignItems: 'flex-start',
-      border: 'none',
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-      borderBottomWidth: hasErrors ? '2px' : '1px',
-      borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
-      borderRight: euiTheme.border.thin,
+      border: hasOutline ? euiTheme.border.thin : 'none',
+      borderBottom: 'none',
       overflow: 'hidden',
     },
     linesBadge: {
@@ -64,7 +57,7 @@ export const textBasedLanguageEditorStyles = (
       borderTop: !isCodeEditorExpandedFocused
         ? hasErrors
           ? `2px solid ${euiTheme.colors.danger}`
-          : 'none'
+          : `2px solid ${euiTheme.colors.lightestShade}`
         : `2px solid ${bottomContainerBorderColor}`,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.xs,
