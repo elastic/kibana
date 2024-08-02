@@ -169,6 +169,17 @@ export const getSavedObjectTypes = (
       },
       modelVersions: {
         1: settingsV1,
+        2: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                use_space_awareness: { type: 'boolean', index: false },
+                use_space_awareness_migration_started_at: { type: 'date', index: false },
+              },
+            },
+          ],
+        },
       },
     },
     [LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]: {

@@ -99,9 +99,7 @@ async function batchMigration(
         }
       }
     }
-
-    finder.find();
   } finally {
-    finder.close();
+    await finder.close();
   }
 }
