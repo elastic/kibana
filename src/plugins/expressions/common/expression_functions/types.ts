@@ -74,7 +74,7 @@ export interface ExpressionFunctionDefinition<
    * Specification of arguments that function supports. This list will also be
    * used for autocomplete functionality when your function is being edited.
    */
-  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
+  args: { [key in keyof Arguments]-?: ArgumentType<Arguments[key]> };
 
   /**
    * @todo What is this?
