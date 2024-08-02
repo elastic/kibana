@@ -97,7 +97,8 @@ export type MyPluginRepositoryClient =
 
 class MyPlugin implements Plugin {
     public setup(core: CoreSetup) {
-        const myPluginRepositoryClient = createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>(core);
+        const myPluginRepositoryClient =
+          createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>(core);
 
         myPluginRepositoryClient('GET /internal/my_plugin/route').then(console.log);
     }
@@ -320,7 +321,8 @@ export type MyPluginRepositoryClient =
 
 class MyPlugin implements Plugin {
     public setup(core: CoreSetup) {
-       const myPluginRepositoryClient = createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions & MyPluginClientOptions>(core);
+       const myPluginRepositoryClient =
+        createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions & MyPluginClientOptions>(core);
 
         myPluginRepositoryClient('GET /internal/my_plugin/route', {
             makeSafe: true,
