@@ -111,6 +111,13 @@ export class Walker {
     return params;
   };
 
+  /**
+   * Finds and returns the first node that matches the search criteria.
+   *
+   * @param node AST node to start the search from.
+   * @param predicate A function that returns true if the node matches the search criteria.
+   * @returns The first node that matches the search criteria.
+   */
   public static readonly find = (
     node: WalkerAstNode,
     predicate: (node: ESQLProperNode) => boolean
@@ -126,6 +133,13 @@ export class Walker {
     return found;
   };
 
+  /**
+   * Finds and returns all nodes that match the search criteria.
+   *
+   * @param node AST node to start the search from.
+   * @param predicate A function that returns true if the node matches the search criteria.
+   * @returns All nodes that match the search criteria.
+   */
   public static readonly findAll = (
     node: WalkerAstNode,
     predicate: (node: ESQLProperNode) => boolean
@@ -141,6 +155,14 @@ export class Walker {
     return list;
   };
 
+  /**
+   * Matches a single node against a template object. Returns the first node
+   * that matches the template.
+   *
+   * @param node AST node to match against the template.
+   * @param template Template object to match against the node.
+   * @returns The first node that matches the template
+   */
   public static readonly match = (
     node: WalkerAstNode,
     template: NodeMatchTemplate
@@ -149,6 +171,14 @@ export class Walker {
     return Walker.find(node, predicate);
   };
 
+  /**
+   * Matches all nodes against a template object. Returns all nodes that match
+   * the template.
+   *
+   * @param node AST node to match against the template.
+   * @param template Template object to match against the node.
+   * @returns All nodes that match the template
+   */
   public static readonly matchAll = (
     node: WalkerAstNode,
     template: NodeMatchTemplate
