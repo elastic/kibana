@@ -13,6 +13,7 @@ import { EuiInputPopover } from '@elastic/eui';
 import {
   apiHasParentApi,
   apiPublishesDataLoading,
+  getUnchangingComparator,
   getViewModeSubject,
   useBatchedPublishingSubjects,
   ViewMode,
@@ -49,10 +50,18 @@ export const getTimesliderControlFactory = (
       i18n.translate('controlsExamples.timesliderControl.displayName', {
         defaultMessage: 'Time slider',
       }),
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
+      const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
+      const isPopoverOpen$ = new BehaviorSubject(false);
+
+      const timeRangePercentage = initTimeRangePercentage(
+        initialState,
+        syncTimesliceWithTimeRangePercentage
+      );
+
       function syncTimesliceWithTimeRangePercentage(
         startPercentage: number | undefined,
         endPercentage: number | undefined
@@ -73,18 +82,16 @@ export const getTimesliderControlFactory = (
         ]);
         setSelectedRange(to - from);
       }
-      const timeRangePercentage = initTimeRangePercentage(
-        initialState,
-        syncTimesliceWithTimeRangePercentage
-      );
+
       function setTimeslice(timeslice?: Timeslice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
         timeslice$.next(timeslice);
       }
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
+
       function setIsAnchored(isAnchored: boolean | undefined) {
         isAnchored$.next(isAnchored);
       }
+
       let selectedRange: number | undefined;
       function setSelectedRange(nextSelectedRange?: number) {
         selectedRange =
@@ -176,14 +183,10 @@ export const getTimesliderControlFactory = (
         setTimeslice([from, Math.min(to, timeRangeMax)]);
       }
 
-      const isPopoverOpen$ = new BehaviorSubject(false);
-      function setIsPopoverOpen(value: boolean) {
-        isPopoverOpen$.next(value);
-      }
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControl = initializeDefaultControlApi(initialState);
+      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
 
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
@@ -217,6 +220,9 @@ export const getTimesliderControlFactory = (
               references: [],
             };
           },
+          clearSelections: () => {
+            setTimeslice(undefined);
+          },
           CustomPrependComponent: () => {
             const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
               controlGroupApi.autoApplySelections$,
@@ -229,7 +235,7 @@ export const getTimesliderControlFactory = (
                 onPrevious={onPrevious}
                 viewMode={viewMode}
                 disablePlayButton={!autoApplySelections}
-                setIsPopoverOpen={setIsPopoverOpen}
+                setIsPopoverOpen={(value) => isPopoverOpen$.next(value)}
                 waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
               />
             );
@@ -237,6 +243,7 @@ export const getTimesliderControlFactory = (
         },
         {
           ...defaultControl.comparators,
+          width: getUnchangingComparator(),
           ...timeRangePercentage.comparators,
           isAnchored: [isAnchored$, setIsAnchored],
         }
@@ -253,7 +260,7 @@ export const getTimesliderControlFactory = (
 
       return {
         api,
-        Component: (controlStyleProps) => {
+        Component: (controlPanelClassNames) => {
           const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
             useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
 
@@ -273,13 +280,12 @@ export const getTimesliderControlFactory = (
 
           return (
             <EuiInputPopover
-              {...controlStyleProps}
-              className="timeSlider__popoverOverride"
+              {...controlPanelClassNames}
               panelClassName="timeSlider__panelOverride"
               input={
                 <TimeSliderPopoverButton
                   onClick={() => {
-                    setIsPopoverOpen(!isPopoverOpen);
+                    isPopoverOpen$.next(!isPopoverOpen);
                   }}
                   formatDate={formatDate}
                   from={from}
@@ -287,7 +293,7 @@ export const getTimesliderControlFactory = (
                 />
               }
               isOpen={isPopoverOpen}
-              closePopover={() => setIsPopoverOpen(false)}
+              closePopover={() => isPopoverOpen$.next(false)}
               panelPaddingSize="s"
             >
               <TimeSliderPopoverContent

@@ -13,7 +13,7 @@ import { AttackDiscoveryTab } from './attack_discovery_tab';
 import { AlertsTab } from './alerts_tab';
 import * as i18n from './translations';
 
-interface TabInfo {
+export interface TabInfo {
   content: JSX.Element;
   id: string;
   name: string;

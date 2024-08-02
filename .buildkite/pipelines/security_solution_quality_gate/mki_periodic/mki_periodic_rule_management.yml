@@ -3,7 +3,7 @@ steps:
     key: cypress_test_rule_management
     steps:
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management
-        label: "Serverless MKI QA Rule Management - Security Solution Cypress Tests"
+        label: "Cypress MKI - Rule Management"
         key: test_rule_management
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
@@ -22,7 +22,7 @@ steps:
               limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:rule_management:prebuilt_rules
-        label: "Serverless MKI QA Rule Management - Prebuilt Rules - Security Solution Cypress Tests"
+        label: "Cypress MKI - Rule Management - Prebuilt Rules"
         key: test_rule_management_prebuilt_rules
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-rule-management"
@@ -40,7 +40,7 @@ steps:
             - exit_status: "-1"
               limit: 1
 
-  - group: "Serverless MKI QA Rule Management - API Integration"
+  - group: "API MKI - Rule Management"
     key: api_test_rule_management
     steps:
       - label: Running rule_creation:qa:serverless

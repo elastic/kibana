@@ -30,18 +30,18 @@
     text-decoration: none;
   }
 
-  .linksPanelLinkText {
+  .linksPanelEditorLinkText {
     &:hover {
       text-decoration: underline !important;
     }
   }
 }
 
-.linksPanelLink {
+.linksPanelEditorLink {
   padding: $euiSizeXS $euiSizeS;
   color: $euiTextColor;
 
-  .linksPanelLinkText {
+  .linksPanelEditorLinkText {
     flex: 1;
     min-width: 0;
   }
@@ -49,11 +49,11 @@
   &.linkError {
     border: 1px solid transparentize($euiColorWarningText, .7);
 
-    .linksPanelLinkText {
+    .linksPanelEditorLinkText {
       color: $euiColorWarningText;
     }
 
-    .linksPanelLinkText--noLabel {
+    .linksPanelEditorLinkText--noLabel {
       font-style: italic;
     }
   }

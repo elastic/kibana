@@ -30,7 +30,6 @@ import type {
   ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint/endpoint_pending_actions';
 import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import type { AppAction } from '../../../../common/store/actions';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
@@ -45,13 +44,7 @@ import {
   sendGetEndpointSecurityPackage,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
-import type {
-  AgentIdsPendingActions,
-  EndpointState,
-  PolicyIds,
-  TransformStats,
-  TransformStatsResponse,
-} from '../types';
+import type { EndpointState, PolicyIds, TransformStats, TransformStatsResponse } from '../types';
 import type { EndpointPackageInfoStateChanged } from './action';
 import {
   endpointPackageInfo,
@@ -62,7 +55,6 @@ import {
   getMetadataTransformStats,
   isMetadataTransformStatsLoading,
   isOnEndpointPage,
-  listData,
   nonExistingPolicies,
   patterns,
   searchBarQuery,
@@ -301,47 +293,6 @@ async function getEndpointPackageInfo(
   }
 }
 
-/**
- * retrieves the Endpoint pending actions for all the existing endpoints being displayed on the list
- * or the details tab.
- *
- * @param store
- */
-const loadEndpointsPendingActions = async ({
-  getState,
-  dispatch,
-}: EndpointPageStore): Promise<void> => {
-  const state = getState();
-  const listEndpoints = listData(state);
-  const agentsIds = new Set<string>();
-
-  for (const endpointInfo of listEndpoints) {
-    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
-  }
-
-  if (agentsIds.size === 0) {
-    return;
-  }
-
-  try {
-    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
-    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
-
-    for (const pendingAction of pendingActions) {
-      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
-    }
-
-    dispatch({
-      type: 'endpointPendingActionsStateChanged',
-      payload: createLoadedResourceState(agentIdToPendingActions),
-    });
-  } catch (error) {
-    // TODO should handle the error instead of logging it to the browser
-    // Also this is an anti-pattern we shouldn't use
-    logError(error);
-  }
-};
-
 async function endpointListMiddleware({
   store,
   coreStart,
@@ -379,8 +330,6 @@ async function endpointListMiddleware({
       type: 'serverReturnedEndpointList',
       payload: endpointResponse,
     });
-
-    loadEndpointsPendingActions(store);
 
     dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
   } catch (error) {

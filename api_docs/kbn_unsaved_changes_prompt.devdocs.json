@@ -2,26 +2,10 @@
   "id": "@kbn/unsaved-changes-prompt",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/unsaved-changes-prompt",
-        "id": "def-common.useUnsavedChangesPrompt",
+        "id": "def-public.useUnsavedChangesPrompt",
         "type": "Function",
         "tags": [],
         "label": "useUnsavedChangesPrompt",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/unsaved-changes-prompt",
-            "id": "def-common.useUnsavedChangesPrompt.$1",
+            "id": "def-public.useUnsavedChangesPrompt.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  hasUnsavedChanges,\n  openConfirm,\n  history,\n  http,\n  navigateToUrl,\n  // Provide overrides for confirm dialog\n  messageText = DEFAULT_BODY_TEXT,\n  titleText = DEFAULT_TITLE_TEXT,\n  confirmButtonText = DEFAULT_CONFIRM_BUTTON,\n  cancelButtonText = DEFAULT_CANCEL_BUTTON,\n}",
@@ -53,6 +37,22 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

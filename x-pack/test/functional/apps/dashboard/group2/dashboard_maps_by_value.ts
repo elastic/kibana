@@ -33,6 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
     }
     await dashboardAddPanel.clickEditorMenuButton();
+    await testSubjects.setValue('dashboardPanelSelectionFlyout__searchInput', 'maps');
     await dashboardAddPanel.clickVisType('maps');
     await PageObjects.maps.clickSaveAndReturnButton();
   }

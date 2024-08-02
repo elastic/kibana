@@ -233,9 +233,9 @@
           "({ core, children, }: React.PropsWithChildren<React.PropsWithChildren<{ core: ",
           {
             "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-common.CoreStart",
+            "section": "def-public.CoreStart",
             "text": "CoreStart"
           },
           "; }>>) => JSX.Element"
@@ -255,9 +255,9 @@
               "React.PropsWithChildren<React.PropsWithChildren<{ core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               "; }>>"
@@ -1043,9 +1043,9 @@
           "(param: { url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.NavigateToAppOptions",
+            "section": "def-public.NavigateToAppOptions",
             "text": "NavigateToAppOptions"
           },
           ") => void"
@@ -1066,9 +1066,9 @@
               "{ url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToAppOptions",
+                "section": "def-public.NavigateToAppOptions",
                 "text": "NavigateToAppOptions"
               }
             ],

@@ -7,9 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { render, screen, within } from '@testing-library/react';
+
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import RuleAdd from './rule_add';
@@ -29,7 +29,6 @@ import {
   RuleTypeModel,
 } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { ReactWrapper } from 'enzyme';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -38,6 +37,8 @@ import { fetchUiHealthStatus } from '@kbn/alerts-ui-shared/src/common/apis/fetch
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { waitFor } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/rule_api/rule_types', () => ({
@@ -81,8 +82,7 @@ export const TestExpression: FunctionComponent<any> = () => {
   );
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/174397
-describe.skip('rule_add', () => {
+describe('rule_add', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -90,7 +90,6 @@ describe.skip('rule_add', () => {
   afterAll(() => {
     jest.resetAllMocks();
   });
-  let wrapper: ReactWrapper<any>;
 
   async function setup({
     initialValues,
@@ -195,51 +194,46 @@ describe.skip('rule_add', () => {
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    wrapper = mountWithIntl(
-      <QueryClientProvider client={new QueryClient()}>
-        <RuleAdd
-          consumer={ALERTING_FEATURE_ID}
-          onClose={onClose}
-          initialValues={initialValues}
-          onSave={() => {
-            return new Promise<void>(() => {});
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          metadata={{ test: 'some value', fields: ['test'] }}
-          ruleTypeId={ruleTypeId}
-          validConsumers={validConsumers}
-        />
-      </QueryClientProvider>
-    );
-
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    return {
+      consumer: ALERTING_FEATURE_ID,
+      onClose,
+      initialValues,
+      onSave: () => {
+        return new Promise<void>(() => {});
+      },
+      actionTypeRegistry,
+      ruleTypeRegistry,
+      metadata: { test: 'some value', fields: ['test'] },
+      ruleTypeId,
+      validConsumers,
+    };
   }
 
   it('renders rule add flyout', async () => {
     (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
+
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose,
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="showRequestButton"]').exists()).toBeTruthy();
+    expect(await screen.findByTestId('addRuleFlyoutTitle')).toBeInTheDocument();
 
-    wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
+    expect(await screen.findByTestId('showRequestButton')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
     expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {
       fields: ['test'],
       test: 'some value',
@@ -251,25 +245,23 @@ describe.skip('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose,
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    await waitFor(() => {
-      const ruleTypesContainer = wrapper.find('[data-test-subj="ruleGroupTypeSelectContainer"]');
-      const ruleTypeButton = ruleTypesContainer
-        .render()
-        .find('[data-test-subj="my-rule-type-SelectOption"]');
+    expect(await screen.findByTestId('my-rule-type-SelectOption')).toBeInTheDocument();
 
-      expect(ruleTypeButton.length).toEqual(1);
-      expect(ruleTypeButton.text()).toMatchInlineSnapshot(`"Testtest"`);
-    });
+    expect(await screen.findByText('Test')).toBeInTheDocument();
+    expect(await screen.findByText('test')).toBeInTheDocument();
   });
 
   it('renders a confirm close modal if the flyout is closed after inputs have changed', async () => {
@@ -277,31 +269,33 @@ describe.skip('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+
+    const props = await setup({
       initialValues: {},
       onClose,
       ruleTypeId: 'my-rule-type',
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    wrapper
-      .find('input#ruleName')
-      .at(0)
-      .simulate('change', { target: { value: 'my rule type' } });
+    expect(await screen.findByTestId('ruleNameInput')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(wrapper.find('input#ruleName').props().value).toBe('my rule type');
-      expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
-      expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+    userEvent.type(await screen.findByTestId('ruleNameInput'), 'my{space}rule{space}type');
 
-      wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
-      expect(onClose).not.toHaveBeenCalled();
-      expect(wrapper.find('[data-test-subj="confirmRuleCloseModal"]').exists()).toBe(true);
-    });
+    expect(await screen.findByTestId('ruleNameInput')).toHaveValue('my rule type');
+    expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('');
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
+
+    userEvent.click(await screen.findByTestId('cancelSaveRuleButton'));
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(await screen.findByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
 
   it('renders rule add flyout with initial values', async () => {
@@ -309,7 +303,7 @@ describe.skip('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {
         name: 'Simple status rule',
         tags: ['uptime', 'logs'],
@@ -321,28 +315,61 @@ describe.skip('rule_add', () => {
       ruleTypeId: 'my-rule-type',
     });
 
-    expect(wrapper.find('input#ruleName').props().value).toBe('Simple status rule');
-    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
-    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('h');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('ruleNameInput')).toHaveValue('Simple status rule');
+
+    expect(
+      await within(await screen.findByTestId('tagsComboBox')).findByText('uptime')
+    ).toBeInTheDocument();
+    expect(
+      await within(await screen.findByTestId('tagsComboBox')).findByText('logs')
+    ).toBeInTheDocument();
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(1);
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('h');
   });
 
   it('renders rule add flyout with DEFAULT_RULE_INTERVAL if no initialValues specified and no minimumScheduleInterval', async () => {
     (fetchUiConfig as jest.Mock).mockResolvedValue({});
-    await setup({ ruleTypeId: 'my-rule-type' });
+    const props = await setup({ ruleTypeId: 'my-rule-type' });
 
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(1);
-    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(1);
+
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
   });
 
   it('renders rule add flyout with minimumScheduleInterval if minimumScheduleInterval is greater than DEFAULT_RULE_INTERVAL', async () => {
     (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '5m', enforce: false },
     });
-    await setup({ ruleTypeId: 'my-rule-type' });
+    const props = await setup({ ruleTypeId: 'my-rule-type' });
 
-    expect(wrapper.find('[data-test-subj="intervalInput"]').first().props().value).toEqual(5);
-    expect(wrapper.find('[data-test-subj="intervalInputUnit"]').first().props().value).toBe('m');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(5);
+
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('m');
   });
 
   it('emit an onClose event when the rule is saved', async () => {
@@ -354,7 +381,7 @@ describe.skip('rule_add', () => {
 
     (createRule as jest.MockedFunction<typeof createRule>).mockResolvedValue(rule);
 
-    await setup({
+    const props = await setup({
       initialValues: {
         name: 'Simple status rule',
         ruleTypeId: 'my-rule-type',
@@ -366,17 +393,23 @@ describe.skip('rule_add', () => {
       onClose,
     });
 
-    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    // Wait for handlers to fire
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
 
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
-      test: 'some value',
-      fields: ['test'],
+    userEvent.click(await screen.findByTestId('saveRuleButton'));
+
+    await waitFor(() => {
+      return expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
+        test: 'some value',
+        fields: ['test'],
+      });
     });
   });
 
@@ -385,7 +418,7 @@ describe.skip('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
     const onClose = jest.fn();
-    await setup({
+    const props = await setup({
       initialValues: {
         name: 'Simple rule',
         consumer: 'alerts',
@@ -435,23 +468,19 @@ describe.skip('rule_add', () => {
       validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
     });
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
+    expect(await screen.findByTestId('saveRuleButton')).toBeInTheDocument();
 
-    wrapper.find('[data-test-subj="saveRuleButton"]').last().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    await waitFor(() => {
-      expect(createRule).toHaveBeenLastCalledWith(
+    await waitFor(async () => {
+      userEvent.click(await screen.findByTestId('saveRuleButton'));
+      return expect(createRule).toHaveBeenLastCalledWith(
         expect.objectContaining({
           rule: expect.objectContaining({
             consumer: 'logs',
@@ -465,7 +494,7 @@ describe.skip('rule_add', () => {
     (fetchUiConfig as jest.Mock).mockResolvedValue({
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
-    await setup({
+    const props = await setup({
       initialValues: { ruleTypeId: 'my-rule-type' },
       onClose: jest.fn(),
       defaultScheduleInterval: '3h',
@@ -473,22 +502,17 @@ describe.skip('rule_add', () => {
       actionsShow: true,
     });
 
-    // Wait for handlers to fire
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
-    await waitFor(() => {
-      const intervalInputUnit = wrapper
-        .find('[data-test-subj="intervalInputUnit"]')
-        .first()
-        .getElement().props.value;
-      const intervalInput = wrapper.find('[data-test-subj="intervalInput"]').first().getElement()
-        .props.value;
-      expect(intervalInputUnit).toBe('h');
-      expect(intervalInput).toBe(3);
-    });
+    expect(await screen.findByTestId('intervalInputUnit')).toHaveValue('h');
+
+    expect(await screen.findByTestId('intervalInput')).toHaveValue(3);
   });
 
   it('should load connectors and connector types when there is a pre-selected rule type', async () => {
@@ -496,18 +520,20 @@ describe.skip('rule_add', () => {
       minimumScheduleInterval: { value: '1m', enforce: false },
     });
 
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose: jest.fn(),
       ruleTypeId: 'my-rule-type',
       actionsShow: true,
     });
 
-    // Wait for handlers to fire
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
     await waitFor(() => {
       expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
@@ -526,28 +552,33 @@ describe.skip('rule_add', () => {
       hasPermanentEncryptionKey: false,
     });
 
-    await setup({
+    const props = await setup({
       initialValues: {},
       onClose: jest.fn(),
       ruleTypeId: 'my-rule-type',
       actionsShow: true,
     });
 
-    // Wait for handlers to fire
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <RuleAdd {...props} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
 
     await waitFor(() => {
       expect(fetchUiHealthStatus).toHaveBeenCalledTimes(1);
       expect(fetchAlertingFrameworkHealth).toHaveBeenCalledTimes(1);
       expect(loadActionTypes).not.toHaveBeenCalled();
       expect(loadAllActions).not.toHaveBeenCalled();
-      expect(wrapper.find('[data-test-subj="actionNeededEmptyPrompt"]').first().text()).toContain(
-        'You must configure an encryption key to use Alerting'
-      );
     });
+
+    expect(
+      await screen.findByText('You must configure an encryption key to use Alerting.', {
+        collapseWhitespace: false,
+      })
+    ).toBeInTheDocument();
   });
 });
 

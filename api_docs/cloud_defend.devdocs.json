@@ -739,7 +739,7 @@
         "label": "CloudDefendStatusCode",
         "description": [],
         "signature": [
-          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
+          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\""
         ],
         "path": "x-pack/plugins/cloud_defend/common/v1.ts",
         "deprecated": false,

@@ -1,0 +1,301 @@
+openapi: 3.0.0
+info:
+  title: Common Exception List Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ExceptionListId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ExceptionListHumanId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      description: Human readable string identifier, e.g. `trusted-linux-processes`
+
+    ExceptionListType:
+      type: string
+      enum:
+        - detection
+        - rule_default
+        - endpoint
+        - endpoint_trusted_apps
+        - endpoint_events
+        - endpoint_host_isolation_exceptions
+        - endpoint_blocklists
+
+    ExceptionListName:
+      type: string
+
+    ExceptionListDescription:
+      type: string
+
+    ExceptionListMeta:
+      type: object
+      additionalProperties: true
+
+    ExceptionNamespaceType:
+      type: string
+      enum:
+        - agnostic
+        - single
+      description: |
+        Determines whether the exception container is available in all Kibana spaces or just the space
+        in which it is created, where:
+
+        - `single`: Only available in the Kibana space in which it is created.
+        - `agnostic`: Available in all Kibana spaces.
+
+    ExceptionListTags:
+      type: array
+      items:
+        type: string
+
+    ExceptionListOsType:
+      type: string
+      enum:
+        - linux
+        - macos
+        - windows
+
+    ExceptionListOsTypeArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExceptionListOsType'
+
+    ExceptionListVersion:
+      type: integer
+      minimum: 1
+
+    ExceptionList:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ExceptionListId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        type:
+          $ref: '#/components/schemas/ExceptionListType'
+        name:
+          $ref: '#/components/schemas/ExceptionListName'
+        description:
+          $ref: '#/components/schemas/ExceptionListDescription'
+        immutable:
+          type: boolean
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListTags'
+        meta:
+          $ref: '#/components/schemas/ExceptionListMeta'
+        version:
+          $ref: '#/components/schemas/ExceptionListVersion'
+        _version:
+          type: string
+        tie_breaker_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          type: string
+      required:
+        - id
+        - list_id
+        - type
+        - name
+        - description
+        - immutable
+        - namespace_type
+        - version
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+
+    ExceptionListItemId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ExceptionListItemHumanId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ExceptionListItemType:
+      type: string
+      enum: [simple]
+
+    ExceptionListItemName:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ExceptionListItemDescription:
+      type: string
+
+    ExceptionListItemMeta:
+      type: object
+      additionalProperties: true
+
+    ExceptionListItemTags:
+      type: array
+      items:
+        $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ExceptionListItemOsType:
+      type: string
+      enum:
+        - linux
+        - macos
+        - windows
+
+    ExceptionListItemOsTypeArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExceptionListOsType'
+
+    ExceptionListItemComment:
+      type: object
+      properties:
+        id:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        comment:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      required:
+        - id
+        - comment
+        - created_at
+        - created_by
+
+    ExceptionListItemCommentArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExceptionListItemComment'
+
+    ExceptionListItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ExceptionListItemId'
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: './exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        expire_time:
+          type: string
+          format: date-time
+        comments:
+          $ref: '#/components/schemas/ExceptionListItemCommentArray'
+        _version:
+          type: string
+        tie_breaker_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        updated_by:
+          type: string
+      required:
+        - id
+        - item_id
+        - list_id
+        - type
+        - name
+        - description
+        - entries
+        - namespace_type
+        - comments
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+
+    ExceptionListSO:
+      type: object
+      properties:
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        list_type:
+          type: string
+          enum: [item, list]
+        immutable:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: './exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        expire_time:
+          type: string
+          format: date-time
+        comments:
+          $ref: '#/components/schemas/ExceptionListItemCommentArray'
+        version:
+          $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        tie_breaker_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        updated_by:
+          type: string
+      required:
+        - list_id
+        - list_type
+        - type
+        - name
+        - description
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by

@@ -28,4 +28,5 @@ export enum ErrorCode {
   STATUS_TRANSITION_ERROR = 'status_transition_error',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
+  GENERATE_INDEX_NAME_ERROR = 'generate_index_name_error',
 }

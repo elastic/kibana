@@ -17,6 +17,7 @@ export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<
   Datatable,
   {
     idMap: string;
+    isTextBased?: boolean;
   },
   Datatable | Promise<Datatable>
 >;

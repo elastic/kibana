@@ -102,7 +102,10 @@ describe('Timeline note middleware', () => {
         },
       },
     });
-    expect(selectTimelineById(store.getState(), TimelineId.test).eventIdToNoteIds).toEqual({});
+    expect(selectTimelineById(store.getState(), TimelineId.test).eventIdToNoteIds).toEqual({
+      // existing note
+      '1': ['1'],
+    });
     await store.dispatch(updateNote({ note: testNote }));
     await store.dispatch(
       addNoteToEvent({ eventId: testEventId, id: TimelineId.test, noteId: testNote.id })

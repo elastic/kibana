@@ -8,7 +8,8 @@
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ManualRuleRunModal, MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS } from '.';
+import { ManualRuleRunModal } from '.';
+import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 
 const convertToDatePickerFormat = (date: moment.Moment) => {
   return `${date.format('L')} ${date.format('LT')}`;
@@ -67,7 +68,7 @@ describe('ManualRuleRunModal', () => {
     expect(confirmModalConfirmButton).toBeEnabled();
 
     const now = moment();
-    const startDate = now.clone().subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS, 'd');
+    const startDate = now.clone().subtract(MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS, 'd');
 
     fireEvent.change(startDatePicker, {
       target: {

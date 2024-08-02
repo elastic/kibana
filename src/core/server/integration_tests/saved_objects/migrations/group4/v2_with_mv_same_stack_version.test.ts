@@ -14,7 +14,7 @@ import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, createType, parseLogFile } from '../test_utils';
+import { createType, parseLogFile } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
 const logFilePath = Path.join(__dirname, 'v2_with_mv_same_stack_version.test.log');
@@ -31,7 +31,6 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const getTestModelVersionType = ({ beforeUpgrade }: { beforeUpgrade: boolean }) => {

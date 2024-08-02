@@ -68,27 +68,28 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
               body: errorMessage,
               statusCode: 400,
             });
-          } else {
-            const exceptionList = await lists.findListItem({
-              currentIndexPosition,
-              filter,
-              listId,
-              page,
-              perPage,
-              runtimeMappings: undefined,
-              searchAfter,
-              sortField,
-              sortOrder,
-            });
-            if (exceptionList == null) {
-              return siemResponse.error({
-                body: `list id: "${listId}" does not exist`,
-                statusCode: 404,
-              });
-            } else {
-              return response.ok({ body: FindListItemsResponse.parse(exceptionList) });
-            }
           }
+
+          const exceptionList = await lists.findListItem({
+            currentIndexPosition,
+            filter,
+            listId,
+            page,
+            perPage,
+            runtimeMappings: undefined,
+            searchAfter,
+            sortField,
+            sortOrder,
+          });
+
+          if (exceptionList == null) {
+            return siemResponse.error({
+              body: `list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
+          }
+
+          return response.ok({ body: FindListItemsResponse.parse(exceptionList) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -22,6 +23,9 @@ import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -40,6 +44,9 @@ jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -69,19 +76,26 @@ describe('Timeline', () => {
 
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (feature: keyof ExperimentalFeatures) => {
+        if (feature === 'unifiedComponentsInTimelineDisabled') {
+          return true;
+        }
+        return allowedExperimentalValues[feature];
+      }
+    );
+
     props = {
+      dispatch: {} as Dispatch,
       activeTab: TimelineTabs.eql,
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
-      expandedDetail: {},
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      showExpandedDetails: false,
       start: startDate,
       timelineId: TimelineId.test,
       timerangeKind: 'absolute',

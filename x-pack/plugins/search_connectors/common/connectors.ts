@@ -334,7 +334,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       }
     ),
     iconPath: 'notion.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['notion', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.notion.name', {
@@ -595,7 +595,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     ),
     iconPath: 'sharepoint_server.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['sharepoint', 'cloud', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.sharepointServer.name', {

@@ -12,12 +12,13 @@ import { NotAvailableEnvironment } from '../not_available_environment';
 
 interface Props {
   environments: string[];
+  isMetricsSignalType?: boolean;
 }
 
-export function EnvironmentBadge({ environments = [] }: Props) {
-  return environments && environments.length > 0 ? (
+export function EnvironmentBadge({ environments = [], isMetricsSignalType = true }: Props) {
+  return isMetricsSignalType || (environments && environments.length > 0) ? (
     <ItemsBadge
-      items={environments}
+      items={environments ?? []}
       multipleItemsMessage={i18n.translate('xpack.apm.servicesTable.environmentCount', {
         values: { environmentCount: environments.length },
         defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',

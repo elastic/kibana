@@ -27,6 +27,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+  const mockNavigateToApp = jest.fn();
   const defaultAssistantAvailability: AssistantAvailability = {
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
@@ -47,7 +48,9 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       }}
       getComments={jest.fn(() => [])}
       http={mockHttp}
+      navigateToApp={mockNavigateToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
+      currentAppId={'test'}
     >
       {children}
     </AssistantProvider>

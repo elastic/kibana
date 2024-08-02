@@ -11,7 +11,7 @@ import {
   UseMutateFunction,
 } from '@tanstack/react-query';
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 

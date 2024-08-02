@@ -23,12 +23,13 @@ import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { getEvaluateRoute } from './evaluate/get_evaluate';
 import { postEvaluateRoute } from './evaluate/post_evaluate';
-import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
 import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
 import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
 import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
+import { chatCompleteRoute } from './chat/chat_complete_route';
+import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { bulkActionKnowledgeBaseEntriesRoute } from './knowledge_base/entries/bulk_actions_route';
 import { createKnowledgeBaseEntryRoute } from './knowledge_base/entries/create_route';
 import { findKnowledgeBaseEntriesRoute } from './knowledge_base/entries/find_route';
@@ -38,6 +39,11 @@ export const registerRoutes = (
   logger: Logger,
   getElserId: GetElser
 ) => {
+  /** PUBLIC */
+  // Chat
+  chatCompleteRoute(router, getElserId);
+
+  /** INTERNAL */
   // Capabilities
   getCapabilitiesRoute(router);
 

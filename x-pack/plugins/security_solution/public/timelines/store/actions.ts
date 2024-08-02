@@ -26,7 +26,6 @@ import type {
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,
-  ToggleDetailPanel,
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../common/types/timeline';
@@ -196,8 +195,6 @@ export const updateIsLoading = actionCreator<{
   id: string;
   isLoading: boolean;
 }>('UPDATE_LOADING');
-
-export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const setEventsLoading = actionCreator<{
   id: string;

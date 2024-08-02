@@ -10,8 +10,8 @@ import {
   NetworkOverviewStrategyResponse,
   NetworkQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -24,11 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With filebeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       const FROM = '2000-01-01T00:00:00.000Z';
@@ -70,11 +70,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With packetbeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       const FROM = '2000-01-01T00:00:00.000Z';
@@ -115,11 +115,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('With auditbeat', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
-        roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview');
-        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       });
 
       const FROM = '2000-01-01T00:00:00.000Z';

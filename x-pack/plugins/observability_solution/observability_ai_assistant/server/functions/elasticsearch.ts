@@ -7,13 +7,15 @@
 
 import type { FunctionRegistrationParameters } from '.';
 
+export const ELASTICSEARCH_FUNCTION_NAME = 'elasticsearch';
+
 export function registerElasticsearchFunction({
   functions,
   resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'elasticsearch',
+      name: ELASTICSEARCH_FUNCTION_NAME,
       description:
         'Call Elasticsearch APIs on behalf of the user. Make sure the request body is valid for the API that you are using. Only call this function when the user has explicitly requested it.',
       descriptionForUser: 'Call Elasticsearch APIs on behalf of the user',
@@ -39,7 +41,7 @@ export function registerElasticsearchFunction({
     },
     async ({ arguments: { method, path, body } }) => {
       const esClient = (await resources.context.core).elasticsearch.client;
-      const response = esClient.asCurrentUser.transport.request({
+      const response = await esClient.asCurrentUser.transport.request({
         method,
         path,
         body,

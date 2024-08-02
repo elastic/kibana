@@ -13,6 +13,7 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
   alertsContextCount: 20,
   approximateFutureTime: null,
   isLoadingPost: false,
+  stats: null,
   didInitialFetch: true,
   failureReason: null,
   generationIntervals: [
@@ -189,9 +190,94 @@ export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   generationIntervals: undefined,
   attackDiscoveries: [],
   isLoadingPost: false,
+  stats: null,
   didInitialFetch: true,
   failureReason: null,
   lastUpdated: null,
   replacements: {},
   isLoading: true, // <-- attack discoveries are being generated
+});
+
+export const getRawAttackDiscoveryResponse = () => ({
+  alertsContextCount: 20,
+  attackDiscoveries: [
+    {
+      alertIds: [
+        '382d546a7ba5ab35c050f106bece236e87e3d51076a479f0beae8b2015b8fb26',
+        'ca9da6b3b77b7038d958b9e144f0a406c223a862c0c991ce9782b98e03a98c87',
+        '5301f4fb014538df7ce1eb9929227dde3adc0bf5b4f28aa15c8aa4e4fda95f35',
+        '1459af4af8b92e1710c0ee075b1c444eaa927583dfd71b42e9a10de37c8b9cf0',
+        '468457e9c5132aadae501b75ec5b766e1465ab865ad8d79e03f66593a76fccdf',
+        'fb92e7fa5679db3e91d84d998faddb7ed269f1c8cdc40443f35e67c930383d34',
+        '03e0f8f1598018da8143bba6b60e6ddea30551a2286ba76d717568eed3d17a66',
+        '28021a7aca7de03018d820182c9784f8d5f2e1b99e0159177509a69bee1c3ac0',
+      ],
+      detailsMarkdown:
+        'The following attack progression appears to have occurred on the host {{ host.name 05207978-1585-4e46-9b36-69c4bb85a768 }} involving the user {{ user.name ddc8db29-46eb-44fe-80b6-1ea642c338ac }}:\\n\\n- A suspicious application named "My Go Application.app" was launched, likely through a malicious download or installation\\n- This application attempted to run various malicious scripts and commands, including:\\n  - Spawning a child process to run the "osascript" utility to display a fake system dialog prompting for user credentials ({{ process.command_line osascript -e display dialog "MacOS wants to access System Preferences\\n\\t\\t\\nPlease enter your password." with title "System Preferences" with icon file "System:Library:CoreServices:CoreTypes.bundle:Contents:Resources:ToolbarAdvanced.icns" default answer "" giving up after 30 with hidden answer ¬ }})\\n  - Modifying permissions on a suspicious file named "unix1" ({{ process.command_line chmod 777 /Users/james/unix1 }})\\n  - Executing the suspicious "unix1" file and passing it the user\'s login keychain file and a hardcoded password ({{ process.command_line /Users/james/unix1 /Users/james/library/Keychains/login.keychain-db TempTemp1234!! }})\\n\\nThis appears to be a multi-stage malware attack, potentially aimed at credential theft and further malicious execution on the compromised host. The tactics used align with Credential Access ({{ threat.tactic.name Credential Access }}) and Execution ({{ threat.tactic.name Execution }}) based on MITRE ATT&CK.',
+      entitySummaryMarkdown:
+        'Suspicious activity detected on {{ host.name 05207978-1585-4e46-9b36-69c4bb85a768 }} involving {{ user.name ddc8db29-46eb-44fe-80b6-1ea642c338ac }}.',
+      mitreAttackTactics: ['Credential Access', 'Execution'],
+      summaryMarkdown:
+        'A multi-stage malware attack was detected on a macOS host, likely initiated through a malicious application download. The attack involved credential phishing attempts, suspicious file modifications, and the execution of untrusted binaries potentially aimed at credential theft. {{ host.name 05207978-1585-4e46-9b36-69c4bb85a768 }} and {{ user.name ddc8db29-46eb-44fe-80b6-1ea642c338ac }} were involved.',
+      title: 'Credential Theft Malware Attack on macOS',
+    },
+    {
+      alertIds: [
+        '8772effc4970e371a26d556556f68cb8c73f9d9d9482b7f20ee1b1710e642a23',
+        '63c761718211fa51ea797669d845c3d4f23b1a28c77a101536905e6fd0b4aaa6',
+        '55f4641a9604e1088deae4897e346e63108bde9167256c7cb236164233899dcc',
+        'eaf9991c83feef7798983dc7cacda86717d77136a3a72c9122178a03ce2f15d1',
+        'f7044f707ac119256e5a0ccd41d451b51bca00bdc6899c7e5e8e1edddfeb6774',
+        'fad83b4223f3c159646ad22df9877b9c400f9472655e49781e2a5951b641088e',
+      ],
+      detailsMarkdown:
+        'The following attack progression appears to have occurred on the host {{ host.name b775910b-4b71-494d-bfb1-4be3fe88c2b0 }} involving the user {{ user.name e411fe2e-aeea-44b5-b09a-4336dabb3969 }}:\\n\\n- A malicious Microsoft Office document was opened, spawning a child process to write a suspicious VBScript file named "AppPool.vbs" ({{ file.path C:\\ProgramData\\WindowsAppPool\\AppPool.vbs }})\\n- The VBScript launched PowerShell and executed an obfuscated script from "AppPool.ps1"\\n- Additional malicious activities were performed, including:\\n  - Creating a scheduled task to periodically execute the VBScript\\n  - Spawning a cmd.exe process to create the scheduled task\\n  - Executing the VBScript directly\\n\\nThis appears to be a multi-stage malware attack initiated through malicious Office documents, employing script obfuscation, scheduled task persistence, and defense evasion tactics. The activities map to Initial Access ({{ threat.tactic.name Initial Access }}), Execution ({{ threat.tactic.name Execution }}), and Defense Evasion ({{ threat.tactic.name Defense Evasion }}) based on MITRE ATT&CK.',
+      entitySummaryMarkdown:
+        'Suspicious activity detected on {{ host.name b775910b-4b71-494d-bfb1-4be3fe88c2b0 }} involving {{ user.name e411fe2e-aeea-44b5-b09a-4336dabb3969 }}.',
+      mitreAttackTactics: ['Initial Access', 'Execution', 'Defense Evasion'],
+      summaryMarkdown:
+        'A multi-stage malware attack was detected on a Windows host, likely initiated through a malicious Microsoft Office document. The attack involved script obfuscation, scheduled task persistence, and other defense evasion tactics. {{ host.name b775910b-4b71-494d-bfb1-4be3fe88c2b0 }} and {{ user.name e411fe2e-aeea-44b5-b09a-4336dabb3969 }} were involved.',
+      title: 'Malicious Office Document Initiates Malware Attack',
+    },
+    {
+      alertIds: [
+        'd1b8b1c6f891fd181af236d0a81b8769c4569016d5b341cdf6a3fefb7cf9cbfd',
+        '005f2dfb7efb08b34865b308876ecad188fc9a3eebf35b5e3af3c3780a3fb239',
+        '7e41ddd221831544c5ff805e0ec31fc3c1f22c04257de1366112cfef14df9f63',
+      ],
+      detailsMarkdown:
+        'The following attack progression appears to have occurred on the host {{ host.name c1e00157-c636-4222-b3a2-5d9ea667a3a8 }} involving the user {{ user.name e411fe2e-aeea-44b5-b09a-4336dabb3969 }}:\\n\\n- A suspicious process launched by msiexec.exe spawned a PowerShell session\\n- The PowerShell process exhibited the following malicious behaviors:\\n  - Shellcode injection detected, indicating the presence of the "Windows.Trojan.Bumblebee" malware\\n  - Establishing network connections, suggesting command and control or data exfiltration\\n\\nThis appears to be a case of malware delivery and execution via an MSI package, potentially initiated through a software supply chain compromise or social engineering attack. The tactics employed align with Defense Evasion ({{ threat.tactic.name Defense Evasion }}) through system binary proxy execution, as well as potential Command and Control ({{ threat.tactic.name Command and Control }}) based on MITRE ATT&CK.',
+      entitySummaryMarkdown:
+        'Suspicious activity detected on {{ host.name c1e00157-c636-4222-b3a2-5d9ea667a3a8 }} involving {{ user.name e411fe2e-aeea-44b5-b09a-4336dabb3969 }}.',
+      mitreAttackTactics: ['Defense Evasion', 'Command and Control'],
+      summaryMarkdown:
+        'A malware attack was detected on a Windows host, likely delivered through a compromised MSI package. The attack involved shellcode injection, network connections, and the use of system binaries for defense evasion. {{ host.name c1e00157-c636-4222-b3a2-5d9ea667a3a8 }} and {{ user.name e411fe2e-aeea-44b5-b09a-4336dabb3969 }} were involved.',
+      title: 'Malware Delivery via Compromised MSI Package',
+    },
+    {
+      alertIds: [
+        '12057d82e79068080f6acf268ca45c777d3f80946b466b59954320ec5f86f24a',
+        '81c7c57a360bee531b1398b0773e7c4a2332fbdda4e66f135e01fc98ec7f4e3d',
+      ],
+      detailsMarkdown:
+        'The following attack progression appears to have occurred on the host {{ host.name d4c92b0d-b82f-4702-892d-dd06ad8418e8 }} involving the user {{ user.name 7245f867-9a09-48d7-9165-84a69fa0727d }}:\\n\\n- A malicious file named "kdmtmpflush" with the SHA256 hash {{ file.hash.sha256 74ef6cc38f5a1a80148752b63c117e6846984debd2af806c65887195a8eccc56 }} was copied to the /dev/shm directory\\n- Permissions were modified to make the file executable\\n- The file was then executed with the "--init" argument, likely to initialize malicious components\\n\\nThis appears to be a case of the "Linux.Trojan.BPFDoor" malware being deployed on the Linux host. The tactics employed align with Execution ({{ threat.tactic.name Execution }}) based on MITRE ATT&CK.',
+      entitySummaryMarkdown:
+        'Suspicious activity detected on {{ host.name d4c92b0d-b82f-4702-892d-dd06ad8418e8 }} involving {{ user.name 7245f867-9a09-48d7-9165-84a69fa0727d }}.',
+      mitreAttackTactics: ['Execution'],
+      summaryMarkdown:
+        'The "Linux.Trojan.BPFDoor" malware was detected being deployed on a Linux host. A malicious file was copied, permissions were modified, and the file was executed to likely initialize malicious components. {{ host.name d4c92b0d-b82f-4702-892d-dd06ad8418e8 }} and {{ user.name 7245f867-9a09-48d7-9165-84a69fa0727d }} were involved.',
+      title: 'Linux.Trojan.BPFDoor Malware Deployment Detected',
+    },
+  ],
+  connector_id: 'pmeClaudeV3SonnetUsEast1',
+  replacements: {
+    'ddc8db29-46eb-44fe-80b6-1ea642c338ac': 'james',
+    '05207978-1585-4e46-9b36-69c4bb85a768': 'SRVMAC08',
+    '7245f867-9a09-48d7-9165-84a69fa0727d': 'root',
+    'e411fe2e-aeea-44b5-b09a-4336dabb3969': 'Administrator',
+    '5a63f6dc-4e40-41fe-a92c-7898e891025e': 'SRVWIN07-PRIV',
+    'b775910b-4b71-494d-bfb1-4be3fe88c2b0': 'SRVWIN07',
+    'c1e00157-c636-4222-b3a2-5d9ea667a3a8': 'SRVWIN06',
+    'd4c92b0d-b82f-4702-892d-dd06ad8418e8': 'SRVNIX05',
+  },
 });

@@ -3,7 +3,8 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}Input
+  {{referenceName}}
+  {{~#if (isCircularRef $ref)}}Input{{/if~}}
   {{~#if nullable}} | null {{/if~}}
 {{~/if~}}
 

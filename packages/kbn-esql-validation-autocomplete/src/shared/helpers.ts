@@ -17,14 +17,14 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLInlineCast } from '@kbn/esql-ast/src/types';
+import { ESQLInlineCast, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, chronoLiterals } from '../definitions/literals';
+import { timeUnits } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -33,7 +33,7 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import type {
+import {
   CommandDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
@@ -43,7 +43,7 @@ import type {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import { esqlToKibanaType } from './esql_to_kibana_type';
+import { isNumericDecimalType } from './esql_types';
 import type { ReasonTypes } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['FROM', 'ROW', 'SHOW'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -226,6 +226,14 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return true;
   }
 
+  if (item.literalType === 'decimal' && isNumericDecimalType(argType)) {
+    return true;
+  }
+
+  if (item.literalType === 'string' && (argType === 'text' || argType === 'keyword')) {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
     if (argType === item.literalType) {
       return true;
@@ -233,11 +241,8 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
     return false;
   }
 
-  if (argType === 'chrono_literal') {
-    return chronoLiterals.some(({ name }) => name === item.text);
-  }
   // date-type parameters accept string literals because of ES auto-casting
-  return ['string', 'date'].includes(argType);
+  return ['string', 'date', 'date', 'date_period'].includes(argType);
 }
 
 /**
@@ -248,7 +253,14 @@ export function lookupColumn(
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
   const columnName = getQuotedColumnName(column);
-  return fields.get(columnName) || variables.get(columnName)?.[0];
+  return (
+    fields.get(columnName) ||
+    variables.get(columnName)?.[0] ||
+    // It's possible columnName has backticks "`fieldName`"
+    // so we need to access the original name as well
+    fields.get(column.name) ||
+    variables.get(column.name)?.[0]
+  );
 }
 
 const ARRAY_REGEXP = /\[\]$/;
@@ -258,10 +270,19 @@ export function isArrayType(type: string) {
 }
 
 const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = new Map([
-  ['number[]', 'number'],
-  ['date[]', 'date'],
-  ['boolean[]', 'boolean'],
+  ['double[]', 'double'],
+  ['unsigned_long[]', 'unsigned_long'],
+  ['long[]', 'long'],
+  ['integer[]', 'integer'],
+  ['counter_integer[]', 'counter_integer'],
+  ['counter_long[]', 'counter_long'],
+  ['counter_double[]', 'counter_double'],
   ['string[]', 'string'],
+  ['keyword[]', 'keyword'],
+  ['text[]', 'text'],
+  ['datetime[]', 'date'],
+  ['date_period[]', 'date_period'],
+  ['boolean[]', 'boolean'],
   ['any[]', 'any'],
 ]);
 
@@ -312,7 +333,7 @@ export function printFunctionSignature(arg: ESQLFunction): string {
           },
         ],
       },
-      { withTypes: false }
+      { withTypes: false, capitalize: true }
     );
     return signature[0].declaration;
   }
@@ -406,11 +427,12 @@ export function checkFunctionArgMatchesDefinition(
   parentCommand?: string
 ) {
   const argType = parameterDefinition.type;
-  if (argType === 'any') {
+  if (argType === 'any' || isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    const matched = compareLiteralType(argType, arg);
+    return matched;
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
@@ -431,11 +453,21 @@ export function checkFunctionArgMatchesDefinition(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
+    return wrappedTypes.some(
+      (ct) =>
+        ['any', 'null'].includes(ct) ||
+        argType === ct ||
+        (ct === 'string' && ['text', 'keyword'].includes(argType))
+    );
   }
   if (arg.type === 'inlineCast') {
-    // TODO - remove with https://github.com/elastic/kibana/issues/174710
-    return argType === esqlToKibanaType(arg.castType);
+    const lowerArgType = argType?.toLowerCase();
+    const lowerArgCastType = arg.castType?.toLowerCase();
+    return (
+      lowerArgType === lowerArgCastType ||
+      // for valid shorthand casts like 321.12::int or "false"::bool
+      (['int', 'bool'].includes(lowerArgCastType) && argType.startsWith(lowerArgCastType))
+    );
   }
 }
 
@@ -557,14 +589,47 @@ export function sourceExists(index: string, sources: Set<string>) {
   return Boolean(fuzzySearch(index, sources.keys()));
 }
 
+/**
+ * Works backward from the cursor position to determine if
+ * the final character of the previous word matches the given character.
+ */
+function characterPrecedesCurrentWord(text: string, char: string) {
+  let inCurrentWord = true;
+  for (let i = text.length - 1; i >= 0; i--) {
+    if (inCurrentWord && /\s/.test(text[i])) {
+      inCurrentWord = false;
+    }
+
+    if (!inCurrentWord && !/\s/.test(text[i])) {
+      return text[i] === char;
+    }
+  }
+}
+
+export function pipePrecedesCurrentWord(text: string) {
+  return characterPrecedesCurrentWord(text, '|');
+}
+
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
 }
 
+/**
+ * Are we after a comma? i.e. STATS fieldA, <here>
+ */
 export function isRestartingExpression(text: string) {
-  return getLastCharFromTrimmed(text) === ',';
+  return getLastCharFromTrimmed(text) === ',' || characterPrecedesCurrentWord(text, ',');
 }
 
+export function findPreviousWord(text: string) {
+  const words = text.split(/\s+/);
+  return words[words.length - 2];
+}
+
+export function shouldBeQuotedSource(text: string) {
+  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
+  return /[:"=|,[\]\/ \t\r\n]/.test(text);
+}
 export function shouldBeQuotedText(
   text: string,
   { dashSupported }: { dashSupported?: boolean } = {}
@@ -574,3 +639,9 @@ export function shouldBeQuotedText(
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
   getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isParam = (x: unknown): x is ESQLParamLiteral =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLParamLiteral).type === 'literal' &&
+  (x as ESQLParamLiteral).literalType === 'param';

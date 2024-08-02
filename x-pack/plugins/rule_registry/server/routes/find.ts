@@ -11,10 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
-import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 
 export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -32,7 +32,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
               size: t.union([PositiveInteger, t.undefined]),
               sort: t.union([t.array(t.object), t.undefined]),
               track_total_hits: t.union([t.boolean, t.undefined]),
-              _source: t.union([t.array(t.string), t.undefined]),
+              _source: t.union([t.array(t.string), t.boolean, t.undefined]),
             })
           )
         ),
@@ -67,7 +67,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           size,
           sort: sort as SortOptions[],
           track_total_hits,
-          _source,
+          _source: _source as false | string[],
         });
         if (alerts == null) {
           return response.notFound({

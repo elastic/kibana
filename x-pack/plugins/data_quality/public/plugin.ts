@@ -54,7 +54,7 @@ export class DataQualityPlugin
 
         return renderApp(coreStart, pluginsStartDeps, pluginStart, params);
       },
-      hideFromSidebar: true,
+      hideFromSidebar: false,
     });
 
     const managementLocator =

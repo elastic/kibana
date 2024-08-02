@@ -77,6 +77,7 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { BrowserFields } from '@kbn/timelines-plugin/common';
 
-import { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
 import { ColumnHeaderOptions } from '../../../common/types';
@@ -25,7 +26,7 @@ export const allowSorting = ({
   browserField,
   fieldName,
 }: {
-  browserField: Partial<BrowserField> | undefined;
+  browserField: Partial<FieldSpec> | undefined;
   fieldName: string;
 }): boolean => {
   const isAggregatable = browserField?.aggregatable ?? false;
@@ -94,8 +95,8 @@ export const allowSorting = ({
   return isAllowlistedNonBrowserField || isAggregatable;
 };
 
-const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
-  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<FieldSpec>> =>
+  Object.values(browserFields).reduce<Array<Partial<FieldSpec>>>(
     (acc, namespace) => [
       ...acc,
       ...Object.values(namespace.fields != null ? namespace.fields : {}),
@@ -105,8 +106,7 @@ const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<Browse
 
 const getAllFieldsByName = (
   browserFields: BrowserFields
-): { [fieldName: string]: Partial<BrowserField> } =>
-  keyBy('name', getAllBrowserFields(browserFields));
+): { [fieldName: string]: Partial<FieldSpec> } => keyBy('name', getAllBrowserFields(browserFields));
 
 /**
  * Valid built-in schema types for the `schema` property of `EuiDataGridColumn`
@@ -204,7 +204,7 @@ export const getColumnHeaders = (
   const headersToMap = isEventRenderedView ? eventRenderedViewColumns : headers;
   return headersToMap
     ? headersToMap.map((header) => {
-        const browserField: Partial<BrowserField> | undefined = browserFieldByName[header.id];
+        const browserField: Partial<FieldSpec> | undefined = browserFieldByName[header.id];
 
         // augment the header with metadata from browserFields:
         const augmentedHeader = {

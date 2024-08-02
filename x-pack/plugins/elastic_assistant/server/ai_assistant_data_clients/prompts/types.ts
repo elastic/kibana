@@ -12,7 +12,9 @@ export interface EsPromptsSchema {
   created_by: string;
   content: string;
   is_default?: boolean;
-  is_shared?: boolean;
+  consumer?: string;
+  color?: string;
+  categories?: string[];
   is_new_conversation_default?: boolean;
   name: string;
   prompt_type: string;
@@ -28,7 +30,8 @@ export interface EsPromptsSchema {
 export interface UpdatePromptSchema {
   id: string;
   '@timestamp'?: string;
-  is_shared?: boolean;
+  color?: string;
+  categories?: string[];
   is_new_conversation_default?: boolean;
   content?: string;
   updated_at?: string;
@@ -42,7 +45,9 @@ export interface UpdatePromptSchema {
 
 export interface CreatePromptSchema {
   '@timestamp'?: string;
-  is_shared?: boolean;
+  consumer?: string;
+  color?: string;
+  categories?: string[];
   is_new_conversation_default?: boolean;
   is_default?: boolean;
   name: string;

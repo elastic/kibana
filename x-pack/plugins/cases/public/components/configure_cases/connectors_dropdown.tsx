@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -14,6 +14,7 @@ import {
   EuiIconTip,
   EuiSuperSelect,
   useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -30,6 +31,15 @@ export interface Props {
   selectedConnector: string;
   appendAddConnectorButton?: boolean;
 }
+
+const suspendedComponentWithProps = (ComponentToSuspend: React.ComponentType) => {
+  // eslint-disable-next-line react/display-name
+  return (props: Record<string, unknown>) => (
+    <Suspense fallback={<EuiLoadingSpinner size={'m'} />}>
+      <ComponentToSuspend {...props} />
+    </Suspense>
+  );
+};
 
 const ICON_SIZE = 'm';
 
@@ -90,6 +100,8 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
+        const iconClass = getConnectorIcon(triggersActionsUi, connector.actionTypeId);
+
         return [
           ...acc,
           {
@@ -102,7 +114,11 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                       margin-right: ${euiTheme.size.m};
                       margin-bottom: 0 !important;
                     `}
-                    type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
+                    type={
+                      typeof iconClass === 'string'
+                        ? iconClass
+                        : suspendedComponentWithProps(iconClass)
+                    }
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>

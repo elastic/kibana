@@ -33,11 +33,18 @@ export function getReducer<T extends UserContentCommonSchema>() {
 
           // Only change the table sort if it hasn't been changed already.
           // For example if its state comes from the URL, we don't want to override it here.
-          if (hasUpdatedAtMetadata && !state.sortColumnChanged) {
-            tableSort = {
-              field: 'updatedAt' as const,
-              direction: 'desc' as const,
-            };
+          if (!state.sortColumnChanged) {
+            if (state.hasRecentlyAccessedMetadata) {
+              tableSort = {
+                field: 'accessedAt' as const,
+                direction: 'desc' as const,
+              };
+            } else if (hasUpdatedAtMetadata) {
+              tableSort = {
+                field: 'updatedAt' as const,
+                direction: 'desc' as const,
+              };
+            }
           }
         }
 

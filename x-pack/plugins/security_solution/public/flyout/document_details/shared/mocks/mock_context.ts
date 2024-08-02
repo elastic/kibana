@@ -27,4 +27,5 @@ export const mockContextValue: DocumentDetailsContext = {
   investigationFields: [],
   refetchFlyoutData: jest.fn(),
   isPreview: false,
+  isPreviewMode: false,
 };

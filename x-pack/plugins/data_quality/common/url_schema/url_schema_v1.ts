@@ -37,11 +37,11 @@ const datasetRT = rt.intersection([
     type: rt.string,
     name: rt.string,
     namespace: rt.string,
-    title: rt.string,
   }),
   rt.exact(
     rt.partial({
       integration: integrationRT,
+      title: rt.string,
     })
   ),
 ]);

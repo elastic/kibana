@@ -26,15 +26,10 @@ const EmptyPromptContainer = styled.div`
 
 interface Props {
   indexName: string;
-  onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
-const EcsCompliantTabComponent: React.FC<Props> = ({
-  indexName,
-  onAddToNewCase,
-  partitionedFieldMetadata,
-}) => {
+const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, partitionedFieldMetadata }) => {
   const emptyPromptBody = useMemo(() => <EmptyPromptBody body={i18n.ECS_COMPLIANT_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
 

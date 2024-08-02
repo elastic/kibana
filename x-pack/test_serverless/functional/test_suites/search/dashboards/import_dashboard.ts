@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Importing an existing dashboard', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('developer');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({});
     });
@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should be able to import dashboard created in 8.11', async () => {

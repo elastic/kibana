@@ -9,8 +9,6 @@ paths:
       operationId: FindLists
       x-codegen-enabled: true
       summary: Finds lists
-      tags:
-        - List API
       parameters:
         - name: page
           in: query
@@ -116,4 +114,4 @@ components:
       $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
     FindListsFilter:
-      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string

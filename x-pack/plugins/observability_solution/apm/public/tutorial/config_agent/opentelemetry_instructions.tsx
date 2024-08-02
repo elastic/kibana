@@ -32,7 +32,7 @@ export function OpenTelemetryInstructions({ apmServerUrl, secretToken }: Props) 
     },
     {
       setting: 'OTEL_EXPORTER_OTLP_HEADERS',
-      value: `"Authorization=Bearer ${secretToken ? secretToken : '<secret-token>'}"`,
+      value: `Authorization=Bearer ${secretToken ? secretToken : '<secret-token>'}`,
     },
     {
       setting: 'OTEL_METRICS_EXPORTER',

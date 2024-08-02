@@ -61,6 +61,7 @@ export function NodeDataFetcher(
     let results: SafeResolverEvent[] | undefined;
     try {
       const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
+      const agentId = selectors.agentId(state.analyzer[id]);
       const timeRangeFilters =
         detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
       results = await dataAccessLayer.nodeData({
@@ -68,6 +69,7 @@ export function NodeDataFetcher(
         timeRange: timeRangeFilters,
         indexPatterns: indices,
         limit: nodeDataLimit,
+        agentId,
       });
     } catch (error) {
       /**

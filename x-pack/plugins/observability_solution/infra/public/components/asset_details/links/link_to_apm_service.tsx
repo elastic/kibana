@@ -39,7 +39,12 @@ export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToAp
         })}
       >
         {agentName ? (
-          <AgentIcon agentName={agentName as AgentName} size="m" css={{ marginRight: '4px' }} />
+          <AgentIcon
+            agentName={agentName as AgentName}
+            size="m"
+            css={{ marginRight: '4px' }}
+            role="presentation"
+          />
         ) : null}
         <span data-test-subj={`serviceNameText-${serviceName}`}>{serviceName}</span>
       </EuiBadge>

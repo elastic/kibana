@@ -8,13 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
-import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
+import {
+  E5_LINUX_OPTIMIZED_MODEL_ID,
+  E5_MODEL_ID,
+  ELSER_LINUX_OPTIMIZED_MODEL_ID,
+  ELSER_MODEL_ID,
+} from '@kbn/ml-trained-models-utils';
 
-export const ELSER_MODEL_ID = '.elser_model_2';
-export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
-export const E5_MODEL_ID = '.multilingual-e5-small';
-export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
-export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
+import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
 export const MODEL_TITLES_BY_TYPE: Record<string, string | undefined> = {
   fill_mask: i18n.translate('xpack.enterpriseSearch.content.ml_inference.fill_mask', {

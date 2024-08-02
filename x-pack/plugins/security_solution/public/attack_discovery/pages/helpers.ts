@@ -90,12 +90,14 @@ export const showWelcomePrompt = ({
 }): boolean => !isLoading && aiConnectorsCount != null && aiConnectorsCount === 0;
 
 export const showEmptyPrompt = ({
+  aiConnectorsCount,
   attackDiscoveriesCount,
   isLoading,
 }: {
+  aiConnectorsCount: number | null;
   attackDiscoveriesCount: number;
   isLoading: boolean;
-}): boolean => !isLoading && attackDiscoveriesCount === 0;
+}): boolean => !isLoading && aiConnectorsCount != null && attackDiscoveriesCount === 0;
 
 export const showLoading = ({
   connectorId,

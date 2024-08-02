@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,8 +42,15 @@ import {
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
-    useDocumentDetailsContext();
+  const {
+    dataAsNestedObject,
+    eventId,
+    indexName,
+    getFieldsData,
+    scopeId,
+    isPreview,
+    isPreviewMode,
+  } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { isTourShown, activeStep } = useTourContext();
 
@@ -95,6 +102,22 @@ export const CorrelationsOverview: React.FC = () => {
 
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
 
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToCorrelationsTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
+                defaultMessage="Show all correlations"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToCorrelationsTab]
+  );
+
   return (
     <ExpandablePanel
       header={{
@@ -104,16 +127,8 @@ export const CorrelationsOverview: React.FC = () => {
             defaultMessage="Correlations"
           />
         ),
-        link: {
-          callback: goToCorrelationsTab,
-          tooltip: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.correlations.overviewTooltip"
-              defaultMessage="Show all correlations"
-            />
-          ),
-        },
-        iconType: 'arrowStart',
+        link,
+        iconType: !isPreviewMode ? 'arrowStart' : undefined,
       }}
       data-test-subj={CORRELATIONS_TEST_ID}
     >

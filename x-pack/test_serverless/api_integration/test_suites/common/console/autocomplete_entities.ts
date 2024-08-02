@@ -28,16 +28,16 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   describe('/api/console/autocomplete_entities', function () {
-    let createIndex: typeof consoleService['helpers']['createIndex'];
-    let createAlias: typeof consoleService['helpers']['createAlias'];
-    let createIndexTemplate: typeof consoleService['helpers']['createIndexTemplate'];
-    let createComponentTemplate: typeof consoleService['helpers']['createComponentTemplate'];
-    let createDataStream: typeof consoleService['helpers']['createDataStream'];
-    let deleteIndex: typeof consoleService['helpers']['deleteIndex'];
-    let deleteAlias: typeof consoleService['helpers']['deleteAlias'];
-    let deleteIndexTemplate: typeof consoleService['helpers']['deleteIndexTemplate'];
-    let deleteComponentTemplate: typeof consoleService['helpers']['deleteComponentTemplate'];
-    let deleteDataStream: typeof consoleService['helpers']['deleteDataStream'];
+    let createIndex: (typeof consoleService)['helpers']['createIndex'];
+    let createAlias: (typeof consoleService)['helpers']['createAlias'];
+    let createIndexTemplate: (typeof consoleService)['helpers']['createIndexTemplate'];
+    let createComponentTemplate: (typeof consoleService)['helpers']['createComponentTemplate'];
+    let createDataStream: (typeof consoleService)['helpers']['createDataStream'];
+    let deleteIndex: (typeof consoleService)['helpers']['deleteIndex'];
+    let deleteAlias: (typeof consoleService)['helpers']['deleteAlias'];
+    let deleteIndexTemplate: (typeof consoleService)['helpers']['deleteIndexTemplate'];
+    let deleteComponentTemplate: (typeof consoleService)['helpers']['deleteComponentTemplate'];
+    let deleteDataStream: (typeof consoleService)['helpers']['deleteDataStream'];
 
     const indexName = 'test-index-1';
     const aliasName = 'test-alias-1';
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
     const dataStreamName = 'test-data-stream-1';
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       ({
         helpers: {
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteIndexTemplate(indexTemplateName);
       await deleteComponentTemplate(componentTemplateName);
 
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should not succeed if no settings are provided in query params', async () => {

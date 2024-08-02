@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import {
+  getSLOPipelineId,
+  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
+  SLO_RESOURCES_VERSION,
+} from '../../../common/constants';
+import { SLODefinition } from '../../domain/models';
 
-export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => ({
-  id,
-  description: 'Ingest pipeline for SLO rollup data',
+export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
+  id: getSLOPipelineId(slo.id, slo.revision),
+  description: `Ingest pipeline for SLO rollup data [id: ${slo.id}, revision: ${slo.revision}]`,
   processors: [
     {
       set: {
@@ -18,9 +23,21 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
       },
     },
     {
+      set: {
+        field: 'slo.id',
+        value: slo.id,
+      },
+    },
+    {
+      set: {
+        field: 'slo.revision',
+        value: slo.revision,
+      },
+    },
+    {
       date_index_name: {
         field: '@timestamp',
-        index_name_prefix: indexNamePrefix,
+        index_name_prefix: SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },

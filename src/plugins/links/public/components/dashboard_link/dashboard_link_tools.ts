@@ -8,7 +8,7 @@
 
 import { isEmpty, filter } from 'lodash';
 
-import { DashboardItem } from '../../embeddable/types';
+import { DashboardItem } from '../../types';
 import { dashboardServices } from '../../services/kibana_services';
 
 /**

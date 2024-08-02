@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import type { OpenApiDocument } from '../openapi_types';
-import { findRefs } from './find_refs';
+import { findRefs } from './helpers/find_refs';
 
 export interface ImportsMap {
   [importPath: string]: string[];

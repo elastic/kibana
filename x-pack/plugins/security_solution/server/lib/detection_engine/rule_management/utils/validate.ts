@@ -31,7 +31,7 @@ import {
   type UnifiedQueryRuleParams,
 } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 export const transformValidateBulkError = (
   ruleId: string,

@@ -560,6 +560,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should have an option to open the chart in lens', async () => {
           await retry.try(async () => {
             await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
+            await browser.pressKeys(browser.keys.ESCAPE);
           });
         });
       });

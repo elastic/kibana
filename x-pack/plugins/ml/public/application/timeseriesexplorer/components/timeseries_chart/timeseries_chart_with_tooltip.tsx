@@ -20,7 +20,6 @@ import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
-
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -136,6 +135,11 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     bounds,
     contextAggregationInterval,
   ]);
+
+  if (chartProps.svgHeight) {
+    // 32 accounts for the height of the chart title
+    chartProps.svgHeight -= 32;
+  }
 
   return (
     <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
