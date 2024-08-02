@@ -50,7 +50,7 @@ interface AggTerms {
  * Represents an item in numeric data.
  * @interface
  */
-interface NumericDataItem {
+export interface NumericDataItem {
   /**
    * The numeric key.
    */
