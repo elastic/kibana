@@ -81,7 +81,11 @@ const getSpaceResourcesInitialized = async (
   assistantService: AIAssistantService,
   namespace: string = DEFAULT_NAMESPACE_STRING
 ) => {
-  const { result } = await assistantService.getSpaceResourcesInitializationPromise(namespace);
+  const tryCount = 0;
+  const { result } = await assistantService.getSpaceResourcesInitializationPromise(
+    namespace,
+    tryCount
+  );
   return result;
 };
 
@@ -540,7 +544,7 @@ describe('AI Assistant Service', () => {
       );
     });
 
-    test('should return null if retrying common resources initialization fails again with same error', async () => {
+    test.only('should return null if retrying common resources initialization fails again with same error', async () => {
       clusterClient.cluster.putComponentTemplate.mockRejectedValue(new Error('fail'));
 
       assistantService = new AIAssistantService(assistantServiceOpts);

@@ -72,6 +72,8 @@ export function createResourceInstallationHelper(
 
   return {
     add: (namespace: string = DEFAULT_NAMESPACE_STRING, timeoutMs?: number) => {
+      logger.info(`Adding spaceId ${namespace}`);
+
       initializedResources.set(
         `${namespace}`,
 
@@ -109,13 +111,15 @@ export function createResourceInstallationHelper(
         );
       }
     },
-    getInitializedResources: async (namespace: string): Promise<InitializationPromise> => {
+    getInitializedResources: (namespace: string): Promise<InitializationPromise> => {
       const key = namespace;
-      return (
-        initializedResources.has(key)
-          ? initializedResources.get(key)
-          : errorResult(`Unrecognized spaceId ${key}`)
-      ) as InitializationPromise;
+
+      if (!initializedResources.has(key)) {
+        logger.info(`Unrecognized spaceId ${key}`);
+        throw errorResult(`Unrecognized spaceId ${key}`);
+      }
+
+      return initializedResources.get(key) as Promise<InitializationPromise>;
     },
   };
 }

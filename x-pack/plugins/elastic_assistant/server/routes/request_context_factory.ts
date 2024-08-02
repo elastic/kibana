@@ -117,7 +117,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
-      getAIAssistantConversationsDataClient: memoize(async () => {
+      getAIAssistantConversationsDataClient: memoize(() => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
