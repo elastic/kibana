@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 
@@ -23,6 +23,7 @@ import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
+import useMountedState from 'react-use/lib/useMountedState';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
@@ -79,7 +80,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   } = useMinimumTimeRange();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
-  const mounted = useRef(false);
+  const isMounted = useMountedState();
   const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
@@ -135,13 +136,11 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   useEffect(
     function cancelRequestOnLeave() {
-      mounted.current = true;
       return () => {
-        mounted.current = false;
         cancelRequest();
       };
     },
-    [cancelRequest, mounted]
+    [cancelRequest]
   );
 
   const { searchQuery } = useSearch(
@@ -231,7 +230,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       earliest === undefined ||
       latest === undefined ||
       minimumTimeRangeOption === undefined ||
-      mounted.current !== true
+      isMounted() !== true
     ) {
       return;
     }
@@ -259,7 +258,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         runtimeMappings
       );
 
-      if (mounted.current !== true) {
+      if (isMounted() === false) {
         return;
       }
 
@@ -287,7 +286,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         ),
       ]);
 
-      if (mounted.current !== true) {
+      if (isMounted() === false) {
         return;
       }
 
@@ -317,9 +316,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         });
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        // ignore error
-      } else {
+      if (error.name !== 'AbortError') {
         toasts.addError(error, {
           title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
             defaultMessage: 'Error loading categories',
@@ -328,7 +325,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       }
     }
 
-    if (mounted.current === true) {
+    if (isMounted() === true) {
       setLoading(false);
     }
   }, [
@@ -338,6 +335,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     earliest,
     latest,
     minimumTimeRangeOption,
+    isMounted,
     cancelRequest,
     getMinimumTimeRange,
     searchQuery,
@@ -393,8 +391,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         forceRefresh();
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [input.lastReloadRequestTime]
+    [forceRefresh, input.lastReloadRequestTime]
   );
   const style = css({
     overflowY: 'auto',

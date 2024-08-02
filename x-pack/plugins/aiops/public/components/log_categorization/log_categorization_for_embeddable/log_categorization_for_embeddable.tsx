@@ -6,7 +6,7 @@
  */
 import type { FC } from 'react';
 import { useMemo } from 'react';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
@@ -20,6 +20,7 @@ import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-anal
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import datemath from '@elastic/datemath';
+import useMountedState from 'react-use/lib/useMountedState';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
@@ -72,7 +73,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     useValidateFieldRequest();
   const { getMinimumTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useMinimumTimeRange();
 
-  const mounted = useRef(false);
+  const isMounted = useMountedState();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
@@ -120,13 +121,11 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   useEffect(
     function cancelRequestOnLeave() {
-      mounted.current = true;
       return () => {
-        mounted.current = false;
         cancelRequest();
       };
     },
-    [cancelRequest, mounted]
+    [cancelRequest]
   );
 
   const timeRangeParsed = useMemo(() => {
@@ -185,7 +184,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       earliest === undefined ||
       latest === undefined ||
       minimumTimeRangeOption === undefined ||
-      mounted.current !== true
+      isMounted() !== true
     ) {
       return;
     }
@@ -212,7 +211,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         runtimeMappings
       );
 
-      if (mounted.current !== true) {
+      if (isMounted() !== true) {
         return;
       }
 
@@ -240,7 +239,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         ),
       ]);
 
-      if (mounted.current !== true) {
+      if (isMounted() !== true) {
         return;
       }
 
@@ -270,9 +269,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         });
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        // ignore error
-      } else {
+      if (error.name !== 'AbortError') {
         toasts.addError(error, {
           title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
             defaultMessage: 'Error loading categories',
@@ -281,7 +278,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       }
     }
 
-    if (mounted.current === true) {
+    if (isMounted() === true) {
       setLoading(false);
     }
   }, [
@@ -292,6 +289,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     fieldName,
     getMinimumTimeRange,
     intervalMs,
+    isMounted,
     latest,
     loading,
     minimumTimeRangeOption,

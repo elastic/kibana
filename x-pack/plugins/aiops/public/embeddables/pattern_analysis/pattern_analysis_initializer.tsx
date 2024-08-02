@@ -28,6 +28,7 @@ import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import useMountedState from 'react-use/lib/useMountedState';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import type { PatternAnalysisEmbeddableRuntimeState } from './types';
@@ -242,29 +243,46 @@ export const FormControls: FC<{
     randomSampler.getProbability()
   );
 
+  const isMounted = useMountedState();
+
   useEffect(
     function initFields() {
-      dataViews.get(dataViewId).then((dataView) => {
-        const isTimeBased = dataView.isTimeBased();
-        setIsDataViewTimeBased(isTimeBased);
-        if (isTimeBased === false) {
+      if (!dataViewId) {
+        setFields([]);
+        setSelectedField(null);
+        return;
+      }
+
+      dataViews
+        .get(dataViewId)
+        .then((dataView) => {
+          if (!isMounted()) {
+            return;
+          }
+          const isTimeBased = dataView.isTimeBased();
+          setIsDataViewTimeBased(isTimeBased);
+          if (isTimeBased === false) {
+            setFields([]);
+            setSelectedField(null);
+            return;
+          }
+          const { dataViewFields, messageField } = getMessageField(dataView);
+          setFields(dataViewFields);
+          const field = dataViewFields.find((f) => f.name === formInput.fieldName);
+          if (formInput.fieldName === undefined) {
+            // form input does not contain a field name, select the found message field
+            setSelectedField(messageField ?? null);
+            return;
+          }
+          // otherwise, select the field from the form input
+          setSelectedField(field ?? messageField ?? null);
+        })
+        .catch(() => {
           setFields([]);
           setSelectedField(null);
-          return;
-        }
-        const { dataViewFields, messageField } = getMessageField(dataView);
-        setFields(dataViewFields);
-        const field = dataViewFields.find((f) => f.name === formInput.fieldName);
-        if (formInput.fieldName === undefined) {
-          // form input does not contain a field name, select the found message field
-          setSelectedField(messageField ?? null);
-          return;
-        }
-        // otherwise, select the field from the form input
-        setSelectedField(field ?? messageField ?? null);
-      });
+        });
     },
-    [dataViewId, dataViews, formInput, onChange]
+    [dataViewId, dataViews, formInput, isMounted, onChange]
   );
 
   useEffect(
