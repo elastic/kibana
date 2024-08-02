@@ -19,13 +19,15 @@ import { NavigationProvider } from '../src/services';
 import { Navigation } from '../src/ui/navigation';
 import type { PanelContentProvider } from '../src/ui';
 import { NavigationServices } from '../src/types';
+import { EventTracker } from '../src/analytics';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];
 
 export const getServicesMock = (): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
-  const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
+  const basePath = { prepend: jest.fn((path: string) => `/base${path}`), remove: jest.fn() };
   const recentlyAccessed$ = new BehaviorSubject([]);
+  const eventTracker = new EventTracker({ reportEvent: jest.fn() });
 
   return {
     basePath,
@@ -34,6 +36,7 @@ export const getServicesMock = (): NavigationServices => {
     navigateToUrl,
     activeNodes$: of(activeNodes),
     isSideNavCollapsed: false,
+    eventTracker,
   };
 };
 

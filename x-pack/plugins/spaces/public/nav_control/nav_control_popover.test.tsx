@@ -16,10 +16,11 @@ import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { NavControlPopover } from './nav_control_popover';
 import type { Space } from '../../common';
+import { EventTracker } from '../analytics';
 import { SpaceAvatarInternal } from '../space_avatar/space_avatar_internal';
 import { SpaceSolutionBadge } from '../space_solution_badge';
 import type { SpacesManager } from '../spaces_manager';
@@ -44,10 +45,18 @@ const mockSpaces = [
   },
 ];
 
+const reportEvent = jest.fn();
+const eventTracker = new EventTracker({ reportEvent });
+
 describe('NavControlPopover', () => {
-  async function setup(spaces: Space[], isSolutionNavEnabled = false) {
+  async function setup(spaces: Space[], isSolutionNavEnabled = false, activeSpace?: Space) {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
+
+    if (activeSpace) {
+      // @ts-ignore readonly check
+      spacesManager.onActiveSpaceChange$ = Rx.of(activeSpace);
+    }
 
     const wrapper = mountWithIntl(
       <NavControlPopover
@@ -58,6 +67,7 @@ describe('NavControlPopover', () => {
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
         solutionNavExperiment={Promise.resolve(isSolutionNavEnabled)}
+        eventTracker={eventTracker}
       />
     );
 
@@ -80,6 +90,7 @@ describe('NavControlPopover', () => {
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
         solutionNavExperiment={Promise.resolve(false)}
+        eventTracker={eventTracker}
       />
     );
     expect(baseElement).toMatchSnapshot();
@@ -105,6 +116,7 @@ describe('NavControlPopover', () => {
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
         solutionNavExperiment={Promise.resolve(false)}
+        eventTracker={eventTracker}
       />
     );
 
@@ -252,5 +264,41 @@ describe('NavControlPopover', () => {
     wrapper.update();
 
     expect(wrapper.find(SpaceSolutionBadge)).toHaveLength(2);
+  });
+
+  it('should report event when switching space', async () => {
+    const spaces: Space[] = [
+      {
+        id: 'space-1',
+        name: 'Space-1',
+        disabledFeatures: [],
+        solution: 'classic',
+      },
+      {
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+        solution: 'security',
+      },
+    ];
+
+    const activeSpace = spaces[0];
+    const wrapper = await setup(spaces, true /** isSolutionEnabled **/, activeSpace);
+
+    await act(async () => {
+      wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');
+    });
+    wrapper.update();
+
+    expect(reportEvent).not.toHaveBeenCalled();
+
+    findTestSubject(wrapper, 'space-2-selectableSpaceItem').simulate('click');
+
+    expect(reportEvent).toHaveBeenCalledWith('space_changed', {
+      solution: 'security',
+      solution_prev: 'classic',
+      space_id: 'space-2',
+      space_id_prev: 'space-1',
+    });
   });
 });
