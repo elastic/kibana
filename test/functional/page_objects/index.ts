@@ -37,6 +37,7 @@ import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
+import { EmbeddedConsoleProvider } from './embedded_console';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -47,6 +48,7 @@ export const pageObjects = {
   dashboardControls: DashboardPageControls,
   dashboardLinks: DashboardPageLinks,
   discover: DiscoverPageObject,
+  embeddedConsole: EmbeddedConsoleProvider,
   error: ErrorPageObject,
   header: HeaderPageObject,
   home: HomePageObject,
