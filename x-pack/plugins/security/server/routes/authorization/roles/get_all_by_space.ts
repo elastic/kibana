@@ -23,13 +23,15 @@ export function defineGetAllRolesBySpaceRoutes({
   router.get(
     {
       path: '/internal/security/roles/{spaceId}',
-      authz: {
-        requiredPrivileges: [
-          ApiActionPermission.ManageSpaces,
-          {
-            anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
-          },
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            ApiActionPermission.ManageSpaces,
+            {
+              anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
+            },
+          ],
+        },
       },
       validate: {
         params: schema.object({ spaceId: schema.string({ minLength: 1 }) }),

@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions, RouteAuthz } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteAuthz, RouteSecurity } from './route';
 import type { Headers } from './headers';
 
 /**
@@ -21,7 +21,7 @@ import type { Headers } from './headers';
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
   access: 'internal' | 'public';
-  authz?: RouteAuthz;
+  security?: RouteSecurity;
 }
 
 /**

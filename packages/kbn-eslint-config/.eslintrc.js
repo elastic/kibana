@@ -278,6 +278,8 @@ module.exports = {
     '@kbn/eslint/no_this_in_property_initializers': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
+    // ESLINT Rule for security object in routes
+    // '@kbn/eslint/no_route_security_defined': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',

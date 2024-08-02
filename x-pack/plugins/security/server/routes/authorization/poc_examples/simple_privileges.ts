@@ -18,9 +18,11 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
   router.get(
     {
       path: '/api/security/authz_poc/authz_disabled',
-      authz: {
-        enabled: false,
-        reason: 'This route is opted out from authorization for demo purposes',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
       },
       validate: false,
     },
@@ -45,8 +47,10 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
   router.get(
     {
       path: '/api/security/authz_poc/simple_privileges_example_1',
-      authz: {
-        requiredPrivileges: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
+      security: {
+        authz: {
+          requiredPrivileges: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
+        },
       },
       validate: false,
     },
@@ -71,13 +75,15 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
   router.get(
     {
       path: '/api/security/authz_poc/simple_privileges_example_2',
-      authz: {
-        requiredPrivileges: [
-          ApiActionPermission.ManageSpaces,
-          {
-            anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
-          },
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            ApiActionPermission.ManageSpaces,
+            {
+              anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
+            },
+          ],
+        },
       },
       validate: false,
     },
@@ -102,12 +108,14 @@ export function defineSimplePrivilegesExampleRoutes({ router }: RouteDefinitionP
   router.get(
     {
       path: '/api/security/authz_poc/simple_privileges_example_3',
-      authz: {
-        requiredPrivileges: [
-          {
-            anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
-          },
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.Features],
+            },
+          ],
+        },
       },
       validate: false,
     },

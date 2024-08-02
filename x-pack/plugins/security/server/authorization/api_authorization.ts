@@ -32,15 +32,15 @@ export function initAPIAuthorization(
     }
 
     // @ts-ignore
-    if (isAuthzDisabled(request.route.options.authz)) {
+    if (isAuthzDisabled(request.route.options.security?.authz)) {
       logger.warn(
-        `Route authz is disabled for ${request.url.pathname}${request.url.search}": ${request.route.options.authz.reason}`
+        `Route authz is disabled for ${request.url.pathname}${request.url.search}": ${request.route.options.security.authz.reason}`
       );
 
       return toolkit.next();
     }
 
-    const authz = request.route.options.authz as AuthzEnabled;
+    const authz = request.route.options.security?.authz as AuthzEnabled;
 
     /**
      * Please note, that this code was intended for POC demo purposes only and is not production-ready.

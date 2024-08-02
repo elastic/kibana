@@ -21,17 +21,19 @@ export function defineOfferingPrivilegesExampleRoutes({ router }: RouteDefinitio
   router.get(
     {
       path: '/api/security/authz_poc/offering_privileges_example_1',
-      authz: {
-        requiredPrivileges: [
-          {
-            offering: 'serverless',
-            allRequired: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
-          },
-          {
-            offering: 'traditional',
-            allRequired: [ApiActionPermission.TaskManager],
-          },
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              offering: 'serverless',
+              allRequired: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
+            },
+            {
+              offering: 'traditional',
+              allRequired: [ApiActionPermission.TaskManager],
+            },
+          ],
+        },
       },
       validate: false,
     },
@@ -57,19 +59,22 @@ export function defineOfferingPrivilegesExampleRoutes({ router }: RouteDefinitio
   router.get(
     {
       path: '/api/security/authz_poc/offering_privileges_example_2',
-      authz: {
-        requiredPrivileges: [
-          {
-            offering: 'serverless',
-            allRequired: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
-            anyRequired: [ApiActionPermission.Features, ApiActionPermission.DecryptedTelemetry],
-          },
-          {
-            offering: 'traditional',
-            anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.ManageSpaces],
-          },
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              offering: 'serverless',
+              allRequired: [ApiActionPermission.ManageSpaces, ApiActionPermission.TaskManager],
+              anyRequired: [ApiActionPermission.Features, ApiActionPermission.DecryptedTelemetry],
+            },
+            {
+              offering: 'traditional',
+              anyRequired: [ApiActionPermission.TaskManager, ApiActionPermission.ManageSpaces],
+            },
+          ],
+        },
       },
+
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -94,14 +99,16 @@ export function defineOfferingPrivilegesExampleRoutes({ router }: RouteDefinitio
   router.get(
     {
       path: '/api/security/authz_poc/offering_privileges_example_3',
-      authz: {
-        requiredPrivileges: [
-          ApiActionPermission.TaskManager,
-          {
-            offering: 'serverless',
-            anyRequired: [ApiActionPermission.Features, ApiActionPermission.DecryptedTelemetry],
-          },
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            ApiActionPermission.TaskManager,
+            {
+              offering: 'serverless',
+              anyRequired: [ApiActionPermission.Features, ApiActionPermission.DecryptedTelemetry],
+            },
+          ],
+        },
       },
       validate: false,
     },

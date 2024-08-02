@@ -12,7 +12,7 @@ import type { VersionedRouter } from '../versioning';
 import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
-import type { RouteConfigOptions, RouteAuthz } from './route';
+import type { RouteConfigOptions, RouteSecurity } from './route';
 import { RouteValidator } from './route_validator';
 
 /**
@@ -124,7 +124,7 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  authz?: RouteAuthz;
+  security?: RouteSecurity;
   /**
    * @note if providing a function to lazily load your validation schemas assume
    *       that the function will only be called once.

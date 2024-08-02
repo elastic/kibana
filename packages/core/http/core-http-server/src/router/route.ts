@@ -52,6 +52,10 @@ export interface AuthzDisabled {
 }
 
 export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+export interface RouteSecurity {
+  authz: RouteAuthz;
+  authRequired?: boolean;
+}
 
 /**
  * The set of supported parseable Content-Types
@@ -231,7 +235,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * The required capabilities to access this route.
    */
-  authz?: RouteAuthz;
+  security?: RouteSecurity;
 }
 
 /**
@@ -312,7 +316,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    */
   validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
 
-  authz?: RouteAuthz;
+  security?: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

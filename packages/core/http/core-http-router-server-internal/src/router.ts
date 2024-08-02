@@ -171,11 +171,15 @@ export interface AuthzDisabled {
 }
 
 export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+export interface RouteSecurity {
+  authz: RouteAuthz;
+  authRequired?: boolean;
+}
 
 /** @internal */
 export interface InternalRouterRoute extends RouterRoute {
   readonly isVersioned: boolean;
-  readonly authz?: RouteAuthz;
+  readonly security?: RouteSecurity;
 }
 
 /** @internal */
@@ -225,7 +229,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
-          authz: route.authz,
+          security: route.security,
           /** Below is added for introspection */
           validationSchemas: route.validate,
           isVersioned: internalOptions.isVersioned,
