@@ -210,5 +210,45 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionStatusInCustomSpace.items[0].nbAgentsActioned).to.eql(2);
       });
     });
+
+    describe('POST /agents/{agentId}/actions', () => {
+      it('should return 404 if the agent is not in the current space', async () => {
+        const resInDefaultSpace = await supertest
+          .post(`/api/fleet/agents/${testSpaceAgent1}/actions`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ action: { type: 'UNENROLL' } })
+          .expect(404);
+        expect(resInDefaultSpace.body.message).to.eql(`${testSpaceAgent1} not found in namespace`);
+
+        const resInCustomSpace = await supertest
+          .post(`/s/${TEST_SPACE_1}/api/fleet/agents/${defaultSpaceAgent1}/actions`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ action: { type: 'UNENROLL' } })
+          .expect(404);
+        expect(resInCustomSpace.body.message).to.eql(
+          `${defaultSpaceAgent1} not found in namespace`
+        );
+      });
+
+      it('should create an action with set namespace in the default space', async () => {
+        await apiClient.postNewAgentAction(defaultSpaceAgent1);
+
+        const actionStatusInDefaultSpace = await apiClient.getActionStatus();
+        expect(actionStatusInDefaultSpace.items.length).to.eql(1);
+
+        const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
+        expect(actionStatusInCustomSpace.items.length).to.eql(0);
+      });
+
+      it('should create an action with set namespace in a custom space', async () => {
+        await apiClient.postNewAgentAction(testSpaceAgent1, TEST_SPACE_1);
+
+        const actionStatusInDefaultSpace = await apiClient.getActionStatus();
+        expect(actionStatusInDefaultSpace.items.length).to.eql(0);
+
+        const actionStatusInCustomSpace = await apiClient.getActionStatus(TEST_SPACE_1);
+        expect(actionStatusInCustomSpace.items.length).to.eql(1);
+      });
+    });
   });
 }

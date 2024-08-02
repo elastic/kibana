@@ -35,25 +35,29 @@ export async function cleanFleetIndices(esClient: Client) {
 }
 
 export async function cleanFleetActionIndices(esClient: Client) {
-  await Promise.all([
-    esClient.deleteByQuery({
-      index: AGENT_POLICY_INDEX,
-      q: '*',
-    }),
-    esClient.deleteByQuery({
-      index: AGENT_ACTIONS_INDEX,
-      q: '*',
-      ignore_unavailable: true,
-      refresh: true,
-    }),
-    esClient.deleteByQuery(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
+  try {
+    await Promise.all([
+      esClient.deleteByQuery({
+        index: AGENT_POLICY_INDEX,
         q: '*',
-      },
-      ES_INDEX_OPTIONS
-    ),
-  ]);
+      }),
+      esClient.deleteByQuery({
+        index: AGENT_ACTIONS_INDEX,
+        q: '*',
+        ignore_unavailable: true,
+        refresh: true,
+      }),
+      esClient.deleteByQuery(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          q: '*',
+        },
+        ES_INDEX_OPTIONS
+      ),
+    ]);
+  } catch (error) {
+    // swallowing error if does not exist
+  }
 }
 
 export const createFleetAgent = async (
