@@ -6,7 +6,6 @@
  */
 
 export * from './actions/file_upload_route';
-export * from './actions/get_file_route';
 export * from './actions/scan_route';
 export * from './actions/common/base';
 export * from './actions/common/response_actions';
@@ -23,6 +22,7 @@ export * from './actions/response_actions/unisolate';
 export * from './actions/response_actions/kill_process';
 export * from './actions/response_actions/suspend_process';
 export * from './actions/response_actions/running_procs';
+export * from './actions/response_actions/get_file';
 export * from './actions/response_actions/execute';
 export * from './metadata/list_metadata_route';
 export * from './metadata/get_metadata_route';

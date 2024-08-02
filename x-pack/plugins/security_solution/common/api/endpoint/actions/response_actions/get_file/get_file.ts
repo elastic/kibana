@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from './common/base';
+import { BaseActionRequestSchema } from '../../common/base';
 
 export const EndpointActionGetFileSchema = {
   body: schema.object({

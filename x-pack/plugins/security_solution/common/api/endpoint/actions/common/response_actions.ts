@@ -8,10 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import { EndpointActionGetFileSchema } from '../get_file_route';
 import { ScanActionRequestSchema } from '../scan_route';
 import { UploadActionRequestSchema } from '../file_upload_route';
 import { ExecuteActionRequestSchema } from '../response_actions/execute';
+import { EndpointActionGetFileSchema } from '../response_actions/get_file';
 import { IsolateRouteRequestSchema } from '../response_actions/isolate';
 import { UnisolateRouteRequestSchema } from '../response_actions/unisolate';
 import { GetProcessesRouteRequestSchema } from '../response_actions/running_procs';
