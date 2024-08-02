@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
@@ -39,6 +39,47 @@ export interface UseAlertsDataViewResult {
 }
 
 /**
+ * Resolves the DataView or DataViewBase object
+ *
+ * Returns undefined if any of the dependencies are in error state
+ */
+const resolveDataView = ({
+  isError,
+  fields,
+  indexNames,
+  virtualDataView,
+}: {
+  isError: boolean;
+  virtualDataView?: DataView;
+  indexNames?: string[];
+  fields?: { fields: FieldSpec[] };
+}) => {
+  if (isError) {
+    return;
+  }
+  // When the only feature id is Security Solution, use an in-memory data view:
+  // their alerting authorization is based on end-user privileges, which allows us to create
+  // an actual data view
+  if (virtualDataView) {
+    return virtualDataView;
+  }
+  // For all other feature id combinations, compute the data view from the fetched index names and
+  // fields since the Kibana-user-based authorization wouldn't allow us to create a data view
+  if (indexNames) {
+    return {
+      title: indexNames.join(','),
+      fieldFormatMap: {},
+      fields: (fields?.fields ?? []).map((field) => {
+        return {
+          ...field,
+          ...(field.esTypes && field.esTypes.includes('flattened') ? { type: 'string' } : {}),
+        };
+      }),
+    };
+  }
+};
+
+/**
  * Computes a {@link DataViewBase} object for alerts indices based on the provided feature ids
  *
  * @returns
@@ -55,6 +96,7 @@ export const useAlertsDataView = ({
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
   const includesSecurity = featureIds.includes(AlertConsumers.SIEM);
   const isOnlySecurity = featureIds.length === 1 && includesSecurity;
+  const hasMixedFeatureIds = featureIds.length > 1 && includesSecurity;
 
   const {
     data: indexNames,
@@ -88,7 +130,7 @@ export const useAlertsDataView = ({
       indexNames,
     },
     {
-      // Create data view only when featureIds = ['siem'] and indexNames are fetched
+      // Create data view only when featureIds = ['siem'] and indexNames have been fetched
       enabled: isOnlySecurity && !!indexNames?.length,
     }
   );
@@ -103,45 +145,30 @@ export const useAlertsDataView = ({
     }
   }, [isFieldsError, isIndexNamesError, isVirtualDataViewError, toasts]);
 
-  const dataView = useMemo(() => {
-    if (isIndexNamesError || isFieldsError || isVirtualDataViewError) {
-      return;
-    }
-    // When the only feature id is Security Solution, use an in-memory data view:
-    // their alerting authorization is based on end-user privileges, which allows us to create
-    // an actual data view
-    if (isOnlySecurity && virtualDataView) {
-      return virtualDataView;
-    }
-    // For all other feature id combinations, compute the data view from the fetched index names and
-    // fields since the Kibana-user-based authorization wouldn't allow us to create a data view
-    if (indexNames) {
-      return {
-        title: indexNames.join(','),
-        fieldFormatMap: {},
-        fields: (fields?.fields ?? []).map((field) => {
-          return {
-            ...field,
-            ...(field.esTypes && field.esTypes.includes('flattened') ? { type: 'string' } : {}),
-          };
-        }),
-      };
-    }
-  }, [
-    fields,
-    indexNames,
-    isFieldsError,
-    isIndexNamesError,
-    isOnlySecurity,
-    isVirtualDataViewError,
-    virtualDataView,
-  ]);
+  const dataView = useMemo(
+    () =>
+      resolveDataView({
+        isError: isIndexNamesError || isFieldsError || isVirtualDataViewError,
+        fields,
+        indexNames,
+        virtualDataView: !isOnlySecurity ? undefined : virtualDataView,
+      }),
+    [
+      fields,
+      indexNames,
+      isFieldsError,
+      isIndexNamesError,
+      isOnlySecurity,
+      isVirtualDataViewError,
+      virtualDataView,
+    ]
+  );
 
   return useMemo(
     () => ({
       dataView,
       isLoading:
-        !featureIds.length || (featureIds.length > 1 && includesSecurity)
+        !featureIds.length || hasMixedFeatureIds
           ? false
           : isOnlySecurity
           ? isInitialLoadingIndexNames || isLoadingIndexNames || !dataView
@@ -153,7 +180,7 @@ export const useAlertsDataView = ({
     [
       dataView,
       featureIds.length,
-      includesSecurity,
+      hasMixedFeatureIds,
       isInitialLoadingFields,
       isInitialLoadingIndexNames,
       isLoadingFields,

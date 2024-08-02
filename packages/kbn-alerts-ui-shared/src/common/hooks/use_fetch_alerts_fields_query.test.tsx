@@ -9,16 +9,20 @@
 import React, { FunctionComponent } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
+
+const { QueryClient, QueryClientProvider } = ReactQuery;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const wrapper: FunctionComponent = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
+
+const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const mockHttpClient = {
   get: jest.fn(),
@@ -55,6 +59,30 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     expect(mockHttpGet).toHaveBeenCalledTimes(0);
     expect(result.current.data).toEqual(emptyData);
+  });
+
+  it('should correctly override the `enabled` option', () => {
+    const { rerender } = renderHook(
+      ({ featureIds, enabled }: { featureIds: AlertConsumers[]; enabled?: boolean }) =>
+        useFetchAlertsFieldsQuery({ http: mockHttpClient, featureIds }, { enabled }),
+      {
+        wrapper,
+        initialProps: {
+          featureIds: ['apm'],
+          enabled: false,
+        },
+      }
+    );
+
+    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+
+    rerender({ featureIds: [], enabled: true });
+
+    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+
+    rerender({ featureIds: ['apm'] });
+
+    expect(useQuerySpy).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
   });
 
   it('should call the api only once', async () => {

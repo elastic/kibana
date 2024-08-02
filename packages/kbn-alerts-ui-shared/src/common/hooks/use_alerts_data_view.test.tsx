@@ -32,10 +32,12 @@ mockFetchAlertsIndexNames.mockResolvedValue([
 ]);
 mockFetchAlertsFields.mockResolvedValue({ browserFields: {}, fields: [] });
 
+const mockDataView = { fields: [] } as unknown as DataView;
+
 const mockServices = {
   http: {} as HttpSetup,
   dataViewsService: {
-    create: jest.fn().mockResolvedValue({ fields: [] } as unknown as DataView),
+    create: jest.fn().mockResolvedValue(mockDataView),
     clearInstanceCache: jest.fn(),
   } as unknown as DataViewsContract,
   toasts: {
@@ -82,7 +84,7 @@ describe('useAlertsDataView', () => {
     await waitFor(() => expect(result.current).toEqual(mockedAsyncDataView));
   });
 
-  it('fetches index names and fields for the provided non-siem featureIds', async () => {
+  it('fetches indexes and fields for non-siem feature ids, returning a DataViewBase object', async () => {
     const { result, waitForValueToChange } = renderHook(
       () =>
         useAlertsDataView({
@@ -98,10 +100,11 @@ describe('useAlertsDataView', () => {
 
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(1);
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
+    expect(result.current.dataView).not.toBe(mockDataView);
   });
 
-  it('only fetches index names for the siem featureId', async () => {
-    const { waitFor } = renderHook(
+  it('only fetches index names for the siem feature id, returning a DataView', async () => {
+    const { result, waitFor } = renderHook(
       () => useAlertsDataView({ ...mockServices, featureIds: [AlertConsumers.SIEM] }),
       {
         wrapper,
@@ -110,9 +113,11 @@ describe('useAlertsDataView', () => {
 
     await waitFor(() => expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1));
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
+
+    await waitFor(() => expect(result.current.dataView).toBe(mockDataView));
   });
 
-  it('does not fetch anything if siem and other featureIds are mixed together', async () => {
+  it('does not fetch anything if siem and other feature ids are mixed together', async () => {
     const { result, waitFor } = renderHook(
       () =>
         useAlertsDataView({
@@ -134,7 +139,7 @@ describe('useAlertsDataView', () => {
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
 
-  it('if fetch throws error return no data', async () => {
+  it('returns an undefined data view if any of the queries fails', async () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
     const { result, waitFor } = renderHook(
@@ -150,5 +155,18 @@ describe('useAlertsDataView', () => {
         dataView: undefined,
       })
     );
+  });
+
+  it('shows an error toast if any of the queries fails', async () => {
+    mockFetchAlertsIndexNames.mockRejectedValue('error');
+
+    const { waitFor } = renderHook(
+      () => useAlertsDataView({ ...mockServices, featureIds: observabilityFeatureIds }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => expect(mockServices.toasts.addDanger).toHaveBeenCalled());
   });
 });
