@@ -41,4 +41,5 @@ export const getLuceneRuleForTesting = (): QueryRuleCreateProps => ({
   query:
     '((event.category: (network OR network_traffic) AND type: (tls OR http)) OR event.dataset: (network_traffic.tls OR network_traffic.http)) AND destination.domain:/[a-z]{3}.stage.[0-9]{8}..*/',
   language: 'lucene',
+  from: '1900-01-01T00:00:00.000Z',
 });

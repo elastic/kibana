@@ -118,12 +118,15 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
+      await deleteAllAlerts(supertest, log, es, [
+        '.preview.alerts-security.alerts-*',
+        '.alerts-security.alerts-*',
+      ]);
       await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - most remaining tests use preview API
-    it.only('should have the specific audit record for _id or none of these tests below will pass', async () => {
+    it('should have the specific audit record for _id or none of these tests below will pass', async () => {
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         query: `_id:${ID}`,
@@ -2752,13 +2755,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('with a Lucene query rule', async () => {
-      test('should run successfully and generate an alert that matches the query', async () => {
+    describe('with a Lucene query rule', () => {
+      it('should run successfully and generate an alert that matches the lucene query', async () => {
         const luceneQueryRule = getLuceneRuleForTesting();
-        const { previewId } = await previewRule({ supertest, luceneQueryRule });
+        const { previewId } = await previewRule({ supertest, rule: luceneQueryRule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        // const alert = previewAlerts[0]._source;
-        expect(previewAlerts).toExist();
+        expect(previewAlerts.length).toBeGreaterThan(0);
+        expect(previewAlerts[0]?._source?.destination).toEqual(
+          expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
+        );
+        expect(previewAlerts[0]?._source?.['event.dataset']).toEqual('network_traffic.tls');
       });
     });
   });
