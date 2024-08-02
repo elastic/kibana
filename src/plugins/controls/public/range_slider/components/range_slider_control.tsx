@@ -155,6 +155,7 @@ export const RangeSliderControl: FC = () => {
         ref={rangeSliderRef}
         id={id}
         fullWidth
+        compressed
         showTicks
         step={step}
         ticks={ticks}

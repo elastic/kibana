@@ -153,6 +153,7 @@ export function ChangeDataView({
         iconType="arrowDown"
         title={triggerLabel}
         fullWidth={fullWidth}
+        size="s"
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
         {...rest}

@@ -18,18 +18,13 @@ interface Props {
    * Displays the last item without a border radius as if attached to the next DOM node
    */
   attached?: boolean;
-  /**
-   * Matches overall height with standard form/button sizes
-   */
-  size?: 'm' | 's';
 }
 
-export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
+export const FilterButtonGroup: FC<Props> = ({ items, attached, ...rest }: Props) => {
   return (
     <EuiFlexGroup
       className={classNames('kbnFilterButtonGroup', {
-        'kbnFilterButtonGroup--attached': attached,
-        [`kbnFilterButtonGroup--${size}`]: size,
+        'kbnFilterButtonGroup--attached': attached
       })}
       gutterSize="none"
       responsive={false}

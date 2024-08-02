@@ -102,6 +102,7 @@ export const ControlFrame = ({
           {renderEmbeddablePrepend()}
         </>
       }
+      compressed
     >
       {embeddable && (
         <div
@@ -137,6 +138,7 @@ export const ControlFrame = ({
         data-test-subj="control-frame-title"
         fullWidth
         label={usingTwoLineLayout ? title || '...' : undefined}
+        display="rowCompressed"
       >
         {form}
       </EuiFormRow>

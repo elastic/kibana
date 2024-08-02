@@ -212,6 +212,7 @@ export const OptionsListControl = ({
       className={classNames('optionsList--filterGroup', {
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
+      compressed
     >
       <EuiInputPopover
         id={popoverId}

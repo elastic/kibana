@@ -844,6 +844,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
                 isInvalid={this.props.isInvalid}
+                compressed
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
