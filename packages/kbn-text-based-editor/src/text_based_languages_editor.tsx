@@ -495,20 +495,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [esqlCallbacks]
   );
 
-  const helpMenuPopoverProps = useMemo(() => {
-    if (setIsHelpMenuOpen) {
-      return {
-        isHelpMenuOpen: isHelpMenuOpen ?? false,
-        setIsHelpMenuOpen,
-      };
-    }
-
-    return {
-      isHelpMenuOpen: isLanguagePopoverOpen,
-      setIsHelpMenuOpen: setIsLanguagePopoverOpen,
-    };
-  }, [isHelpMenuOpen, isLanguagePopoverOpen, setIsHelpMenuOpen]);
-
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;

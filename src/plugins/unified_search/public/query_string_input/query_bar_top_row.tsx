@@ -641,7 +641,6 @@ export const QueryBarTopRow = React.memo(
             textBasedLanguage={textBasedLanguage}
             onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
             isDisabled={props.isDisabled}
-            openESQLInlineDocs={() => setIsESQLInlineDocsOpen(true)}
           />
         </EuiFlexItem>
       );
@@ -753,8 +752,6 @@ export const QueryBarTopRow = React.memo(
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
-            isHelpMenuOpen={isESQLInlineDocsOpen}
-            setIsHelpMenuOpen={setIsESQLInlineDocsOpen}
           />
         )
       );
