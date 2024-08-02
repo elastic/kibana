@@ -23,7 +23,6 @@ export type GetAppUrl = (param: {
  */
 export const useGetAppUrl = () => {
   const { getUrlForApp } = useNavigationContext().application;
-
   const getAppUrl = useCallback<GetAppUrl>(
     ({ appId = SECURITY_UI_APP_ID, ...options }) => getUrlForApp(appId, options),
     [getUrlForApp]

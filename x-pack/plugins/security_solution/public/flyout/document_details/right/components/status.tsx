@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type {
@@ -17,7 +16,7 @@ import type {
   EnrichedFieldInfoWithValues,
 } from '../../../../common/components/event_details/types';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
+import { StatusPopoverButton } from './status_popover_button';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
 import { CellActions } from './cell_actions';
@@ -34,7 +33,6 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  * Document details status displayed in flyout right section header
  */
 export const DocumentStatus: FC = () => {
-  const { closeFlyout } = useExpandableFlyoutApi();
   const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
     useDocumentDetailsContext();
 
@@ -77,7 +75,6 @@ export const DocumentStatus: FC = () => {
               contextId={scopeId}
               enrichedFieldInfo={statusData}
               scopeId={scopeId}
-              handleOnEventClosed={closeFlyout}
             />
           </CellActions>
         )}

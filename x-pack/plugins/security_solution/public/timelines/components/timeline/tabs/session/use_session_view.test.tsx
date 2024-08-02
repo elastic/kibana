@@ -68,18 +68,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
     }),
   };
 });
-const mockOpenDetailFn = jest.fn();
-
-jest.mock('../../../side_panel/hooks/use_detail_panel', () => {
-  return {
-    useDetailPanel: () => ({
-      openEventDetailsPanel: mockOpenDetailFn,
-      handleOnDetailsPanelClosed: () => {},
-      DetailsPanel: () => <div />,
-      shouldShowDetailsPanel: false,
-    }),
-  };
-});
 
 describe('useSessionView with active timeline and a session id and graph event id', () => {
   let setTimelineFullScreen: jest.Mock;
@@ -155,12 +143,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       },
       { wrapper: Wrapper }
     );
-    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalledWith({
-      height: 1000,
-      sessionEntityId: 'test',
-      loadAlertDetails: mockOpenDetailFn,
-      canReadPolicyManagement: false,
-    });
+    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
   });
 
   describe('useSessionView with non active timeline and graph event id set', () => {

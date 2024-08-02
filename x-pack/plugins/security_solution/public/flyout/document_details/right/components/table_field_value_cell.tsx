@@ -16,7 +16,7 @@ import { MESSAGE_FIELD_NAME } from '../../../../timelines/components/timeline/bo
 
 export interface FieldValueCellProps {
   /**
-   * Value used to create a unique identifier in children components
+   * `Value used to create a unique identifier in children components`
    */
   contextId: string;
   /**

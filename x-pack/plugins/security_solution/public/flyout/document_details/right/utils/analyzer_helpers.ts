@@ -7,7 +7,7 @@
 import React from 'react';
 import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 import { EuiToken } from '@elastic/eui';
-import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
 
 /**
  * Helper function to recursively create ancestor tree nodes

@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useOsqueryTab } from '../../../../common/components/event_details/osquery_tab';
-import { useResponseActionsView } from '../../../../common/components/event_details/response_actions_view';
+import { useOsqueryTab } from '../hooks/use_osquery_tab';
+import { useResponseActionsView } from '../hooks/use_response_actions_view';
 
 const ExtendedFlyoutWrapper = styled.div`
  figure {

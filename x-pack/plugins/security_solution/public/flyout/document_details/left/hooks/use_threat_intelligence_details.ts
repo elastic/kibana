@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
