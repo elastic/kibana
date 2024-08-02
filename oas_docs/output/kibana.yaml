@@ -2839,9 +2839,6 @@ paths:
             application/json:
               schema:
                 type: object
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_bulk_create:
     post:
       summary: Create saved objects
@@ -2877,9 +2874,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_bulk_delete:
     post:
       summary: Delete saved objects
@@ -2932,9 +2926,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_bulk_get:
     post:
       summary: Get saved objects
@@ -2965,9 +2956,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_bulk_resolve:
     post:
       summary: Resolve saved objects
@@ -3009,9 +2997,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_bulk_update:
     post:
       summary: Update saved objects
@@ -3046,17 +3031,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_export:
     post:
-      summary: Export saved objects in the default space
+      summary: Export saved objects
       operationId: exportSavedObjectsDefault
       description: >
         Retrieve sets of saved objects that you want to import into Kibana.
 
         You must include `type` or `objects` in the request body.
+
+
+        Exported saved objects are not backwards compatible and cannot be
+        imported into an older version of Kibana.
 
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting
@@ -3121,9 +3107,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_find:
     get:
       summary: Search for saved objects
@@ -3256,12 +3239,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_import:
     post:
-      summary: Import saved objects in the default space
+      summary: Import saved objects
       operationId: importSavedObjectsDefault
       description: >
         Create sets of Kibana saved objects from a file created by the export
@@ -3383,9 +3363,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/_resolve_import_errors:
     post:
       summary: Resolve import errors
@@ -3544,9 +3521,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/{type}:
     post:
       summary: Create a saved object
@@ -3591,9 +3565,6 @@ paths:
             application/json:
               schema:
                 type: object
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/{type}/{id}:
     get:
       summary: Get a saved object
@@ -3618,9 +3589,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
     post:
       summary: Create a saved object
       operationId: createSavedObjectId
@@ -3667,9 +3635,6 @@ paths:
             application/json:
               schema:
                 type: object
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
     put:
       summary: Update a saved object
       operationId: updateSavedObject
@@ -3706,9 +3671,6 @@ paths:
             application/json:
               schema:
                 type: object
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /api/saved_objects/resolve/{type}/{id}:
     get:
       summary: Resolve a saved object
@@ -3740,9 +3702,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saved_objects_400_response'
-      security:
-        - Saved_objects_basicAuth: []
-        - Saved_objects_apiKeyAuth: []
   /s/{spaceId}/api/observability/slos:
     post:
       summary: Create an SLO
@@ -15911,14 +15870,6 @@ components:
           schema:
             $ref: '#/components/schemas/Connectors_action_response_properties'
   securitySchemes:
-    Saved_objects_basicAuth:
-      type: http
-      scheme: basic
-    Saved_objects_apiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
     SLOs_basicAuth:
       type: http
       scheme: basic
