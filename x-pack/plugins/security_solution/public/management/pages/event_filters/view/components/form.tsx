@@ -564,6 +564,12 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
 
+        console.log(
+          'entry is undefined',
+          arg.exceptionItems[0] === undefined,
+          arg.exceptionItems[0],
+          exception
+        );
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
             ? {
