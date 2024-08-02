@@ -21,6 +21,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
+import { deepFreeze } from '@kbn/std';
 
 const postAuthResult = {
   next(): OnPostAuthResult {
@@ -51,7 +52,17 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
       if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
+
       if (postAuthResult.isNext(result)) {
+        if (result.authzResult) {
+          Object.defineProperty(request.app, 'authzResult', {
+            value: deepFreeze(result.authzResult),
+            configurable: false,
+            writable: false,
+            enumerable: false,
+          });
+        }
+
         return responseToolkit.continue;
       }
 

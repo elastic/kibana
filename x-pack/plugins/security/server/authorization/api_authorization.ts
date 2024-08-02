@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OnPostAuthResultType } from '@kbn/core/server';
 import type {
   AuthzDisabled,
   AuthzEnabled,
@@ -13,7 +14,6 @@ import type {
   RouteAuthz,
 } from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
-import { deepFreeze } from '@kbn/std';
 
 const isAuthzDisabled = (authz?: RouteAuthz): authz is AuthzDisabled => {
   return (authz as AuthzDisabled)?.enabled === false;
@@ -109,14 +109,7 @@ export function initAPIAuthorization(
         }
       }
 
-      Object.defineProperty(request, 'authzResult', {
-        value: deepFreeze(kibanaPrivileges),
-        enumerable: false,
-        configurable: false,
-        writable: false,
-      });
-
-      return toolkit.next();
+      return { type: OnPostAuthResultType.next, authzResult: kibanaPrivileges };
     }
 
     const tags = request.route.options.tags;

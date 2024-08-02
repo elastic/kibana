@@ -20,6 +20,7 @@ export enum OnPostAuthResultType {
  */
 export interface OnPostAuthNextResult {
   type: OnPostAuthResultType.next;
+  authzResult?: Record<string, boolean>;
 }
 
 /**

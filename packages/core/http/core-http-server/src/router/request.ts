@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions, RouteAuthz, RouteSecurity } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteSecurity } from './route';
 import type { Headers } from './headers';
 
 /**
@@ -32,6 +32,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  authzResult?: Record<string, boolean>;
   measureElu?: () => void;
 }
 
@@ -137,7 +138,7 @@ export interface KibanaRequest<
    */
   readonly isFakeRequest: boolean;
 
-  readonly authzResult?: any;
+  readonly authzResult?: Record<string, boolean>;
 
   /**
    * An internal request has access to internal routes.
