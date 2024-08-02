@@ -81,6 +81,24 @@ describe('structurally can walk all nodes', () => {
       ]);
     });
 
+    test('"visitAny" can capture command nodes', () => {
+      const { ast } = getAstAndSyntaxErrors('FROM index | STATS a = 123 | WHERE 123 | LIMIT 10');
+      const commands: ESQLCommand[] = [];
+
+      walk(ast, {
+        visitAny: (node) => {
+          if (node.type === 'command') commands.push(node);
+        },
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual([
+        'from',
+        'limit',
+        'stats',
+        'where',
+      ]);
+    });
+
     describe('command options', () => {
       test('can visit command options', () => {
         const { ast } = getAstAndSyntaxErrors('FROM index METADATA _index');
@@ -93,19 +111,47 @@ describe('structurally can walk all nodes', () => {
         expect(options.length).toBe(1);
         expect(options[0].name).toBe('metadata');
       });
+
+      test('"visitAny" can capture an options node', () => {
+        const { ast } = getAstAndSyntaxErrors('FROM index METADATA _index');
+        const options: ESQLCommandOption[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'option') options.push(node);
+          },
+        });
+
+        expect(options.length).toBe(1);
+        expect(options[0].name).toBe('metadata');
+      });
     });
 
     describe('command mode', () => {
       test('visits "mode" nodes', () => {
         const { ast } = getAstAndSyntaxErrors('FROM index | ENRICH a:b');
-        const options: ESQLCommandMode[] = [];
+        const modes: ESQLCommandMode[] = [];
 
         walk(ast, {
-          visitCommandMode: (opt) => options.push(opt),
+          visitCommandMode: (opt) => modes.push(opt),
         });
 
-        expect(options.length).toBe(1);
-        expect(options[0].name).toBe('a');
+        expect(modes.length).toBe(1);
+        expect(modes[0].name).toBe('a');
+      });
+
+      test('"visitAny" can capture a mode node', () => {
+        const { ast } = getAstAndSyntaxErrors('FROM index | ENRICH a:b');
+        const modes: ESQLCommandMode[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'mode') modes.push(node);
+          },
+        });
+
+        expect(modes.length).toBe(1);
+        expect(modes[0].name).toBe('a');
       });
     });
 
@@ -117,6 +163,20 @@ describe('structurally can walk all nodes', () => {
 
           walk(ast, {
             visitSource: (opt) => sources.push(opt),
+          });
+
+          expect(sources.length).toBe(1);
+          expect(sources[0].name).toBe('index');
+        });
+
+        test('"visitAny" can capture a source node', () => {
+          const { ast } = getAstAndSyntaxErrors('FROM index');
+          const sources: ESQLSource[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'source') sources.push(node);
+            },
           });
 
           expect(sources.length).toBe(1);
@@ -142,13 +202,32 @@ describe('structurally can walk all nodes', () => {
       });
 
       describe('columns', () => {
-        test('can through a single column', () => {
+        test('can walk through a single column', () => {
           const query = 'ROW x = 1';
           const { ast } = getAstAndSyntaxErrors(query);
           const columns: ESQLColumn[] = [];
 
           walk(ast, {
             visitColumn: (node) => columns.push(node),
+          });
+
+          expect(columns).toMatchObject([
+            {
+              type: 'column',
+              name: 'x',
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture a column', () => {
+          const query = 'ROW x = 1';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const columns: ESQLColumn[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'column') columns.push(node);
+            },
           });
 
           expect(columns).toMatchObject([
@@ -176,6 +255,52 @@ describe('structurally can walk all nodes', () => {
             {
               type: 'column',
               name: 'b',
+            },
+          ]);
+        });
+      });
+
+      describe('functions', () => {
+        test('can walk through functions', () => {
+          const query = 'FROM a | STATS fn(1), agg(true)';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const nodes: ESQLFunction[] = [];
+
+          walk(ast, {
+            visitFunction: (node) => nodes.push(node),
+          });
+
+          expect(nodes).toMatchObject([
+            {
+              type: 'function',
+              name: 'fn',
+            },
+            {
+              type: 'function',
+              name: 'agg',
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture function nodes', () => {
+          const query = 'FROM a | STATS fn(1), agg(true)';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const nodes: ESQLFunction[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'function') nodes.push(node);
+            },
+          });
+
+          expect(nodes).toMatchObject([
+            {
+              type: 'function',
+              name: 'fn',
+            },
+            {
+              type: 'function',
+              name: 'agg',
             },
           ]);
         });
@@ -299,6 +424,20 @@ describe('structurally can walk all nodes', () => {
                 ],
               },
             ]);
+          });
+
+          test('"visitAny" can capture a list literal', () => {
+            const query = 'ROW x = [1, 2]';
+            const { ast } = getAstAndSyntaxErrors(query);
+            const lists: ESQLList[] = [];
+
+            walk(ast, {
+              visitAny: (node) => {
+                if (node.type === 'list') lists.push(node);
+              },
+            });
+
+            expect(lists.length).toBe(1);
           });
 
           test('can walk plain literals inside list literal', () => {
@@ -492,7 +631,6 @@ describe('structurally can walk all nodes', () => {
         test('can visit time interval nodes', () => {
           const query = 'FROM index | STATS a = 123 BY 1h';
           const { ast } = getAstAndSyntaxErrors(query);
-
           const intervals: ESQLTimeInterval[] = [];
 
           walk(ast, {
@@ -507,6 +645,43 @@ describe('structurally can walk all nodes', () => {
             },
           ]);
         });
+
+        test('"visitAny" can capture time interval expressions', () => {
+          const query = 'FROM index | STATS a = 123 BY 1h';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const intervals: ESQLTimeInterval[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'timeInterval') intervals.push(node);
+            },
+          });
+
+          expect(intervals).toMatchObject([
+            {
+              type: 'timeInterval',
+              quantity: 1,
+              unit: 'h',
+            },
+          ]);
+        });
+
+        test('"visitAny" does not capture time interval node if type-specific callback provided', () => {
+          const query = 'FROM index | STATS a = 123 BY 1h';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const intervals1: ESQLTimeInterval[] = [];
+          const intervals2: ESQLTimeInterval[] = [];
+
+          walk(ast, {
+            visitTimeIntervalLiteral: (node) => intervals1.push(node),
+            visitAny: (node) => {
+              if (node.type === 'timeInterval') intervals2.push(node);
+            },
+          });
+
+          expect(intervals1.length).toBe(1);
+          expect(intervals2.length).toBe(0);
+        });
       });
 
       describe('cast expression', () => {
@@ -518,6 +693,30 @@ describe('structurally can walk all nodes', () => {
 
           walk(ast, {
             visitInlineCast: (node) => casts.push(node),
+          });
+
+          expect(casts).toMatchObject([
+            {
+              type: 'inlineCast',
+              castType: 'integer',
+              value: {
+                type: 'literal',
+                literalType: 'integer',
+                value: 123,
+              },
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture cast expression', () => {
+          const query = 'FROM index | STATS a = 123::integer';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const casts: ESQLInlineCast[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'inlineCast') casts.push(node);
+            },
           });
 
           expect(casts).toMatchObject([
