@@ -17,3 +17,5 @@ export type {
   UserProfileAPIClient,
 } from './src/user_profile';
 export type { RolePutPayload, RolesAPIClient } from './src/roles';
+export { PrivilegesAPIClientPublicContract } from './src/privileges';
+export type { PrivilegesAPIClientGetAllArgs } from './src/privileges';

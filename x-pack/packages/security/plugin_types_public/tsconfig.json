@@ -13,6 +13,6 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-user-profile-common",
     "@kbn/security-plugin-types-common",
-    "@kbn/core-security-common",
+    "@kbn/core-security-common"
   ]
 }
