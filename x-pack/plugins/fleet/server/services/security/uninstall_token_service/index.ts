@@ -576,7 +576,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getAllPolicyIds(): Promise<string[]> {
-    const agentPolicyIdsFetcher = agentPolicyService.fetchAllAgentPolicyIds(this.soClient);
+    const agentPolicyIdsFetcher = await agentPolicyService.fetchAllAgentPolicyIds(this.soClient);
     const policyIds: string[] = [];
     for await (const agentPolicyId of agentPolicyIdsFetcher) {
       policyIds.push(...agentPolicyId);
