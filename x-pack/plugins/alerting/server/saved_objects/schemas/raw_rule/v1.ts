@@ -11,6 +11,7 @@ const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
   schema.literal('maxQueuedActions'),
+  schema.literal('ruleExecution'),
 ]);
 
 const executionStatusErrorReason = schema.oneOf([
