@@ -17,7 +17,7 @@ import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, ServerProviderEvents } from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
-import { filter, mergeMap, startWith, Subject } from 'rxjs';
+import { filter, switchMap, startWith, Subject } from 'rxjs';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 /**
@@ -99,14 +99,14 @@ export class FeatureFlagsService {
         ),
       getBooleanValue$: (flagName, fallbackValue) => {
         return observeFeatureFlag$(flagName).pipe(
-          mergeMap(() =>
+          switchMap(() =>
             this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
           )
         );
       },
       getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          mergeMap(() =>
+          switchMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getStringValue,
               flagName,
@@ -117,7 +117,7 @@ export class FeatureFlagsService {
       },
       getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          mergeMap(() =>
+          switchMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getNumberValue,
               flagName,
