@@ -10,9 +10,9 @@ import * as params from './use_url_params';
 
 describe('useFilterUpdate', () => {
   describe('useFilterUpdate hook', () => {
-    let useUrlParamsSpy: jest.SpyInstance;
-    let getUrlParamsSpy: jest.SpyInstance;
-    let updateUrlSpy: jest.SpyInstance;
+    let useUrlParamsSpy;
+    let getUrlParamsSpy;
+    let updateUrlSpy;
 
     beforeEach(() => {
       getUrlParamsSpy = jest.fn().mockReturnValue({
