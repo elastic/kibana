@@ -20,7 +20,6 @@ import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
 export class FilterListsUI extends Component {
@@ -97,7 +96,7 @@ export class FilterListsUI extends Component {
   render() {
     const { filterLists, selectedFilterLists } = this.state;
     const { canCreateFilter, canDeleteFilter } = this.props;
-    const helpLink = getDocLinks().links.ml.customRules;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.customRules;
 
     return (
       <>
