@@ -1,0 +1,16 @@
+[[dashboard]]
+= Dashboards
+
+Dashboards are the best way to visualize and share insights from your {es} data. 
+
+// add link to reference of panel types
+A dashboard is made of one or more panels that you can organize as you like. Each panel can display various types of content: visualizations such as charts, tables, metrics, and maps, static annotations like text or images, or even specialized views for Machine Learning or Observability data.
+
+[role="screenshot"]
+image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
+
+// add link to create section
+There are several editors in {kib} that let you create and configure different types of visualizations.
+
+// add link to sharin section
+At any time, you can share a dashboard you've created with your team, in {kib} or outside.
