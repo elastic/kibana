@@ -125,6 +125,21 @@ export class Walker {
     return found;
   };
 
+  public static readonly findAll = (
+    node: WalkerAstNode,
+    predicate: (node: ESQLProperNode) => boolean
+  ): ESQLProperNode[] => {
+    const list: ESQLProperNode[] = [];
+    Walker.walk(node, {
+      visitAny: (child) => {
+        if (predicate(child)) {
+          list.push(child);
+        }
+      },
+    });
+    return list;
+  };
+
   /**
    * Finds the first function that matches the predicate.
    *
