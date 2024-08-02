@@ -73,6 +73,7 @@ describe('FeatureFlagsService Browser', () => {
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementation(async () => {
         await new Promise(() => {}); // never resolves
       });
+      const apmCaptureErrorSpy = jest.spyOn(apm, 'captureError');
       const fakeProvider = {} as Provider;
       setProvider(fakeProvider);
       expect(spy).toHaveBeenCalledWith(fakeProvider);
@@ -80,6 +81,9 @@ describe('FeatureFlagsService Browser', () => {
       await expect(isSettledPromise(startPromise)).resolves.toBe(false);
       await new Promise((resolve) => setTimeout(resolve, 2100)); // A bit longer than 2 seconds
       await expect(isSettledPromise(startPromise)).resolves.toBe(true);
+      expect(apmCaptureErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('The feature flags provider took too long to initialize.')
+      );
     });
   });
 

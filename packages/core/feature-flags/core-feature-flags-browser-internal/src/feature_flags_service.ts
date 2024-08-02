@@ -137,7 +137,11 @@ export class FeatureFlagsService {
       new Promise((resolve) => {
         timeoutId = setTimeout(resolve, 2 * 1000);
       }).then(() => {
-        this.logger.warn('The feature flags provider took too long to initialize');
+        const msg = `The feature flags provider took too long to initialize.
+        Won't hold the page load any longer.
+        Feature flags will return the provided fallbacks until the provider is eventually initialized.`;
+        this.logger.warn(msg);
+        apm.captureError(msg);
       }),
     ]);
     clearTimeout(timeoutId);
