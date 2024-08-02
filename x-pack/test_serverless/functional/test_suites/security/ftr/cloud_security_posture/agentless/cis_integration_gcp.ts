@@ -6,8 +6,6 @@
  */
 const CIS_GCP_OPTION_TEST_ID = 'cisGcpTestId';
 const GCP_SINGLE_ACCOUNT_TEST_ID = 'gcpSingleAccountTestId';
-const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
-const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
