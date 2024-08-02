@@ -1636,19 +1636,6 @@ async function getOptionArgsSuggestions(
   }
 
   if (command.name === 'stats') {
-    suggestions.push(
-      ...(await getFieldsOrFunctionsSuggestions(
-        ['column'],
-        command.name,
-        option.name,
-        getFieldsByType,
-        {
-          functions: false,
-          fields: true,
-        }
-      ))
-    );
-
     const argDef = optionDef?.signature.params[argIndex];
 
     const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
