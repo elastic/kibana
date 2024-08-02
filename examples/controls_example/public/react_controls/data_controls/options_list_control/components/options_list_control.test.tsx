@@ -21,10 +21,12 @@ describe('Options list control', () => {
     api,
     displaySettings,
     stateManager,
+    setExclude,
   }: {
     api: any;
     displaySettings: any;
     stateManager: any;
+    setExclude: (next: boolean | undefined) => void;
   }) => {
     return render(
       <OptionsListControlContext.Provider
@@ -32,6 +34,7 @@ describe('Options list control', () => {
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
           stateManager: stateManager as unknown as ControlStateManager<OptionsListComponentState>,
+          setExclude,
         }}
       >
         <OptionsListControl controlPanelClassName="controlPanel" />
@@ -42,8 +45,8 @@ describe('Options list control', () => {
   test('if exclude = false and existsSelected = true, then the option should read "Exists"', async () => {
     const mocks = getOptionsListMocks();
     mocks.api.uuid = 'testExists';
-    mocks.stateManager.exclude.next(false);
-    mocks.stateManager.existsSelected.next(true);
+    mocks.setExclude(false);
+    mocks.setExistsSelected(true);
     const control = mountComponent(mocks);
     const existsOption = control.getByTestId('optionsList-control-testExists');
     expect(existsOption).toHaveTextContent('Exists');
@@ -52,8 +55,8 @@ describe('Options list control', () => {
   test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', async () => {
     const mocks = getOptionsListMocks();
     mocks.api.uuid = 'testDoesNotExist';
-    mocks.stateManager.exclude.next(true);
-    mocks.stateManager.existsSelected.next(true);
+    mocks.setExclude(true);
+    mocks.setExistsSelected(true);
     const control = mountComponent(mocks);
     const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
     expect(existsOption).toHaveTextContent('DOES NOT Exist');
@@ -68,7 +71,7 @@ describe('Options list control', () => {
         { value: 'bark', docCount: 10 },
         { value: 'meow', docCount: 12 },
       ]);
-      mocks.stateManager.selectedOptions.next(['woof', 'bark']);
+      mocks.setSelectedOptions(['woof', 'bark']);
       mocks.api.field$.next({
         name: 'Test keyword field',
         type: 'keyword',
@@ -87,7 +90,7 @@ describe('Options list control', () => {
       { value: 2, docCount: 10 },
       { value: 3, docCount: 12 },
     ]);
-    mocks.stateManager.selectedOptions.next([1, 2]);
+    mocks.setSelectedOptions([1, 2]);
     mocks.api.field$.next({
       name: 'Test keyword field',
       type: 'number',
@@ -105,7 +108,7 @@ describe('Options list control', () => {
       { value: 'bark', docCount: 10 },
       { value: 'meow', docCount: 12 },
     ]);
-    mocks.stateManager.selectedOptions.next(['woof', 'bark']);
+    mocks.setSelectedOptions(['woof', 'bark']);
     mocks.api.invalidSelections$.next(new Set(['woof']));
     mocks.api.field$.next({
       name: 'Test keyword field',

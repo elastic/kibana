@@ -399,6 +399,7 @@ export const getOptionsListControlFactory = (
             <OptionsListControlContext.Provider
               value={{
                 stateManager,
+                setExclude: optionsListControlSelections.setExclude,
                 api: componentApi,
                 displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
               }}

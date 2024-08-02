@@ -27,6 +27,7 @@ export const OptionsListControlContext = React.createContext<
         existsSelected: PublishingSubject<boolean | undefined>;
         exclude: PublishingSubject<boolean | undefined>;
       };
+      setExclude: (next: boolean | undefined) => void;
       displaySettings: OptionsListDisplaySettings;
     }
   | undefined

@@ -175,9 +175,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
 
   const filtersReadySubscription = filters$.pipe(debounceTime(0)).subscribe(() => {
     // Set filtersReady$.next(true); in filters$ subscription instead of setOutputFilter
-    // to avoid signaling filters ready until after filters have been emitted 
+    // to avoid signaling filters ready until after filters have been emitted
     // to avoid timing issues
-    filtersReady$.next(true)
+    filtersReady$.next(true);
   });
 
   const api: ControlApiInitialization<DataControlApi> = {
