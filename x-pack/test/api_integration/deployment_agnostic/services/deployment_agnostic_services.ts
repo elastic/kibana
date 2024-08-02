@@ -20,7 +20,7 @@ export const deploymentAgnosticServices = _.pick(apiIntegrationServices, [
   'indexPatterns',
   'ingestPipelines',
   'kibanaServer',
-  'ml',
+  // 'ml', depends on 'esDeleteAllIndices', can we make it deployment agnostic?
   'randomness',
   'retry',
   'security',

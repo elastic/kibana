@@ -9,10 +9,10 @@
 import { readRolesDescriptorsFromResource, STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
-import { AuthRoleProvider } from './auth_role_provider';
-import { getStatefulInternalRequestHeaders, COMMON_REQUEST_HEADERS } from './internal_headers';
+import { AuthProvider } from '../get_auth_provider';
+import { getStatefulInternalRequestHeaders, COMMON_REQUEST_HEADERS } from '../internal_headers';
 
-export class StatefuAuthRoleProvider implements AuthRoleProvider {
+export class StatefuAuthProvider implements AuthProvider {
   private rolesDefinitionPath: string;
 
   constructor() {

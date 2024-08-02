@@ -11,8 +11,7 @@ import { type Config } from '@kbn/test';
 import { isServerlessProjectType, readRolesDescriptorsFromResource } from '@kbn/es/src/utils';
 import { resolve } from 'path';
 import { Role } from '@kbn/test/src/auth/types';
-import { AuthRoleProvider } from './auth_role_provider';
-import { getServerlessInternalRequestHeaders, COMMON_REQUEST_HEADERS } from './internal_headers';
+import { getServerlessInternalRequestHeaders, COMMON_REQUEST_HEADERS } from '../internal_headers';
 
 const projectDefaultRoles = new Map<string, Role>([
   ['es', 'developer'],
@@ -28,7 +27,7 @@ const getDefaultServerlessRole = (projectType: string) => {
   }
 };
 
-export class ServerlessAuthRoleProvider implements AuthRoleProvider {
+export class ServerlessAuthProvider implements AuthProvider {
   private projectType: string;
   private rolesDefinitonPath: string;
 

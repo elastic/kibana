@@ -4,8 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Config, FtrConfigProviderContext } from '@kbn/test';
-
+import { resolve } from 'path';
+import Fs from 'fs';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ENTITY_ID,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  MOCK_IDP_ATTRIBUTE_NAME,
+} from '@kbn/mock-idp-utils';
+import {
+  esTestConfig,
+  kbnTestConfig,
+  systemIndicesSuperuser,
+  FtrConfigProviderContext,
+} from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { services } from './services';
 
 interface CreateTestConfigOptions {
@@ -17,37 +32,76 @@ interface CreateTestConfigOptions {
 }
 
 export function createStatefulTestConfig(options: CreateTestConfigOptions) {
-  return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
-    const svlSharedConfig = await readConfigFile(
-      // TBD: create base config with SAML auth for stateful
-      require.resolve('@kbn/test-suites-serverless/shared/config.base')
+  return async ({ readConfigFile }: FtrConfigProviderContext) => {
+    const xPackAPITestsConfig = await readConfigFile(require.resolve('../config.ts'));
+
+    // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
+    const idpPath = require.resolve(
+      '@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml'
     );
 
+    const servers = {
+      kibana: {
+        ...kbnTestConfig.getUrlParts(systemIndicesSuperuser),
+        protocol: process.env.TEST_CLOUD ? 'https' : 'http',
+        certificateAuthorities: process.env.TEST_CLOUD
+          ? undefined
+          : [Fs.readFileSync(CA_CERT_PATH)],
+      },
+      elasticsearch: {
+        ...esTestConfig.getUrlParts(),
+        protocol: process.env.TEST_CLOUD ? 'https' : 'http',
+        certificateAuthorities: process.env.TEST_CLOUD
+          ? undefined
+          : [Fs.readFileSync(CA_CERT_PATH)],
+      },
+    };
+
+    const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
+
+    const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
+
     return {
-      ...svlSharedConfig.getAll(),
-
-      serverless: false,
-
-      services: {
-        ...services,
-      },
-      esTestCluster: {
-        ...svlSharedConfig.get('esTestCluster'),
-        serverArgs: [
-          ...svlSharedConfig.get('esTestCluster.serverArgs'),
-          ...(options.esServerArgs ?? []),
-        ],
-      },
-      kbnTestServer: {
-        ...svlSharedConfig.get('kbnTestServer'),
-        serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
-          ...(options.kbnServerArgs || []),
-        ],
-      },
+      servers,
       testFiles: options.testFiles,
+      security: { disableTestUser: true },
+      services,
       junit: options.junit,
       suiteTags: options.suiteTags,
+
+      esTestCluster: {
+        ...xPackAPITestsConfig.get('esTestCluster'),
+        serverArgs: [
+          ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
+          ...(options.esServerArgs ?? []),
+          'xpack.security.authc.token.enabled=true',
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kbnUrl}/logout`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+        ],
+      },
+
+      kbnTestServer: {
+        ...xPackAPITestsConfig.get('kbnTestServer'),
+        serverArgs: [
+          ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          ...(options.kbnServerArgs || []),
+          `--plugin-path=${testEndpointsPlugin}`,
+          '--xpack.security.authc.selector.enabled=false',
+          `--xpack.security.authc.providers=${JSON.stringify({
+            saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },
+            basic: { 'cloud-basic': { order: 1 } },
+          })}`,
+          `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+        ],
+      },
     };
   };
 }
