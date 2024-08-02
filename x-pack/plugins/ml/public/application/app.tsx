@@ -166,7 +166,6 @@ export const renderApp = (
     config: coreStart.uiSettings!,
     docLinks: coreStart.docLinks!,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
-    application: coreStart.application,
     maps: deps.maps,
   });
 
