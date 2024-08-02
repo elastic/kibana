@@ -7,10 +7,10 @@
 
 import { useMemo } from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { getTermsAggregationFields } from '../../../../detection_engine/rule_creation_ui/components/step_define_rule/utils';
 import { useRuleFields } from '../../../../detection_engine/rule_management/logic/use_rule_fields';
-import type { BrowserField } from '../../../containers/source';
 import { useMlCapabilities } from './use_ml_capabilities';
 import { useMlRuleValidations } from './use_ml_rule_validations';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -21,7 +21,7 @@ export interface UseMlRuleConfigReturn {
   hasMlLicense: boolean;
   loading: boolean;
   mlFields: DataViewFieldBase[];
-  mlSuppressionFields: BrowserField[];
+  mlSuppressionFields: FieldSpec[];
   allJobsStarted: boolean;
 }
 
@@ -46,7 +46,7 @@ export const useMLRuleConfig = ({
     machineLearningJobId,
   });
   const mlSuppressionFields = useMemo(
-    () => getTermsAggregationFields(mlFields as BrowserField[]),
+    () => getTermsAggregationFields(mlFields as FieldSpec[]),
     [mlFields]
   );
 
