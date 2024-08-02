@@ -9,8 +9,6 @@ paths:
       operationId: FindListItems
       x-codegen-enabled: true
       summary: Finds list items
-      tags:
-        - List API
       parameters:
         - name: list_id
           in: query
