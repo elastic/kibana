@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
-    const testSubjects = getService('testSubjects');
 
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();

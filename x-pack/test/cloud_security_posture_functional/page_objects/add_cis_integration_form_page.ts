@@ -223,12 +223,6 @@ export function AddCisIntegrationFormPageProvider({
     await agentOption.click();
   };
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
-    // const credentialsSelect = await testSubjects.find(AWS_CREDENTIAL_SELECTOR);
-    // await credentialsSelect.click();
-    // const credentialsOptions = await credentialsSelect.findAllByCssSelector('option');
-    // const credentialsOption = credentialsOptions[credentialType === 'direct' ? 0 : 1];
-    // await credentialsOption.click();
-
     await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
       AWS_CREDENTIAL_SELECTOR,
