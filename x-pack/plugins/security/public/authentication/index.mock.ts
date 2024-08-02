@@ -32,6 +32,10 @@ export const authorizationMock = {
       deleteRole: jest.fn(),
       saveRole: jest.fn(),
     },
+    privileges: {
+      getAll: jest.fn(),
+      getBuiltIn: jest.fn(),
+    },
   }),
   createStart: (): jest.Mocked<AuthorizationServiceStart> => ({
     isRoleManagementEnabled: jest.fn(),
@@ -40,6 +44,10 @@ export const authorizationMock = {
       getRole: jest.fn(),
       deleteRole: jest.fn(),
       saveRole: jest.fn(),
+    },
+    privileges: {
+      getAll: jest.fn(),
+      getBuiltIn: jest.fn(),
     },
   }),
 };
