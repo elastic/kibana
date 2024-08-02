@@ -26,8 +26,6 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getDocLinks } from '../../util/dependency_cache';
-
 import { parseMessages } from '../../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { Callout, statusToEuiIconType } from '../callout';
@@ -120,6 +118,7 @@ export class ValidateJobUI extends Component {
   };
 
   validate = () => {
+    const docLinks = this.props.kibana.services.docLinks;
     const job = this.props.getJobConfig();
     const getDuration = this.props.getDuration;
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
@@ -134,7 +133,7 @@ export class ValidateJobUI extends Component {
         this.props.ml
           .validateJob({ duration, fields, job })
           .then((validationMessages) => {
-            const messages = parseMessages(validationMessages, getDocLinks());
+            const messages = parseMessages(validationMessages, docLinks);
             shouldShowLoadingIndicator = false;
 
             const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
@@ -229,7 +228,7 @@ export class ValidateJobUI extends Component {
   };
 
   render() {
-    const jobTipsUrl = getDocLinks().links.ml.anomalyDetectionJobTips;
+    const jobTipsUrl = this.props.kibana.services.docLinks.links.ml.anomalyDetectionJobTips;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true

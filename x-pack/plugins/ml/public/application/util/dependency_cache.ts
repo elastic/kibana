@@ -6,24 +6,21 @@
  */
 
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
-  docLinks: DocLinksStart | null;
 }
 
 const cache: DependencyCache = {
   timefilter: null,
   config: null,
-  docLinks: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.timefilter = deps.timefilter || null;
   cache.config = deps.config || null;
-  cache.docLinks = deps.docLinks || null;
 }
 
 export function getTimefilter() {
@@ -31,13 +28,6 @@ export function getTimefilter() {
     throw new Error("timefilter hasn't been initialized");
   }
   return cache.timefilter.timefilter;
-}
-
-export function getDocLinks() {
-  if (cache.docLinks === null) {
-    throw new Error("docLinks hasn't been initialized");
-  }
-  return cache.docLinks;
 }
 
 export function getUiSettings() {

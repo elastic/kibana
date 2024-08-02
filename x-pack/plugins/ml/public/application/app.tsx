@@ -163,7 +163,6 @@ export const renderApp = (
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
     config: coreStart.uiSettings!,
-    docLinks: coreStart.docLinks!,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());
