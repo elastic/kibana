@@ -243,7 +243,11 @@ export async function suggest(
     if (!ast.length) {
       return suggestions.filter(isSourceCommand);
     }
-    return suggestions.filter((def) => !isSourceCommand(def));
+
+    // Temporarily disabling INLINESTATS from being suggested until it's released
+    // TODO: Remove in filter when command is available in tech preview
+    // See  https://github.com/elastic/kibana/issues/189356
+    return suggestions.filter((def) => !isSourceCommand(def) && def.label !== 'INLINESTATS');
   }
 
   if (astContext.type === 'expression') {

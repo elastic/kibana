@@ -80,7 +80,7 @@ const absDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -139,7 +139,7 @@ const acosDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=.9\n| EVAL acos=ACOS(a)'],
@@ -196,7 +196,7 @@ const asinDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=.9\n| EVAL asin=ASIN(a)'],
@@ -253,7 +253,7 @@ const atanDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=12.9\n| EVAL atan=ATAN(a)'],
@@ -510,7 +510,7 @@ const atan2Definition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)'],
@@ -567,7 +567,7 @@ const cbrtDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW d = 1000.0\n| EVAL c = cbrt(d)'],
@@ -623,7 +623,7 @@ const ceilDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL a=CEIL(a)'],
@@ -672,7 +672,7 @@ const cidrMatchDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -753,16 +753,16 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'date',
+          type: 'datetime',
           optional: true,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
       minParams: 1,
     },
     {
@@ -938,7 +938,7 @@ const coalesceDefinition: FunctionDefinition = {
       minParams: 1,
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
@@ -1018,7 +1018,7 @@ const concatDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -1076,7 +1076,7 @@ const cosDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8 \n| EVAL cos=COS(a)'],
@@ -1132,7 +1132,7 @@ const coshDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8 \n| EVAL cosh=COSH(a)'],
@@ -1218,12 +1218,12 @@ const dateDiffDefinition: FunctionDefinition = {
         },
         {
           name: 'startTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'endTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1238,19 +1238,19 @@ const dateDiffDefinition: FunctionDefinition = {
         },
         {
           name: 'startTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'endTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
       returnType: 'integer',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -1308,7 +1308,7 @@ const dateExtractDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1323,14 +1323,14 @@ const dateExtractDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
       returnType: 'long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -1357,7 +1357,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1372,14 +1372,14 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -1410,7 +1410,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1425,7 +1425,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1440,7 +1440,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1455,10 +1455,10 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW date_string = "2022-05-06"\n| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)'],
@@ -1482,11 +1482,11 @@ const dateTruncDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1497,14 +1497,14 @@ const dateTruncDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -1528,7 +1528,7 @@ const eDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW E()'],
@@ -1575,7 +1575,7 @@ const endsWithDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_E = ENDS_WITH(last_name, "d")'],
@@ -1631,7 +1631,7 @@ const expDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW d = 5.0\n| EVAL s = EXP(d)'],
@@ -1687,7 +1687,7 @@ const floorDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8\n| EVAL a=FLOOR(a)'],
@@ -1723,7 +1723,7 @@ const fromBase64Definition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['row a = "ZWxhc3RpYw==" \n| eval d = from_base64(a)'],
@@ -1923,7 +1923,7 @@ const greatestDefinition: FunctionDefinition = {
       minParams: 1,
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)'],
@@ -1959,7 +1959,7 @@ const ipPrefixDefinition: FunctionDefinition = {
       returnType: 'ip',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -2161,7 +2161,7 @@ const leastDefinition: FunctionDefinition = {
       minParams: 1,
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a = 10, b = 20\n| EVAL l = LEAST(a, b)'],
@@ -2208,7 +2208,7 @@ const leftDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -2246,7 +2246,7 @@ const lengthDefinition: FunctionDefinition = {
       returnType: 'integer',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['FROM employees\n| KEEP first_name, last_name\n| EVAL fn_length = LENGTH(first_name)'],
@@ -2403,7 +2403,7 @@ const locateDefinition: FunctionDefinition = {
       returnType: 'integer',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['row a = "hello"\n| eval a_ll = locate(a, "ll")'],
@@ -2700,14 +2700,14 @@ const logDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: (fnDef: ESQLFunction) => {
     const messages = [];
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && Number(arg.value) < 0) {
+      if (isLiteralItem(arg) && arg.value < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2783,14 +2783,14 @@ const log10Definition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: (fnDef: ESQLFunction) => {
     const messages = [];
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && Number(arg.value) < 0) {
+      if (isLiteralItem(arg) && arg.value < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2842,7 +2842,7 @@ const ltrimDefinition: FunctionDefinition = {
       returnType: 'text',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -2908,16 +2908,16 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'field2',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3055,7 +3055,7 @@ const mvAppendDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [],
@@ -3112,7 +3112,7 @@ const mvAvgDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=[3, 5, 1, 6]\n| EVAL avg_a = MV_AVG(a)'],
@@ -3189,7 +3189,7 @@ const mvConcatDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -3242,7 +3242,7 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -3349,7 +3349,7 @@ const mvCountDefinition: FunctionDefinition = {
       returnType: 'integer',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=["foo", "zoo", "bar"]\n| EVAL count_a = MV_COUNT(a)'],
@@ -3398,11 +3398,11 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3495,7 +3495,7 @@ const mvDedupeDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=["foo", "foo", "bar", "foo"]\n| EVAL dedupe_a = MV_DEDUPE(a)'],
@@ -3545,11 +3545,11 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3652,7 +3652,7 @@ const mvFirstDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a="foo;bar;baz"\n| EVAL first_a = MV_FIRST(SPLIT(a, ";"))'],
@@ -3702,11 +3702,11 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3809,7 +3809,7 @@ const mvLastDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a="foo;bar;baz"\n| EVAL last_a = MV_LAST(SPLIT(a, ";"))'],
@@ -3839,11 +3839,11 @@ const mvMaxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3926,7 +3926,7 @@ const mvMaxDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -3986,7 +3986,7 @@ const mvMedianDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -4019,11 +4019,11 @@ const mvMinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4106,7 +4106,7 @@ const mvMinDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -4189,7 +4189,7 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
@@ -4203,7 +4203,7 @@ const mvSliceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4386,7 +4386,7 @@ const mvSliceDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -4424,7 +4424,7 @@ const mvSortDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
@@ -4434,7 +4434,7 @@ const mvSortDefinition: FunctionDefinition = {
           literalOptions: ['asc', 'desc'],
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4511,7 +4511,6 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -4527,7 +4526,6 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'text',
@@ -4543,13 +4541,12 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")'],
@@ -4606,7 +4603,7 @@ const mvSumDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=[3, 5, 6]\n| EVAL sum_a = MV_SUM(a)'],
@@ -4843,7 +4840,7 @@ const mvZipDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -4862,10 +4859,10 @@ const nowDefinition: FunctionDefinition = {
   signatures: [
     {
       params: [],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW current_date = NOW()', 'FROM sample_data\n| WHERE @timestamp > NOW() - 1 hour'],
@@ -4885,7 +4882,7 @@ const piDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW PI()'],
@@ -5141,7 +5138,7 @@ const powDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -5191,7 +5188,7 @@ const repeatDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a = "Hello!"\n| EVAL triple_a = REPEAT(a, 3);'],
@@ -5368,7 +5365,7 @@ const replaceDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW str = "Hello World"\n| EVAL str = REPLACE(str, "World", "Universe")\n| KEEP str'],
@@ -5415,7 +5412,7 @@ const rightDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -5519,7 +5516,7 @@ const roundDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -5557,7 +5554,7 @@ const rtrimDefinition: FunctionDefinition = {
       returnType: 'text',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -5616,7 +5613,7 @@ const signumDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW d = 100.0\n| EVAL s = SIGNUM(d)'],
@@ -5672,7 +5669,7 @@ const sinDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8 \n| EVAL sin=SIN(a)'],
@@ -5728,7 +5725,7 @@ const sinhDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8 \n| EVAL sinh=SINH(a)'],
@@ -5804,7 +5801,7 @@ const splitDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW words="foo;bar;baz;qux;quux;corge"\n| EVAL word = SPLIT(words, ";")'],
@@ -5861,7 +5858,7 @@ const sqrtDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW d = 100.0\n| EVAL s = SQRT(d)'],
@@ -5998,7 +5995,7 @@ const stContainsDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6137,7 +6134,7 @@ const stDisjointDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6186,7 +6183,7 @@ const stDistanceDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6325,7 +6322,7 @@ const stIntersectsDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6464,7 +6461,7 @@ const stWithinDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6503,7 +6500,7 @@ const stXDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6542,7 +6539,7 @@ const stYDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6591,7 +6588,7 @@ const startsWithDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_S = STARTS_WITH(last_name, "B")'],
@@ -6648,7 +6645,7 @@ const substringDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -6708,7 +6705,7 @@ const tanDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8 \n| EVAL tan=TAN(a)'],
@@ -6764,7 +6761,7 @@ const tanhDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=1.8 \n| EVAL tanh=TANH(a)'],
@@ -6784,7 +6781,7 @@ const tauDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW TAU()'],
@@ -6820,7 +6817,7 @@ const toBase64Definition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['row a = "elastic" \n| eval e = to_base64(a)'],
@@ -6907,7 +6904,7 @@ const toBooleanDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW str = ["true", "TRuE", "false", "", "yes", "1"]\n| EVAL bool = TO_BOOLEAN(str)'],
@@ -6957,7 +6954,7 @@ const toCartesianpointDefinition: FunctionDefinition = {
       returnType: 'cartesian_point',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7019,7 +7016,7 @@ const toCartesianshapeDefinition: FunctionDefinition = {
       returnType: 'cartesian_shape',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7041,11 +7038,11 @@ const toDatetimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7055,7 +7052,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7065,7 +7062,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7075,7 +7072,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7085,7 +7082,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7095,7 +7092,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7105,10 +7102,10 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7167,7 +7164,7 @@ const toDegreesDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW rad = [1.57, 3.14, 4.71]\n| EVAL deg = TO_DEGREES(rad)'],
@@ -7227,7 +7224,7 @@ const toDoubleDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7294,7 +7291,7 @@ const toDoubleDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7343,7 +7340,7 @@ const toGeopointDefinition: FunctionDefinition = {
       returnType: 'geo_point',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW wkt = "POINT(42.97109630194 14.7552534413725)"\n| EVAL pt = TO_GEOPOINT(wkt)'],
@@ -7400,7 +7397,7 @@ const toGeoshapeDefinition: FunctionDefinition = {
       returnType: 'geo_shape',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7442,7 +7439,7 @@ const toIntegerDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7509,7 +7506,7 @@ const toIntegerDefinition: FunctionDefinition = {
       returnType: 'integer',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)'],
@@ -7555,7 +7552,7 @@ const toIpDefinition: FunctionDefinition = {
       returnType: 'ip',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7607,7 +7604,7 @@ const toLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7674,7 +7671,7 @@ const toLongDefinition: FunctionDefinition = {
       returnType: 'long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -7712,7 +7709,7 @@ const toLowerDefinition: FunctionDefinition = {
       returnType: 'text',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW message = "Some Text"\n| EVAL message_lower = TO_LOWER(message)'],
@@ -7768,7 +7765,7 @@ const toRadiansDefinition: FunctionDefinition = {
       returnType: 'double',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW deg = [90.0, 180.0, 270.0]\n| EVAL rad = TO_RADIANS(deg)'],
@@ -7817,7 +7814,7 @@ const toStringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7924,7 +7921,7 @@ const toStringDefinition: FunctionDefinition = {
       returnType: 'keyword',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW a=10\n| EVAL j = TO_STRING(a)', 'ROW a=[10, 9, 8]\n| EVAL j = TO_STRING(a)'],
@@ -7957,7 +7954,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -8024,7 +8021,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -8062,7 +8059,7 @@ const toUpperDefinition: FunctionDefinition = {
       returnType: 'text',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW message = "Some Text"\n| EVAL message_upper = TO_UPPER(message)'],
@@ -8108,7 +8105,7 @@ const toVersionDefinition: FunctionDefinition = {
       returnType: 'version',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: ['ROW v = TO_VERSION("1.2.3")'],
@@ -8144,7 +8141,7 @@ const trimDefinition: FunctionDefinition = {
       returnType: 'text',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
@@ -8177,7 +8174,7 @@ const caseDefinition: FunctionDefinition = {
       returnType: 'any',
     },
   ],
-  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
   examples: [
