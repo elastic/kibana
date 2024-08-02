@@ -17,8 +17,12 @@ import { DatasetQualityStartDeps } from '../../types';
 import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
 import { IDataStreamDetailsClient } from '../../services/data_stream_details';
 import { indexNameToDataStreamParts } from '../../../common/utils';
-import { NonAggregatableDatasets } from '../../../common/api_types';
+import { DataStreamDetails, NonAggregatableDatasets } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
+import {
+  fetchDataStreamDetailsFailedNotifier,
+  assertBreakdownFieldEcsFailedNotifier,
+} from './notifications';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
   initialContext: DatasetQualityDetailsControllerContext
@@ -47,14 +51,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               states: {
                 fetching: {
                   invoke: {
-                    src: 'checkIfDatasetIsNonAggregatable',
+                    src: 'checkDatasetIsAggregatable',
                     onDone: {
                       target: 'done',
-                      actions: ['storeDatasetNonAggregatableStatus'],
+                      actions: ['storeDatasetAggregatableStatus'],
                     },
                     onError: {
                       target: 'done',
-                      actions: ['notifyFailedFetchForNonAggregatableDatasets'],
+                      actions: ['notifyFailedFetchForAggregatableDatasets'],
                     },
                   },
                 },
@@ -68,13 +72,63 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 },
               },
             },
+            dataStreamDetails: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadDataStreamDetails',
+                    onDone: {
+                      target: 'done',
+                      actions: ['storeDataStreamDetails'],
+                    },
+                    onError: {
+                      target: 'done',
+                      actions: ['notifyFetchDataStreamDetailsFailed'],
+                    },
+                  },
+                },
+                done: {
+                  on: {
+                    UPDATE_TIME_RANGE: {
+                      target: 'fetching',
+                      actions: ['storeTimeRange'],
+                    },
+                    BREAKDOWN_FIELD_CHANGE: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.checkBreakdownFieldIsEcs.fetching',
+                      actions: ['storeBreakDownField'],
+                    },
+                  },
+                },
+              },
+            },
+            checkBreakdownFieldIsEcs: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'checkBreakdownFieldIsEcs',
+                    onDone: {
+                      target: 'done',
+                      actions: ['storeBreakdownFieldEcsStatus'],
+                    },
+                    onError: {
+                      target: 'done',
+                      actions: ['notifyCheckBreakdownFieldIsEcsFailed'],
+                    },
+                  },
+                },
+                done: {},
+              },
+            },
           },
         },
       },
     },
     {
       actions: {
-        storeDatasetNonAggregatableStatus: assign(
+        storeDatasetAggregatableStatus: assign(
           (_context, event: DoneInvokeEvent<NonAggregatableDatasets>) => {
             return 'data' in event
               ? {
@@ -87,6 +141,23 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           return {
             timeRange: 'timeRange' in event ? event.timeRange : context.timeRange,
           };
+        }),
+        storeDataStreamDetails: assign((_context, event: DoneInvokeEvent<DataStreamDetails>) => {
+          return 'data' in event
+            ? {
+                dataStreamDetails: event.data,
+              }
+            : {};
+        }),
+        storeBreakDownField: assign((_context, event) => {
+          return 'breakdownField' in event ? { breakdownField: event.breakdownField } : {};
+        }),
+        storeBreakdownFieldEcsStatus: assign((_context, event: DoneInvokeEvent<boolean>) => {
+          return 'data' in event
+            ? {
+                isBreakdownFieldEcs: event.data,
+              }
+            : {};
         }),
       },
     }
@@ -108,20 +179,54 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
-      notifyFailedFetchForNonAggregatableDatasets: (_context, event: DoneInvokeEvent<Error>) =>
+      notifyFailedFetchForAggregatableDatasets: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
+      notifyFetchDataStreamDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDataStreamDetailsFailedNotifier(toasts, event.data),
+      notifyCheckBreakdownFieldIsEcsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        assertBreakdownFieldEcsFailedNotifier(toasts, event.data),
     },
     services: {
-      checkIfDatasetIsNonAggregatable: async (context) => {
-        const { type } = indexNameToDataStreamParts(context.datastream);
+      checkDatasetIsAggregatable: (context) => {
+        const { type } = indexNameToDataStreamParts(context.dataStream);
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamStatsClient.getNonAggregatableDatasets({
           type,
           start,
           end,
-          dataStream: context.datastream,
+          dataStream: context.dataStream,
         });
+      },
+      loadDataStreamDetails: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+
+        return dataStreamDetailsClient.getDataStreamDetails({
+          dataStream: context.dataStream,
+          start,
+          end,
+        });
+      },
+      checkBreakdownFieldIsEcs: async (context) => {
+        if (context.breakdownField) {
+          const allowedFieldSources = ['ecs', 'metadata'];
+
+          // This timeout is to avoid a runtime error that randomly happens on breakdown field change
+          // TypeError: Cannot read properties of undefined (reading 'timeFieldName')
+          await new Promise((res) => setTimeout(res, 300));
+
+          const client = await plugins.fieldsMetadata.getClient();
+          const { fields } = await client.find({
+            attributes: ['source'],
+            fieldNames: [context.breakdownField],
+          });
+
+          const breakdownFieldSource = fields[context.breakdownField]?.source;
+
+          return !!(breakdownFieldSource && allowedFieldSources.includes(breakdownFieldSource));
+        }
+
+        return false;
       },
     },
   });

@@ -28,9 +28,9 @@ export type DatasetQualityDetailsPublicState = WithDefaultControllerState;
 // a must and everything else can be optional. The table inside the
 // degradedFields must accept field property as string
 export type DatasetQualityDetailsPublicStateUpdate = Partial<
-  Pick<WithDefaultControllerState, 'timeRange' | 'isBreakdownFieldEcs'>
+  Pick<WithDefaultControllerState, 'timeRange'>
 > & {
-  datastream: string;
+  dataStream: string;
 } & {
   degradedFields?: {
     table?: DatasetQualityDegradedFieldTableOptions;

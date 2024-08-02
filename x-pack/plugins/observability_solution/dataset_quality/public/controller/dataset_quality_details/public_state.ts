@@ -17,9 +17,9 @@ export const getPublicStateFromContext = (
 ): DatasetQualityDetailsPublicState => {
   return {
     degradedFields: context.degradedFields,
-    isBreakdownFieldEcs: context.isBreakdownFieldEcs,
-    datastream: context.datastream,
+    dataStream: context.dataStream,
     timeRange: context.timeRange,
+    breakdownField: context.breakdownField,
   };
 };
 
@@ -47,5 +47,5 @@ export const getContextFromPublicState = (
       ...publicState.timeRange?.refresh,
     },
   },
-  datastream: publicState.datastream,
+  dataStream: publicState.dataStream,
 });

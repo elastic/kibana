@@ -15,7 +15,7 @@ import {
   NUMBER_FORMAT,
 } from '../../../../common/constants';
 import {
-  flyoutDegradedDocsText,
+  overviewDegradedDocsText,
   flyoutDocsCountTotalText,
   flyoutHostsText,
   flyoutServicesText,
@@ -26,7 +26,7 @@ import { DataStreamDetails } from '../../../../common/api_types';
 import { NavigationTarget, NavigationSource } from '../../../services/telemetry';
 import { useKibanaContextForPlugin } from '../../../utils';
 import type { useRedirectLink, useDatasetDetailsTelemetry } from '../../../hooks';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export function getSummaryKpis({
   dataStreamDetails,
@@ -77,7 +77,7 @@ export function getSummaryKpis({
           {
             title: flyoutSizeText,
             value: formatNumber(dataStreamDetails?.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
-            userHasPrivilege: dataStreamDetails?.userPrivileges?.canMonitor ?? true,
+            userHasPrivilege: Boolean(dataStreamDetails?.userPrivileges?.canMonitor),
           },
         ]
       : []),
@@ -89,7 +89,7 @@ export function getSummaryKpis({
     },
     getHostsKpi(dataStreamDetails?.hosts, timeRange, telemetry, hostsLocator),
     {
-      title: flyoutDegradedDocsText,
+      title: overviewDegradedDocsText,
       value: formatNumber(dataStreamDetails?.degradedDocsCount ?? 0, NUMBER_FORMAT),
       link:
         degradedDocsLinkProps && degradedDocsLinkProps.linkProps.href

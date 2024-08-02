@@ -11,10 +11,10 @@ import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
-import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
-import { useKibanaContextForPlugin } from '../../../utils';
-import { useDegradedDocsChart } from '../../../hooks';
+import { flyoutDegradedDocsTrendText } from '../../../../../../common/translations';
+import { useKibanaContextForPlugin } from '../../../../../utils';
+import { TimeRangeConfig } from '../../../../../../common/types';
+import { useDegradedDocs } from '../../../../../hooks/use_degraded_docs';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
@@ -26,7 +26,7 @@ const DISABLED_ACTIONS = [
 
 interface DegradedDocsChartProps
   extends Pick<
-    ReturnType<typeof useDegradedDocsChart>,
+    ReturnType<typeof useDegradedDocs>,
     'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
   > {
   timeRange: TimeRangeConfig;

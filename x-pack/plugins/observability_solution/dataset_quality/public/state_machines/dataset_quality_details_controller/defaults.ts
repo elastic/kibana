@@ -24,7 +24,6 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
       },
     },
   },
-  isBreakdownFieldEcs: null,
   timeRange: {
     from: 'now-24h',
     to: 'now',

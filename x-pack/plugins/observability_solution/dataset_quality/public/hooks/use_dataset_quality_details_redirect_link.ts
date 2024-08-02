@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import {
   SINGLE_DATASET_LOCATOR_ID,
   SingleDatasetLocatorParams,
@@ -18,20 +17,17 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useKibanaContextForPlugin } from '../utils';
 import { BasicDataStream, TimeRangeConfig } from '../../common/types';
-import { useRedirectLinkTelemetry } from './use_telemetry';
 
-export const useRedirectLink = <T extends BasicDataStream>({
+export const useDatasetQualityDetailsRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,
   query,
   timeRangeConfig,
   breakdownField,
-  telemetry,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
   timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
-  telemetry?: Parameters<typeof useRedirectLinkTelemetry>[0]['telemetry'];
 }) => {
   const {
     services: { share },
@@ -42,66 +38,31 @@ export const useRedirectLink = <T extends BasicDataStream>({
   const logsExplorerLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
-  const { sendTelemetry } = useRedirectLinkTelemetry({
-    rawName: dataStreamStat.rawName,
-    isLogsExplorer: !!logsExplorerLocator,
-    telemetry,
-    query,
-  });
+  const config = logsExplorerLocator
+    ? buildLogsExplorerConfig({
+        locator: logsExplorerLocator,
+        dataStreamStat,
+        query,
+        from,
+        to,
+        breakdownField,
+      })
+    : buildDiscoverConfig({
+        locatorClient: share.url.locators,
+        dataStreamStat,
+        query,
+        from,
+        to,
+        breakdownField,
+      });
 
-  return useMemo<{
-    linkProps: RouterLinkProps;
-    navigate: () => void;
-    isLogsExplorerAvailable: boolean;
-  }>(() => {
-    const config = logsExplorerLocator
-      ? buildLogsExplorerConfig({
-          locator: logsExplorerLocator,
-          dataStreamStat,
-          query,
-          from,
-          to,
-          breakdownField,
-        })
-      : buildDiscoverConfig({
-          locatorClient: share.url.locators,
-          dataStreamStat,
-          query,
-          from,
-          to,
-          breakdownField,
-        });
-
-    const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
-      sendTelemetry();
-      if (config.routerLinkProps.onClick) {
-        config.routerLinkProps.onClick(event);
-      }
-    };
-
-    const navigateWithTelemetry = () => {
-      sendTelemetry();
-      config.navigate();
-    };
-
-    return {
-      linkProps: {
-        ...config.routerLinkProps,
-        onClick: onClickWithTelemetry,
-      },
-      navigate: navigateWithTelemetry,
-      isLogsExplorerAvailable: !!logsExplorerLocator,
-    };
-  }, [
-    breakdownField,
-    dataStreamStat,
-    from,
-    to,
-    logsExplorerLocator,
-    query,
-    sendTelemetry,
-    share.url.locators,
-  ]);
+  return {
+    linkProps: {
+      ...config.routerLinkProps,
+    },
+    navigate: config.navigate,
+    isLogsExplorerAvailable: !!logsExplorerLocator,
+  };
 };
 
 const buildLogsExplorerConfig = <T extends BasicDataStream>({

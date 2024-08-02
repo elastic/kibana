@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { DoneInvokeEvent } from 'xstate';
 import { DegradedFieldSortField } from '../../hooks';
-import { DegradedField, NonAggregatableDatasets } from '../../../common/api_types';
-import { TableCriteria } from '../../../common/types';
+import {
+  DataStreamDetails,
+  DegradedField,
+  NonAggregatableDatasets,
+} from '../../../common/api_types';
+import { TableCriteria, TimeRangeConfig } from '../../../common/types';
 
 export interface DataStream {
   name: string;
@@ -27,15 +30,24 @@ export interface DegradedFieldsWithData {
   data: DegradedField[];
 }
 
-export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
-  refresh: RefreshInterval;
-};
-
 export interface WithDefaultControllerState {
-  datastream: string;
+  dataStream: string;
   degradedFields: DegradedFieldsTableConfig;
-  isBreakdownFieldEcs: boolean | null;
   timeRange: TimeRangeConfig;
+  isBreakdownFieldEcs?: boolean;
+  breakdownField?: string;
+}
+
+export interface WithDataStreamDetails {
+  dataStreamDetails: DataStreamDetails;
+}
+
+export interface WithBreakdownField {
+  breakdownField: string | undefined;
+}
+
+export interface WithBreakdownInEcsCheck {
+  isBreakdownFieldEcs: boolean;
 }
 
 export interface WithDegradedFieldsData {
@@ -48,17 +60,33 @@ export interface WithNonAggregatableDatasetStatus {
 
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
-  'degradedFields' | 'isBreakdownFieldEcs' | 'timeRange'
+  'degradedFields' | 'timeRange'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
   | {
-      value: 'initializing' | 'uninitialized';
+      value:
+        | 'initializing'
+        | 'uninitialized'
+        | 'initializing.nonAggregatableDataset.fetching'
+        | 'initializing.dataStreamDetails.fetching';
       context: WithDefaultControllerState;
     }
   | {
       value: 'initializing.nonAggregatableDataset.done';
       context: WithDefaultControllerState & WithNonAggregatableDatasetStatus;
+    }
+  | {
+      value: 'initializing.dataStreamDetails.done';
+      context: WithDefaultControllerState & WithDataStreamDetails;
+    }
+  | {
+      value: 'initializing.checkBreakdownFieldIsEcs.fetching';
+      context: WithDefaultControllerState & WithBreakdownField;
+    }
+  | {
+      value: 'initializing.checkBreakdownFieldIsEcs.done';
+      context: WithDefaultControllerState & WithBreakdownInEcsCheck;
     };
 
 export type DatasetQualityDetailsControllerContext =
@@ -69,5 +97,11 @@ export type DatasetQualityDetailsControllerEvent =
       type: 'UPDATE_TIME_RANGE';
       timeRange: TimeRangeConfig;
     }
+  | {
+      type: 'BREAKDOWN_FIELD_CHANGE';
+      breakdownField: string | undefined;
+    }
   | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<Error>;
+  | DoneInvokeEvent<DataStreamDetails>
+  | DoneInvokeEvent<Error>
+  | DoneInvokeEvent<boolean>;

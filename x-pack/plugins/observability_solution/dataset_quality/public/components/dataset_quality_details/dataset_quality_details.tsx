@@ -4,59 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { DatasetQualityDetailsContext, DatasetQualityDetailsContextValue } from './context';
-import { useKibanaContextForPluginProvider } from '../../utils';
-import { DatasetQualityStartDeps } from '../../types';
-import { ITelemetryClient } from '../../services/telemetry';
-import { DatasetQualityDetailsController } from '../../controller/dataset_quality_details';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { useDatasetQualityDetailsState } from '../../hooks/use_dataset_quality_details_state';
+import { BasicDataStream } from '../../../common/types';
 
-export interface DatasetQualityDetailsProps {
-  controller: DatasetQualityDetailsController;
-}
+const Header = dynamic(() => import('./header'));
+const Overview = dynamic(() => import('./overview'));
 
-export interface CreateDatasetQualityArgs {
-  core: CoreStart;
-  plugins: DatasetQualityStartDeps;
-  telemetryClient: ITelemetryClient;
-}
-
-export const createDatasetQualityDetails = ({
-  core,
-  plugins,
-  telemetryClient,
-}: CreateDatasetQualityArgs) => {
-  return ({ controller }: DatasetQualityDetailsProps) => {
-    const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
-
-    const datasetQualityDetailsProviderValue: DatasetQualityDetailsContextValue = useMemo(
-      () => ({
-        service: controller.service,
-        telemetryClient,
-      }),
-      [controller.service]
-    );
-
-    return (
-      <PerformanceContextProvider>
-        <DatasetQualityDetailsContext.Provider value={datasetQualityDetailsProviderValue}>
-          <KibanaContextProviderForPlugin>
-            <DatasetQualityDetails />
-          </KibanaContextProviderForPlugin>
-        </DatasetQualityDetailsContext.Provider>
-      </PerformanceContextProvider>
-    );
+export function DatasetQualityDetails() {
+  const { datasetDetails, timeRange } = useDatasetQualityDetailsState();
+  const linkDetails: BasicDataStream = {
+    name: datasetDetails.dataset,
+    rawName: datasetDetails.rawName,
+    type: datasetDetails.type,
+    namespace: datasetDetails.namespace,
   };
-};
 
-function DatasetQualityDetails() {
+  const title = datasetDetails.dataset;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
-        <p>Hello, Achyut</p>
+        <Header linkDetails={linkDetails} title={title} loading={false} timeRange={timeRange} />
+        <EuiHorizontalRule />
+        <Overview />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

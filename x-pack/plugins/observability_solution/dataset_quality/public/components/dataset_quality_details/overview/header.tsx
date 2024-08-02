@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiIcon,
@@ -16,20 +14,27 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import React, { useCallback } from 'react';
+import { useDatasetQualityDetailsState } from '../../../hooks';
+import { overviewHeaderTitle, overviewTitleTooltip } from '../../../../common/translations';
 
-import { flyoutSummaryText } from '../../../../common/translations';
-import { TimeRangeConfig } from '../../../../common/types';
-
-export function FlyoutSummaryHeader({
-  timeRange,
-  onTimeChange,
-  onRefresh,
+export function OverviewHeader({
+  handleRefresh,
 }: {
-  timeRange: TimeRangeConfig;
-  onTimeChange: (timeChangeProps: OnTimeChangeProps) => void;
-  onRefresh: (refreshProps: OnRefreshProps) => void;
+  handleRefresh: (refreshProps: OnRefreshProps) => void;
 }) {
+  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
+
+  const onTimeChange = useCallback(
+    ({ isInvalid, ...timeRangeProps }: OnTimeChangeProps) => {
+      if (!isInvalid) {
+        updateTimeRange({ refreshInterval: timeRange.refresh.value, ...timeRangeProps });
+      }
+    },
+    [updateTimeRange, timeRange.refresh]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" wrap={true}>
       <EuiFlexGroup
@@ -41,9 +46,9 @@ export function FlyoutSummaryHeader({
         gutterSize="xs"
       >
         <EuiTitle size="s">
-          <span>{flyoutSummaryText}</span>
+          <span>{overviewHeaderTitle}</span>
         </EuiTitle>
-        <EuiToolTip content={flyoutSummaryTooltip}>
+        <EuiToolTip content={overviewTitleTooltip}>
           <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
         </EuiToolTip>
       </EuiFlexGroup>
@@ -60,7 +65,7 @@ export function FlyoutSummaryHeader({
           start={timeRange.from}
           end={timeRange.to}
           onTimeChange={onTimeChange}
-          onRefresh={onRefresh}
+          onRefresh={handleRefresh}
           isQuickSelectOnly={false}
           showUpdateButton="iconOnly"
           updateButtonProps={{ fill: false }}
@@ -69,10 +74,3 @@ export function FlyoutSummaryHeader({
     </EuiFlexGroup>
   );
 }
-
-const flyoutSummaryTooltip = (
-  <FormattedMessage
-    id="xpack.datasetQuality.flyoutSummaryTooltip"
-    defaultMessage="Stats of the data set within the selected time range."
-  />
-);

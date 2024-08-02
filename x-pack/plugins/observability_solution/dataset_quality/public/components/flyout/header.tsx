@@ -17,23 +17,22 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  flyoutOpenInDiscoverText,
-  flyoutOpenInLogsExplorerText,
-} from '../../../common/translations';
+import { openInDiscoverText, openInLogsExplorerText } from '../../../common/translations';
 import { NavigationSource } from '../../services/telemetry';
 import { useRedirectLink } from '../../hooks';
 import { IntegrationIcon } from '../common';
-import { BasicDataStream } from '../../../common/types';
+import { BasicDataStream, TimeRangeConfig } from '../../../common/types';
 
 export function Header({
   linkDetails,
   loading,
   title,
+  timeRange,
 }: {
   linkDetails: BasicDataStream;
   loading: boolean;
   title: string;
+  timeRange: TimeRangeConfig;
 }) {
   const { integration } = linkDetails;
   const euiShadow = useEuiShadow('s');
@@ -44,6 +43,7 @@ export function Header({
       page: 'details',
       navigationSource: NavigationSource.Header,
     },
+    timeRangeConfig: timeRange,
   });
 
   return (
@@ -90,8 +90,8 @@ export function Header({
                 }
               >
                 {redirectLinkProps.isLogsExplorerAvailable
-                  ? flyoutOpenInLogsExplorerText
-                  : flyoutOpenInDiscoverText}
+                  ? openInLogsExplorerText
+                  : openInDiscoverText}
               </EuiButton>
             </EuiFlexGroup>
           </EuiFlexItem>

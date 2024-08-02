@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useState } from 'react';
+import { EuiSpacer, OnRefreshProps } from '@elastic/eui';
+import { useDatasetQualityDetailsState } from '../../../hooks';
+import { AggregationNotSupported } from './aggregation_not_supported';
+import { OverviewHeader } from './header';
+import { Summary } from './summary';
+import { DegradedDocs } from './document_trends/degraded_docs';
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function Overview() {
+  const { dataStream, isNonAggregatable, updateTimeRange } = useDatasetQualityDetailsState();
+  const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
+
+  const handleRefresh = useCallback(
+    (refreshProps: OnRefreshProps) => {
+      updateTimeRange(refreshProps);
+      setLastReloadTime(Date.now());
+    },
+    [updateTimeRange]
+  );
+  return (
+    <>
+      {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
+      <OverviewHeader handleRefresh={handleRefresh} />
+      <EuiSpacer size="m" />
+      <Summary />
+      <EuiSpacer size="m" />
+      <DegradedDocs lastReloadTime={lastReloadTime} />
+    </>
+  );
+}

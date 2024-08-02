@@ -43,15 +43,15 @@ export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCance
   defaultMessage: 'Cancel',
 });
 
-export const flyoutOpenInLogsExplorerText = i18n.translate(
-  'xpack.datasetQuality.flyoutOpenInLogsExplorerText',
+export const openInLogsExplorerText = i18n.translate(
+  'xpack.datasetQuality.details.openInLogsExplorerText',
   {
     defaultMessage: 'Open in Logs Explorer',
   }
 );
 
-export const flyoutOpenInDiscoverText = i18n.translate(
-  'xpack.datasetQuality.flyoutOpenInDiscoverText',
+export const openInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.details.openInDiscoverText',
   {
     defaultMessage: 'Open in Discover',
   }
@@ -103,7 +103,7 @@ export const flyoutSummaryText = i18n.translate('xpack.datasetQuality.flyoutSumm
   defaultMessage: 'Summary',
 });
 
-export const flyoutDegradedDocsText = i18n.translate(
+export const overviewDegradedDocsText = i18n.translate(
   'xpack.datasetQuality.flyout.degradedDocsTitle',
   {
     defaultMessage: 'Degraded docs',
@@ -269,5 +269,76 @@ export const fullDatasetNameDescription = i18n.translate(
   'xpack.datasetQuality.fullDatasetNameDescription',
   {
     defaultMessage: 'Turn on to show the actual data set names used to store the documents.',
+  }
+);
+
+/*
+Dataset Quality Details
+*/
+
+export const overviewHeaderTitle = i18n.translate('xpack.datasetQuality.details.overviewTitle', {
+  defaultMessage: 'Overview',
+});
+
+export const overviewTitleTooltip = i18n.translate(
+  'xpack.datasetQuality.details.overviewTitleTooltip',
+  {
+    defaultMessage: 'Stats of the data set within the selected time range.',
+  }
+);
+
+export const overviewPanelTitleDocuments = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.documents.title',
+  {
+    defaultMessage: 'Documents',
+  }
+);
+
+export const overviewPanelDocumentsIndicatorTotalCount = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.documents.totalCount',
+  {
+    defaultMessage: 'Total count',
+  }
+);
+
+export const overviewPanelDocumentsIndicatorSize = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.documents.size',
+  {
+    defaultMessage: 'Size',
+  }
+);
+
+export const overviewPanelTitleResources = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.resources.title',
+  {
+    defaultMessage: 'Resources',
+  }
+);
+
+export const overviewPanelResourcesIndicatorServices = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.resources.services',
+  {
+    defaultMessage: 'Services',
+  }
+);
+
+export const overviewPanelResourcesIndicatorSize = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.resources.hosts',
+  {
+    defaultMessage: 'Hosts',
+  }
+);
+
+export const overviewPanelTitleDatasetQuality = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.title',
+  {
+    defaultMessage: 'Data set quality',
+  }
+);
+
+export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
+  'xpack.datasetQuality.details.overviewPanel.datasetQuality.degradedDocs',
+  {
+    defaultMessage: 'Degraded docs',
   }
 );

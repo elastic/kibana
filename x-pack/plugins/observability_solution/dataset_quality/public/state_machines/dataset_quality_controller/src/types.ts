@@ -6,8 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { QualityIndicators, TableCriteria } from '../../../../common/types';
+import { QualityIndicators, TableCriteria, TimeRangeConfig } from '../../../../common/types';
 import {
   Dashboard,
   DatasetUserPrivileges,
@@ -36,10 +35,6 @@ export interface DegradedFields {
   table: TableCriteria<DegradedFieldSortField>;
   data?: DegradedField[];
 }
-
-export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
-  refresh: RefreshInterval;
-};
 
 interface FiltersCriteria {
   inactive: boolean;

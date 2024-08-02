@@ -6,12 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { datastreamRT, degradedFieldRT, timeRangeRT } from './common';
+import { dataStreamRT, degradedFieldRT, timeRangeRT } from './common';
 
 export const urlSchemaRT = rt.exact(
   rt.intersection([
     rt.type({
-      datastream: datastreamRT,
+      dataStream: dataStreamRT,
     }),
     rt.partial({
       v: rt.literal(1),

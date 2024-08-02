@@ -25,9 +25,9 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useDegradedDocsChart } from '../../../hooks';
 
 import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
-import { flyoutDegradedDocsText } from '../../../../common/translations';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
-import { DegradedDocsChart } from './degraded_docs_chart';
+import { overviewDegradedDocsText } from '../../../../common/translations';
+import { DegradedDocsChart } from '../../dataset_quality_details/overview/document_trends/degraded_docs/degraded_docs_chart';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export function DegradedDocs({
   dataStream,
@@ -70,7 +70,7 @@ export function DegradedDocs({
           `}
         >
           <EuiTitle size="xxxs">
-            <h6>{flyoutDegradedDocsText}</h6>
+            <h6>{overviewDegradedDocsText}</h6>
           </EuiTitle>
           <EuiToolTip content={degradedDocsTooltip}>
             <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />

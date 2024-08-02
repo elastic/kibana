@@ -42,8 +42,8 @@ export const degradedFieldRT = rt.exact(
   })
 );
 
-export const datastreamRT = new rt.Type<string, string, unknown>(
-  'datastreamRT',
+export const dataStreamRT = new rt.Type<string, string, unknown>(
+  'dataStreamRT',
   (input: unknown): input is string =>
     typeof input === 'string' && (input.match(/-/g) || []).length === 2,
   (input, context) =>
@@ -52,5 +52,3 @@ export const datastreamRT = new rt.Type<string, string, unknown>(
       : rt.failure(input, context),
   rt.identity
 );
-
-export type DatastreamType = rt.TypeOf<typeof datastreamRT>;

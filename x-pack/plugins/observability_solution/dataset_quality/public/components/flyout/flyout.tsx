@@ -74,6 +74,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
             linkDetails={linkDetails}
             loading={!loadingState.datasetIntegrationDone}
             title={title}
+            timeRange={timeRange}
           />
           <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">

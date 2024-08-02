@@ -96,7 +96,7 @@ export const noDatasetSelected = i18n.translate(
 
 export const assertBreakdownFieldEcsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality. assertBreakdownFieldEcsFailed', {
+    title: i18n.translate('xpack.datasetQuality.assertBreakdownFieldEcsFailed', {
       defaultMessage: "We couldn't retrieve breakdown field metadata.",
     }),
     text: error.message,

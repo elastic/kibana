@@ -14,9 +14,10 @@ import { DataStreamDetails } from '../../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { NavigationSource } from '../../../services/telemetry';
 import { useDatasetDetailsTelemetry, useRedirectLink } from '../../../hooks';
-import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
+import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 import { FlyoutSummaryKpiItem, FlyoutSummaryKpiItemLoading } from './flyout_summary_kpi_item';
 import { getSummaryKpis } from './get_summary_kpis';
+import { TimeRangeConfig } from '../../../../common/types';
 
 export function FlyoutSummaryKpis({
   dataStreamStat,

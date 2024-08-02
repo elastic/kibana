@@ -1,0 +1,121 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiAccordion,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSkeletonRectangle,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+  OnTimeChangeProps,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { css } from '@emotion/react';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
+import { overviewDegradedDocsText } from '../../../../../../common/translations';
+import { useDegradedDocs } from '../../../../../hooks/use_degraded_docs';
+import { DegradedDocsChart } from './degraded_docs_chart';
+import { useDatasetQualityDetailsState } from '../../../../../hooks';
+
+const degradedDocsTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.degradedDocsTooltip"
+    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your data set."
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+    }}
+  />
+);
+
+export function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
+  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
+  const { dataView, breakdown, ...chartProps } = useDegradedDocs();
+
+  const accordionId = useGeneratedHtmlId({
+    prefix: overviewDegradedDocsText,
+  });
+
+  const [breakdownDataViewField, setBreakdownDataViewField] = useState<DataViewField | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (breakdown.dataViewField && breakdown.fieldSupportsBreakdown) {
+      setBreakdownDataViewField(breakdown.dataViewField);
+    } else {
+      setBreakdownDataViewField(undefined);
+    }
+  }, [setBreakdownDataViewField, breakdown]);
+
+  const onTimeRangeChange = useCallback(
+    ({ start, end }: Pick<OnTimeChangeProps, 'start' | 'end'>) => {
+      updateTimeRange({ start, end, refreshInterval: timeRange.refresh.value });
+    },
+    [updateTimeRange, timeRange.refresh]
+  );
+
+  const accordionTitle = (
+    <EuiFlexItem
+      css={css`
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 4px;
+      `}
+    >
+      <EuiTitle size={'xxs'}>
+        <h5>{overviewDegradedDocsText}</h5>
+      </EuiTitle>
+      <EuiToolTip content={degradedDocsTooltip}>
+        <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+
+  return (
+    <EuiPanel hasBorder grow={false}>
+      <EuiAccordion
+        id={accordionId}
+        buttonContent={accordionTitle}
+        paddingSize="m"
+        initialIsOpen={true}
+        data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
+      >
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
+            <UnifiedBreakdownFieldSelector
+              dataView={dataView!}
+              breakdown={{ field: breakdownDataViewField }}
+              onBreakdownFieldChange={breakdown.onChange}
+            />
+          </EuiSkeletonRectangle>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        <DegradedDocsChart
+          {...chartProps}
+          timeRange={timeRange}
+          lastReloadTime={lastReloadTime}
+          onTimeRangeChange={onTimeRangeChange}
+        />
+      </EuiAccordion>
+    </EuiPanel>
+  );
+}
