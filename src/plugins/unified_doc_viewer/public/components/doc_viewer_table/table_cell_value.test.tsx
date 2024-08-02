@@ -61,7 +61,9 @@ describe('TableFieldValue', () => {
     expect(toggleButton).toBeInTheDocument();
     expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
 
-    expect(screen.getByTestId('tableDocViewRow-message-value').getAttribute('css')).toBeDefined();
+    let valueElement = screen.getByTestId('tableDocViewRow-message-value');
+    expect(valueElement.getAttribute('css')).toBeDefined();
+    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
 
     toggleButton.click();
 
@@ -69,7 +71,9 @@ describe('TableFieldValue', () => {
     expect(toggleButton).toBeInTheDocument();
     expect(toggleButton.getAttribute('aria-expanded')).toBe('true');
 
-    expect(screen.getByTestId('tableDocViewRow-message-value').getAttribute('css')).toBeNull();
+    valueElement = screen.getByTestId('tableDocViewRow-message-value');
+    expect(valueElement.getAttribute('css')).toBeNull();
+    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
   });
 
   it('should not truncate a long value when inside a popover', async () => {
@@ -87,6 +91,9 @@ describe('TableFieldValue', () => {
     expect(screen.getByText(value)).toBeInTheDocument();
 
     expect(screen.queryByTestId('toggleLongFieldValue-bytes')).toBeNull();
-    expect(screen.getByTestId('tableDocViewRow-message-value').getAttribute('css')).toBeNull();
+
+    const valueElement = screen.getByTestId('tableDocViewRow-message-value');
+    expect(valueElement.getAttribute('css')).toBeNull();
+    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
   });
 });

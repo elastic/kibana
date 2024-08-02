@@ -12,7 +12,11 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import {
+  buildDataTableRecord,
+  TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
+} from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../types';
 
@@ -22,8 +26,8 @@ const services = {
       if (key === 'discover:showMultiFields') {
         return true;
       }
-      if (key === 'truncate:maxHeight') {
-        return 115;
+      if (key === TRUNCATE_MAX_HEIGHT) {
+        return TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE;
       }
     },
   },
@@ -244,7 +248,7 @@ describe('DocViewTable at Discover Context', () => {
     const btn = findTestSubject(component, 'toggleLongFieldValue-message');
     const html = component.html();
 
-    expect(component.html()).toContain('dscTruncateByHeight');
+    expect(html).toContain('kbnDocViewer__value--truncated');
 
     expect(btn.length).toBe(1);
     btn.simulate('click');

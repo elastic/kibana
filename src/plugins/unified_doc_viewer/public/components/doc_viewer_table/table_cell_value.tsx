@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import classnames from 'classnames';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -163,6 +164,10 @@ export const TableFieldValue = ({
   const shouldTruncate = isCollapsible && isCollapsed;
   const valueElementId = `tableDocViewRow-${field}-value`;
 
+  const valueClasses = classnames('kbnDocViewer__value', {
+    'kbnDocViewer__value--truncated': shouldTruncate,
+  });
+
   return (
     <Fragment>
       {ignoreReason && (
@@ -196,12 +201,14 @@ export const TableFieldValue = ({
         <EuiFlexItem>
           <div
             ref={valueRef}
-            className="kbnDocViewer__value"
+            className={valueClasses}
             css={
               shouldTruncate
                 ? css`
-                    max-height: ${truncateMaxHeight}px;
-                    overflow: hidden;
+                    &.kbnDocViewer__value--truncated {
+                      max-height: ${truncateMaxHeight}px;
+                      overflow: hidden;
+                    }
                   `
                 : undefined
             }
