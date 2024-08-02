@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SvlUserManagerProvider } from '@kbn/test-suites-serverless/shared/services/svl_user_manager';
+import { SvlCommonApiServiceProvider } from '@kbn/test-suites-serverless/shared/services/svl_common_api';
 import { services as xPackFunctionalServices } from '../../functional/services';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
@@ -19,8 +21,6 @@ import {
 } from './supertest_with_cert';
 import { SecuritySolutionEndpointDataStreamHelpers } from '../../common/services/security_solution/endpoint_data_stream_helpers';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution/endpoint_registry_helpers';
-import { SvlUserManagerProvider } from '../../../test_serverless/shared/services/svl_user_manager';
-import { SvlCommonApiServiceProvider } from '../../../test_serverless/shared/services/svl_common_api';
 
 export const services = {
   ...xPackFunctionalServices,
