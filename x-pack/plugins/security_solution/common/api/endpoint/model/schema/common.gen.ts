@@ -99,16 +99,22 @@ export type UserIds = z.infer<typeof UserIds>;
 export const UserIds = z.union([z.array(z.string().min(1)).min(1), z.string().min(1)]);
 
 /**
- * With Outputs
+ * Shows detailed outputs for an action response
  */
 export type WithOutputs = z.infer<typeof WithOutputs>;
 export const WithOutputs = z.union([z.array(z.string().min(1)).min(1), z.string().min(1)]);
 
+/**
+ * Type of response action
+ */
 export type Type = z.infer<typeof Type>;
 export const Type = z.enum(['automated', 'manual']);
 export type TypeEnum = typeof Type.enum;
 export const TypeEnum = Type.enum;
 
+/**
+ * List of types of response actions
+ */
 export type Types = z.infer<typeof Types>;
 export const Types = z.array(Type);
 
@@ -136,10 +142,10 @@ export const Comment = z.string();
 export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
 
-export type AgentType = z.infer<typeof AgentType>;
-export const AgentType = z.enum(['endpoint', 'sentinel_one', 'crowdstrike']);
-export type AgentTypeEnum = typeof AgentType.enum;
-export const AgentTypeEnum = AgentType.enum;
+export type AgentTypes = z.infer<typeof AgentTypes>;
+export const AgentTypes = z.enum(['endpoint', 'sentinel_one', 'crowdstrike']);
+export type AgentTypesEnum = typeof AgentTypes.enum;
+export const AgentTypesEnum = AgentTypes.enum;
 
 export type BaseActionSchema = z.infer<typeof BaseActionSchema>;
 export const BaseActionSchema = z.object({
@@ -148,7 +154,7 @@ export const BaseActionSchema = z.object({
   case_ids: CaseIds.optional(),
   comment: Comment.optional(),
   parameters: Parameters.optional(),
-  agent_type: AgentType.optional(),
+  agent_type: AgentTypes.optional(),
 });
 
 export type NoParametersRequestSchema = z.infer<typeof NoParametersRequestSchema>;

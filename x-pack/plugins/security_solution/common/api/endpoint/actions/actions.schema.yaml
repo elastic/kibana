@@ -19,28 +19,6 @@ paths:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
-  /api/endpoint/action/running_procs:
-    post:
-      summary: Get Running Processes Action
-      operationId: EndpointGetRunningProcessesAction
-      x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
-
   /api/endpoint/action/kill_process:
     post:
       summary: Kill process Action

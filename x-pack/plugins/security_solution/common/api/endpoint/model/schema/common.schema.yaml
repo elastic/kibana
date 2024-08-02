@@ -102,16 +102,18 @@ components:
           minItems: 1
         - type: string
           minLength: 1
-      description: With Outputs
+      description: Shows detailed outputs for an action response
 
     Type:
       type: string
+      description: Type of response action
       enum:
         - automated
         - manual
 
     Types:
       type: array
+      description: List of types of response actions
       items:
         $ref: '#/components/schemas/Type'
       minLength: 1
@@ -137,7 +139,7 @@ components:
     Parameters:
       type: object
       description: Optional parameters object
-    AgentType:
+    AgentTypes:
       type: string
       enum:
         - endpoint
@@ -159,7 +161,7 @@ components:
         parameters:
           $ref: '#/components/schemas/Parameters'
         agent_type:
-          $ref: '#/components/schemas/AgentType'
+          $ref: '#/components/schemas/AgentTypes'
       required:
         - endpoint_ids
 
@@ -170,8 +172,6 @@ components:
       properties:
         body:
           $ref: '#/components/schemas/BaseActionSchema'
-
-
 
     KillOrSuspendActionSchema:
       allOf:
