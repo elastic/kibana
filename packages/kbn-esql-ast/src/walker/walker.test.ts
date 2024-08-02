@@ -775,7 +775,7 @@ describe('Walker.commands()', () => {
   });
 });
 
-describe('Walker.params', () => {
+describe('Walker.params()', () => {
   test('can collect all params', () => {
     const query = 'ROW x = ?';
     const { ast } = getAstAndSyntaxErrors(query);
@@ -876,6 +876,37 @@ describe('Walker.findAll()', () => {
         ],
       },
     ]);
+  });
+});
+
+describe('Walker.match()', () => {
+  test('can find a bucket() function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.match(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: 'bucket',
+    });
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'bucket',
+    });
+  });
+
+  test('finds the first "fn" function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.match(getAstAndSyntaxErrors(query).ast!, { type: 'function', name: 'fn' });
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'fn',
+      args: [
+        {
+          type: 'literal',
+          value: 1,
+        },
+      ],
+    });
   });
 });
 
