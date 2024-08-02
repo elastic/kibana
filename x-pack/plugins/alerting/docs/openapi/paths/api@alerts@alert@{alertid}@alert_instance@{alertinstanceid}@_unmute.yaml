@@ -1,5 +1,5 @@
 post:
-  summary: Unmutes an alert instance.
+  summary: Unmute an alert instance
   operationId: legacyUnmuteAlertInstance
   deprecated: true
   description: Deprecated in 7.13.0. Use the unmute alert API instead.
@@ -7,23 +7,20 @@ post:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: alertId
       description: An identifier for the alert.
       required: true
       schema:
         type: string
-        examples:
-          - 41893910-6bca-11eb-9e0d-85d233e3ee35
+        example: 41893910-6bca-11eb-9e0d-85d233e3ee35
     - in: path
       name: alertInstanceId
       description: An identifier for the alert instance.
       required: true
       schema:
         type: string
-        examples:
-          - dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+        example: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
   responses:
     '204':
       description: Indicates a successful call.

@@ -1,5 +1,5 @@
 post:
-  summary: Disables a rule.
+  summary: Disable a rule
   operationId: disableRule
   description: >
     You must have `all` privileges for the appropriate Kibana features,
@@ -11,7 +11,6 @@ post:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/rule_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.

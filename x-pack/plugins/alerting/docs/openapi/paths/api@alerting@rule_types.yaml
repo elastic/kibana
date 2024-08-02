@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of rule types.
+  summary: Get the rule types
   operationId: getRuleTypes
   description: >
     If you have `read` privileges for one or more Kibana features, the API
@@ -10,8 +10,6 @@ get:
     **Stack Monitoring** feature, use the `monitoring_user` built-in role.
   tags:
     - alerting
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -245,16 +243,14 @@ get:
                 minimum_license_required:
                   description: The subscriptions required to use the rule type.
                   type: string
-                  examples:
-                    - basic
+                  example: basic
                 name:
                   description: The descriptive name of the rule type.
                   type: string
                 producer:
                   description: An identifier for the application that produces this rule type.
                   type: string
-                  examples:
-                    - stackAlerts
+                  example: stackAlerts
                 recovery_action_group:
                   description: An action group to use when an alert goes from an active state to an inactive one.
                   type: object
@@ -265,8 +261,7 @@ get:
                       type: string
                 rule_task_timeout:
                   type: string
-                  examples:
-                    - 5m
+                  example: 5m
           examples:
             getRuleTypesResponse:
               $ref: '../components/examples/get_rule_types_response.yaml'

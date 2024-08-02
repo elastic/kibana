@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves the health status of the alerting framework.
+  summary: Get the alerting framework health
   operationId: getAlertingHealth
   description: >
     You must have `read` privileges for the **Management > Stack Rules** feature
@@ -7,8 +7,6 @@ get:
     **Analytics > Machine Learning**, **Observability**, or **Security** features.
   tags:
     - alerting
-  parameters:
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -28,8 +26,7 @@ get:
                     properties:
                       status:
                         type: string
-                        examples:
-                          - ok
+                        example: ok
                         enum:
                          - error
                          - ok
@@ -37,16 +34,14 @@ get:
                       timestamp:
                         type: string
                         format: date-time
-                        examples:
-                          - "2023-01-13T01:28:00.280Z"
+                        example: "2023-01-13T01:28:00.280Z"
                   execution_health:
                     type: object
                     description: The timestamp and status of the rule run.
                     properties:
                       status:
                         type: string
-                        examples:
-                          - ok
+                        example: ok
                         enum:
                          - error
                          - ok
@@ -54,16 +49,14 @@ get:
                       timestamp:
                         type: string
                         format: date-time
-                        examples:
-                          - "2023-01-13T01:28:00.280Z"
+                        example: "2023-01-13T01:28:00.280Z"
                   read_health:
                     type: object
                     description: The timestamp and status of the rule reading events.
                     properties:
                       status:
                         type: string
-                        examples:
-                          - ok
+                        example: ok
                         enum:
                          - error
                          - ok
@@ -71,18 +64,15 @@ get:
                       timestamp:
                         type: string
                         format: date-time
-                        examples:
-                          - "2023-01-13T01:28:00.280Z"
+                        example: "2023-01-13T01:28:00.280Z"
               has_permanent_encryption_key:
                 type: boolean
                 description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
-                examples:
-                  - true
+                example: true
               is_sufficiently_secure:
                 type: boolean
                 description: If `false`, security is enabled but TLS is not.
-                examples:
-                  - true
+                example: true
           examples:
             getAlertingHealthResponse:
               $ref: '../components/examples/get_health_response.yaml'

@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a rule by its identifier.
+  summary: Get rule details
   operationId: getRule
   description: >
     You must have `read` privileges for the appropriate Kibana features,
@@ -12,7 +12,6 @@ get:
     - alerting
   parameters:
     - $ref: '../components/parameters/rule_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -37,7 +36,7 @@ get:
             $ref: '../components/schemas/404_response.yaml'
 
 delete:
-  summary: Deletes a rule.
+  summary: Delete a rule
   operationId: deleteRule
   description: >
     To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting.
@@ -49,7 +48,6 @@ delete:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/rule_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.
@@ -67,9 +65,11 @@ delete:
             $ref: '../components/schemas/404_response.yaml'
 
 post:
-  summary: Creates a rule with a specific rule identifier.
+  summary: Create a rule
   operationId: createRuleId
   description: >
+    This API creates a rule with a specific rule identifier.
+    If you omit the identifer, it is automatically generated.
     To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating.
     For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.
     If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
@@ -81,7 +81,6 @@ post:
     - alerting
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
     - in: path
       name: ruleId
       description: >
@@ -90,8 +89,7 @@ post:
       required: true
       schema:
         type: string
-        examples:
-          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
@@ -137,7 +135,7 @@ post:
             $ref: '../components/schemas/404_response.yaml'
 
 put:
-  summary: Updates the attributes for a rule.
+  summary: Update a rule
   operationId: updateRule
   description: >
     To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating.
@@ -155,7 +153,6 @@ put:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/rule_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
