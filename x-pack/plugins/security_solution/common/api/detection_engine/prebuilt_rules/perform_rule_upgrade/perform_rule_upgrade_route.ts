@@ -84,6 +84,8 @@ export const RuleUpgradeSpecifier = z.object({
   revision: z.number(),
   version: RuleVersion,
   pick_version: PickVersionValues.optional(),
+  // Fields that can be customized during the upgrade workflow
+  // as decided in: https://github.com/elastic/kibana/issues/186544
   fields: z
     .object({
       name: createUpgradeFieldSchema(RuleName),
