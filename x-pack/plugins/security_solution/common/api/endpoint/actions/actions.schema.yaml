@@ -19,24 +19,3 @@ paths:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
-  /api/endpoint/action/suspend_process:
-    post:
-      summary: Suspend process Action
-      operationId: EndpointSuspendProcessAction
-      x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '../model/schema/common.schema.yaml#/components/schemas/KillOrSuspendActionSchema'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

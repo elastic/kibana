@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from './common/base';
+import { BaseActionRequestSchema } from '../../common/base';
 
 export const SuspendProcessRouteRequestSchema = {
   body: schema.object({
@@ -17,3 +18,5 @@ export const SuspendProcessRouteRequestSchema = {
     ]),
   }),
 };
+
+export type SuspendProcessRequestBody = TypeOf<typeof SuspendProcessRouteRequestSchema.body>;
