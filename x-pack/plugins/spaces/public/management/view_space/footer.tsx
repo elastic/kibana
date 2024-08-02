@@ -40,7 +40,6 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
 
   return (
     <>
-      <EuiSpacer />
       <EuiCallOut
         color="warning"
         iconType="help"
