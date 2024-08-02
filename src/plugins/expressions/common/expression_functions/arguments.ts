@@ -81,8 +81,6 @@ interface BaseArgumentType<T> {
    * as soon as all the functions list all the available options.
    */
   strict?: boolean;
-  /** Names of types that are valid values of the Argument. */
-  types?: string[];
   /** The optional default value of the Argument. */
   default?: T | string;
   /**
