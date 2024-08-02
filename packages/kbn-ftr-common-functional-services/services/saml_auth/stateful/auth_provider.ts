@@ -12,7 +12,7 @@ import { resolve } from 'path';
 import { AuthProvider } from '../get_auth_provider';
 import { getStatefulInternalRequestHeaders, COMMON_REQUEST_HEADERS } from '../internal_headers';
 
-export class StatefuAuthProvider implements AuthProvider {
+export class StatefulAuthProvider implements AuthProvider {
   private rolesDefinitionPath: string;
 
   constructor() {

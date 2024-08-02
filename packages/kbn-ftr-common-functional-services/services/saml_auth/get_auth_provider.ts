@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { KibanaServer } from '../..';
 
 import { ServerlessAuthProvider } from './serverless/auth_provider';
-import { StatefuAuthProvider } from './stateful/auth_provider';
+import { StatefulAuthProvider } from './stateful/auth_provider';
 import { createRole, createRoleMapping } from './stateful/create_role_mapping';
 
 const STATEFUL_ADMIN_ROLE_MAPPING_PATH = './stateful/admin_mapping';
@@ -38,7 +38,7 @@ export const getAuthRoleProvider = async (props: AuthProviderProps) => {
   if (isServerless) {
     return new ServerlessAuthProvider(config);
   } else {
-    const provider = new StatefuAuthProvider();
+    const provider = new StatefulAuthProvider();
 
     // TODO: move admin role & roles mapping creation to @kbn-es
     // 'viewer' and 'editor' roles are already pre-exist for stateful ES, but we have to add 'admin'

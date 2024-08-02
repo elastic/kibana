@@ -1,7 +1,6 @@
 disabled:
-  # Deployment-agnostic default config + example
+  # Deployment-agnostic default config
   - x-pack/test/api_integration/deployment_agnostic/stateful.config.base.ts
-  - x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/stateful.config.ts
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
   - test/functional/firefox/config.base.ts
@@ -135,6 +134,7 @@ enabled:
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
+  - x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/stateful.config.ts
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts

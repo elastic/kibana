@@ -1,7 +1,6 @@
 disabled:
-  # Deployment-agnostic default config + example
+  # Deployment-agnostic default config
   - x-pack/test/api_integration/deployment_agnostic/serverless.config.base.ts
-  - x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/oblt.serverless.config.ts
   # Base config files, only necessary to inform config finding script
   - x-pack/test_serverless/functional/test_suites/observability/cypress/oblt_config.base.ts
 
@@ -29,3 +28,4 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
+  - x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/oblt.serverless.config.ts

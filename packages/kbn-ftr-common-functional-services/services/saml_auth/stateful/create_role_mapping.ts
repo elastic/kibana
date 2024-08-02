@@ -10,17 +10,22 @@ import { Config, createEsClientForFtrConfig } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KibanaServer } from '../../..';
 
-export async function createRole({
-  roleName,
-  roleMapping,
-  kibanaServer,
-  log,
-}: {
+export interface CreateRoleProps {
   roleName: string;
-  roleMapping: any;
+  roleMapping: string[];
   kibanaServer: KibanaServer;
   log: ToolingLog;
-}) {
+}
+
+export interface CreateRoleMappingProps {
+  name: string;
+  roles: string[];
+  config: Config;
+  log: ToolingLog;
+}
+
+export async function createRole(props: CreateRoleProps) {
+  const { roleName, roleMapping, kibanaServer, log } = props;
   log.debug(`Adding a SAML role: ${roleName}`);
   const { status, statusText } = await kibanaServer.request({
     path: `/api/security/role/${roleName}`,
@@ -33,17 +38,8 @@ export async function createRole({
   }
 }
 
-export async function createRoleMapping({
-  name,
-  roles,
-  config,
-  log,
-}: {
-  name: string;
-  roles: string[];
-  config: Config;
-  log: ToolingLog;
-}) {
+export async function createRoleMapping(props: CreateRoleMappingProps) {
+  const { name, roles, config, log } = props;
   log.debug(`Creating a role mapping: {realm.name: ${name}, roles: ${roles}}`);
   const esClient = createEsClientForFtrConfig(config);
   await esClient.security.putRoleMapping({
