@@ -21,7 +21,7 @@ import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSetting
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
-import { SelectButton } from './data_table_document_selection';
+import { SelectButton, SelectAllButton } from './data_table_document_selection';
 import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
@@ -70,15 +70,7 @@ const select = {
   id: SELECT_ROW,
   width: 24,
   rowCellRender: SelectButton,
-  headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('unifiedDataTable.selectColumnHeader', {
-          defaultMessage: 'Select column',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
+  headerCellRender: SelectAllButton,
 };
 
 export function getAllControlColumns(): ControlColumns {

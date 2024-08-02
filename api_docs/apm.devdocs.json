@@ -189,9 +189,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -236,9 +236,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -262,9 +262,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -291,9 +291,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -334,9 +334,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
               ", plugins: ",
@@ -357,9 +357,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -3996,7 +3996,13 @@
           "; }>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params?: { query?: { 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; } | undefined; } | undefined; }) => Promise<",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/settings/apm-indices/save\": { endpoint: \"POST /internal/apm/settings/apm-indices/save\"; params?: ",
@@ -5254,7 +5260,13 @@
           "; }>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { query: { start: number; end: number; } & { transactionName: string; serviceName: string; }; }; }) => Promise<{ transaction: ",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/traces/{traceId}/spans/{spanId}\": { endpoint: \"GET /internal/apm/traces/{traceId}/spans/{spanId}\"; params?: ",
@@ -5284,9 +5296,21 @@
           "]>]>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; spanId: string; }; query: { start: number; end: number; } & { parentTransactionId?: string | undefined; }; }; }) => Promise<{ span?: ",
-          "Span",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Span",
+            "text": "Span"
+          },
           " | undefined; parentTransaction?: ",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           " | undefined; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\": { endpoint: \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\"; params?: ",
@@ -5306,7 +5330,13 @@
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; transactionId: string; }; query: { start: number; end: number; }; }; }) => Promise<",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           ">; } & ",
           "APMRouteCreateOptions",
           "; \"POST /internal/apm/traces/aggregated_critical_path\": { endpoint: \"POST /internal/apm/traces/aggregated_critical_path\"; params?: ",
@@ -5460,7 +5490,13 @@
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { path: { transactionId: string; }; query: { start: number; end: number; }; }; }) => Promise<{ transaction: ",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/traces/{traceId}/root_transaction\": { endpoint: \"GET /internal/apm/traces/{traceId}/root_transaction\"; params?: ",
@@ -5478,7 +5514,13 @@
           "<number, string, unknown>; }>; }> | undefined; handler: ({}: ",
           "APMRouteHandlerResources",
           " & { params: { path: { traceId: string; }; query: { start: number; end: number; }; }; }) => Promise<{ transaction: ",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           "; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/traces\": { endpoint: \"GET /internal/apm/traces\"; params?: ",
@@ -5562,7 +5604,13 @@
           " & { params: { path: { traceId: string; }; query: { start: number; end: number; } & { entryTransactionId: string; } & { maxTraceItems?: number | undefined; }; }; }) => Promise<{ traceItems: ",
           "TraceItems",
           "; entryTransaction?: ",
-          "Transaction",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Transaction",
+            "text": "Transaction"
+          },
           " | undefined; }>; } & ",
           "APMRouteCreateOptions",
           "; \"GET /internal/apm/suggestions\": { endpoint: \"GET /internal/apm/suggestions\"; params?: ",
