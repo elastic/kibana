@@ -17,8 +17,9 @@ import { mergeTags } from './merge_tags';
 import { getOasVersion } from '../../utils/get_oas_version';
 import { getOasDocumentVersion } from '../../utils/get_oas_document_version';
 import { enrichWithVersionMimeParam } from './enrich_with_version_mime_param';
+import { MergeOptions } from './merge_options';
 
-export interface MergeDocumentsOptions {
+interface MergeDocumentsOptions extends MergeOptions {
   splitDocumentsByVersion: boolean;
 }
 
@@ -52,10 +53,20 @@ export async function mergeDocuments(
       ...documentsGroup,
     ];
 
-    mergedDocument.servers = mergeServers(documentsToMerge);
-    mergedDocument.paths = mergePaths(documentsToMerge);
-    mergedDocument.components = mergeSharedComponents(documentsToMerge);
-    mergedDocument.security = mergeSecurityRequirements(documentsToMerge);
+    mergedDocument.paths = mergePaths(documentsToMerge, options);
+    mergedDocument.components = {
+      ...mergedDocument.components,
+      ...mergeSharedComponents(documentsToMerge, options),
+    };
+
+    if (!options.skipServers) {
+      mergedDocument.servers = mergeServers(documentsToMerge);
+    }
+
+    if (!options.skipSecurity) {
+      mergedDocument.security = mergeSecurityRequirements(documentsToMerge);
+    }
+
     mergedDocument.tags = mergeTags(documentsToMerge);
 
     mergedByVersion.set(mergedDocument.info.version, mergedDocument);
