@@ -16,8 +16,15 @@ import { IndexPatternsService } from './index_patterns';
 import { BsearchService } from './bsearch';
 import { ConsoleProvider } from './console';
 
+// pick only required services
+const { es, esArchiver, kibanaServer, retry, supertestWithoutAuth } = commonFunctionalServices;
+
 export const services = {
-  ...commonFunctionalServices,
+  es,
+  esArchiver,
+  kibanaServer,
+  retry,
+  supertestWithoutAuth,
   deployment: DeploymentService,
   randomness: RandomnessService,
   security: SecurityServiceProvider,
