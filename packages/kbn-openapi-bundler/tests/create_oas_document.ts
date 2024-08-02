@@ -15,6 +15,7 @@ export function createOASDocument(overrides: {
   components?: OpenAPIV3.ComponentsObject;
   servers?: OpenAPIV3.ServerObject[];
   security?: OpenAPIV3.SecurityRequirementObject[];
+  tags?: OpenAPIV3.TagObject[];
 }): OpenAPIV3.Document {
   const document: OpenAPIV3.Document = {
     openapi: overrides.openapi ?? '3.0.3',
@@ -37,6 +38,10 @@ export function createOASDocument(overrides: {
 
   if (overrides.security) {
     document.security = overrides.security;
+  }
+
+  if (overrides.tags) {
+    document.tags = overrides.tags;
   }
 
   return document;
