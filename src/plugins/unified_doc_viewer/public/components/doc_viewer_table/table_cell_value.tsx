@@ -103,7 +103,7 @@ type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
   formattedValue: FieldRecord['value']['formattedValue'];
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
-  isDetails: boolean; // true when inside EuiDataGrid cell popover
+  isDetails?: boolean; // true when inside EuiDataGrid cell popover
 };
 
 export const TableFieldValue = ({
