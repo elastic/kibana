@@ -68,6 +68,7 @@ const handleApiError = (error: Error) => {
   throw error;
 };
 
+// FIXME: add eventTracker
 export const ViewSpacePage: FC<PageProps> = (props) => {
   const {
     spaceId,

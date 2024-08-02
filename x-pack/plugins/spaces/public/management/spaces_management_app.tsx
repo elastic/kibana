@@ -29,7 +29,6 @@ interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
-  solutionNavExperiment: Promise<boolean>;
   eventTracker: EventTracker;
 }
 
@@ -39,7 +38,6 @@ export const spacesManagementApp = Object.freeze({
     getStartServices,
     spacesManager,
     config,
-    solutionNavExperiment,
     eventTracker,
     getRolesAPIClient,
   }: CreateParams) {
@@ -85,7 +83,7 @@ export const spacesManagementApp = Object.freeze({
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };
@@ -108,7 +106,7 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
               eventTracker={eventTracker}
             />
           );
@@ -145,8 +143,6 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
-              eventTracker={eventTracker}
               onLoadSpace={onLoadSpace}
               spaceId={spaceId}
               selectedTabId={selectedTabId}
