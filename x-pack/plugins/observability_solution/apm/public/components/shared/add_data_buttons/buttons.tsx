@@ -64,6 +64,8 @@ export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       href={associateServiceLogs.link}
       target="_blank"
+      iconType="popout"
+      iconSide="right"
     >
       {associateServiceLogs.name}
     </EuiButton>
