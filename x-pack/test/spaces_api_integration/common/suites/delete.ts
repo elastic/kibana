@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { SuperTest } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { createTestAgent } from '../lib/create_test_agent';
 
 interface DeleteTest {
   statusCode: number;
@@ -31,11 +30,7 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
-export function deleteTestSuiteFactory(
-  es: Client,
-  esArchiver: any,
-  supertestWithoutAuth: SupertestWithoutAuthProviderType
-) {
+export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -152,7 +147,7 @@ export function deleteTestSuiteFactory(
 
   const makeDeleteTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user, spaceId, tests }: DeleteTestDefinition) => {
+    (description: string, { user = {}, spaceId, tests }: DeleteTestDefinition) => {
       describeFn(description, () => {
         beforeEach(async () => {
           await esArchiver.load(
@@ -167,20 +162,18 @@ export function deleteTestSuiteFactory(
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
-            return createTestAgent(supertestWithoutAuth, user)(
-              'delete',
-              `${urlPrefix}/api/spaces/space/space_2`
-            )
+            return supertest
+              .delete(`${urlPrefix}/api/spaces/space/space_2`)
+              .auth(user.username, user.password)
               .expect(tests.exists.statusCode)
               .then(tests.exists.response);
           });
 
           describe(`when the space is reserved`, () => {
             it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
-              return createTestAgent(supertestWithoutAuth, user)(
-                'delete',
-                `${urlPrefix}/api/spaces/space/default`
-              )
+              return supertest
+                .delete(`${urlPrefix}/api/spaces/space/default`)
+                .auth(user.username, user.password)
                 .expect(tests.reservedSpace.statusCode)
                 .then(tests.reservedSpace.response);
             });
@@ -188,10 +181,9 @@ export function deleteTestSuiteFactory(
 
           describe(`when the space doesn't exist`, () => {
             it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
-              return createTestAgent(supertestWithoutAuth, user)(
-                'delete',
-                `${urlPrefix}/api/spaces/space/space_3`
-              )
+              return supertest
+                .delete(`${urlPrefix}/api/spaces/space/space_3`)
+                .auth(user.username, user.password)
                 .expect(tests.doesntExist.statusCode)
                 .then(tests.doesntExist.response);
             });

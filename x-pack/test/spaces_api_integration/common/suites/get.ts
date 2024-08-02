@@ -6,10 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { SuperAgent } from 'superagent';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { createTestAgent } from '../lib/create_test_agent';
 
 interface GetTest {
   statusCode: number;
@@ -29,10 +28,7 @@ interface GetTestDefinition {
 
 const nonExistantSpaceId = 'not-a-space';
 
-export function getTestSuiteFactory(
-  esArchiver: any,
-  supertestWithoutAuth: SupertestWithoutAuthProviderType
-) {
+export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>) {
   const createExpectEmptyResult = () => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql('');
   };
@@ -81,13 +77,13 @@ export function getTestSuiteFactory(
 
   const makeGetTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
+    (description: string, { user = {}, currentSpaceId, spaceId, tests }: GetTestDefinition) => {
       describeFn(description, () => {
-        before(() => {
+        before(() =>
           esArchiver.load(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
-        });
+          )
+        );
         after(() =>
           esArchiver.unload(
             'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
@@ -96,10 +92,9 @@ export function getTestSuiteFactory(
 
         getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.default.statusCode} ${scenario}`, async () => {
-            return createTestAgent(supertestWithoutAuth, user)(
-              'get',
-              `${urlPrefix}/api/spaces/space/${spaceId}`
-            )
+            return supertest
+              .get(`${urlPrefix}/api/spaces/space/${spaceId}`)
+              .auth(user.username, user.password)
               .expect(tests.default.statusCode)
               .then(tests.default.response);
           });

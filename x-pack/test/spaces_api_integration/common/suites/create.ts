@@ -6,10 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { SuperTest } from 'supertest';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
-import { createTestAgent } from '../lib/create_test_agent';
 
 interface CreateTest {
   statusCode: number;
@@ -29,10 +28,7 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
-export function createTestSuiteFactory(
-  esArchiver: any,
-  supertestWithoutAuth: SupertestWithoutAuthProviderType
-) {
+export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -81,7 +77,7 @@ export function createTestSuiteFactory(
 
   const makeCreateTest =
     (describeFn: DescribeFn) =>
-    (description: string, { user, spaceId, tests }: CreateTestDefinition) => {
+    (description: string, { user = {}, spaceId, tests }: CreateTestDefinition) => {
       describeFn(description, () => {
         beforeEach(() =>
           esArchiver.load(
@@ -96,10 +92,9 @@ export function createTestSuiteFactory(
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.newSpace.statusCode} ${scenario}`, async () => {
-            return createTestAgent(supertestWithoutAuth, user)(
-              'post',
-              `${urlPrefix}/api/spaces/space`
-            )
+            return supertest
+              .post(`${urlPrefix}/api/spaces/space`)
+              .auth(user.username, user.password)
               .send({
                 name: 'marketing',
                 id: 'marketing',
@@ -113,10 +108,9 @@ export function createTestSuiteFactory(
 
           describe('when it already exists', () => {
             it(`should return ${tests.alreadyExists.statusCode} ${scenario}`, async () => {
-              return createTestAgent(supertestWithoutAuth, user)(
-                'post',
-                `${urlPrefix}/api/spaces/space`
-              )
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
                 .send({
                   name: 'space_1',
                   id: 'space_1',
@@ -131,10 +125,9 @@ export function createTestSuiteFactory(
 
           describe('when _reserved is specified', () => {
             it(`should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`, async () => {
-              return createTestAgent(supertestWithoutAuth, user)(
-                'post',
-                `${urlPrefix}/api/spaces/space`
-              )
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
                 .send({
                   name: 'reserved space',
                   id: 'reserved',
@@ -150,10 +143,9 @@ export function createTestSuiteFactory(
 
           describe('when solution is specified', () => {
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
-              return createTestAgent(supertestWithoutAuth, user)(
-                'post',
-                `${urlPrefix}/api/spaces/space`
-              )
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
                 .send({
                   name: 'space with solution',
                   id: 'solution',
