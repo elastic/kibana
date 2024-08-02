@@ -14,13 +14,13 @@ import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
-  METRICSET_INTERVAL,
-  METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
 } from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
+
+export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/utils';
 
 export async function getHasTransactionsEvents({
   start,
@@ -123,23 +123,6 @@ export function getDurationFieldForTransactions(
   }
 
   return TRANSACTION_DURATION;
-}
-
-// The function returns Document type filter for 1m Transaction Metrics
-export function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions: boolean) {
-  return searchAggregatedTransactions
-    ? [
-        {
-          bool: {
-            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
-            must_not: [
-              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
-              { term: { [METRICSET_NAME]: 'service_transaction' } },
-            ],
-          },
-        },
-      ]
-    : [];
 }
 
 export function getProcessorEventForTransactions(
