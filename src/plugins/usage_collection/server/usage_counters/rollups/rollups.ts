@@ -14,6 +14,9 @@ import { type UsageCountersSavedObjectAttributes, USAGE_COUNTERS_SAVED_OBJECT_TY
 import type { IUsageCounter } from '../usage_counter';
 import { usageCountersSearchParamsToKueryFilter } from '../common/kuery_utils';
 
+// Process 1000 at a time as a compromise of speed and overload
+const ROLLUP_BATCH_SIZE = 1000;
+
 export async function rollUsageCountersIndices({
   logger,
   getRegisteredUsageCounters,
@@ -32,7 +35,11 @@ export async function rollUsageCountersIndices({
   let cleanupCounter = 0;
 
   try {
-    for (const counter of getRegisteredUsageCounters()) {
+    const counterQueue = getRegisteredUsageCounters();
+
+    while (counterQueue.length > 0) {
+      const counter = counterQueue.shift()!;
+
       const findParams: SavedObjectsFindOptions = {
         type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
         filter: usageCountersSearchParamsToKueryFilter({
@@ -48,7 +55,7 @@ export async function rollUsageCountersIndices({
         sortField: 'updated_at',
         sortOrder: 'asc',
         namespaces: ['*'],
-        perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
+        perPage: ROLLUP_BATCH_SIZE,
       };
 
       const { saved_objects: rawUiCounterDocs } =
@@ -77,6 +84,11 @@ export async function rollUsageCountersIndices({
             )
           )
         );
+
+        if (toDelete.length === ROLLUP_BATCH_SIZE) {
+          // we found a lot of old Usage Counters, put the counter back in the queue, as there might be more
+          counterQueue.push(counter);
+        }
       }
     }
   } catch (err) {

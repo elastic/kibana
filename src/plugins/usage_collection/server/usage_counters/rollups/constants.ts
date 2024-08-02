@@ -7,9 +7,9 @@
  */
 
 /**
- * Roll indices every 24h
+ * Roll indices every hour
  */
-export const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
+export const ROLL_INDICES_INTERVAL = 3600_000;
 
 /**
  * Start rolling indices after 5 minutes up
