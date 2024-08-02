@@ -23,6 +23,7 @@ import {
   AGENT_POLICY_INDEX,
 } from '../../../common';
 import { appContextService } from '..';
+import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 
 /**
  * Return current bulk actions.
@@ -35,10 +36,11 @@ import { appContextService } from '..';
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
-  options: ActionStatusOptions
+  options: ActionStatusOptions,
+  namespace?: string
 ): Promise<ActionStatus[]> {
-  const actionResults = await getActionResults(esClient, options);
-  const policyChangeActions = await getPolicyChangeActions(esClient, options);
+  const actionResults = await getActionResults(esClient, options, namespace);
+  const policyChangeActions = await getPolicyChangeActions(esClient, options, namespace);
   const actionStatuses = [...actionResults, ...policyChangeActions]
     .sort((a: ActionStatus, b: ActionStatus) => (b.creationTime > a.creationTime ? 1 : -1))
     .slice(getPage(options), getPerPage(options));
@@ -47,9 +49,10 @@ export async function getActionStatuses(
 
 async function getActionResults(
   esClient: ElasticsearchClient,
-  options: ActionStatusOptions
+  options: ActionStatusOptions,
+  namespace?: string
 ): Promise<ActionStatus[]> {
-  const actions = await getActions(esClient, options);
+  const actions = await getActions(esClient, options, namespace);
   const cancelledActions = await getCancelledActions(esClient);
   let acks: any;
 
@@ -200,41 +203,41 @@ export function getPerPage(options: ActionStatusOptions) {
 
 async function getActions(
   esClient: ElasticsearchClient,
-  options: ActionStatusOptions
+  options: ActionStatusOptions,
+  namespace?: string
 ): Promise<ActionStatus[]> {
+  const query = {
+    bool: {
+      must_not: [
+        {
+          term: {
+            type: 'CANCEL',
+          },
+        },
+      ],
+      ...(options.date || options.latest
+        ? {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    // options.date overrides options.latest
+                    gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
+                    lte: options.date ? moment(options.date).add(1, 'days').toISOString() : 'now/s',
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+    },
+  };
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     from: 0,
     size: getPerPage(options),
-    query: {
-      bool: {
-        must_not: [
-          {
-            term: {
-              type: 'CANCEL',
-            },
-          },
-        ],
-        ...(options.date || options.latest
-          ? {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      // options.date overrides options.latest
-                      gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
-                      lte: options.date
-                        ? moment(options.date).add(1, 'days').toISOString()
-                        : 'now/s',
-                    },
-                  },
-                },
-              ],
-            }
-          : {}),
-      },
-    },
+    query: addNamespaceFilteringToQuery(query, namespace),
     body: {
       sort: [{ '@timestamp': 'desc' }],
     },
@@ -340,49 +343,51 @@ export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
 
 async function getPolicyChangeActions(
   esClient: ElasticsearchClient,
-  options: ActionStatusOptions
+  options: ActionStatusOptions,
+  namespace?: string
 ): Promise<ActionStatus[]> {
   // option.latest is used to fetch recent errors, which policy change actions do not contain
   if (options.latest) {
     return [];
   }
 
+  const query = {
+    bool: {
+      filter: [
+        {
+          range: {
+            revision_idx: {
+              gt: 1,
+            },
+          },
+        },
+        // This filter is for retrieving docs created by Kibana, as opposed to Fleet Server (coordinator_idx: 1).
+        // Note: the coordinator will be removed from Fleet Server (https://github.com/elastic/fleet-server/pull/3131),
+        // so this filter will eventually not be needed.
+        {
+          term: {
+            coordinator_idx: 0,
+          },
+        },
+        ...(options.date
+          ? [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: options.date,
+                    lte: moment(options.date).add(1, 'days').toISOString(),
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  };
   const agentPoliciesRes = await esClient.search({
     index: AGENT_POLICY_INDEX,
     size: getPerPage(options),
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              revision_idx: {
-                gt: 1,
-              },
-            },
-          },
-          // This filter is for retrieving docs created by Kibana, as opposed to Fleet Server (coordinator_idx: 1).
-          // Note: the coordinator will be removed from Fleet Server (https://github.com/elastic/fleet-server/pull/3131),
-          // so this filter will eventually not be needed.
-          {
-            term: {
-              coordinator_idx: 0,
-            },
-          },
-          ...(options.date
-            ? [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: options.date,
-                      lte: moment(options.date).add(1, 'days').toISOString(),
-                    },
-                  },
-                },
-              ]
-            : []),
-        ],
-      },
-    },
+    query: addNamespaceFilteringToQuery(query, namespace),
     sort: [
       {
         '@timestamp': {
