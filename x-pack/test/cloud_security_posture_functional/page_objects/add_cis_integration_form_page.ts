@@ -354,9 +354,21 @@ export function AddCisIntegrationFormPageProvider({
     await nameField[0].type(uuidv4());
   };
 
+  const inputIntegrationName = async (text: string) => {
+    const flyout = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await flyout.findAllByCssSelector('input[id="name"]');
+    await nameField[0].clearValueWithKeyboard();
+    await nameField[0].type(text);
+  };
+
   const getSecretComponentReplaceButton = async (secretButtonSelector: string) => {
     const secretComponentReplaceButton = await testSubjects.find(secretButtonSelector);
     return secretComponentReplaceButton;
+  };
+
+  const clickAddElasticAgentLaterButton = async () => {
+    const addElasticAgentLaterButton = await testSubjects.find('confirmModalCancelButton');
+    await addElasticAgentLaterButton.click();
   };
 
   return {
@@ -374,6 +386,7 @@ export function AddCisIntegrationFormPageProvider({
     clickFirstElementOnIntegrationTable,
     clickFirstElementOnIntegrationTableAddAgent,
     clickLaunchAndGetCurrentUrl,
+    clickAddElasticAgentLaterButton,
     getIntegrationFormEntirePage,
     getIntegrationPolicyTable,
     getIntegrationFormEditPage,
@@ -397,5 +410,6 @@ export function AddCisIntegrationFormPageProvider({
     getReplaceSecretButton,
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
+    inputIntegrationName,
   };
 }

@@ -11,10 +11,6 @@ import { http, HttpResponse, StrictResponse } from 'msw';
 
 export const setupMockServer = () => {
   const server = createServer(deploymentHandler);
-  //   server.events.on('request:start', ({ request }) => {
-  //     console.log('Outgoing:', request.method, request.url);
-  //   });
-
   return server;
 };
 
@@ -26,7 +22,6 @@ const deploymentHandler = http.post(
   'agentless-api/api/v1/ess/deployments',
   async ({ request }): Promise<StrictResponse<AgentlessApiResponse>> => {
     return HttpResponse.json({
-      data: {},
       status: 200,
     });
   }

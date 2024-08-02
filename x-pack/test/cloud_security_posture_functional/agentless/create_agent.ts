@@ -6,7 +6,6 @@
  */
 
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import expect from '@kbn/expect';
 import * as http from 'http';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
@@ -31,14 +30,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let mockApiServer: http.Server;
-    // let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
 
     before(async () => {
-      // await pageObjects.cspSecurity.createUsers();
-      // await pageObjects.cspSecurity.login('csp_read_user');
       cisIntegration = pageObjects.cisAddIntegration;
-      // cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-
       mockApiServer = await mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8081
     });
 
@@ -47,79 +41,57 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       mockApiServer.close();
     });
 
-    describe('Agentless API', () => {
-      it(`should create agentless-agent`, async () => {
-        const integrationName = `cloud_security_posture-${new Date().toISOString()}`;
-        // await cisIntegration.navigateToAddIntegrationCspmPage();
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_CREDENTIALS_PACKAGE_VERSION
-        );
+    it(`should create agentless-agent`, async () => {
+      const integrationName = `cloud_security_posture-${new Date().toISOString()}`;
+      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+        CLOUD_CREDENTIALS_PACKAGE_VERSION
+      );
 
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
-        // await cisIntegration.findOptionInPage();
-        await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-        await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-        await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-        await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+      await cisIntegration.inputIntegrationName(integrationName);
 
-        await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+      await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
+      await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+      await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
-        await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      //   it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {
-      //     await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
+      await cisIntegration.clickSaveButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.clickAddElasticAgentLaterButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+    });
 
-      //     await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      //     await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-      //     await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-      //     await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-      //     await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
-      //     await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-      //     await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
+    it(`should create default agent-based agent`, async () => {
+      const integrationName = `cloud_security_posture-${new Date().toISOString()}`;
 
-      //     await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+        CLOUD_CREDENTIALS_PACKAGE_VERSION
+      );
 
-      //     expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
-      //   });
-      // });
+      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
-      // describe('Agentless CIS_AWS ORG Account Launch Cloud formation', () => {
-      //   it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_CREDENTIALS_PACKAGE_VERSION}`, async () => {
-      //     await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-      //       CLOUD_CREDENTIALS_PACKAGE_VERSION
-      //     );
+      await cisIntegration.inputIntegrationName(integrationName);
 
-      //     await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      //     await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-      //     await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-      //     await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-      //     await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-      //     await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+      await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+      await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
 
-      //     await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+      await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
-      //     expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
-      //   });
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      //   it(`should hide CIS_AWS Launch Cloud formation button when credentials selector is temporary keys and package version is less than ${previousPackageVersion}`, async () => {
-      //     await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(previousPackageVersion);
+      await cisIntegration.clickSaveButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      //     await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      //     await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-      //     await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-      //     await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-      //     await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-      //     await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
-
-      //     await pageObjects.header.waitUntilLoadingHasFinished();
-
-      //     expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
-      //   });
+      await cisIntegration.clickAddElasticAgentLaterButton();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
   });
 }
