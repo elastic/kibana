@@ -21,11 +21,8 @@ jest.mock('../../../../../capabilities/check_capabilities', () => ({
   createPermissionFailureMessage: jest.fn(),
 }));
 
-jest.mock('../../../../../util/dependency_cache', () => ({
-  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
-}));
-
 jest.mock('../../../../../contexts/kibana', () => ({
+  useMlApiContext: jest.fn(),
   useMlKibana: () => ({
     services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
