@@ -67,7 +67,6 @@ import { EditQueryDelay } from './edit_query_delay';
 import type { ChartDirectionType } from './constants';
 import { CHART_DIRECTION, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
-import { useMlJobService } from '../../../../services/job_service';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { type ChartDataWithNullValues, fillMissingChartData } from './fill_missing_chart_data';
 
@@ -111,7 +110,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   onClose,
   onModelSnapshotAnnotationClick,
 }) => {
-  const mlJobService = useMlJobService();
+  const mlApiServices = useMlApiContext();
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
@@ -214,7 +213,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
   const getJobAndSnapshotData = useCallback(async () => {
     try {
-      const job: CombinedJobWithStats = await loadFullJob(mlJobService, jobId);
+      const job: CombinedJobWithStats = await loadFullJob(mlApiServices, jobId);
       const modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[] = [];
       const modelSnapshotsResp = await getModelSnapshots(jobId);
       const modelSnapshots = modelSnapshotsResp.model_snapshots ?? [];
@@ -661,7 +660,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
   unsetShowFunction,
   refreshJobs,
 }) => {
-  const mlJobService = useMlJobService();
+  const mlApiServices = useMlApiContext();
   const [isVisible, setIsVisible] = useState(false);
   const [job, setJob] = useState<MlSummaryJob | undefined>();
   const [jobWithStats, setJobWithStats] = useState<CombinedJobWithStats | undefined>();
@@ -678,10 +677,10 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
   const showRevertModelSnapshot = useCallback(async () => {
     // Need to load the full job with stats, as the model snapshot
     // flyout needs the timestamp of the last result.
-    const fullJob: CombinedJobWithStats = await loadFullJob(mlJobService, job!.id);
+    const fullJob: CombinedJobWithStats = await loadFullJob(mlApiServices, job!.id);
     setJobWithStats(fullJob);
     setIsRevertModelSnapshotFlyoutVisible(true);
-    // exclude mlJobservice from deps
+    // exclude mlApiServices from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job]);
 

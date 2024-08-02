@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getToastNotifications } from '../../../util/dependency_cache';
 import { isJobIdValid } from '../../../../../common/util/job_utils';
 
 export function isValidFilterListId(id) {
@@ -16,11 +15,11 @@ export function isValidFilterListId(id) {
 
 // Saves a filter list, running an update if the supplied loadedFilterList, holding the
 // original filter list to which edits are being applied, is defined with a filter_id property.
-export function saveFilterList(filterId, description, items, loadedFilterList) {
+export function saveFilterList(toastNotifications, filterId, description, items, loadedFilterList) {
   return new Promise((resolve, reject) => {
     if (loadedFilterList === undefined || loadedFilterList.filter_id === undefined) {
       // Create a new filter.
-      addFilterList(filterId, description, items)
+      addFilterList(toastNotifications, filterId, description, items)
         .then((newFilter) => {
           resolve(newFilter);
         })
@@ -40,7 +39,7 @@ export function saveFilterList(filterId, description, items, loadedFilterList) {
   });
 }
 
-export function addFilterList(mlApiServices, filterId, description, items) {
+export function addFilterList(toastNotifications, mlApiServices, filterId, description, items) {
   const filterWithIdExistsErrorMessage = i18n.translate(
     'xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage',
     {
@@ -68,7 +67,6 @@ export function addFilterList(mlApiServices, filterId, description, items) {
               reject(error);
             });
         } else {
-          const toastNotifications = getToastNotifications();
           toastNotifications.addDanger(filterWithIdExistsErrorMessage);
           reject(new Error(filterWithIdExistsErrorMessage));
         }

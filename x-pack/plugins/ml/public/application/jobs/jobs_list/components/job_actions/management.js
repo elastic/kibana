@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
+  toastNotifications,
   application,
   mlJobService,
   showEditJobFlyout,
@@ -112,7 +113,7 @@ export function actionsMenuContent(
         if (isManagedJob(item)) {
           showCloseJobsConfirmModal([item]);
         } else {
-          closeJobs([item], refreshJobs);
+          closeJobs(toastNotifications, mlJobService, [item], refreshJobs);
         }
 
         closeMenu(true);

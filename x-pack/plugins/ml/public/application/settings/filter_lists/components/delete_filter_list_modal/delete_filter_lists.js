@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { getToastNotifications } from '../../../../util/dependency_cache';
 import { i18n } from '@kbn/i18n';
 
-export async function deleteFilterLists(mlApiServices, filterListsToDelete) {
+export async function deleteFilterLists(toastNotifications, mlApiServices, filterListsToDelete) {
   if (filterListsToDelete === undefined || filterListsToDelete.length === 0) {
     return;
   }
-
-  const toastNotifications = getToastNotifications();
 
   // Delete each of the specified filter lists in turn, waiting for each response
   // before deleting the next to minimize load on the cluster.

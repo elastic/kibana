@@ -8,11 +8,7 @@
 import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import {
-  getToastNotificationService,
-  toastNotificationServiceProvider,
-} from '../../../services/toast_notification_service';
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
@@ -84,7 +80,14 @@ export function isResettable(jobs) {
   );
 }
 
-export function forceStartDatafeeds(mlJobService, jobs, start, end, finish = () => {}) {
+export function forceStartDatafeeds(
+  toastNotifications,
+  mlJobService,
+  jobs,
+  start,
+  end,
+  finish = () => {}
+) {
   const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
   mlJobService
     .forceStartDatafeeds(datafeedIds, start, end)
@@ -93,7 +96,6 @@ export function forceStartDatafeeds(mlJobService, jobs, start, end, finish = () 
       finish();
     })
     .catch((error) => {
-      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.startJobErrorMessage', {
           defaultMessage: 'Jobs failed to start',
@@ -104,7 +106,7 @@ export function forceStartDatafeeds(mlJobService, jobs, start, end, finish = () 
     });
 }
 
-export function stopDatafeeds(mlJobService, jobs, finish = () => {}) {
+export function stopDatafeeds(toastNotifications, mlJobService, jobs, finish = () => {}) {
   const datafeedIds = jobs.filter((j) => j.hasDatafeed).map((j) => j.datafeedId);
   mlJobService
     .stopDatafeeds(datafeedIds)
@@ -113,7 +115,6 @@ export function stopDatafeeds(mlJobService, jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
         i18n.translate('xpack.ml.jobsList.stopJobErrorMessage', {
           defaultMessage: 'Jobs failed to stop',
@@ -124,7 +125,7 @@ export function stopDatafeeds(mlJobService, jobs, finish = () => {}) {
     });
 }
 
-function showResults(resp, action) {
+function showResults(toastNotifications, resp, action) {
   const successes = [];
   const failures = [];
   for (const d in resp) {
@@ -182,7 +183,6 @@ function showResults(resp, action) {
     });
   }
 
-  const toastNotifications = getToastNotifications();
   if (successes.length > 0) {
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
@@ -214,11 +214,17 @@ function showResults(resp, action) {
   }
 }
 
-export async function cloneJob(application, mlJobService, jobId) {
+export async function cloneJob(
+  toastNotifications,
+  application,
+  mlApiServices,
+  mlJobService,
+  jobId
+) {
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
-      loadJobForCloning(jobId),
-      loadFullJob(jobId, false),
+      loadJobForCloning(mlApiServices, jobId),
+      loadFullJob(mlApiServices, jobId),
     ]);
 
     const createdBy = originalJob?.custom_settings?.created_by;
@@ -277,7 +283,7 @@ export async function cloneJob(application, mlJobService, jobId) {
 
     application.navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {
-    getToastNotificationService().displayErrorToast(
+    toastNotificationServiceProvider(toastNotifications).displayErrorToast(
       error,
       i18n.translate('xpack.ml.jobsList.cloneJobErrorMessage', {
         defaultMessage: 'Could not clone {jobId}. Job could not be found',
@@ -287,7 +293,7 @@ export async function cloneJob(application, mlJobService, jobId) {
   }
 }
 
-export function closeJobs(mlJobService, jobs, finish = () => {}) {
+export function closeJobs(toastNotifications, mlJobService, jobs, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
   mlJobService
     .closeJobs(jobIds)
@@ -296,7 +302,7 @@ export function closeJobs(mlJobService, jobs, finish = () => {}) {
       finish();
     })
     .catch((error) => {
-      getToastNotificationService().displayErrorToast(
+      toastNotificationServiceProvider(toastNotifications).displayErrorToast(
         error,
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
           defaultMessage: 'Jobs failed to close',
@@ -306,7 +312,13 @@ export function closeJobs(mlJobService, jobs, finish = () => {}) {
     });
 }
 
-export function resetJobs(mlJobService, jobIds, deleteUserAnnotations, finish = () => {}) {
+export function resetJobs(
+  toastNotifications,
+  mlJobService,
+  jobIds,
+  deleteUserAnnotations,
+  finish = () => {}
+) {
   mlJobService
     .resetJobs(jobIds, deleteUserAnnotations)
     .then((resp) => {
@@ -314,7 +326,7 @@ export function resetJobs(mlJobService, jobIds, deleteUserAnnotations, finish = 
       finish();
     })
     .catch((error) => {
-      getToastNotificationService().displayErrorToast(
+      toastNotificationServiceProvider(toastNotifications).displayErrorToast(
         error,
         i18n.translate('xpack.ml.jobsList.resetJobErrorMessage', {
           defaultMessage: 'Jobs failed to reset',
@@ -325,6 +337,7 @@ export function resetJobs(mlJobService, jobIds, deleteUserAnnotations, finish = 
 }
 
 export function deleteJobs(
+  toastNotifications,
   mlJobService,
   jobs,
   deleteUserAnnotations,
@@ -339,7 +352,7 @@ export function deleteJobs(
       finish();
     })
     .catch((error) => {
-      getToastNotificationService().displayErrorToast(
+      toastNotificationServiceProvider(toastNotifications).displayErrorToast(
         error,
         i18n.translate('xpack.ml.jobsList.deleteJobErrorMessage', {
           defaultMessage: 'Jobs failed to delete',

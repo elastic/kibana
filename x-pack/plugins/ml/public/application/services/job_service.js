@@ -112,7 +112,7 @@ class JobService {
 
       function error(err) {
         console.log('jobService error getting list of jobs:', err);
-        this.getToastNotificationService().displayErrorToast(err);
+        this.toastNotificationService.displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -195,7 +195,7 @@ class JobService {
 
       function error(err) {
         console.log('JobService error getting list of jobs:', err);
-        this.getToastNotificationService().displayErrorToast(err);
+        this.toastNotificationService.displayErrorToast(err);
         reject({ jobs, err });
       }
     });
@@ -235,7 +235,7 @@ class JobService {
 
       function error(err) {
         console.log('loadDatafeeds error getting list of datafeeds:', err);
-        this.getToastNotificationService().displayErrorToast(err);
+        this.toastNotificationService.displayErrorToast(err);
         reject({ jobs, err });
       }
     });

@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../../contexts/kibana';
 import { deleteJobs } from '../utils';
 import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
@@ -40,6 +41,11 @@ interface Props {
 }
 
 export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
   const mlJobService = useMlJobService();
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -85,6 +91,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const deleteJob = useCallback(() => {
     setDeleting(true);
     deleteJobs(
+      toasts,
       mlJobService,
       jobIds.map((id) => ({ id })),
       deleteUserAnnotations,

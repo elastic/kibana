@@ -147,7 +147,7 @@ export class JobsListViewUI extends Component {
       }
 
       this.setState({ itemIdToExpandedRowMap }, () => {
-        loadFullJob(jobId)
+        loadFullJob(this.props.kibana.services.mlServices.mlApiServices, jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
             if (this.props.showNodeInfo === false) {

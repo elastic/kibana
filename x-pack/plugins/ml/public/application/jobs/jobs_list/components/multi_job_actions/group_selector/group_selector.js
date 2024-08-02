@@ -28,7 +28,7 @@ import { cloneDeep } from 'lodash';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
-import { getToastNotificationService } from '../../../../../services/toast_notification_service';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map((j) => j.id);
@@ -61,8 +61,8 @@ export class GroupSelectorUI extends Component {
     refreshJobs: PropTypes.func.isRequired,
   };
 
-  constructor(props) {
-    super(props);
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
 
     this.state = {
       isPopoverOpen: false,
@@ -73,6 +73,9 @@ export class GroupSelectorUI extends Component {
 
     this.refreshJobs = this.props.refreshJobs;
     this.canUpdateJob = checkPermission('canUpdateJob');
+    this.toastNotificationsService = toastNotificationServiceProvider(
+      props.kibana.services.notifications.toasts
+    );
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -134,6 +137,7 @@ export class GroupSelectorUI extends Component {
   };
 
   applyChanges = () => {
+    const toastNotificationsService = this.toastNotificationsService;
     const { selectedGroups } = this.state;
     const { jobs } = this.props;
     const newJobs = jobs.map((j) => ({
@@ -163,7 +167,7 @@ export class GroupSelectorUI extends Component {
           // check success of each job update
           if (resp.hasOwnProperty(jobId)) {
             if (resp[jobId].success === false) {
-              getToastNotificationService().displayErrorToast(resp[jobId].error);
+              toastNotificationsService.displayErrorToast(resp[jobId].error);
               success = false;
             }
           }
@@ -178,7 +182,7 @@ export class GroupSelectorUI extends Component {
         }
       })
       .catch((error) => {
-        getToastNotificationService().displayErrorToast(error);
+        toastNotificationsService.displayErrorToast(error);
         console.error(error);
       });
   };

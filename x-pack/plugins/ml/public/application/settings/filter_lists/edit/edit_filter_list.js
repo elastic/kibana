@@ -285,7 +285,13 @@ export class EditFilterListUI extends Component {
 
     const { loadedFilter, newFilterId, description, items } = this.state;
     const filterId = this.props.filterId !== undefined ? this.props.filterId : newFilterId;
-    saveFilterList(filterId, description, items, loadedFilter)
+    saveFilterList(
+      this.props.kibana.services.notifications.toasts,
+      filterId,
+      description,
+      items,
+      loadedFilter
+    )
       .then((savedFilter) => {
         this.setLoadedFilterState(savedFilter);
         this.returnToFiltersList();

@@ -265,7 +265,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const tzConfig = config.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
-  if (timeSeriesJobs.length === 0) {
+  if (timeSeriesJobs.length === 0 || selectedJobId === undefined) {
     return (
       <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
         <TimeseriesexplorerNoJobsFound />

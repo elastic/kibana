@@ -107,7 +107,7 @@ export class TimeSeriesExplorer extends React.Component {
     bounds: PropTypes.object.isRequired,
     dateFormatTz: PropTypes.string.isRequired,
     lastRefresh: PropTypes.number.isRequired,
-    previousRefresh: PropTypes.number.isRequired,
+    previousRefresh: PropTypes.number,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
     selectedEntities: PropTypes.object,
