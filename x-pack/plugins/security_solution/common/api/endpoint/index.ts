@@ -6,7 +6,6 @@
  */
 
 export * from './actions/file_upload_route';
-export * from './actions/list_route';
 export * from './actions/isolate_route';
 export * from './actions/unisolate_route';
 export * from './actions/kill_process_route';
@@ -23,6 +22,7 @@ export * from './actions/status';
 export * from './actions/details';
 export * from './actions/file_download';
 export * from './actions/file_info';
+export * from './actions/list';
 export * from './metadata/list_metadata_route';
 export * from './metadata/get_metadata_route';
 

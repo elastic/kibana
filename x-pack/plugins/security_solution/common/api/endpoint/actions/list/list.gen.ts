@@ -17,7 +17,9 @@
 import { z } from 'zod';
 
 import {
+  SuccessResponse,
   AgentIds,
+  AgentTypes,
   Commands,
   Page,
   StartDate,
@@ -25,11 +27,12 @@ import {
   UserIds,
   Types,
   WithOutputs,
-} from '../model/schema/common.gen';
+} from '../../model/schema/common.gen';
 
-export type EndpointActionListRequestQuery = z.infer<typeof EndpointActionListRequestQuery>;
-export const EndpointActionListRequestQuery = z.object({
+export type GetEndpointActionListRouteQuery = z.infer<typeof GetEndpointActionListRouteQuery>;
+export const GetEndpointActionListRouteQuery = z.object({
   agentIds: AgentIds.optional(),
+  agentTypes: AgentTypes.optional(),
   commands: Commands.optional(),
   page: Page.optional(),
   /**
@@ -42,3 +45,14 @@ export const EndpointActionListRequestQuery = z.object({
   types: Types.optional(),
   withOutputs: WithOutputs.optional(),
 });
+
+export type EndpointGetActionsListRequestQuery = z.infer<typeof EndpointGetActionsListRequestQuery>;
+export const EndpointGetActionsListRequestQuery = z.object({
+  query: GetEndpointActionListRouteQuery,
+});
+export type EndpointGetActionsListRequestQueryInput = z.input<
+  typeof EndpointGetActionsListRequestQuery
+>;
+
+export type EndpointGetActionsListResponse = z.infer<typeof EndpointGetActionsListResponse>;
+export const EndpointGetActionsListResponse = SuccessResponse;

@@ -12,9 +12,9 @@ import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
-} from '../../../endpoint/service/response_actions/constants';
-import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
-import { agentTypesSchema } from './common/base';
+} from '../../../../endpoint/service/response_actions/constants';
+import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../endpoint/constants';
+import { agentTypesSchema } from '../common/base';
 
 const commandsSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call
