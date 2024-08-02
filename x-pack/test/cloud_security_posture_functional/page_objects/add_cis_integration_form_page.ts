@@ -366,9 +366,15 @@ export function AddCisIntegrationFormPageProvider({
     return secretComponentReplaceButton;
   };
 
-  const clickAddElasticAgentLaterButton = async () => {
-    const addElasticAgentLaterButton = await testSubjects.find('confirmModalCancelButton');
-    await addElasticAgentLaterButton.click();
+  const getFirstCspmIntegrationPageIntegration = async () => {
+    const integrationList = await testSubjects.findAll('integrationNameLink');
+    return await integrationList[0].getVisibleText();
+  };
+
+  const getFirstCspmIntegrationPageAgent = async () => {
+    const agentList = await testSubjects.findAll('agentPolicyNameLink');
+    // this is assuming that the agent was just created therefor should be the first element
+    return await agentList[0].getVisibleText();
   };
 
   return {
@@ -386,7 +392,6 @@ export function AddCisIntegrationFormPageProvider({
     clickFirstElementOnIntegrationTable,
     clickFirstElementOnIntegrationTableAddAgent,
     clickLaunchAndGetCurrentUrl,
-    clickAddElasticAgentLaterButton,
     getIntegrationFormEntirePage,
     getIntegrationPolicyTable,
     getIntegrationFormEditPage,
@@ -411,5 +416,7 @@ export function AddCisIntegrationFormPageProvider({
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
     inputIntegrationName,
+    getFirstCspmIntegrationPageIntegration,
+    getFirstCspmIntegrationPageAgent,
   };
 }

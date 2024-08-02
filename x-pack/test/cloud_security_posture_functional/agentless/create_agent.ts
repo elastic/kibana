@@ -7,6 +7,7 @@
 
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 // eslint-disable-next-line import/no-default-export
@@ -42,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`should create agentless-agent`, async () => {
-      const integrationName = `cloud_security_posture-${new Date().toISOString()}`;
+      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
         CLOUD_CREDENTIALS_PACKAGE_VERSION
       );
@@ -50,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
-      await cisIntegration.inputIntegrationName(integrationName);
+      await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
       await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
@@ -62,12 +63,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await cisIntegration.clickAddElasticAgentLaterButton();
+
+      await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
+        integrationPolicyName
+      );
+      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(
+        `Agentless policy for ${integrationPolicyName}`
+      );
     });
 
     it(`should create default agent-based agent`, async () => {
-      const integrationName = `cloud_security_posture-${new Date().toISOString()}`;
+      const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
         CLOUD_CREDENTIALS_PACKAGE_VERSION
@@ -76,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
-      await cisIntegration.inputIntegrationName(integrationName);
+      await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
       await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
@@ -90,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await cisIntegration.clickAddElasticAgentLaterButton();
+      await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
   });
