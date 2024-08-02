@@ -264,8 +264,15 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('with overrides', async () => {
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
       expect(startContract.getBooleanValue('my-overridden-flag', false)).toEqual(true);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
+      expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+      // Only to prove the spy works
+      expect(startContract.getBooleanValue('another-flag', false)).toEqual(false);
+      expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+      expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
     });
   });
 });
