@@ -13,7 +13,7 @@ export const fetchAlertsIndexNames = async ({ http, featureIds }: FetchAlertsInd
   const { index_name: indexNames = [] } = await http.get<{ index_name: string[] }>(
     `${BASE_RAC_ALERTS_API_PATH}/index`,
     {
-      query: { features: featureIds.sort().join(',') },
+      query: { features: featureIds.join(',') },
     }
   );
   return indexNames;

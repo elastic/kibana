@@ -152,6 +152,28 @@ describe('useColumns', () => {
     });
   });
 
+  test("does not fetch alerts fields if they're overridden through the alertsFields prop", () => {
+    const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
+    const alertsFields = {
+      testField: { name: 'testField', type: 'string', searchable: true, aggregatable: true },
+    };
+    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
+      () =>
+        useColumns({
+          alertsFields,
+          defaultColumns,
+          featureIds,
+          id,
+          storageAlertsTable: localStorageAlertsTable,
+          storage,
+        }),
+      { wrapper }
+    );
+
+    expect(mockFetchAlertsFields).not.toHaveBeenCalled();
+    expect(result.current.browserFields).toEqual(alertsFields);
+  });
+
   describe('visibleColumns', () => {
     test('hide all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
@@ -204,7 +226,7 @@ describe('useColumns', () => {
       expect(result.current.columns).toEqual(defaultColumns);
     });
 
-    test('should populate visiblecolumns correctly', async () => {
+    test('should populate visibleColumns correctly', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
       const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(
         () =>
@@ -221,7 +243,7 @@ describe('useColumns', () => {
       expect(result.current.visibleColumns).toMatchObject(defaultColumns.map((col) => col.id));
     });
 
-    test('should change visiblecolumns if provided defaultColumns change', async () => {
+    test('should change visibleColumns if provided defaultColumns change', async () => {
       let localDefaultColumns = [...defaultColumns];
       let localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
       const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(

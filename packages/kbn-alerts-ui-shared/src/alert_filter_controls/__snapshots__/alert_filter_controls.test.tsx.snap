@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlertFilterControls renders 1`] = `
+<div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <button
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          aria-label="Loading"
+          class="euiLoadingChart filter-group__loading emotion-euiLoadingChart-m"
+          data-test-subj="filter-group__loading"
+          role="progressbar"
+        >
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`AlertFilterControls should render 1`] = `
+<div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <button
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          aria-label="Loading"
+          class="euiLoadingChart filter-group__loading emotion-euiLoadingChart-m"
+          data-test-subj="filter-group__loading"
+          role="progressbar"
+        >
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+          <span
+            class="emotion-euiLoadingChart__bar-nonmono-m"
+          />
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
