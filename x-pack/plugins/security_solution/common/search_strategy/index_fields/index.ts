@@ -14,4 +14,4 @@ export type {
   BrowserField,
   BrowserFields,
 } from '@kbn/timelines-plugin/common';
-export { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
+export { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
