@@ -1,10 +1,9 @@
 get:
-  summary: Retrieves all the user comments from a case.
-  operationId: findCaseComments
+  summary: Find case comments and alerts
+  operationId: findCaseCommentsDefaultSpace
   description: >
-    You must have `read` privileges for the **Cases** feature in the **Management**,
-    **Observability**, or **Security** section of the Kibana feature privileges,
-    depending on the owner of the cases with the comments you're seeking.
+    Retrieves a paginated list of comments for a case.
+    You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
   tags:
     - cases
   parameters:
@@ -12,7 +11,6 @@ get:
     - $ref: '../components/parameters/page_index.yaml'
     - $ref: '../components/parameters/page_size.yaml'
     - $ref: '../components/parameters/sort_order.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
