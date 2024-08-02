@@ -212,9 +212,11 @@
               },
               "[]>; }; getIsSideNavCollapsed$: () => ",
               "Observable",
-              "<boolean>; }; http: { basePath: BasePathService; getLoadingCount$(): ",
+              "<boolean>; }; http: { basePath: ",
+              "BasePathService",
+              "; getLoadingCount$(): ",
               "Observable",
-              "<number>; }; }"
+              "<number>; }; analytics: { reportEvent: (eventType: string, eventData: object) => void; }; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
@@ -267,7 +269,7 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              "{ prepend: (url: string) => string; }"
+              "{ prepend: (url: string) => string; remove: (url: string) => string; }"
             ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
@@ -394,6 +396,20 @@
             "tags": [],
             "label": "isSideNavCollapsed",
             "description": [],
+            "path": "packages/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.eventTracker",
+            "type": "Object",
+            "tags": [],
+            "label": "eventTracker",
+            "description": [],
+            "signature": [
+              "EventTracker"
+            ],
             "path": "packages/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -603,7 +619,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.FieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "FieldType",
+        "description": [],
+        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
@@ -639,6 +668,18 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.EventType",
+        "type": "string",
+        "tags": [],
+        "label": "EventType",
+        "description": [],
+        "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
