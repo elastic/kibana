@@ -182,6 +182,10 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     );
   };
 
+  const { id, solution: spaceSolution } = space;
+  const solution = spaceSolution ?? 'classic';
+  const shouldShowSolutionBadge = isSolutionNavEnabled || solution !== 'classic';
+
   return (
     <ViewSpaceContextProvider
       capabilities={capabilities}
@@ -199,16 +203,16 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
             <EuiTitle size="l">
               <h1 data-test-subj="spaceTitle">
                 {space.name}
-                {isSolutionNavEnabled ? (
+                {shouldShowSolutionBadge ? (
                   <>
                     {' '}
                     <SpaceSolutionBadge
-                      solution={space.solution}
-                      data-test-subj={`space-solution-badge-${space.solution}`}
+                      solution={solution}
+                      data-test-subj={`space-solution-badge-${solution}`}
                     />
                   </>
                 ) : null}
-                {userActiveSpace?.id === space.id ? (
+                {userActiveSpace?.id === id ? (
                   <>
                     {' '}
                     <EuiBadge color="primary">
@@ -234,14 +238,14 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
               </p>
             </EuiText>
           </EuiFlexItem>
-          {userActiveSpace?.id !== space.id ? (
+          {userActiveSpace?.id !== id ? (
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="merge"
                 href={addSpaceIdToPath(
                   props.serverBasePath,
-                  space.id,
-                  `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${space.id}`
+                  id,
+                  `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/edit/${id}`
                 )}
                 data-test-subj="spaceSwitcherButton"
               >
@@ -264,10 +268,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
                   key={index}
                   isSelected={tab.id === selectedTabId}
                   append={tab.append}
-                  {...reactRouterNavigate(
-                    history,
-                    `/edit/${encodeURIComponent(space.id)}/${tab.id}`
-                  )}
+                  {...reactRouterNavigate(history, `/edit/${encodeURIComponent(id)}/${tab.id}`)}
                 >
                   {tab.name}
                 </EuiTab>
