@@ -26,8 +26,6 @@ function parseBfetchResponse(resp: request.Response, compressed: boolean = false
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const svlCommonApi = getService('svlCommonApi');
-
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -45,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
@@ -81,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/bsearch?compress=true`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
@@ -117,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
@@ -163,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
@@ -197,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/bsearch`)
           .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             batch: [
@@ -240,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post(`/internal/bsearch`)
             .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({
               batch: [

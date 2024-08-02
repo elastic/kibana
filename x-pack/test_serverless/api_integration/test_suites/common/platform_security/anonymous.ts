@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/anonymous', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      internalReqHeader = svlUserManager.getInternalRequestHeader();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);

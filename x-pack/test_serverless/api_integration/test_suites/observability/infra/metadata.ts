@@ -24,7 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
 
   const fetchMetadata = async (
     body: InfraMetadataRequest,
@@ -32,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<InfraMetadata | undefined> => {
     const response = await supertestWithoutAuth
       .post('/api/infra/metadata')
-      .set(svlCommonApi.getInternalRequestHeader())
+      .set(svlUserManager.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);

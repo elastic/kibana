@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('route access disabled', async () => {
       const { body, status } = await supertestWithoutAuth
         .get('/internal/security/_check_security_features')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       svlCommonApi.assertApiNotFound(body, status);
     });

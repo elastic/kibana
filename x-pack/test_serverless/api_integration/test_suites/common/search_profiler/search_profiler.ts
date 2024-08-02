@@ -13,7 +13,6 @@ import { RoleCredentials } from '../../../../shared/services';
 const API_BASE_PATH = '/api/searchprofiler';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const supertestWithoutAuth = getService('supertestWithoutAuth') as any;
@@ -38,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertestWithoutAuth
         .post(`${API_BASE_PATH}/profile`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set('Content-Type', 'application/json;charset=UTF-8')
         .set(roleAuthc.apiKeyHeader)
         .send(payload)
@@ -59,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertestWithoutAuth
         .post(`${API_BASE_PATH}/profile`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set('Content-Type', 'application/json;charset=UTF-8')
         .set(roleAuthc.apiKeyHeader)
         .send(payloadWithInvalidIndex)

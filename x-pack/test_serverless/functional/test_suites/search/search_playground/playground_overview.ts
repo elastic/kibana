@@ -16,7 +16,6 @@ const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -40,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         deepLinkId: 'searchPlayground',
       });
 
-      const requestHeader = svlCommonApi.getInternalRequestHeader();
+      const requestHeader = svlUserManager.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       createConnector = async () => {
         removeOpenAIConnector = await createOpenAIConnector({

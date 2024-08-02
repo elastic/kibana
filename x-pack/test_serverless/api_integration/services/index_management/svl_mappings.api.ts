@@ -11,18 +11,18 @@ import { RoleCredentials } from '../../../shared/services';
 
 export function SvlMappingsApi({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
 
   const getMapping = async (index: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .get(`${API_BASE_PATH}/mapping/${index}`)
-      .set(svlCommonApi.getInternalRequestHeader())
+      .set(svlUserManager.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const updateMappings = async (index: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .put(`${API_BASE_PATH}/mapping/${index}`)
-      .set(svlCommonApi.getInternalRequestHeader())
+      .set(svlUserManager.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({ name: { type: 'text' } });
 

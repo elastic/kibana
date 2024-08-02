@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
     // it('rejects request to update a space with disabledFeatures', async () => {
     //   const { body, status } = await supertest
     //     .put('/api/spaces/space/default')
-    //     .set(svlCommonApi.getInternalRequestHeader())
+    //     .set(svlUserManager.getInternalRequestHeader())
     //     .send({
     //       id: 'custom',
     //       name: 'Custom',

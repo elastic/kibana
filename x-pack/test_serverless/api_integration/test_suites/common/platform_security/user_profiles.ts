@@ -12,7 +12,6 @@ import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const samlTools = getService('samlTools');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -33,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('update', async () => {
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/user_profile/_data`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .set(await samlTools.login(kibanaTestUser.username))
             .send({ key: 'value' });
@@ -44,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
             .set(roleAuthc.apiKeyHeader)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(await samlTools.login(kibanaTestUser.username));
           expect(status).not.toBe(404);
         });
@@ -52,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('bulk get', async () => {
           const { status } = await supertestWithoutAuth
             .get(`/internal/security/user_profile`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .set(await samlTools.login(kibanaTestUser.username))
             .send({ uids: ['12345678'] });

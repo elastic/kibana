@@ -71,7 +71,7 @@ type FetchHistoricalSummaryParams = t.OutputOf<
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const retry = getService('retry');
   const requestTimeout = 30 * 1000;
   const retryTimeout = 180 * 1000;
@@ -80,7 +80,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     async create(slo: SloParams, roleAuthc: RoleCredentials) {
       const { body } = await supertest
         .post(`/api/observability/slos`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(slo);
 
@@ -90,7 +90,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     async delete({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       const response = await supertest
         .delete(`/api/observability/slos/${sloId}`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       return response;
     },
@@ -101,7 +101,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     ): Promise<FetchHistoricalSummaryResponse> {
       const { body } = await supertest
         .post(`/internal/observability/slos/_historical_summary`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(params);
 
@@ -121,7 +121,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
           .delete(`/api/observability/slos/${sloId}`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (!response.ok) {
@@ -138,7 +138,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
           .get(`/api/observability/slos/${sloId}`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
@@ -196,14 +196,14 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     async deleteAllSLOs() {
       const response = await supertest
         .get(`/api/observability/slos/_definitions`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .send()
         .expect(200);
       await Promise.all(
         response.body.results.map(({ id }: { id: string }) => {
           return supertest
             .delete(`/api/observability/slos/${id}`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send()
             .expect(204);
         })

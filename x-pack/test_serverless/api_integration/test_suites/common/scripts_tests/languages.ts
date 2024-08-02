@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -30,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
       expect(response.body).to.be.an('array');
@@ -41,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
       expect(response.body).to.contain('expression');

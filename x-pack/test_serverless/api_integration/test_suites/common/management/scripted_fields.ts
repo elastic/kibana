@@ -13,7 +13,6 @@ import { InternalRequestHeader, RoleCredentials } from '../../../../shared/servi
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -22,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('scripted fields disabled', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      internalReqHeader = svlUserManager.getInternalRequestHeader();
       // TODO: We're running into a 'Duplicate data view: basic_index'
       // error in Serverless, so make sure to clean up first
       await kibanaServer.savedObjects.cleanStandardList();

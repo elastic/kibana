@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
@@ -38,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should return 200 with individual responses', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
         expect(body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
@@ -50,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 200 with empty response', async () => {
           const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find?type=wigwags')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
           expect(body).to.eql({
@@ -68,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(
               '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
@@ -85,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return 400 when using searchFields', async () => {
           const { body } = await supertestWithoutAuth
             .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(400);
           expect(body).to.eql({
@@ -123,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'visualization',
               hasReference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
             })
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
           const objects = body.saved_objects;
@@ -142,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
             hasReferenceOperator: 'OR',
           })
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader);
 
         expect(response.status).to.eql(200);
@@ -161,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
             ]),
             hasReferenceOperator: 'AND',
           })
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
         const objects = body.saved_objects;
@@ -177,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
               sortField: 'type',
               sortOrder: 'asc',
             })
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
@@ -194,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
               sortField: 'type',
               sortOrder: 'desc',
             })
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
@@ -221,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for searches', async () => {
         const response = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=search')
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
@@ -241,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for dashboards', async () => {
         const response = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=dashboard')
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
@@ -261,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for visualizations', async () => {
         const response = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
         expect(response.body.saved_objects).to.have.length(2);
@@ -282,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should inject meta attributes for index patterns', async () => {
         const response = await supertestWithoutAuth
           .get('/api/kibana/management/saved_objects/_find?type=index-pattern')
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
         expect(response.body.saved_objects).to.have.length(1);

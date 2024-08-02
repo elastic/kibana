@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/authorization', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      internalReqHeader = svlUserManager.getInternalRequestHeader();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('get all privileges', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/api/security/privileges')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('get built-in elasticsearch privileges', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/internal/security/esPrivileges/builtin')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('create/update roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
               .put('/api/security/roleAuthc/test')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('get roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/api/security/roleAuthc/superuser')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('get all roles', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/api/security/roleAuthc')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('delete roleAuthc', async () => {
             const { body, status } = await supertestWithoutAuth
               .delete('/api/security/roleAuthc/superuser')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('get shared saved object permissions', async () => {
             const { body, status } = await supertestWithoutAuth
               .get('/internal/security/_share_saved_object_permissions')
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .set(roleAuthc.apiKeyHeader);
             svlCommonApi.assertApiNotFound(body, status);
           });
@@ -122,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('all Dashboard and Discover sub-feature privileges are disabled', async () => {
         const { body } = await supertest
           .get('/api/features')
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(adminCredentials)
           .expect(200);
 

@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      internalReqHeader = svlUserManager.getInternalRequestHeader();
       log.debug(`Creating index: '${indexName}'`);
       try {
         indexName = await svlIndicesHelpers.createIndex();

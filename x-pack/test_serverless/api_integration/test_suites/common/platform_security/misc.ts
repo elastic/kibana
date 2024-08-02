@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get index fields', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/fields/test')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ params: 'params' });
           svlCommonApi.assertApiNotFound(body, status);
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('fix deprecated roles', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/internal/security/deprecations/kibana_user_role/_fix_users')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('fix deprecated roleAuthc mappings', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/internal/security/deprecations/kibana_user_role/_fix_role_mappings')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get security checkup state', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/security_checkup/state')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get record auth type', async () => {
           const { status } = await supertestWithoutAuth
             .post('/internal/security/analytics/_record_auth_type')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).toBe(200);
         });

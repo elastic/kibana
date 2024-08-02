@@ -17,7 +17,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const browser = getService('browser');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
 
   /**
    * Delete browser cookies, clear session and local storages
@@ -94,7 +93,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           }
           const { body } = await supertestWithoutAuth
             .get('/internal/security/me')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set({ Cookie: `sid=${browserCookies[0].value}` });
 
           const email = await svlUserManager.getEmail(role);

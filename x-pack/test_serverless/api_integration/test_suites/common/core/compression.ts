@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -20,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertestWithoutAuth
         .get(url)
         .set('accept-encoding', 'gzip')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       expect(response.header).to.have.property('content-encoding', 'gzip');
     });
@@ -29,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertestWithoutAuth
         .get(url)
         .set('accept-encoding', 'gzip')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set('referer', 'https://some-host.com')
         .set(roleAuthc.apiKeyHeader);
       expect(response.header).to.have.property('content-encoding', 'gzip');

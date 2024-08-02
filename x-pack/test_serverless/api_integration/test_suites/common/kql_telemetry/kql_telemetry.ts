@@ -16,7 +16,6 @@ import { RoleCredentials } from '../../../../shared/services';
 export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -43,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .send({ opt_in: true })
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
@@ -62,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .send({ opt_in: false })
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
@@ -81,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .send({ opt_in: true })
         .expect('Content-Type', /json/)
         .set(roleAuthc.apiKeyHeader)
@@ -95,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('content-type', 'application/json')
         .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
         // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .send({ opt_in: false })
         .expect('Content-Type', /json/)
         .set(roleAuthc.apiKeyHeader)
@@ -110,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('content-type', 'application/json')
           .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({ opt_in: 'notabool' })
           .expect(400),
@@ -119,7 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('content-type', 'application/json')
           .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({ opt_in: 0 })
           .expect(400),
@@ -128,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('content-type', 'application/json')
           .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({ opt_in: null })
           .expect(400),
@@ -137,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('content-type', 'application/json')
           .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({ opt_in: undefined })
           .expect(400),
@@ -146,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('content-type', 'application/json')
           .set(ELASTIC_HTTP_VERSION_HEADER, KQL_TELEMETRY_ROUTE_LATEST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({})
           .expect(400),

@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -25,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`returns the translations with the correct headers`, async () => {
       const response = await supertestWithoutAuth
         .get('/translations/en.json')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
 
       expect(response.body.locale).to.eql('en');
@@ -40,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`returns a 404 when not using the correct locale`, async () => {
       const response = await supertestWithoutAuth
         .get('/translations/foo.json')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       expect(response.status).to.eql(404);
     });

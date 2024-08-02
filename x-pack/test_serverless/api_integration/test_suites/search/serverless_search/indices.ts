@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
@@ -28,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('has route', async () => {
         const { body } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/indices`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
@@ -37,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts search_query', async () => {
         await supertestWithoutAuth
           .get(`${API_BASE_PATH}/indices`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .query({ search_query: 'foo' })
           .expect(200);
@@ -45,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('accepts from & size', async () => {
         await supertestWithoutAuth
           .get(`${API_BASE_PATH}/indices`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .query({ from: 0, size: 10 })
           .expect(200);

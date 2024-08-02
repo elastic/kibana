@@ -22,7 +22,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const requestTimeout = 30 * 1000;
   const retryTimeout = 120 * 1000;
   const logger = getService('log');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
@@ -41,7 +41,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
           .get(`/api/alerting/rule/${ruleId}`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         const { execution_status: executionStatus } = response.body || {};
@@ -112,7 +112,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/actions/connector`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           name,
@@ -146,7 +146,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/alerting/rule`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           params,
@@ -168,7 +168,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       }
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },

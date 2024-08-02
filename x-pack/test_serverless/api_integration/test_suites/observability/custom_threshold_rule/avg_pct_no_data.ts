@@ -25,7 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
@@ -41,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      internalReqHeader = svlUserManager.getInternalRequestHeader();
       await dataViewApi.create({
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,

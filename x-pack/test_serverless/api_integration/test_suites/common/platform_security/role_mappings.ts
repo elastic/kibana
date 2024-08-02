@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('create/update roleAuthc mapping', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/internal/security/role_mapping/test')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get roleAuthc mapping', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/role_mapping/test')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get all roleAuthc mappings', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/role_mapping')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
           // this test works because the message for a missing endpoint is different from a missing roleAuthc mapping
           const { body, status } = await supertestWithoutAuth
             .delete('/internal/security/role_mapping/test')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });

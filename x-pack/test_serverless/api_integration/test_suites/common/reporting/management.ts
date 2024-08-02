@@ -19,7 +19,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const reportingAPI = getService('svlReportingApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   let adminUser: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
@@ -27,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('Reporting Management', function () {
     before(async () => {
       adminUser = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      internalReqHeader = svlUserManager.getInternalRequestHeader();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminUser);

@@ -19,7 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
 
   const fetchSnapshot = async (
     body: SnapshotRequest,
@@ -27,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<SnapshotNodeResponse | undefined> => {
     const response = await supertestWithoutAuth
       .post('/api/metrics/snapshot')
-      .set(svlCommonApi.getInternalRequestHeader())
+      .set(svlUserManager.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);

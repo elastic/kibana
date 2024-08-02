@@ -14,7 +14,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
 
   describe('post_case', () => {
@@ -31,7 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('403 when trying to create case', async () => {
       await supertestWithoutAuth
         .post(CASES_URL)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           description: 'This is a brand new case of a bad meanie defacing data',

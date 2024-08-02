@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/users/elastic')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get all', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/users')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('create/update', async () => {
           const { body, status } = await supertestWithoutAuth
             .post(`/internal/security/users/some_testuser`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send({ username: 'some_testuser', password: 'testpassword', roles: [] });
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('delete', async () => {
           const { body, status } = await supertestWithoutAuth
             .delete(`/internal/security/users/elastic`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('disable', async () => {
           const { body, status } = await supertestWithoutAuth
             .post(`/internal/security/users/elastic/_disable`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('enable', async () => {
           const { body, status } = await supertestWithoutAuth
             .post(`/internal/security/users/elastic/_enable`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -76,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('set password', async () => {
           const { body, status } = await supertestWithoutAuth
             .post(`/internal/security/users/{username}/password`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send({
               password: 'old_pw',
               newPassword: 'new_pw',
@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get', async () => {
           const { status } = await supertestWithoutAuth
             .get('/internal/security/users/elastic')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).not.toBe(404);
         });
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get all', async () => {
           const { status } = await supertestWithoutAuth
             .get('/internal/security/users')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).not.toBe(404);
         });
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('create/update', async () => {
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/users/some_testuser`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send({ username: 'some_testuser', password: 'testpassword', roles: [] });
           expect(status).not.toBe(404);
         });
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('delete', async () => {
           const { status } = await supertestWithoutAuth
             .delete(`/internal/security/users/elastic`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).not.toBe(404);
         });
@@ -122,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('disable', async () => {
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/users/elastic/_disable`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).not.toBe(404);
         });
@@ -130,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('enable', async () => {
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/users/elastic/_enable`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).not.toBe(404);
         });
@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('set password', async () => {
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/users/{username}/password`)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send({
               password: 'old_pw',
               newPassword: 'new_pw',

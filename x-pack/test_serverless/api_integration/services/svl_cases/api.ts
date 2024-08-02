@@ -24,7 +24,7 @@ export interface User {
 export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
   const kbnServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
 
   const defaultUser = {
     email: null,
@@ -124,7 +124,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       const apiCall = supertestWithoutAuth.post(`${CASES_URL}`);
 
       const response = await apiCall
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(params)
         .expect(expectedHttpCode);
@@ -146,7 +146,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
     ): Promise<CasesFindResponse> {
       const { body: res } = await supertestWithoutAuth
         .get(`${this.getSpaceUrlPrefix(space)}${CASES_URL}/_find`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .query({ sortOrder: 'asc', ...query })
         .send()
@@ -175,7 +175,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
             space
           )}${CASES_URL}/${caseId}?includeComments=${includeComments}`
         )
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(expectedHttpCode);
 

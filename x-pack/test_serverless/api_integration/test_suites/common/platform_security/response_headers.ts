@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -39,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { header } = await supertestWithoutAuth
         .get(`/internal/security/me`)
         .set(roleAuthc.apiKeyHeader)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .expect(200);
 
       expect(header).toBeDefined();
@@ -55,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('redirect endpoint response contains default security headers', async () => {
       const { header } = await supertestWithoutAuth
         .get(`/logout`)
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .expect(200);
 
       expect(header).toBeDefined();

@@ -20,8 +20,6 @@ const INDEX_NAME = 'api-integration-test-field-preview';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const svlCommonApi = getService('svlCommonApi');
-
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -100,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post(FIELD_PREVIEW_PATH)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
             // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send(payload)
             .set('kbn-xsrf', 'xxx')
             .set(roleAuthc.apiKeyHeader)
@@ -117,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             context: 'keyword_field',
             index: INDEX_NAME,
@@ -132,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             script: { source: 'emit("hello")' },
             index: INDEX_NAME,
@@ -147,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             script: { source: 'emit("hello")' },
             context: 'keyword_field',
@@ -167,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(FIELD_PREVIEW_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
           // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             script: { source: 'emit(123)' }, // We send a long but the type is "keyword"
             context: 'keyword_field',

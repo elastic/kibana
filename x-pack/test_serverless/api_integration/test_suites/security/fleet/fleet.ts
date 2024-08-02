@@ -14,7 +14,6 @@ import {
 } from '../../common/fleet/default_setup';
 
 export default function (ctx: FtrProviderContext) {
-  const svlCommonApi = ctx.getService('svlCommonApi');
   const supertestWithoutAuth = ctx.getService('supertestWithoutAuth');
   const svlUserManager = ctx.getService('svlUserManager');
   let roleAuthc: RoleCredentials;
@@ -39,7 +38,7 @@ export default function (ctx: FtrProviderContext) {
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/fleet_server_hosts')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'test',
@@ -58,7 +57,7 @@ export default function (ctx: FtrProviderContext) {
     it('accepts request to create a new fleet server hosts if host url is same as default', async () => {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/fleet_server_hosts')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test Fleet server host',
@@ -77,7 +76,7 @@ export default function (ctx: FtrProviderContext) {
     it('rejects request to create a new elasticsearch output if host is different from default', async () => {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/outputs')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test output',
@@ -96,7 +95,7 @@ export default function (ctx: FtrProviderContext) {
     it('accepts request to create a new elasticsearch output if host url is same as default', async () => {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/outputs')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test output',

@@ -13,7 +13,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
-  const svlCommonApi = getService('svlCommonApi');
 
   describe('GET /api/console/api_server', () => {
     before(async () => {
@@ -27,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/api/console/api_server')
         .set('kbn-xsrf', 'true')
 
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .expect(200);
       expect(body.es).to.be.ok();
       const {

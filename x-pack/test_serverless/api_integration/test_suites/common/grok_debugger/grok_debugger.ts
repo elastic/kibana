@@ -12,7 +12,6 @@ import { RoleCredentials } from '../../../../shared/services';
 const API_BASE_PATH = '/api/grokdebugger';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -33,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/simulate`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(requestBody)
           .set(roleAuthc.apiKeyHeader)
@@ -58,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/simulate`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(requestBody)
           .set(roleAuthc.apiKeyHeader)
@@ -80,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/simulate`)
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(requestBody)
           .set(roleAuthc.apiKeyHeader)
