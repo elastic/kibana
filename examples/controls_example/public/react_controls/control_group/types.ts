@@ -31,13 +31,16 @@ import { Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
+/**
+ * ----------------------------------------------------------------
+ * Control group API
+ * ----------------------------------------------------------------
+ */
+
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
   labelPosition: PublishingSubject<ControlStyle>;
 };
-export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
-  [panelId: string]: ControlState;
-}
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
@@ -45,8 +48,6 @@ export type ControlGroupUnsavedChanges = Omit<
 > & {
   filters: Filter[] | undefined;
 };
-
-export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
@@ -67,7 +68,13 @@ export type ControlGroupApi = PresentationContainer &
     untilInitialized: () => Promise<void>;
   };
 
-export interface ControlGroupRuntimeState {
+/**
+ * ----------------------------------------------------------------
+ * Control group state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
@@ -75,7 +82,8 @@ export interface ControlGroupRuntimeState {
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  initialChildControlState: ControlPanelsState<ControlPanelState>;
+  initialChildControlState: ControlPanelsState<State>;
+
   /** TODO: Handle the editor config, which is used with the control group renderer component */
   editorConfig?: {
     hideDataViewSelector?: boolean;
@@ -84,14 +92,9 @@ export interface ControlGroupRuntimeState {
   };
 }
 
-export type ControlGroupEditorState = Pick<
-  ControlGroupRuntimeState,
-  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
->;
-
 export interface ControlGroupSerializedState {
   chainingSystem: ControlGroupChainingSystem;
-  panelsJSON: string;
+  panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;
   // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
@@ -99,4 +102,36 @@ export interface ControlGroupSerializedState {
   // In runtime state, we refer to the inverse of this property as `autoApplySelections`
   // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
   showApplySelections: boolean | undefined;
+}
+
+export type ControlGroupEditorState = Pick<
+  ControlGroupRuntimeState,
+  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
+>;
+
+/**
+ * ----------------------------------------------------------------
+ * Control group panel state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlPanelsState<State extends DefaultControlState = DefaultControlState> {
+  [panelId: string]: ControlPanelState<State>;
+}
+
+export type ControlPanelState<State extends DefaultControlState = DefaultControlState> = State & {
+  type: string;
+  order: number;
+};
+
+/**
+ * `SerializedControlPanelState` is flattened and converted to `ControlPanelState` via the deserialize method of the
+ * control group, so the type is only relevent to the control group (no individual control ever sees `explicitInput`)
+ */
+export interface SerializedControlPanelState<
+  State extends DefaultControlState = DefaultControlState
+> extends DefaultControlState {
+  type: string;
+  order: number;
+  explicitInput: Omit<State, keyof DefaultControlState> & { id: string };
 }

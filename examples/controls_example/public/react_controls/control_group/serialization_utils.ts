@@ -9,33 +9,47 @@
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import { DefaultDataControlState } from '../data_controls/types';
+import {
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlPanelsState,
+  ControlPanelState,
+  SerializedControlPanelState,
+} from './types';
 
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState => {
-  const panels = JSON.parse(state.rawState.panelsJSON);
+  const panels: ControlPanelsState<SerializedControlPanelState> = JSON.parse(
+    state.rawState.panelsJSON
+  );
   const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
+
+  /** Flatten the state of each panel by removing `explicitInput` */
+  const flattenedPanels: ControlPanelsState<ControlPanelState> = Object.keys(panels).reduce(
+    (prev, panelId) => {
+      const currentPanel: SerializedControlPanelState = panels[panelId];
+      const currentPanelExplicitInput = panels[panelId].explicitInput;
+      return {
+        ...prev,
+        [panelId]: { ...omit(currentPanel, 'explicitInput'), ...currentPanelExplicitInput },
+      };
+    },
+    {}
+  );
 
   /** Inject data view references into each individual control */
   const references = state.references ?? [];
   references.forEach((reference) => {
     const referenceName = reference.name;
     const panelId = referenceName.substring('controlGroup_'.length, referenceName.lastIndexOf(':'));
-    if (panels[panelId]) {
-      panels[panelId].dataViewId = reference.id;
+    if (flattenedPanels[panelId]) {
+      // if the panel has a reference to a data view, then it is a data control so cast it to the proper type
+      (flattenedPanels[panelId] as ControlPanelState<DefaultDataControlState>).dataViewId =
+        reference.id;
     }
   });
-
-  /** Flatten the state of each panel by removing `explicitInput` */
-  const flattenedPanels = Object.keys(panels).reduce((prev, panelId) => {
-    const currentPanel = panels[panelId];
-    const currentPanelExplicitInput = panels[panelId].explicitInput;
-    return {
-      ...prev,
-      [panelId]: { ...omit(currentPanel, 'explicitInput'), ...currentPanelExplicitInput },
-    };
-  }, {});
 
   return {
     ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),

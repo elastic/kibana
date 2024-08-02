@@ -21,6 +21,7 @@ import { OPTIONS_LIST_CONTROL_TYPE } from './react_controls/data_controls/option
 import { RANGE_SLIDER_CONTROL_TYPE } from './react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from './react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from './react_controls/timeslider_control/types';
+import { setKibanaServices } from './react_controls/services/kibana_services';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -123,6 +124,8 @@ export class ControlsExamplePlugin
   }
 
   public start(core: CoreStart, deps: ControlsExampleStartDeps) {
+    setKibanaServices(core, deps);
+
     const editControlAction = new EditControlAction();
     deps.uiActions.registerAction(editControlAction);
     deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);

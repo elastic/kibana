@@ -66,7 +66,7 @@ export type ControlApiRegistration<ControlApi extends DefaultControlApi = Defaul
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
   Omit<
     ControlApiRegistration<ControlApi>,
-    'serializeState' | 'getTypeDisplayName' | 'clearSelections'
+    'serializeState' | 'getTypeDisplayName' | 'clearSelections' | 'selectionsToFilter'
   >;
 
 // TODO: Move this to the Control plugin's setup contract

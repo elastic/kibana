@@ -32,7 +32,7 @@ const App = ({
   data,
   navigation,
 }: { core: CoreStart } & Pick<ControlsExampleStartDeps, 'data' | 'navigation'>) => {
-  const [selectedTabId, setSelectedTabId] = useState(CONTROLS_REFACTOR_TEST); // TODO: Make this the first tab
+  const [selectedTabId, setSelectedTabId] = useState(CONTROLS_AS_A_BUILDING_BLOCK);
 
   function onSelectedTabChanged(tabId: string) {
     setSelectedTabId(tabId);

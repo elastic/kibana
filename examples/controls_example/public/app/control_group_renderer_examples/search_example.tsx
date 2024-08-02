@@ -22,7 +22,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  AwaitingControlGroupAPI,
+  ControlGroupRenderer,
+} from '../../react_controls/control_group/external_api';
+
 import { PLUGIN_ID } from '../../constants';
 
 interface Props {
