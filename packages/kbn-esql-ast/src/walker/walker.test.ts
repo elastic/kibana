@@ -812,10 +812,44 @@ describe('Walker.params', () => {
   });
 });
 
+describe('Walker.find()', () => {
+  test('can find a bucket() function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.find(
+      getAstAndSyntaxErrors(query).ast!,
+      (node) => node.type === 'function' && node.name === 'bucket'
+    );
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'bucket',
+    });
+  });
+
+  test('finds the first "fn" function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.find(
+      getAstAndSyntaxErrors(query).ast!,
+      (node) => node.type === 'function' && node.name === 'fn'
+    );
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'fn',
+      args: [
+        {
+          type: 'literal',
+          value: 1,
+        },
+      ],
+    });
+  });
+});
+
 describe('Walker.hasFunction()', () => {
   test('can find assignment expression', () => {
-    const query1 = 'METRICS source bucket(bytes, 1 hour)';
-    const query2 = 'METRICS source var0 = bucket(bytes, 1 hour)';
+    const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
+    const query2 = 'FROM b | STATS var0 = bucket(bytes, 1 hour)';
     const has1 = Walker.hasFunction(getAstAndSyntaxErrors(query1).ast!, '=');
     const has2 = Walker.hasFunction(getAstAndSyntaxErrors(query2).ast!, '=');
 
