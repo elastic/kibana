@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { NoParametersRequestSchema } from './common/base';
-
-export const UnisolateRouteRequestSchema = NoParametersRequestSchema;
+export * from './unisolate';
+export * from './unisolate.gen';
+export * from './deprecated_unisolate.gen';
