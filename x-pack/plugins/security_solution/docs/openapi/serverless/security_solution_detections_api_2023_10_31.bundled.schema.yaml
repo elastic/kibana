@@ -1248,44 +1248,6 @@ components:
       type: integer
     DataViewId:
       type: string
-    DefaultParams:
-      type: object
-      properties:
-        command:
-          enum:
-            - isolate
-          type: string
-        comment:
-          type: string
-      required:
-        - command
-    EcsMapping:
-      additionalProperties:
-        type: object
-        properties:
-          field:
-            type: string
-          value:
-            oneOf:
-              - type: string
-              - items:
-                  type: string
-                type: array
-      type: object
-    EndpointResponseAction:
-      type: object
-      properties:
-        action_type_id:
-          enum:
-            - .endpoint
-          type: string
-        params:
-          oneOf:
-            - $ref: '#/components/schemas/DefaultParams'
-            - $ref: '#/components/schemas/ProcessesParams'
-      required:
-        - action_type_id
-        - params
     EqlOptionalFields:
       type: object
       properties:
@@ -1299,10 +1261,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/TiebreakerField'
         timestamp_field:
@@ -1990,10 +1948,6 @@ components:
       properties:
         alert_suppression:
           $ref: '#/components/schemas/AlertSuppression'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
     EsqlRulePatchProps:
       allOf:
         - type: object
@@ -3299,58 +3253,6 @@ components:
         - message
         - status_code
         - rules
-    OsqueryParams:
-      type: object
-      properties:
-        ecs_mapping:
-          $ref: '#/components/schemas/EcsMapping'
-        pack_id:
-          type: string
-        queries:
-          items:
-            $ref: '#/components/schemas/OsqueryQuery'
-          type: array
-        query:
-          type: string
-        saved_query_id:
-          type: string
-        timeout:
-          type: number
-    OsqueryQuery:
-      type: object
-      properties:
-        ecs_mapping:
-          $ref: '#/components/schemas/EcsMapping'
-        id:
-          description: Query ID
-          type: string
-        platform:
-          type: string
-        query:
-          description: Query to run
-          type: string
-        removed:
-          type: boolean
-        snapshot:
-          type: boolean
-        version:
-          description: Query version
-          type: string
-      required:
-        - id
-        - query
-    OsqueryResponseAction:
-      type: object
-      properties:
-        action_type_id:
-          enum:
-            - .osquery
-          type: string
-        params:
-          $ref: '#/components/schemas/OsqueryParams'
-      required:
-        - action_type_id
-        - params
     PlatformErrorResponse:
       type: object
       properties:
@@ -3364,31 +3266,6 @@ components:
         - statusCode
         - error
         - message
-    ProcessesParams:
-      type: object
-      properties:
-        command:
-          enum:
-            - kill-process
-            - suspend-process
-          type: string
-        comment:
-          type: string
-        config:
-          type: object
-          properties:
-            field:
-              description: Field to use instead of process.pid
-              type: string
-            overwrite:
-              default: true
-              description: Whether to overwrite field with process.pid
-              type: boolean
-          required:
-            - field
-      required:
-        - command
-        - config
     QueryRule:
       allOf:
         - type: object
@@ -3617,10 +3494,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
         saved_id:
           $ref: '#/components/schemas/SavedQueryId'
     QueryRulePatchFields:
@@ -3987,10 +3860,6 @@ components:
       required:
         - name
         - type
-    ResponseAction:
-      oneOf:
-        - $ref: '#/components/schemas/OsqueryResponseAction'
-        - $ref: '#/components/schemas/EndpointResponseAction'
     ResponseFields:
       type: object
       properties:
@@ -4648,10 +4517,6 @@ components:
           $ref: '#/components/schemas/IndexPatternArray'
         query:
           $ref: '#/components/schemas/RuleQuery'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
     SavedQueryRulePatchFields:
       allOf:
         - type: object
