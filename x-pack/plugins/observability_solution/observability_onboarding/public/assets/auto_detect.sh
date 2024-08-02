@@ -6,7 +6,19 @@ fail() {
 }
 
 if [ -z "${BASH_VERSION:-}" ]; then
-  fail "Bash is requred to run this script"
+  fail "Bash is required to run this script"
+fi
+
+if ! command -v curl >/dev/null 2>&1; then
+    fail "curl is required to run this script"
+fi
+
+# Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
+LSOF_PATH=""
+if command -v lsof >/dev/null 2>&1; then
+    LSOF_PATH=$(command -v lsof)
+elif command -v /usr/sbin/lsof >/dev/null 2>&1; then
+    LSOF_PATH="/usr/sbin/lsof"
 fi
 
 install_api_key_encoded=""
@@ -106,7 +118,7 @@ elif [ "${OS}" == "Darwin" ]; then
   fi
   elastic_agent_config_path=/Library/Elastic/Agent/elastic-agent.yml
 else
-  fail "This script is only supported on linux and macOS"
+  fail "This script is only supported on Linux and macOS"
 fi
 
 elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch}"
@@ -136,6 +148,7 @@ update_step_progress() {
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
+  rm -rf "./${elastic_agent_artifact_name}" "./${elastic_agent_artifact_name}.tar.gz"
   curl -L -O $download_url --silent --fail
 
   if [ "$?" -eq 0 ]; then
@@ -293,19 +306,27 @@ read_open_log_file_list() {
     "^\/var\/log\/system.log"
     "^\/var\/log\/messages"
     "^\/var\/log\/secure"
+    # Exclude previous installation logs
+    "\/opt\/Elastic\/Agent\/"
+    "\/Library\/Elastic\/Agent\/"
   )
 
-  local list=$(lsof -Fn / | grep "^n.*\.log$" | cut -c2- | sort -u)
+  local list=$("$LSOF_PATH" -Fn / | grep "^n.*\.log$" | cut -c2- | sort -u)
 
   # Filtering by the exclude patterns
   while IFS= read -r line; do
-      if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
-          unknown_log_file_path_list_string+="$line\n"
-      fi
+    if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
+        unknown_log_file_path_list_string+="$line\n"
+    fi
   done <<< "$list"
 }
 
 detect_known_integrations() {
+  # Always suggesting to install System integartion.
+  # Even when there is no system logs on the host,
+  # System integration will still be able to to collect metrics.
+  known_integrations_list_string+="system"$'\n'
+
   local nginx_patterns=(
     "/var/log/nginx/access.log*"
     "/var/log/nginx/error.log*"
@@ -333,25 +354,11 @@ detect_known_integrations() {
     fi
   done
 
-  if compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
+  if [ -S /var/run/docker.sock ]; then
+    known_integrations_list_string+="docker"$'\n'
+  elif compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
     known_integrations_list_string+="docker"$'\n'
   fi
-
-  local system_patterns=(
-    "/var/log/messages*"
-    "/var/log/syslog*"
-    "/var/log/system*"
-    "/var/log/auth.log*"
-    "/var/log/secure*"
-    "/var/log/system.log*"
-  )
-
-  for pattern in "${system_patterns[@]}"; do
-    if compgen -G "$pattern" > /dev/null; then
-      known_integrations_list_string+="system"$'\n'
-      break
-    fi
-  done
 }
 
 known_integration_title() {
@@ -367,7 +374,7 @@ known_integration_title() {
       echo "Docker Container Logs"
       ;;
     "system")
-      echo "System Logs"
+      echo "System Logs And Metrics"
       ;;
     *)
       echo "Unknown"
@@ -377,6 +384,10 @@ known_integration_title() {
 
 build_unknown_log_file_patterns() {
   while IFS= read -r log_file_path; do
+    if [ -z "$log_file_path" ]; then
+      continue
+    fi
+
     unknown_log_file_pattern_list_string+="$(dirname "$log_file_path")/*.log\n"
   done <<< "$(echo -e $unknown_log_file_path_list_string)"
 
@@ -506,8 +517,15 @@ generate_custom_integration_name() {
 printf "\e[1m%s\e[0m\n" "Looking for log files..."
 update_step_progress "logs-detect" "loading"
 detect_known_integrations
-read_open_log_file_list
-build_unknown_log_file_patterns
+
+# Check if LSOF_PATH is executable
+if [ -x "$LSOF_PATH" ]; then
+    read_open_log_file_list
+    build_unknown_log_file_patterns
+else
+    echo -e "\nlsof is required to detect custom log files. Looking for known integrations only."
+fi
+
 update_step_progress "logs-detect" "complete"
 echo -e "\nWe found these logs on your system:"
 select_list

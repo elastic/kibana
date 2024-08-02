@@ -32,6 +32,7 @@ const assertHasCreatedDefinition = (
   expect(soClient.create).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition, {
     id: definition.id,
     overwrite: true,
+    managed: definition.managed,
   });
 
   expect(esClient.indices.putIndexTemplate).toBeCalledTimes(2);
