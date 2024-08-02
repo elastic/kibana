@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { resolve } from 'path';
 import Fs from 'fs';
 import {
   MOCK_IDP_REALM_NAME,
@@ -57,8 +56,6 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
       },
     };
 
-    const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
-
     const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
 
     return {
@@ -93,7 +90,6 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.kbnServerArgs || []),
-          `--plugin-path=${testEndpointsPlugin}`,
           '--xpack.security.authc.selector.enabled=false',
           `--xpack.security.authc.providers=${JSON.stringify({
             saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },
