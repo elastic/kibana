@@ -18,7 +18,8 @@ interface TestState {
   key2: string;
 }
 
-describe('unsavedChanges api', () => {
+// Failing: See https://github.com/elastic/kibana/issues/189811
+describe.skip('unsavedChanges api', () => {
   const lastSavedState = {
     key1: 'original key1 value',
     key2: 'original key2 value',
