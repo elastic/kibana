@@ -910,6 +910,93 @@ describe('Walker.match()', () => {
   });
 });
 
+describe('Walker.matchAll()', () => {
+  test('find all "fn" functions', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.matchAll(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: 'fn',
+    });
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 1,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 2,
+          },
+        ],
+      },
+    ]);
+  });
+
+  test('find all "fn" and "agg" functions', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.matchAll(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: ['fn', 'agg'],
+    });
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 1,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 2,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'agg',
+      },
+    ]);
+  });
+
+  test('find all functions which start with "b" or "a"', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.matchAll(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: /^a|b/i,
+    });
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'bucket',
+      },
+      {
+        type: 'function',
+        name: 'agg',
+      },
+    ]);
+  });
+});
+
 describe('Walker.hasFunction()', () => {
   test('can find assignment expression', () => {
     const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
