@@ -227,8 +227,8 @@ export const BareNote = z.object({
 export type Note = z.infer<typeof Note>;
 export const Note = BareNote.merge(
   z.object({
-    noteId: z.string().optional(),
-    version: z.string().optional(),
+    noteId: z.string(),
+    version: z.string(),
   })
 );
 
@@ -267,6 +267,24 @@ export const FavoriteTimelineResponse = z.object({
   templateTimelineVersion: z.number().nullable().optional(),
   timelineType: TimelineType.optional(),
   favorite: z.array(FavoriteTimelineResult).optional(),
+});
+
+export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternalRefs>;
+export const BareNoteWithoutExternalRefs = z.object({
+  eventId: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  timelineId: z.string().nullable().optional(),
+  created: z.number().nullable().optional(),
+  createdBy: z.string().nullable().optional(),
+  updated: z.number().nullable().optional(),
+  updatedBy: z.string().nullable().optional(),
+});
+
+export type ResponseNote = z.infer<typeof ResponseNote>;
+export const ResponseNote = z.object({
+  code: z.number(),
+  message: z.string(),
+  note: Note,
 });
 
 export type GlobalNote = z.infer<typeof GlobalNote>;

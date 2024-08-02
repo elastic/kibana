@@ -17,7 +17,9 @@ import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
 import {
+  BareNote,
   DataProviderTypeEnum,
+  type Note,
   RowRendererId,
   RowRendererIdEnum,
   SortFieldTimeline,
@@ -31,8 +33,10 @@ import {
 } from './components.gen';
 
 export {
+  BareNote,
   DataProviderType,
   DataProviderTypeEnum,
+  Note,
   RowRendererId,
   RowRendererIdEnum,
   SortFieldTimeline,
@@ -83,8 +87,6 @@ export const BareNoteSchema = runtimeTypes.intersection([
   }),
 ]);
 
-export type BareNote = runtimeTypes.TypeOf<typeof BareNoteSchema>;
-
 /**
  * This type represents a note type stored in a saved object that does not include any fields that reference
  * other saved objects.
@@ -109,15 +111,7 @@ export const NoteRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-export type Note = runtimeTypes.TypeOf<typeof NoteRuntimeType>;
-
-export interface ResponseNote {
-  code?: Maybe<number>;
-
-  message?: Maybe<string>;
-
-  note: Note;
-}
+// type Note = runtimeTypes.TypeOf<typeof NoteRuntimeType>;
 
 /*
  *  ColumnHeader Types

@@ -9,3 +9,12 @@ export {
   DeleteTimelinesRequestBody,
   DeleteTimelinesResponse,
 } from './delete_timelines/delete_timelines_route.gen';
+
+export {
+  PersistNoteRouteRequestBody,
+  PersistNoteRouteResponse,
+  ResponseNote,
+} from './persist_note/persist_note_route.gen';
+export { DeleteNoteRequestBody, DeleteNoteResponse } from './delete_note/delete_note_route.gen';
+
+export { CleanDraftTimelinesRequestBody } from './clean_draft_timelines/clean_draft_timelines_route.gen';

@@ -133,7 +133,7 @@ export const createNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}) => {
+}): Promise<ResponseNote> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 
@@ -201,7 +201,7 @@ export const updateNote = async ({
   noteId: string;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}) => {
+}): Promise<ResponseNote> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 

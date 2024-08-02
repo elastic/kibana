@@ -6,17 +6,17 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
 
-import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { deleteNoteSchema } from '../../../../../common/api/timeline';
+import { DeleteNoteRequestBody, type DeleteNoteResponse } from '../../../../../common/api/timeline';
 import { deleteNote } from '../../saved_object/notes';
 
 export const deleteNoteRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
@@ -31,7 +31,7 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter, config: Co
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(deleteNoteSchema) },
+          request: { body: buildRouteValidationWithZod(DeleteNoteRequestBody) },
         },
         version: '2023-10-31',
       },
@@ -40,27 +40,25 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter, config: Co
 
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
-          const noteId = request.body?.noteId ?? '';
-          const noteIds = request.body?.noteIds ?? null;
-          if (noteIds != null) {
-            await deleteNote({
-              request: frameworkRequest,
-              noteIds,
-            });
-
-            return response.ok({
-              body: { data: {} },
-            });
-          } else {
-            await deleteNote({
-              request: frameworkRequest,
-              noteIds: [noteId],
-            });
-
-            return response.ok({
-              body: { data: {} },
-            });
+          if (!request.body) {
+            throw new Error('Missing request body');
           }
+          let noteIds: string[] = [];
+          if ('noteId' in request.body) {
+            noteIds = [request.body.noteId];
+          } else if ('noteIds' in request.body && Array.isArray(request.body.noteIds)) {
+            noteIds = request.body.noteIds;
+          }
+
+          await deleteNote({
+            request: frameworkRequest,
+            noteIds,
+          });
+
+          const body: DeleteNoteResponse = { data: {} };
+          return response.ok({
+            body,
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

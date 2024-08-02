@@ -305,6 +305,30 @@ components:
           nullable: true
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
+    BareNoteWithoutExternalRefs:
+      type: object
+      properties:
+        eventId:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        timelineId:
+          type: string
+          nullable: true
+        created:
+          type: number
+          nullable: true
+        createdBy:
+          type: string
+          nullable: true
+        updated:
+          type: number
+          nullable: true
+        updatedBy:
+          type: string
+          nullable: true
     BareNote:
       type: object
       required: [timelineId]
@@ -334,6 +358,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/BareNote'
         - type: object
+          required: [noteId, version]
           properties:
             noteId:
               type: string

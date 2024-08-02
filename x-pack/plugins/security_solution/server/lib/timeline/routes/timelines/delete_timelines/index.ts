@@ -11,7 +11,7 @@ import type { ConfigType } from '../../../../..';
 import {
   DeleteTimelinesRequestBody,
   type DeleteTimelinesResponse,
-} from '../../../../../../common/api/timeline/routes';
+} from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
