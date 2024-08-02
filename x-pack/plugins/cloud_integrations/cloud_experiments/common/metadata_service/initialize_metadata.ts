@@ -59,5 +59,5 @@ export function initializeMetadata({
         }
       })
     )
-    .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
+    .subscribe(); // This subscription will stop when the metadataService stops because it completes the Observable
 }
