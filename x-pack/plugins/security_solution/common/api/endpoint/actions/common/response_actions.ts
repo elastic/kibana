@@ -8,7 +8,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import { UploadActionRequestSchema } from '../file_upload_route';
 import { ExecuteActionRequestSchema } from '../response_actions/execute';
 import { EndpointActionGetFileSchema } from '../response_actions/get_file';
 import { ScanActionRequestSchema } from '../response_actions/scan';
@@ -17,6 +16,7 @@ import { UnisolateRouteRequestSchema } from '../response_actions/unisolate';
 import { GetProcessesRouteRequestSchema } from '../response_actions/running_procs';
 import { KillProcessRouteRequestSchema } from '../response_actions/kill_process';
 import { SuspendProcessRouteRequestSchema } from '../response_actions/suspend_process';
+import { UploadActionRequestSchema } from '../response_actions/upload';
 
 export const ResponseActionBodySchema = schema.oneOf([
   IsolateRouteRequestSchema.body,
