@@ -42,15 +42,24 @@ export class TaskPartitioner {
     return this.podName;
   }
 
+  getPodPartitions(): number[] {
+    return this.podPartitions;
+  }
+
   async getPartitions(): Promise<number[]> {
     const lastUpdated = new Date(this.podPartitionsLastUpdated).getTime();
     const now = Date.now();
 
     // update the pod partitions cache after 10 seconds
     if (now - lastUpdated >= CACHE_INTERVAL) {
-      const allPodNames = await this.getAllPodNames();
-      this.podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
-      this.podPartitionsLastUpdated = now;
+      try {
+        const allPodNames = await this.getAllPodNames();
+        this.podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
+        this.podPartitionsLastUpdated = now;
+      } catch (error) {
+        // return the cached value
+        return this.podPartitions;
+      }
     }
     return this.podPartitions;
   }
