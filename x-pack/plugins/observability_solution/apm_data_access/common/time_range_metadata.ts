@@ -4,4 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { APMEventClient, type APMEventESSearchRequest } from '@kbn/apm-data-access-plugin/server';
+
+import { ApmDataSource } from './data_source';
+
+export interface TimeRangeMetadata {
+  isUsingServiceDestinationMetrics: boolean;
+  sources: Array<ApmDataSource & { hasDocs: boolean; hasDurationSummaryField: boolean }>;
+}

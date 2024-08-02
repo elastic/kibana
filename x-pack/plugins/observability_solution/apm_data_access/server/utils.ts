@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export {
-  ApmDocumentType,
-  type ApmServiceTransactionDocumentType,
-  type ApmTransactionDocumentType,
-} from '@kbn/apm-data-access-plugin/common';
+  getDocumentTypeFilterForServiceDestinationStatistics,
+  getBackwardCompatibleDocumentTypeFilter,
+  callAsyncWithDebug,
+  cancelEsRequestOnAbort,
+  getDebugBody,
+  getDebugTitle,
+} from './lib/helpers';
+
+export { withApmSpan } from './utils/with_apm_span';

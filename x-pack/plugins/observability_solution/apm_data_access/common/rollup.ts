@@ -4,4 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { APMEventClient, type APMEventESSearchRequest } from '@kbn/apm-data-access-plugin/server';
+
+export enum RollupInterval {
+  OneMinute = '1m',
+  TenMinutes = '10m',
+  SixtyMinutes = '60m',
+  None = 'none',
+}
