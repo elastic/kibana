@@ -66,6 +66,7 @@ import {
   canUseMultipleAgentPolicies,
   isSimplifiedCreatePackagePolicyRequest,
   removeFieldsFromInputSchema,
+  alignInputsAndStreams,
 } from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
@@ -276,6 +277,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
 
     const installation = await getInstallation({
       savedObjectsClient: soClient,
@@ -416,6 +418,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
+    newData.inputs = alignInputsAndStreams(newData.inputs);
     const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
     if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
       throw new PackagePolicyRequestError(errorMessage);

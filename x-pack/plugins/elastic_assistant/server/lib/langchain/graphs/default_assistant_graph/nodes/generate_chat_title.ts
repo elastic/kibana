@@ -46,7 +46,6 @@ export const generateChatTitle = async ({
   logger.debug(`chatTitle: ${chatTitle}`);
 
   return {
-    ...state,
     chatTitle,
   };
 };

@@ -32,7 +32,7 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
+export function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
   return shouldBeQuotedText(text, options)
     ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
     : text;
@@ -235,7 +235,7 @@ export const buildMatchingFieldsDefinition = (
 ): SuggestionRawDefinition[] =>
   fields.map((label) => ({
     label,
-    text: label,
+    text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',

@@ -16,7 +16,9 @@ import { asHttpRequestExecutionSource } from '../../lib/action_execution_source'
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: { description: 'An identifier for the connector.' },
+  }),
 });
 
 const bodySchema = schema.object({
@@ -34,6 +36,8 @@ export const executeActionRoute = (
       options: {
         access: 'public',
         summary: `Run a connector`,
+        deprecated: true,
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         body: bodySchema,

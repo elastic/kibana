@@ -42,6 +42,7 @@ import {
   isSingleItem,
   nonNullable,
   getColumnExists,
+  findPreviousWord,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -91,13 +92,9 @@ import {
 import { FunctionParameter } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
-type GetDataSourceFn = (sourceName: string) => Promise<
-  | {
-      name: string;
-      dataStreams?: Array<{ name: string; title?: string }>;
-    }
-  | undefined
->;
+type GetDataStreamsForIntegrationFn = (
+  sourceName: string
+) => Promise<Array<{ name: string; title?: string }> | undefined>;
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[]
@@ -147,17 +144,65 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
  * @param text
  * @returns
  */
-function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
+function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
   const stack = [];
-  const closingBrackets = { '(': ')', '[': ']' };
-  for (const char of text) {
-    if (char === bracketType) {
-      stack.push(bracketType);
-    } else if (char === closingBrackets[bracketType]) {
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  for (let i = 0; i < text.length; i++) {
+    const substr = text.substring(i, i + bracketType.length);
+    if (substr === closingBrackets[bracketType] && stack.length) {
       stack.pop();
+    } else if (substr === bracketType) {
+      stack.push(bracketType);
     }
   }
   return stack.length;
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * This is important because a syntactically-invalid query will not generate a good AST.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+function correctQuerySyntax(_query: string, context: EditorContext) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
+  const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
+  // if it's a comma by the user or a forced trigger by a function argument suggestion
+  // add a marker to make the expression still valid
+  const charThatNeedMarkers = [',', ':'];
+  if (
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
+    (context.triggerCharacter === ' ' &&
+      (isMathFunction(query, query.length) || isComma(query.trimEnd()[query.trimEnd().length - 1])))
+  ) {
+    query += EDITOR_MARKER;
+  }
+
+  // if there are unclosed brackets, close them
+  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
+    for (const [char, count] of [
+      ['"""', unclosedTripleQuotes],
+      ['"', unclosedQuotes],
+      [')', unclosedRoundBrackets],
+      [']', unclosedSquaredBrackets],
+    ]) {
+      if (count) {
+        // inject the closing brackets
+        query += Array(count).fill(char).join('');
+      }
+    }
+  }
+
+  return query;
 }
 
 export async function suggest(
@@ -169,44 +214,16 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   const innerText = fullText.substring(0, offset);
 
-  let finalText = innerText;
+  const correctedQuery = correctQuerySyntax(innerText, context);
 
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
-  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    (context.triggerKind === 0 &&
-      unclosedRoundBrackets === 0 &&
-      getLastCharFromTrimmed(innerText) !== '_') ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) ||
-        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
-  ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
-  }
-  // if there are unclosed brackets, close them
-  if (unclosedBrackets) {
-    for (const [char, count] of [
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        finalText += Array(count).fill(char).join('');
-      }
-    }
-  }
-
-  const { ast } = await astProvider(finalText);
+  const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
+  const queryForFields = getQueryForFields(
+    buildQueryUntilPreviousCommand(ast, correctedQuery),
+    ast
+  );
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -324,11 +341,13 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function getDatastreamsForIntegrationRetriever(resourceRetriever?: ESQLCallbacks) {
+function getDatastreamsForIntegrationRetriever(
+  resourceRetriever?: ESQLCallbacks
+): GetDataStreamsForIntegrationFn {
   const helper = getSourcesHelper(resourceRetriever);
   return async (sourceName: string) => {
     const list = (await helper()) || [];
-    return list.find(({ name }) => name === sourceName);
+    return list.find(({ name }) => name === sourceName)?.dataStreams;
   };
 }
 
@@ -502,7 +521,7 @@ async function getExpressionSuggestionsByType(
     node: ESQLSingleAstItem | undefined;
   },
   getSources: GetSourceFn,
-  getDatastreamsForIntegration: GetDataSourceFn,
+  getDatastreamsForIntegration: GetDataStreamsForIntegrationFn,
   getFieldsByType: GetFieldsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
@@ -510,6 +529,12 @@ async function getExpressionSuggestionsByType(
 ) {
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
+
+  // TODO - this is a workaround because it was too difficult to handle this case in a generic way :(
+  if (commandDef.name === 'from' && node && isSourceItem(node) && /\s/.test(node.name)) {
+    // FROM " <suggest>"
+    return [];
+  }
 
   // A new expression is considered either
   // * just after a command name => i.e. ... | STATS <here>
@@ -859,27 +884,31 @@ async function getExpressionSuggestionsByType(
       } else {
         const index = getSourcesFromCommands(commands, 'index');
         const canRemoveQuote = isNewExpression && innerText.includes('"');
+        // Function to add suggestions based on canRemoveQuote
+        const addSuggestionsBasedOnQuote = async (definitions: SuggestionRawDefinition[]) => {
+          suggestions.push(
+            ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
+          );
+        };
 
-        // This is going to be empty for simple indices, and not empty for integrations
         if (index && index.text && index.text !== EDITOR_MARKER) {
           const source = index.text.replace(EDITOR_MARKER, '');
-          const dataSource = await getDatastreamsForIntegration(source);
+          const dataStreams = await getDatastreamsForIntegration(source);
 
-          const newDefinitions = buildSourcesDefinitions(
-            dataSource?.dataStreams?.map(({ name }) => ({ name, isIntegration: false })) || []
-          );
-          suggestions.push(
-            ...(canRemoveQuote ? removeQuoteForSuggestedSources(newDefinitions) : newDefinitions)
-          );
+          if (dataStreams) {
+            // Integration name, suggest the datastreams
+            await addSuggestionsBasedOnQuote(
+              buildSourcesDefinitions(
+                dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+              )
+            );
+          } else {
+            // Not an integration, just a partial source name
+            await addSuggestionsBasedOnQuote(await getSources());
+          }
         } else {
-          // FROM <suggest>
-          // @TODO: filter down the suggestions here based on other existing sources defined
-          const sourcesDefinitions = await getSources();
-          suggestions.push(
-            ...(canRemoveQuote
-              ? removeQuoteForSuggestedSources(sourcesDefinitions)
-              : sourcesDefinitions)
-          );
+          // FROM <suggest> or no index/text
+          await addSuggestionsBasedOnQuote(await getSources());
         }
       }
     }
@@ -1444,7 +1473,11 @@ async function getOptionArgsSuggestions(
   if (command.name === 'enrich') {
     if (option.name === 'on') {
       // if it's a new expression, suggest fields to match on
-      if (isNewExpression || (option && isAssignment(option.args[0]) && !option.args[1])) {
+      if (
+        isNewExpression ||
+        findPreviousWord(innerText) === 'ON' ||
+        (option && isAssignment(option.args[0]) && !option.args[1])
+      ) {
         const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
         if (policyName) {
           const policyMetadata = await getPolicyMetadata(policyName);
@@ -1477,7 +1510,7 @@ async function getOptionArgsSuggestions(
           innerText
         );
 
-        if (isNewExpression) {
+        if (isNewExpression || findPreviousWord(innerText) === 'WITH') {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyEnhancedVariables)));
         }
 
@@ -1540,7 +1573,14 @@ async function getOptionArgsSuggestions(
   if (option.name === 'metadata') {
     const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
     const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    if (isNewExpression) {
+      suggestions.push(...buildFieldsDefinitions(filteredMetaFields));
+    } else if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
+    }
   }
 
   if (command.name === 'stats') {
