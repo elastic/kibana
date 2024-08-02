@@ -19,6 +19,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('es');
+  const esSupertest = getService('esSupertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
   const randomness = getService('randomness');
@@ -72,9 +73,22 @@ export default function ({ getService }: FtrProviderContext) {
     return cookie;
   }
 
+  async function addESClusterDebugLogging() {
+    const addLogging = {
+      persistent: {
+        'logger.org.elasticsearch.xpack.security.authc': 'DEBUG',
+        'logger.org.elasticsearch.xpack.security.authc.RealmsAuthenticator': 'DEBUG',
+        'logger.org.elasticsearch.xpack.security.authc.ServiceAccountAuthenticator': 'DEBUG',
+        'logger.org.elasticsearch.xpack.security.authc.AuthenticatorChain': 'DEBUG',
+      },
+    };
+    await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);
+  }
+
   describe('Session Lifespan cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
+      await addESClusterDebugLogging();
       await esDeleteAllIndices('.kibana_security_session*');
     });
 
