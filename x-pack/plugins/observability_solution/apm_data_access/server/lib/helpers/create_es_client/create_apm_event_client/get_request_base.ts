@@ -6,12 +6,12 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { uniq } from 'lodash';
-import { ApmDataSource } from '../../../../../common/data_source';
-import { PROCESSOR_EVENT } from '../../../../../common/es_fields/apm';
+import { PROCESSOR_EVENT } from '@kbn/apm-types/es_fields';
+import type { APMIndices } from '../../../..';
 import { getConfigForDocumentType, getProcessorEventForDocumentType } from '../document_type';
+import type { ApmDataSource } from '../../../../../common/data_source';
 
 const processorEventIndexMap = {
   [ProcessorEvent.transaction]: 'transaction',
