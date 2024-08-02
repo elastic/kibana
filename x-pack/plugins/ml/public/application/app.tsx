@@ -164,7 +164,6 @@ export const renderApp = (
     timefilter: deps.data.query.timefilter,
     config: coreStart.uiSettings!,
     docLinks: coreStart.docLinks!,
-    maps: deps.maps,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

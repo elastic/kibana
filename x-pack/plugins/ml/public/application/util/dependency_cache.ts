@@ -7,20 +7,17 @@
 
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
-import type { MapsStartApi } from '@kbn/maps-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
   docLinks: DocLinksStart | null;
-  maps: MapsStartApi | null;
 }
 
 const cache: DependencyCache = {
   timefilter: null,
   config: null,
   docLinks: null,
-  maps: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
