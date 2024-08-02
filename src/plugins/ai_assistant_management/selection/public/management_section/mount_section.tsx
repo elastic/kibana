@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { BuildFlavor } from '@kbn/config';
+import type { BuildFlavor } from '@kbn/config';
 import type { StartDependencies, AIAssistantManagementSelectionPluginPublicStart } from '../plugin';
 import { aIAssistantManagementSelectionRouter } from '../routes/config';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';

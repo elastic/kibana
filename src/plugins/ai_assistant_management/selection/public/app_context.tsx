@@ -9,7 +9,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { BuildFlavor } from '@kbn/config';
+import type { BuildFlavor } from '@kbn/config';
 import type { StartDependencies } from './plugin';
 
 interface ContextValue extends StartDependencies {
