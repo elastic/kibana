@@ -19,6 +19,7 @@ import type {
   ESQLList,
   ESQLLiteral,
   ESQLParamLiteral,
+  ESQLProperNode,
   ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
@@ -40,6 +41,13 @@ export interface WalkerOptions {
   visitTimeIntervalLiteral?: (node: ESQLTimeInterval) => void;
   visitInlineCast?: (node: ESQLInlineCast) => void;
   visitUnknown?: (node: ESQLUnknownItem) => void;
+
+  /**
+   * Called for any node type that does not have a specific visitor.
+   *
+   * @param node Any valid AST node.
+   */
+  visitAny?: (node: ESQLProperNode) => void;
 }
 
 export type WalkerAstNode = ESQLAstNode | ESQLAstNode[];
@@ -161,7 +169,8 @@ export class Walker {
   }
 
   public walkCommand(node: ESQLAstCommand): void {
-    this.options.visitCommand?.(node);
+    const { options } = this;
+    (options.visitCommand ?? options.visitAny)?.(node);
     switch (node.name) {
       default: {
         this.walk(node.args);
@@ -171,7 +180,8 @@ export class Walker {
   }
 
   public walkOption(node: ESQLCommandOption): void {
-    this.options.visitCommandOption?.(node);
+    const { options } = this;
+    (options.visitCommandOption ?? options.visitAny)?.(node);
     for (const child of node.args) {
       this.walkAstItem(child);
     }
@@ -188,11 +198,13 @@ export class Walker {
   }
 
   public walkMode(node: ESQLCommandMode): void {
-    this.options.visitCommandMode?.(node);
+    const { options } = this;
+    (options.visitCommandMode ?? options.visitAny)?.(node);
   }
 
   public walkListLiteral(node: ESQLList): void {
-    this.options.visitListLiteral?.(node);
+    const { options } = this;
+    (options.visitListLiteral ?? options.visitAny)?.(node);
     for (const value of node.values) {
       this.walkAstItem(value);
     }
@@ -215,11 +227,11 @@ export class Walker {
         break;
       }
       case 'source': {
-        options.visitSource?.(node);
+        (options.visitSource ?? options.visitAny)?.(node);
         break;
       }
       case 'column': {
-        options.visitColumn?.(node);
+        (options.visitColumn ?? options.visitAny)?.(node);
         break;
       }
       case 'literal': {
@@ -231,22 +243,23 @@ export class Walker {
         break;
       }
       case 'timeInterval': {
-        options.visitTimeIntervalLiteral?.(node);
+        (options.visitTimeIntervalLiteral ?? options.visitAny)?.(node);
         break;
       }
       case 'inlineCast': {
-        options.visitInlineCast?.(node);
+        (options.visitInlineCast ?? options.visitAny)?.(node);
         break;
       }
       case 'unknown': {
-        options.visitUnknown?.(node);
+        (options.visitUnknown ?? options.visitAny)?.(node);
         break;
       }
     }
   }
 
   public walkFunction(node: ESQLFunction): void {
-    this.options.visitFunction?.(node);
+    const { options } = this;
+    (options.visitFunction ?? options.visitAny)?.(node);
     const args = node.args;
     const length = args.length;
     for (let i = 0; i < length; i++) {
