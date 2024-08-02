@@ -17,16 +17,18 @@ import {
 } from './types';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 
+export type ContextStateManager = ControlStateManager<
+  Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selectedOptions'>
+> & {
+  selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
+  existsSelected: PublishingSubject<boolean | undefined>;
+  exclude: PublishingSubject<boolean | undefined>;
+};
+
 export const OptionsListControlContext = React.createContext<
   | {
       api: OptionsListComponentApi;
-      stateManager: ControlStateManager<
-        Omit<OptionsListComponentState, 'exclude' | 'existsSelected' | 'selectedOptions'>
-      > & {
-        selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
-        existsSelected: PublishingSubject<boolean | undefined>;
-        exclude: PublishingSubject<boolean | undefined>;
-      };
+      stateManager: ContextStateManager;
       setExclude: (next: boolean | undefined) => void;
       displaySettings: OptionsListDisplaySettings;
     }

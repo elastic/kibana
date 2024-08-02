@@ -13,14 +13,9 @@ import { act, render, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { BehaviorSubject } from 'rxjs';
-import { ControlStateManager } from '../../../types';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
-import {
-  OptionsListComponentApi,
-  OptionsListComponentState,
-  OptionsListDisplaySettings,
-} from '../types';
+import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListComponentApi, OptionsListDisplaySettings } from '../types';
 import { OptionsListPopover } from './options_list_popover';
 
 describe('Options list popover', () => {
@@ -42,7 +37,7 @@ describe('Options list popover', () => {
         value={{
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
-          stateManager: stateManager as unknown as ControlStateManager<OptionsListComponentState>,
+          stateManager: stateManager as unknown as ContextStateManager,
           setExclude,
         }}
       >
