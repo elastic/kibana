@@ -40,6 +40,9 @@ import * as outputsHelpers from './agent_policies/outputs_helpers';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
+import { isSpaceAwarenessEnabled } from './spaces/helpers';
+
+jest.mock('./spaces/helpers');
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -119,6 +122,7 @@ describe('Agent policy', () => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -789,7 +793,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -864,7 +868,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -1465,13 +1469,13 @@ describe('Agent policy', () => {
       });
 
       it('should return an iterator', async () => {
-        expect(agentPolicyService.fetchAllAgentPolicyIds(soClientMock)).toEqual({
+        expect(await agentPolicyService.fetchAllAgentPolicyIds(soClientMock)).toEqual({
           [Symbol.asyncIterator]: expect.any(Function),
         });
       });
 
       it('should provide item ids on every iteration', async () => {
-        for await (const ids of agentPolicyService.fetchAllAgentPolicyIds(soClientMock)) {
+        for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(soClientMock)) {
           expect(ids).toEqual(['so-123', 'so-123']);
         }
 
@@ -1479,7 +1483,7 @@ describe('Agent policy', () => {
       });
 
       it('should use default options', async () => {
-        for await (const ids of agentPolicyService.fetchAllAgentPolicyIds(soClientMock)) {
+        for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(soClientMock)) {
           expect(ids);
         }
 
@@ -1496,7 +1500,7 @@ describe('Agent policy', () => {
       });
 
       it('should use custom options when defined', async () => {
-        for await (const ids of agentPolicyService.fetchAllAgentPolicyIds(soClientMock, {
+        for await (const ids of await agentPolicyService.fetchAllAgentPolicyIds(soClientMock, {
           perPage: 13,
           kuery: 'one=two',
         })) {
@@ -1529,13 +1533,13 @@ describe('Agent policy', () => {
       });
 
       it('should return an iterator', async () => {
-        expect(agentPolicyService.fetchAllAgentPolicies(soClientMock)).toEqual({
+        expect(await agentPolicyService.fetchAllAgentPolicies(soClientMock)).toEqual({
           [Symbol.asyncIterator]: expect.any(Function),
         });
       });
 
       it('should provide items on every iteration', async () => {
-        for await (const items of agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
+        for await (const items of await agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
           expect(items.map((item) => item.id)).toEqual(soList.map((_so) => 'so-123'));
         }
 
@@ -1543,7 +1547,7 @@ describe('Agent policy', () => {
       });
 
       it('should use default options', async () => {
-        for await (const ids of agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
+        for await (const ids of await agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
           expect(ids);
         }
 
@@ -1560,7 +1564,7 @@ describe('Agent policy', () => {
       });
 
       it('should use custom options when defined', async () => {
-        for await (const ids of agentPolicyService.fetchAllAgentPolicies(soClientMock, {
+        for await (const ids of await agentPolicyService.fetchAllAgentPolicies(soClientMock, {
           kuery: 'one=two',
           perPage: 12,
           sortOrder: 'desc',
@@ -1607,9 +1611,11 @@ describe('Agent policy', () => {
     });
 
     const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
-      jest.fn(async function* () {
-        yield items;
-      });
+      jest.fn().mockResolvedValue(
+        jest.fn(async function* () {
+          yield items;
+        })()
+      );
 
     it('should return if all policies are compliant', async () => {
       const mockSoClient = savedObjectsClientMock.create();

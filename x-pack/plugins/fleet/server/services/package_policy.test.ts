@@ -4971,13 +4971,13 @@ describe('Package policy service', () => {
     });
 
     it('should return an iterator', async () => {
-      expect(packagePolicyService.fetchAllItemIds(soClientMock)).toEqual({
+      expect(await packagePolicyService.fetchAllItemIds(soClientMock)).toEqual({
         [Symbol.asyncIterator]: expect.any(Function),
       });
     });
 
     it('should provide item ids on every iteration', async () => {
-      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock)) {
+      for await (const ids of await packagePolicyService.fetchAllItemIds(soClientMock)) {
         expect(ids).toEqual(['so-123', 'so-123']);
       }
 
@@ -4985,7 +4985,7 @@ describe('Package policy service', () => {
     });
 
     it('should use default options', async () => {
-      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock)) {
+      for await (const ids of await packagePolicyService.fetchAllItemIds(soClientMock)) {
         expect(ids);
       }
 
@@ -5002,7 +5002,7 @@ describe('Package policy service', () => {
     });
 
     it('should use custom options when defined', async () => {
-      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock, {
+      for await (const ids of await packagePolicyService.fetchAllItemIds(soClientMock, {
         perPage: 13,
         kuery: 'one=two',
       })) {
@@ -5039,13 +5039,13 @@ describe('Package policy service', () => {
     });
 
     it('should return an iterator', async () => {
-      expect(packagePolicyService.fetchAllItems(soClientMock)).toEqual({
+      expect(await packagePolicyService.fetchAllItems(soClientMock)).toEqual({
         [Symbol.asyncIterator]: expect.any(Function),
       });
     });
 
     it('should provide items on every iteration', async () => {
-      for await (const items of packagePolicyService.fetchAllItems(soClientMock)) {
+      for await (const items of await packagePolicyService.fetchAllItems(soClientMock)) {
         expect(items).toEqual(
           PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse().saved_objects.map(
             (soItem) => {
@@ -5059,7 +5059,7 @@ describe('Package policy service', () => {
     });
 
     it('should use default options', async () => {
-      for await (const ids of packagePolicyService.fetchAllItemIds(soClientMock)) {
+      for await (const ids of await packagePolicyService.fetchAllItemIds(soClientMock)) {
         expect(ids);
       }
 
@@ -5076,7 +5076,7 @@ describe('Package policy service', () => {
     });
 
     it('should use custom options when defined', async () => {
-      for await (const ids of packagePolicyService.fetchAllItems(soClientMock, {
+      for await (const ids of await packagePolicyService.fetchAllItems(soClientMock, {
         kuery: 'one=two',
         perPage: 12,
         sortOrder: 'desc',
