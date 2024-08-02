@@ -251,6 +251,9 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public getColumnConfig() {
+    const { activeSpace, features } = this.state;
+    const { solution: activeSolution } = activeSpace ?? {};
+
     const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
@@ -284,7 +287,7 @@ export class SpacesGridPage extends Component<Props, State> {
                 {value}
               </EuiLink>
             </EuiFlexItem>
-            {this.state.activeSpace?.name === rowRecord.name && (
+            {activeSpace?.name === rowRecord.name && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="primary" data-test-subj={`spacesListCurrentBadge-${rowRecord.id}`}>
                   {i18n.translate('xpack.spaces.management.spacesGridPage.currentSpaceMarkerText', {
@@ -306,17 +309,21 @@ export class SpacesGridPage extends Component<Props, State> {
         truncateText: true,
         width: '30%',
       },
-      {
+    ];
+
+    const shouldShowFeaturesColumn = !activeSolution || activeSolution === 'classic';
+    if (shouldShowFeaturesColumn) {
+      config.push({
         field: 'disabledFeatures',
         name: i18n.translate('xpack.spaces.management.spacesGridPage.featuresColumnName', {
           defaultMessage: 'Features visible',
         }),
         sortable: (space: Space) => {
-          return getEnabledFeatures(this.state.features, space).length;
+          return getEnabledFeatures(features, space).length;
         },
         render: (_disabledFeatures: string[], rowRecord: Space) => {
-          const enabledFeatureCount = getEnabledFeatures(this.state.features, rowRecord).length;
-          if (enabledFeatureCount === this.state.features.length) {
+          const enabledFeatureCount = getEnabledFeatures(features, rowRecord).length;
+          if (enabledFeatureCount === features.length) {
             return (
               <FormattedMessage
                 id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
@@ -340,26 +347,27 @@ export class SpacesGridPage extends Component<Props, State> {
               defaultMessage="{enabledFeatureCount} / {totalFeatureCount}"
               values={{
                 enabledFeatureCount,
-                totalFeatureCount: this.state.features.length,
+                totalFeatureCount: features.length,
               }}
             />
           );
         },
+      });
+    }
+
+    config.push({
+      field: 'id',
+      name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
+        defaultMessage: 'Identifier',
+      }),
+      sortable: true,
+      render(id: string) {
+        if (id === DEFAULT_SPACE_ID) {
+          return '';
+        }
+        return id;
       },
-      {
-        field: 'id',
-        name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
-          defaultMessage: 'Identifier',
-        }),
-        sortable: true,
-        render(id: string) {
-          if (id === DEFAULT_SPACE_ID) {
-            return '';
-          }
-          return id;
-        },
-      },
-    ];
+    });
 
     if (this.props.allowSolutionVisibility) {
       config.push({
@@ -404,7 +412,7 @@ export class SpacesGridPage extends Component<Props, State> {
             defaultMessage: 'Switch',
           }),
           description: (rowRecord) =>
-            this.state.activeSpace?.name !== rowRecord.name
+            activeSpace?.name !== rowRecord.name
               ? i18n.translate(
                   'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
                   {
@@ -428,7 +436,7 @@ export class SpacesGridPage extends Component<Props, State> {
               rowRecord.id,
               `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
             ),
-          enabled: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
+          enabled: (rowRecord) => activeSpace?.name !== rowRecord.name,
           'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
         },
         {

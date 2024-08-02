@@ -13,13 +13,11 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Role } from '@kbn/security-plugin-types-common';
 
-import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
+import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
 import { ViewSpaceContent } from './view_space_content_tab';
-import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
 import { ViewSpaceSettings } from './view_space_general_tab';
 import { ViewSpaceAssignedRoles } from './view_space_roles';
 import type { Space } from '../../../common';
-import { getEnabledFeatures } from '../lib/feature_utils';
 
 export interface ViewSpaceTab {
   id: string;
@@ -38,7 +36,7 @@ export interface GetTabsProps {
     roles?: { view: boolean; save: boolean };
   };
   isSolutionNavEnabled: boolean;
-  allowFeatureVisibility: boolean;
+  allowFeatureVisibility: boolean; // FIXME: not for tab
 }
 
 export const getTabs = ({
@@ -47,12 +45,7 @@ export const getTabs = ({
   history,
   capabilities,
   roles,
-  isSolutionNavEnabled,
-  allowFeatureVisibility,
 }: GetTabsProps): ViewSpaceTab[] => {
-  const enabledFeatureCount = getEnabledFeatures(features, space).length;
-  const totalFeatureCount = features.length;
-
   const canUserViewRoles = Boolean(capabilities?.roles?.view);
   const canUserModifyRoles = Boolean(capabilities?.roles?.save);
 
@@ -65,28 +58,6 @@ export const getTabs = ({
       content: <ViewSpaceContent space={space} />,
     },
   ];
-
-  if (allowFeatureVisibility) {
-    tabsDefinition.push({
-      id: TAB_ID_FEATURES,
-      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.feature.heading', {
-        defaultMessage: 'Feature visibility',
-      }),
-      append: (
-        <EuiNotificationBadge className="eui-alignCenter" color="subdued" size="m">
-          {enabledFeatureCount} / {totalFeatureCount}
-        </EuiNotificationBadge>
-      ),
-      content: (
-        <ViewSpaceEnabledFeatures
-          features={features}
-          history={history}
-          space={space}
-          isSolutionNavEnabled={isSolutionNavEnabled}
-        />
-      ),
-    });
-  }
 
   if (canUserViewRoles) {
     tabsDefinition.push({
