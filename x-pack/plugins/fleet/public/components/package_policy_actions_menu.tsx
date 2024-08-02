@@ -138,7 +138,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     // </EuiContextMenuItem>,
   ];
 
-  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy.supports_agentless) {
+  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
     const ContextMenuItem = canWriteIntegrationPolicies
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;
