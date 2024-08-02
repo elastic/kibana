@@ -24,7 +24,7 @@ import { TransformHealthColoredDot } from './transform_health_colored_dot';
 export const transformFilters: SearchFilterConfig[] = [
   {
     type: 'field_value_selection',
-    field: 'state.state',
+    field: 'stats.state',
     name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
     multiSelect: 'or',
     options: Object.values(TRANSFORM_STATE).map((val) => ({
