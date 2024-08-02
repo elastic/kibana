@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const testSubjects = getService('testSubjects');
 
   describe('find', () => {
@@ -47,8 +47,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('returns saved objects with importableAndExportable types', async () => {
         const resp = await supertest
           .get('/api/kibana/management/saved_objects/_find?type=test-hidden-importable-exportable')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .expect(200);
         expect(
           resp.body.saved_objects.map((so: { id: string; type: string }) => ({
@@ -68,8 +68,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .get(
             '/api/kibana/management/saved_objects/_find?type=test-hidden-non-importable-exportable'
           )
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .expect(200);
         expect(resp.body.saved_objects).to.eql([]);
       });

@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       // admin is the only predefined role that will work for all 3 solutions
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+      commonRequestHeader = svlUserManager.getCommonRequestHeader();
+      internalRequestHeader = svlUserManager.getInternalRequestHeader();
     });
 
     after(async () => {

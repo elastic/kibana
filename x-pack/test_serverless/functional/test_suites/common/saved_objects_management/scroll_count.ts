@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const testSubjects = getService('testSubjects');
 
   describe('scroll_count', () => {
@@ -43,8 +43,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('only counts hidden types that are importableAndExportable', async () => {
         const res = await supertest
           .post(apiUrl)
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             typesToInclude: [
               'test-hidden-non-importable-exportable',

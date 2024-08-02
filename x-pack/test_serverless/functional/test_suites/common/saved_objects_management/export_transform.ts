@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const testSubjects = getService('testSubjects');
 
   describe('export transforms', () => {
@@ -44,8 +44,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to mutate the objects during an export', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             type: ['test-export-transform'],
             excludeExportDetails: true,
@@ -68,8 +68,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to add additional objects to an export', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -87,8 +87,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to add additional objects to an export when exporting by type', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             type: ['test-export-add'],
             excludeExportDetails: true,
@@ -106,8 +106,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('returns a 400 when the type causes a transform error', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             type: ['test-export-transform-error'],
             excludeExportDetails: true,
@@ -126,8 +126,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('returns a 400 when the type causes an invalid transform', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             type: ['test-export-invalid-transform'],
             excludeExportDetails: true,
@@ -165,8 +165,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('execute export transforms for reference objects', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -212,8 +212,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should only export objects returning `true` for `isExportable`', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -236,8 +236,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('lists objects that got filtered', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -272,8 +272,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('excludes objects if `isExportable` throws', async () => {
         const resp = await supertest
           .post('/api/saved_objects/_export')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .send({
             objects: [
               {

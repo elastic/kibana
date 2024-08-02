@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
           const { body, status } = await supertestWithoutAuth
             .post('/internal/security/api_key')
             .set(roleAuthc.cookieHeader)
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .send({
               name: 'test',
               metadata: {},
@@ -43,13 +43,13 @@ export default function ({ getService }: FtrProviderContext) {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/api_key?isAdmin=true')
             .set(roleAuthc.cookieHeader)
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(svlUserManager.getInternalRequestHeader());
 
           if (status === 200) {
             await supertestWithoutAuth
               .post('/internal/security/api_key/invalidate')
               .set(roleAuthc.cookieHeader)
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(svlUserManager.getInternalRequestHeader())
               .send({
                 apiKeys: body?.apiKeys,
                 isAdmin: true,
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .post('/internal/security/api_key')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlUserManager.getCommonRequestHeader())
             .send(requestBody));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .post('/internal/security/api_key')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.cookieHeader)
             .send(requestBody));
           // expect success because we're using the internal header
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .put('/internal/security/api_key')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlUserManager.getCommonRequestHeader())
             .set(roleAuthc.cookieHeader)
             .send(requestBody));
           // expect a rejection because we're not using the internal header
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .put('/internal/security/api_key')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.cookieHeader)
             .send(requestBody));
           // expect success because we're using the internal header
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertest
             .get('/internal/security/api_key/_enabled')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlUserManager.getCommonRequestHeader())
             .set(roleAuthc.cookieHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
           ({ body, status } = await supertestWithoutAuth
             .get('/internal/security/api_key/_enabled')
             .set(roleAuthc.cookieHeader)
-            .set(svlCommonApi.getInternalRequestHeader()));
+            .set(svlUserManager.getInternalRequestHeader()));
           // expect success because we're using the internal header
           expect(body).toEqual({ apiKeysEnabled: true });
           expect(status).toBe(200);
@@ -164,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .post('/internal/security/api_key/invalidate')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlUserManager.getCommonRequestHeader())
             .set(roleAuthc.cookieHeader)
             .send(requestBody));
           // expect a rejection because we're not using the internal header
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .post('/internal/security/api_key/invalidate')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.cookieHeader)
             .send(requestBody));
           // expect success because we're using the internal header
@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const { body } = await supertestWithoutAuth
             .post('/internal/security/api_key/_query')
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(svlUserManager.getInternalRequestHeader())
             .set(roleAuthc.cookieHeader)
             .send(requestBody)
             .expect(200);

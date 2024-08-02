@@ -10,7 +10,6 @@ import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -35,7 +34,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     it('GET should get the default config', async () => {
       const { body } = await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlUserManager.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
 
@@ -45,13 +44,13 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     it('GET should get updated labels after dynamically updating them', async () => {
       const { body: initialConfig } = await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlUserManager.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
 
       await supertestWithoutAuth
         .put('/internal/core/_settings')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlUserManager.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .set('elastic-api-version', '1')
         .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
@@ -59,7 +58,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
 
       await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
-        .set(svlCommonApi.getCommonRequestHeader())
+        .set(svlUserManager.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200, {
           ...initialConfig,

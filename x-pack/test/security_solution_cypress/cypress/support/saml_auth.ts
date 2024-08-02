@@ -9,8 +9,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { resolve } from 'path';
 import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
 
 export const samlAuthentication = async (
@@ -33,32 +31,27 @@ export const samlAuthentication = async (
 
   // If config.env.PROXY_ORG is set, it means that proxy service is used to create projects. Define the proxy org filename to override the roles.
   const rolesFilename = config.env.PROXY_ORG ? `${config.env.PROXY_ORG}.json` : undefined;
-  let sessionManager: SamlSessionManager;
 
-  const getSessionManager = () => {
-    if (!sessionManager) {
-      // Init lazily when getSessionCookie or getFullname is called 1st time
-      sessionManager = new SamlSessionManager({
+  on('task', {
+    getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
+      const sessionManager = new SamlSessionManager({
         hostOptions,
         log,
         isCloud: config.env.CLOUD_SERVERLESS,
         cloudUsersFilePath: resolve(REPO_ROOT, '.ftr', rolesFilename ?? 'role_users.json'),
       });
-    }
-
-    return sessionManager;
-  };
-
-  on('task', {
-    getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
-      const sm = getSessionManager();
-      return sm.getInteractiveUserSessionCookieWithRoleScope(role);
+      return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
-      const sm = getSessionManager();
-      const { full_name: fullName } = await sm.getUserData(role);
+      const sessionManager = new SamlSessionManager({
+        hostOptions,
+        log,
+        isCloud: config.env.CLOUD_SERVERLESS,
+        cloudUsersFilePath: resolve(REPO_ROOT, '.ftr', rolesFilename ?? 'role_users.json'),
+      });
+      const { full_name: fullName } = await sessionManager.getUserData(role);
       return fullName;
     },
   });

@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const testSubjects = getService('testSubjects');
 
   describe('_bulk_get', () => {
@@ -75,8 +75,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await supertest
           .post(URL)
           .send([hiddenTypeExportableImportable])
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .expect(200)
           .then((response: Response) => {
             expect(response.body).to.have.length(1);
@@ -87,8 +87,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await supertest
           .post(URL)
           .send([hiddenTypeNonExportableImportable])
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .expect(200)
           .then((response: Response) => {
             expect(response.body).to.have.length(1);
@@ -99,8 +99,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await supertest
           .post(URL)
           .send([hiddenTypeExportableImportable, hiddenTypeNonExportableImportable])
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .expect(200)
           .then((response: Response) => {
             expect(response.body).to.have.length(2);

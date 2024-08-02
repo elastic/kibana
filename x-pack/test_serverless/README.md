@@ -152,8 +152,8 @@ Recommendations:
 describe("my test suite", async function() {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
-      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+      commonRequestHeader = svlUserManager.getCommonRequestHeader();
+      internalRequestHeader = svlUserManager.getInternalRequestHeader();
     });
 
     after(async () => {

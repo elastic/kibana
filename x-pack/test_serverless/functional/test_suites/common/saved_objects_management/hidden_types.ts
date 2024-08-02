@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
   const testSubjects = getService('testSubjects');
 
   describe('saved objects management with hidden types', () => {
@@ -50,8 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should flag the object as hidden in its meta', async () => {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=test-actions-export-hidden')
-          .set(svlCommonApi.getCommonRequestHeader())
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(svlUserManager.getCommonRequestHeader())
+          .set(svlUserManager.getInternalRequestHeader())
           .expect(200)
           .then((resp) => {
             expect(
