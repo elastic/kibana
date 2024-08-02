@@ -11,12 +11,12 @@ import { schema } from '@kbn/config-schema';
 import { ExecuteActionRequestSchema } from '../execute_route';
 import { EndpointActionGetFileSchema } from '../get_file_route';
 import { ScanActionRequestSchema } from '../scan_route';
-import { KillProcessRouteRequestSchema } from '../kill_process_route';
 import { SuspendProcessRouteRequestSchema } from '../suspend_process_route';
 import { UploadActionRequestSchema } from '../file_upload_route';
 import { IsolateRouteRequestSchema } from '../response_actions/isolate';
 import { UnisolateRouteRequestSchema } from '../response_actions/unisolate';
 import { GetProcessesRouteRequestSchema } from '../response_actions/running_procs';
+import { KillProcessRouteRequestSchema } from '../response_actions/kill_process';
 
 export const ResponseActionBodySchema = schema.oneOf([
   IsolateRouteRequestSchema.body,

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from './common/base';
+import { BaseActionRequestSchema } from '../../common/base';
 
 // --------------------------------------------------
 // Tests for this module are at:
@@ -41,3 +42,5 @@ export const KillProcessRouteRequestSchema = {
     }
   ),
 };
+
+export type KillProcessRequestBody = TypeOf<typeof KillProcessRouteRequestSchema.body>;
