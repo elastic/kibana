@@ -25,7 +25,7 @@ import type {
   ESQLTimeInterval,
   ESQLUnknownItem,
 } from '../types';
-import { templateToPredicate } from './helpers';
+import { NodeMatchTemplate, templateToPredicate } from './helpers';
 
 type Node = ESQLAstNode | ESQLAstNode[];
 
@@ -143,10 +143,18 @@ export class Walker {
 
   public static readonly match = (
     node: WalkerAstNode,
-    template: Partial<ESQLProperNode>
+    template: NodeMatchTemplate
   ): ESQLProperNode | undefined => {
     const predicate = templateToPredicate(template);
     return Walker.find(node, predicate);
+  };
+
+  public static readonly matchAll = (
+    node: WalkerAstNode,
+    template: NodeMatchTemplate
+  ): ESQLProperNode[] => {
+    const predicate = templateToPredicate(template);
+    return Walker.findAll(node, predicate);
   };
 
   /**
