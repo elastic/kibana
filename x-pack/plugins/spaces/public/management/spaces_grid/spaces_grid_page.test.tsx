@@ -84,6 +84,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility={false}
         {...spacesGridCommonProps}
       />
     );
@@ -143,7 +144,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
@@ -179,7 +180,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
@@ -212,7 +213,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
@@ -244,7 +245,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
@@ -275,6 +276,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
@@ -305,6 +307,7 @@ describe('SpacesGridPage', () => {
           spaces: { manage: true },
         }}
         maxSpaces={1}
+        allowSolutionVisibility
         serverBasePath={spacesGridCommonProps.serverBasePath}
       />
     );
@@ -339,6 +342,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
@@ -374,6 +378,7 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowSolutionVisibility
         {...spacesGridCommonProps}
       />
     );
