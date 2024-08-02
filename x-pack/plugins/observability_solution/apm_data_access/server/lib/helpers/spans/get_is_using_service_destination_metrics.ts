@@ -17,13 +17,13 @@ export function getDocumentTypeFilterForServiceDestinationStatistics(
         {
           bool: {
             filter: termQuery(METRICSET_NAME, 'service_destination'),
-            must_not: {
+            must_not: [
               ...termsQuery(
                 METRICSET_INTERVAL,
                 RollupInterval.TenMinutes,
                 RollupInterval.SixtyMinutes
               ),
-            },
+            ],
           },
         },
       ]
