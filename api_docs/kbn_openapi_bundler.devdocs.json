@@ -209,9 +209,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ mergedSpecInfo?: Partial<",
-              "OpenAPIV3",
-              ".InfoObject> | undefined; } | undefined"
+              "MergerOptions | undefined"
             ],
             "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,
