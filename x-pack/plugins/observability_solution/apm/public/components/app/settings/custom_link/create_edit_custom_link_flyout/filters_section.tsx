@@ -98,7 +98,7 @@ export function FiltersSection({
               <SuggestionsSelect
                 key={key}
                 dataTestSubj={`${key}.value`}
-                fieldName={key}
+                fieldName={key !== '' ? key : DEFAULT_OPTION.value}
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                   { defaultMessage: 'Value' }
