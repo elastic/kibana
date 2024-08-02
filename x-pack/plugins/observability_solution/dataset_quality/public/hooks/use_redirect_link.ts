@@ -17,20 +17,20 @@ import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { useSelector } from '@xstate/react';
-import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { FlyoutDataset, TimeRangeConfig } from '../state_machines/dataset_quality_controller';
+import { TimeRangeConfig } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
+import { BasicDataStream } from '../../common/types';
 import { useRedirectLinkTelemetry } from './use_telemetry';
 
-export const useRedirectLink = ({
+export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,
   query,
   timeRangeConfig,
   breakdownField,
   telemetry,
 }: {
-  dataStreamStat: DataStreamStat | FlyoutDataset;
+  dataStreamStat: T;
   query?: Query | AggregateQuery;
   timeRangeConfig?: TimeRangeConfig;
   breakdownField?: string;
@@ -109,7 +109,7 @@ export const useRedirectLink = ({
   ]);
 };
 
-const buildLogsExplorerConfig = ({
+const buildLogsExplorerConfig = <T extends BasicDataStream>({
   locator,
   dataStreamStat,
   query,
@@ -118,7 +118,7 @@ const buildLogsExplorerConfig = ({
   breakdownField,
 }: {
   locator: LocatorPublic<SingleDatasetLocatorParams>;
-  dataStreamStat: DataStreamStat | FlyoutDataset;
+  dataStreamStat: T;
   query?: Query | AggregateQuery;
   from: string;
   to: string;
@@ -158,7 +158,7 @@ const buildLogsExplorerConfig = ({
   return { routerLinkProps: logsExplorerLinkProps, navigate: navigateToLogsExplorer };
 };
 
-const buildDiscoverConfig = ({
+const buildDiscoverConfig = <T extends BasicDataStream>({
   locatorClient,
   dataStreamStat,
   query,
@@ -167,7 +167,7 @@ const buildDiscoverConfig = ({
   breakdownField,
 }: {
   locatorClient: LocatorClient;
-  dataStreamStat: DataStreamStat | FlyoutDataset;
+  dataStreamStat: T;
   query?: Query | AggregateQuery;
   from: string;
   to: string;

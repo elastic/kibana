@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SetupPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
 import {
@@ -28,30 +27,26 @@ import { persistNoteRoute, deleteNoteRoute, getNotesRoute } from './notes';
 
 import { persistPinnedEventRoute } from './pinned_events';
 
-export function registerTimelineRoutes(
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) {
-  createTimelinesRoute(router, config, security);
-  patchTimelinesRoute(router, config, security);
+export function registerTimelineRoutes(router: SecuritySolutionPluginRouter, config: ConfigType) {
+  createTimelinesRoute(router, config);
+  patchTimelinesRoute(router, config);
 
-  importTimelinesRoute(router, config, security);
-  exportTimelinesRoute(router, config, security);
-  getDraftTimelinesRoute(router, config, security);
-  getTimelineRoute(router, config, security);
-  resolveTimelineRoute(router, config, security);
-  getTimelinesRoute(router, config, security);
-  cleanDraftTimelinesRoute(router, config, security);
-  deleteTimelinesRoute(router, config, security);
-  persistFavoriteRoute(router, config, security);
-  copyTimelineRoute(router, config, security);
+  importTimelinesRoute(router, config);
+  exportTimelinesRoute(router, config);
+  getDraftTimelinesRoute(router, config);
+  getTimelineRoute(router, config);
+  resolveTimelineRoute(router, config);
+  getTimelinesRoute(router, config);
+  cleanDraftTimelinesRoute(router, config);
+  deleteTimelinesRoute(router, config);
+  persistFavoriteRoute(router, config);
+  copyTimelineRoute(router, config);
 
-  installPrepackedTimelinesRoute(router, config, security);
+  installPrepackedTimelinesRoute(router, config);
 
-  persistNoteRoute(router, config, security);
-  deleteNoteRoute(router, config, security);
-  getNotesRoute(router, config, security);
+  persistNoteRoute(router, config);
+  deleteNoteRoute(router, config);
+  getNotesRoute(router, config);
 
-  persistPinnedEventRoute(router, config, security);
+  persistPinnedEventRoute(router, config);
 }

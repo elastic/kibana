@@ -24,6 +24,7 @@ interface Props {
   step: number | undefined;
   value: RangeValue | undefined;
   uuid: string;
+  controlPanelClassName?: string;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -36,6 +37,7 @@ export const RangeSliderControl: FC<Props> = ({
   step,
   value,
   uuid,
+  controlPanelClassName,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -178,6 +180,7 @@ export const RangeSliderControl: FC<Props> = ({
         max={displayedMax}
         isLoading={isLoading}
         inputPopoverProps={{
+          className: controlPanelClassName,
           panelMinWidth: MIN_POPOVER_WIDTH,
         }}
         append={

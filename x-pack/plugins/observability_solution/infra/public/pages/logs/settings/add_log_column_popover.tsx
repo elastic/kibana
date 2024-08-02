@@ -18,7 +18,7 @@ import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogColumnConfiguration } from '../../../utils/source_configuration';
-import { useVisibilityState } from '../../../utils/use_visibility_state';
+import { useVisibilityState } from '../../../hooks/use_visibility_state';
 
 interface SelectableColumnOption {
   optionProps: EuiSelectableOption;

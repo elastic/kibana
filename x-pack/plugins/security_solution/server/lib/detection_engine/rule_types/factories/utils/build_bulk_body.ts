@@ -104,6 +104,7 @@ export const buildBulkBody = (
     mergedDoc,
   });
 
+  const thresholdResult = mergedDoc._source?.threshold_result;
   if (isSourceDoc(mergedDoc)) {
     return {
       ...validatedSource,
@@ -121,7 +122,11 @@ export const buildBulkBody = (
       ),
       ...additionalAlertFields({
         ...mergedDoc,
-        _source: { ...mergedDoc._source, ...validatedEventFields },
+        _source: {
+          ...validatedSource,
+          ...validatedEventFields,
+          threshold_result: thresholdResult,
+        },
       }),
     };
   }

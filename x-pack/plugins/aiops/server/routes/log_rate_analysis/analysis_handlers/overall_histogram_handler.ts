@@ -22,7 +22,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const overallHistogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     requestBody,
     logDebugMessage,
     logger,
@@ -42,19 +42,18 @@ export const overallHistogramHandlerFactory =
 
     try {
       overallTimeSeries = (
-        (await fetchHistogramsForFields(
-          client,
-          requestBody.index,
-          overallHistogramQuery,
-          // fields
-          histogramFields,
-          // samplerShardSize
-          -1,
-          undefined,
+        (await fetchHistogramsForFields({
+          esClient,
           abortSignal,
-          stateHandler.sampleProbability(),
-          RANDOM_SAMPLER_SEED
-        )) as [NumericChartData]
+          arguments: {
+            indexPattern: requestBody.index,
+            query: overallHistogramQuery,
+            fields: histogramFields,
+            samplerShardSize: -1,
+            randomSamplerProbability: stateHandler.sampleProbability(),
+            randomSamplerSeed: RANDOM_SAMPLER_SEED,
+          },
+        })) as [NumericChartData]
       )[0];
     } catch (e) {
       if (!isRequestAbortedError(e)) {

@@ -17,7 +17,8 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHeartbeats } from '../../tasks/index_endpoint_heartbeats';
 import { login, ROLE } from '../../tasks/login';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/187083
+describe.skip(
   'Metering',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
@@ -29,6 +30,7 @@ describe(
         ],
       },
     },
+    pageLoadTimeout: 1 * 60 * 1000,
   },
   () => {
     const HEARTBEAT_COUNT = 2001;
@@ -55,8 +57,7 @@ describe(
       stopTransparentApiProxy();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/187083
-    describe.skip('Usage Reporting Task', () => {
+    describe('Usage Reporting Task', () => {
       it('properly sends indexed heartbeats to the metering api', () => {
         const expectedChunks = Math.ceil(HEARTBEAT_COUNT / METERING_SERVICE_BATCH_SIZE);
 

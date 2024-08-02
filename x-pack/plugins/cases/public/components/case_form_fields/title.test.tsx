@@ -16,7 +16,8 @@ import { Title } from './title';
 import { schema } from '../create/schema';
 import type { CaseFormFieldsSchemaProps } from './schema';
 
-describe('Title', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/187364
+describe.skip('Title', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {

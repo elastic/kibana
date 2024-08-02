@@ -49,6 +49,19 @@ export const persistConversationChanges = async ({
     });
   }
 
+  const lastMessage = state.conversation.messages
+    ? state.conversation.messages[state.conversation.messages.length - 1]
+    : undefined;
+  if (lastMessage && lastMessage.content === state.input && lastMessage.role === 'user') {
+    // this is a regenerated message, do not update the conversation again
+    const langChainMessages = getLangChainMessages(state.conversation.messages ?? []);
+    const messages = langChainMessages.slice(0, -1); // all but the last message
+    return {
+      conversation: state.conversation,
+      messages,
+    };
+  }
+
   const updatedConversation = await conversationsDataClient?.appendConversationMessages({
     existingConversation: conversation ? conversation : state.conversation,
     messages: [

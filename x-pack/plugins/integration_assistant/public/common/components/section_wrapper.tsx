@@ -26,7 +26,7 @@ export const SectionWrapper = React.memo<SectionWrapperProps>(({ children, title
     <EuiSpacer size="xxl" />
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiFlexItem css={contentCss}>
-        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" gutterSize="m">
+        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="l">
               <h1 css={titleCss}>{title}</h1>

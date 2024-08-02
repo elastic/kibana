@@ -128,6 +128,7 @@ const STANDARD_LIST_TYPES = [
   'fleet-fleet-server-host',
   'fleet-proxy',
   'fleet-uninstall-tokens',
+  'fleet-space-settings',
 ];
 
 /**

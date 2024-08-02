@@ -13,7 +13,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    { "path": "../../test_serverless/tsconfig.json" },
+    "@kbn/test-suites-serverless",
     { "path": "../../test_serverless/api_integration/**/*" },
     { "path": "../../test_serverless/shared/**/*" },
     { "path": "../../api_integration/services/**/*" },
@@ -45,8 +45,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/utility-types",
     "@kbn/timelines-plugin",
-    "@kbn/ftr-common-functional-ui-services",
-    "@kbn/test-subj-selector",
     "@kbn/dev-cli-runner",
+    "@kbn/security-plugin",
+    "@kbn/test-suites-src",
   ]
 }

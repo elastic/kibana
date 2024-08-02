@@ -22,6 +22,7 @@ import {
   type UserProvidedValues,
   type DarkModeValue,
   parseDarkModeValue,
+  type UiSettingsParams,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
@@ -41,6 +42,7 @@ import {
   getBrowserLoggingConfig,
 } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
+import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
@@ -120,7 +122,7 @@ export class RenderingService {
       client: IUiSettingsClient;
       globalClient: IUiSettingsClient;
     },
-    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const { elasticsearch, http, uiPlugins, status, customBranding, userSettings, i18n } =
       renderOptions;
@@ -147,8 +149,13 @@ export class RenderingService {
       globalSettingsUserValues = userValues[1];
     }
 
+    const defaultSettings = await withAsyncDefaultValues(
+      request,
+      uiSettings.client?.getRegistered()
+    );
+
     const settings = {
-      defaults: uiSettings.client?.getRegistered() ?? {},
+      defaults: defaultSettings,
       user: settingsUserValues,
     };
     const globalSettings = {
@@ -215,13 +222,13 @@ export class RenderingService {
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
     }
 
+    const apmConfig = getApmConfig(request.url.pathname);
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      i18n: i18nLib.translate,
       locale,
       themeVersion,
       darkMode,
@@ -244,6 +251,7 @@ export class RenderingService {
         logging: loggingConfig,
         env,
         clusterInfo,
+        apmConfig,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
@@ -263,7 +271,6 @@ export class RenderingService {
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
-        vars: vars ?? {},
         uiPlugins: await Promise.all(
           filteredPlugins.map(async ([id, plugin]) => {
             const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
@@ -300,4 +307,30 @@ const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
   const { status: authStatus } = auth.get(request);
   // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
   return authStatus !== 'unauthenticated';
+};
+
+/**
+ * Load async values from the definitions that have a `getValue()` function
+ *
+ * @param defaultSettings The default settings to add async values to
+ * @param request The current KibanaRequest
+ * @returns The default settings with values updated with async values
+ */
+const withAsyncDefaultValues = async (
+  request: KibanaRequest,
+  defaultSettings: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>> = {}
+): Promise<Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>> => {
+  const updatedSettings = { ...defaultSettings };
+
+  await Promise.all(
+    Object.entries(defaultSettings)
+      .filter(([_, definition]) => typeof definition.getValue === 'function')
+      .map(([key, definition]) => {
+        return definition.getValue!({ request }).then((value) => {
+          updatedSettings[key] = { ...definition, value };
+        });
+      })
+  );
+
+  return updatedSettings;
 };

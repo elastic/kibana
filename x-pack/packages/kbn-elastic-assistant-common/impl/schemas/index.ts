@@ -13,7 +13,7 @@ export const API_VERSIONS = {
   internal: {
     v1: '1',
   },
-};
+} as const;
 
 export const PUBLIC_API_ACCESS = 'public';
 export const INTERNAL_API_ACCESS = 'internal';
@@ -38,6 +38,7 @@ export * from './evaluation/get_evaluate_route.gen';
 export * from './capabilities/get_capabilities_route.gen';
 
 // Conversations Schemas
+export * from './conversations/append_message.gen';
 export * from './conversations/bulk_crud_conversations_route.gen';
 export * from './conversations/common_attributes.gen';
 export * from './conversations/crud_conversation_route.gen';
@@ -52,3 +53,6 @@ export * from './knowledge_base/bulk_crud_knowledge_base_route.gen';
 export * from './knowledge_base/common_attributes.gen';
 export * from './knowledge_base/crud_knowledge_base_route.gen';
 export * from './knowledge_base/find_knowledge_base_entries_route.gen';
+
+export * from './prompts/find_prompts_route.gen';
+export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';

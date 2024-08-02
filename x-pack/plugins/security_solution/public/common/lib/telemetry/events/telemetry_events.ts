@@ -44,6 +44,10 @@ import {
   manualRuleRunOpenModalEvent,
 } from './manual_rule_run';
 import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
+import {
+  addNoteFromExpandableFlyoutClickedEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+} from './notes';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -186,4 +190,6 @@ export const telemetryEvents = [
   manualRuleRunOpenModalEvent,
   eventLogFilterByRunTypeEvent,
   eventLogShowSourceEventDateRangeEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+  addNoteFromExpandableFlyoutClickedEvent,
 ];

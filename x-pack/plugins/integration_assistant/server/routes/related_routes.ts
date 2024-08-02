@@ -11,6 +11,8 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
@@ -39,7 +41,8 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
-        const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
+        const { packageName, dataStreamName, rawSamples, currentPipeline, langSmithOptions } =
+          req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -68,13 +71,21 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
             streaming: false,
           });
 
-          const graph = await getRelatedGraph(client, model);
-          const results = await graph.invoke({
+          const parameters = {
             packageName,
             dataStreamName,
             rawSamples,
             currentPipeline,
-          });
+          };
+          const options = {
+            callbacks: [
+              new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
+              ...getLangSmithTracer({ ...langSmithOptions, logger }),
+            ],
+          };
+
+          const graph = await getRelatedGraph(client, model);
+          const results = await graph.invoke(parameters, options);
           return res.ok({ body: RelatedResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });

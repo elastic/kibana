@@ -23,6 +23,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Disables requests batching. This increases number of HTTP requests from Kibana, but allows to debug requests individually.',
       }),
       schema: schema.boolean(),
+      deprecation: {
+        message: i18n.translate('bfetch.advancedSettings.disableBfetchDeprecation', {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }),
+        docLinksKey: 'generalSettings',
+      },
       category: [],
       requiresPageReload: true,
     },
@@ -36,6 +42,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Disable batch compression. This allows you to debug individual requests, but increases response size.',
       }),
       schema: schema.boolean(),
+      deprecation: {
+        message: i18n.translate('bfetch.advancedSettings.disableBfetchCompressionDeprecation', {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+        }),
+        docLinksKey: 'generalSettings',
+      },
       category: [],
       requiresPageReload: true,
     },

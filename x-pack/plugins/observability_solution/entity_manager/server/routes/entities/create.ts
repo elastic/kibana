@@ -7,31 +7,23 @@
 
 import { RequestHandlerContext } from '@kbn/core/server';
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetupRouteOptions } from '../types';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { startTransform } from '../../lib/entities/start_transform';
-import { ENTITY_INTERNAL_API_PREFIX } from '../../../common/constants_entities';
 import { installEntityDefinition } from '../../lib/entities/install_entity_definition';
 
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,
-  spaces,
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
-      path: `${ENTITY_INTERNAL_API_PREFIX}/definition`,
+      path: '/internal/entities/definition',
       validate: {
-        body: (body, res) => {
-          try {
-            return res.ok(entityDefinitionSchema.parse(body));
-          } catch (e) {
-            return res.badRequest(stringifyZodError(e));
-          }
-        },
+        body: buildRouteValidationWithZod(entityDefinitionSchema.strict()),
       },
     },
     async (context, req, res) => {
@@ -39,12 +31,10 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
       const core = await context.core;
       const soClient = core.savedObjects.client;
       const esClient = core.elasticsearch.client.asCurrentUser;
-      const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
       try {
         const definition = await installEntityDefinition({
           soClient,
           esClient,
-          spaceId,
           logger,
           definition: req.body,
         });

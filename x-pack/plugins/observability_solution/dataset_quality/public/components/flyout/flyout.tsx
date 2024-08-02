@@ -26,6 +26,7 @@ import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
 import { FlyoutSummary } from './flyout_summary/flyout_summary';
+import { BasicDataStream } from '../../../common/types';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -39,7 +40,18 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     timeRange,
     loadingState,
     flyoutLoading,
+    integration,
   } = useDatasetQualityFlyout();
+
+  const linkDetails: BasicDataStream = {
+    name: dataset.name,
+    rawName: dataset.rawName,
+    integration: integration?.integrationDetails,
+    type: dataset.type,
+    namespace: dataset.namespace,
+  };
+
+  const title = integration?.integrationDetails?.datasets?.[dataset.name] ?? dataset.name;
 
   const { startTracking } = useDatasetDetailsTelemetry();
 
@@ -58,7 +70,11 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
         <EuiSkeletonRectangle width="100%" height={80} />
       ) : (
         <>
-          <Header dataStreamStat={dataset} />
+          <Header
+            linkDetails={linkDetails}
+            loading={!loadingState.datasetIntegrationDone}
+            title={title}
+          />
           <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <FlyoutSummary
@@ -86,12 +102,13 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
                     fieldFormats={fieldFormats}
                   />
 
-                  {dataStreamStat.integration && (
+                  {integration?.integrationDetails && (
                     <>
                       <EuiSpacer />
                       <IntegrationSummary
-                        integration={dataStreamStat.integration}
-                        dashboardsLoading={loadingState.datasetIntegrationsLoading}
+                        integration={integration.integrationDetails}
+                        dashboards={integration?.dashboards ?? []}
+                        dashboardsLoading={loadingState.datasetIntegrationDashboardLoading}
                       />
                     </>
                   )}

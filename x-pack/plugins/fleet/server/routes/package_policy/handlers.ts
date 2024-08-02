@@ -62,7 +62,13 @@ import {
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-import { isSimplifiedCreatePackagePolicyRequest, removeFieldsFromInputSchema } from './utils';
+import {
+  canUseMultipleAgentPolicies,
+  isSimplifiedCreatePackagePolicyRequest,
+  removeFieldsFromInputSchema,
+  renameAgentlessAgentPolicy,
+  alignInputsAndStreams,
+} from './utils';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -246,6 +252,11 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
     }
 
+    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+    if ((newPolicy.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+      throw new PackagePolicyRequestError(errorMessage);
+    }
+
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -267,6 +278,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    newPackagePolicy.inputs = alignInputsAndStreams(newPackagePolicy.inputs);
 
     const installation = await getInstallation({
       savedObjectsClient: soClient,
@@ -407,6 +419,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         newData.overrides = overrides;
       }
     }
+    newData.inputs = alignInputsAndStreams(newData.inputs);
+    const { canUseReusablePolicies, errorMessage } = canUseMultipleAgentPolicies();
+    if ((newData.policy_ids ?? []).length > 1 && !canUseReusablePolicies) {
+      throw new PackagePolicyRequestError(errorMessage);
+    }
+
+    if (newData.policy_ids && newData.policy_ids.length === 0) {
+      throw new PackagePolicyRequestError('At least one agent policy id must be provided');
+    }
+
+    await renameAgentlessAgentPolicy(soClient, esClient, packagePolicy, newData.name);
+
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,

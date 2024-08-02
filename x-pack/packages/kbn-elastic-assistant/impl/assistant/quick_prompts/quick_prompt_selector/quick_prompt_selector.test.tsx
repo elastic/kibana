@@ -25,9 +25,9 @@ describe('QuickPromptSelector', () => {
   });
   it('Selects an existing quick prompt', () => {
     const { getByTestId } = render(<QuickPromptSelector {...testProps} />);
-    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(MOCK_QUICK_PROMPTS[0].title);
+    expect(getByTestId('euiComboBoxPill')).toHaveTextContent(MOCK_QUICK_PROMPTS[0].name);
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
-    fireEvent.click(getByTestId(MOCK_QUICK_PROMPTS[1].title));
+    fireEvent.click(getByTestId(MOCK_QUICK_PROMPTS[1].name));
     expect(onQuickPromptSelectionChange).toHaveBeenCalledWith(MOCK_QUICK_PROMPTS[1]);
   });
   it('Only custom option can be deleted', () => {
@@ -49,8 +49,10 @@ describe('QuickPromptSelector', () => {
     expect(onQuickPromptSelectionChange).toHaveBeenCalledWith({
       categories: [],
       color: '#D36086',
-      prompt: 'quickly prompt please',
-      title: 'A_CUSTOM_OPTION',
+      content: 'quickly prompt please',
+      id: 'A_CUSTOM_OPTION',
+      name: 'A_CUSTOM_OPTION',
+      promptType: 'quick',
     });
   });
   it('Reset settings every time before selecting an system prompt from the input if resetSettings is provided', () => {
@@ -60,7 +62,7 @@ describe('QuickPromptSelector', () => {
     );
     // changing the selection
     fireEvent.change(getByTestId('comboBoxSearchInput'), {
-      target: { value: MOCK_QUICK_PROMPTS[1].title },
+      target: { value: MOCK_QUICK_PROMPTS[1].name },
     });
     fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
       key: 'Enter',

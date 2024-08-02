@@ -143,7 +143,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     describe('and user clicks submit', () => {
       let releaseApiUpdateResponse: () => void;
-      let getByTestId: typeof renderResult['getByTestId'];
+      let getByTestId: (typeof renderResult)['getByTestId'];
 
       beforeEach(async () => {
         await act(async () => {

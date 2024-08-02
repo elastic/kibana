@@ -7,12 +7,7 @@
 
 export * from './api/register_routes';
 
-// TODO: https://github.com/elastic/kibana/pull/142950
-// TODO: Revisit and consider moving to the rule_schema subdomain
-export {
-  commonParamsCamelToSnake,
-  typeSpecificCamelToSnake,
-  convertCreateAPIToInternalSchema,
-} from './normalization/rule_converters';
+export { commonParamsCamelToSnake } from './logic/detection_rules_client/converters/common_params_camel_to_snake';
+export { typeSpecificCamelToSnake } from './logic/detection_rules_client/converters/type_specific_camel_to_snake';
 
 export { transformFromAlertThrottle, transformToNotifyWhen } from './normalization/rule_actions';

@@ -42,8 +42,10 @@ export const getPromptsSearchEsMock = () => {
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             content: 'test content',
             name: 'test',
-            prompt_type: 'quickPrompt',
-            is_shared: false,
+            prompt_type: 'quick',
+            consumer: 'securitySolutionUI',
+            categories: [],
+            color: 'red',
             created_by: 'elastic',
             users: [
               {
@@ -62,15 +64,19 @@ export const getCreatePromptSchemaMock = (): PromptCreateProps => ({
   name: 'test',
   content: 'test content',
   isNewConversationDefault: false,
-  isShared: true,
+  consumer: 'securitySolutionUI',
+  categories: [],
+  color: 'red',
   isDefault: false,
-  promptType: 'quickPrompt',
+  promptType: 'quick',
 });
 
 export const getUpdatePromptSchemaMock = (promptId = 'prompt-1'): PromptUpdateProps => ({
   content: 'test content',
   isNewConversationDefault: false,
-  isShared: true,
+  consumer: 'securitySolutionUI',
+  categories: [],
+  color: 'red',
   isDefault: false,
   id: promptId,
 });
@@ -79,7 +85,7 @@ export const getPromptMock = (params: PromptCreateProps | PromptUpdateProps): Pr
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   content: 'test content',
   name: 'test',
-  promptType: 'quickPrompt',
+  promptType: 'quick',
   isDefault: false,
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',
@@ -97,19 +103,23 @@ export const getQueryPromptParams = (isUpdate?: boolean): PromptCreateProps | Pr
     ? {
         content: 'test 2',
         name: 'test',
-        promptType: 'quickPrompt',
+        promptType: 'quick',
         isDefault: false,
         isNewConversationDefault: true,
-        isShared: true,
+        consumer: 'securitySolutionUI',
+        categories: [],
+        color: 'red',
         id: '1',
       }
     : {
         content: 'test 2',
         name: 'test',
-        promptType: 'quickPrompt',
+        promptType: 'quick',
         isDefault: false,
         isNewConversationDefault: true,
-        isShared: true,
+        consumer: 'securitySolutionUI',
+        categories: [],
+        color: 'red',
       };
 };
 

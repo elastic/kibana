@@ -7,16 +7,18 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
-import { services } from './services';
+import { services as baseServices } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 interface CreateTestConfigOptions {
   license: string;
   ssl?: boolean;
+  services?: any;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases',
   '.email',
   '.index',
   '.pagerduty',
@@ -33,7 +35,7 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
-  const { license = 'trial', ssl = false } = options;
+  const { license = 'trial', ssl = false, services = baseServices } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -80,11 +82,8 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'previewTelemetryUrlEnabled',
-            'alertSuppressionForEsqlRuleEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'bulkCustomHighlightedFieldsEnabled',
-            'alertSuppressionForMachineLearningRuleEnabled',
             'manualRuleRunEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',

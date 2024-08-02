@@ -42,6 +42,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
+  esql: 37000
   esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
@@ -85,6 +86,7 @@ pageLoadAssetSize:
   integrationAssistant: 19524
   interactiveSetup: 80000
   investigate: 17970
+  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -103,13 +105,13 @@ pageLoadAssetSize:
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82210
+  ml: 85000
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 76678
+  observability: 118191
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279
@@ -156,7 +158,6 @@ pageLoadAssetSize:
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
-  textBasedLanguages: 37000
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007

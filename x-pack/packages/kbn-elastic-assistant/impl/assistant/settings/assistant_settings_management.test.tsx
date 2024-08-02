@@ -10,10 +10,11 @@ import { useAssistantContext } from '../../assistant_context';
 import { fireEvent, render } from '@testing-library/react';
 
 import React from 'react';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { I18nProvider } from '@kbn/i18n-react';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
+
 import {
   ANONYMIZATION_TAB,
   CONNECTORS_TAB,
@@ -23,6 +24,7 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
+import { mockSystemPrompts } from '../../mock/system_prompt';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -33,6 +35,8 @@ const saveSettings = jest.fn();
 const mockValues = {
   conversationSettings: mockConversations,
   saveSettings,
+  systemPromptSettings: mockSystemPrompts,
+  quickPromptSettings: [],
 };
 
 const setSelectedSettingsTab = jest.fn();
@@ -48,23 +52,9 @@ const mockContext = {
     isAssistantEnabled: true,
   },
 };
-const onClose = jest.fn();
-const onSave = jest.fn().mockResolvedValue(() => {});
-const onConversationSelected = jest.fn();
 
 const testProps = {
-  conversationsLoaded: true,
-  defaultConnectorId: '123',
-  defaultProvider: OpenAiProviderType.OpenAi,
   selectedConversation: welcomeConvo,
-  onClose,
-  onSave,
-  isFlyoutMode: false,
-  onConversationSelected,
-  conversations: {},
-  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
-  refetchAnonymizationFieldsResults: jest.fn(),
-  refetchConversations: jest.fn(),
 };
 jest.mock('../../assistant_context');
 
@@ -84,6 +74,10 @@ jest.mock('../prompt_editor/system_prompt/system_prompt_settings_management', ()
   SystemPromptSettingsManagement: () => <span data-test-subj="SYSTEM_PROMPTS_TAB-tab" />,
 }));
 
+jest.mock('../../knowledge_base/knowledge_base_settings_management', () => ({
+  KnowledgeBaseSettingsManagement: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
+}));
+
 jest.mock('../../data_anonymization/settings/anonymization_settings_management', () => ({
   AnonymizationSettingsManagement: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
 }));
@@ -91,7 +85,6 @@ jest.mock('../../data_anonymization/settings/anonymization_settings_management',
 jest.mock('.', () => {
   return {
     EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
-    KnowledgeBaseSettings: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
   };
 });
 
@@ -103,10 +96,16 @@ jest.mock('./use_settings_updater/use_settings_updater', () => {
   };
 });
 
+jest.mock('../../connectorland/use_load_connectors', () => ({
+  useLoadConnectors: jest.fn().mockReturnValue({ data: [] }),
+}));
+
 const queryClient = new QueryClient();
 
 const wrapper = (props: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+  <I18nProvider>
+    <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+  </I18nProvider>
 );
 
 describe('AssistantSettingsManagement', () => {

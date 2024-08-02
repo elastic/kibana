@@ -35,7 +35,7 @@ describe('SystemPromptSelector', () => {
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete system prompt because there is only one custom option
     fireEvent.click(getAllByTestId('delete-prompt')[1]);
-    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPrompts[1].name);
+    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPrompts[1].id);
     expect(onSystemPromptSelectionChange).not.toHaveBeenCalled();
   });
   it('Deletes a system prompt that is selected', () => {
@@ -43,7 +43,7 @@ describe('SystemPromptSelector', () => {
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete system prompt because there is only one custom option
     fireEvent.click(getAllByTestId('delete-prompt')[0]);
-    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPrompts[0].name);
+    expect(onSystemPromptDeleted).toHaveBeenCalledWith(mockSystemPrompts[0].id);
     expect(onSystemPromptSelectionChange).toHaveBeenCalledWith(undefined);
   });
   it('Selects existing system prompt from the search input', () => {

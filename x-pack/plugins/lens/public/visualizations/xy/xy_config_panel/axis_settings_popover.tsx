@@ -17,7 +17,7 @@ import {
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,

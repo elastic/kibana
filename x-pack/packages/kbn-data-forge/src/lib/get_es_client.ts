@@ -32,7 +32,7 @@ export const getEsClient = (config: Config) => {
     tls: caCert
       ? {
           ca: caCert,
-          rejectUnauthorized: true,
+          rejectUnauthorized: false,
         }
       : undefined,
   });

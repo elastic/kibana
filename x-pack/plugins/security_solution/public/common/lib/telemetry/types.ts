@@ -66,6 +66,12 @@ import type {
   ReportEventLogShowSourceEventDateRangeParams,
   ReportEventLogTelemetryEventParams,
 } from './events/event_log/types';
+import type {
+  AddNoteFromExpandableFlyoutClickedParams,
+  NotesTelemetryEventParams,
+  NotesTelemetryEvents,
+  OpenNoteInExpandableFlyoutClickedParams,
+} from './events/notes/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
@@ -129,7 +135,8 @@ export type TelemetryEventParams =
   | OnboardingHubStepFinishedParams
   | OnboardingHubStepLinkClickedParams
   | ReportManualRuleRunTelemetryEventParams
-  | ReportEventLogTelemetryEventParams;
+  | ReportEventLogTelemetryEventParams
+  | NotesTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -183,6 +190,10 @@ export interface TelemetryClientStart {
   reportEventLogShowSourceEventDateRange(
     params: ReportEventLogShowSourceEventDateRangeParams
   ): void;
+
+  // new notes
+  reportOpenNoteInExpandableFlyoutClicked(params: OpenNoteInExpandableFlyoutClickedParams): void;
+  reportAddNoteFromExpandableFlyoutClicked(params: AddNoteFromExpandableFlyoutClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -209,4 +220,5 @@ export type TelemetryEvent =
     }
   | OnboardingHubTelemetryEvent
   | ManualRuleRunTelemetryEvent
-  | EventLogTelemetryEvent;
+  | EventLogTelemetryEvent
+  | NotesTelemetryEvents;

@@ -8,13 +8,12 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
-
+import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
-import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
 import { useRedirectLink } from './use_redirect_link';
@@ -54,10 +53,28 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     services: { lens },
   } = useKibanaContextForPlugin();
   const { service } = useDatasetQualityContext();
-  const { trackDetailsNavigated, navigationTargets, navigationSources } =
-    useDatasetDetailsTelemetry();
+
+  const {
+    trackDatasetDetailsBreakdownFieldChanged,
+    trackDetailsNavigated,
+    navigationTargets,
+    navigationSources,
+  } = useDatasetDetailsTelemetry();
 
   const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
+
+  const isBreakdownFieldEcs = useSelector(
+    service,
+    (state) => state.context.flyout.isBreakdownFieldEcs
+  );
+
+  const isBreakdownFieldEcsAsserted = useSelector(service, (state) => {
+    return (
+      state.matches('flyout.initializing.assertBreakdownFieldIsEcs.done') &&
+      state.history?.matches('flyout.initializing.assertBreakdownFieldIsEcs.fetching') &&
+      isBreakdownFieldEcs !== null
+    );
+  });
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
@@ -86,6 +103,10 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     },
     [service]
   );
+
+  useEffect(() => {
+    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
+  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldEcsAsserted]);
 
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
@@ -193,7 +214,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 };
 
 function getDataViewIndexPattern(dataStream: string | undefined) {
-  return dataStream ? `${indexNameToDataStreamParts(dataStream).type}-*-*` : DEFAULT_LOGS_DATA_VIEW;
+  return dataStream ?? DEFAULT_LOGS_DATA_VIEW;
 }
 
 function getDataViewField(dataView: DataView | undefined, fieldName: string | undefined) {

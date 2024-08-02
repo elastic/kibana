@@ -27,7 +27,7 @@ const contents = [
     role: 'user',
     parts: [
       {
-        text: 'Write the first line of a story about a magic backpack.',
+        text: 'Hello world!',
       },
     ],
   },

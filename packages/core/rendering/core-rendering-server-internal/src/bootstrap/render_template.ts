@@ -80,10 +80,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       var errorTitleEl = document.createElement('h1');
       errorTitleEl.innerText = errorTitle;
       errorTitleEl.style.margin = '20px';
+      errorTitleEl.style.color = '#1a1c21';
 
       var errorTextEl = document.createElement('p');
       errorTextEl.innerText = errorText;
       errorTextEl.style.margin = '20px';
+      errorTextEl.style.color = '#343741';
 
       var errorReloadEl = document.createElement('button');
       errorReloadEl.innerText = errorReload;

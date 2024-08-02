@@ -18,6 +18,7 @@ export const ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL =
   `${ASSET_CRITICALITY_PUBLIC_URL}/upload_csv` as const;
 export const ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL =
   `${ASSET_CRITICALITY_PUBLIC_URL}/bulk` as const;
+export const ASSET_CRITICALITY_PUBLIC_LIST_URL = `${ASSET_CRITICALITY_PUBLIC_URL}/list` as const;
 
 export const ASSET_CRITICALITY_INDEX_PATTERN = '.asset-criticality.asset-criticality-*';
 

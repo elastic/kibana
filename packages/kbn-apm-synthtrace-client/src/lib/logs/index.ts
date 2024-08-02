@@ -14,6 +14,7 @@ export type LogDocument = Fields &
     'input.type': string;
     'log.file.path'?: string;
     'service.name'?: string;
+    'service.environment'?: string;
     'data_stream.namespace': string;
     'data_stream.type': string;
     'data_stream.dataset': string;

@@ -18,6 +18,7 @@ export const entityDefinition: SavedObjectsType = {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
+      version: { type: 'keyword' },
       name: { type: 'text' },
       description: { type: 'text' },
       type: { type: 'keyword' },
@@ -35,6 +36,18 @@ export const entityDefinition: SavedObjectsType = {
     importableAndExportable: false,
     getTitle(savedObject: SavedObject<EntityDefinition>) {
       return `EntityDefinition: [${savedObject.attributes.name}]`;
+    },
+  },
+  modelVersions: {
+    '1': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            version: { type: 'keyword' },
+          },
+        },
+      ],
     },
   },
 };

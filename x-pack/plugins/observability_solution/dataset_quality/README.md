@@ -47,7 +47,7 @@ Once the tests finish, the instances will be terminated.
 node x-pack/plugins/observability_solution/dataset_quality/scripts/api --server
 
 # run tests
-node x-pack/plugins/observability_solution/dataset_quality/scripts/api --runner --grep-files=error_group_list
+node x-pack/plugins/observability_solution/dataset_quality/scripts/api --runner --grep-files=data_stream_settings.spec.ts
 ```
 
 

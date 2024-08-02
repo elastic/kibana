@@ -5,6 +5,7 @@ info:
 paths:
   /api/lists/items/_import:
     post:
+      x-labels: [serverless, ess]
       operationId: ImportListItems
       x-codegen-enabled: true
       summary: Imports list items

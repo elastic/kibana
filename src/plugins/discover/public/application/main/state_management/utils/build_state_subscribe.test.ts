@@ -11,7 +11,8 @@ import { FetchStatus } from '../../../types';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { createDataViewDataSource, DataSourceType } from '../../../../../common/data_sources';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
@@ -19,6 +20,7 @@ describe('buildStateSubscribe', () => {
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
   stateContainer.actions.setDataView = jest.fn();
+  stateContainer.savedSearchState.update = jest.fn();
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
@@ -49,6 +51,20 @@ describe('buildStateSubscribe', () => {
     await getSubscribeFn()(stateContainer.appState.getState());
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+  });
+
+  it('should not call refetch$ if viewMode changes', async () => {
+    await getSubscribeFn()({
+      ...stateContainer.appState.getState(),
+      dataSource: {
+        type: DataSourceType.Esql,
+      },
+      viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+    });
+
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(stateContainer.dataState.reset).not.toHaveBeenCalled();
+    expect(stateContainer.savedSearchState.update).toHaveBeenCalled();
   });
 
   it('should call refetch$ if the chart is hidden', async () => {

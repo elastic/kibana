@@ -85,46 +85,48 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a configuration with templates', async () => {
+      const mockTemplates = [
+        {
+          key: 'test_template_1',
+          name: 'First test template',
+          description: 'This is a first test template',
+          tags: [],
+          caseFields: null,
+        },
+        {
+          key: 'test_template_2',
+          name: 'Second test template',
+          description: 'This is a second test template',
+          tags: ['foobar'],
+          caseFields: {
+            title: 'Case with sample template 2',
+            description: 'case desc',
+            severity: CaseSeverity.LOW,
+            category: null,
+            tags: ['sample-4'],
+            assignees: [],
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'My Connector',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          },
+        },
+        {
+          key: 'test_template_3',
+          name: 'Third test template',
+          description: 'This is a third test template',
+          caseFields: {
+            title: 'Case with sample template 3',
+            tags: ['sample-3'],
+          },
+        },
+      ];
+
       const templates = {
-        templates: [
-          {
-            key: 'test_template_1',
-            name: 'First test template',
-            description: 'This is a first test template',
-            tags: [],
-            caseFields: null,
-          },
-          {
-            key: 'test_template_2',
-            name: 'Second test template',
-            description: 'This is a second test template',
-            tags: ['foobar'],
-            caseFields: {
-              title: 'Case with sample template 2',
-              description: 'case desc',
-              severity: CaseSeverity.LOW,
-              category: null,
-              tags: ['sample-4'],
-              assignees: [],
-              customFields: [],
-              connector: {
-                id: 'none',
-                name: 'My Connector',
-                type: ConnectorTypes.none,
-                fields: null,
-              },
-            },
-          },
-          {
-            key: 'test_template_3',
-            name: 'Third test template',
-            description: 'This is a third test template',
-            caseFields: {
-              title: 'Case with sample template 3',
-              tags: ['sample-3'],
-            },
-          },
-        ],
+        templates: mockTemplates,
       };
 
       await createConfiguration(
@@ -136,7 +138,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const configuration = await getConfiguration({ supertest });
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
-      expect(data).to.eql(getConfigurationOutput(false, templates));
+      expect(data).to.eql(
+        getConfigurationOutput(false, {
+          templates: mockTemplates,
+        })
+      );
     });
 
     it('should get a single configuration', async () => {
