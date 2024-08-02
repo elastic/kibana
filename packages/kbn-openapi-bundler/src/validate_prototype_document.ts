@@ -29,8 +29,28 @@ export async function validatePrototypeDocument(
     throw new Error(`Prototype document's ${chalk.bold('servers')} must be an array`);
   }
 
+  if (prototypeDocument.servers && prototypeDocument.servers.length === 0) {
+    throw new Error(
+      `Prototype document's ${chalk.bold('servers')} should have as minimum one entry`
+    );
+  }
+
+  if (prototypeDocument.security && !Array.isArray(prototypeDocument.security)) {
+    throw new Error(`Prototype document's ${chalk.bold('security')} must be an array`);
+  }
+
+  if (prototypeDocument.security && prototypeDocument.security.length === 0) {
+    throw new Error(
+      `Prototype document's ${chalk.bold('security')} should have as minimum one entry`
+    );
+  }
+
   if (prototypeDocument.tags && !Array.isArray(prototypeDocument.tags)) {
     throw new Error(`Prototype document's ${chalk.bold('tags')} must be an array`);
+  }
+
+  if (prototypeDocument.tags && prototypeDocument.tags.length === 0) {
+    throw new Error(`Prototype document's ${chalk.bold('tags')} should have as minimum one entry`);
   }
 
   if (prototypeDocument.security && !prototypeDocument.components?.securitySchemes) {
