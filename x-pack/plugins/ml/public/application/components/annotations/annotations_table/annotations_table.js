@@ -105,7 +105,7 @@ class AnnotationsTableUI extends Component {
     };
     this.mlJobService = mlJobServiceFactory(
       toastNotificationServiceProvider(this.props.kibana.services.notifications.toasts),
-      this.context.kibana.services.mlServices.mlApiServices
+      this.props.kibana.services.mlServices.mlApiServices
     );
   }
 
