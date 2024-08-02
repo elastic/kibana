@@ -19,6 +19,14 @@ export type Alert = ParsedTechnicalFields & {
   process?: {
     pid: string;
   };
+  kibana: {
+    alert?: {
+      rule: {
+        name: string;
+        rule_id: string;
+      };
+    };
+  };
 };
 
 export interface AlertAgent {
