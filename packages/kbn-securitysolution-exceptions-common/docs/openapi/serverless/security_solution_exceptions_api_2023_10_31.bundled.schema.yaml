@@ -76,7 +76,6 @@ paths:
       summary: Creates rule exception list items
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists:
     delete:
       operationId: DeleteExceptionList
@@ -141,7 +140,6 @@ paths:
       summary: Deletes an exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
     get:
       operationId: GetExceptionList
       parameters:
@@ -205,7 +203,6 @@ paths:
       summary: Retrieves an exception list using its `id` or `list_id` field
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
     post:
       operationId: CreateExceptionList
       requestBody:
@@ -283,7 +280,6 @@ paths:
       summary: Creates an exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
     put:
       operationId: UpdateExceptionList
       requestBody:
@@ -364,7 +360,6 @@ paths:
       summary: Updates an exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/_duplicate:
     post:
       operationId: DuplicateExceptionList
@@ -434,7 +429,6 @@ paths:
       summary: Duplicates an exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/_export:
     post:
       description: Exports an exception list and its associated items to an .ndjson file
@@ -515,7 +509,6 @@ paths:
       summary: Exports an exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/_find:
     get:
       operationId: FindExceptionLists
@@ -636,7 +629,6 @@ paths:
       summary: Finds exception lists
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/_import:
     post:
       description: Imports an exception list and associated items
@@ -753,7 +745,6 @@ paths:
       summary: Imports an exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/items:
     delete:
       operationId: DeleteExceptionListItem
@@ -818,7 +809,6 @@ paths:
       summary: Deletes an exception list item
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
     get:
       operationId: GetExceptionListItem
       parameters:
@@ -882,7 +872,6 @@ paths:
       summary: Gets an exception list item
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
     post:
       operationId: CreateExceptionListItem
       requestBody:
@@ -970,7 +959,6 @@ paths:
       summary: Creates an exception list item
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
     put:
       operationId: UpdateExceptionListItem
       requestBody:
@@ -1062,7 +1050,6 @@ paths:
       summary: Updates an exception list item
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/items/_find:
     get:
       operationId: FindExceptionListItems
@@ -1199,7 +1186,6 @@ paths:
       summary: Finds exception list items
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exception_lists/summary:
     get:
       operationId: GetExceptionListSummary
@@ -1283,7 +1269,6 @@ paths:
       summary: Retrieves an exception list summary
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
   /api/exceptions/shared:
     post:
       operationId: CreateSharedExceptionList
@@ -1343,7 +1328,6 @@ paths:
       summary: Creates a shared exception list
       tags:
         - Security Solution Exceptions API
-        - Exceptions API
 components:
   schemas:
     CreateExceptionListItemComment:
