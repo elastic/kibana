@@ -17,12 +17,17 @@ export function isAgentInNamespace(agent: Agent, namespace?: string) {
     return true;
   }
 
+  // In a custom space, only return true if the agent is explicitly in that space.
+  if (namespace && namespace !== DEFAULT_NAMESPACE_STRING) {
+    return agent.namespaces?.includes(namespace) ?? false;
+  }
+
+  // In the default space OR in if the current namespace is not defined,
+  // return true if the agent is explicitly in the default space OR if it has no defined namespaces.
   return (
-    (namespace && agent.namespaces?.includes(namespace)) ||
-    (!namespace &&
-      (!agent.namespaces ||
-        agent.namespaces.length === 0 ||
-        agent.namespaces?.includes(DEFAULT_NAMESPACE_STRING)))
+    !agent.namespaces ||
+    agent.namespaces.length === 0 ||
+    agent.namespaces?.includes(DEFAULT_NAMESPACE_STRING)
   );
 }
 
