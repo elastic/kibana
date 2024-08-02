@@ -91,7 +91,7 @@ export function ServiceLink({
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} size="l" />
+              <AgentIcon agentName={agentName} size="l" role="presentation" />
             </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate">
               <span className="eui-textTruncate">{serviceName}</span>

@@ -18,3 +18,6 @@ export const OKTA_MANAGED_DATA_TITLE = `${MANAGED_DATA_SECTION} ${getDataTestSub
 export const ENTRA_MANAGED_DATA_TITLE = `${MANAGED_DATA_SECTION} ${getDataTestSubjectSelector(
   'managed-user-accordion-userAssetEntraLeftSection'
 )}`;
+
+export const USER_PREVIEW_PANEL_FOOTER = getDataTestSubjectSelector('user-preview-footer');
+export const OPEN_USER_FLYOUT_LINK = getDataTestSubjectSelector('open-user-flyout');

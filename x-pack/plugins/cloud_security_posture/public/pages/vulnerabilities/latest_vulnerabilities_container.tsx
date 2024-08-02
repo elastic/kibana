@@ -42,7 +42,7 @@ export const LatestVulnerabilitiesContainer = () => {
       setActivePageIndex,
     } = useLatestVulnerabilitiesGrouping({
       groupPanelRenderer,
-      groupStatsRenderer,
+      getGroupStats: groupStatsRenderer,
       groupingLevel,
       selectedGroup,
       groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
@@ -138,7 +138,7 @@ export const LatestVulnerabilitiesContainer = () => {
   };
 
   const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
-    useLatestVulnerabilitiesGrouping({ groupPanelRenderer, groupStatsRenderer });
+    useLatestVulnerabilitiesGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
 
   if (error || isEmptyResults) {
     return (

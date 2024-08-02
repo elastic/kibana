@@ -13,8 +13,8 @@ import {
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"
@@ -39,11 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Timeline Details', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default');
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('Make sure that we get Event Details data', async () => {

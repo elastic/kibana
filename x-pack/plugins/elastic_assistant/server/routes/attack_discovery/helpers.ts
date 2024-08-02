@@ -28,7 +28,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { getLangSmithTracer } from '../evaluate/utils';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
 import {

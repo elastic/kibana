@@ -39,7 +39,7 @@ import {
 /**
  * Describes public Features plugin contract returned at the `setup` stage.
  */
-export interface PluginSetupContract {
+export interface FeaturesPluginSetup {
   registerKibanaFeature(feature: KibanaFeatureConfig): void;
 
   registerElasticsearchFeature(feature: ElasticsearchFeatureConfig): void;
@@ -81,7 +81,7 @@ export interface PluginSetupContract {
   subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator;
 }
 
-export interface PluginStartContract {
+export interface FeaturesPluginStart {
   getElasticsearchFeatures(): ElasticsearchFeature[];
 
   getKibanaFeatures(): KibanaFeature[];
@@ -91,7 +91,7 @@ export interface PluginStartContract {
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
 export class FeaturesPlugin
-  implements Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>>
+  implements Plugin<RecursiveReadonly<FeaturesPluginSetup>, RecursiveReadonly<FeaturesPluginStart>>
 {
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
@@ -102,7 +102,7 @@ export class FeaturesPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup): RecursiveReadonly<PluginSetupContract> {
+  public setup(core: CoreSetup): RecursiveReadonly<FeaturesPluginSetup> {
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
@@ -126,7 +126,7 @@ export class FeaturesPlugin
     });
   }
 
-  public start(core: CoreStart): RecursiveReadonly<PluginStartContract> {
+  public start(core: CoreStart): RecursiveReadonly<FeaturesPluginStart> {
     this.registerOssFeatures(core.savedObjects);
 
     const { overrides } = this.initializerContext.config.get<ConfigType>();

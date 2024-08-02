@@ -53,6 +53,9 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.clickEditorMenuButton');
     await this.testSubjects.click('dashboardEditorMenuButton');
     await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('dashboardPanelSelectionList');
+    });
   }
 
   async expectEditorMenuClosed() {
@@ -69,9 +72,14 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`visType-${visType}`);
   }
 
-  async verifyEmbeddableFactoryGroupExists(groupId: string) {
+  async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {
     this.log.debug('DashboardAddPanel.verifyEmbeddableFactoryGroupExists');
-    await this.testSubjects.existOrFail(`dashboardEditorMenu-${groupId}Group`);
+    const testSubject = `dashboardEditorMenu-${groupId}Group`;
+    if (expectExist) {
+      await this.testSubjects.existOrFail(testSubject);
+    } else {
+      await this.testSubjects.missingOrFail(testSubject);
+    }
   }
 
   async clickAddNewEmbeddableLink(type: string) {

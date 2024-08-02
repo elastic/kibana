@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 export const NO_INDEX_PATTERNS: DataView[] = [];
-export const EMPTY_AAD_FIELDS: DataViewField[] = [];
 export * from '../common/constants';

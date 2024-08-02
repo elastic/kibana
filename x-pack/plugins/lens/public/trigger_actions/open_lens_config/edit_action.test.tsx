@@ -95,7 +95,7 @@ describe('open config panel action', () => {
           };
         },
         getIsEditable: () => true,
-        openConfingPanel: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
+        openConfigPanel: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
         getRoot: () => {
           return {
             openOverlay: jest.fn(),

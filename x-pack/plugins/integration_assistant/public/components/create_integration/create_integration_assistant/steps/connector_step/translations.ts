@@ -24,3 +24,11 @@ export const CREATE_CONNECTOR = i18n.translate(
     defaultMessage: 'Create new connector',
   }
 );
+
+export const SUPPORTED_MODELS_INFO = i18n.translate(
+  'xpack.integrationAssistant.steps.connector.supportedModelsInfo',
+  {
+    defaultMessage:
+      "Automatic Import currently supports Anthropic models via Elastic's connector for Amazon Bedrock. Support for additional LLMs will be introduced soon",
+  }
+);

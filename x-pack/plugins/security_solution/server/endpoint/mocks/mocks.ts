@@ -15,6 +15,7 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -154,7 +155,7 @@ export const createMockEndpointAppContextServiceStartContract =
 
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const savedObjectsStart = savedObjectsServiceMock.createStartContract();
-    const security = securityMock.createStart();
+    const security = securityServiceMock.createStart();
     const agentService = createMockAgentService();
     const agentPolicyService = createMockAgentPolicyService();
     const packagePolicyService = createPackagePolicyServiceMock();
@@ -194,10 +195,6 @@ export const createMockEndpointAppContextServiceStartContract =
     // Make current user have `superuser` role by default
     security.authc.getCurrentUser.mockReturnValue(
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
-    );
-
-    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-      jest.fn(() => ({ privileges: { kibana: [] } }))
     );
 
     const casesMock = casesPluginMock.createStartContract();
@@ -270,6 +267,8 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   getRegisteredRouteHandler: (method: RouterMethod, path: string) => RequestHandler;
   /** Retrieves the route handler configuration that was registered with the router */
   getRegisteredRouteConfig: (method: RouterMethod, path: string) => RouteConfig<any, any, any, any>;
+  /** Sets endpoint authz overrides on the data returned by `EndpointAppContext.services.getEndpointAuthz()` */
+  setEndpointAuthz: (overrides: Partial<EndpointAuthz>) => void;
   /** Get a registered versioned route */
   getRegisteredVersionedRoute: (
     method: RouterMethod,
@@ -290,8 +289,9 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
   const endpointAppContextMock = createMockEndpointAppContext();
   const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const savedObjectClientMock = savedObjectsClientMock.create();
+  const endpointAuthz = getEndpointAuthzInitialStateMock();
   const httpHandlerContextMock = requestContextMock.convertContext(
-    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock)
+    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock, { endpointAuthz })
   );
   const httpResponseMock = httpServerMock.createResponseFactory();
   const getRegisteredRouteHandler: HttpApiTestSetupMock['getRegisteredRouteHandler'] = (
@@ -324,6 +324,11 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 
     return handler[0];
   };
+  const setEndpointAuthz = (overrides: Partial<EndpointAuthz>) => {
+    Object.assign(endpointAuthz, overrides);
+  };
+
+  (endpointAppContextMock.service.getEndpointAuthz as jest.Mock).mockResolvedValue(endpointAuthz);
 
   return {
     routerMock,
@@ -351,6 +356,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
 
     getRegisteredRouteHandler,
     getRegisteredRouteConfig,
+    setEndpointAuthz,
 
     getRegisteredVersionedRoute: getRegisteredVersionedRouteMock.bind(null, routerMock),
   };

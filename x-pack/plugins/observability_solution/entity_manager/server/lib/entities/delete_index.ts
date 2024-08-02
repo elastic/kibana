@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryIndexName, generateLatestIndexName } from './helpers/generate_index_name';
+import { generateHistoryIndexName, generateLatestIndexName } from './helpers/generate_component_id';
 
 export async function deleteIndices(
   esClient: ElasticsearchClient,

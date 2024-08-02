@@ -20,7 +20,11 @@ import {
   EuiSuperDatePicker,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import {
+  CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -36,9 +40,11 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { OPTIONS_LIST_CONTROL_TYPE } from '../react_controls/data_controls/options_list_control/constants';
 import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
+import { openDataControlEditor } from '../react_controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
@@ -53,13 +59,14 @@ const toggleViewButtons = [
   },
 ];
 
+const optionsListId = 'optionsList1';
 const searchControlId = 'searchControl1';
 const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
     type: SEARCH_CONTROL_TYPE,
-    order: 0,
+    order: 3,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -68,13 +75,12 @@ const controlGroupPanels = {
       title: 'Message',
       grow: true,
       width: 'medium',
-      searchString: 'this',
       enhancements: {},
     },
   },
   [rangeSliderControlId]: {
     type: RANGE_SLIDER_CONTROL_TYPE,
-    order: 0,
+    order: 1,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -88,12 +94,25 @@ const controlGroupPanels = {
   },
   [timesliderControlId]: {
     type: TIMESLIDER_CONTROL_TYPE,
-    order: 0,
+    order: 4,
     grow: true,
     width: 'medium',
     explicitInput: {
       id: timesliderControlId,
-      title: 'Time slider',
+      enhancements: {},
+    },
+  },
+  [optionsListId]: {
+    type: OPTIONS_LIST_CONTROL_TYPE,
+    order: 2,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: searchControlId,
+      fieldName: 'agent.keyword',
+      title: 'Agent',
+      grow: true,
+      width: 'medium',
       enhancements: {},
     },
   },
@@ -139,6 +158,7 @@ export const ReactControlExample = ({
   );
 
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
+  const [isControlGroupInitialized, setIsControlGroupInitialized] = useState(false);
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
 
   const dashboardApi = useMemo(() => {
@@ -167,6 +187,7 @@ export const ReactControlExample = ({
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },
+      lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -215,6 +236,22 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [controlGroupFilters$, controlGroupApi]);
+
+  useEffect(() => {
+    if (!controlGroupApi) {
+      return;
+    }
+    let ignore = false;
+    controlGroupApi.untilInitialized().then(() => {
+      if (!ignore) {
+        setIsControlGroupInitialized(true);
+      }
+    });
+
+    return () => {
+      ignore = true;
+    };
+  }, [controlGroupApi]);
 
   useEffect(() => {
     if (!controlGroupApi) return;
@@ -282,6 +319,35 @@ export const ReactControlExample = ({
             Serialize control group
           </EuiButton>
         </EuiFlexItem>
+        {controlGroupApi && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                openDataControlEditor({
+                  initialState: {
+                    grow: DEFAULT_CONTROL_GROW,
+                    width: DEFAULT_CONTROL_WIDTH,
+                    dataViewId: dashboardApi.lastUsedDataViewId.getValue(),
+                  },
+                  onSave: ({ type: controlType, state: initialState }) => {
+                    controlGroupApi.addNewPanel({
+                      panelType: controlType,
+                      initialState,
+                    });
+                  },
+                  controlGroupApi,
+                  services: {
+                    core,
+                    dataViews: dataViewsService,
+                  },
+                });
+              }}
+              size="s"
+            >
+              Add new data control
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             legend="Change the view mode"
@@ -335,28 +401,35 @@ export const ReactControlExample = ({
                 type: 'index-pattern',
                 id: WEB_LOGS_DATA_VIEW_ID,
               },
+              {
+                name: `controlGroup_${optionsListId}:optionsListControlDataView`,
+                type: 'index-pattern',
+                id: WEB_LOGS_DATA_VIEW_ID,
+              },
             ],
           }),
         })}
         key={`control_group`}
       />
       <EuiSpacer size="l" />
-      <div style={{ height: '400px' }}>
-        <ReactEmbeddableRenderer
-          type={'data_table'}
-          getParentApi={() => ({
-            ...dashboardApi,
-            getSerializedStateForChild: () => ({
-              rawState: {},
-              references: [],
-            }),
-          })}
-          hidePanelChrome={false}
-          onApiAvailable={(api) => {
-            dashboardApi?.setChild(api);
-          }}
-        />
-      </div>
+      {isControlGroupInitialized && (
+        <div style={{ height: '400px' }}>
+          <ReactEmbeddableRenderer
+            type={'data_table'}
+            getParentApi={() => ({
+              ...dashboardApi,
+              getSerializedStateForChild: () => ({
+                rawState: {},
+                references: [],
+              }),
+            })}
+            hidePanelChrome={false}
+            onApiAvailable={(api) => {
+              dashboardApi?.setChild(api);
+            }}
+          />
+        </div>
+      )}
     </>
   );
 };

@@ -22,7 +22,7 @@ export type {
   FeatureElasticsearchPrivileges,
 } from '../common';
 export { KibanaFeature, ElasticsearchFeature } from '../common';
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = { schema: ConfigSchema };
 export const plugin = async (initializerContext: PluginInitializerContext) => {

@@ -17,7 +17,7 @@ export function useFetchSLOSuggestions() {
     queryFn: async ({ signal }) => {
       try {
         return await http.get<GetSLOSuggestionsResponse>(
-          '/internal/api/observability/slos/suggestions',
+          '/internal/observability/slos/suggestions',
           {
             signal,
           }

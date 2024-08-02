@@ -7,9 +7,10 @@
 
 import React from 'react';
 import {
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutResizable,
+  EuiOutsideClickDetector,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -32,7 +33,7 @@ export type NotesFlyoutProps = {
  * z-index override is needed because otherwise NotesFlyout appears below
  * Timeline Modal as they both have same z-index of 1000
  */
-const NotesFlyoutContainer = styled(EuiFlyout)`
+const NotesFlyoutContainer = styled(EuiFlyoutResizable)`
   /*
   * We want the width of flyout to be less than 50% of screen because
   * otherwise it interferes with the delete notes modal
@@ -55,33 +56,37 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
   }
 
   return (
-    <NotesFlyoutContainer
-      ownFocus={false}
-      className="timeline-notes-flyout"
-      data-test-subj="timeline-notes-flyout"
-      onClose={onClose}
-      aria-labelledby={notesFlyoutTitleId}
-      maxWidth={750}
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{i18n.NOTES}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <NoteCards
-          ariaRowindex={0}
-          associateNote={associateNote}
-          className="notes-in-flyout"
-          data-test-subj="note-cards"
-          notes={notes}
-          showAddNote={true}
-          toggleShowAddNote={toggleShowAddNote}
-          eventId={eventId}
-          timelineId={timelineId}
-          onCancel={onCancel}
-        />
-      </EuiFlyoutBody>
-    </NotesFlyoutContainer>
+    <EuiOutsideClickDetector onOutsideClick={onClose}>
+      <NotesFlyoutContainer
+        ownFocus={false}
+        className="timeline-notes-flyout"
+        data-test-subj="timeline-notes-flyout"
+        onClose={onClose}
+        aria-labelledby={notesFlyoutTitleId}
+        minWidth={500}
+        maxWidth={1400}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>{i18n.NOTES}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <NoteCards
+            ariaRowindex={0}
+            associateNote={associateNote}
+            className="notes-in-flyout"
+            data-test-subj="note-cards"
+            notes={notes}
+            showAddNote={true}
+            toggleShowAddNote={toggleShowAddNote}
+            eventId={eventId}
+            timelineId={timelineId}
+            onCancel={onCancel}
+            showToggleEventDetailsAction={false}
+          />
+        </EuiFlyoutBody>
+      </NotesFlyoutContainer>
+    </EuiOutsideClickDetector>
   );
 });

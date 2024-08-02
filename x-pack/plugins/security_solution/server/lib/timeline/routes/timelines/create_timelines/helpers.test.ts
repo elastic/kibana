@@ -12,7 +12,6 @@ import type { FrameworkRequest } from '../../../../framework';
 import type { SavedTimeline, Note } from '../../../../../../common/api/timeline';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import {
   getCreateTimelinesRequest,
@@ -62,23 +61,14 @@ jest.mock('../../../saved_object/notes/persist_notes', () => ({
 }));
 
 describe('createTimelines', () => {
-  let securitySetup: SecurityPluginSetup;
   let frameworkRequest: FrameworkRequest;
 
   beforeAll(async () => {
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn(),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
     const { context } = requestContextMock.createTools();
     const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
 
     frameworkRequest = await buildFrameworkRequest(
       requestContextMock.convertContext(context),
-      securitySetup,
       mockRequest
     );
     Date.now = jest.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));

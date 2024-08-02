@@ -6,10 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
-import type { RiskEngineEnableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
+import type { InitRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { EnableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
 import type {
   RiskScoresPreviewRequest,
   RiskScoresPreviewResponse,
@@ -18,7 +19,6 @@ import type {
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
 } from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import type { AssetCriticalityBulkUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
@@ -39,9 +39,9 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   API_VERSIONS,
 } from '../../../common/constants';
-import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;
@@ -81,7 +81,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Init risk score engine
      */
     const initRiskEngine = () =>
-      http.fetch<RiskEngineInitResponse>(RISK_ENGINE_INIT_URL, {
+      http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
         version: '1',
         method: 'POST',
       });
@@ -90,7 +90,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Enable risk score engine
      */
     const enableRiskEngine = () =>
-      http.fetch<RiskEngineEnableResponse>(RISK_ENGINE_ENABLE_URL, {
+      http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
         version: '1',
         method: 'POST',
       });
@@ -99,7 +99,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Disable risk score engine
      */
     const disableRiskEngine = () =>
-      http.fetch<RiskEngineDisableResponse>(RISK_ENGINE_DISABLE_URL, {
+      http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
         version: '1',
         method: 'POST',
       });
@@ -181,12 +181,12 @@ export const useEntityAnalyticsRoutes = () => {
     const uploadAssetCriticalityFile = async (
       fileContent: string,
       fileName: string
-    ): Promise<AssetCriticalityBulkUploadResponse> => {
+    ): Promise<UploadAssetCriticalityRecordsResponse> => {
       const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
       const body = new FormData();
       body.append('file', file);
 
-      return http.fetch<AssetCriticalityBulkUploadResponse>(
+      return http.fetch<UploadAssetCriticalityRecordsResponse>(
         ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
         {
           version: API_VERSIONS.public.v1,
@@ -224,7 +224,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risk engine settings
      */
     const fetchRiskEngineSettings = () =>
-      http.fetch<RiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
+      http.fetch<ReadRiskEngineSettingsResponse>(RISK_ENGINE_SETTINGS_URL, {
         version: '1',
         method: 'GET',
       });

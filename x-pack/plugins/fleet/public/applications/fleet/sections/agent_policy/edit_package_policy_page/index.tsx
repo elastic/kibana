@@ -144,6 +144,13 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
+  // make form dirty if new agent policy is selected
+  useEffect(() => {
+    if (newAgentPolicyName) {
+      setIsEdited(true);
+    }
+  }, [newAgentPolicyName, setIsEdited]);
+
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
   // Retrieve agent count
@@ -190,7 +197,7 @@ export const EditPackagePolicyForm = memo<{
         })
       : policyId
       ? getHref('policy_details', { policyId })
-      : '/';
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
@@ -200,7 +207,7 @@ export const EditPackagePolicyForm = memo<{
         })
       : policyId
       ? getHref('policy_details', { policyId })
-      : '/';
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);

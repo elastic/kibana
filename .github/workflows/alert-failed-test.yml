@@ -7,7 +7,7 @@ jobs:
     name: Alert on failed test
     if: |
       !github.event.issue.pull_request
-      && github.event.comment.user.login == 'kibanamachine'
+      && (github.event.comment.user.login == 'kibanamachine' || github.event.comment.user.login == 'elasticmachine')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kibana-operations

@@ -78,9 +78,9 @@ export const useExpandableFlyoutApi = () => {
   );
 
   const previousPreviewPanel = useCallback(() => {
-    dispatch(previousPreviewPanelAction({ id }));
-
-    if (id !== REDUX_ID_FOR_MEMORY_STORAGE) {
+    if (id === REDUX_ID_FOR_MEMORY_STORAGE) {
+      dispatch(previousPreviewPanelAction({ id }));
+    } else {
       history.goBack();
     }
   }, [dispatch, id, history]);

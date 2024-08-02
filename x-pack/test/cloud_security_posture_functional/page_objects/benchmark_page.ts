@@ -40,6 +40,28 @@ export function BenchmarkPagePageProvider({ getService, getPageObjects }: FtrPro
     doesBenchmarkTableExists: async () => {
       return await testSubjects.find('csp_benchmarks_table');
     },
+
+    getBenchmarkTableRows: async () => {
+      const benchmarkTable = await testSubjects.find(CSP_BECNHMARK_TABLE);
+      return await benchmarkTable.findAllByXpath(`//tbody//tr`);
+    },
+
+    getCellData: async (row: any, cellDataTestSubj: string) => {
+      const cell = await row.findByTestSubject(cellDataTestSubj);
+      return await cell.getVisibleText();
+    },
+
+    getEvaluatedCellData: async (row: any) => {
+      return await benchmarkPage.getCellData(row, 'benchmark-table-column-evaluated');
+    },
+
+    getComplianceCellData: async (row: any) => {
+      return await benchmarkPage.getCellData(row, 'benchmark-table-column-compliance');
+    },
+
+    getCisNameCellData: async (row: any) => {
+      return await benchmarkPage.getCellData(row, 'benchmark-table-column-cis-name');
+    },
   };
 
   const navigateToBenchnmarkPage = async () => {

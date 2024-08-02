@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
+import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import { SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../../../../../../common/constants';
 
 import {
@@ -81,6 +82,7 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
+import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -110,12 +112,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
+  const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
-    generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
+    generateNewAgentPolicyWithDefaults({
+      name: 'Agent policy 1',
+      namespace: spaceSettings.defaultNamespace,
+    })
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const validation = agentPolicyFormValidation(newAgentPolicy);
+  const validation = agentPolicyFormValidation(newAgentPolicy, {
+    allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
+  });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
     queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
@@ -341,15 +349,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-
-  const { agentlessPolicy, handleSetupTechnologyChange, selectedSetupTechnology } =
-    useSetupTechnology({
-      newAgentPolicy,
-      updateNewAgentPolicy,
-      updateAgentPolicies,
-      setSelectedPolicyTab,
-      packageInfo,
-    });
+  const { isAgentlessEnabled } = useAgentless();
+  const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
+    newAgentPolicy,
+    setNewAgentPolicy,
+    updateAgentPolicies,
+    setSelectedPolicyTab,
+    packageInfo,
+    packagePolicy,
+  });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -365,7 +373,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            agentlessPolicy={agentlessPolicy}
+            isAgentlessEnabled={isAgentlessEnabled}
           />
         </ExtensionWrapper>
       )
@@ -378,7 +386,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
-            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            namespacePlaceholder={getInheritedNamespace(
+              agentPolicies,
+              spaceSettings?.allowedNamespacePrefixes?.[0]
+            )}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
@@ -423,6 +434,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       integrationInfo?.name,
       extensionView,
       handleExtensionViewOnChange,
+      spaceSettings?.allowedNamespacePrefixes,
     ]
   );
 

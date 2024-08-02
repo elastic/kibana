@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_i18n_check');
+require('../src/dev/i18n_tools/bin/run_i18n_check');

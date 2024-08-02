@@ -39,6 +39,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -352,16 +353,15 @@ describe('Response actions history', () => {
     });
 
     it('should show multiple hostnames correctly', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
+      const data = await getActionListMock({
+        actionCount: 1,
         hosts: {
-          ...data.data[0].hosts,
           'agent-b': { name: 'Host-agent-b' },
           'agent-c': { name: '' },
           'agent-d': { name: 'Host-agent-d' },
         },
-      };
+        agentIds: ['agent-a', 'agent-b', 'agent-c', 'agent-d'],
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -375,14 +375,11 @@ describe('Response actions history', () => {
     });
 
     it('should show display host is unenrolled for a single agent action when metadata host name is empty', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
-        hosts: {
-          ...data.data[0].hosts,
-          'agent-a': { name: '' },
-        },
-      };
+      const data = await getActionListMock({
+        actionCount: 1,
+        agentIds: ['agent-a'],
+        hosts: { 'agent-a': { name: '' } },
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -396,16 +393,15 @@ describe('Response actions history', () => {
     });
 
     it('should show display host is unenrolled for a single agent action when metadata host names are empty', async () => {
-      const data = await getActionListMock({ actionCount: 1 });
-      data.data[0] = {
-        ...data.data[0],
+      const data = await getActionListMock({
+        actionCount: 1,
+        agentIds: ['agent-a', 'agent-b', 'agent-c'],
         hosts: {
-          ...data.data[0].hosts,
           'agent-a': { name: '' },
           'agent-b': { name: '' },
           'agent-c': { name: '' },
         },
-      };
+      });
 
       useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
@@ -1233,7 +1229,7 @@ describe('Response actions history', () => {
                           command === 'get-file'
                             ? 'ra_get-file_error_not-found'
                             : command === 'scan'
-                            ? 'ra_scan_error_scan_invalid-input'
+                            ? 'ra_scan_error_invalid-input'
                             : 'non_existing_code_for_test',
                       },
                     },
@@ -1388,7 +1384,7 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_not-found'
                         : command === 'scan'
-                        ? 'ra_scan_error_scan_invalid-input'
+                        ? 'ra_scan_error_invalid-input'
                         : 'non_existing_code_for_test',
                     content: undefined,
                   },
@@ -1400,7 +1396,7 @@ describe('Response actions history', () => {
                       command === 'get-file'
                         ? 'ra_get-file_error_invalid-input'
                         : command === 'scan'
-                        ? 'ra_scan_error_scan_invalid-input'
+                        ? 'ra_scan_error_invalid-input'
                         : 'non_existing_code_for_test',
                     content: undefined,
                   },
@@ -1490,6 +1486,17 @@ describe('Response actions history', () => {
   });
 
   describe('Actions filter', () => {
+    let featureFlags: Partial<ExperimentalFeatures>;
+
+    beforeEach(() => {
+      featureFlags = {
+        responseActionUploadEnabled: true,
+        responseActionScanEnabled: false,
+      };
+
+      mockedContext.setExperimentalFlag(featureFlags);
+    });
+
     const filterPrefix = 'actions-filter';
 
     it('should have a search bar', () => {
@@ -1505,7 +1512,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions (without `scan`) when opened', () => {
-      mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
+      mockedContext.setExperimentalFlag({
+        ...featureFlags,
+        responseActionScanEnabled: false,
+      });
       render();
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1529,7 +1539,7 @@ describe('Response actions history', () => {
 
     it('should show a list of actions (with `scan`) when opened', () => {
       mockedContext.setExperimentalFlag({
-        responseActionUploadEnabled: true,
+        ...featureFlags,
         responseActionScanEnabled: true,
       });
       render();

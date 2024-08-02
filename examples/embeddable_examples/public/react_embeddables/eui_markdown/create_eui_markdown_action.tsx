@@ -41,7 +41,7 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
       );
     },
     getDisplayName: () =>
-      i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
+      i18n.translate('embeddableExamples.euiMarkdownEditor.displayNameAriaLabel', {
         defaultMessage: 'EUI Markdown',
       }),
   });

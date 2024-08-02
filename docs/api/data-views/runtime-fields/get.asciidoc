@@ -4,7 +4,7 @@
 <titleabbrev>Get runtime field</titleabbrev>
 ++++
 
-experimental[] Get a runtime field
+Get a runtime field
 
 [NOTE]
 ====

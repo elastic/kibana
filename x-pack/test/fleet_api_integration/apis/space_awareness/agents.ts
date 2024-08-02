@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import { CreateAgentPolicyResponse, GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -130,6 +130,122 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(err).to.be.an(Error);
         expect(err?.message).to.match(/404 "Not Found"/);
+      });
+    });
+
+    describe('PUT /agents/{id}', () => {
+      it('should allow to update an agent in the same space', async () => {
+        await apiClient.updateAgent(testSpaceAgent1, { tags: ['foo'] }, TEST_SPACE_1);
+        await apiClient.updateAgent(testSpaceAgent1, { tags: ['tag1'] }, TEST_SPACE_1);
+      });
+
+      it('should not allow to update an agent from a different space from the default space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.updateAgent(testSpaceAgent1, { tags: ['foo'] });
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+    });
+
+    describe('DELETE /agents/{id}', () => {
+      it('should allow to delete an agent in the same space', async () => {
+        const testSpaceAgent3 = await createFleetAgent(spaceTest1Policy2.item.id, TEST_SPACE_1);
+        await apiClient.deleteAgent(testSpaceAgent3, TEST_SPACE_1);
+      });
+
+      it('should not allow to delete an agent from a different space from the default space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.deleteAgent(testSpaceAgent1);
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+    });
+
+    describe('POST /agents/bulkUpdateAgentTags', () => {
+      function getAgentTags(agents: GetAgentsResponse) {
+        return agents.items?.reduce((acc, item) => {
+          acc[item.id] = item.tags;
+          return acc;
+        }, {} as any);
+      }
+
+      it('should only update tags of agents in the same space when passing a list of agent ids', async () => {
+        let agents = await apiClient.getAgents(TEST_SPACE_1);
+        let agentTags = getAgentTags(agents);
+        expect(agentTags[testSpaceAgent1]).to.eql(['tag1']);
+        expect(agentTags[testSpaceAgent2]).to.eql(['tag1']);
+        // Add tag
+        await apiClient.bulkUpdateAgentTags(
+          {
+            agents: [defaultSpaceAgent1, testSpaceAgent1],
+            tagsToAdd: ['space1'],
+          },
+          TEST_SPACE_1
+        );
+        agents = await apiClient.getAgents(TEST_SPACE_1);
+        agentTags = getAgentTags(agents);
+        expect(agentTags[testSpaceAgent1]).to.eql(['tag1', 'space1']);
+        expect(agentTags[testSpaceAgent2]).to.eql(['tag1']);
+        // Reset tags
+        await apiClient.bulkUpdateAgentTags(
+          {
+            agents: [testSpaceAgent1],
+            tagsToRemove: ['space1'],
+          },
+          TEST_SPACE_1
+        );
+        agents = await apiClient.getAgents(TEST_SPACE_1);
+        agentTags = getAgentTags(agents);
+        expect(agentTags[testSpaceAgent1]).to.eql(['tag1']);
+      });
+
+      it('should only update tags of agents in the same space when passing a kuery', async () => {
+        let agentsInDefaultSpace = await apiClient.getAgents();
+        let agentInDefaultSpaceTags = getAgentTags(agentsInDefaultSpace);
+        let agentsInTestSpace = await apiClient.getAgents(TEST_SPACE_1);
+        let agentInTestSpaceTags = getAgentTags(agentsInTestSpace);
+        expect(agentInDefaultSpaceTags[defaultSpaceAgent1]).to.eql(['tag1']);
+        expect(agentInDefaultSpaceTags[defaultSpaceAgent2]).to.eql(['tag1']);
+        expect(agentInTestSpaceTags[testSpaceAgent1]).to.eql(['tag1']);
+        expect(agentInTestSpaceTags[testSpaceAgent2]).to.eql(['tag1']);
+        // Add tag
+        await apiClient.bulkUpdateAgentTags(
+          {
+            agents: '',
+            tagsToAdd: ['space1'],
+          },
+          TEST_SPACE_1
+        );
+        agentsInDefaultSpace = await apiClient.getAgents();
+        agentInDefaultSpaceTags = getAgentTags(agentsInDefaultSpace);
+        agentsInTestSpace = await apiClient.getAgents(TEST_SPACE_1);
+        agentInTestSpaceTags = getAgentTags(agentsInTestSpace);
+        expect(agentInDefaultSpaceTags[defaultSpaceAgent1]).to.eql(['tag1']);
+        expect(agentInDefaultSpaceTags[defaultSpaceAgent2]).to.eql(['tag1']);
+        expect(agentInTestSpaceTags[testSpaceAgent1]).to.eql(['tag1', 'space1']);
+        expect(agentInTestSpaceTags[testSpaceAgent2]).to.eql(['tag1', 'space1']);
+        // Reset tags
+        await apiClient.bulkUpdateAgentTags(
+          {
+            agents: '',
+            tagsToRemove: ['space1'],
+          },
+          TEST_SPACE_1
+        );
+        agentsInTestSpace = await apiClient.getAgents(TEST_SPACE_1);
+        agentInTestSpaceTags = getAgentTags(agentsInTestSpace);
+        expect(agentInTestSpaceTags[testSpaceAgent1]).to.eql(['tag1']);
+        expect(agentInTestSpaceTags[testSpaceAgent2]).to.eql(['tag1']);
       });
     });
   });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { fetchConnectors } from './fetch_connectors';
 import { isIndexNotFoundException } from '../utils/identify_exceptions';

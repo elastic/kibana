@@ -83,7 +83,7 @@
     "@kbn/core-user-profile-browser",
     "@kbn/security-api-key-management",
     "@kbn/security-form-components",
-    "@kbn/core-security-server-mocks",
+    "@kbn/core-security-server-mocks"
   ],
   "exclude": [
     "target/**/*",
