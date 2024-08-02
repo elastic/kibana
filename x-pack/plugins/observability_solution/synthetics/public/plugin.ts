@@ -60,6 +60,7 @@ import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/pu
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { SloPublicStart } from '@kbn/slo-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -111,6 +112,7 @@ export interface ClientPluginsStart {
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  slo?: SloPublicStart;
   presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
 }

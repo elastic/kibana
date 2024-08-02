@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ECS_FULL } from '../../../common/ecs';
 import type { EcsMappingState } from '../../types';
+import { ECS_RESERVED } from './constants';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);
 type AnyObject = Record<string, any>;
@@ -127,10 +128,11 @@ function findDuplicateFields(samples: string[], ecsMapping: AnyObject): string[]
 }
 
 // Function to find invalid ECS fields
-function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
+export function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
   const results: string[] = [];
   const output: Record<string, string[][]> = {};
   const ecsDict = ECS_FULL;
+  const ecsReserved = ECS_RESERVED;
 
   processMapping([], ecsMapping, output);
   const filteredOutput = Object.fromEntries(
@@ -141,6 +143,11 @@ function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
     if (!Object.prototype.hasOwnProperty.call(ecsDict, ecsValue)) {
       const field = paths.map((p) => p.join('.'));
       results.push(`Invalid ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
+    }
+
+    if (ecsReserved.includes(ecsValue)) {
+      const field = paths.map((p) => p.join('.'));
+      results.push(`Reserved ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
     }
   }
 

@@ -24,7 +24,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty } from 'lodash';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useQueryClient } from '@tanstack/react-query';
@@ -54,7 +54,6 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
@@ -84,7 +83,6 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
-import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
@@ -210,16 +208,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     mlSuppressionFields,
   } = useMLRuleConfig({ machineLearningJobId });
 
+  const isMlSuppressionIncomplete =
+    isMlRule(ruleType) && machineLearningJobId?.length > 0 && !allJobsStarted;
+
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
-
-  const isAIAssistantEnabled = useIsExperimentalFeatureEnabled(
-    'AIAssistantOnRuleCreationFormEnabled'
-  );
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -268,12 +265,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const [aggFields, setAggregatableFields] = useState<BrowserField[]>([]);
+  const [aggFields, setAggregatableFields] = useState<FieldSpec[]>([]);
 
   useEffect(() => {
     const { fields } = indexPattern;
     /**
-     * Typecasting to BrowserField because fields is
+     * Typecasting to FieldSpec because fields is
      * typed as DataViewFieldBase[] which does not have
      * the 'aggregatable' property, however the type is incorrect
      *
@@ -281,10 +278,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      * We will need to determine where these types are defined and
      * figure out where the discrepency is.
      */
-    setAggregatableFields(aggregatableFields(fields as BrowserField[]));
+    setAggregatableFields(aggregatableFields(fields as FieldSpec[]));
   }, [indexPattern]);
 
-  const termsAggregationFields: BrowserField[] = useMemo(
+  const termsAggregationFields: FieldSpec[] = useMemo(
     () => getTermsAggregationFields(aggFields),
     [aggFields]
   );
@@ -938,7 +935,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {isAIAssistantEnabled && !isMlRule(ruleType) && !isQueryBarValid && (
+          {!isMlRule(ruleType) && !isQueryBarValid && (
             <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
           )}
 
@@ -1092,7 +1089,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     disabledText: suppressionGroupByDisabledText,
                   }}
                 />
-                {!allJobsStarted && (
+                {isMlSuppressionIncomplete && (
                   <EuiText size="xs" color="warning">
                     {i18n.MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL}
                   </EuiText>

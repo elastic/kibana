@@ -16,6 +16,7 @@ import type {
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
+import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   lookupColumn,
@@ -88,6 +89,7 @@ import {
   getParamAtPosition,
   getQueryForFields,
   getSourcesFromCommands,
+  getSupportedTypesForBinaryOperators,
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
@@ -124,7 +126,7 @@ function appendEnrichFields(
   // @TODO: improve this
   const newMap: Map<string, ESQLRealField> = new Map(fieldsMap);
   for (const field of policyMetadata.enrichFields) {
-    newMap.set(field, { name: field, type: 'number' });
+    newMap.set(field, { name: field, type: 'double' });
   }
   return newMap;
 }
@@ -146,17 +148,65 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
  * @param text
  * @returns
  */
-function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
+function countBracketsUnclosed(bracketType: '(' | '[' | '"' | '"""', text: string) {
   const stack = [];
-  const closingBrackets = { '(': ')', '[': ']' };
-  for (const char of text) {
-    if (char === bracketType) {
-      stack.push(bracketType);
-    } else if (char === closingBrackets[bracketType]) {
+  const closingBrackets = { '(': ')', '[': ']', '"': '"', '"""': '"""' };
+  for (let i = 0; i < text.length; i++) {
+    const substr = text.substring(i, i + bracketType.length);
+    if (substr === closingBrackets[bracketType] && stack.length) {
       stack.pop();
+    } else if (substr === bracketType) {
+      stack.push(bracketType);
     }
   }
   return stack.length;
+}
+
+/**
+ * This function attempts to correct the syntax of a partial query to make it valid.
+ *
+ * This is important because a syntactically-invalid query will not generate a good AST.
+ *
+ * @param _query
+ * @param context
+ * @returns
+ */
+function correctQuerySyntax(_query: string, context: EditorContext) {
+  let query = _query;
+  // check if all brackets are closed, otherwise close them
+  const unclosedRoundBrackets = countBracketsUnclosed('(', query);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', query);
+  const unclosedQuotes = countBracketsUnclosed('"', query);
+  const unclosedTripleQuotes = countBracketsUnclosed('"""', query);
+  // if it's a comma by the user or a forced trigger by a function argument suggestion
+  // add a marker to make the expression still valid
+  const charThatNeedMarkers = [',', ':'];
+  if (
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
+    (context.triggerCharacter === ' ' &&
+      (isMathFunction(query, query.length) || isComma(query.trimEnd()[query.trimEnd().length - 1])))
+  ) {
+    query += EDITOR_MARKER;
+  }
+
+  // if there are unclosed brackets, close them
+  if (unclosedRoundBrackets || unclosedSquaredBrackets || unclosedQuotes) {
+    for (const [char, count] of [
+      ['"""', unclosedTripleQuotes],
+      ['"', unclosedQuotes],
+      [')', unclosedRoundBrackets],
+      [']', unclosedSquaredBrackets],
+    ]) {
+      if (count) {
+        // inject the closing brackets
+        query += Array(count).fill(char).join('');
+      }
+    }
+  }
+
+  return query;
 }
 
 export async function suggest(
@@ -168,43 +218,16 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   const innerText = fullText.substring(0, offset);
 
-  let finalText = innerText;
+  const correctedQuery = correctQuerySyntax(innerText, context);
 
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
-  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
-    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) ||
-        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
-  ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
-  }
-  // if there are unclosed brackets, close them
-  if (unclosedBrackets) {
-    for (const [char, count] of [
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        finalText += Array(count).fill(char).join('');
-      }
-    }
-  }
-
-  const { ast } = await astProvider(finalText);
+  const { ast } = await astProvider(correctedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
+  const queryForFields = getQueryForFields(
+    buildQueryUntilPreviousCommand(ast, correctedQuery),
+    ast
+  );
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -511,6 +534,12 @@ async function getExpressionSuggestionsByType(
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
 
+  // TODO - this is a workaround because it was too difficult to handle this case in a generic way :(
+  if (commandDef.name === 'from' && node && isSourceItem(node) && /\s/.test(node.name)) {
+    // FROM " <suggest>"
+    return [];
+  }
+
   // A new expression is considered either
   // * just after a command name => i.e. ... | STATS <here>
   // * or after a comma => i.e. STATS fieldA, <here>
@@ -705,7 +734,7 @@ async function getExpressionSuggestionsByType(
               workoutBuiltinOptions(rightArg, references)
             )
           );
-          if (nodeArgType === 'number' && isLiteralItem(rightArg)) {
+          if (isNumericType(nodeArgType) && isLiteralItem(rightArg)) {
             // ... EVAL var = 1 <suggest>
             suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
           }
@@ -713,7 +742,7 @@ async function getExpressionSuggestionsByType(
             if (rightArg.args.some(isTimeIntervalItem)) {
               const lastFnArg = rightArg.args[rightArg.args.length - 1];
               const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
-              if (lastFnArgType === 'number' && isLiteralItem(lastFnArg))
+              if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                 // ... EVAL var = 1 year + 2 <suggest>
                 suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
             }
@@ -750,7 +779,7 @@ async function getExpressionSuggestionsByType(
               if (nodeArg.args.some(isTimeIntervalItem)) {
                 const lastFnArg = nodeArg.args[nodeArg.args.length - 1];
                 const lastFnArgType = extractFinalTypeFromArg(lastFnArg, references);
-                if (lastFnArgType === 'number' && isLiteralItem(lastFnArg))
+                if (isNumericType(lastFnArgType) && isLiteralItem(lastFnArg))
                   // ... EVAL var = 1 year + 2 <suggest>
                   suggestions.push(...getCompatibleLiterals(command.name, ['time_literal_unit']));
               }
@@ -766,7 +795,10 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...buildConstantsDefinitions(argDef.values));
     }
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
-    if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
+    if (
+      ['string', 'text', 'keyword', 'boolean', ...ESQL_NUMBER_TYPES].includes(argDef.type) &&
+      !argDef.values
+    ) {
       // it can be just literal values (i.e. "string")
       if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
@@ -944,6 +976,7 @@ async function getBuiltinFunctionNextArgument(
 ) {
   const suggestions = [];
   const isFnComplete = isFunctionArgComplete(nodeArg, references);
+
   if (isFnComplete.complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
@@ -974,17 +1007,16 @@ async function getBuiltinFunctionNextArgument(
         suggestions.push(listCompleteItem);
       } else {
         const finalType = nestedType || nodeArgType || 'any';
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
             // <COMMAND> expression AND/OR <suggest>
             // technically another boolean value should be suggested, but it is a better experience
             // to actually suggest a wider set of fields/functions
-            [
-              finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
-                ? 'any'
-                : finalType,
-            ],
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
+              ? ['any']
+              : supportedTypes,
             command.name,
             option?.name,
             getFieldsByType,
@@ -1294,7 +1326,7 @@ async function getFunctionArgsSuggestions(
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
-      if (isLiteralItem(arg) && arg.literalType === 'number') {
+      if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
@@ -1597,6 +1629,22 @@ async function getOptionArgsSuggestions(
           ))
         );
       }
+    }
+
+    // If it's a complete expression then propose some final suggestions
+    if (
+      (!nodeArgType &&
+        option.name === 'by' &&
+        option.args.length &&
+        !isNewExpression &&
+        !isAssignment(lastArg)) ||
+      (isAssignment(lastArg) && isAssignmentComplete(lastArg))
+    ) {
+      suggestions.push(
+        ...getFinalSuggestions({
+          comma: optionDef?.signature.multipleParams ?? option.name === 'by',
+        })
+      );
     }
   }
 

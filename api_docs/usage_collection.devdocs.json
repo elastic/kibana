@@ -1585,9 +1585,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -1882,7 +1882,7 @@
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/analytics/ebt/client/src/schema/types.ts",
+        "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
