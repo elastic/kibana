@@ -465,24 +465,25 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
-                <p>
-                  <EuiIcon color="danger" type="warning" />
-                  &nbsp;
-                  <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
-                  {rule.executionStatus.error?.message}
-                  &nbsp;
-                  <EuiLink
-                    href={`${http.basePath.get()}/app/management/stack/license_management`}
-                    color="primary"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                      defaultMessage="Manage license"
-                    />
-                  </EuiLink>
-                </p>
+              <EuiCallOut
+                color="danger"
+                data-test-subj="ruleErrorBanner"
+                size="s"
+                iconType="error"
+                title={getRuleStatusErrorReasonText()}
+              >
+                <EuiText size="xs">{rule.executionStatus.error?.message}</EuiText>
+                <EuiSpacer size="s" />
+                <EuiLink
+                  href={`${http.basePath.get()}/app/management/stack/license_management`}
+                  color="primary"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+                    defaultMessage="Manage license"
+                  />
+                </EuiLink>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>
