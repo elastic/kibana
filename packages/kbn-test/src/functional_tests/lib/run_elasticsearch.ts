@@ -79,11 +79,7 @@ export async function runElasticsearch(
   options: RunElasticsearchOptions
 ): Promise<() => Promise<void>> {
   const { log, logsDir, name } = options;
-  let config = getEsConfig(options);
-  config = {
-    ...config,
-    esArgs: ['xpack.ml.enabled=false', ...config.esArgs],
-  };
+  const config = getEsConfig(options);
 
   if (!config.ccsConfig) {
     const node = await startEsNode({
