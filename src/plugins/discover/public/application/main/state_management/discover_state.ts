@@ -23,6 +23,7 @@ import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/pub
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -174,6 +175,16 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
+    /**
+     * Triggered when transitioning from ESQL to Dataview
+     * Clean ups the ES|QL query and moves to the dataview mode
+     */
+    transitionFromESQLToDataview: (dataViewId: string) => void;
+    /**
+     * Triggered when transitioning from ESQL to Dataview
+     * Clean ups the ES|QL query and moves to the dataview mode
+     */
+    transitionFromDataviewToESQL: (dataView: DataView) => void;
     /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
@@ -350,6 +361,29 @@ export function getDiscoverStateContainer({
         savedSearchId: newSavedSearchId,
       });
     }
+  };
+
+  const transitionFromESQLToDataview = (dataViewId: string) => {
+    appStateContainer.update({
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+      dataSource: {
+        type: DataSourceType.DataView,
+        dataViewId,
+      },
+    });
+  };
+
+  const transitionFromDataviewToESQL = (dataView: DataView) => {
+    const queryString = getInitialESQLQuery(dataView);
+    appStateContainer.update({
+      query: { esql: queryString },
+      dataSource: {
+        type: DataSourceType.Esql,
+      },
+    });
   };
 
   const onDataViewCreated = async (nextDataView: DataView) => {
@@ -544,6 +578,8 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
+      transitionFromESQLToDataview,
+      transitionFromDataviewToESQL,
       onUpdateQuery,
       setDataView,
       undoSavedSearchChanges,

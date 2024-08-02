@@ -12,10 +12,10 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { omit } from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getInitialESQLQuery, ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
+import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { showOpenSearchPanel } from './show_open_search_panel';
-import { DataSourceType } from '../../../../../common/data_sources';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -34,6 +34,7 @@ export const getTopNavLinks = ({
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
+  shouldShowESQLToDataviewTransitionModal,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -42,6 +43,7 @@ export const getTopNavLinks = ({
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
+  shouldShowESQLToDataviewTransitionModal: boolean;
 }): TopNavMenuData[] => {
   const alerts = {
     id: 'alerts',
@@ -86,24 +88,22 @@ export const getTopNavLinks = ({
     run: () => {
       if (dataView) {
         if (isEsqlMode) {
-          state.appState.update({
-            query: {
-              language: 'kuery',
-              query: '',
-            },
-            dataSource: {
-              type: DataSourceType.DataView,
-              dataViewId: dataView.id ?? '',
-            },
-          });
+          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+          /**
+           * Display the transition modal if:
+           * - the user has not dismissed the modal
+           * - the user has opened and applied changes to the saved search
+           */
+          if (
+            shouldShowESQLToDataviewTransitionModal &&
+            !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+          ) {
+            state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
+          } else {
+            state.actions.transitionFromESQLToDataview(dataView.id ?? '');
+          }
         } else {
-          const queryString = getInitialESQLQuery(dataView);
-          state.appState.update({
-            query: { esql: queryString },
-            dataSource: {
-              type: DataSourceType.Esql,
-            },
-          });
+          state.actions.transitionFromDataviewToESQL(dataView);
           services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
         }
       }

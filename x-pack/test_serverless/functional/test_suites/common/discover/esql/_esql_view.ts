@@ -262,7 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
       });
 
@@ -275,17 +275,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
         await find.clickByCssSelector(
-          '[data-test-subj="unifiedSearch_switch_modal"] .euiModal__closeIcon'
+          '[data-test-subj="discover-esql-to-dataview-modal"] .euiModal__closeIcon'
         );
         await retry.try(async () => {
-          await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+          await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
         await testSubjects.click('switch-to-dataviews');
-        await testSubjects.missingOrFail('unifiedSearch_switch_modal');
+        await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
       it('should show switch modal when switching to a data view while a saved search with unsaved changes is open', async () => {
@@ -300,7 +300,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
-          await testSubjects.existOrFail('unifiedSearch_switch_modal');
+          await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
       });
     });

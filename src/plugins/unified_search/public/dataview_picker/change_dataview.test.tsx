@@ -86,7 +86,6 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
-      onTextLangQuerySubmit: jest.fn(),
     };
   });
 
