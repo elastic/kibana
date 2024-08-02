@@ -23,7 +23,7 @@ const services = {
         return true;
       }
       if (key === 'truncate:maxHeight') {
-        return 110;
+        return 115;
       }
     },
   },

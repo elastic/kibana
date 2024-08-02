@@ -427,6 +427,7 @@ export const DocViewerTable = ({
             formattedValue={formattedValue}
             rawValue={flattenedField}
             ignoreReason={ignored}
+            isDetails={isDetails}
           />
         );
       }

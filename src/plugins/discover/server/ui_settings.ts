@@ -28,6 +28,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
@@ -318,7 +319,7 @@ export const getUiSettings: (
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
       defaultMessage: 'Maximum cell height in the table',
     }),
-    value: 110,
+    value: TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:

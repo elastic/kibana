@@ -14,15 +14,20 @@ import {
   EuiIcon,
   EuiTextColor,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import classNames from 'classnames';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import {
+  IgnoredReason,
+  TRUNCATE_MAX_HEIGHT,
+  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
+} from '@kbn/discover-utils';
 import { FieldRecord } from './table';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 const COLLAPSE_LINE_LENGTH = 350;
+const DOC_VIEWER_BETTER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110; // DocViewer's line height is denser than the one in the legacy table, so the height should smaller
 
 // Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
 const expandedFieldValuesSet = new Set<string>();
@@ -97,6 +102,7 @@ type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
   formattedValue: FieldRecord['value']['formattedValue'];
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
+  isDetails: boolean; // true when inside EuiDataGrid cell popover
 };
 
 export const TableFieldValue = ({
@@ -104,26 +110,27 @@ export const TableFieldValue = ({
   field,
   rawValue,
   ignoreReason,
+  isDetails,
 }: TableFieldValueProps) => {
+  const { euiTheme } = useEuiTheme();
   const { uiSettings } = getUnifiedDocViewerServices();
-  const truncateMaxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
+  let truncateMaxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
+
+  if (truncateMaxHeight === TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE) {
+    truncateMaxHeight = DOC_VIEWER_BETTER_DEFAULT_TRUNCATE_MAX_HEIGHT;
+  }
 
   const valueRef = useRef<HTMLDivElement>(null);
   const [collapsedScrollHeight, setCollapsedScrollHeight] = useState<number>(0);
 
   const [isValueExpanded, setIsValueExpanded] = useState(expandedFieldValuesSet.has(field));
   const isCollapsible =
+    !isDetails &&
     truncateMaxHeight > 0 &&
     String(rawValue).length > COLLAPSE_LINE_LENGTH &&
     // Don't collapse if the field value fits into the available height anyway (when the screen width is large enough)
     (!collapsedScrollHeight || collapsedScrollHeight > truncateMaxHeight);
   const isCollapsed = isCollapsible && !isValueExpanded;
-
-  const valueClassName = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    kbnDocViewer__value: true,
-    dscTruncateByHeight: isCollapsible && isCollapsed,
-  });
 
   const onToggleCollapse = useCallback(
     () =>
@@ -145,6 +152,17 @@ export const TableFieldValue = ({
     }
   }, [isCollapsible, isCollapsed, setCollapsedScrollHeight]);
 
+  const toggleButtonLabel = isCollapsed
+    ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
+        defaultMessage: 'View more',
+      })
+    : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
+        defaultMessage: 'View less',
+      });
+
+  const shouldTruncate = isCollapsible && isCollapsed;
+  const valueElementId = `tableDocViewRow-${field}-value`;
+
   return (
     <Fragment>
       {ignoreReason && (
@@ -156,22 +174,21 @@ export const TableFieldValue = ({
       )}
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexStart">
         {isCollapsible && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              margin-top: -${euiTheme.size.xxs};
+            `}
+          >
             <EuiButtonIcon
               iconType={isCollapsed ? 'plusInSquare' : 'minusInSquare'}
               size="xs"
               color="primary"
               data-test-subj={`toggleLongFieldValue-${field}`}
-              title={
-                isCollapsed
-                  ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
-                      defaultMessage: 'View more',
-                    })
-                  : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
-                      defaultMessage: 'View less',
-                    })
-              }
+              title={toggleButtonLabel}
+              aria-label={toggleButtonLabel}
               aria-expanded={!isCollapsed}
+              aria-controls={valueElementId}
               onClick={onToggleCollapse}
             />
           </EuiFlexItem>
@@ -179,8 +196,17 @@ export const TableFieldValue = ({
         <EuiFlexItem>
           <div
             ref={valueRef}
-            className={valueClassName}
-            data-test-subj={`tableDocViewRow-${field}-value`}
+            className="kbnDocViewer__value"
+            css={
+              shouldTruncate
+                ? css`
+                    max-height: ${truncateMaxHeight}px;
+                    overflow: hidden;
+                  `
+                : undefined
+            }
+            id={valueElementId}
+            data-test-subj={valueElementId}
             // Value returned from formatFieldValue is always sanitized
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: formattedValue }}
