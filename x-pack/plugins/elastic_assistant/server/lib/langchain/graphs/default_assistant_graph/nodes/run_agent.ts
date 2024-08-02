@@ -42,13 +42,12 @@ export const runAgent = async ({
   const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
-      messages: state.messages.splice(-1),
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
     },
     config
   );
+
   return {
-    ...state,
     agentOutcome,
   };
 };

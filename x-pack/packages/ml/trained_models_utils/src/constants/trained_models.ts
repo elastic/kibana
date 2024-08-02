@@ -273,7 +273,7 @@ export type InferenceServiceSettings =
 
 export type InferenceAPIConfigResponse = {
   // Refers to a deployment id
-  model_id: string;
+  inference_id: string;
   task_type: 'sparse_embedding' | 'text_embedding';
   task_settings: {
     model?: string;
