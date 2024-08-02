@@ -23,7 +23,7 @@ import { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/a
 import { CreateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/create_list_item/create_list_item.gen';
 import { DeleteListRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list/delete_list.gen';
 import { DeleteListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/delete_list_item/delete_list_item.gen';
-import { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_item.gen';
+import { ExportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/export_list_items/export_list_items.gen';
 import { FindListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_list_items/find_list_items.gen';
 import { FindListsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/find_lists/find_lists.gen';
 import { ImportListItemsRequestQueryInput } from '@kbn/securitysolution-lists-common/api/import_list_items/import_list_items.gen';
