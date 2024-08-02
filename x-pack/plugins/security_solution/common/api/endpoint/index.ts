@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './actions/audit_log_route';
 export * from './actions/action_status_route';
 export * from './actions/details_route';
 export * from './actions/file_download_route';
@@ -23,6 +22,7 @@ export * from './actions/scan_route';
 export * from './actions/common/base';
 export * from './actions/common/response_actions';
 
+export * from './actions/audit_log';
 export * from './metadata/list_metadata_route';
 export * from './metadata/get_metadata_route';
 

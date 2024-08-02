@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-import { Page, PageSize, StartDate, EndDate, AgentId } from '../model/schema/common.gen';
+import { Page, PageSize, StartDate, EndDate } from '../../model/schema/common.gen';
 
 export type AuditLogRequestQuery = z.infer<typeof AuditLogRequestQuery>;
 export const AuditLogRequestQuery = z.object({
@@ -24,9 +24,4 @@ export const AuditLogRequestQuery = z.object({
   page_size: PageSize.optional(),
   start_date: StartDate.optional(),
   end_date: EndDate.optional(),
-});
-
-export type AuditLogRequestParams = z.infer<typeof AuditLogRequestParams>;
-export const AuditLogRequestParams = z.object({
-  agent_id: AgentId.optional(),
 });
