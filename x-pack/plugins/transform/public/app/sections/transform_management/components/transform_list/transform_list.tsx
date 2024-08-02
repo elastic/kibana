@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler, useEffect, useState } from 'react';
+import React, { type FC, type MouseEventHandler, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
@@ -108,7 +108,15 @@ export const TransformList: FC<TransformListProps> = ({
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 
-  const [query, setQuery] = useState<Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]>();
+  const searchQueryText = pageState.queryText ?? '';
+  const setSearchQueryText = useCallback(
+    (value) => {
+      updatePageState({ queryText: value });
+    },
+    [updatePageState]
+  );
+
+  const [searchError, setSearchError] = useState<string | undefined>();
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
@@ -140,21 +148,11 @@ export const TransformList: FC<TransformListProps> = ({
     transformsStatsLoading
   );
 
-  useEffect(
-    function setStateFromUrl() {
-      if (pageState && pageState.queryText) {
-        const queryFromPageState = EuiSearchBar.Query.parse(pageState.queryText);
-        if (queryFromPageState) {
-          setQuery({ queryText: pageState.queryText, query: queryFromPageState, error: null });
-        }
-      }
-    },
-    [pageState]
-  );
-
-  const clauses = query?.query?.ast?.clauses ?? [];
-  const filteredTransforms =
-    clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
+  const filteredTransforms = useMemo(() => {
+    const query = searchQueryText !== '' ? EuiSearchBar.Query.parse(searchQueryText) : undefined;
+    const clauses = query?.ast?.clauses ?? [];
+    return clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
+  }, [searchQueryText, transforms]);
 
   if (transforms.length === 0) {
     return (
@@ -336,8 +334,13 @@ export const TransformList: FC<TransformListProps> = ({
   );
 
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
-    setQuery(search);
-    updatePageState({ queryText: search.queryText });
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
   };
 
   const search = {
@@ -348,7 +351,7 @@ export const TransformList: FC<TransformListProps> = ({
       incremental: true,
     },
     filters: transformFilters,
-    query: query?.queryText,
+    query: searchQueryText,
   };
 
   const selection = {
@@ -373,7 +376,7 @@ export const TransformList: FC<TransformListProps> = ({
         allowNeutralSort={false}
         className="transform__TransformTable"
         columns={columns}
-        error={query?.error?.message}
+        error={searchError}
         items={filteredTransforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
