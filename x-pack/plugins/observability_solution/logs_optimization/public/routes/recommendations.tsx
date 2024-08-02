@@ -614,7 +614,7 @@ const MappingGapRecommendation = ({
             <CodeEditor
               languageId="json"
               value={JSON.stringify(pipeline, null, 2)}
-              onChange={setPipeline}
+              onChange={(change) => setPipeline(JSON.parse(change))}
               fitToContent={{
                 minLines: 10,
                 maxLines: 20,
