@@ -82,8 +82,6 @@ export function initializeControlGroupUnsavedChanges(
         });
 
         await Promise.all(filtersReadyPromises);
-        // wait to allow controlGroup controlApi.filters$ subscriptions to fire
-        await new Promise((resolve) => setTimeout(resolve, 10));
         applySelections();
       },
     } as Pick<PublishesUnsavedChanges, 'unsavedChanges'> & {

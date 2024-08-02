@@ -7,7 +7,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, first, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, first, switchMap, tap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
@@ -173,6 +173,13 @@ export const initializeDataControl = <EditorState extends object = {}>(
     });
   };
 
+  const filtersReadySubscription = filters$.pipe(debounceTime(0)).subscribe(() => {
+    // Set filtersReady$.next(true); in filters$ subscription instead of setOutputFilter
+    // to avoid signaling filters ready until after filters have been emitted 
+    // to avoid timing issues
+    filtersReady$.next(true)
+  });
+
   const api: ControlApiInitialization<DataControlApi> = {
     ...defaultControl.api,
     panelTitle,
@@ -201,6 +208,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
+      filtersReadySubscription.unsubscribe();
     },
     comparators: {
       ...defaultControl.comparators,
@@ -214,7 +222,6 @@ export const initializeDataControl = <EditorState extends object = {}>(
       },
       setOutputFilter: (newFilter: Filter | undefined) => {
         filters$.next(newFilter ? [newFilter] : undefined);
-        filtersReady$.next(true);
       },
     },
     stateManager,
