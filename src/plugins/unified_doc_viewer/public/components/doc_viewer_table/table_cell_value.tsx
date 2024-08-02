@@ -27,7 +27,7 @@ import { FieldRecord } from './table';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 const COLLAPSE_LINE_LENGTH = 350;
-const DOC_VIEWER_BETTER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110; // DocViewer's line height is denser than the one in the legacy table, so the height should smaller
+const DOC_VIEWER_BETTER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110; // DocViewer's line height is denser than line height in the legacy table rows, so the height should be smaller
 
 // Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
 const expandedFieldValuesSet = new Set<string>();
