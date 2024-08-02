@@ -38,15 +38,15 @@ interface PrivilegeGroups {
 }
 
 const extractAuthzDescription = (route: InternalRouterRoute) => {
-  if (!route?.authz) {
+  if (!route?.security?.authz) {
     return '';
   }
 
-  if ((route.authz as AuthzDisabled).enabled === false) {
-    return `Route authz is disabled. ${(route.authz as AuthzDisabled).reason ?? ''}`;
+  if ((route.security.authz as AuthzDisabled).enabled === false) {
+    return `Route authz is disabled. ${(route.security?.authz as AuthzDisabled).reason ?? ''}`;
   }
 
-  const privileges = (route?.authz as AuthzEnabled).requiredPrivileges;
+  const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;
   const offeringGroupedPrivileges = privileges.reduce<PrivilegeGroups>(
     (groups, privilege) => {
       if (typeof privilege === 'string') {
