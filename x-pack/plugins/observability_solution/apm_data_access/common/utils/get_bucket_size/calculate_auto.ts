@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment, { Duration } from 'moment';
 const d = moment.duration;
 
-const roundingRules = [
+type RoundingRule = [Duration, Duration];
+
+const roundingRules: RoundingRule[] = [
   [d(500, 'ms'), d(100, 'ms')],
   [d(5, 'second'), d(1, 'second')],
   [d(7.5, 'second'), d(5, 'second')],
@@ -24,19 +26,21 @@ const roundingRules = [
   [d(1, 'week'), d(1, 'd')],
   [d(3, 'week'), d(1, 'week')],
   [d(1, 'year'), d(1, 'month')],
-  [Infinity, d(1, 'year')],
+  [d(Infinity, 'year'), d(1, 'year')],
 ];
 
-const revRoundingRules = roundingRules.slice(0).reverse();
+const revRoundingRules = [...roundingRules].reverse();
 
-function find(rules, check, last) {
-  function pick(buckets, duration) {
-    const target = duration / buckets;
-    let lastResp = null;
+type CheckFunction = (bound: Duration, interval: Duration, target: number) => Duration | null;
+
+function find(rules: RoundingRule[], check: CheckFunction, last?: boolean) {
+  function pick(buckets: number, duration: Duration): Duration | null {
+    const target = duration.asMilliseconds() / buckets;
+    let lastResp: Duration | null = null;
 
     for (let i = 0; i < rules.length; i++) {
-      const rule = rules[i];
-      const resp = check(rule[0], rule[1], target);
+      const [bound, interval] = rules[i];
+      const resp = check(bound, interval, target);
 
       if (resp == null) {
         if (!last) continue;
@@ -53,9 +57,9 @@ function find(rules, check, last) {
     return moment.duration(ms, 'ms');
   }
 
-  return (buckets, duration) => {
+  return (buckets: number, duration: Duration): Duration | undefined => {
     const interval = pick(buckets, duration);
-    if (interval) return moment.duration(interval._data);
+    if (interval) return moment.duration(interval);
   };
 }
 
@@ -63,16 +67,19 @@ export const calculateAuto = {
   near: find(
     revRoundingRules,
     function near(bound, interval, target) {
-      if (bound > target) return interval;
+      if (bound.asMilliseconds() > target) return interval;
+      return null;
     },
     true
   ),
 
   lessThan: find(revRoundingRules, function lessThan(_bound, interval, target) {
-    if (interval < target) return interval;
+    if (interval.asMilliseconds() < target) return interval;
+    return null;
   }),
 
   atLeast: find(revRoundingRules, function atLeast(_bound, interval, target) {
-    if (interval <= target) return interval;
+    if (interval.asMilliseconds() <= target) return interval;
+    return null;
   }),
 };

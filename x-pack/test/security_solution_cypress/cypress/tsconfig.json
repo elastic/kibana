@@ -41,7 +41,6 @@
     "@kbn/license-management-plugin",
     "@kbn/actions-plugin",
     "@kbn/alerts-ui-shared",
-    "@kbn/repo-info",
     "@kbn/securitysolution-endpoint-exceptions-common",
   ]
 }
