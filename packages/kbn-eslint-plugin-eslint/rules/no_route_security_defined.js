@@ -12,8 +12,8 @@ module.exports = {
     docs: {
       description:
         'Automatically append security object after path if not defined within router methods',
-      category: 'Best Practices',
-      recommended: false,
+      category: 'Security Best Practices',
+      recommended: true,
     },
     fixable: 'code',
     schema: [],
