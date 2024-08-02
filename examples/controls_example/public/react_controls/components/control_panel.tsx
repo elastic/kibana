@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -119,6 +120,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
   const isEditable = viewMode === ViewMode.EDIT;
+  const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
 
   return (
     <EuiFlexItem
@@ -130,9 +132,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       data-render-complete="true"
       className={classNames('controlFrameWrapper', {
         'controlFrameWrapper--grow': grow,
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--large': width === 'large',
+        'controlFrameWrapper--small': controlWidth === 'small',
+        'controlFrameWrapper--medium': controlWidth === 'medium',
+        'controlFrameWrapper--large': controlWidth === 'large',
         'controlFrameWrapper-isDragging': isDragging,
         'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (activeIndex ?? -1),
         'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (activeIndex ?? -1),
