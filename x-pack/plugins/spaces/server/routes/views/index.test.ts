@@ -133,8 +133,6 @@ describe('Enter Space view routes', () => {
       expect(responseFactory.redirected).toHaveBeenCalledWith({
         headers: { location: expectedLocation },
       });
-
-      responseFactory.redirected.mockClear();
     });
   };
 
