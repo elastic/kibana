@@ -146,6 +146,10 @@ export class JourneyFtrHarness {
       `Journey: ${this.journeyConfig.getName()}`,
       'performance'
     );
+
+    this.context?.setExtraHTTPHeaders({
+      traceparent: this.currentTransaction.traceparent ?? '',
+    });
   }
 
   private async setupBrowserAndPage() {
