@@ -7,7 +7,7 @@
 
 /* eslint-disable no-console */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render as reactRender } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
@@ -72,8 +72,8 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
   license,
 }) => {
-  const coreStart = coreMock.createStart();
-  const services = createStartServicesMock({ license });
+  const coreStart = useMemo(() => coreMock.createStart(), []);
+  const services = useMemo(() => createStartServicesMock({ license }), [license]);
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -91,7 +91,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   const getFilesClient = mockGetFilesClient();
 
   return (
-    <KibanaRenderContextProvider {...coreStart}>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
           <CasesProvider
@@ -171,7 +171,7 @@ export const createAppMockRenderer = ({
   const getFilesClient = mockGetFilesClient();
 
   const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <KibanaRenderContextProvider {...coreStart}>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
           <CasesProvider
