@@ -60,7 +60,6 @@ import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
   ENRICHMENT_QUERY_START_INPUT,
-  THREAT_INTEL_TAB,
   CELL_EXPAND_VALUE,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
@@ -153,8 +152,6 @@ export const hideMessageTooltip = () => {
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
-
-export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
