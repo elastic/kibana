@@ -23,7 +23,7 @@ describe('CustomCallout', () => {
   beforeEach(() => {
     render(
       <TestProviders>
-        <CustomCallout enrichedFieldMetadata={[hostNameKeyword, someField]}>
+        <CustomCallout customFieldMetadata={[hostNameKeyword, someField]}>
           <div data-test-subj="children">{content}</div>
         </CustomCallout>
       </TestProviders>

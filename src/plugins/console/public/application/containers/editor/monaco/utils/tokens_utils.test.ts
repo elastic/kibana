@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseBody, removeTrailingWhitespaces } from './tokens_utils';
+import { parseBody, removeTrailingWhitespaces, parseUrl } from './tokens_utils';
 
 describe('tokens_utils', () => {
   describe('removeTrailingWhitespaces', () => {
@@ -24,6 +24,11 @@ describe('tokens_utils', () => {
       const url = '_search some_text';
       const result = removeTrailingWhitespaces(url);
       expect(result).toBe('_search');
+    });
+    it(`doesn't split a query parameter with whitespaces`, () => {
+      const url = '_search?q="with whitespace"';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe(url);
     });
   });
 
@@ -118,6 +123,10 @@ describe('tokens_utils', () => {
         value: '{"property1":{"nested1":"value","nested2":{}},"',
         tokens: ['{'],
       },
+      {
+        value: '{\n  "explain": false,\n  "',
+        tokens: ['{'],
+      },
     ];
     for (const testCase of testCases) {
       const { value, tokens } = testCase;
@@ -126,5 +135,19 @@ describe('tokens_utils', () => {
         expect(parsedTokens).toEqual(tokens);
       });
     }
+  });
+
+  describe('parseUrl', () => {
+    it('groups more than 1 slashes together when splitting', () => {
+      const url = '_search//test';
+      const result = parseUrl(url);
+      expect(result.urlPathTokens).toEqual(['_search', 'test']);
+    });
+
+    it('filters out empty tokens', () => {
+      const url = '/_search/test/';
+      const result = parseUrl(url);
+      expect(result.urlPathTokens).toEqual(['_search', 'test']);
+    });
   });
 });

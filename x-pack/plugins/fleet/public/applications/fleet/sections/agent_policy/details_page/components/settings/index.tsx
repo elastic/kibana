@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+
 import type { AgentPolicy } from '../../../../../types';
 import {
   useStartServices,
@@ -53,10 +55,11 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'agent_features',
     'is_protected',
     'advanced_settings',
+    'global_data_tags',
   ]);
 
 const FormWrapper = styled.div`
-  max-width: 800px;
+  max-width: 1200px;
   margin-right: auto;
   margin-left: auto;
 `;
@@ -73,11 +76,15 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
     });
+    const spaceSettings = useSpaceSettingsContext();
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasChanges, setHasChanges] = useState<boolean>(false);
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-    const validation = agentPolicyFormValidation(agentPolicy);
+    const validation = agentPolicyFormValidation(agentPolicy, {
+      allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
+    });
     const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
@@ -98,7 +105,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         if (data) {
           notifications.toasts.addSuccess(
             i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
-              defaultMessage: "Successfully updated '{name}' settings",
+              defaultMessage: "Successfully updated ''{name}'' settings",
               values: { name: agentPolicy.name },
             })
           );
@@ -153,7 +160,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         {agentCount ? (
           <ConfirmDeployAgentPolicyModal
             agentCount={agentCount}
-            agentPolicy={agentPolicy}
+            agentPolicies={[agentPolicy]}
             onConfirm={() => {
               setAgentCount(0);
               submitUpdateAgentPolicy();

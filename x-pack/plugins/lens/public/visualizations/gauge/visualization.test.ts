@@ -565,6 +565,7 @@ describe('gauge', () => {
             "longMessage": "",
             "severity": "error",
             "shortMessage": "Minimum value may not be greater than maximum value",
+            "uniqueId": "gauge_min_gt_max",
           },
         ]
       `);

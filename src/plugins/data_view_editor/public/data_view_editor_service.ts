@@ -179,6 +179,9 @@ export class DataViewEditorService {
   };
 
   private getRollupIndexCaps = async () => {
+    if (this.dataViews.getRollupsEnabled() === false) {
+      return {};
+    }
     let rollupIndicesCaps: RollupIndicesCapsResponse = {};
     try {
       rollupIndicesCaps = await this.http.get<RollupIndicesCapsResponse>('/api/rollup/indices');
@@ -347,6 +350,7 @@ export class DataViewEditorService {
     const getFieldsOptions: GetFieldsOptions = {
       pattern: this.indexPattern,
       allowHidden: this.allowHidden,
+      allowNoIndex: true,
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;

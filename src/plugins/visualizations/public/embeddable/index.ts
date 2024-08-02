@@ -7,7 +7,7 @@
  */
 
 export { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
-export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+export { VISUALIZE_EMBEDDABLE_TYPE, COMMON_VISUALIZATION_GROUPING } from './constants';
 export { VIS_EVENT_TO_TRIGGER } from './events';
 export { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 

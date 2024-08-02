@@ -67,7 +67,7 @@ export const ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL = i18n.translate(
 
 export const ENGINE_CREATION_SUCCESS_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.engineCreation.successMessage', {
-    defaultMessage: "Engine '{name}' was created",
+    defaultMessage: "Engine ''{name}'' was created",
     values: { name },
   });
 

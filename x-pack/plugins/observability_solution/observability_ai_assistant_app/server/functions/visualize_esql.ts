@@ -5,9 +5,12 @@
  * 2.0.
  */
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
-import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
-import { FunctionRegistrationParameters } from '.';
-import { validateEsqlQuery } from './query/validate_esql_query';
+import {
+  visualizeESQLFunction,
+  type VisualizeQueryResponsev1,
+} from '../../common/functions/visualize_esql';
+import type { FunctionRegistrationParameters } from '.';
+import { runAndValidateEsqlQuery } from './query/validate_esql_query';
 
 const getMessageForLLM = (
   intention: VisualizeESQLUserIntention,
@@ -27,22 +30,32 @@ export function registerVisualizeESQLFunction({
   functions,
   resources,
 }: FunctionRegistrationParameters) {
-  functions.registerFunction(visualizeESQLFunction, async ({ arguments: { query, intention } }) => {
-    const { columns, errorMessages } = await validateEsqlQuery({
-      query,
-      client: (await resources.context.core).elasticsearch.client.asCurrentUser,
-    });
+  functions.registerFunction(
+    visualizeESQLFunction,
+    async ({ arguments: { query, intention } }): Promise<VisualizeQueryResponsev1> => {
+      // errorMessages contains the syntax errors from the client side valdation
+      // error contains the error from the server side validation, it is always one error
+      // and help us identify errors like index not found, field not found etc.
+      const { columns, errorMessages, rows, error } = await runAndValidateEsqlQuery({
+        query,
+        client: (await resources.context.core).elasticsearch.client.asCurrentUser,
+      });
 
-    const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));
+      const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));
 
-    return {
-      data: {
-        columns,
-      },
-      content: {
-        message,
-        errorMessages,
-      },
-    };
-  });
+      return {
+        data: {
+          columns: columns ?? [],
+          rows: rows ?? [],
+        },
+        content: {
+          message,
+          errorMessages: [
+            ...(errorMessages ? errorMessages : []),
+            ...(error ? [error.message] : []),
+          ],
+        },
+      };
+    }
+  );
 }

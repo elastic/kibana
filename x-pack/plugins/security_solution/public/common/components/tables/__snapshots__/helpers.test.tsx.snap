@@ -18,26 +18,36 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
           Array [
             "item1",
             "item2",
-            "item3",
           ]
         }
       />
-      <p
-        data-test-subj="popover-additional-overflow"
-      >
-        <EuiTextColor
-          color="subdued"
-        >
-          1
-           
-          <FormattedMessage
-            defaultMessage="more not shown"
-            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-            values={Object {}}
-          />
-        </EuiTextColor>
-      </p>
     </EuiText>
+    <EuiFlexGroup
+      css={
+        Object {
+          "paddingTop": "12px",
+        }
+      }
+      data-test-subj="popover-additional-overflow"
+    >
+      <EuiFlexItem>
+        <EuiText
+          size="xs"
+        >
+          <EuiTextColor
+            color="subdued"
+          >
+            1
+             
+            <MemoizedFormattedMessage
+              data-test-subj="popover-additional-overflow-text"
+              defaultMessage="more not shown"
+              id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
+            />
+          </EuiTextColor>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </Popover>
 </Fragment>
 `;

@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { DeprecationCallout } from '../components';
 
 import {
   EuiCallOut,
@@ -553,6 +554,10 @@ export class JobCreateUi extends Component {
             />
           }
         />
+
+        <EuiSpacer size="l" />
+
+        <DeprecationCallout linksTestSubjPrefix="createForm" />
 
         <EuiSpacer size="l" />
 

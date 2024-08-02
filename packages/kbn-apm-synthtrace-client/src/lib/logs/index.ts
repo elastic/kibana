@@ -14,6 +14,7 @@ export type LogDocument = Fields &
     'input.type': string;
     'log.file.path'?: string;
     'service.name'?: string;
+    'service.environment'?: string;
     'data_stream.namespace': string;
     'data_stream.type': string;
     'data_stream.dataset': string;
@@ -25,11 +26,14 @@ export type LogDocument = Fields &
     'host.name'?: string;
     'container.id'?: string;
     'trace.id'?: string;
+    'transaction.id'?: string;
     'agent.id'?: string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'kubernetes.pod.uid'?: string;
+    'aws.s3.bucket.name'?: string;
     'orchestrator.namespace'?: string;
     'container.name'?: string;
     'cloud.provider'?: string;
@@ -40,6 +44,7 @@ export type LogDocument = Fields &
     'error.stack_trace'?: string;
     'error.exception.stacktrace'?: string;
     'error.log.stacktrace'?: string;
+    'log.custom': Record<string, unknown>;
   }>;
 
 class Log extends Serializable<LogDocument> {

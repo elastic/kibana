@@ -6,7 +6,7 @@
  */
 
 import { inRange } from 'lodash';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '.';
@@ -30,7 +30,6 @@ const getXAxisTickValues = (tickValues: number[], topTraceDuration?: number) => 
 };
 
 interface TimelineAxisProps {
-  header?: ReactNode;
   plotValues: PlotValues;
   marks?: Mark[];
   topTraceDuration: number;
@@ -54,11 +53,7 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
   return (
     <div
       style={{
-        position: 'sticky',
-        top: 0,
-        borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
         height: margins.top,
-        zIndex: 2,
         width: '100%',
       }}
     >

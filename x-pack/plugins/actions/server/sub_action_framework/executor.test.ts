@@ -20,6 +20,7 @@ import {
   TestExecutor,
 } from './mocks';
 import { IService, ServiceParams } from './types';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 describe('Executor', () => {
   const actionId = 'test-action-id';
@@ -172,6 +173,27 @@ describe('Executor', () => {
     ).rejects.toThrowError(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
+  });
+
+  it('marks schema validation errors as user error', async () => {
+    const executor = createExecutor(TestExecutor);
+
+    try {
+      await executor({
+        actionId,
+        params: { subAction: 'echo', subActionParams: { id: 'test-id', foo: 'bar' } },
+        config,
+        secrets,
+        services,
+        configurationUtilities: mockedActionsConfig,
+        logger,
+      });
+    } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+      expect(e.message).toBe(
+        'Request validation failed (Error: [foo]: definition for this key is missing)'
+      );
+    }
   });
 
   it('throws if the method does not exists', async () => {

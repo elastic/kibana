@@ -5,8 +5,26 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
 import { i18n } from '@kbn/i18n';
 import { Connector, ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
+
+export const isLastSeenOld = (connector: Connector): boolean =>
+  connector.last_seen
+    ? moment(connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
+    : false;
+
+export const getConnectorLastSeenError = (connector: Connector): string => {
+  return i18n.translate(
+    'xpack.enterpriseSearch.content.searchIndices.connectorStatus.lastSeenError.label',
+    {
+      defaultMessage:
+        'Your connector has not checked in for over 30 minutes. (last_seen: {lastSeen})',
+      values: { lastSeen: connector.last_seen },
+    }
+  );
+};
 
 const incompleteText = i18n.translate(
   'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
@@ -26,16 +44,17 @@ export function connectorStatusToText(connector: Connector): string {
     );
   }
   if (
-    connector.error === SyncStatus.ERROR ||
-    connector.last_sync_error !== null ||
-    connector.last_access_control_sync_error !== null
+    connector.last_sync_status === SyncStatus.ERROR ||
+    connector.last_access_control_sync_status === SyncStatus.ERROR ||
+    connector.last_sync_error != null ||
+    connector.last_access_control_sync_error != null
   ) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.syncFailure.label',
       { defaultMessage: 'Sync Failure' }
     );
   }
-  if (connectorStatus === ConnectorStatus.ERROR) {
+  if (isLastSeenOld(connector) || connectorStatus === ConnectorStatus.ERROR) {
     return i18n.translate(
       'xpack.enterpriseSearch.content.searchIndices.connectorStatus.connectorFailure.label',
       { defaultMessage: 'Connector Failure' }
@@ -67,10 +86,12 @@ export function connectorStatusToColor(connector: Connector): 'warning' | 'dange
     return 'warning';
   }
   if (
+    isLastSeenOld(connector) ||
     connectorStatus === ConnectorStatus.ERROR ||
-    connector.error === SyncStatus.ERROR ||
-    connector.last_sync_error !== null ||
-    connector.last_access_control_sync_error !== null
+    connector.last_sync_status === SyncStatus.ERROR ||
+    connector.last_access_control_sync_status === SyncStatus.ERROR ||
+    connector.last_sync_error != null ||
+    connector.last_access_control_sync_error != null
   ) {
     return 'danger';
   }

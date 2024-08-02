@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiInMemoryTable,
   CriteriaWithPagination,
-  PropertySort,
   SearchFilterConfig,
   Direction,
   Query,
@@ -31,7 +30,7 @@ import type {
 } from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
-import { TagFilterPanel } from './tag_filter_panel';
+import { TagFilterPanel, TagFilterContextProvider } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
@@ -59,6 +58,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
+  hasRecentlyAccessedMetadata: boolean;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
@@ -81,6 +81,7 @@ export function Table<T extends UserContentCommonSchema>({
   tableSort,
   tableFilter,
   hasUpdatedAtMetadata,
+  hasRecentlyAccessedMetadata,
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
@@ -174,44 +175,22 @@ export function Table<T extends UserContentCommonSchema>({
           <TableSortSelect
             tableSort={tableSort}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
             onChange={onSortChange}
           />
         );
       },
     };
-  }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
+  }, [hasUpdatedAtMetadata, onSortChange, tableSort, hasRecentlyAccessedMetadata]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     if (!isTaggingEnabled()) return null;
 
     return {
       type: 'custom_component',
-      component: () => {
-        return (
-          <TagFilterPanel
-            isPopoverOpen={isPopoverOpen}
-            isInUse={isInUse}
-            closePopover={closePopover}
-            options={options}
-            totalActiveFilters={totalActiveFilters}
-            onFilterButtonClick={onFilterButtonClick}
-            onSelectChange={onSelectChange}
-            clearTagSelection={clearTagSelection}
-          />
-        );
-      },
+      component: TagFilterPanel,
     };
-  }, [
-    isPopoverOpen,
-    isInUse,
-    isTaggingEnabled,
-    closePopover,
-    options,
-    totalActiveFilters,
-    onFilterButtonClick,
-    onSelectChange,
-    clearTagSelection,
-  ]);
+  }, [isTaggingEnabled]);
 
   const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     return createdByEnabled
@@ -254,6 +233,7 @@ export function Table<T extends UserContentCommonSchema>({
     if (tableFilter?.createdBy?.length > 0) {
       return items.filter((item) => {
         if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
+        else if (item.managed) return false;
         else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
       });
     }
@@ -267,13 +247,20 @@ export function Table<T extends UserContentCommonSchema>({
     let _showNoUserOption = false;
     const users = new Set<string>();
     items.forEach((item) => {
-      if (item.createdBy) users.add(item.createdBy);
-      else {
+      if (item.createdBy) {
+        users.add(item.createdBy);
+      } else if (!item.managed) {
+        // show no user option only if there is an item without createdBy that is not a "managed" item
         _showNoUserOption = true;
       }
     });
     return { allUsers: Array.from(users), showNoUserOption: _showNoUserOption };
   }, [createdByEnabled, items]);
+
+  const sorting =
+    tableSort.field === 'accessedAt' // "accessedAt" is a special case with a custom sorting
+      ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
+      : { sort: tableSort };
 
   return (
     <UserFilterContextProvider
@@ -285,22 +272,33 @@ export function Table<T extends UserContentCommonSchema>({
       selectedUsers={tableFilter.createdBy}
       showNoUserOption={showNoUserOption}
     >
-      <EuiInMemoryTable<T>
-        itemId="id"
-        items={visibleItems}
-        columns={tableColumns}
-        pagination={pagination}
-        loading={isFetchingItems}
-        message={noItemsMessage}
-        selection={selection}
-        search={search}
-        executeQueryOptions={{ enabled: false }}
-        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
-        onChange={onTableChange}
-        data-test-subj="itemsInMemTable"
-        rowHeader="attributes.title"
-        tableCaption={tableCaption}
-      />
+      <TagFilterContextProvider
+        isPopoverOpen={isPopoverOpen}
+        isInUse={isInUse}
+        closePopover={closePopover}
+        onFilterButtonClick={onFilterButtonClick}
+        onSelectChange={onSelectChange}
+        options={options}
+        totalActiveFilters={totalActiveFilters}
+        clearTagSelection={clearTagSelection}
+      >
+        <EuiInMemoryTable<T>
+          itemId="id"
+          items={visibleItems}
+          columns={tableColumns}
+          pagination={pagination}
+          loading={isFetchingItems}
+          message={noItemsMessage}
+          selection={selection}
+          search={search}
+          executeQueryOptions={{ enabled: false }}
+          sorting={sorting}
+          onChange={onTableChange}
+          data-test-subj="itemsInMemTable"
+          rowHeader="attributes.title"
+          tableCaption={tableCaption}
+        />
+      </TagFilterContextProvider>
     </UserFilterContextProvider>
   );
 }

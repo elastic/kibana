@@ -22,7 +22,7 @@ import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/
 import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
-import { useAppContext } from '../../hooks/use_app_context';
+import { useKibana } from '../../hooks/use_kibana';
 
 const CATEGORY_MAP = {
   lens: {
@@ -49,7 +49,7 @@ export function KnowledgeBaseCategoryFlyout({
   category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
-  const { uiSettings } = useAppContext();
+  const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
   const { mutate: deleteEntry } = useDeleteKnowledgeBaseEntry();

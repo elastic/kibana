@@ -12,7 +12,7 @@ import { MonitoringConfig } from '../../../config';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
-  INDEX_PATTERN_LOGSTASH,
+  INDEX_PATTERN_LOGSTASH_MONITORING,
   INDEX_PATTERN_BEATS,
 } from '../../../../common/constants';
 import { fetchStackProductUsage } from './fetch_stack_product_usage';
@@ -31,7 +31,7 @@ export const getStackProductsUsage = async (
 > => {
   const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);
   const kibanaIndex = getCcsIndexPattern(INDEX_PATTERN_KIBANA, availableCcs);
-  const logstashIndex = getCcsIndexPattern(INDEX_PATTERN_LOGSTASH, availableCcs);
+  const logstashIndex = getCcsIndexPattern(INDEX_PATTERN_LOGSTASH_MONITORING, availableCcs);
   const beatsIndex = getCcsIndexPattern(INDEX_PATTERN_BEATS, availableCcs);
   const [elasticsearch, kibana, logstash, beats, apm] = await Promise.all([
     fetchESUsage(callCluster, clusterUuid, elasticsearchIndex),

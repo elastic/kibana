@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { DiscoverCustomizationContext } from '../types';
+import { defaultCustomizationContext } from '../defaults';
 
-export const mockCustomizationContext: DiscoverCustomizationContext = {
-  displayMode: 'standalone',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
-};
+export const mockCustomizationContext = defaultCustomizationContext;

@@ -1,18 +1,20 @@
-SUM
+## SUM
 
-Syntax
-SUM(expression)
-expression
-Numeric expression.
-DescriptionReturns the sum of a numeric expression.Example
+The `SUM` function in ES|QL is used to calculate the sum of a numeric expression.
+
+### Examples
+
+Here are a couple of examples of how you can use the `SUM` function in ES|QL:
+
+1. To calculate the sum of a field named `languages` in an index named `employees`, you can use the following query:
+
 ```esql
 FROM employees
 | STATS SUM(languages)
 ```
 
-The expression can use inline functions. For example, to calculate
-the sum of each employee’s maximum salary changes, apply the
-MV_MAX function to each row and then sum the results:
+2. You can also use the `SUM` function with other functions like `MV_MAX`. In the following example, the `MV_MAX` function is applied to each row of the `salary_change` field to get the maximum salary change for each employee. The `SUM` function then calculates the total of these maximum salary changes:
+
 ```esql
 FROM employees
 | STATS total_salary_changes = SUM(MV_MAX(salary_change))

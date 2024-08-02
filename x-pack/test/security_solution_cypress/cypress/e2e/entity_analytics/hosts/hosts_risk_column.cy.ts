@@ -13,7 +13,7 @@ import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
+describe('All hosts table', { tags: ['@ess'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -36,7 +36,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });

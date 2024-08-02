@@ -16,8 +16,10 @@ import { defer, BehaviorSubject } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
@@ -94,15 +96,15 @@ export const WithFieldEditorDependencies =
   (props: T) => {
     // Setup mocks
     (
-      fieldFormats.getByFieldType as jest.MockedFunction<typeof fieldFormats['getByFieldType']>
+      fieldFormats.getByFieldType as jest.MockedFunction<(typeof fieldFormats)['getByFieldType']>
     ).mockReturnValue(fieldFormatsOptions);
 
     (
-      fieldFormats.getDefaultType as jest.MockedFunction<typeof fieldFormats['getDefaultType']>
+      fieldFormats.getDefaultType as jest.MockedFunction<(typeof fieldFormats)['getDefaultType']>
     ).mockReturnValue(MockDefaultFieldFormat);
 
     (
-      fieldFormats.getInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+      fieldFormats.getInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
     ).mockImplementation((id: string) => {
       if (id === MockCustomFieldFormat.id) {
         return new MockCustomFieldFormat();
@@ -112,7 +114,7 @@ export const WithFieldEditorDependencies =
     });
 
     (
-      fieldFormats.getDefaultInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+      fieldFormats.getDefaultInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
     ).mockImplementation(() => {
       return new MockDefaultFieldFormat();
     });
@@ -150,9 +152,17 @@ export const WithFieldEditorDependencies =
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
     const previewController = new PreviewController({
+      deps: {
+        dataViews: dataViewPluginMocks.createStartContract(),
+        search,
+        fieldFormats,
+        usageCollection: {
+          reportUiCounter: jest.fn(),
+        } as UsageCollectionStart,
+        notifications: notificationServiceMock.createStartContract(),
+      },
       dataView,
-      search,
-      fieldFormats,
+      onSave: jest.fn(),
       fieldTypeToProcess: 'runtime',
     });
 

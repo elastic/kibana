@@ -11,8 +11,15 @@ import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
-import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  merge,
+  skip,
+  Subject,
+  Subscription,
+} from 'rxjs';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -97,7 +104,7 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
-  private invalidSelectionsState: { [childId: string]: boolean };
+  private invalidSelectionsState: { [childId: string]: boolean } = {};
 
   public diffingSubscription: Subscription = new Subscription();
 
@@ -163,12 +170,12 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
-    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
-      return { ...prev, [id]: false };
-    }, {});
-
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
+      this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+        return { ...prev, [id]: false };
+      }, {});
+
       this.recalculateDataViews();
       this.setupSubscriptions();
       const { filters, timeslice } = this.recalculateFilters();
@@ -317,7 +324,13 @@ export class ControlGroupContainer extends Container<
     this.subscriptions = new Subscription();
     this.initialized$.next(false);
     this.updateInput(newInput);
+
     this.untilAllChildrenReady().then(() => {
+      this.dispatch.setControlWithInvalidSelectionsId(undefined);
+      this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+        return { ...prev, [id]: false };
+      }, {});
+
       this.recalculateDataViews();
       const { filters, timeslice } = this.recalculateFilters();
       this.publishFilters({ filters, timeslice });
@@ -477,6 +490,11 @@ export class ControlGroupContainer extends Container<
       } as ControlPanelState<TEmbeddableInput>,
       otherPanels,
     };
+  }
+
+  public removePanel(id: string): void {
+    /** TODO: This is a temporary wrapper until the control group refactor is complete */
+    super.removeEmbeddable(id);
   }
 
   protected onRemoveEmbeddable(idToRemove: string) {

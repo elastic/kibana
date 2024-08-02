@@ -14,7 +14,7 @@ import { RouteDependencies } from '../../types';
 import { pipelineSchema } from './shared';
 
 const bodySchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
   ...pipelineSchema,
 });
 
@@ -46,7 +46,7 @@ export const registerCreateRoute = ({
           return res.conflict({
             body: new Error(
               i18n.translate('xpack.ingestPipelines.createRoute.duplicatePipelineIdErrorMessage', {
-                defaultMessage: "There is already a pipeline with name '{name}'.",
+                defaultMessage: "There is already a pipeline with name ''{name}''.",
                 values: {
                   name,
                 },

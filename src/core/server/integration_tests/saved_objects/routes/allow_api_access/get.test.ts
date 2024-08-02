@@ -78,7 +78,8 @@ describe('GET /api/saved_objects/{type}/{id} with allowApiAccess true', () => {
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
-    registerGetRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerGetRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

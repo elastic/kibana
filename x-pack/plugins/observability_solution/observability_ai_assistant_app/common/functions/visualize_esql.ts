@@ -7,6 +7,8 @@
 import type { FromSchema } from 'json-schema-to-ts';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { VISUALIZE_ESQL_USER_INTENTIONS } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
+import type { ESQLRow } from '@kbn/es-types';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 export const visualizeESQLFunction = {
   name: 'visualize_query',
@@ -29,4 +31,24 @@ export const visualizeESQLFunction = {
   contexts: ['core'],
 };
 
-export type VisualizeESQLFunctionArguments = FromSchema<typeof visualizeESQLFunction['parameters']>;
+export interface VisualizeQueryResponsev0 {
+  content: DatatableColumn[];
+}
+
+export interface VisualizeQueryResponsev1 {
+  data: {
+    columns: DatatableColumn[];
+    rows: ESQLRow[];
+    userOverrides?: unknown;
+  };
+  content: {
+    message: string;
+    errorMessages: string[];
+  };
+}
+
+export type VisualizeQueryResponse = VisualizeQueryResponsev0 | VisualizeQueryResponsev1;
+
+export type VisualizeESQLFunctionArguments = FromSchema<
+  (typeof visualizeESQLFunction)['parameters']
+>;

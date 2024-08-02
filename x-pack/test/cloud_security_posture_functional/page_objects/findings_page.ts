@@ -337,6 +337,10 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     return trueOrFalse;
   };
 
+  const getUnprivilegedPrompt = async () => {
+    return await testSubjects.find('status-api-unprivileged');
+  };
+
   return {
     navigateToLatestFindingsPage,
     navigateToLatestVulnerabilitiesPage,
@@ -356,5 +360,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     findingsGrouping,
     createDataTableObject,
     isLatestFindingsTableThere,
+    getUnprivilegedPrompt,
   };
 }

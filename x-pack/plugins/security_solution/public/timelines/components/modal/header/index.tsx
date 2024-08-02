@@ -32,9 +32,9 @@ import { createHistoryEntry } from '../../../../common/utils/global_query_string
 import { timelineActions } from '../../../store';
 import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { combineQueries } from '../../../../common/lib/kuery';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import * as i18n from '../translations';
 import { AddToFavoritesButton } from '../../add_to_favorites';
 import { TimelineSaveStatus } from '../../save_status';

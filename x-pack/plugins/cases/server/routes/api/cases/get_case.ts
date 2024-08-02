@@ -22,7 +22,7 @@ const params = {
     /**
      * @deprecated since version 8.1.0
      */
-    includeComments: schema.boolean({ defaultValue: true }),
+    includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
   }),
 };
 
@@ -30,6 +30,11 @@ export const getCaseRoute = createCasesRoute({
   method: 'get',
   path: CASE_DETAILS_URL,
   params,
+  routerOptions: {
+    access: 'public',
+    summary: `Get a case`,
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response, logger, kibanaVersion }) => {
     try {
       const isIncludeCommentsParamProvidedByTheUser =

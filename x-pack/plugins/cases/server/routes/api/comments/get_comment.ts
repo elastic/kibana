@@ -21,6 +21,12 @@ export const getCommentRoute = createCasesRoute({
       comment_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    summary: `Get a case comment or alert`,
+    // decription: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.',
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

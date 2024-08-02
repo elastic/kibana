@@ -7,7 +7,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../../../../../../common/constants';
 import { hideTestNowFlyoutAction, testNowRunsSelector } from '../../../state/manual_test_runs';
 
@@ -24,9 +24,11 @@ export const useTestFlyoutOpen = () => {
 
   const dispatch = useDispatch();
 
-  const flyoutTestOpen = Object.values(testNowRuns).find((value) => {
-    return value.isTestNowFlyoutOpen;
-  });
+  const flyoutTestOpen = useMemo(() => {
+    return Object.values(testNowRuns).find((value) => {
+      return value.isTestNowFlyoutOpen;
+    });
+  }, [testNowRuns]);
 
   const isSameMonitor = flyoutTestOpen?.configId === isMonitorDetails?.params.monitorId;
 

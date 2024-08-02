@@ -16,5 +16,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
     loadTestFile(require.resolve('./upgrade_prebuilt_rules_with_historical_versions'));
     loadTestFile(require.resolve('./fleet_integration'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.number_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.single_line_string_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.scalar_array_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.multi_line_string_fields'));
+    loadTestFile(require.resolve('./upgrade_review_prebuilt_rules.stats'));
   });
 };

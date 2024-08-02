@@ -125,7 +125,7 @@ export const CategoryStoppedPartitions: FC = () => {
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout"
-                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job '{jobId}' are unsuitable for categorization and have been excluded from further categorization or anomaly detection analysis."
+                defaultMessage="Per-partition categorization and stop_on_warn settings are enabled. Some partitions in job ''{jobId}'' are unsuitable for categorization and have been excluded from further categorization or anomaly detection analysis."
                 values={{
                   jobId: jobCreator.jobId,
                 }}

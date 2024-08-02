@@ -12,6 +12,7 @@ import {
   rowClickTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
+  addPanelMenuTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
 import { setAnalytics, setI18n, setTheme } from './services';
@@ -48,6 +49,7 @@ export class UiActionsPlugin
   constructor(_initializerContext: PluginInitializerContext) {}
 
   public setup(_core: CoreSetup): UiActionsPublicSetup {
+    this.service.registerTrigger(addPanelMenuTrigger);
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);

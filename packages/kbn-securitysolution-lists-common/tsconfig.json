@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "exclude": ["target/**/*"],
+  "extends": "../../tsconfig.base.json",
+  "include": ["**/*.ts"],
+  "kbn_references": ["@kbn/zod-helpers", "@kbn/openapi-common"]
+}

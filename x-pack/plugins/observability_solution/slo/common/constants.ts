@@ -15,6 +15,7 @@ export const ALERT_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.alertAction', {
     defaultMessage: 'Critical',
   }),
+  severity: { level: 3 },
 };
 
 export const HIGH_PRIORITY_ACTION_ID = 'slo.burnRate.high';
@@ -23,6 +24,7 @@ export const HIGH_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.highPriorityAction', {
     defaultMessage: 'High',
   }),
+  severity: { level: 2 },
 };
 
 export const MEDIUM_PRIORITY_ACTION_ID = 'slo.burnRate.medium';
@@ -31,6 +33,7 @@ export const MEDIUM_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.mediumPriorityAction', {
     defaultMessage: 'Medium',
   }),
+  severity: { level: 1 },
 };
 
 export const LOW_PRIORITY_ACTION_ID = 'slo.burnRate.low';
@@ -39,6 +42,7 @@ export const LOW_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.lowPriorityAction', {
     defaultMessage: 'Low',
   }),
+  severity: { level: 0 },
 };
 
 export const SUPPRESSED_PRIORITY_ACTION_ID = 'slo.burnRate.suppressed';
@@ -50,7 +54,7 @@ export const SUPPRESSED_PRIORITY_ACTION = {
 };
 
 export const SLO_MODEL_VERSION = 2;
-export const SLO_RESOURCES_VERSION = 3.2;
+export const SLO_RESOURCES_VERSION = 3.3;
 export const SLO_RESOURCES_VERSION_MAJOR = 3;
 
 export const SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.sli-mappings';
@@ -62,7 +66,6 @@ export const SLO_INDEX_TEMPLATE_PATTERN = `.slo-observability.sli-*`;
 export const SLO_DESTINATION_INDEX_NAME = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}`;
 export const SLO_DESTINATION_INDEX_PATTERN = `.slo-observability.sli-v${SLO_RESOURCES_VERSION_MAJOR}*`;
 
-export const SLO_INGEST_PIPELINE_NAME = `.slo-observability.sli.pipeline-v${SLO_RESOURCES_VERSION}`;
 export const SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}.`;
 
 export const SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.summary-mappings';
@@ -82,6 +85,9 @@ export const DEFAULT_SLO_GROUPS_PAGE_SIZE = 25;
 
 export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
   `slo-summary-${sloId}-${sloRevision}`;
+
+export const getSLOPipelineId = (sloId: string, sloRevision: number) =>
+  `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
 
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;

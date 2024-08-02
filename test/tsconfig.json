@@ -61,7 +61,6 @@
     "@kbn/core-application-browser",
     "@kbn/screenshot-mode-plugin",
     "@kbn/dev-utils",
-    "@kbn/analytics-client",
     "@kbn/utility-types",
     "@kbn/dev-proc-runner",
     "@kbn/enterprise-search-plugin",
@@ -72,7 +71,7 @@
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/monaco",
-    "@kbn/esql-utils",
     "@kbn/search-types",
+    "@kbn/console-plugin",
   ]
 }

@@ -7,10 +7,9 @@ exports[`License prompt renders a prompt with a link to License Management 1`] =
       <EuiLink
         href="/license_management"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Manage your license"
           id="xpack.watcher.app.licenseErrorLinkText"
-          values={Object {}}
         />
       </EuiLink>,
     ]
@@ -24,10 +23,9 @@ exports[`License prompt renders a prompt with a link to License Management 1`] =
   iconType="warning"
   title={
     <h1>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="License error"
         id="xpack.watcher.app.licenseErrorTitle"
-        values={Object {}}
       />
     </h1>
   }
@@ -47,10 +45,9 @@ exports[`License prompt renders a prompt without a link to License Management 1`
         License error
       </p>
       <p>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Contact your administrator to change your license."
           id="xpack.watcher.app.licenseErrorBody"
-          values={Object {}}
         />
       </p>
     </React.Fragment>
@@ -59,10 +56,9 @@ exports[`License prompt renders a prompt without a link to License Management 1`
   iconType="warning"
   title={
     <h1>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="License error"
         id="xpack.watcher.app.licenseErrorTitle"
-        values={Object {}}
       />
     </h1>
   }

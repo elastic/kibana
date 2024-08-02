@@ -19,10 +19,12 @@ export async function getExistingApmIndexTemplates({
 }) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
   const values = await Promise.all(
-    apmIndexTemplateNames.map(async (indexTemplateName) => {
-      const res = await getIndexTemplate(esClient, { name: indexTemplateName });
-      return res.index_templates[0];
-    })
+    Object.values(apmIndexTemplateNames)
+      .flat()
+      .map(async (indexTemplateName) => {
+        const res = await getIndexTemplate(esClient, { name: indexTemplateName });
+        return res.index_templates[0];
+      })
   );
 
   return values.filter((v) => v !== undefined);

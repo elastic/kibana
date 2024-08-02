@@ -10,12 +10,12 @@ import { URL, format } from 'node:url';
 import type { CspAdditionalConfig } from '../csp';
 
 export interface Input {
-  url?: string;
+  url?: null | string;
 }
 
 export class CdnConfig {
   private readonly url: undefined | URL;
-  constructor(url?: string) {
+  constructor(url?: null | string) {
     if (url) {
       this.url = new URL(url); // This will throw for invalid URLs, although should be validated before reaching this point
     }

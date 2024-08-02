@@ -4,6 +4,8 @@
   @include euiBreakpoint('xs', 's', 'm') {
     clip-path: none;
   }
+  max-inline-size: $euiSizeXXL * 20;
+  min-inline-size: $euiSizeXXL * 8;
   background: $euiColorLightestShade;
   .kbnOverlayMountWrapper {
     padding-left: $euiFormMaxWidth;
@@ -12,5 +14,11 @@
     .euiFlyoutFooter {
       pointer-events: auto;
     }
+  }
+}
+
+.lnsEditFlyoutBody {
+  .euiFlyoutBody__overflow {
+    transform: initial;
   }
 }

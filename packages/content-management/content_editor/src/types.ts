@@ -13,4 +13,11 @@ export interface Item {
   title: string;
   description?: string;
   tags: SavedObjectsReference[];
+
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+
+  managed?: boolean;
 }

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { CreateListIndexResponse } from '@kbn/securitysolution-lists-common/api';
 
-import { createListIndexResponse } from '../../../common/api';
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
@@ -64,12 +63,7 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
             : lists.createListItemDataStream());
         }
 
-        const [validated, errors] = validate({ acknowledged: true }, createListIndexResponse);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
+        return response.ok({ body: CreateListIndexResponse.parse({ acknowledged: true }) });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -12,6 +12,8 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RouteValidatorConfig,
+  RouteConfigOptions,
+  RouteMethod,
 } from '@kbn/core/server';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -40,8 +42,6 @@ interface CaseRouteHandlerArguments<P, Q, B> {
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 }
 
-type CaseRouteTags = 'access:casesSuggestUserProfiles' | 'access:casesGetConnectorsConfigure';
-
 export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
   path: string;
@@ -53,6 +53,6 @@ export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
   /**
    * These options are passed to the router's options field
    */
-  routerOptions?: { tags: CaseRouteTags[] };
+  routerOptions?: RouteConfigOptions<RouteMethod>;
   handler: (args: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
 }

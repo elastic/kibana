@@ -127,7 +127,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
     <div data-test-subj="incompatibleTab">
       {showInvalidCallout(partitionedFieldMetadata.incompatible) ? (
         <>
-          <IncompatibleCallout enrichedFieldMetadata={partitionedFieldMetadata.incompatible}>
+          <IncompatibleCallout ecsBasedFieldMetadata={partitionedFieldMetadata.incompatible}>
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButton

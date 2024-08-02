@@ -24,7 +24,12 @@ describe('tagKibanaAssets', () => {
     description: '',
     name: 'Managed',
   };
-  const managedTagPayloadArg2 = { id: 'fleet-managed-default', overwrite: true, refresh: false };
+  const managedTagPayloadArg2 = {
+    id: 'fleet-managed-default',
+    overwrite: true,
+    refresh: false,
+    managed: true,
+  };
 
   beforeEach(() => {
     savedObjectTagAssignmentService.updateTagAssignments.mockReset();
@@ -55,7 +60,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#0077CC',
       },
-      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+      { id: 'fleet-managed-default', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -63,7 +68,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#4DD2CA',
       },
-      { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-system-default', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
@@ -201,7 +206,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#0077CC',
       },
-      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+      { id: 'fleet-managed-default', overwrite: true, refresh: false, managed: true }
     );
 
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -210,7 +215,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#4DD2CA',
       },
-      { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-system-default', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['managed', 'fleet-pkg-system-default'],
@@ -248,7 +253,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#0077CC',
       },
-      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+      { id: 'fleet-managed-default', overwrite: true, refresh: false, managed: true }
     );
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalledWith(
@@ -257,7 +262,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#4DD2CA',
       },
-      { id: 'system', overwrite: true, refresh: false }
+      { id: 'system', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'system'],
@@ -339,7 +344,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         name: 'TestPackage',
       },
-      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -351,6 +356,7 @@ describe('tagKibanaAssets', () => {
         id: FOO_TAG_ID,
         overwrite: true,
         refresh: false,
+        managed: true,
       }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
@@ -436,7 +442,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         name: 'TestPackage',
       },
-      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -448,6 +454,7 @@ describe('tagKibanaAssets', () => {
         id: BAR_TAG_ID,
         overwrite: true,
         refresh: false,
+        managed: true,
       }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
@@ -538,7 +545,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         name: 'TestPackage',
       },
-      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false, managed: true }
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -550,6 +557,7 @@ describe('tagKibanaAssets', () => {
         id: MY_CUSTOM_TAG_ID,
         overwrite: true,
         refresh: false,
+        managed: true,
       }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledTimes(3);
@@ -684,7 +692,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#4DD2CA',
       },
-      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false, managed: true }
     );
   });
 
@@ -728,7 +736,7 @@ describe('tagKibanaAssets', () => {
           description: '',
           name: 'TestPackage',
         },
-        { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false }
+        { id: 'fleet-pkg-test-pkg-default', overwrite: true, refresh: false, managed: true }
       );
       expect(savedObjectTagClient.create).toHaveBeenCalledWith(
         {
@@ -736,7 +744,7 @@ describe('tagKibanaAssets', () => {
           description: 'Tag defined in package-spec',
           name: 'Security Solution',
         },
-        { id: 'security-solution-default', overwrite: true, refresh: false }
+        { id: 'security-solution-default', overwrite: true, refresh: false, managed: true }
       );
     });
 
@@ -779,7 +787,12 @@ describe('tagKibanaAssets', () => {
           description: '',
           name: 'TestPackage',
         },
-        { id: 'fleet-pkg-test-pkg-my-secondary-space', overwrite: true, refresh: false }
+        {
+          id: 'fleet-pkg-test-pkg-my-secondary-space',
+          overwrite: true,
+          refresh: false,
+          managed: true,
+        }
       );
       expect(savedObjectTagClient.create).toHaveBeenCalledWith(
         {
@@ -787,7 +800,12 @@ describe('tagKibanaAssets', () => {
           description: 'Tag defined in package-spec',
           name: 'Security Solution',
         },
-        { id: 'security-solution-my-secondary-space', overwrite: true, refresh: false }
+        {
+          id: 'security-solution-my-secondary-space',
+          overwrite: true,
+          refresh: false,
+          managed: true,
+        }
       );
     });
   });

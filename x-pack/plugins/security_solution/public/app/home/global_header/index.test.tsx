@@ -7,7 +7,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
-import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
@@ -22,7 +21,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { sourcererPaths } from '../../../common/containers/sourcerer';
+import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -35,7 +34,7 @@ jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
-jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
@@ -59,10 +58,6 @@ describe('global header', () => {
     },
   };
   const store = createMockStore(state);
-
-  beforeEach(() => {
-    useVariationMock.mockReset();
-  });
 
   it('has add data link', () => {
     (useLocation as jest.Mock).mockReturnValue([
@@ -98,26 +93,6 @@ describe('global header', () => {
     );
     const link = queryByTestId('add-data');
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
-  });
-
-  it('points to the resolved Add data URL by useVariation', () => {
-    (useLocation as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
-
-    const customResolvedUrl = '/test/url';
-    useVariationMock.mockImplementationOnce(
-      (cloudExperiments, featureFlagName, defaultValue, setter) => {
-        setter(customResolvedUrl);
-      }
-    );
-    const { queryByTestId } = render(
-      <TestProviders store={store}>
-        <GlobalHeader />
-      </TestProviders>
-    );
-    const link = queryByTestId('add-data');
-    expect(link?.getAttribute('href')).toBe(customResolvedUrl);
   });
 
   it.each(sourcererPaths)('shows sourcerer on %s page', (pathname) => {

@@ -12,6 +12,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import {
@@ -57,6 +58,12 @@ interface BulkQueueOpts {
   rules: RuleDomain[];
   ruleTypeRegistry: RuleTypeRegistry;
   spaceId: string;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+}
+
+interface DeleteBackfillForRulesOpts {
+  ruleIds: string[];
+  namespace?: string;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
 
@@ -152,7 +159,7 @@ export class BackfillClient {
     );
 
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
-      (so: SavedObject<AdHocRunSO>) => {
+      (so: SavedObject<AdHocRunSO>, index: number) => {
         if (so.error) {
           auditLogger?.log(
             adHocRunAuditEvent({
@@ -168,7 +175,7 @@ export class BackfillClient {
             })
           );
         }
-        return transformAdHocRunToBackfillResult(so);
+        return transformAdHocRunToBackfillResult(so, adHocSOsToCreate?.[index]);
       }
     );
 
@@ -229,6 +236,69 @@ export class BackfillClient {
 
     return createSOResult;
   }
+
+  public async deleteBackfillForRules({
+    ruleIds,
+    namespace,
+    unsecuredSavedObjectsClient,
+  }: DeleteBackfillForRulesOpts) {
+    try {
+      // query for all ad hoc runs that reference this ruleId
+      const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        hasReference: ruleIds.map((ruleId) => ({ id: ruleId, type: RULE_SAVED_OBJECT_TYPE })),
+        ...(namespace ? { namespaces: [namespace] } : undefined),
+      });
+
+      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+      for await (const response of adHocRunFinder.find()) {
+        adHocRuns.push(...response.saved_objects);
+      }
+      await adHocRunFinder.close();
+
+      if (adHocRuns.length > 0) {
+        const deleteResult = await unsecuredSavedObjectsClient.bulkDelete(
+          adHocRuns.map((adHocRun) => ({
+            id: adHocRun.id,
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          }))
+        );
+
+        const deleteErrors = deleteResult.statuses.filter((status) => !!status.error);
+        if (deleteErrors.length > 0) {
+          this.logger.warn(
+            `Error deleting backfill jobs with IDs: ${deleteErrors
+              .map((status) => status.id)
+              .join(', ')} with errors: ${deleteErrors.map(
+              (status) => status.error?.message
+            )} - jobs and associated task were not deleted.`
+          );
+        }
+
+        // only delete tasks if the associated ad hoc runs were successfully deleted
+        const taskIdsToDelete = deleteResult.statuses
+          .filter((status) => status.success)
+          .map((status) => status.id);
+
+        // delete the associated tasks
+        const taskManager = await this.taskManagerStartPromise;
+        const deleteTaskResult = await taskManager.bulkRemove(taskIdsToDelete);
+        const deleteTaskErrors = deleteTaskResult.statuses.filter((status) => !!status.error);
+        if (deleteTaskErrors.length > 0) {
+          this.logger.warn(
+            `Error deleting tasks with IDs: ${deleteTaskErrors
+              .map((status) => status.id)
+              .join(', ')} with errors: ${deleteTaskErrors.map((status) => status.error?.message)}`
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
+      );
+    }
+  }
 }
 
 function getRuleOrError(
@@ -245,16 +315,13 @@ function getRuleOrError(
       ruleId
     );
     return {
-      error: createBackfillError(
-        notFoundError.output.payload.error,
-        notFoundError.output.payload.message
-      ),
+      error: createBackfillError(notFoundError.output.payload.message, ruleId),
     };
   }
 
   // if rule exists, check that it is enabled
   if (!rule.enabled) {
-    return { error: createBackfillError('Bad Request', `Rule ${ruleId} is disabled`) };
+    return { error: createBackfillError(`Rule ${ruleId} is disabled`, ruleId, rule.name) };
   }
 
   // check that the rule type is supported
@@ -262,8 +329,9 @@ function getRuleOrError(
   if (isLifecycleRule) {
     return {
       error: createBackfillError(
-        'Bad Request',
-        `Rule type "${rule.alertTypeId}" for rule ${ruleId} is not supported`
+        `Rule type "${rule.alertTypeId}" for rule ${ruleId} is not supported`,
+        ruleId,
+        rule.name
       ),
     };
   }
@@ -271,7 +339,7 @@ function getRuleOrError(
   // check that the API key is not null
   if (!rule.apiKey) {
     return {
-      error: createBackfillError('Bad Request', `Rule ${ruleId} has no API key`),
+      error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
     };
   }
 

@@ -5,7 +5,7 @@
 # SKIP_VERIFICATION: if set to 1/true, it will skip running all tests
 # SKIP_CYPRESS: if set to 1/true, it will skip running the cypress tests
 # FTR_EXTRA_ARGS: a string argument, if passed, it will be forwarded verbatim to the FTR run script
-# ES_SERVERLESS_IMAGE: the tag for the docker image to test, in the form of docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:$TAG
+# ES_SERVERLESS_IMAGE: the full image path for the docker image to test
 # BUILDKITE_COMMIT: the commit hash of the kibana branch to test
 
 agents:
@@ -16,16 +16,7 @@ agents:
 
 steps:
   - label: "Annotate runtime parameters"
-    command: |
-      buildkite-agent annotate --context kibana-commit --style info "Kibana build hash: $BUILDKITE_BRANCH / $BUILDKITE_COMMIT"
-      cat << EOF | buildkite-agent annotate --context es-serverless-image --style info
-        ES Serverless image: \`$ES_SERVERLESS_IMAGE\`
-
-        To run this locally:
-        \`\`\`
-        node scripts/es serverless --image $ES_SERVERLESS_IMAGE
-        \`\`\`
-      EOF
+    command: .buildkite/scripts/steps/es_serverless/annotate_runtime_parameters.sh
 
   - group: "(:kibana: x :elastic:) Trigger Kibana Serverless suite"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"

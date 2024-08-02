@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a connector by ID.
+  summary: Get connector information
   operationId: getConnectorWithSpaceId
   description: >
     You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
@@ -24,7 +24,7 @@ get:
       $ref: '../components/responses/404.yaml'
 
 delete:
-  summary: Deletes a connector.
+  summary: Delete a connector
   operationId: deleteConnectorWithSpaceId
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
@@ -44,7 +44,7 @@ delete:
       $ref: '../components/responses/404.yaml'
 
 post:
-  summary: Creates a connector.
+  summary: Create a connector
   operationId: createConnectorIdWithSpaceId
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
@@ -59,8 +59,7 @@ post:
       required: true
       schema:
         type: string
-        examples:
-          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
@@ -84,7 +83,7 @@ post:
       $ref: '../components/responses/401.yaml'
 
 put:
-  summary: Updates the attributes for a connector.
+  summary: Update a connector
   operationId: updateConnectorWithSpaceId
   description: >
     You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.

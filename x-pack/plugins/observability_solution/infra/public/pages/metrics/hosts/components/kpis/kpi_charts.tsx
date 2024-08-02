@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -16,7 +17,8 @@ import { useMetricsDataViewContext } from '../../../../../containers/metrics_sou
 
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
+  const { searchSessionId } = useSearchSessionContext();
+  const { hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { isRequestRunning: hostCountLoading, data: hostCountData } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
 
@@ -76,7 +78,7 @@ export const KpiCharts = () => {
       filters={afterLoadedState.filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      options={{ getSubtitle: afterLoadedState.getSubtitle }}
+      getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
     />
   );

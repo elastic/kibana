@@ -12,35 +12,15 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { sendRequest } from '../../../hooks';
-import { INGEST_SAVED_OBJECT_INDEX } from '../../../../../../common/constants';
+import { debugRoutesService } from '../../../../../../common/services';
+import { API_VERSIONS } from '../../../../../../common/constants';
 
 const fetchSavedObjectNames = async (type: string) => {
-  const path = `/${INGEST_SAVED_OBJECT_INDEX}/_search`;
-  const body = {
-    size: 0,
-    query: {
-      bool: {
-        filter: {
-          term: {
-            type,
-          },
-        },
-      },
-    },
-    aggs: {
-      names: {
-        terms: { field: `${type}.name`, size: 500 },
-      },
-    },
-  };
   const response = await sendRequest({
     method: 'post',
-    path: `/api/console/proxy`,
-    query: {
-      path,
-      method: 'GET',
-    },
-    body,
+    path: debugRoutesService.getSavedObjectNamesPath(),
+    body: { type },
+    version: API_VERSIONS.internal.v1,
   });
 
   if (response.error) {

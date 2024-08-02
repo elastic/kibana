@@ -23,7 +23,7 @@ export function getFieldIconType<T extends FieldBase = DataViewField>(
 ): string {
   const type = getCustomFieldType ? getCustomFieldType(field) : getFieldType<T>(field);
   const esType = field.esTypes?.[0] || null;
-  if (esType && ['_id', '_index'].includes(esType) && type === 'string') {
+  if (esType && ['_id', '_index', '_ignored'].includes(esType) && type === 'string') {
     return 'keyword';
   }
   if (type === 'unknown' && esType && isKnownFieldType(esType)) {

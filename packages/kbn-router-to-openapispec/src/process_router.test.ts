@@ -7,8 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
-import { extractResponses, type InternalRouterRoute } from './process_router';
+import { createOperationIdCounter } from './operation_id_counter';
+import { extractResponses, processRouter, type InternalRouterRoute } from './process_router';
 
 describe('extractResponses', () => {
   let oasConverter: OasConverter;
@@ -31,10 +33,12 @@ describe('extractResponses', () => {
         response: {
           200: {
             bodyContentType: 'application/test+json',
+            description: 'OK response',
             body: () => schema.object({ bar: schema.number({ min: 1, max: 99 }) }),
           },
           404: {
             bodyContentType: 'application/test2+json',
+            description: 'Not Found response',
             body: () => schema.object({ ok: schema.literal(false) }),
           },
           unsafe: { body: false },
@@ -43,7 +47,7 @@ describe('extractResponses', () => {
     };
     expect(extractResponses(route, oasConverter)).toEqual({
       200: {
-        description: 'No description',
+        description: 'OK response',
         content: {
           'application/test+json; Elastic-Api-Version=2023-10-31': {
             schema: {
@@ -58,7 +62,7 @@ describe('extractResponses', () => {
         },
       },
       404: {
-        description: 'No description',
+        description: 'Not Found response',
         content: {
           'application/test2+json; Elastic-Api-Version=2023-10-31': {
             schema: {
@@ -73,5 +77,43 @@ describe('extractResponses', () => {
         },
       },
     });
+  });
+});
+
+describe('processRouter', () => {
+  const testRouter = {
+    getRoutes: () => [
+      {
+        path: '/foo',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+      },
+      {
+        path: '/bar',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+      },
+      {
+        path: '/baz',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+      },
+    ],
+  } as unknown as Router;
+
+  it('only provides routes for version 2023-10-31', () => {
+    const result1 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2023-10-31',
+    });
+
+    expect(Object.keys(result1.paths!)).toHaveLength(3);
+
+    const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2024-10-31',
+    });
+    expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 });

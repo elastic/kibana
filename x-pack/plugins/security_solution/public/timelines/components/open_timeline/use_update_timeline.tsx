@@ -13,8 +13,8 @@ import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { sourcererActions } from '../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { sourcererActions } from '../../../sourcerer/store';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,

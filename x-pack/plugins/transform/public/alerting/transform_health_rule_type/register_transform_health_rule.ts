@@ -61,24 +61,24 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
     defaultActionMessage: i18n.translate(
       'xpack.transform.alertTypes.transformHealth.defaultActionMessage',
       {
-        defaultMessage: `[\\{\\{rule.name\\}\\}] Transform health check result:
-\\{\\{context.message\\}\\}
-\\{\\{#context.results\\}\\}
-  Transform ID: \\{\\{transform_id\\}\\}
-  \\{\\{#description\\}\\}Transform description: \\{\\{description\\}\\}
-  \\{\\{/description\\}\\}\\{\\{#transform_state\\}\\}Transform state: \\{\\{transform_state\\}\\}
-  \\{\\{/transform_state\\}\\}\\{\\{#health_status\\}\\}Transform health status: \\{\\{health_status\\}\\}
-  \\{\\{/health_status\\}\\}\\{\\{#issues\\}\\}Issue: \\{\\{issue\\}\\}
-  Issue count: \\{\\{count\\}\\}
-  \\{\\{#details\\}\\}Issue details: \\{\\{details\\}\\}
-  \\{\\{/details\\}\\}\\{\\{#first_occurrence\\}\\}First occurrence: \\{\\{first_occurrence\\}\\}
-  \\{\\{/first_occurrence\\}\\}
-  \\{\\{/issues\\}\\}\\{\\{#failure_reason\\}\\}Failure reason: \\{\\{failure_reason\\}\\}
-  \\{\\{/failure_reason\\}\\}\\{\\{#notification_message\\}\\}Notification message: \\{\\{notification_message\\}\\}
-  \\{\\{/notification_message\\}\\}\\{\\{#node_name\\}\\}Node name: \\{\\{node_name\\}\\}
-  \\{\\{/node_name\\}\\}\\{\\{#timestamp\\}\\}Timestamp: \\{\\{timestamp\\}\\}
-  \\{\\{/timestamp\\}\\}
-\\{\\{/context.results\\}\\}
+        defaultMessage: `['{{rule.name}}'] Transform health check result:
+'{{context.message}}'
+'{{#context.results}}'
+  Transform ID: '{{transform_id}}'
+  '{{#description}}'Transform description: '{{description}}'
+  '{{/description}}{{#transform_state}}'Transform state: '{{transform_state}}'
+  '{{/transform_state}}{{#health_status}}'Transform health status: '{{health_status}}'
+  '{{/health_status}}{{#issues}}'Issue: '{{issue}}'
+  Issue count: '{{count}}'
+  '{{#details}}'Issue details: '{{details}}'
+  '{{/details}}{{#first_occurrence}}'First occurrence: '{{first_occurrence}}'
+  '{{/first_occurrence}}'
+  '{{/issues}}{{#failure_reason}}'Failure reason: '{{failure_reason}}'
+  '{{/failure_reason}}{{#notification_message}}'Notification message: '{{notification_message}}'
+  '{{/notification_message}}{{#node_name}}'Node name: '{{node_name}}'
+  '{{/node_name}}{{#timestamp}}'Timestamp: '{{timestamp}}'
+  '{{/timestamp}}'
+'{{/context.results}}'
 `,
       }
     ),

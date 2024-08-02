@@ -211,8 +211,9 @@ export const useGetGroupSelector = ({
           fields,
           maxGroupingLevels,
           options,
+          title,
         }}
       />
     );
-  }, [groupingId, fields, maxGroupingLevels, onChange, selectedGroups, options]);
+  }, [groupingId, fields, maxGroupingLevels, onChange, selectedGroups, options, title]);
 };

@@ -1,19 +1,28 @@
-MIN
+## MIN
 
-Syntax
-MIN(expression)
-Parameters
-expression
-Expression from which to return the minimum value.
-DescriptionReturns the minimum value of a numeric expression.Example
+The `MIN` function in ES|QL is used to return the minimum value of a numeric expression.
+
+### Syntax:
+
+`MIN(expression)`
+
+#### Parameters:
+
+`expression`: The expression from which to return the minimum value.
+
+### Examples:
+
+Here are a couple of examples of how you can use the `MIN` function in ES|QL:
+
+1. To find the minimum value of a field, you can use the `MIN` function directly. For example, the following query returns the minimum value of the `languages` field from the `employees` index:
+
 ```esql
 FROM employees
 | STATS MIN(languages)
 ```
 
-The expression can use inline functions. For example, to calculate the minimum
-over an average of a multivalued column, use MV_AVG to first average the
-multiple values per row, and use the result with the MIN function:
+2. You can also use the `MIN` function with other functions like `MV_AVG` to perform more complex calculations. For example, the following query calculates the average of a multivalued column `salary_change` for each row, and then finds the minimum of these averages:
+
 ```esql
 FROM employees
 | STATS min_avg_salary_change = MIN(MV_AVG(salary_change))

@@ -88,6 +88,7 @@ export const <%= upperCamelCase(name) %>App = ({ basename, notifications, http, 
                   <FormattedMessage
                     id="<%= camelCase(name) %>.buttonText"
                     defaultMessage="<%= hasServer ? 'Get data' : 'Click me' %>"
+                    ignoreTag
                   />
                 </EuiButton>
               </EuiText>

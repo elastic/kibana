@@ -11,10 +11,9 @@ exports[`render 1`] = `
       <EuiTextColor
         color="subdued"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Recently viewed"
           id="home.recentlyAccessed.recentlyViewedTitle"
-          values={Object {}}
         />
       </EuiTextColor>
     </h2>

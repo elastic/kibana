@@ -1,15 +1,29 @@
-LTRIM
+## LTRIM
 
-Syntax
-Parameters
-string
-String expression. If null, the function returns null.
-DescriptionRemoves leading whitespaces from a string.Supported types
-Example
+The `LTRIM` function is used to remove leading whitespaces from a string.
+
+### Syntax
+
+`LTRIM(string)`
+
+#### Parameters
+
+- `string`: String expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `LTRIM` function in ES|QL queries:
+
 ```esql
-ROW message = "   some text  ",  color = " red "
-| EVAL message = LTRIM(message)
-| EVAL color = LTRIM(color)
-| EVAL message = CONCAT("'", message, "'")
-| EVAL color = CONCAT("'", color, "'")
+ROW message = "   some text  "
+| EVAL trimmed_message = LTRIM(message)
 ```
+
+In this example, the `LTRIM` function is used to remove the leading whitespaces from the `message` string.
+
+```esql
+ROW color = " red "
+| EVAL trimmed_color = LTRIM(color)
+```
+
+In this example, the `LTRIM` function is used to remove the leading whitespace from the `color` string.

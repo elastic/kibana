@@ -18,6 +18,7 @@ import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
 import type {
+  BuildFleetAgentBulkCreateOperationsResponse,
   DeleteIndexedFleetAgentsResponse,
   IndexedFleetAgentResponse,
 } from './index_fleet_agent';
@@ -167,16 +168,31 @@ export const indexEndpointHostDocs = usageTracker.track(
         if (!wasAgentEnrolled) {
           wasAgentEnrolled = true;
 
-          const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
-            endpoints: [hostMetadata],
-            agentPolicyId: realPolicies[appliedPolicyId].policy_id,
-            kibanaVersion,
+          const agentOperations: BuildFleetAgentBulkCreateOperationsResponse = {
+            agents: [],
+            fleetAgentsIndex: '',
+            operations: [],
+          };
+
+          realPolicies[appliedPolicyId].policy_ids.forEach((policyId) => {
+            const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
+              endpoints: [hostMetadata],
+              agentPolicyId: policyId,
+              kibanaVersion,
+            });
+
+            agentOperations.agents = [...agentOperations.agents, ...agents];
+            agentOperations.fleetAgentsIndex = fleetAgentsIndex;
+            agentOperations.operations = [...agentOperations.operations, ...operations];
           });
 
-          bulkOperations.push(...operations);
-          agentId = agents[0]?.agent?.id ?? agentId;
+          bulkOperations.push(...agentOperations.operations);
+          agentId = agentOperations.agents[0]?.agent?.id ?? agentId;
 
-          mergeAndAppendArrays(response, { agents, fleetAgentsIndex });
+          mergeAndAppendArrays(response, {
+            agents: agentOperations.agents,
+            fleetAgentsIndex: agentOperations.fleetAgentsIndex,
+          });
         }
 
         // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id

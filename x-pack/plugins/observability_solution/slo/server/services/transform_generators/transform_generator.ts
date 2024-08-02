@@ -10,29 +10,20 @@ import {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
   public abstract getTransformParams(
     slo: SLODefinition,
-    spaceId: string
-  ): TransformPutTransformRequest;
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest>;
 
-  public buildCommonRuntimeMappings(slo: SLODefinition): MappingRuntimeFields {
+  public buildCommonRuntimeMappings(slo: SLODefinition, dataView?: DataView): MappingRuntimeFields {
     return {
-      'slo.id': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.id}')`,
-        },
-      },
-      'slo.revision': {
-        type: 'long',
-        script: {
-          source: `emit(${slo.revision})`,
-        },
-      },
+      ...(dataView?.getRuntimeMappings?.() ?? {}),
     };
   }
 
@@ -67,8 +58,6 @@ export abstract class TransformGenerator {
         : {};
 
     return {
-      'slo.id': { terms: { field: 'slo.id' } },
-      'slo.revision': { terms: { field: 'slo.revision' } },
       ...groupings,
       ...extraGroupByFields,
       // @timestamp field defined in the destination index
@@ -79,6 +68,24 @@ export abstract class TransformGenerator {
         },
       },
     };
+  }
+
+  public async getIndicatorDataView({
+    dataViewService,
+    dataViewId,
+  }: {
+    dataViewService: DataViewsService;
+    dataViewId?: string;
+  }): Promise<DataView | undefined> {
+    let dataView: DataView | undefined;
+    if (dataViewId) {
+      try {
+        dataView = await dataViewService.get(dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
+    }
+    return dataView;
   }
 
   public buildSettings(

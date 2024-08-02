@@ -6,7 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../../common/alerting/metrics';
 import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
 
 export const buildMetricThresholdRule = (
@@ -59,24 +60,24 @@ export const buildMetricThresholdRule = (
       criteria: [
         {
           aggType: Aggregators.COUNT,
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [2000],
           timeSize: 15,
           timeUnit: 'm',
         },
         {
           aggType: Aggregators.MAX,
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [4],
           timeSize: 15,
           timeUnit: 'm',
           metric: 'system.cpu.user.pct',
-          warningComparator: Comparator.GT,
+          warningComparator: COMPARATORS.GREATER_THAN,
           warningThreshold: [2.2],
         },
         {
           aggType: Aggregators.MIN,
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [0.8],
           timeSize: 15,
           timeUnit: 'm',
@@ -86,6 +87,7 @@ export const buildMetricThresholdRule = (
       filterQuery:
         '{"bool":{"filter":[{"bool":{"should":[{"term":{"host.hostname":{"value":"Users-System.local"}}}],"minimum_should_match":1}},{"bool":{"should":[{"term":{"service.type":{"value":"system"}}}],"minimum_should_match":1}}]}}',
       groupBy: ['host.hostname'],
+      sourceId: 'sourceId',
     },
     monitoring: {
       run: {
@@ -131,7 +133,7 @@ export const buildMetricThresholdAlert = (
         criteria: [
           {
             aggType: Aggregators.AVERAGE,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [2000],
             timeSize: 15,
             timeUnit: 'm',
@@ -139,12 +141,12 @@ export const buildMetricThresholdAlert = (
           },
           {
             aggType: Aggregators.MAX,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [4],
             timeSize: 15,
             timeUnit: 'm',
             metric: 'system.cpu.user.pct',
-            warningComparator: Comparator.GT,
+            warningComparator: COMPARATORS.GREATER_THAN,
             warningThreshold: [2.2],
           },
         ],

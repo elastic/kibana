@@ -19,11 +19,22 @@ export const farequoteDataViewTestData: TestData = {
   brushDeviationTargetTimestamp: 1455033600000,
   brushIntervalFactor: 1,
   chartClickCoordinates: [0, 0],
+  columnSelectorSearch: 'p-value',
   fieldSelectorSearch: 'airline',
   fieldSelectorApplyAvailable: false,
   expected: {
     totalDocCountFormatted: '86,374',
     sampleProbabilityFormatted: '0.5',
+    columnSelectorPopover: [
+      'Log rate',
+      'Doc count',
+      'p-value',
+      'Impact',
+      'Baseline rate',
+      'Deviation rate',
+      'Log rate change',
+      'Actions',
+    ],
     fieldSelectorPopover: ['airline', 'custom_field.keyword'],
     globalState: {
       refreshInterval: { pause: true, value: 60000 },

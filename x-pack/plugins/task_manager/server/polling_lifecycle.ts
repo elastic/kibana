@@ -14,7 +14,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_DEFAULT } from './config';
 
 import {
   TaskMarkRunning,
@@ -43,6 +43,7 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
@@ -58,6 +59,7 @@ export type TaskPollingLifecycleOpts = {
   elasticsearchAndSOAvailability$: Observable<boolean>;
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
+  taskPartitioner: TaskPartitioner;
 } & ManagedConfiguration;
 
 export type TaskLifecycleEvent =
@@ -109,6 +111,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     unusedTypes,
     executionContext,
     usageCounter,
+    taskPartitioner,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -150,19 +153,23 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
               0
             )
           : this.pool.availableWorkers,
+      taskPartitioner,
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    const { poll_interval: pollInterval } = config;
+    const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
 
-    const pollIntervalDelay$ = delayOnClaimConflicts(
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
-      this.events$,
-      config.version_conflict_threshold,
-      config.monitored_stats_running_average_window
-    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+    let pollIntervalDelay$: Observable<number> | undefined;
+    if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
+      pollIntervalDelay$ = delayOnClaimConflicts(
+        maxWorkersConfiguration$,
+        pollIntervalConfiguration$,
+        this.events$,
+        config.version_conflict_threshold,
+        config.monitored_stats_running_average_window
+      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+    }
 
     const poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,

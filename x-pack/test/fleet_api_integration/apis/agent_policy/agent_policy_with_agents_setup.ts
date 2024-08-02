@@ -10,6 +10,7 @@ import {
   AGENT_POLICY_INDEX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
 } from '@kbn/fleet-plugin/common';
+import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from '../agents/services';
@@ -19,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   async function getEnrollmentKeyForPolicyId(policyId: string) {
     const listRes = await supertest.get(`/api/fleet/enrollment_api_keys`).expect(200);
@@ -34,7 +36,7 @@ export default function (providerContext: FtrProviderContext) {
     return res.body.item;
   }
 
-  async function hasFleetServerPoliciesForPolicy(policyId: string) {
+  async function assertFleetServerPoliciesForPolicy(policyId: string, spaceId?: string) {
     const res = await esClient.search({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
@@ -49,8 +51,36 @@ export default function (providerContext: FtrProviderContext) {
       },
     });
 
+    if (spaceId) {
+      const docsSpaceId = res.hits.hits.flatMap((hit) => (hit._source as any).namespaces)?.[0];
+      expect(docsSpaceId).to.eql(docsSpaceId);
+    }
+
     // @ts-expect-error TotalHit
-    return res.hits.total.value !== 0;
+    expect(res.hits.total.value !== 0).to.be(true);
+  }
+
+  async function assertHasFleetServerEnrollmentApiKeyForPolicy(policyId: string, spaceId?: string) {
+    const res = await esClient.search({
+      index: ENROLLMENT_API_KEYS_INDEX,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          term: {
+            policy_id: policyId,
+          },
+        },
+        size: 1,
+      },
+    });
+
+    if (spaceId) {
+      const docsSpaceId = res.hits.hits.flatMap((hit) => (hit._source as any).namespaces)?.[0];
+      expect(docsSpaceId).to.eql(docsSpaceId);
+    }
+
+    // @ts-expect-error TotalHit
+    expect(res.hits.total.value !== 0).to.be(true);
   }
 
   // Test all the side effect that should occurs when we create|update an agent policy
@@ -70,47 +100,80 @@ export default function (providerContext: FtrProviderContext) {
 
     setupFleetAndAgents(providerContext);
 
-    describe('POST /api/fleet/agent_policies', () => {
-      it('should create an enrollment key for the policy', async () => {
-        const name = `test-${Date.now()}`;
+    describe('In default space', () => {
+      describe('POST /api/fleet/agent_policies', () => {
+        it('should create an enrollment key for the policy', async () => {
+          const name = `test-${Date.now()}`;
 
-        const res = await supertest
-          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name,
-            namespace: 'default',
-          })
-          .expect(200);
+          const res = await supertest
+            .post(`/s/test/api/fleet/agent_policies?sys_monitoring=true`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name,
+              namespace: 'default',
+            })
+            .expect(200);
 
-        const policyId = res.body.item.id;
-        const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
-        expect(enrollmentKey).not.empty();
+          const policyId = res.body.item.id;
+          const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
+          expect(enrollmentKey).not.empty();
 
-        expect(await hasFleetServerPoliciesForPolicy(policyId)).to.be(true);
+          await assertFleetServerPoliciesForPolicy(policyId);
+        });
+      });
+
+      describe('POST /api/fleet/agent_policies/copy', () => {
+        const TEST_POLICY_ID = `policy1`;
+
+        it('should create an enrollment key for the policy', async () => {
+          const name = `test-${Date.now()}`;
+
+          const res = await supertest
+            .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name,
+              description: 'Test',
+            })
+            .expect(200);
+
+          const policyId = res.body.item.id;
+          const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
+          expect(enrollmentKey).not.empty();
+
+          await assertFleetServerPoliciesForPolicy(policyId);
+        });
       });
     });
 
-    describe('POST /api/fleet/agent_policies/copy', () => {
-      const TEST_POLICY_ID = `policy1`;
-
-      it('should create an enrollment key for the policy', async () => {
-        const name = `test-${Date.now()}`;
-
-        const res = await supertest
-          .post(`/api/fleet/agent_policies/${TEST_POLICY_ID}/copy`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name,
-            description: 'Test',
+    describe('In a non default space', () => {
+      const SPACE_ID = 'test';
+      before(async () => {
+        await kibanaServer.spaces
+          .create({
+            id: SPACE_ID,
+            name: SPACE_ID,
           })
-          .expect(200);
+          .catch((err) => {});
+      });
+      describe('POST /s/test/api/fleet/agent_policies', () => {
+        it('should create an .fleet-policy and .fleet-enrollment key for the policy', async () => {
+          const name = `test-${Date.now()}`;
 
-        const policyId = res.body.item.id;
-        const enrollmentKey = await getEnrollmentKeyForPolicyId(policyId);
-        expect(enrollmentKey).not.empty();
+          const res = await supertest
+            .post(`/s/${SPACE_ID}/api/fleet/agent_policies?sys_monitoring=true`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name,
+              namespace: 'default',
+            })
+            .expect(200);
 
-        expect(await hasFleetServerPoliciesForPolicy(policyId)).to.be(true);
+          const policyId = res.body.item.id;
+
+          await assertHasFleetServerEnrollmentApiKeyForPolicy(policyId, SPACE_ID);
+          await assertFleetServerPoliciesForPolicy(policyId, SPACE_ID);
+        });
       });
     });
   });

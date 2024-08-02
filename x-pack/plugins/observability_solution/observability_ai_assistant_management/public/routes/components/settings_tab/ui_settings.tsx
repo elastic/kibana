@@ -17,7 +17,7 @@ import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-
 import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { useAppContext } from '../../../hooks/use_app_context';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const settingsKeys = [
   aiAssistantLogsIndexPattern,
@@ -27,7 +27,7 @@ const settingsKeys = [
 ];
 
 export function UISettings() {
-  const { docLinks, settings, notifications } = useAppContext();
+  const { docLinks, settings, notifications } = useKibana().services;
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(settingsKeys);

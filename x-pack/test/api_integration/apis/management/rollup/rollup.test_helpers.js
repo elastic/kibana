@@ -119,8 +119,50 @@ export const registerHelpers = (getService) => {
       throw err;
     });
 
+  const createMockRollupIndex = () =>
+    createIndexWithMappings('mock_rollup_index', {
+      _meta: {
+        _rollup: {
+          logs_job: {
+            id: 'mockRollupJob',
+            index_pattern: 'mockRollupIndex',
+            rollup_index: ROLLUP_INDEX_NAME,
+            cron: '0 0 0 ? * 7',
+            page_size: 1000,
+            groups: {
+              date_histogram: {
+                interval: '24h',
+                delay: '1d',
+                time_zone: 'UTC',
+                field: 'testCreatedField',
+              },
+              terms: {
+                fields: ['testTotalField', 'testTagField'],
+              },
+              histogram: {
+                interval: '7',
+                fields: ['testTotalField'],
+              },
+            },
+            metrics: [
+              {
+                field: 'testTotalField',
+                metrics: ['avg', 'value_count'],
+              },
+              {
+                field: 'testCreatedField',
+                metrics: ['max', 'min'],
+              },
+            ],
+          },
+        },
+        'rollup-version': '',
+      },
+    });
+
   return {
     createIndexWithMappings,
+    createMockRollupIndex,
     getJobPayload,
     loadJobs,
     createJob,

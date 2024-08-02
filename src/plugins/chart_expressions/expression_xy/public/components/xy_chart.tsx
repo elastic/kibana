@@ -51,7 +51,6 @@ import {
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-  XYLegendValue,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -829,6 +828,8 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
+            legendValues={isHistogramViz ? legend.legendStats : []}
+            legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
             theme={[
               {
                 barSeriesStyle: {
@@ -864,7 +865,7 @@ export function XYChart({
             xDomain={xDomain}
             // enable brushing only for time charts, for both ES|QL and DSL queries
             onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-            onElementClick={interactive && !isEsqlMode ? clickHandler : undefined}
+            onElementClick={interactive ? clickHandler : undefined}
             legendAction={
               interactive
                 ? getLegendAction(
@@ -877,9 +878,6 @@ export function XYChart({
                     singleTable
                   )
                 : undefined
-            }
-            showLegendExtra={
-              isHistogramViz && legend.legendStats?.[0] === XYLegendValue.CurrentAndLastValue
             }
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
@@ -1040,4 +1038,24 @@ export function XYChart({
       </LegendColorPickerWrapperContext.Provider>
     </div>
   );
+}
+
+const defaultLegendTitle = i18n.translate('expressionXY.xyChart.legendTitle', {
+  defaultMessage: 'Legend',
+});
+
+function getLegendTitle(
+  title: string | undefined,
+  layer?: CommonXYDataLayerConfig,
+  isTitleVisible?: boolean
+) {
+  if (!isTitleVisible) {
+    return undefined;
+  }
+  if (typeof title === 'string' && title.length > 0) {
+    return title;
+  }
+  return layer?.splitAccessors?.[0]
+    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+    : defaultLegendTitle;
 }

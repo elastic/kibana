@@ -9,6 +9,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
+    data-test-subj="mlRuleEditorFlyout"
     onClose={[Function]}
   >
     <EuiFlyoutHeader
@@ -20,10 +21,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
         <h1
           id="flyoutTitle"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Create job rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
-            values={Object {}}
           />
         </h1>
       </EuiTitle>
@@ -90,7 +90,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiText>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Job rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are satisfied, its actions are triggered. {learnMoreLink}"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
@@ -99,10 +99,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
                   href="jest-metadata-mock-url"
                   target="_blank"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Learn more"
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
-                    values={Object {}}
                   />
                 </EuiLink>,
               }
@@ -113,10 +112,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       <EuiSpacer />
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Action"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -134,10 +132,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       />
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Conditions"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -147,10 +144,8 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       <EuiCheckbox
         checked={true}
         className="scope-enable-checkbox"
-        compressed={false}
         disabled={true}
         id="enable_conditions_checkbox"
-        indeterminate={false}
         label="Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
@@ -186,25 +181,22 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
         color="warning"
         iconType="help"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Rerun job"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
-            values={Object {}}
           />
         }
       >
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Changes to job rules take effect for new results only."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
-            values={Object {}}
           />
         </p>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
-            values={Object {}}
           />
         </p>
       </EuiCallOut>
@@ -221,10 +213,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
             iconType="cross"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Close"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -236,10 +227,9 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
             isDisabled={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiFlexItem>
@@ -254,6 +244,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
+    data-test-subj="mlRuleEditorFlyout"
     onClose={[Function]}
   >
     <EuiFlyoutHeader
@@ -265,10 +256,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
         <h1
           id="flyoutTitle"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Edit job rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
-            values={Object {}}
           />
         </h1>
       </EuiTitle>
@@ -349,7 +339,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiText>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Job rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are satisfied, its actions are triggered. {learnMoreLink}"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
@@ -358,10 +348,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
                   href="jest-metadata-mock-url"
                   target="_blank"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Learn more"
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
-                    values={Object {}}
                   />
                 </EuiLink>,
               }
@@ -372,10 +361,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       <EuiSpacer />
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Action"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -393,10 +381,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       />
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Conditions"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -406,10 +393,8 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       <EuiCheckbox
         checked={true}
         className="scope-enable-checkbox"
-        compressed={false}
         disabled={true}
         id="enable_conditions_checkbox"
-        indeterminate={false}
         label="Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
@@ -445,25 +430,22 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
         color="warning"
         iconType="help"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Rerun job"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
-            values={Object {}}
           />
         }
       >
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Changes to job rules take effect for new results only."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
-            values={Object {}}
           />
         </p>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
-            values={Object {}}
           />
         </p>
       </EuiCallOut>
@@ -480,10 +462,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
             iconType="cross"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Close"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -495,10 +476,9 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
             isDisabled={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiFlexItem>
@@ -513,6 +493,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
   <EuiFlyout
     aria-labelledby="flyoutTitle"
     className="ml-rule-editor-flyout"
+    data-test-subj="mlRuleEditorFlyout"
     onClose={[Function]}
   >
     <EuiFlyoutHeader
@@ -524,10 +505,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
         <h1
           id="flyoutTitle"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Create job rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
-            values={Object {}}
           />
         </h1>
       </EuiTitle>
@@ -594,7 +574,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiText>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Job rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are satisfied, its actions are triggered. {learnMoreLink}"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
@@ -603,10 +583,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
                   href="jest-metadata-mock-url"
                   target="_blank"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Learn more"
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
-                    values={Object {}}
                   />
                 </EuiLink>,
               }
@@ -617,10 +596,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       <EuiSpacer />
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Action"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -638,10 +616,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       />
       <EuiTitle>
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Conditions"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.conditionsTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -651,10 +628,8 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       <EuiCheckbox
         checked={true}
         className="scope-enable-checkbox"
-        compressed={false}
         disabled={true}
         id="enable_conditions_checkbox"
-        indeterminate={false}
         label="Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
@@ -682,25 +657,22 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
         color="warning"
         iconType="help"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Rerun job"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
-            values={Object {}}
           />
         }
       >
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Changes to job rules take effect for new results only."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
-            values={Object {}}
           />
         </p>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="To apply these changes to existing results you must clone and rerun the job. Note rerunning the job may take some time and should only be done once you have completed all your changes to the rules for this job."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.howToApplyChangesToExistingResultsDescription"
-            values={Object {}}
           />
         </p>
       </EuiCallOut>
@@ -717,10 +689,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
             iconType="cross"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Close"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -732,10 +703,9 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
             isDisabled={true}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiFlexItem>
@@ -761,10 +731,9 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
         <h1
           id="flyoutTitle"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Edit job rules"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
-            values={Object {}}
           />
         </h1>
       </EuiTitle>
@@ -835,10 +804,9 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
             iconType="cross"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Close"
               id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

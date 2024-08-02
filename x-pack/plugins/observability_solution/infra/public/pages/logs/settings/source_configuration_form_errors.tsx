@@ -38,7 +38,7 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
     return (
       <FormattedMessage
         id="xpack.infra.logSourceConfiguration.emptyFieldErrorMessage"
-        defaultMessage="The field '{fieldName}' must not be empty."
+        defaultMessage="The field ''{fieldName}'' must not be empty."
         values={{
           fieldName: error.fieldName,
         }}
@@ -48,7 +48,7 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
     return (
       <FormattedMessage
         id="xpack.infra.logSourceConfiguration.includesSpacesErrorMessage"
-        defaultMessage="The field '{fieldName}' must not include spaces."
+        defaultMessage="The field ''{fieldName}'' must not include spaces."
         values={{
           fieldName: error.fieldName,
         }}

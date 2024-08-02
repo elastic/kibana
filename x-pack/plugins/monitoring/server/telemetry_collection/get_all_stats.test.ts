@@ -10,12 +10,26 @@ import sinon from 'sinon';
 import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
-import { LogstashStatsByClusterUuid } from './get_logstash_stats';
+import { LogstashStatsByClusterUuid } from './logstash_monitoring';
+import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('get_all_stats', () => {
   const timestamp = Date.now();
   const searchMock = sinon.stub();
-  const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
+  const infoMock = sinon.stub().returns({ cluster_uuid: 'cluster-uuid-1' });
+  const catIndicesMock = { indices: sinon.stub() };
+  const records: CatIndicesResponse = [
+    {
+      index: 'monitoring-logstash-8-test',
+    },
+  ];
+  catIndicesMock.indices.returns(Promise.resolve(records));
+
+  const callCluster = {
+    search: searchMock,
+    info: infoMock,
+    cat: catIndicesMock,
+  } as unknown as ElasticsearchClient;
   afterEach(() => {
     searchMock.reset();
   });
@@ -160,6 +174,7 @@ describe('get_all_stats', () => {
                 collection_types: {
                   internal_collection: 1,
                 },
+                monitoringClusterUuid: 'cluster-uuid-1',
                 pipelines: {},
                 plugins: [],
               },
@@ -174,16 +189,13 @@ describe('get_all_stats', () => {
         .onCall(1)
         .returns(Promise.resolve(kibanaStatsResponse))
         .onCall(2)
-        .returns(Promise.resolve(logstashStatsResponse)) // to define if it is internal monitoring or not
-        .returns(Promise.resolve(logstashStatsResponse))
+        .returns(Promise.resolve({}))
         .onCall(3)
-        .returns(Promise.resolve({})) // Beats stats
+        .returns(Promise.resolve({}))
         .onCall(4)
-        .returns(Promise.resolve({})) // Beats state
+        .returns(Promise.resolve(logstashStatsResponse))
         .onCall(5)
-        .returns(Promise.resolve(logstashStatsResponse)) // Logstash stats
-        .onCall(6)
-        .returns(Promise.resolve({})); // Logstash state
+        .returns(Promise.resolve(logstashStatsResponse));
 
       expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });

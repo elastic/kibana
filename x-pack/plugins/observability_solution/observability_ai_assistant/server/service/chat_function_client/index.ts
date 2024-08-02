@@ -31,6 +31,8 @@ const ajv = new Ajv({
   strict: false,
 });
 
+export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
+
 export class ChatFunctionClient {
   private readonly instructions: RegisteredInstruction[] = [];
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
@@ -46,7 +48,7 @@ export class ChatFunctionClient {
     if (allData.length) {
       this.registerFunction(
         {
-          name: 'get_data_on_screen',
+          name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           description: dedent(`Get data that is on the screen:
             ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
           `),

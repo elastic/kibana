@@ -8,14 +8,17 @@
 import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  ImportListItemsRequestQuery,
+  ImportListItemsResponse,
+} from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
 import { ConfigType } from '../../config';
-import { importListItemRequestQuery, importListItemResponse } from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
 import { getListClient } from '..';
 
@@ -43,7 +46,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         validate: {
           request: {
             body: schema.buffer(),
-            query: buildRouteValidation(importListItemRequestQuery),
+            query: buildRouteValidationWithZod(ImportListItemsRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -119,12 +122,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               version: 1,
             });
 
-            const [validated, errors] = validate(list, importListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+            return response.ok({ body: ImportListItemsResponse.parse(list) });
           } else if (type != null) {
             const importedList = await lists.importListItemsToStream({
               deserializer,
@@ -142,12 +140,8 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
                 statusCode: 400,
               });
             }
-            const [validated, errors] = validate(importedList, importListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+
+            return response.ok({ body: ImportListItemsResponse.parse(importedList) });
           } else {
             return siemResponse.error({
               body: 'Either type or list_id need to be defined in the query',

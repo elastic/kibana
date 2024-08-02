@@ -22,15 +22,16 @@ import {
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
+import { MODELS } from '../common/models';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
     try {
-      const replacedQuery = esQuery.replace(/{query}/g, question.replace(/"/g, '\\"'));
+      const replacedQuery = esQuery.replace(/\"{query}\"/g, JSON.stringify(question));
       const query = JSON.parse(replacedQuery);
       return query;
     } catch (e) {
-      throw Error(e);
+      throw Error("Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.");
     }
   };
 }
@@ -89,13 +90,14 @@ export function defineRoutes({
       },
     },
     errorHandler(async (context, request, response) => {
-      const [{ analytics }, { actions }] = await getStartServices();
+      const [{ analytics }, { actions, cloud }] = await getStartServices();
+
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
       const { messages, data } = await request.body;
-      const { chatModel, chatPrompt, connector } = await getChatParams(
+      const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
           model: data.summarization_model,
@@ -119,6 +121,9 @@ export function defineRoutes({
         throw Error(e);
       }
 
+      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const modelPromptLimit = model?.promptTokenLimit;
+
       const chain = ConversationalChain({
         model: chatModel,
         rag: {
@@ -126,14 +131,32 @@ export function defineRoutes({
           retriever: createRetriever(data.elasticsearch_query),
           content_field: sourceFields,
           size: Number(data.doc_size),
+          inputTokensLimit: modelPromptLimit,
         },
         prompt: chatPrompt,
+        questionRewritePrompt,
       });
 
       let stream: ReadableStream<Uint8Array>;
 
       try {
         stream = await chain.stream(aiClient, messages);
+
+        analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+          connectorType:
+            connector.actionTypeId +
+            (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+          model: data.summarization_model ?? '',
+          isCitationsEnabled: data.citations,
+        });
+
+        return handleStreamResponse({
+          logger,
+          stream,
+          response,
+          request,
+          isCloud: cloud?.isCloudEnabled ?? false,
+        });
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
@@ -147,16 +170,6 @@ export function defineRoutes({
 
         throw e;
       }
-
-      analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
-        connectorType:
-          connector.actionTypeId +
-          (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
-        model: data.summarization_model ?? '',
-        isCitationsEnabled: data.citations,
-      });
-
-      return handleStreamResponse({ logger, stream, response, request });
     })
   );
 

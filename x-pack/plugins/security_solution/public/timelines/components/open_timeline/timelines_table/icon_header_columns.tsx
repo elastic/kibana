@@ -6,6 +6,7 @@
  */
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType, HorizontalAlignment } from '@elastic/eui';
 import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
@@ -22,10 +23,10 @@ export const getIconHeaderColumns = ({
   timelineType,
 }: {
   timelineType: TimelineTypeLiteralWithNull;
-}) => {
+}): Array<EuiTableFieldDataColumnType<object>> => {
   const columns = {
     note: {
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       field: 'eventIdToNoteIds',
       name: (
         <EuiToolTip content={i18n.NOTES}>
@@ -40,7 +41,7 @@ export const getIconHeaderColumns = ({
       width: ACTION_COLUMN_WIDTH,
     },
     pinnedEvent: {
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       field: 'pinnedEventIds',
       name: (
         <EuiToolTip content={i18n.PINNED_EVENTS}>
@@ -57,7 +58,7 @@ export const getIconHeaderColumns = ({
       width: ACTION_COLUMN_WIDTH,
     },
     favorite: {
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       field: 'favorite',
       name: (
         <EuiToolTip content={i18n.FAVORITES}>

@@ -219,6 +219,9 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
+  settings: {
+    preventInitialBackfill: false,
+  },
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
@@ -235,6 +238,9 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
+  settings: {
+    preventInitialBackfill: false,
+  },
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm = {
@@ -251,6 +257,9 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm
     target: 99,
   },
   groupBy: SYNTHETICS_DEFAULT_GROUPINGS,
+  settings: {
+    preventInitialBackfill: false,
+  },
 };
 
 export const COMPARATOR_GT = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.gtLabel', {

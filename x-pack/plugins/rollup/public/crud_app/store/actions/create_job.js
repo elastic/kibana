@@ -54,7 +54,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
                 message: i18n.translate(
                   'xpack.rollupJobs.createAction.jobIdAlreadyExistsErrorMessage',
                   {
-                    defaultMessage: `A job with ID '{jobConfigId}' already exists.`,
+                    defaultMessage: `A job with ID ''{jobConfigId}'' already exists.`,
                     values: { jobConfigId: jobConfig.id },
                   }
                 ),

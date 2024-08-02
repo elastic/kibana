@@ -13,7 +13,7 @@ import type { MetricVisualizationState } from '@kbn/lens-plugin/public';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 
-jest.mock('../../common/containers/sourcerer', () => ({
+jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',

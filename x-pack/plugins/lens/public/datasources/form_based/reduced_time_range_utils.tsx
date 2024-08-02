@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { FormBasedLayer } from './types';
 import type { IndexPattern } from '../../types';
 import type { FieldBasedOperationErrorMessage } from './operations/definitions';
+import {
+  REDUCED_TIME_RANGE_DEFAULT_DATE_FIELD,
+  REDUCED_TIME_RANGE_NO_DATE_HISTOGRAM,
+} from '../../user_messages_ids';
 
 export const reducedTimeRangeOptions = [
   {
@@ -57,33 +61,39 @@ export function getColumnReducedTimeRangeError(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern
-): FieldBasedOperationErrorMessage[] | undefined {
+): FieldBasedOperationErrorMessage[] {
   const currentColumn = layer.columns[columnId];
   if (!currentColumn.reducedTimeRange) {
-    return;
+    return [];
   }
   const hasDateHistogram = Object.values(layer.columns).some(
     (column) => column.operationType === 'date_histogram'
   );
   const hasTimeField = Boolean(indexPattern.timeFieldName);
-  const errors: FieldBasedOperationErrorMessage[] = [
-    hasDateHistogram &&
-      i18n.translate('xpack.lens.indexPattern.reducedTimeRangeWithDateHistogram', {
+  const errors: FieldBasedOperationErrorMessage[] = [];
+  if (hasDateHistogram) {
+    errors.push({
+      uniqueId: REDUCED_TIME_RANGE_NO_DATE_HISTOGRAM,
+      message: i18n.translate('xpack.lens.indexPattern.reducedTimeRangeWithDateHistogram', {
         defaultMessage:
           'Reduced time range can only be used without a date histogram. Either remove the date histogram dimension or remove the reduced time range from {column}.',
         values: {
           column: currentColumn.label,
         },
       }),
-    !hasTimeField &&
-      i18n.translate('xpack.lens.indexPattern.reducedTimeRangeWithoutTimefield', {
+    });
+  }
+  if (!hasTimeField) {
+    errors.push({
+      uniqueId: REDUCED_TIME_RANGE_DEFAULT_DATE_FIELD,
+      message: i18n.translate('xpack.lens.indexPattern.reducedTimeRangeWithoutTimefield', {
         defaultMessage:
           'Reduced time range can only be used with a specified default time field on the data view. Either use a different data view with default time field or remove the reduced time range from {column}.',
         values: {
           column: currentColumn.label,
         },
       }),
-  ].filter(Boolean) as FieldBasedOperationErrorMessage[];
-
+    });
+  }
   return errors;
 }

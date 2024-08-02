@@ -62,7 +62,7 @@ const tabs = [
   },
 ] as const;
 
-type RuleTab = typeof tabs[number]['id'];
+type RuleTab = (typeof tabs)[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
@@ -99,7 +99,6 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
 
   return (
     <EuiFlyout
-      ownFocus={false}
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
       outsideClickCloses

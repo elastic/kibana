@@ -19,6 +19,7 @@ export * from './actions/suspend_process_route';
 export * from './actions/get_processes_route';
 export * from './actions/get_file_route';
 export * from './actions/execute_route';
+export * from './actions/scan_route';
 export * from './actions/common/base';
 export * from './actions/common/response_actions';
 

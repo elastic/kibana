@@ -28,7 +28,10 @@ import {
 import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
+import {
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../common/entity_analytics/risk_engine';
 import { createTransform, getLatestTransformId } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
@@ -70,6 +73,12 @@ export class RiskScoreDataClient {
     this.writerCache.set(namespace, writer);
     return writer;
   }
+
+  public refreshRiskScoreIndex = async () => {
+    await this.options.esClient.indices.refresh({
+      index: getRiskScoreTimeSeriesIndex(this.options.namespace),
+    });
+  };
 
   public getRiskInputsIndex = ({ dataViewId }: { dataViewId: string }) =>
     getRiskInputsIndex({
@@ -179,6 +188,49 @@ export class RiskScoreDataClient {
       throw error;
     }
   }
+
+  /**
+   * Deletes all resources created by init().
+   * It returns an array of errors that occurred during the deletion.
+   *
+   * WARNING: It will remove all data.
+   */
+  public async tearDown() {
+    const namespace = this.options.namespace;
+    const esClient = this.options.esClient;
+    const indexPatterns = getIndexPatternDataStream(namespace);
+    const errors: Error[] = [];
+    const addError = (e: Error) => errors.push(e);
+
+    await esClient.transform
+      .deleteTransform({
+        transform_id: getLatestTransformId(namespace),
+        delete_dest_index: true,
+        force: true,
+      })
+      .catch(addError);
+
+    await esClient.indices
+      .deleteDataStream({
+        name: indexPatterns.alias,
+      })
+      .catch(addError);
+
+    await esClient.indices
+      .deleteIndexTemplate({
+        name: indexPatterns.template,
+      })
+      .catch(addError);
+
+    await esClient.cluster
+      .deleteComponentTemplate({
+        name: mappingComponentName,
+      })
+      .catch(addError);
+
+    return errors;
+  }
+
   /**
    * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
    *

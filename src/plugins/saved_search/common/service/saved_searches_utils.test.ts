@@ -65,6 +65,10 @@ describe('saved_searches_utils', () => {
               "aggs": Object {
                 "createAggConfigs": [MockFunction],
               },
+              "dataViews": Object {
+                "getMetaFields": [MockFunction],
+                "getShortDotsEnable": [MockFunction],
+              },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
               "scriptedFieldsEnabled": true,

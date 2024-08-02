@@ -16,7 +16,6 @@
     "@kbn/std",
     "@kbn/logging",
     "@kbn/i18n",
-    "@kbn/analytics-client",
     "@kbn/core-base-common",
     "@kbn/core-base-server-internal",
     "@kbn/core-http-server",

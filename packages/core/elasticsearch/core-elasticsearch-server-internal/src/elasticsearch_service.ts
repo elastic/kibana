@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs';
+import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -61,7 +60,7 @@ export class ElasticsearchService
   private client?: ClusterClient;
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
-  private agentManager: AgentManager;
+  private agentManager?: AgentManager;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -69,7 +68,6 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    this.agentManager = new AgentManager(this.log.get('agent-manager'));
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -93,6 +91,8 @@ export class ElasticsearchService
 
     const config = await firstValueFrom(this.config$);
 
+    const agentManager = this.getAgentManager(config);
+
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
@@ -105,6 +105,13 @@ export class ElasticsearchService
       log: this.log,
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
+
+    // Log every error we may encounter in the connection to Elasticsearch
+    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
 
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
@@ -125,7 +132,7 @@ export class ElasticsearchService
         this.unauthorizedErrorHandler = handler;
       },
       agentStatsProvider: {
-        getAgentsStats: this.agentManager.getAgentsStats.bind(this.agentManager),
+        getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
     };
   }
@@ -136,13 +143,6 @@ export class ElasticsearchService
     }
 
     const config = await firstValueFrom(this.config$);
-
-    // Log every error we may encounter in the connection to Elasticsearch
-    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
 
     let capabilities: ElasticsearchCapabilities;
     let elasticsearchWaitTime: number;
@@ -218,8 +218,17 @@ export class ElasticsearchService
       authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
-      agentFactoryProvider: this.agentManager,
+      agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
     });
+  }
+
+  private getAgentManager({ dnsCacheTtl }: ElasticsearchClientConfig): AgentManager {
+    if (!this.agentManager) {
+      this.agentManager = new AgentManager(this.log.get('agent-manager'), {
+        dnsCacheTtlInSeconds: dnsCacheTtl?.asSeconds() ?? 0, // it should always exists, but some test shortcuts and mocks break this assumption
+      });
+    }
+    return this.agentManager;
   }
 }

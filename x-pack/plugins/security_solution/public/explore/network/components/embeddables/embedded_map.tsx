@@ -26,10 +26,10 @@ import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getLayerList } from './map_config';
-import { sourcererSelectors } from '../../../../common/store/sourcerer';
+import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { State } from '../../../../common/store';
-import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { SourcererDataView } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export const NETWORK_MAP_VISIBLE = 'network_map_visbile';
 

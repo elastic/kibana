@@ -19,6 +19,7 @@ import {
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
   INITIAL_REST_VERSION,
+  DELETE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 
 interface DeleteDataViewArgs {
@@ -39,7 +40,7 @@ export const deleteDataView = async ({
 };
 
 const deleteIndexPatternRouteFactory =
-  (path: string) =>
+  (path: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -48,7 +49,7 @@ const deleteIndexPatternRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.delete({ path, access: 'public' }).addVersion(
+    router.versioned.delete({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -91,7 +92,10 @@ const deleteIndexPatternRouteFactory =
     );
   };
 
-export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH,
+  DELETE_DATA_VIEW_DESCRIPTION
+);
 
 export const registerDeleteDataViewRouteLegacy = deleteIndexPatternRouteFactory(
   SPECIFIC_DATA_VIEW_PATH_LEGACY

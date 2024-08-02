@@ -125,9 +125,9 @@ export async function getSharingData(
                 field = `${column}.*`;
               }
 
-              return { field, include_unmapped: 'true' };
+              return { field, include_unmapped: true };
             })
-          : [{ field: '*', include_unmapped: 'true' }];
+          : [{ field: '*', include_unmapped: true }];
 
         searchSourceUpdated.setField('fields', fields);
       }

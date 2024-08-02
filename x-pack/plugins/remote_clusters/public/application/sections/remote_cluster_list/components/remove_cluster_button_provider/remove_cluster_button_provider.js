@@ -58,7 +58,7 @@ export class RemoveClusterButtonProvider extends Component {
         ? i18n.translate(
             'xpack.remoteClusters.removeButton.confirmModal.deleteSingleClusterTitle',
             {
-              defaultMessage: "Remove remote cluster '{name}'?",
+              defaultMessage: "Remove remote cluster ''{name}''?",
               values: { name: clusterNames[0] },
             }
           )

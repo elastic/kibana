@@ -28,7 +28,7 @@ export interface MlAuthz {
  * @param ml {@link MlPluginSetup} ML services to fetch ML capabilities
  * @param request A {@link KibanaRequest} representing the authenticated user
  *
- * @returns A {@link MLAuthz} service object
+ * @returns A {@link MlAuthz} service object
  */
 export const buildMlAuthz = ({
   license,

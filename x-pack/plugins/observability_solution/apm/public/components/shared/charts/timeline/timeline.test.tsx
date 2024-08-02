@@ -12,10 +12,10 @@ import {
   mockMoment,
   toJson,
 } from '../../../../utils/test_helpers';
-import { Timeline } from '.';
+import { TimelineAxisContainer, TimelineProps, VerticalLinesContainer } from '.';
 import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
-describe('Timeline', () => {
+describe.each([[TimelineAxisContainer], [VerticalLinesContainer]])(`Timeline`, (Component) => {
   let consoleMock: jest.SpyInstance;
 
   beforeAll(() => {
@@ -27,19 +27,15 @@ describe('Timeline', () => {
     consoleMock.mockRestore();
   });
 
-  it('should render with data', () => {
-    const props = {
-      traceRootDuration: 200000,
-      width: 1000,
-      duration: 200000,
-      height: 116,
+  it(`${Component.name} should render with data`, () => {
+    const props: TimelineProps = {
+      xMax: 1000,
       margins: {
         top: 100,
         left: 50,
         right: 50,
         bottom: 0,
       },
-      animation: null,
       marks: [
         {
           id: 'timeToFirstByte',
@@ -62,17 +58,14 @@ describe('Timeline', () => {
       ] as AgentMark[],
     };
 
-    const wrapper = mountWithTheme(<Timeline {...props} />);
+    const wrapper = mountWithTheme(<Component {...props} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  it('should not crash if traceRootDuration is 0', () => {
-    const props = {
-      traceRootDuration: 0,
-      width: 1000,
+  it(`${Component.name} should not crash if traceRootDuration is 0`, () => {
+    const props: TimelineProps = {
       xMax: 0,
-      height: 116,
       margins: {
         top: 100,
         left: 50,
@@ -81,7 +74,7 @@ describe('Timeline', () => {
       },
     };
 
-    const mountTimeline = () => mountWithTheme(<Timeline {...props} />);
+    const mountTimeline = () => mountWithTheme(<Component {...props} />);
 
     expect(mountTimeline).not.toThrow();
   });

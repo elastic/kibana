@@ -7,22 +7,26 @@
 
 import React, { type FC } from 'react';
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { i18n } from '@kbn/i18n';
 
-interface LogRateAnalysisTypeCallOutProps {
-  analysisType: LogRateAnalysisType;
-  zeroDocsFallback: boolean;
-}
+export const LogRateAnalysisTypeCallOut: FC = () => {
+  const showCallout = useAppSelector((s) => s.logRateAnalysisResults.significantItems.length > 0);
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
+  const analysisType = useAppSelector((s) => s.logRateAnalysisResults.currentAnalysisType);
+  const fieldSelectionMessage = useAppSelector(
+    (s) => s.logRateAnalysisFieldCandidates.fieldSelectionMessage
+  );
 
-export const LogRateAnalysisTypeCallOut: FC<LogRateAnalysisTypeCallOutProps> = ({
-  analysisType,
-  zeroDocsFallback,
-}) => {
   let callOutTitle: string;
   let callOutText: string;
+
+  if (!showCallout) {
+    return null;
+  }
 
   if (!zeroDocsFallback && analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE) {
     callOutTitle = i18n.translate('xpack.aiops.analysis.analysisTypeSpikeCallOutTitle', {
@@ -61,13 +65,20 @@ export const LogRateAnalysisTypeCallOut: FC<LogRateAnalysisTypeCallOutProps> = (
   }
 
   return (
-    <EuiCallOut
-      title={<span data-test-subj="aiopsAnalysisTypeCalloutTitle">{callOutTitle}</span>}
-      color="primary"
-      iconType="pin"
-      size="s"
-    >
-      <EuiText size="s">{callOutText}</EuiText>
-    </EuiCallOut>
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        title={<span data-test-subj="aiopsAnalysisTypeCalloutTitle">{callOutTitle}</span>}
+        color="primary"
+        iconType="pin"
+        size="s"
+      >
+        <EuiText size="s">
+          {callOutText}
+          {fieldSelectionMessage && ` ${fieldSelectionMessage}`}
+        </EuiText>
+      </EuiCallOut>
+      <EuiSpacer size="xs" />
+    </>
   );
 };

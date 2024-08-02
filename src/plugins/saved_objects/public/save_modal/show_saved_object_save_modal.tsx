@@ -7,9 +7,8 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { getAnalytics, getI18n, getTheme } from '../kibana_services';
 
 /**
@@ -34,34 +33,42 @@ export function showSaveModal(
   saveModal: React.ReactElement<MinimalSaveModalProps>,
   Wrapper?: FC<PropsWithChildren<unknown>>
 ) {
-  const container = document.createElement('div');
-  const closeModal = () => {
-    ReactDOM.unmountComponentAtNode(container);
-    document.body.removeChild(container);
-    saveModal.props.onClose?.();
-  };
+  // initialize variable that will hold reference for unmount
+  // eslint-disable-next-line prefer-const
+  let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
 
-  const onSave = saveModal.props.onSave;
+  const mount = toMountPoint(
+    React.createElement(function createSavedObjectModal() {
+      const closeModal = () => {
+        unmount();
+        // revert control back to caller after cleaning up modal
+        setTimeout(() => {
+          saveModal.props.onClose?.();
+        }, 0);
+      };
 
-  const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
-    const response = await onSave(...args);
-    // close modal if we either hit an error or the saved object got an id
-    if (Boolean(isSuccess(response) ? response.id : response.error)) {
-      closeModal();
-    }
-    return response;
-  };
-  document.body.appendChild(container);
-  const element = React.cloneElement(saveModal, {
-    onSave: onSaveConfirmed,
-    onClose: closeModal,
-  });
+      const onSave = saveModal.props.onSave;
 
-  const I18nContext = getI18n().Context;
-  ReactDOM.render(
-    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
-      <I18nContext>{Wrapper ? <Wrapper>{element}</Wrapper> : element}</I18nContext>
-    </KibanaRenderContextProvider>,
-    container
+      const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
+        const response = await onSave(...args);
+        // close modal if we either hit an error or the saved object got an id
+        if (Boolean(isSuccess(response) ? response.id : response.error)) {
+          closeModal();
+        }
+        return response;
+      };
+
+      const augmentedElement = React.cloneElement(saveModal, {
+        onSave: onSaveConfirmed,
+        onClose: closeModal,
+      });
+
+      return React.createElement(Wrapper ?? React.Fragment, {
+        children: augmentedElement,
+      });
+    }),
+    { analytics: getAnalytics(), theme: getTheme(), i18n: getI18n() }
   );
+
+  unmount = mount(document.createElement('div'));
 }

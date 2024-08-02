@@ -60,7 +60,7 @@ export const TestConnectorForm = ({
     (async () => {
       const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
       setActionErrors({ ...res });
-      setHasErrors(!!Object.values(res).find((errors) => errors.length > 0));
+      setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
   }, [actionTypeModel, actionParams]);
 
@@ -187,7 +187,6 @@ const SuccessfulExecution = () => (
       'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
       {
         defaultMessage: 'Test was successful',
-        values: {},
       }
     )}
     color="success"

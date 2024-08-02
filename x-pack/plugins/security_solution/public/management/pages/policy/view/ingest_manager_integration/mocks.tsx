@@ -16,9 +16,9 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { deepFreeze } from '@kbn/std';
+import { createFleetContextReduxStore } from '../../../../../common/components/with_security_context/store';
 import type { AppContextTestRender, UiRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { createFleetContextReduxStore } from './components/with_security_context/store';
 import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 import type { State } from '../../../../../common/store';
@@ -26,7 +26,7 @@ import { mockGlobalState } from '../../../../../common/mock';
 import { managementReducer } from '../../../../store/reducer';
 import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
-import { RenderContextProviders } from './components/with_security_context/render_context_providers';
+import { RenderContextProviders } from '../../../../../common/components/with_security_context/render_context_providers';
 import type { AppAction } from '../../../../../common/store/actions';
 
 // Defined a private custom reducer that reacts to an action that enables us to update the

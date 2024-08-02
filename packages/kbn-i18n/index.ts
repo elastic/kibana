@@ -7,21 +7,13 @@
  */
 
 import {
-  formats,
-  addTranslation,
   getTranslation,
-  setLocale,
   getLocale,
-  setDefaultLocale,
-  getDefaultLocale,
-  setFormats,
-  getFormats,
-  getRegisteredLocales,
   translate,
   init,
   load,
-  isPseudoLocale,
-  translateUsingPseudoLocale,
+  handleIntlError,
+  getIsInitialized,
 } from './src/core';
 
 import {
@@ -34,21 +26,13 @@ import {
 } from './src/loader';
 
 const i18n = {
-  formats,
-  addTranslation,
   getTranslation,
-  setLocale,
   getLocale,
-  setDefaultLocale,
-  getDefaultLocale,
-  setFormats,
-  getFormats,
-  getRegisteredLocales,
   translate,
   init,
   load,
-  isPseudoLocale,
-  translateUsingPseudoLocale,
+  handleIntlError,
+  getIsInitialized,
 };
 
 const i18nLoader = {
@@ -60,6 +44,6 @@ const i18nLoader = {
   getRegisteredLocales: getRegisteredLocalesForLoader,
 };
 
-export type { Translation } from './src/translation';
+export type { Translation, TranslationInput } from './src/translation';
 export type { Formats, TranslateArguments } from './src/core';
 export { i18n, i18nLoader };

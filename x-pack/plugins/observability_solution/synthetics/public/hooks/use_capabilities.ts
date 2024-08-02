@@ -62,7 +62,7 @@ export const useCanReadSyntheticsIndex = () => {
           },
         });
     });
-  }, []);
+  }, [dataPublicPluginStart.search]);
 
   return {
     canRead: data?.canRead,

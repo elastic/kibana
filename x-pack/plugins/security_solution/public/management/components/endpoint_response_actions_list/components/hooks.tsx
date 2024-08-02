@@ -334,6 +334,11 @@ export const useActionsLogFilter = ({
             return false;
           }
 
+          // `scan` - v8.15
+          if (commandName === 'scan' && !featureFlags.responseActionScanEnabled) {
+            return false;
+          }
+
           return true;
         }).map((commandName) => ({
           key: commandName,

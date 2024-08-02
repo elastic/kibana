@@ -8,11 +8,16 @@
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { type UiCounterMetricType } from '@kbn/analytics';
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type {
+  PublishesBlockingError,
+  PublishesDataLoading,
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export interface RandomSamplingOption {
@@ -115,7 +120,9 @@ interface FieldStatisticsTableEmbeddableComponentApi {
 
 export type FieldStatisticsTableEmbeddableApi =
   DefaultEmbeddableApi<FieldStatisticsTableEmbeddableState> &
-    FieldStatisticsTableEmbeddableComponentApi;
+    FieldStatisticsTableEmbeddableComponentApi &
+    PublishesDataLoading &
+    PublishesBlockingError;
 
 export interface FieldStatisticsTableProps {
   /**
@@ -164,4 +171,16 @@ export interface FieldStatisticsTableProps {
    * Search session id to save to or restore from
    */
   searchSessionId?: string;
+  /**
+   * Additional field groups (e.g. Smart Fields)
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
+  /**
+   * If table should query using ES|QL
+   */
+  isEsqlMode?: boolean;
+  /**
+   * Time range
+   */
+  timeRange?: TimeRange;
 }

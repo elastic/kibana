@@ -18,7 +18,8 @@ import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
-import { dataStreamService } from '../../../services';
+import { dataStreamService, datasetQualityPrivileges } from '../../../services';
+import { getDataStreamsStats } from '../get_data_streams_stats';
 
 export async function getDataStreamSettings({
   esClient,
@@ -31,8 +32,13 @@ export async function getDataStreamSettings({
 
   const createdOn = await getDataStreamCreatedOn(esClient, dataStream);
 
+  // Getting the 1st item from the data streams endpoint as we will be passing the exact DS name
+  const [dataStreamInfo] = await dataStreamService.getMatchingDataStreams(esClient, dataStream);
+  const integration = dataStreamInfo?._meta?.package?.name;
+
   return {
     createdOn,
+    integration,
   };
 }
 
@@ -51,6 +57,20 @@ export async function getDataStreamDetails({
 }): Promise<DataStreamDetails> {
   throwIfInvalidDataStreamParams(dataStream);
 
+  const hasAccessToDataStream = (
+    await datasetQualityPrivileges.getHasIndexPrivileges(esClient, [dataStream], ['monitor'])
+  )[dataStream];
+
+  const lastActivity = hasAccessToDataStream
+    ? (
+        await getDataStreamsStats({
+          esClient,
+          dataStreams: [dataStream],
+          sizeStatsAvailable,
+        })
+      ).items[0]?.lastActivity
+    : undefined;
+
   try {
     const dataStreamSummaryStats = await getDataStreamSummaryStats(
       esClient,
@@ -61,7 +81,7 @@ export async function getDataStreamDetails({
 
     const whenSizeStatsNotAvailable = NaN; // This will indicate size cannot be calculated
     const avgDocSizeInBytes = sizeStatsAvailable
-      ? dataStreamSummaryStats.docsCount > 0
+      ? hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
         ? await getAvgDocSizeInBytes(esClient, dataStream)
         : 0
       : whenSizeStatsNotAvailable;
@@ -70,6 +90,10 @@ export async function getDataStreamDetails({
     return {
       ...dataStreamSummaryStats,
       sizeBytes,
+      lastActivity,
+      userPrivileges: {
+        canMonitor: hasAccessToDataStream,
+      },
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist

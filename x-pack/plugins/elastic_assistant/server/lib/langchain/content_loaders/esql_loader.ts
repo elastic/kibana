@@ -9,7 +9,9 @@ import { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
+import { Document } from 'langchain/document';
 
+import { Metadata } from '@kbn/elastic-assistant-common';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
@@ -47,15 +49,15 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
       true
     );
 
-    const docs = await docsLoader.load();
-    const languageDocs = await languageLoader.load();
+    const docs = (await docsLoader.load()) as Array<Document<Metadata>>;
+    const languageDocs = (await languageLoader.load()) as Array<Document<Metadata>>;
     const rawExampleQueries = await exampleQueriesLoader.load();
 
     // Add additional metadata to the example queries that indicates they are required KB documents:
     const requiredExampleQueries = addRequiredKbResourceMetadata({
       docs: rawExampleQueries,
       kbResource: ESQL_RESOURCE,
-    });
+    }) as Array<Document<Metadata>>;
 
     logger.info(
       `Loading ${docs.length} ES|QL docs, ${languageDocs.length} language docs, and ${requiredExampleQueries.length} example queries into the Knowledge Base`

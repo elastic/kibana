@@ -53,6 +53,7 @@ export const PACKAGE_POLICIES_MAPPINGS = {
     enabled: { type: 'boolean' },
     is_managed: { type: 'boolean' },
     policy_id: { type: 'keyword' },
+    policy_ids: { type: 'keyword' },
     package: {
       properties: {
         name: { type: 'keyword' },
@@ -259,6 +260,9 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    namespaces: {
+      type: 'keyword',
+    },
     packages: {
       type: 'keyword',
     },
@@ -287,6 +291,9 @@ export const AGENT_MAPPINGS = {
       type: 'date',
     },
     unenrolled_reason: {
+      type: 'keyword',
+    },
+    unhealthy_reason: {
       type: 'keyword',
     },
     updated_at: {
@@ -325,6 +332,9 @@ export const AGENT_MAPPINGS = {
             download_percent: {
               type: 'double',
             },
+            download_rate: {
+              type: 'double',
+            },
             failed_state: {
               type: 'keyword',
             },
@@ -335,6 +345,17 @@ export const AGENT_MAPPINGS = {
                   type: 'keyword',
                 },
               },
+            },
+            retry_error_msg: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                },
+              },
+            },
+            retry_until: {
+              type: 'date',
             },
           },
         },

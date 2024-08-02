@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   type CoreStart,
   IUiSettingsClient,
@@ -15,7 +15,6 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -23,8 +22,9 @@ import {
   SerializedTitles,
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
-  EmbeddableApiContext,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 
 export interface SloItem {
   id: string;
@@ -38,43 +38,30 @@ export interface EmbeddableSloProps {
   showAllGroupByInstances?: boolean;
 }
 
-export type SloAlertsEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
-
 export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
 
 export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
-  HasSloAlertsConfig;
+  HasSloAlertsConfig &
+  HasEditCapabilities;
 
 export interface HasSloAlertsConfig {
   getSloAlertsConfig: () => EmbeddableSloProps;
   updateSloAlertsConfig: (next: EmbeddableSloProps) => void;
 }
 
-export const apiHasSloAlertsConfig = (api: unknown | null): api is HasSloAlertsConfig => {
-  return Boolean(
-    api &&
-      typeof (api as HasSloAlertsConfig).getSloAlertsConfig === 'function' &&
-      typeof (api as HasSloAlertsConfig).updateSloAlertsConfig === 'function'
-  );
-};
-
-export type SloAlertsEmbeddableActionContext = EmbeddableApiContext & {
-  embeddable: SloAlertsApi;
-};
-
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
   application: ApplicationStart;
+  observability: ObservabilityPublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
   cases: CasesPublicStart;
   settings: SettingsStart;
-  security: SecurityPluginStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
   serverless?: ServerlessPluginStart;

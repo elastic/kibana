@@ -43,6 +43,7 @@ export function ErrorRateChart({
     slo,
     threshold,
     alertTimeRange,
+    dataTimeRange,
     annotations,
     showErrorRateAsLine,
     selectedTabId,

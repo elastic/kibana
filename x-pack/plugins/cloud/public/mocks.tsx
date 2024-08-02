@@ -26,6 +26,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    onboarding: {},
     isServerlessEnabled: false,
     serverless: {
       projectId: undefined,

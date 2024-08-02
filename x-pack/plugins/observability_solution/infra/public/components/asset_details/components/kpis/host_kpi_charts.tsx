@@ -18,9 +18,7 @@ export interface HostKpiChartsProps {
   query?: Query;
   filters?: Filter[];
   searchSessionId?: string;
-  options?: {
-    getSubtitle?: (formulaValue: string) => string;
-  };
+  getSubtitle?: (formulaValue: string) => string;
   loading?: boolean;
 }
 
@@ -28,7 +26,7 @@ export const HostKpiCharts = ({
   dateRange,
   dataView,
   filters,
-  options,
+  getSubtitle,
   query,
   searchSessionId,
   loading = false,
@@ -36,10 +34,8 @@ export const HostKpiCharts = ({
   const { euiTheme } = useEuiTheme();
   const charts = useHostKpiCharts({
     dataViewId: dataView?.id,
-    options: {
-      getSubtitle: options?.getSubtitle,
-      seriesColor: euiTheme.colors.lightestShade,
-    },
+    getSubtitle,
+    seriesColor: euiTheme.colors.lightestShade,
   });
 
   return (

@@ -17,6 +17,7 @@ import type {
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
 import type { PackagePolicyClient } from '../services/package_policy_service';
+import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 
 /** @internal */
 export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
@@ -31,6 +32,9 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
     packagePolicyService: {
       asCurrentUser: PackagePolicyClient;
       asInternalUser: PackagePolicyClient;
+    };
+    uninstallTokenService: {
+      asCurrentUser: UninstallTokenServiceInterface;
     };
     /**
      * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be

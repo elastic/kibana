@@ -433,11 +433,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await visualBuilder.clickSeriesLegendItem('png');
             await visualBuilder.clickSeriesLegendItem('php');
             legendNames = await visualBuilder.getLegendNames();
-            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+            expect(legendNames).to.eql(['png', 'php']);
 
             await visualize.clickRefresh(true);
             legendNames = await visualBuilder.getLegendNames();
-            expect(legendNames).to.eql(['jpg', 'css', 'gif']);
+            expect(legendNames).to.eql(['png', 'php']);
           });
         });
 

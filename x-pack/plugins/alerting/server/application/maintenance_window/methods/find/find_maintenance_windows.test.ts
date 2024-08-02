@@ -6,7 +6,11 @@
  */
 
 import { findMaintenanceWindows } from './find_maintenance_windows';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
@@ -15,11 +19,13 @@ import {
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 
 const savedObjectsClient = savedObjectsClientMock.create();
+const uiSettings = uiSettingsServiceMock.createClient();
 
 const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
   getModificationMetadata: jest.fn(),
   savedObjectsClient,
+  uiSettings,
 };
 
 describe('MaintenanceWindowClient - find', () => {

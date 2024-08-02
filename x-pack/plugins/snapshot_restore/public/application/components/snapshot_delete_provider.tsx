@@ -78,7 +78,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
               }
             )
           : i18n.translate('xpack.snapshotRestore.deleteSnapshot.successSingleNotificationTitle', {
-              defaultMessage: "Deleted snapshot '{name}'",
+              defaultMessage: "Deleted snapshot ''{name}''",
               values: { name: itemsDeleted[0].snapshot },
             });
         toastNotifications.addSuccess(successMessage);
@@ -101,7 +101,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
               },
             })
           : i18n.translate('xpack.snapshotRestore.deleteSnapshot.errorSingleNotificationTitle', {
-              defaultMessage: "Error deleting snapshot '{name}'",
+              defaultMessage: "Error deleting snapshot ''{name}''",
               values: { name: (errors && errors[0].id.snapshot) || snapshotsToDelete[0].snapshot },
             });
         toastNotifications.addDanger(errorMessage);
@@ -122,7 +122,7 @@ export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ childre
           isSingle ? (
             <FormattedMessage
               id="xpack.snapshotRestore.deleteSnapshot.confirmModal.deleteSingleTitle"
-              defaultMessage="Delete snapshot '{name}'?"
+              defaultMessage="Delete snapshot ''{name}''?"
               values={{ name: snapshotIds[0].snapshot }}
             />
           ) : (

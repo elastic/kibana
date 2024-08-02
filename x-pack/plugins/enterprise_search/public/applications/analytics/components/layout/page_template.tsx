@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
@@ -87,7 +87,7 @@ export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
       {...pageTemplateProps}
       solutionNav={{
         items: chromeStyle === 'classic' ? navItems : undefined,
-        name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
+        name: SEARCH_PRODUCT_NAME,
       }}
       setPageChrome={pageChrome && <SetAnalyticsChrome trail={pageChrome} />}
     >

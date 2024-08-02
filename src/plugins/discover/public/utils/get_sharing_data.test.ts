@@ -83,7 +83,7 @@ describe('getSharingData', () => {
         "fields": Array [
           Object {
             "field": "*",
-            "include_unmapped": "true",
+            "include_unmapped": true,
           },
         ],
         "index": "the-data-view-id",
@@ -154,13 +154,13 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource({}).fields).toStrictEqual([
-      { field: 'cool-timefield', include_unmapped: 'true' },
-      { field: 'cool-field-1', include_unmapped: 'true' },
-      { field: 'cool-field-2', include_unmapped: 'true' },
-      { field: 'cool-field-3', include_unmapped: 'true' },
-      { field: 'cool-field-4', include_unmapped: 'true' },
-      { field: 'cool-field-5', include_unmapped: 'true' },
-      { field: 'cool-field-6', include_unmapped: 'true' },
+      { field: 'cool-timefield', include_unmapped: true },
+      { field: 'cool-field-1', include_unmapped: true },
+      { field: 'cool-field-2', include_unmapped: true },
+      { field: 'cool-field-3', include_unmapped: true },
+      { field: 'cool-field-4', include_unmapped: true },
+      { field: 'cool-field-5', include_unmapped: true },
+      { field: 'cool-field-6', include_unmapped: true },
     ]);
   });
 
@@ -190,9 +190,9 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource({}).fields).toStrictEqual([
-      { field: 'cool-timefield', include_unmapped: 'true' },
-      { field: 'cool-field-1', include_unmapped: 'true' },
-      { field: 'cool-field-2.*', include_unmapped: 'true' },
+      { field: 'cool-timefield', include_unmapped: true },
+      { field: 'cool-field-1', include_unmapped: true },
+      { field: 'cool-field-2.*', include_unmapped: true },
     ]);
   });
 

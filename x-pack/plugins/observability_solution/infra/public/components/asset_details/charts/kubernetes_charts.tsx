@@ -19,7 +19,7 @@ import { Chart } from './chart';
 import { useIntegrationCheck } from '../hooks/use_integration_check';
 import { useK8sContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
 import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
-import { ContainerMetricTypes, MetricsChartsFields } from './types';
+import { KubernetesContainerMetrics, MetricsChartsFields } from './types';
 
 const FRAGMENT_BASE = 'key-metrics';
 
@@ -27,7 +27,7 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
   ({ assetId, dataView, dateRange, onShowAll, overview }, ref) => {
     const { charts } = useKubernetesCharts({
       dataViewId: dataView?.id,
-      options: { overview },
+      overview,
     });
 
     const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesNode });
@@ -63,10 +63,11 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
         <ChartsGrid columns={2}>
           {charts.map((chart) => (
             <Chart
+              id={chart.id}
               key={chart.id}
-              {...chart}
               assetId={assetId}
               dateRange={dateRange}
+              lensAttributes={chart}
               queryField={findInventoryFields('host').id}
             />
           ))}
@@ -78,8 +79,8 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
 
 export const KubernetesContainerCharts = React.forwardRef<
   HTMLDivElement,
-  MetricsChartsFields & { metric: ContainerMetricTypes }
->(({ assetId, dataView, dateRange, metric }, ref) => {
+  MetricsChartsFields & { metric: KubernetesContainerMetrics }
+>(({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
   const { charts } = useK8sContainerPageViewMetricsCharts({
     metric,
     metricsDataViewId: dataView?.id,
@@ -120,15 +121,33 @@ export const KubernetesContainerCharts = React.forwardRef<
           }
         />
       }
-      data-test-subj="infraAssetDetailsK8ContainerChartsSection"
-      id="k8sContainerCharts"
+      data-test-subj={`infraAssetDetailsK8ContainerChartsSection${metric}`}
+      id={metric}
       ref={ref}
+      extraAction={
+        onShowAll ? (
+          <EuiButtonEmpty
+            data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
+            onClick={() => onShowAll(metric)}
+            size="xs"
+            flush="both"
+            iconSide="right"
+            iconType="sortRight"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetails.charts.kubernetes.showAllButton"
+              defaultMessage="Show all"
+            />
+          </EuiButtonEmpty>
+        ) : null
+      }
     >
       <ChartsGrid columns={2}>
         {charts.map((chart) => (
           <Chart
+            id={chart.id}
             key={chart.id}
-            {...chart}
+            lensAttributes={chart}
             assetId={assetId}
             dateRange={dateRange}
             queryField={findInventoryFields('container').id}

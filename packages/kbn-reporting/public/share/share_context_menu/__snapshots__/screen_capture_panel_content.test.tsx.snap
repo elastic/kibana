@@ -9,9 +9,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-      </span>
+      Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
     </p>
   </div>
   <div
@@ -61,18 +59,14 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           class="euiSwitch__label"
           id="generated-id"
         >
-          <span>
-            Full page layout
-          </span>
+          Full page layout
         </span>
       </div>
       <div
         class="euiFormHelpText euiFormRow__text"
         id="generated-id-help-0"
       >
-        <span>
-          Remove borders and footer logo
-        </span>
+        Remove borders and footer logo
       </div>
     </div>
   </div>
@@ -84,9 +78,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     <span
       class="emotion-euiButtonDisplayContent"
     >
-      <span>
-        Generate Analytical App
-      </span>
+      Generate Analytical App
     </span>
   </button>
   <hr
@@ -147,9 +139,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           class="euiText emotion-euiText-s"
         >
           <p>
-            <span>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-            </span>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
           </p>
         </div>
         <div
@@ -180,9 +170,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
               class="euiText emotion-euiText-s"
             >
               <p>
-                <span>
-                  Save your work before copying this URL.
-                </span>
+                Save your work before copying this URL.
               </p>
             </div>
             <div
@@ -205,9 +193,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-      </span>
+      Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
     </p>
   </div>
   <div
@@ -257,18 +243,14 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           class="euiSwitch__label"
           id="generated-id"
         >
-          <span>
-            Optimize for printing
-          </span>
+          Optimize for printing
         </span>
       </div>
       <div
         class="euiFormHelpText euiFormRow__text"
         id="generated-id-help-0"
       >
-        <span>
-          Uses multiple pages, showing at most 2 visualizations per page
-        </span>
+        Uses multiple pages, showing at most 2 visualizations per page
       </div>
     </div>
   </div>
@@ -280,9 +262,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     <span
       class="emotion-euiButtonDisplayContent"
     >
-      <span>
-        Generate Analytical App
-      </span>
+      Generate Analytical App
     </span>
   </button>
   <hr
@@ -343,9 +323,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           class="euiText emotion-euiText-s"
         >
           <p>
-            <span>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-            </span>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
           </p>
         </div>
         <div
@@ -376,9 +354,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
               class="euiText emotion-euiText-s"
             >
               <p>
-                <span>
-                  Save your work before copying this URL.
-                </span>
+                Save your work before copying this URL.
               </p>
             </div>
             <div
@@ -401,9 +377,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-      </span>
+      Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
     </p>
   </div>
   <div
@@ -417,9 +391,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     <span
       class="emotion-euiButtonDisplayContent"
     >
-      <span>
-        Generate Analytical App
-      </span>
+      Generate Analytical App
     </span>
   </button>
   <hr
@@ -480,9 +452,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
           class="euiText emotion-euiText-s"
         >
           <p>
-            <span>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-            </span>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
           </p>
         </div>
         <div
@@ -513,9 +483,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
               class="euiText emotion-euiText-s"
             >
               <p>
-                <span>
-                  Save your work before copying this URL.
-                </span>
+                Save your work before copying this URL.
               </p>
             </div>
             <div

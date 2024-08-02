@@ -14,6 +14,8 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
+import type { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
+
 import {
   clearLog,
   startElasticsearch,
@@ -25,7 +27,6 @@ import {
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 import '../jest_matchers';
-import { CloneIndexParams } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
 // mock clone_index from packages/core
 jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
@@ -51,7 +52,7 @@ const RELOCATE_TYPES: Record<string, string> = {
   visualization: '.kibana_slow_clone_1',
   'canvas-workpad': '.kibana_slow_clone_1',
   search: '.kibana_slow_clone_2',
-  task: '.kibana_task_manager',
+  task: '.kibana_task_manager_new', // force reindex
   'epm-packages-assets': '.kibana_slow_clone_1',
   // the remaining types will be forced to go to '.kibana',
   // overriding `indexPattern: foo` defined in the registry
@@ -59,8 +60,7 @@ const RELOCATE_TYPES: Record<string, string> = {
 
 export const logFilePath = Path.join(__dirname, 'split_failed_to_clone.test.log');
 
-// Failing: See https://github.com/elastic/kibana/issues/163253
-describe.skip('when splitting .kibana into multiple indices and one clone fails', () => {
+describe('when splitting .kibana into multiple indices and one clone fails', () => {
   let esServer: TestElasticsearchUtils['es'];
   let typeRegistry: ISavedObjectTypeRegistry;
   let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
@@ -139,7 +139,7 @@ describe.skip('when splitting .kibana into multiple indices and one clone fails'
     );
 
     // remove the failure
-    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 20 } });
+    await client.cluster.putSettings({ persistent: { 'cluster.max_shards_per_node': 150 } });
 
     const { runMigrations: runMigrations2ndTime } = await migratorTestKitFactory();
     await runMigrations2ndTime();

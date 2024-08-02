@@ -30,7 +30,7 @@ import * as i18n from './translations';
 import { timelineActions, timelineSelectors } from '../../../store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FixedWidthLastUpdatedContainer } from './last_updated';
+import { LastUpdatedContainer } from './last_updated';
 
 interface HeightProp {
   height: number;
@@ -335,10 +335,10 @@ export const FooterComponent = ({
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <FixedWidthLastUpdatedContainer updatedAt={updatedAt} />
+          <LastUpdatedContainer updatedAt={updatedAt} />
         </EuiFlexItem>
 
-        <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
+        <EuiFlexItem grow={false}>
           {isLive ? (
             <EuiText size="s" data-test-subj="is-live-on-message">
               <b>
@@ -360,7 +360,6 @@ export const FooterComponent = ({
             </EuiText>
           ) : (
             <PagingControl
-              data-test-subj="paging-control"
               totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}

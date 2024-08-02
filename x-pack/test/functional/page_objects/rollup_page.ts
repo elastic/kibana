@@ -13,6 +13,7 @@ export class RollupPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly retry = this.ctx.getService('retry');
 
   async createNewRollUpJob(
@@ -26,7 +27,7 @@ export class RollupPageObject extends FtrService {
   ) {
     let stepNum = 1;
     // Step 1
-    await this.testSubjects.click('createRollupJobButton');
+    await this.common.navigateToUrlWithBrowserHistory('rollupJob', '/create');
     await this.verifyStepIsActive(stepNum);
     await this.addRollupNameandIndexPattern(jobName, indexPattern);
     await this.verifyIndexPatternAccepted();

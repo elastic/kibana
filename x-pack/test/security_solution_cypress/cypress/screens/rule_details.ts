@@ -175,3 +175,17 @@ export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]
 export const EXECUTION_RUN_TYPE_FILTER = `[data-test-subj="ExecutionRunTypeFilter"]`;
 
 export const EXECUTION_RUN_TYPE_FILTER_ITEM = `[data-test-subj="ExecutionRunTypeFilter-item"]`;
+
+export const RULE_BACKFILLS_INFO_HEADEAR =
+  '[data-test-subj="rule-backfills-info"] [data-test-subj="header-section"]';
+
+export const RULE_BACKFILLS_TABLE = '[data-test-subj="rule-backfills-table"]';
+
+export const RULE_BACKFILLS_COLUMN_ERROR = '[data-test-subj="rule-backfills-column-error"]';
+export const RULE_BACKFILLS_COLUMN_PENDING = '[data-test-subj="rule-backfills-column-pending"]';
+export const RULE_BACKFILLS_COLUMN_RUNNING = '[data-test-subj="rule-backfills-column-running"]';
+export const RULE_BACKFILLS_COLUMN_COMPLETED = '[data-test-subj="rule-backfills-column-completed"]';
+export const RULE_BACKFILLS_COLUMN_TOTAL = '[data-test-subj="rule-backfills-column-total"]';
+export const RULE_BACKFILLS_DELETE_BUTTON = '[data-test-subj="rule-backfills-delete-button"]';
+export const RULE_BACKFILLS_DELETE_MODAL = '[data-test-subj="rule-backfills-delete-modal"]';
+export const RULE_BACKFILL_DELETE_MODAL_CONFIRM_BUTTON = `${RULE_BACKFILLS_DELETE_MODAL} [data-test-subj="confirmModalConfirmButton"]`;

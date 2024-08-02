@@ -1,0 +1,33 @@
+openapi: 3.0.0
+info:
+  title: Endpoint Unisolate Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/unisolate:
+    post:
+      summary: Permanently redirects to a new location
+      operationId: EndpointUnisolateRedirect
+      x-codegen-enabled: true
+      x-labels:
+        - ess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+      responses:
+        '308':
+          description: Permanent Redirect
+          headers:
+            Location:
+              description: Permanently redirects to "/api/endpoint/action/unisolate"
+              schema:
+                type: string
+                example: "/api/endpoint/action/unisolate"
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

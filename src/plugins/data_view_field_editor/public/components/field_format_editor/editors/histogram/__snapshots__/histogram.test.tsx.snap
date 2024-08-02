@@ -42,10 +42,9 @@ exports[`HistogramFormatEditor should render normally 1`] = `
           href="https://adamwdraper.github.io/Numeral-js/"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Documentation"
             id="indexPatternFieldEditor.number.documentationLabel"
-            values={Object {}}
           />
            
           <EuiIcon

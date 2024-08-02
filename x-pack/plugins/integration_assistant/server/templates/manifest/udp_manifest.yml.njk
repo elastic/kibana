@@ -1,0 +1,41 @@
+- input: udp
+  template_path: udp.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: listen_address
+      type: text
+      title: Listen Address
+      description: |
+        Bind address for the listener. Use 0.0.0.0 to listen on all interfaces.
+      required: true
+      show_user: true
+      default: localhost
+    - name: listen_port
+      type: text
+      title: Listen port
+      description: |
+        Bind port for the listener.
+      required: true
+      show_user: true
+      default: 8080
+    - name: max_message_size
+      type: text
+      title: Max Message Size
+      description: The maximum size of the message received over TCP. The default is 20MiB
+      required: false
+      show_user: false
+    - name: timeout
+      type: text
+      title: Timeout
+      description: The duration of inactivity before a remote connection is closed. The default is 300s. Valid time units are ns, us, ms, s, m, h.
+      required: false
+      show_user: false
+    - name: keep_null
+      type: bool
+      title: Keep Null Values
+      description: If this option is set to true, fields with null values will be published in the output document. By default, keep_null is set to false.
+      required: false
+      show_user: false

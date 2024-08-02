@@ -22,6 +22,7 @@ import {
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import { RegistryProvider } from './registry';
 import { DatasetQualityFtrConfigName } from '../configs';
+import { PackageService } from './package_service';
 
 export interface DatasetQualityFtrConfig {
   name: DatasetQualityFtrConfigName;
@@ -48,6 +49,7 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
 export type DatasetQualityApiClientKey =
   | 'noAccessUser'
+  | 'viewerUser'
   | 'readUser'
   | 'adminUser'
   | 'writeUser'
@@ -69,6 +71,7 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
+    packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -97,6 +100,7 @@ export function createTestConfig(
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],
       services: {
         ...services,
+        packageService: PackageService,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
@@ -120,9 +124,13 @@ export function createTestConfig(
               kibanaServer,
               username: DatasetQualityUsername.noAccessUser,
             }),
-            readUser: await getDatasetQualityApiClient({
+            viewerUser: await getDatasetQualityApiClient({
               kibanaServer,
               username: DatasetQualityUsername.viewerUser,
+            }),
+            readUser: await getDatasetQualityApiClient({
+              kibanaServer,
+              username: DatasetQualityUsername.readUser,
             }),
             adminUser: await getDatasetQualityApiClient({
               kibanaServer,

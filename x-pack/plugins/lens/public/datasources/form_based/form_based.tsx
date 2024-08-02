@@ -100,6 +100,7 @@ import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -760,48 +761,56 @@ export function getFormBasedDatasource({
         layerErrorMessages,
         (layerId, columnId) => {
           const layer = state.layers[layerId];
-          return !isColumnInvalid(
+          const column = layer.columns[columnId];
+          const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+          if (!column || !indexPattern) {
+            // this is a different issue that should be catched earlier
+            return false;
+          }
+          return isColumnInvalid(
             layer,
+            column,
             columnId,
-            framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+            indexPattern,
             framePublicAPI.dateRange,
             uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
       );
 
-      const warningMessages = [
-        ...[
-          ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, framePublicAPI) ||
-            []),
-        ].map((longMessage) => {
-          const message: UserMessage = {
-            severity: 'warning',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }],
-            shortMessage: '',
-            longMessage,
-          };
+      const timeShiftWarningMessages = getStateTimeShiftWarningMessages(
+        data.datatableUtilities,
+        state,
+        framePublicAPI
+      );
 
-          return message;
-        }),
-        ...getPrecisionErrorWarningMessages(
-          data.datatableUtilities,
-          state,
-          framePublicAPI,
-          core.docLinks,
-          setState
-        ),
-        ...getUnsupportedOperationsWarningMessage(state, framePublicAPI, core.docLinks),
-      ];
+      const precisionErrorWarningMsg = getPrecisionErrorWarningMessages(
+        data.datatableUtilities,
+        state,
+        framePublicAPI,
+        core.docLinks,
+        setState
+      );
+
+      const unsupportedOpsWarningMsg = getUnsupportedOperationsWarningMessage(
+        state,
+        framePublicAPI,
+        core.docLinks
+      );
 
       const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
-      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
+      return layerErrorMessages.concat(
+        dimensionErrorMessages,
+        timeShiftWarningMessages,
+        precisionErrorWarningMsg,
+        unsupportedOpsWarningMsg,
+        infoMessages
+      );
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getSearchWarningMessages(state, warning, request, response, core.theme)];
+      return getSearchWarningMessages(state, warning, request, response, core.theme);
     },
 
     checkIntegrity: (state, indexPatterns) => {
@@ -916,7 +925,7 @@ function getLayerErrorMessages(
   setState: StateSetter<FormBasedPrivateState, unknown>,
   core: CoreStart,
   data: DataPublicPluginStart
-) {
+): UserMessage[] {
   const indexPatterns = framePublicAPI.dataViews.indexPatterns;
 
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
@@ -927,6 +936,7 @@ function getLayerErrorMessages(
         []
       ).map((error) => {
         const message: UserMessage = {
+          uniqueId: typeof error === 'string' ? error : error.uniqueId,
           severity: 'error',
           fixableInEditor: true,
           displayLocations:
@@ -1005,7 +1015,7 @@ function getLayerErrorMessages(
 function getInvalidDimensionErrorMessages(
   state: FormBasedPrivateState,
   currentErrorMessages: UserMessage[],
-  isValidColumn: (layerId: string, columnId: string) => boolean
+  isInvalidColumn: (layerId: string, columnId: string) => boolean
 ) {
   // generate messages for invalid columns
   const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
@@ -1022,8 +1032,9 @@ function getInvalidDimensionErrorMessages(
           continue;
         }
 
-        if (!isValidColumn(layerId, columnId)) {
+        if (isInvalidColumn(layerId, columnId)) {
           messages.push({
+            uniqueId: EDITOR_INVALID_DIMENSION,
             severity: 'error',
             displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
             fixableInEditor: true,

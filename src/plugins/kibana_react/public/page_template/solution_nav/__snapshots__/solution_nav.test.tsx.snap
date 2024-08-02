@@ -70,7 +70,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
     }
     mobileTitle={
       <React.Fragment>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="{solutionName} Menu"
           id="kibana-react.solutionNav.mobileTitleText"
           values={
@@ -158,7 +158,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
     }
     mobileTitle={
       <React.Fragment>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="{solutionName} Menu"
           id="kibana-react.solutionNav.mobileTitleText"
           values={
@@ -254,7 +254,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
           iconType="logoElastic"
           name="Solution"
         />
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="{solutionName} Menu"
           id="kibana-react.solutionNav.mobileTitleText"
           values={

@@ -7,12 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FunctionRegistrationParameters } from '.';
+import { RandomSampler } from '../lib/helpers/get_random_sampler';
 import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
+
+interface DownstreamDependenciesFunctionRegistrationParams extends FunctionRegistrationParameters {
+  randomSampler: RandomSampler;
+}
 
 export function registerGetApmDownstreamDependenciesFunction({
   apmEventClient,
   registerFunction,
-}: FunctionRegistrationParameters) {
+  randomSampler,
+}: DownstreamDependenciesFunctionRegistrationParams) {
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
@@ -32,11 +38,11 @@ export function registerGetApmDownstreamDependenciesFunction({
       parameters: {
         type: 'object',
         properties: {
-          'service.name': {
+          serviceName: {
             type: 'string',
             description: 'The name of the service',
           },
-          'service.environment': {
+          serviceEnvironment: {
             type: 'string',
             description:
               'The environment that the service is running in. Leave empty to query for all environments.',
@@ -50,7 +56,7 @@ export function registerGetApmDownstreamDependenciesFunction({
             description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
-        required: ['service.name', 'start', 'end'],
+        required: ['serviceName', 'start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
@@ -58,6 +64,7 @@ export function registerGetApmDownstreamDependenciesFunction({
         content: await getAssistantDownstreamDependencies({
           arguments: args,
           apmEventClient,
+          randomSampler,
         }),
       };
     }

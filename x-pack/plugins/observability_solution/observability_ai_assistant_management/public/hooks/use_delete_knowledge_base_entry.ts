@@ -8,8 +8,8 @@
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAppContext } from './use_app_context';
 import { REACT_QUERY_KEYS } from '../constants';
+import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -17,7 +17,8 @@ export function useDeleteKnowledgeBaseEntry() {
   const {
     observabilityAIAssistant,
     notifications: { toasts },
-  } = useAppContext();
+  } = useKibana().services;
+
   const queryClient = useQueryClient();
   const observabilityAIAssistantApi = observabilityAIAssistant?.service.callApi;
 

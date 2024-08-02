@@ -80,6 +80,9 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n-react',
           disallowedMessage: `import from @kbn/i18n-react instead`,
+          exclude: [
+            /packages[\/\\]kbn-i18n-react[\/\\]/,
+          ]
         },
         {
           from: 'styled-components',

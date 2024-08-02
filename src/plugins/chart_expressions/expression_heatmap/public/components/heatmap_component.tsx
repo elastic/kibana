@@ -7,6 +7,7 @@
  */
 
 import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import {
   Chart,
   ElementClickListener,
@@ -253,7 +254,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       datatables: [formattedTable.table],
     });
 
-    const hasTooltipActions = interactive;
+    const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
+
+    const hasTooltipActions = interactive && !isEsqlMode;
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {

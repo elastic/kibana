@@ -24,6 +24,6 @@ export function useDateFormat(): DateFormatter {
   return (timestamp?: string) => {
     if (!timestamp) return '';
     const date = moment(timestamp);
-    return `${date.format('ll')} @ ${date.format('LT')}`;
+    return `${date.format('ll')} @ ${date.format('LTS')}`;
   };
 }

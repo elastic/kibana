@@ -7,28 +7,21 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { CreateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   CreateRuleRequestBody,
   validateCreateRuleProps,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { createRules } from '../../../logic/crud/create_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import { validateResponseActionsPermissions } from '../../../utils/validate';
 
-export const createRuleRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
-): void => {
+export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
@@ -64,7 +57,7 @@ export const createRuleRoute = (
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const savedObjectsClient = ctx.core.savedObjects.client;
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
@@ -81,14 +74,6 @@ export const createRuleRoute = (
             }
           }
 
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
-          throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
-
           // This will create the endpoint list if it does not exist yet
           await exceptionsClient?.createEndpointList();
           checkDefaultRuleExceptionListReferences({
@@ -104,13 +89,12 @@ export const createRuleRoute = (
 
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
-          const createdRule = await createRules({
-            rulesClient,
+          const createdRule = await detectionRulesClient.createCustomRule({
             params: request.body,
           });
 
           return response.ok({
-            body: transformValidate(createdRule),
+            body: createdRule,
           });
         } catch (err) {
           const error = transformError(err as Error);

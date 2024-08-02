@@ -24,7 +24,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
         functional: await readConfigFile(
-          require.resolve('../../../../test/functional/config.base.js')
+          require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
       },
       xpack: {
@@ -44,6 +44,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
         spaces: config.xpack.api.get('services.spaces'),
+        usageAPI: config.xpack.api.get('services.usageAPI'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,

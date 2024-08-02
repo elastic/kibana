@@ -12,7 +12,6 @@ import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { SearchBarProps } from './query_builder';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -23,7 +22,7 @@ export const QuerySearchBar = memo(
     isFlyoutOpen,
     name,
     label,
-    indexPatternString,
+    dataView,
     required,
     tooltip,
     dataTestSubj,
@@ -36,9 +35,6 @@ export const QuerySearchBar = memo(
     setRange: (range: TimeRange) => void;
   }) => {
     const { SearchBar } = useKibana().services.unifiedSearch.ui;
-    const { dataView } = useCreateDataView({
-      indexPatternString,
-    });
 
     const { control } = useFormContext<CreateSLOForm>();
 

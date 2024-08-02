@@ -12,7 +12,7 @@ import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_BEATS,
-  INDEX_PATTERN_LOGSTASH,
+  INDEX_PATTERN_LOGSTASH_MONITORING,
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
@@ -230,7 +230,7 @@ function getIndexPatternForStackProduct(product: string) {
     case APM_SYSTEM_ID:
       return INDEX_PATTERN_BEATS;
     case LOGSTASH_SYSTEM_ID:
-      return INDEX_PATTERN_LOGSTASH;
+      return INDEX_PATTERN_LOGSTASH_MONITORING;
   }
   return null;
 }
@@ -238,7 +238,6 @@ function getIndexPatternForStackProduct(product: string) {
 /**
  * Get statistics about selected Elasticsearch clusters, for the selected {@code product}.
  *
- * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  * @param {Date} start Start time to limit the stats
@@ -246,6 +245,7 @@ function getIndexPatternForStackProduct(product: string) {
  * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
  *
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
+ * @param maxBucketSize size of the return bucket
  */
 export async function getHighLevelStats(
   callCluster: ElasticsearchClient,

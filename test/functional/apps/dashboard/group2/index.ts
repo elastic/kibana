@@ -30,5 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dashboard_filter_bar'));
     loadTestFile(require.resolve('./dashboard_filtering'));
     loadTestFile(require.resolve('./panel_expand_toggle'));
+    loadTestFile(require.resolve('./multiple_data_views'));
   });
 }

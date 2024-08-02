@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, memo, useCallback } from 'react';
+import React, { useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
@@ -44,12 +44,9 @@ export const LineStyleSettings = ({
           <EuiFlexItem>
             <LineThicknessSlider
               value={currentConfig?.lineWidth || 1}
-              // Without this memoization, EuiFieldNumber rerenders too often
-              // which somehow causes the annotation query to fall out of sync
-              onChange={useCallback((value) => {
+              onChange={(value) => {
                 setConfig({ lineWidth: value });
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-              }, [])}
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

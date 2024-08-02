@@ -351,7 +351,7 @@ export class FollowerIndexForm extends PureComponent {
                 message: i18n.translate(
                   'xpack.crossClusterReplication.followerIndexForm.leaderIndexNotFoundError',
                   {
-                    defaultMessage: `The leader index '{leaderIndex}' does not exist.`,
+                    defaultMessage: `The leader index ''{leaderIndex}'' does not exist.`,
                     values: { leaderIndex },
                   }
                 ),
@@ -454,7 +454,7 @@ export class FollowerIndexForm extends PureComponent {
           title: (
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutTitle"
-              defaultMessage="Can't edit follower index because remote cluster '{name}' is not connected"
+              defaultMessage="Can't edit follower index because remote cluster ''{name}'' is not connected"
               values={{ name }}
             />
           ),
@@ -469,7 +469,7 @@ export class FollowerIndexForm extends PureComponent {
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
             defaultMessage="To edit this follower index, you must add a remote cluster
-              named '{name}'."
+              named ''{name}''."
             values={{ name }}
           />
         ),

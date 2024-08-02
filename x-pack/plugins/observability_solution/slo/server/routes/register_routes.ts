@@ -21,6 +21,7 @@ import {
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { SloConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { SloRequestHandlerContext } from '../types';
@@ -43,6 +44,7 @@ export interface RegisterRoutesDependencies {
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
   getRacClientWithRequest: (request: KibanaRequest) => Promise<AlertsClient>;
+  getDataViewsStart: () => Promise<DataViewsServerPluginStart>;
 }
 
 export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {

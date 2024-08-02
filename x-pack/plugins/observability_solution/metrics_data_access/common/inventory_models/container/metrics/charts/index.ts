@@ -7,10 +7,14 @@
 
 import { cpu } from './cpu';
 import { memory } from './memory';
+import { network } from './network';
+import { diskIO } from './disk';
 
 export const charts = {
   cpu,
   memory,
+  network,
+  diskIO,
 } as const;
 
 export type ContainerCharts = typeof charts;

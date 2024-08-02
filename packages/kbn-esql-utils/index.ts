@@ -20,7 +20,11 @@ export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,
+  formatESQLColumns,
+  getTimeFieldFromESQLQuery,
+  getStartEndParams,
+  hasStartEndParams,
   TextBasedLanguages,
 } from './src';
 
-export { ESQL_LATEST_VERSION, ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL } from './constants';

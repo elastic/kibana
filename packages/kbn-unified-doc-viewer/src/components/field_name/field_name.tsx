@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiHighlight,
+  EuiIcon,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
-import { FieldDescriptionIconButton, getFieldTypeName } from '@kbn/field-utils';
+import { getFieldTypeName } from '@kbn/field-utils';
 
 interface Props {
   fieldName: string;
@@ -23,6 +30,7 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
+  isPinned?: boolean;
 }
 
 export function FieldName({
@@ -32,6 +40,7 @@ export function FieldName({
   fieldIconProps,
   scripted = false,
   highlight = '',
+  isPinned = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName =
@@ -41,54 +50,76 @@ export function FieldName({
   const isMultiField = !!subTypeMulti?.multi;
 
   return (
-    <Fragment>
-      <EuiFlexItem grow={false} className="kbnDocViewer__fieldIcon">
-        <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
+    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="s"
+          responsive={false}
+          alignItems="center"
+          direction="row"
+          wrap={false}
+          className="kbnDocViewer__fieldIconContainer"
+        >
+          <EuiFlexItem grow={false}>
+            <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
+          </EuiFlexItem>
+          {isPinned && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type="pinFilled"
+                size="s"
+                aria-label={i18n.translate('unifiedDocViewer.pinnedFieldTooltipContent', {
+                  defaultMessage: 'Pinned field',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart" direction="row">
-        <EuiFlexItem className="kbnDocViewer__fieldName eui-textBreakAll" grow={false}>
-          <EuiToolTip
-            position="top"
-            content={tooltip}
-            delay="long"
-            anchorClassName="eui-textBreakAll"
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
+          <EuiFlexItem
+            className="kbnDocViewer__fieldName eui-textBreakAll"
+            grow={false}
+            data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
-            <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
-          </EuiToolTip>
-        </EuiFlexItem>
-
-        {fieldMapping?.customDescription ? (
-          <EuiFlexItem grow={false}>
-            <FieldDescriptionIconButton field={fieldMapping} />
-          </EuiFlexItem>
-        ) : null}
-
-        {isMultiField && (
-          <EuiToolTip
-            position="top"
-            delay="long"
-            content={i18n.translate(
-              'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
-              {
-                defaultMessage: 'Multi-fields can have multiple values per field',
-              }
-            )}
-          >
-            <EuiBadge
-              title=""
-              className="kbnDocViewer__multiFieldBadge"
-              color="default"
-              data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
+            <EuiToolTip
+              position="top"
+              content={tooltip}
+              delay="long"
+              anchorClassName="eui-textBreakAll"
             >
-              <FormattedMessage
-                id="unifiedDocViewer.fieldChooser.discoverField.multiField"
-                defaultMessage="multi-field"
-              />
-            </EuiBadge>
-          </EuiToolTip>
-        )}
-      </EuiFlexGroup>
-    </Fragment>
+              <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
+            </EuiToolTip>
+          </EuiFlexItem>
+
+          {isMultiField && (
+            <EuiToolTip
+              position="top"
+              delay="long"
+              content={i18n.translate(
+                'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
+                {
+                  defaultMessage: 'Multi-fields can have multiple values per field',
+                }
+              )}
+            >
+              <EuiBadge
+                title=""
+                className="kbnDocViewer__multiFieldBadge"
+                color="default"
+                data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
+              >
+                <FormattedMessage
+                  id="unifiedDocViewer.fieldChooser.discoverField.multiField"
+                  defaultMessage="multi-field"
+                />
+              </EuiBadge>
+            </EuiToolTip>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

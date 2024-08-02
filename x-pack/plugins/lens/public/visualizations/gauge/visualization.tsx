@@ -48,6 +48,14 @@ import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
+import {
+  GAUGE_GOAL_GT_MAX,
+  GAUGE_METRIC_GT_MAX,
+  GAUGE_MIN_GT_GOAL,
+  GAUGE_MIN_GT_MAX,
+  GAUGE_MIN_GT_METRIC,
+  GAUGE_MIN_NE_MAX,
+} from '../../user_messages_ids';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
   defaultMessage: 'Goal and single value',
@@ -131,6 +139,7 @@ const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): 
   if (maxValue !== null && maxValue !== undefined && minValue != null && minValue !== undefined) {
     if (maxValue < minValue) {
       errors.push({
+        uniqueId: GAUGE_MIN_GT_MAX,
         severity: 'error',
         displayLocations: [
           { id: 'dimensionButton', dimensionId: minAccessor! },
@@ -148,6 +157,7 @@ const getErrorMessages = (row?: DatatableRow, state?: GaugeVisualizationState): 
     }
     if (maxValue === minValue) {
       errors.push({
+        uniqueId: GAUGE_MIN_NE_MAX,
         severity: 'error',
         displayLocations: [
           { id: 'dimensionButton', dimensionId: minAccessor! },
@@ -519,6 +529,7 @@ export const getGaugeVisualization = ({
     if (typeof minValue === 'number') {
       if (minValue > metricValue) {
         warnings.push({
+          uniqueId: GAUGE_MIN_GT_METRIC,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -533,6 +544,7 @@ export const getGaugeVisualization = ({
       }
       if (minValue > goalValue) {
         warnings.push({
+          uniqueId: GAUGE_MIN_GT_GOAL,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -550,6 +562,7 @@ export const getGaugeVisualization = ({
     if (typeof maxValue === 'number') {
       if (metricValue > maxValue) {
         warnings.push({
+          uniqueId: GAUGE_METRIC_GT_MAX,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -565,6 +578,7 @@ export const getGaugeVisualization = ({
 
       if (typeof goalValue === 'number' && goalValue > maxValue) {
         warnings.push({
+          uniqueId: GAUGE_GOAL_GT_MAX,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TelemetryCounter } from '@kbn/analytics-client';
+import type { TelemetryCounter } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { registerEbtCounters } from './register_ebt_counters';
@@ -24,7 +24,7 @@ describe('registerEbtCounters', () => {
       .spyOn(core.analytics.telemetryCounter$, 'subscribe')
       .mockImplementation(((listener) => {
         internalListener = listener as (counter: TelemetryCounter) => void;
-      }) as typeof core.analytics.telemetryCounter$['subscribe']);
+      }) as (typeof core.analytics.telemetryCounter$)['subscribe']);
   });
 
   test('it subscribes to `analytics.telemetryCounters$`', () => {

@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
+
 const service = {
   start: async () => {
     return {
+      chat: () => new Subject(),
+      complete: () => new Subject(),
       getFunctions: [],
+      getSystemMessage: () => {},
+      hasFunction: () => true,
+      hasRenderFunction: () => true,
+      sendAnalyticsEvent: () => {},
     };
   },
 };

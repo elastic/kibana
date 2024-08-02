@@ -19,6 +19,8 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiBadge,
+  EuiButton,
+  EuiCode,
 } from '@elastic/eui';
 
 import {
@@ -27,7 +29,9 @@ import {
   TabAliases,
   TabMappings,
   attemptToURIDecode,
+  reactRouterNavigate,
 } from '../shared_imports';
+import { useAppContext } from '../../../app_context';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
@@ -46,12 +50,18 @@ export const defaultFlyoutProps = {
   'aria-labelledby': 'componentTemplateDetailsFlyoutTitle',
 };
 
+// All component templates for integrations end in @custom
+const isIntegrationsComponentTemplate = (name: string) => {
+  return name.toLowerCase().endsWith('@custom');
+};
+
 export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Props> = ({
   componentTemplateName,
   onClose,
   actions,
   showSummaryCallToAction,
 }) => {
+  const { history } = useAppContext();
   const { api } = useComponentTemplatesContext();
 
   const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName)!;
@@ -76,21 +86,62 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
       </SectionLoading>
     );
   } else if (error) {
-    content = (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.componentTemplateDetails.loadingErrorMessage"
-            defaultMessage="Error loading component template"
-          />
-        }
-        color="danger"
-        iconType="warning"
-        data-test-subj="sectionError"
-      >
-        <p>{error.message}</p>
-      </EuiCallOut>
-    );
+    if (
+      error?.error === 'Not Found' &&
+      isIntegrationsComponentTemplate(decodedComponentTemplateName)
+    ) {
+      content = (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.calloutTitle"
+              defaultMessage="Custom template doesn't exist"
+            />
+          }
+          color="warning"
+          iconType="warning"
+          data-test-subj="missingCustomComponentTemplate"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.text"
+              defaultMessage="The custom template {templateName} doesn't exist."
+              values={{
+                templateName: <EuiCode>{decodedComponentTemplateName}</EuiCode>,
+              }}
+            />
+          </p>
+          <EuiButton
+            color="warning"
+            {...reactRouterNavigate(
+              history,
+              `/create_component_template?name=${decodedComponentTemplateName}`
+            )}
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.button"
+              defaultMessage="Create component template"
+            />
+          </EuiButton>
+        </EuiCallOut>
+      );
+    } else {
+      content = (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateDetails.loadingErrorMessage"
+              defaultMessage="Error loading component template"
+            />
+          }
+          color="danger"
+          iconType="warning"
+          data-test-subj="sectionError"
+        >
+          <p>{error.message}</p>
+        </EuiCallOut>
+      );
+    }
   } else if (componentTemplateDetails) {
     const {
       template: { settings, mappings, aliases },

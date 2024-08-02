@@ -8,13 +8,11 @@
 import moment from 'moment';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { format } from 'url';
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
@@ -104,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             criteria: [
               {
                 aggType: 'custom',
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [7500000],
                 timeSize: 5,
                 timeUnit: 'm',

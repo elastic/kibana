@@ -8,51 +8,23 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../helpers/test_helper';
-import { useAppContext } from '../../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab';
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import { coreMock } from '@kbn/core/public/mocks';
 import { uiSettings } from '../../../../common/ui_settings';
-import { merge } from 'lodash';
 
 jest.mock('../../../hooks/use_app_context');
 
-const useAppContextMock = useAppContext as jest.Mock;
-const navigateToAppMock = jest.fn(() => Promise.resolve());
-
 describe('SettingsTab', () => {
-  beforeEach(() => {
-    useAppContextMock.mockReturnValue({
-      uiSettings: {
-        get: jest.fn(),
-      },
-      docLinks: {
-        links: {},
-      },
-      application: { navigateToApp: navigateToAppMock },
-      observabilityAIAssistant: {
-        useGenAIConnectors: () => ({
-          connectors: [
-            { name: 'openAi', id: 'openAi' },
-            { name: 'azureOpenAi', id: 'azureOpenAi' },
-            { name: 'bedrock', id: 'bedrock' },
-          ],
-        }),
-        useUserPreferredLanguage: () => ({
-          LANGUAGE_OPTIONS: [{ label: 'English' }],
-          selectedLanguage: 'English',
-          setSelectedLanguage: () => {},
-          getPreferredLanguage: () => 'English',
-        }),
+  it('should offer a way to configure Observability AI Assistant visibility in apps', () => {
+    const navigateToAppMock = jest.fn(() => Promise.resolve());
+    const { getByTestId } = render(<SettingsTab />, {
+      coreStart: {
+        application: { navigateToApp: navigateToAppMock },
       },
     });
-  });
-
-  it('should offer a way to configure Observability AI Assistant visibility in apps', () => {
-    const { getByTestId } = render(<SettingsTab />);
 
     fireEvent.click(getByTestId('settingsTabGoToSpacesButton'));
 
@@ -60,7 +32,12 @@ describe('SettingsTab', () => {
   });
 
   it('should offer a way to configure Gen AI connectors', () => {
-    const { getByTestId } = render(<SettingsTab />);
+    const navigateToAppMock = jest.fn(() => Promise.resolve());
+    const { getByTestId } = render(<SettingsTab />, {
+      coreStart: {
+        application: { navigateToApp: navigateToAppMock },
+      },
+    });
 
     fireEvent.click(getByTestId('settingsTabGoToConnectorsButton'));
 
@@ -83,14 +60,14 @@ describe('SettingsTab', () => {
       });
 
       const { getByTestId, container } = render(<SettingsTab />, {
-        coreStartMock: merge(coreMock.createStart(), {
+        coreStart: {
           settings: {
             client: {
               set: settingsClientSet,
               getAll: () => uiSettings,
             },
           },
-        }),
+        },
       });
 
       await waitFor(() => expect(container.querySelector('.euiLoadingSpinner')).toBeNull());

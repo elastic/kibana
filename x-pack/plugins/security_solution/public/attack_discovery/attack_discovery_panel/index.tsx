@@ -7,14 +7,13 @@
 
 import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionableSummary } from './actionable_summary';
 import { Actions } from './actions';
 import { Tabs } from './tabs';
 import { Title } from './title';
-import type { AttackDiscovery } from '../types';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

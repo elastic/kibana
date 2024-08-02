@@ -5,10 +5,12 @@ info:
 paths:
   /api/detection_engine/rules/_bulk_update:
     patch:
-      operationId: BulkPatchRules
+      x-labels: [ess]
       x-codegen-enabled: true
+      summary: Patch multiple detection rules
+      operationId: BulkPatchRules
       deprecated: true
-      description: Updates multiple rules using the `PATCH` method.
+      description: Update specific fields of existing detection rules using the `rule_id` or `id` field.
       tags:
         - Bulk API
       requestBody:

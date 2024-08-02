@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
 import type { ArtifactListPageProps } from '../artifact_list_page';
@@ -14,6 +15,7 @@ import type { ArtifactListPageRenderingSetup } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -144,6 +146,19 @@ describe('When using the ArtifactListPage component', () => {
       });
     });
 
+    it('should show per card decoration', async () => {
+      const MockCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
+        return <p>{'mock decorator'}</p>;
+      });
+      MockCardDecorator.displayName = 'MockCardDecorator';
+
+      const { getAllByText } = await renderWithListData({
+        CardDecorator: MockCardDecorator,
+      });
+
+      expect(getAllByText('mock decorator')).toHaveLength(10);
+    });
+
     it('should call useGetEndpointSpecificPolicies hook with specific perPage value', () => {
       expect(mockUseGetEndpointSpecificPolicies).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -268,11 +283,11 @@ describe('When using the ArtifactListPage component', () => {
 
         await act(async () => {
           await waitFor(() => {
-            expect(renderResult.getByTestId(firstPolicyTestId)).toBeTruthy();
+            expect(renderResult.getAllByTestId(firstPolicyTestId).length > 0).toBeTruthy();
           });
         });
 
-        userEvent.click(renderResult.getByTestId(firstPolicyTestId));
+        userEvent.click(renderResult.getAllByTestId(firstPolicyTestId)[0]);
 
         await waitFor(() => {
           expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));

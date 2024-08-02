@@ -118,9 +118,6 @@ async function generateTranslationFile(locale: string, pluginPaths: string[]) {
   const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
   i18nLoader.registerTranslationFiles(translationFiles);
   const translations = await i18nLoader.getTranslationsByLocale(locale);
-  i18n.init({
-    locale,
-    ...translations,
-  });
+  i18n.init(translations);
   return JSON.stringify(i18n.getTranslation());
 }

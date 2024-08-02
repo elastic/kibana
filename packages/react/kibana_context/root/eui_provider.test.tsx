@@ -56,7 +56,7 @@ describe('KibanaEuiProvider', () => {
     const coreTheme: KibanaTheme = { darkMode: true };
 
     const wrapper = mountWithIntl(
-      <KibanaEuiProvider theme={{ theme$: of(coreTheme) }}>
+      <KibanaEuiProvider theme={{ theme$: of(coreTheme) }} modify={{ breakpoint: { xxl: 1600 } }}>
         <InnerComponent />
       </KibanaEuiProvider>
     );
@@ -64,6 +64,7 @@ describe('KibanaEuiProvider', () => {
     await refresh(wrapper);
 
     expect(euiTheme!.colorMode).toEqual('DARK');
+    expect(euiTheme!.euiTheme.breakpoint.xxl).toEqual(1600);
     expect(consoleWarnMock).not.toBeCalled();
   });
 

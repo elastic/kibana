@@ -55,7 +55,7 @@ const strings = {
     }),
   getDeleteElementTitle: (elementName: string) =>
     i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
-      defaultMessage: `Delete element '{elementName}'?`,
+      defaultMessage: `Delete element ''{elementName}''?`,
       values: {
         elementName,
       },

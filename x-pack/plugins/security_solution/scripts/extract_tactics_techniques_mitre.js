@@ -19,7 +19,7 @@ const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v14.1'; // last updated when preparing for 8.14.0 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v15.1'; // last updated when preparing for 8.15.0 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 /**
@@ -184,7 +184,7 @@ const buildMockThreatData = (tacticsData, techniques, subtechniques) => {
   const numberOfThreatsToGenerate = 4;
   const mockThreatData = [];
   for (let i = 0; i < numberOfThreatsToGenerate; i++) {
-    const subtechnique = subtechniques[i * 20]; // Double our interval to broaden the subtechnique types we're pulling data from a bit
+    const subtechnique = subtechniques[i * 50]; // Increase our interval to broaden the subtechnique types we're pulling data from a bit
     const technique = techniques.find((technique) => technique.id === subtechnique.techniqueId);
     const tactic = tacticsData.find((tactic) => tactic.shortName === technique.tactics[0]);
 

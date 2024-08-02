@@ -12,11 +12,8 @@ import { DragDropContextWrapper } from '../../common/components/drag_and_drop/dr
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
-import {
-  useInitSourcerer,
-  getScopeFromPath,
-  useSourcererDataView,
-} from '../../common/containers/sourcerer';
+import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
@@ -29,6 +26,7 @@ import { useUpgradeSecurityPackages } from '../../detection_engine/rule_manageme
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { AssistantOverlay } from '../../assistant/overlay';
+import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 
 interface HomePageProps {
   children: React.ReactNode;

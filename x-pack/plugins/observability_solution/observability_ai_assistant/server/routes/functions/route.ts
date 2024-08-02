@@ -33,7 +33,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    const [functionClient, knowledgeBaseInstructions] = await Promise.all([
+    const [functionClient, userInstructions] = await Promise.all([
       service.getFunctionClient({
         signal: controller.signal,
         resources,
@@ -41,7 +41,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         screenContexts: [],
       }),
       // error is caught in client
-      client.fetchKnowledgeBaseInstructions(),
+      client.fetchUserInstructions(),
     ]);
 
     const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);
@@ -52,7 +52,7 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
       systemMessage: getSystemMessageFromInstructions({
         registeredInstructions: functionClient.getInstructions(),
-        knowledgeBaseInstructions,
+        userInstructions,
         requestInstructions: [],
         availableFunctionNames,
       }),
@@ -65,7 +65,16 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
-        queries: t.array(nonEmptyStringRt),
+        queries: t.array(
+          t.intersection([
+            t.type({
+              text: t.string,
+            }),
+            t.partial({
+              boost: t.number,
+            }),
+          ])
+        ),
       }),
       t.partial({
         categories: t.array(t.string),

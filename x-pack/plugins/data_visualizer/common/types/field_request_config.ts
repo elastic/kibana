@@ -81,6 +81,7 @@ export interface FieldVisStats {
   examples?: Array<string | GeoPointExample | object>;
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
+  approximate?: boolean;
 }
 
 export interface DVErrorObject {

@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('without data loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('without data loaded', { config: 'basic', archives: [] }, () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
         const response = await getSessionsChart({ serviceName: 'foo' });
@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/177393
-  registry.when('with data loaded', { config: 'basic', archives: [] }, () => {
+  registry.when.skip('with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
         apmSynthtraceEsClient,

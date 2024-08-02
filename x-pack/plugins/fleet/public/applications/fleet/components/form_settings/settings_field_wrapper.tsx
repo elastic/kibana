@@ -35,7 +35,8 @@ export const SettingsFieldWrapper: React.FC<{
   settingsConfig: SettingsConfig;
   typeName: keyof typeof ZodFirstPartyTypeKind;
   renderItem: Function;
-}> = ({ settingsConfig, typeName, renderItem }) => {
+  disabled?: boolean;
+}> = ({ settingsConfig, typeName, renderItem, disabled }) => {
   const [error, setError] = useState('');
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
@@ -88,7 +89,7 @@ export const SettingsFieldWrapper: React.FC<{
         </>
       }
     >
-      <EuiFormRow fullWidth key={fieldKey} error={error} isInvalid={!!error}>
+      <EuiFormRow isDisabled={disabled} fullWidth key={fieldKey} error={error} isInvalid={!!error}>
         {renderItem({ fieldValue, handleChange, isInvalid: !!error, fieldKey, coercedSchema })}
       </EuiFormRow>
     </EuiDescribedFormGroup>

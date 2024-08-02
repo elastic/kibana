@@ -41,6 +41,9 @@ export const transformFromChatMessages = (messages: UseChatHelpers['messages']):
           total: annotations?.find(
             (annotation): annotation is AnnotationTokens => annotation.type === 'prompt_token_count'
           )?.count,
+          contextClipped: annotations?.find(
+            (annotation): annotation is AnnotationTokens => annotation.type === 'context_clipped'
+          )?.count,
         },
       } as AIMessage;
     }

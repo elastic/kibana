@@ -7,8 +7,8 @@
 
 import { some } from 'lodash/fp';
 import { useMemo } from 'react';
+import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 export interface GetBasicDataFromDetailsData {
@@ -34,50 +34,57 @@ export const useBasicDataFromDetailsData = (
   const ruleId = useMemo(
     () =>
       isAlert
-        ? getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data)
-        : getFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
+        ? getAlertDetailsFieldValue({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, data)
+        : getAlertDetailsFieldValue({ category: 'signal', field: 'signal.rule.id' }, data),
     [isAlert, data]
   );
 
   const ruleName = useMemo(
-    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, data),
+    () => getAlertDetailsFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, data),
     [data]
   );
 
   const ruleDescription = useMemo(
-    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.description' }, data),
+    () =>
+      getAlertDetailsFieldValue(
+        { category: 'kibana', field: 'kibana.alert.rule.description' },
+        data
+      ),
     [data]
   );
 
-  const alertId = useMemo(() => getFieldValue({ category: '_id', field: '_id' }, data), [data]);
+  const alertId = useMemo(
+    () => getAlertDetailsFieldValue({ category: '_id', field: '_id' }, data),
+    [data]
+  );
 
   const indexName = useMemo(
-    () => getFieldValue({ category: '_index', field: '_index' }, data),
+    () => getAlertDetailsFieldValue({ category: '_index', field: '_index' }, data),
     [data]
   );
 
   const alertUrl = useMemo(
-    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.url' }, data),
+    () => getAlertDetailsFieldValue({ category: 'kibana', field: 'kibana.alert.url' }, data),
     [data]
   );
 
   const agentId = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.id' }, data),
+    () => getAlertDetailsFieldValue({ category: 'agent', field: 'agent.id' }, data),
     [data]
   );
 
   const hostName = useMemo(
-    () => getFieldValue({ category: 'host', field: 'host.name' }, data),
+    () => getAlertDetailsFieldValue({ category: 'host', field: 'host.name' }, data),
     [data]
   );
 
   const userName = useMemo(
-    () => getFieldValue({ category: 'user', field: 'user.name' }, data),
+    () => getAlertDetailsFieldValue({ category: 'user', field: 'user.name' }, data),
     [data]
   );
 
   const timestamp = useMemo(
-    () => getFieldValue({ category: 'base', field: '@timestamp' }, data),
+    () => getAlertDetailsFieldValue({ category: 'base', field: '@timestamp' }, data),
     [data]
   );
 

@@ -20,6 +20,13 @@ properties:
     type: string
     description: Agent policy ID where that package policy will be added
     example: 'agent-policy-id'
+    deprecated: true
+  policy_ids:
+    type: array
+    items:
+      type: string
+    description: Agent policy IDs where that package policy will be added
+    example: ['agent-policy-id']
   package:
     type: object
     properties:
@@ -86,5 +93,4 @@ properties:
     description: Force package policy creation even if package is not verified, or if the agent policy is managed.
 required:
   - name
-  - policy_id
   - package

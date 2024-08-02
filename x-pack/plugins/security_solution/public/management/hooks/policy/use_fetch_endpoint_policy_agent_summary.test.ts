@@ -46,7 +46,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
     renderHook = () => {
       return (testContext.renderReactQueryHook as HookRenderer)(() =>
-        useFetchAgentByAgentPolicySummary(policy.policy_id, queryOptions)
+        useFetchAgentByAgentPolicySummary(policy.policy_ids, queryOptions)
       );
     };
   });
@@ -56,7 +56,7 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
 
     expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
       path: agentRouteService.getStatusPath(),
-      query: { policyId: policy.policy_id },
+      query: { policyId: policy.policy_ids[0] },
       version: API_VERSIONS.public.v1,
     });
     expect(data).toEqual({
@@ -78,5 +78,16 @@ describe('When using the `useFetchEndpointPolicyAgentSummary()` hook', () => {
     await renderHook();
 
     expect(useQueryMock).toHaveBeenCalledWith(expect.objectContaining(queryOptions));
+  });
+
+  it('should call the correct api with multiple policy ids', async () => {
+    policy.policy_ids = ['1', '2', '3'];
+    await renderHook();
+
+    expect(apiMocks.responseProvider.agentStatus).toHaveBeenCalledWith({
+      path: agentRouteService.getStatusPath(),
+      query: { kuery: 'policy_id:1 OR policy_id:2 OR policy_id:3' },
+      version: API_VERSIONS.public.v1,
+    });
   });
 });

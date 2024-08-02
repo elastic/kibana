@@ -9,7 +9,7 @@ import React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { CellValueElementProps } from '../../../../../common/types';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { RenderCellValue } from '../../../../detections/configurations/security_solution_detections';
 
 export const PreviewRenderCellValue: React.FC<

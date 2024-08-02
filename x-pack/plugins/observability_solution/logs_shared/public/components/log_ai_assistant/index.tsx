@@ -22,12 +22,12 @@ export function createLogAIAssistant({
 export const createLogsAIAssistantRenderer =
   (LogAIAssistantRender: ReturnType<typeof createLogAIAssistant>) =>
   ({ doc }: ObservabilityLogsAIAssistantFeatureRenderDeps) => {
-    const mappedDoc = useMemo(
+    const mappedDoc = useMemo<LogAIAssistantDocument>(
       () => ({
         fields: Object.entries(doc.flattened).map(([field, value]) => ({
           field,
-          value,
-        })) as LogAIAssistantDocument['fields'],
+          value: Array.isArray(value) ? value : [value],
+        })),
       }),
       [doc]
     );

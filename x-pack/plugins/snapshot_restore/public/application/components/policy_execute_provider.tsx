@@ -50,7 +50,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
         const successMessage = i18n.translate(
           'xpack.snapshotRestore.executePolicy.successNotificationTitle',
           {
-            defaultMessage: "Policy '{name}' is running",
+            defaultMessage: "Policy ''{name}'' is running",
             values: { name: policyName },
           }
         );
@@ -65,7 +65,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
         const errorMessage = i18n.translate(
           'xpack.snapshotRestore.executePolicy.errorNotificationTitle',
           {
-            defaultMessage: "Error running policy '{name}'",
+            defaultMessage: "Error running policy ''{name}''",
             values: { name: policyName },
           }
         );
@@ -85,7 +85,7 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.executePolicy.confirmModal.executePolicyTitle"
-            defaultMessage="Run '{name}' now?"
+            defaultMessage="Run ''{name}'' now?"
             values={{ name: policyName }}
           />
         }

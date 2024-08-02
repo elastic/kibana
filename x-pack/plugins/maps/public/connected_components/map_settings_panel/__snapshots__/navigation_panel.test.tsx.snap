@@ -6,10 +6,9 @@ exports[`should render 1`] = `
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Navigation"
         id="xpack.maps.mapSettingsPanel.navigationTitle"
-        values={Object {}}
       />
     </h5>
   </EuiTitle>
@@ -98,10 +97,9 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Navigation"
         id="xpack.maps.mapSettingsPanel.navigationTitle"
-        values={Object {}}
       />
     </h5>
   </EuiTitle>
@@ -209,10 +207,9 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Navigation"
         id="xpack.maps.mapSettingsPanel.navigationTitle"
-        values={Object {}}
       />
     </h5>
   </EuiTitle>
@@ -348,10 +345,9 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
       <EuiButtonEmpty
         onClick={[Function]}
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Set to current view"
           id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
-          values={Object {}}
         />
       </EuiButtonEmpty>
     </EuiFlexItem>

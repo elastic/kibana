@@ -31,7 +31,7 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-ubuntu',
-      'skip-docker-chainguard',
+      'skip-docker-wolfi',
       'skip-docker-cloud',
       'skip-docker-serverless',
       'skip-docker-fips',
@@ -48,6 +48,7 @@ export function readCliArgs(argv: string[]) {
       'help',
       'with-test-plugins',
       'with-example-plugins',
+      'serverless',
     ],
     string: ['docker-namespace', 'epr-registry'],
     alias: {
@@ -140,15 +141,16 @@ export function readCliArgs(argv: string[]) {
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
-    createDockerChainguard:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-chainguard']),
+    createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerServerless:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),
+      (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
+      Boolean(flags.serverless),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    targetServerlessPlatforms: Boolean(flags.serverless),
     eprRegistry: flags['epr-registry'],
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),

@@ -197,7 +197,6 @@ export function CustomSelectionTable({
         label={mobile ? selectAll : null}
         checked={areAllItemsSelected()}
         onChange={toggleAll}
-        type={mobile ? null : 'inList'}
       />
     );
   }
@@ -283,7 +282,6 @@ export function CustomSelectionTable({
                   data-test-subj={`${item[tableItemId]}-checkbox`}
                   checked={isItemSelected(item[tableItemId])}
                   onChange={() => toggleItem(item[tableItemId])}
-                  type="inList"
                 />
               )}
               {singleSelection && (

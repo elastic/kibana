@@ -28,8 +28,9 @@ import {
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
   useFleetServerHostsForPolicy,
+  useAuthz,
 } from '../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../constants';
+import { FLEET_SERVER_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
 import type { PackagePolicy, AgentPolicy } from '../../types';
 
 import { Loading } from '..';
@@ -60,6 +61,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     if (!id) return undefined;
     return policies.find((p) => p.id === id);
   };
+
+  const authz = useAuthz();
 
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
@@ -106,7 +109,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const { cloudSecurityIntegration } = useCloudSecurityIntegration(selectedPolicy ?? undefined);
 
   return (
-    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
+    <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
@@ -172,6 +175,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
                 data-test-subj="standaloneTab"
                 isSelected={mode === 'standalone'}
                 onClick={() => setMode('standalone')}
+                // Standalone need read access to agent policies
+                disabled={!authz.fleet.readAgentPolicies}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"

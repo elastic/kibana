@@ -54,7 +54,8 @@ describe('POST /api/saved_objects/_bulk_create with allowApiAccess true', () => 
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     const config = setupConfig(true);
-    registerBulkCreateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerBulkCreateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

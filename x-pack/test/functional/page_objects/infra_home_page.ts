@@ -478,5 +478,31 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
     },
+
+    async clickCloseFlyoutButton() {
+      return testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async clickCustomMetricDropdown() {
+      await testSubjects.click('infraInventoryMetricDropdown');
+    },
+
+    async addCustomMetric(field: string) {
+      await testSubjects.click('infraModeSwitcherAddMetricButton');
+      const groupByCustomField = await testSubjects.find('infraCustomMetricFieldSelect');
+      await comboBox.setElement(groupByCustomField, field);
+      await testSubjects.click('infraCustomMetricFormSaveButton');
+    },
+
+    async getMetricsContextMenuItemsCount() {
+      const contextMenu = await testSubjects.find('infraInventoryMetricsContextMenu');
+      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+      return menuItems.length;
+    },
+
+    async ensureCustomMetricAddButtonIsDisabled() {
+      const button = await testSubjects.find('infraModeSwitcherAddMetricButton');
+      expect(await button.getAttribute('disabled')).to.be('true');
+    },
   };
 }

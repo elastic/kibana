@@ -11,6 +11,7 @@
 import * as rt from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
+import { EcsSchema } from './ecs_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -77,6 +78,6 @@ const StackAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const StackAlertSchema = rt.intersection([StackAlertRequired, StackAlertOptional, AlertSchema]);
+export const StackAlertSchema = rt.intersection([StackAlertRequired, StackAlertOptional, AlertSchema, EcsSchema]);
 // prettier-ignore
 export type StackAlert = rt.TypeOf<typeof StackAlertSchema>;

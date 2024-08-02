@@ -15,26 +15,33 @@ import { buildCombinedAssetFilter } from '../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
-import { useLoadingStateContext } from '../hooks/use_loading_state';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 
-export type ChartProps = LensConfig &
-  Pick<LensChartProps, 'overrides'> & {
-    id: string;
-    queryField: string;
-    dateRange: TimeRange;
-    assetId: string;
-  };
+export type ChartProps = Pick<LensChartProps, 'overrides'> & {
+  id: string;
+  queryField: string;
+  dateRange: TimeRange;
+  assetId: string;
+  lensAttributes: LensConfig;
+};
 
-export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props }: ChartProps) => {
+export const Chart = ({
+  id,
+  queryField,
+  overrides,
+  dateRange,
+  assetId,
+  lensAttributes,
+}: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
-  const { searchSessionId } = useLoadingStateContext();
+  const { searchSessionId } = useSearchSessionContext();
   const {
     services: { dataViews },
   } = useKibanaContextForPlugin();
 
   const { value: filters = [] } = useAsync(async () => {
     const resolvedDataView = await resolveDataView({
-      dataViewId: (props.dataset as LensDataviewDataset)?.index,
+      dataViewId: (lensAttributes.dataset as LensDataviewDataset)?.index,
       dataViewsService: dataViews,
     });
 
@@ -45,7 +52,7 @@ export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props 
         dataView: resolvedDataView.dataViewReference,
       }),
     ];
-  }, [assetId, dataViews, props.dataset, queryField]);
+  }, [assetId, dataViews, lensAttributes.dataset, queryField]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {
@@ -75,13 +82,13 @@ export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props 
 
   return (
     <LensChart
-      {...props}
       id={`infraAssetDetailsMetricChart${id}`}
       borderRadius="m"
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
       searchSessionId={searchSessionId}
       filters={filters}
+      lensAttributes={lensAttributes}
       overrides={overrides}
       onBrushEnd={handleBrushEnd}
       onFilter={handleFilter}

@@ -17,7 +17,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
-import type { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { LegendValue } from '@elastic/charts';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
 import { XY_ID } from './constants';
@@ -131,7 +131,7 @@ export const getXYVisualizationState = (
     isVisible: false,
     position: 'right',
     showSingleSeries: false,
-    legendStats: ['currentAndLastValue' as XYLegendValue.CurrentAndLastValue],
+    legendStats: [LegendValue.CurrentAndLastValue],
   },
   valueLabels: 'show',
   yLeftScale: 'linear',

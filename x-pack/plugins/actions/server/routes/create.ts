@@ -14,8 +14,14 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { CreateOptions } from '../actions_client';
 
 export const bodySchema = schema.object({
-  name: schema.string({ validate: validateEmptyStrings }),
-  connector_type_id: schema.string({ validate: validateEmptyStrings }),
+  name: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The display name for the connector.' },
+  }),
+  connector_type_id: schema.string({
+    validate: validateEmptyStrings,
+    meta: { description: 'The type of connector.' },
+  }),
   config: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
     defaultValue: {},
   }),
@@ -55,7 +61,10 @@ export const createActionRoute = (
       path: `${BASE_ACTION_API_PATH}/connector/{id?}`,
       options: {
         access: 'public',
-        description: 'Create a connector',
+        summary: 'Create a connector',
+        tags: ['oas-tag:connectors'],
+        // description:
+        //   'You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.',
       },
       validate: {
         params: schema.maybe(

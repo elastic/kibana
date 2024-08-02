@@ -1,15 +1,23 @@
-RTRIM
+## RTRIM
 
-Syntax
-Parameters
-string
-String expression. If null, the function returns null.
-DescriptionRemoves trailing whitespaces from a string.Supported types
-Example
+The `RTRIM` function in ES|QL is used to remove trailing whitespaces from a string. If the string expression is null, the function will return null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `RTRIM` function in ES|QL queries:
+
 ```esql
-ROW message = "   some text  ",  color = " red "
+ROW message = "   some text  "
 | EVAL message = RTRIM(message)
-| EVAL color = RTRIM(color)
 | EVAL message = CONCAT("'", message, "'")
+```
+
+In this example, the `RTRIM` function is used to remove trailing whitespaces from the `message` string. The `CONCAT` function is then used to concatenate the modified `message` string with single quotes.
+
+```esql
+ROW color = " red "
+| EVAL color = RTRIM(color)
 | EVAL color = CONCAT("'", color, "'")
 ```
+
+In this second example, the `RTRIM` function is used to remove trailing whitespaces from the `color` string. The `CONCAT` function is then used to concatenate the modified `color` string with single quotes.

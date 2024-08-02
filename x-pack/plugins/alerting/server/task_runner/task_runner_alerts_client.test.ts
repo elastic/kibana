@@ -98,9 +98,11 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { createTaskRunnerLogger } from './lib';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -114,6 +116,7 @@ jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 
 let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
+const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -307,7 +310,7 @@ describe('Task Runner', () => {
         await taskRunner.run();
 
         expect(mockAlertsService.createAlertsClient).toHaveBeenCalledWith({
-          logger,
+          logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
           namespace: 'default',
           rule: {
@@ -333,18 +336,23 @@ describe('Task Runner', () => {
 
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+          tags: ['1', 'test'],
+        });
         expect(logger.debug).nthCalledWith(
           2,
-          'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+          'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
+          { tags: ['1', 'test'] }
         );
         expect(logger.debug).nthCalledWith(
           3,
-          'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
+          'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
+          { tags: ['1', 'test'] }
         );
         expect(logger.debug).nthCalledWith(
           4,
-          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
+          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}',
+          { tags: ['1', 'test'] }
         );
 
         expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
@@ -441,7 +449,8 @@ describe('Task Runner', () => {
         expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
         expect(logger.debug).nthCalledWith(
           debugCall++,
-          'executing rule test:1 at 1970-01-01T00:00:00.000Z'
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          { tags: ['1', 'test'] }
         );
 
         if (!useDataStreamForAlerts) {
@@ -464,15 +473,18 @@ describe('Task Runner', () => {
         );
         expect(logger.debug).nthCalledWith(
           debugCall++,
-          'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+          'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
+          { tags: ['1', 'test'] }
         );
         expect(logger.debug).nthCalledWith(
           debugCall++,
-          'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
+          'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
+          { tags: ['1', 'test'] }
         );
         expect(logger.debug).nthCalledWith(
           debugCall++,
-          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
+          { tags: ['1', 'test'] }
         );
         expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
           ...generateSavedObjectParams({})
@@ -570,6 +582,7 @@ describe('Task Runner', () => {
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
+              [ALERT_SEVERITY_IMPROVING]: false,
               [ALERT_MAINTENANCE_WINDOW_IDS]: [],
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
@@ -644,10 +657,11 @@ describe('Task Runner', () => {
 
         expect(mockAlertsService.createAlertsClient).toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(
-          `Error initializing AlertsClient for context test. Using legacy alerts client instead. - Could not initialize!`
+          `Error initializing AlertsClient for context test. Using legacy alerts client instead. - Could not initialize!`,
+          { tags: ['1', 'test'] }
         );
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
-          logger,
+          logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
         });
 
@@ -659,7 +673,9 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+          tags: ['1', 'test'],
+        });
 
         expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
           ...generateSavedObjectParams({})
@@ -732,7 +748,7 @@ describe('Task Runner', () => {
         expect(mockAlertsService.createAlertsClient).not.toHaveBeenCalled();
         expect(logger.error).not.toHaveBeenCalled();
         expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
-          logger,
+          logger: taskRunnerLogger,
           ruleType: ruleTypeWithAlerts,
         });
 
@@ -744,7 +760,9 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+          tags: ['1', 'test'],
+        });
 
         expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
           ...generateSavedObjectParams({})
@@ -815,7 +833,6 @@ describe('Task Runner', () => {
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
-        notifyOnActionGroupChange: false,
         alertDelay: 0,
         flappingSettings: {
           enabled: true,

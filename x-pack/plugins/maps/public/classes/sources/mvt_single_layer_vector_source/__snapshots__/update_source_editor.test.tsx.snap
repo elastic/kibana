@@ -7,10 +7,9 @@ exports[`should render update source editor (fields _should_ be included) 1`] = 
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Source settings"
           id="xpack.maps.mvtSource.sourceSettings"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>
@@ -34,10 +33,9 @@ exports[`should render update source editor (fields _should_ be included) 1`] = 
       size="xs"
     >
       <h5>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Tooltip fields"
           id="xpack.maps.mvtSource.tooltipsTitle"
-          values={Object {}}
         />
       </h5>
     </EuiTitle>

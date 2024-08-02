@@ -376,6 +376,17 @@ describe('Group Selector Hooks', () => {
         type: ActionType.updateGroupOptions,
       });
     });
+
+    it('Supports custom group by title', () => {
+      const result = renderHook(() =>
+        useGetGroupSelector({
+          ...defaultArgs,
+          title: 'Group custom property by',
+        })
+      );
+
+      expect(result.result.current.props.title).toEqual('Group custom property by');
+    });
   });
 
   describe('useGetGroupSelectorStateless', () => {

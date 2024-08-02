@@ -24,7 +24,8 @@ BUNDLER_DEPS = [
   "//packages/kbn-i18n",
   "@npm//prop-types",
   "@npm//react",
-  "@npm//react-intl"
+  "@npm//react-intl",
+  "@npm//@formatjs/intl-utils"
 ]
 
 js_library(

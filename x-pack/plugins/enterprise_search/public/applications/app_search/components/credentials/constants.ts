@@ -22,17 +22,17 @@ export enum ApiTokenTypes {
 
 export const CREATE_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.tokens.created', {
-    defaultMessage: "API key '{name}' was created",
+    defaultMessage: "API key ''{name}'' was created",
     values: { name },
   });
 export const UPDATE_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.tokens.update', {
-    defaultMessage: "API key '{name}' was updated",
+    defaultMessage: "API key ''{name}'' was updated",
     values: { name },
   });
 export const DELETE_MESSAGE = (name: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.tokens.deleted', {
-    defaultMessage: "API key '{name}' was deleted",
+    defaultMessage: "API key ''{name}'' was deleted",
     values: { name },
   });
 

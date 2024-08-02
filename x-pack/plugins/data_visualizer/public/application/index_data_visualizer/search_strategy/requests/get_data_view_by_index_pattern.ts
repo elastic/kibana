@@ -6,6 +6,11 @@
  */
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import {
+  getESQLAdHocDataview,
+  getIndexPatternFromESQLQuery,
+  getTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 
 /**
  * Get a saved data view that matches the index pattern (as close as possible)
@@ -17,31 +22,20 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
  */
 export async function getOrCreateDataViewByIndexPattern(
   dataViews: DataViewsContract,
-  indexPatternFromQuery: string | undefined,
+  query: string,
   currentDataView: DataView | undefined
 ) {
-  if (indexPatternFromQuery) {
-    const matched = await dataViews.find(indexPatternFromQuery);
-
-    // Only returns persisted data view if it matches index pattern exactly
-    // Because * in pattern can result in misleading matches (i.e. "kibana*" will return data view with pattern "kibana_1")
-    // which is not neccessarily the one we want to use
-    if (matched.length > 0 && matched[0].getIndexPattern() === indexPatternFromQuery)
-      return matched[0];
-  }
+  const indexPatternFromQuery = getIndexPatternFromESQLQuery(query);
+  const newTimeField = getTimeFieldFromESQLQuery(query);
 
   if (
-    indexPatternFromQuery &&
-    (currentDataView?.isPersisted() || indexPatternFromQuery !== currentDataView?.getIndexPattern())
+    currentDataView?.isPersisted() ||
+    indexPatternFromQuery !== currentDataView?.getIndexPattern() ||
+    // here the pattern hasn't changed but the time field has
+    (newTimeField !== currentDataView?.timeFieldName &&
+      indexPatternFromQuery === currentDataView?.getIndexPattern())
   ) {
-    const dataViewObj = await dataViews.create({
-      title: indexPatternFromQuery,
-    });
-
-    if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-      dataViewObj.timeFieldName = '@timestamp';
-    }
-    return dataViewObj;
+    return await getESQLAdHocDataview(query, dataViews);
   }
   return currentDataView;
 }

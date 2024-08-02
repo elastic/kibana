@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -19,7 +19,7 @@ import { Header } from './header';
 describe('Header', () => {
   const mockedContext = mockManagementPlugin.createIndexPatternManagmentContext();
   test('should render normally', () => {
-    const component = mount(
+    const component = mountWithI18nProvider(
       <Header.WrappedComponent
         indexPatternId="test"
         history={scopedHistoryMock.create() as unknown as ScopedHistory}

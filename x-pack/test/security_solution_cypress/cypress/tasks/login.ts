@@ -10,6 +10,7 @@ import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin
 import { LOGOUT_URL } from '../urls/navigation';
 import {
   CLOUD_SERVERLESS,
+  DEFAULT_SERVERLESS_ROLE,
   ELASTICSEARCH_PASSWORD,
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
@@ -40,19 +41,12 @@ export const getEnvAuth = (role: SecurityRoleName): User => {
   return user;
 };
 
-export const getDefaultUserName = (): string => {
-  if (Cypress.env(IS_SERVERLESS)) {
-    return Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
-  }
-  return defaultUser.username;
-};
-
 export const login = (role?: SecurityRoleName): void => {
   let testRole = '';
 
   if (Cypress.env(IS_SERVERLESS)) {
     if (!role) {
-      testRole = Cypress.env(CLOUD_SERVERLESS) ? 'admin' : 'system_indices_superuser';
+      testRole = DEFAULT_SERVERLESS_ROLE;
     } else {
       testRole = role;
     }

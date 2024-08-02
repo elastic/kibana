@@ -11,9 +11,6 @@ import { AlertDetailsRedirect } from './alert_details_redirect';
 import { TestProviders } from '../../../common/mock';
 import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-
-jest.mock('../../../common/hooks/use_experimental_features');
 
 jest.mock('../../../common/lib/kibana');
 
@@ -60,7 +57,8 @@ describe('AlertDetailsRedirect', () => {
           "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
           '!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!f,selectedOptions:!(),title:Status))',
-        flyout: '(panelView:eventDetail,params:(eventId:test-alert-id,indexName:.someTestIndex))',
+        flyout:
+          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
       });
 
       expect(historyMock.replace).toHaveBeenCalledWith({
@@ -98,7 +96,8 @@ describe('AlertDetailsRedirect', () => {
           "(global:(linkTo:!(timeline,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',kind:absolute,to:'2020-07-08T08:25:18.966Z')),timeline:(linkTo:!(global,socTrends),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
         pageFilters:
           '!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!f,selectedOptions:!(),title:Status))',
-        flyout: '(panelView:eventDetail,params:(eventId:test-alert-id,indexName:.someTestIndex))',
+        flyout:
+          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.someTestIndex,scopeId:alerts-page)))',
       });
 
       expect(historyMock.replace).toHaveBeenCalledWith({
@@ -136,7 +135,7 @@ describe('AlertDetailsRedirect', () => {
         pageFilters:
           '!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.workflow_status,hideActionBar:!f,selectedOptions:!(),title:Status))',
         flyout:
-          '(panelView:eventDetail,params:(eventId:test-alert-id,indexName:.internal.alerts-security.alerts-default))',
+          '(preview:!(),right:(id:document-details-right,params:(id:test-alert-id,indexName:.internal.alerts-security.alerts-default,scopeId:alerts-page)))',
       });
 
       expect(historyMock.replace).toHaveBeenCalledWith({
@@ -144,39 +143,6 @@ describe('AlertDetailsRedirect', () => {
         pathname: ALERTS_PATH,
         search: `?${expectedSearchParam.toString()}`,
         state: undefined,
-      });
-    });
-  });
-
-  describe('When expandable flyout is enabled', () => {
-    beforeEach(() => {
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
-    });
-
-    describe('when eventFlyout or flyout are not in the query', () => {
-      it('redirects to the expected path with the correct query parameters', () => {
-        const testSearch = `?index=${testIndex}&timestamp=${testTimestamp}`;
-        const historyMock = {
-          ...mockHistory,
-          location: {
-            hash: '',
-            pathname: mockPathname,
-            search: testSearch,
-            state: '',
-          },
-        };
-        render(
-          <TestProviders>
-            <Router history={historyMock}>
-              <AlertDetailsRedirect />
-            </Router>
-          </TestProviders>
-        );
-
-        const [{ search, pathname }] = historyMock.replace.mock.lastCall;
-
-        expect(search as string).toMatch(/flyout.*/);
-        expect(pathname).toEqual(ALERTS_PATH);
       });
     });
   });

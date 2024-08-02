@@ -6,10 +6,8 @@
  */
 
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -118,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                comparator: Comparator.GT_OR_EQ,
+                comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
                 threshold: [50_000],
                 timeSize: 1,
                 timeUnit: 'm',

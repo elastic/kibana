@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+import { Integration } from '../../../common/data_streams_stats/integration';
+import { Dashboard } from '../../../common/api_types';
 
 const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
   defaultMessage: 'Integration actions',
@@ -40,13 +41,17 @@ const viewDashboardsText = i18n.translate('xpack.datasetQuality.flyoutViewDashbo
 
 export function IntegrationActionsMenu({
   integration,
+  dashboards,
   dashboardsLoading,
 }: {
   integration: Integration;
+  dashboards: Dashboard[];
   dashboardsLoading: boolean;
 }) {
-  const { type, name } = useDatasetQualityFlyout().dataStreamStat!;
-  const { dashboards = [], version, name: integrationName } = integration;
+  const { dataStreamStat, canUserAccessDashboards, canUserViewIntegrations } =
+    useDatasetQualityFlyout();
+  const { version, name: integrationName } = integration;
+  const { type, name } = dataStreamStat!;
   const {
     isOpen,
     handleCloseMenu,
@@ -71,11 +76,13 @@ export function IntegrationActionsMenu({
     buttonText,
     routerLinkProps,
     iconType,
+    disabled = false,
   }: {
     dataTestSubject: string;
-    buttonText: string;
+    buttonText: string | React.ReactNode;
     routerLinkProps: RouterLinkProps;
     iconType: string;
+    disabled?: boolean;
   }) => (
     <EuiButtonEmpty
       {...routerLinkProps}
@@ -86,6 +93,7 @@ export function IntegrationActionsMenu({
       color="text"
       iconType={iconType}
       data-test-subj={dataTestSubject}
+      disabled={disabled}
     >
       {buttonText}
     </EuiButtonEmpty>
@@ -93,16 +101,21 @@ export function IntegrationActionsMenu({
 
   const panelItems = useMemo(() => {
     const firstLevelItems: EuiContextMenuPanelItemDescriptor[] = [
-      {
-        renderItem: () => (
-          <MenuActionItem
-            buttonText={seeIntegrationText}
-            dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
-            routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
-            iconType="package"
-          />
-        ),
-      },
+      ...(canUserViewIntegrations
+        ? [
+            {
+              renderItem: () => (
+                <MenuActionItem
+                  buttonText={seeIntegrationText}
+                  dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
+                  routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
+                  iconType="package"
+                  disabled={!canUserViewIntegrations}
+                />
+              ),
+            },
+          ]
+        : []),
       {
         renderItem: () => (
           <MenuActionItem
@@ -122,12 +135,13 @@ export function IntegrationActionsMenu({
       },
     ];
 
-    if (dashboards.length) {
+    if (dashboards.length && canUserAccessDashboards) {
       firstLevelItems.push({
         icon: 'dashboardApp',
         panel: 1,
         name: viewDashboardsText,
         'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
+        disabled: false,
       });
     } else if (dashboardsLoading) {
       firstLevelItems.push({
@@ -172,6 +186,8 @@ export function IntegrationActionsMenu({
     type,
     version,
     dashboardsLoading,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   ]);
 
   return (

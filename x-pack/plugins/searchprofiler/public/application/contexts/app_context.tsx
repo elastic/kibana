@@ -10,15 +10,16 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { HttpSetup, ToastsSetup } from '@kbn/core/public';
 import { LicenseStatus } from '../../../common';
+import { SearchProfilerStartServices } from '../../types';
 
-export interface ContextArgs {
+export interface ContextArgs extends SearchProfilerStartServices {
   http: HttpSetup;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
   location: RouteComponentProps['location'];
 }
 
-export interface ContextValue {
+export interface ContextValue extends SearchProfilerStartServices {
   http: HttpSetup;
   notifications: ToastsSetup;
   getLicenseStatus: () => LicenseStatus;
@@ -29,7 +30,7 @@ const AppContext = createContext<ContextValue>(null as any);
 
 export const AppContextProvider = ({
   children,
-  args: { http, notifications, initialLicenseStatus, location },
+  args: { http, notifications, initialLicenseStatus, location, ...startServices },
 }: {
   children: React.ReactNode;
   args: ContextArgs;
@@ -39,6 +40,7 @@ export const AppContextProvider = ({
   return (
     <AppContext.Provider
       value={{
+        ...startServices,
         http,
         notifications,
         getLicenseStatus,

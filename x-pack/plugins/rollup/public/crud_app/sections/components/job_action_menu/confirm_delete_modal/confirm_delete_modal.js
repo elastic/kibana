@@ -52,7 +52,7 @@ export class ConfirmDeleteModal extends Component {
       title = i18n.translate(
         'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobTitle',
         {
-          defaultMessage: "Delete rollup job '{id}'?",
+          defaultMessage: "Delete rollup job ''{id}''?",
           values: { id },
         }
       );

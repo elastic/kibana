@@ -75,6 +75,8 @@ export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
 
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
+export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
+
 export const CSP_INGEST_TIMESTAMP_PIPELINE = 'cloud_security_posture_add_ingest_timestamp_pipeline';
 export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
   'cloud_security_posture_latest_index_add_ingest_timestamp_pipeline';
@@ -192,3 +194,13 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   managed_identity: [],
   manual: [],
 };
+
+export const CLOUD_FORMATION_STACK_NAME = 'Elastic-Cloud-Security-Posture-Management';
+export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
+
+export const ORGANIZATION_ACCOUNT = 'organization-account';
+export const SINGLE_ACCOUNT = 'single-account';
+
+export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
+// Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
+export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.10.0-preview01';

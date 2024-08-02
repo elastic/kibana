@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('SavedObjectSaveModal', () => {
   it('should render matching snapshot', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -29,7 +30,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('should render matching snapshot when given options', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -45,7 +46,7 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('should render matching snapshot when custom isValid is set', () => {
-    const falseWrapper = shallow(
+    const falseWrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -58,7 +59,7 @@ describe('SavedObjectSaveModal', () => {
     );
     expect(falseWrapper).toMatchSnapshot();
 
-    const trueWrapper = shallow(
+    const trueWrapper = shallowWithIntl(
       <SavedObjectSaveModal
         onSave={() => void 0}
         onClose={() => void 0}
@@ -76,15 +77,17 @@ describe('SavedObjectSaveModal', () => {
     const confirmButtonLabel = 'Save and done';
 
     render(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        confirmButtonLabel={confirmButtonLabel}
-      />
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          confirmButtonLabel={confirmButtonLabel}
+        />
+      </I18nProvider>
     );
 
     expect(screen.queryByText(confirmButtonLabel)).toBeInTheDocument();
@@ -94,15 +97,17 @@ describe('SavedObjectSaveModal', () => {
     const onSave = jest.fn();
 
     render(
-      <SavedObjectSaveModal
-        onSave={onSave}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        objectType="visualization"
-        showDescription={true}
-        showCopyOnSave={true}
-        mustCopyOnSaveMessage="You must save a copy of the object."
-      />
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          objectType="visualization"
+          showDescription={true}
+          showCopyOnSave={true}
+          mustCopyOnSaveMessage="You must save a copy of the object."
+        />
+      </I18nProvider>
     );
 
     expect(onSave).not.toHaveBeenCalled();

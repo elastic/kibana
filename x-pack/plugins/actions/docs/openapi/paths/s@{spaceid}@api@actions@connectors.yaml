@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves all connectors.
+  summary: Get all connectors
   operationId: getConnectorsWithSpaceId
   description: >
     You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.

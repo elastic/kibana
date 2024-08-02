@@ -28,13 +28,13 @@ export interface ServicesDefinitionSet {
   [version: Version]: ServicesDefinition;
 }
 
-import {
+import type {
   SortOrder,
   AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   MutatingOperationRefreshSetting,
   SavedObjectsPitParams,
   SavedObjectsFindOptionsReference,
@@ -202,6 +202,7 @@ export interface SOWithMetadata<Attributes extends object = object> {
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
+  updatedBy?: string;
   error?: {
     error: string;
     message: string;

@@ -167,9 +167,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const filterKey = 'bytes';
         await filterBar.toggleFilterPinned(filterKey);
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.saveDashboard('saved with pinned filters', {
-          saveAsNew: true,
-        });
+        await PageObjects.dashboard.saveDashboard('saved with pinned filters');
         expect(await filterBar.isFilterPinned(filterKey)).to.be(true);
         await pieChart.expectPieSliceCount(1);
       });

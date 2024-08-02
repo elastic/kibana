@@ -50,6 +50,9 @@ export function transformSloResponseToCreateSloForm(
     },
     groupBy: [values.groupBy].flat(),
     tags: values.tags,
+    settings: {
+      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+    },
   };
 }
 
@@ -76,6 +79,9 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     },
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
+    settings: {
+      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+    },
   };
 }
 
@@ -102,6 +108,9 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     },
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
+    settings: {
+      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+    },
   };
 }
 
@@ -209,6 +218,10 @@ export function transformPartialUrlStateToFormState(
 
   if (values.timeWindow?.duration && values.timeWindow?.type) {
     state.timeWindow = { duration: values.timeWindow.duration, type: values.timeWindow.type };
+  }
+
+  if (!!values.settings?.preventInitialBackfill) {
+    state.settings = { preventInitialBackfill: values.settings.preventInitialBackfill };
   }
 
   return state;

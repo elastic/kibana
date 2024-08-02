@@ -63,6 +63,10 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
       expect(exists('rollupJobCreateDateHistogramDocsButton')).toBe(true);
     });
 
+    test('should have a deprecation callout', () => {
+      expect(exists('rollupDeprecationCallout')).toBe(true);
+    });
+
     it('should have the "next" and "back" button visible', () => {
       expect(exists('rollupJobBackButton')).toBe(true);
       expect(exists('rollupJobNextButton')).toBe(true);

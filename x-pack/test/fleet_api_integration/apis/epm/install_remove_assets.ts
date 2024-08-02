@@ -11,7 +11,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
@@ -24,8 +24,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
   const es: Client = getService('es');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
@@ -48,11 +46,11 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('installs all assets when installing a package for the first time', async () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({
@@ -69,11 +67,11 @@ export default function (providerContext: FtrProviderContext) {
       // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
       // and then we'll test that not artifacts are left behind.
       before(() => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         return installPackage(pkgName, pkgVersion);
       });
       before(() => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         return uninstallPackage(pkgName, pkgVersion);
       });
 
@@ -298,13 +296,13 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('reinstalls all assets', async () => {
       before(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await installPackage(pkgName, pkgVersion);
         // reinstall
         await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({

@@ -52,3 +52,8 @@ export type BurnRateAllowedActionGroups = ActionGroupIdsOf<
   | typeof LOW_PRIORITY_ACTION
   | typeof SUPPRESSED_PRIORITY_ACTION
 >;
+
+export interface Group {
+  field: string;
+  value: string;
+}

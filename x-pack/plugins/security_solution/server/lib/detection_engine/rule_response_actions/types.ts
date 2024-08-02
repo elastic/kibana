@@ -24,6 +24,7 @@ export type Alert = ParsedTechnicalFields & {
 export interface AlertAgent {
   id: string;
   name: string;
+  type: string;
 }
 
 export interface AlertWithAgent extends Alert {

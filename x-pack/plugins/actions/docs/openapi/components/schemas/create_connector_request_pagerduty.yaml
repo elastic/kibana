@@ -16,12 +16,10 @@ properties:
     description: The type of connector.
     enum:
       - .pagerduty
-    examples:
-      - .pagerduty
+    example: .pagerduty
   name:
     type: string
     description: The display name for the connector.
-    examples:
-      - my-connector
+    example: my-connector
   secrets:
     $ref: 'secrets_properties_pagerduty.yaml' 

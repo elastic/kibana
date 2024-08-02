@@ -28,10 +28,9 @@ exports[`Table editing should show an input field 1`] = `
 exports[`Table editing should update the matches dynamically as input value is changed 1`] = `
 <div>
   <em>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="The source filter doesn't match any known fields."
       id="indexPatternManagement.editIndexPattern.source.table.notMatchedLabel"
-      values={Object {}}
     />
   </em>
 </div>

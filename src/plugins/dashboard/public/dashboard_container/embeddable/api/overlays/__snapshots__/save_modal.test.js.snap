@@ -14,27 +14,42 @@ exports[`renders DashboardSaveModal 1`] = `
         display="row"
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
-        helpText={
-          <FormattedMessage
-            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-            id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-            values={Object {}}
-          />
-        }
         labelType="label"
       >
-        <EuiSwitch
-          checked={true}
-          data-test-subj="storeTimeWithDashboard"
-          label={
-            <FormattedMessage
-              defaultMessage="Store time with dashboard"
-              id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-              values={Object {}}
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiSwitch
+              checked={true}
+              data-test-subj="storeTimeWithDashboard"
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Store time with dashboard"
+                  id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+                />
+              }
+              onChange={[Function]}
             />
-          }
-          onChange={[Function]}
-        />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIconTip
+              content={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+                  id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+                />
+              }
+              position="top"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </React.Fragment>
   }

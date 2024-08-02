@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // FLAKY: https://github.com/elastic/kibana/issues/177223
   // Failing: See https://github.com/elastic/kibana/issues/177223
-  describe('@ess @serverless Get Rule Execution Results', () => {
+  describe.skip('@ess @serverless Get Rule Execution Results', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');

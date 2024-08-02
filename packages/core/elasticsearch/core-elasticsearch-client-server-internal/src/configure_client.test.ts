@@ -54,7 +54,7 @@ describe('configureClient', () => {
     config = createFakeConfig();
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
-    agentFactoryProvider = new AgentManager(logger);
+    agentFactoryProvider = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
   });
 
   afterEach(() => {

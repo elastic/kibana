@@ -60,11 +60,9 @@ describe('SourceConfigFields', () => {
       preventDefault: jest.fn(),
     };
 
-    const input = wrapper
+    wrapper
       .find('[data-test-subj="external-connector-url-input"]')
-      .dive()
-      .find('input');
-    input.simulate('click', simulatedEvent);
+      .simulate('click', simulatedEvent);
 
     expect(simulatedEvent.currentTarget.select).toHaveBeenCalled();
   });

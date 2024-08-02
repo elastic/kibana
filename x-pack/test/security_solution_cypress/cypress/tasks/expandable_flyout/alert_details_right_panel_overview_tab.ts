@@ -21,6 +21,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_PREVALENCE_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_TITLE_LINK,
 } from '../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 /* About section */
@@ -124,4 +125,11 @@ export const clickAlertReasonButton = () => {
  */
 export const navigateToResponseDetails = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON).should('be.visible').click();
+};
+
+/**
+ * Click the Response button to open the response detail tab in the left section
+ */
+export const clickAnalyzerPreviewTitleToOpenTimeline = () => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_TITLE_LINK).click();
 };

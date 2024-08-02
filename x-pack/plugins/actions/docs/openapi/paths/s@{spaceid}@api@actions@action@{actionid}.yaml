@@ -1,5 +1,5 @@
 delete:
-  summary: Deletes a connector.
+  summary: Delete a connector
   operationId: legacyDeleteConnector
   deprecated: true
   description: >
@@ -18,7 +18,7 @@ delete:
       $ref: '../components/responses/401.yaml'
 
 get:
-  summary: Retrieves a connector by ID.
+  summary: Get connector information
   operationId: legacyGetConnector
   description: Deprecated in 7.13.0. Use the get connector API instead.
   deprecated: true
@@ -34,7 +34,7 @@ get:
       $ref: '../components/responses/401.yaml'
 
 put:
-  summary: Updates the attributes for a connector.
+  summary: Update a connector
   operationId: legacyUpdateConnector
   deprecated: true
   description: Deprecated in 7.13.0. Use the update connector API instead.

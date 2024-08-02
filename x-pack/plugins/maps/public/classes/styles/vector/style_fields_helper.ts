@@ -120,7 +120,7 @@ export class StyleFieldsHelper {
               unsupportedMsg: i18n.translate(
                 'xpack.maps.style.field.unsupportedWithVectorTileMsg',
                 {
-                  defaultMessage: `'{styleLabel}' does not support this field with vector tiles. To style '{styleLabel}' with this field, select 'Limit results' in 'Scaling'.`,
+                  defaultMessage: `''{styleLabel}'' does not support this field with vector tiles. To style ''{styleLabel}'' with this field, select 'Limit results' in 'Scaling'.`,
                   values: {
                     styleLabel: getVectorStyleLabel(styleProperty.getStyleName()),
                   },

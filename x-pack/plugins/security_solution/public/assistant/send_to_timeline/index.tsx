@@ -17,7 +17,7 @@ import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../sourcerer/store/model';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
@@ -35,7 +35,7 @@ import {
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 
 export interface SendToTimelineButtonProps {

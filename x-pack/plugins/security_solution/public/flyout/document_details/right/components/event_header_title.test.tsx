@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { SEVERITY_VALUE_TEST_ID, FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { EventHeaderTitle } from './event_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
@@ -22,12 +22,12 @@ moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-const renderHeader = (contextValue: RightPanelContext) =>
+const renderHeader = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProvidersComponent>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <EventHeaderTitle />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProvidersComponent>
   );
 

@@ -4,6 +4,8 @@ description: >
 enum:
   - alerting 
   - cases
-  - generativeAI
+  - generativeAIForSecurity
+  - generativeAIForObservability
+  - generativeAIForSearchPlayground
   - siem
   - uptime

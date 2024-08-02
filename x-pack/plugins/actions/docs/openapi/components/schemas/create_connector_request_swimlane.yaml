@@ -14,12 +14,10 @@ properties:
     description: The type of connector.
     enum:
       - .swimlane
-    examples:
-      - .swimlane
+    example: .swimlane
   name:
     type: string
     description: The display name for the connector.
-    examples:
-      - my-connector
+    example: my-connector
   secrets:
     $ref: 'secrets_properties_swimlane.yaml'

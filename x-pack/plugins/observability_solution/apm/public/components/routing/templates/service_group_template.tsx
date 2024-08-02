@@ -20,6 +20,8 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
+import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -99,7 +101,7 @@ export function ServiceGroupTemplate({
                 ]
               : []),
             {
-              title: selectedTab.label,
+              title: selectedTab.breadcrumbLabel || selectedTab.label,
               href: selectedTab.href,
             } as { title: string; href: string },
           ]
@@ -134,6 +136,7 @@ export function ServiceGroupTemplate({
       environmentFilter={environmentFilter}
       showServiceGroupSaveButton={!isAllServices}
       showServiceGroupsNav={isAllServices}
+      showEnablementCallout
       selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}
     >
@@ -144,18 +147,34 @@ export function ServiceGroupTemplate({
 
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key: 'service-inventory' | 'service-map';
+  breadcrumbLabel?: string;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/service-map');
+  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
 
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
-      label: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+      breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
         defaultMessage: 'Inventory',
       }),
+      label: (
+        <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+              defaultMessage: 'Inventory',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {isEntityCentricExperienceViewEnabled && (
+              <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       href: router.link('/services', { query }),
     },
     {
@@ -169,9 +188,10 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, breadcrumbLabel }) => ({
       href,
       label,
       isSelected: key === selectedTab,
+      breadcrumbLabel,
     }));
 }

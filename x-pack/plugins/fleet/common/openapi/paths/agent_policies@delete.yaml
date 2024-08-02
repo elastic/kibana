@@ -28,6 +28,9 @@ post:
           properties:
             agentPolicyId:
               type: string
+            force:
+              type: boolean
+              description: bypass validation checks that can prevent agent policy deletion
           required:
             - agentPolicyId
   parameters:

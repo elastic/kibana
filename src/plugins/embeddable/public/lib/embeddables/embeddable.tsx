@@ -127,7 +127,7 @@ export abstract class Embeddable<
       dataLoading: this.dataLoading,
       filters$: this.filters$,
       blockingError: this.blockingError,
-      onPhaseChange: this.onPhaseChange,
+      phase$: this.phase$,
       setPanelTitle: this.setPanelTitle,
       linkToLibrary: this.linkToLibrary,
       hidePanelTitle: this.hidePanelTitle,
@@ -168,7 +168,7 @@ export abstract class Embeddable<
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
   public dataLoading: LegacyEmbeddableAPI['dataLoading'];
   public filters$: LegacyEmbeddableAPI['filters$'];
-  public onPhaseChange: LegacyEmbeddableAPI['onPhaseChange'];
+  public phase$: LegacyEmbeddableAPI['phase$'];
   public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
   public blockingError: LegacyEmbeddableAPI['blockingError'];
   public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];

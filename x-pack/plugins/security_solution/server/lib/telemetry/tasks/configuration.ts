@@ -32,26 +32,27 @@ export function createTelemetryConfigurationTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('configuration'));
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('configuration'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const manifest = await artifactService.getArtifact(artifactName);
 
         if (manifest.notModified) {
-          log.l('No new configuration artifact found, skipping...');
+          log.debug('No new configuration artifact found, skipping...');
           await taskMetricsService.end(trace);
           return 0;
         }
 
         const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
-        log.l(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
+        log.l('Got telemetry configuration artifact', {
+          artifact: configArtifact,
+        });
 
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
@@ -86,9 +87,9 @@ export function createTelemetryConfigurationTaskConfig() {
             } else {
               const channel = channelsDict.get(channelName);
               if (!channel) {
-                log.l(`Ignoring unknown channel "${channelName}"`);
+                log.l('Ignoring unknown channel', { channel: channelName });
               } else {
-                log.l(`Updating configuration for channel "${channelName}`);
+                log.l('Updating configuration for channel', { channel: channelName });
                 sender.updateQueueConfig(channel, {
                   bufferTimeSpanMillis: config.buffer_time_span_millis,
                   inflightEventsThreshold: config.inflight_events_threshold,
@@ -108,10 +109,10 @@ export function createTelemetryConfigurationTaskConfig() {
 
         await taskMetricsService.end(trace);
 
-        log.l(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);
+        log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });
         return 0;
       } catch (err) {
-        log.l(`Failed to set telemetry configuration due to ${err.message}`);
+        log.l('Failed to set telemetry configuration', { error: err.message });
         telemetryConfiguration.resetAllToDefault();
         await taskMetricsService.end(trace, err);
         return 0;

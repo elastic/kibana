@@ -24,7 +24,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
@@ -92,9 +92,6 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
   describe.skip(
     'from Alerts',
     {
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
       tags: ['@brokenInServerless'],
     },
     () => {
@@ -103,7 +100,6 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
       let hostname: string;
 
       before(() => {
-        disableExpandableFlyoutAdvancedSettings();
         indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
           (indexEndpoints) => {
             endpointData = indexEndpoints;
@@ -201,7 +197,8 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
     }
   );
 
-  describe('from Cases', () => {
+  // TODO re-enable when https://github.com/elastic/security-team/issues/9625 is merged
+  describe.skip('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
@@ -211,7 +208,6 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
     let hostname: string;
 
     before(() => {
-      disableExpandableFlyoutAdvancedSettings();
       indexNewCase().then((indexCase) => {
         caseData = indexCase;
         caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;

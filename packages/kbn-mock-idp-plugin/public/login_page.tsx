@@ -139,13 +139,14 @@ export const LoginPage = () => {
               actions={[
                 <EuiButton
                   type="submit"
+                  data-test-subj="loginButton"
                   disabled={!formik.isValid || !isRolesDefined()}
                   isLoading={formik.isSubmitting}
                   fill
                 >
                   Log in
                 </EuiButton>,
-                <EuiButtonEmpty size="xs" href="/">
+                <EuiButtonEmpty size="xs" href="/login">
                   More login options
                 </EuiButtonEmpty>,
               ]}

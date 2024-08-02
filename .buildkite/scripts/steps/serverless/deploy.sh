@@ -49,7 +49,7 @@ deploy() {
   PROJECT_EXISTS_LOGS=$(mktemp --suffix ".json")
   PROJECT_INFO_LOGS=$(mktemp --suffix ".json")
 
-  curl -s \
+  curl -s --fail \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
     -XGET &> $PROJECT_EXISTS_LOGS
@@ -60,7 +60,7 @@ deploy() {
       echo "No project to remove"
     else
       echo "Shutting down previous project..."
-      curl -s \
+      curl -s --fail \
         -H "Authorization: ApiKey $PROJECT_API_KEY" \
         -H "Content-Type: application/json" \
         "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
@@ -71,7 +71,7 @@ deploy() {
 
   if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
     echo "Creating project..."
-    curl -s \
+    curl -s --fail \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
@@ -88,28 +88,22 @@ deploy() {
 
     echo "Write to vault..."
 
-    # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-    if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-      VAULT_ROLE_ID="$(get_vault_role_id)"
-      VAULT_SECRET_ID="$(get_vault_secret_id)"
-      VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-      retry 5 30 vault login -no-print "$VAULT_TOKEN"
-      vault_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
-    else
-      vault_kv_set "cloud-deploy/$VAULT_KEY_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
-    fi
+    set_in_legacy_vault "$VAULT_KEY_NAME" \
+     username="$PROJECT_USERNAME" \
+     password="$PROJECT_PASSWORD" \
+     id="$PROJECT_ID"
 
   else
     echo "Updating project..."
-    curl -s \
+    curl -s --fail \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
-      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
+      -XPATCH -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
   fi
 
   echo "Getting project info..."
-  curl -s \
+  curl -s --fail \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
     -XGET &> $PROJECT_INFO_LOGS
@@ -118,12 +112,7 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r '.endpoints.elasticsearch' $PROJECT_INFO_LOGS)
 
-  # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
-    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
-  else
-    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$VAULT_KEY_NAME"
-  fi
+  VAULT_READ_COMMAND=$(print_legacy_vault_read "$VAULT_KEY_NAME")
 
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment
@@ -171,9 +160,12 @@ EOF
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 if is_pr_with_label "ci:project-deploy-observability" ; then
-  create_github_issue_oblt_test_environments
-  echo "--- Deploy observability with Kibana CI"
-  deploy "observability"
+  # Only deploy observability if the PR is targeting main
+  if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
+    create_github_issue_oblt_test_environments
+    echo "--- Deploy observability with Kibana CI"
+    deploy "observability"
+  fi
 fi
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
 

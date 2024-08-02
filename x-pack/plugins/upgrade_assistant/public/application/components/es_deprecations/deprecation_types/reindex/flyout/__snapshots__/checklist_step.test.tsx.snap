@@ -5,7 +5,7 @@ exports[`ChecklistFlyout renders 1`] = `
   <EuiFlyoutBody>
     <EuiText>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
           values={
@@ -21,10 +21,9 @@ exports[`ChecklistFlyout renders 1`] = `
         />
       </p>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
-          values={Object {}}
         />
       </p>
     </EuiText>
@@ -61,10 +60,9 @@ exports[`ChecklistFlyout renders 1`] = `
           iconType="cross"
           onClick={[MockFunction]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Close"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -79,10 +77,9 @@ exports[`ChecklistFlyout renders 1`] = `
           isLoading={false}
           onClick={[MockFunction]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Start reindexing"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

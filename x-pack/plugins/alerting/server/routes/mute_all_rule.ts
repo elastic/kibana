@@ -27,7 +27,8 @@ export const muteAllRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_mute_all`,
       options: {
         access: 'public',
-        description: `Mute all alerts`,
+        summary: `Mute all alerts`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         params: paramSchema,

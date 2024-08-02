@@ -16,6 +16,7 @@ import {
   mapKeys,
   difference,
   intersection,
+  flatMap,
 } from 'lodash';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -122,7 +123,7 @@ export const getInitialPolicies = (
     satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
   );
 
-  const supportedPackagePolicyIds = uniq(map(supportedPackagePolicies, 'policy_id'));
+  const supportedPackagePolicyIds = uniq(flatMap(supportedPackagePolicies, 'policy_ids'));
   // we want to find all policies, because this is a global pack
   if (shards?.['*']) {
     return { policiesList: supportedPackagePolicyIds };

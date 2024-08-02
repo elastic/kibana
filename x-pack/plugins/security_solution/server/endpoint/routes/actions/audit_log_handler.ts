@@ -10,8 +10,8 @@ import type {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
 } from '../../../../common/api/endpoint';
-import { getAuditLogResponse } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { getAuditLogResponse } from '../../services/actions/actions_audit_log';
 import type { EndpointAppContext } from '../../types';
 
 export const auditLogRequestHandler = (

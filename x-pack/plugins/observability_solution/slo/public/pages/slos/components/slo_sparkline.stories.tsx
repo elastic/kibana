@@ -8,7 +8,7 @@
 import { HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import {
   DEGRADING_FAST_ROLLING_SLO,
   HEALTHY_RANDOM_ROLLING_SLO,

@@ -39,10 +39,13 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
         });
       }
     }
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monitorData]);
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
 
     if (status === FETCH_STATUS.FAILURE && error) {
       toasts.addError(
@@ -61,7 +64,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
           <p data-test-subj="synthetcsMonitorSaveSubtext">
             {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT}
           </p>,
-          core
+          coreStart
         ),
         toastLifeTimeMs: 3000,
       });

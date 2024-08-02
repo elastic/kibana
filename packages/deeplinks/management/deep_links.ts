@@ -34,6 +34,7 @@ export type ManagementId =
   | 'cases'
   | 'cross_cluster_replication'
   | 'dataViews'
+  | 'data_quality'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'

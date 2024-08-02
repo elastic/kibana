@@ -24,7 +24,7 @@ import { getDataStreamAdapter } from './lib/data_stream_adapter';
 
 jest.mock('../alerts_client');
 
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {
@@ -1253,16 +1253,10 @@ describe('Alerts Service', () => {
               TestRegistrationContext.context,
               DEFAULT_NAMESPACE_STRING
             )
-          ).toEqual({
-            error:
-              'Failure during installation. Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default',
-            result: false,
-          });
+          ).toEqual({ result: true });
 
-          expect(logger.error).toHaveBeenCalledWith(
-            new Error(
-              `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
-            )
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();

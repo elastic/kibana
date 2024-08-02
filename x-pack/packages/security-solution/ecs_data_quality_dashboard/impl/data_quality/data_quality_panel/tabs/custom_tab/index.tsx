@@ -91,7 +91,7 @@ const CustomTabComponent: React.FC<Props> = ({
     <>
       {showCustomCallout(partitionedFieldMetadata.custom) ? (
         <>
-          <CustomCallout enrichedFieldMetadata={partitionedFieldMetadata.custom}>
+          <CustomCallout customFieldMetadata={partitionedFieldMetadata.custom}>
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy}>

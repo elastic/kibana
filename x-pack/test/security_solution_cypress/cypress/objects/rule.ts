@@ -216,7 +216,7 @@ export const getUnmappedRule = (
 ): QueryRuleCreateProps => ({
   type: 'query',
   query: '*:*',
-  index: ['unmapped*'],
+  index: ['auditbeat-unmapped*'],
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'high',
@@ -361,8 +361,8 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
-    'Unusual Linux Network Activity',
-    'Anomalous Process for a Linux Population',
+    'v3_linux_anomalous_network_activity',
+    'v3_linux_anomalous_process_all_hosts',
   ],
   anomaly_threshold: 20,
   name: 'New ML Rule Test',
@@ -478,7 +478,7 @@ export const getNewThreatIndicatorRule = (
   query: '*:*',
   threat_query: '*:*',
   threat_language: 'kuery',
-  index: ['suspicious-*'],
+  index: ['auditbeat-suspicious-*'],
   severity: 'critical',
   risk_score: 20,
   tags: ['test', 'threat'],
@@ -551,6 +551,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     version,
     exceptions_list: exceptionsList,
     immutable,
+    rule_source: ruleSource,
     related_integrations: relatedIntegrations,
     setup,
     investigation_fields: investigationFields,
@@ -594,6 +595,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     version,
     exceptions_list: exceptionsList,
     immutable,
+    rule_source: ruleSource,
     related_integrations: relatedIntegrations,
     required_fields: [],
     setup,
@@ -633,7 +635,7 @@ export const getEndpointRule = (): QueryRuleCreateProps => ({
   description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
-  interval: '10s',
+  interval: '1m',
   from: 'now-50000h',
   max_signals: 100,
   exceptions_list: [

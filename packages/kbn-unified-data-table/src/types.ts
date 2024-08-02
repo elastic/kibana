@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiDataGridCellValueElementProps, type EuiDataGridColumn } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 /**
@@ -23,6 +23,12 @@ export interface UnifiedDataTableSettings {
 
 export interface UnifiedDataTableSettingsColumn {
   width?: number;
+  /**
+  Optional props passed to Columns to display provided labels as column names instead of field names.
+  This object maps column field names to their corresponding display labels.
+  These labels will take precedence over the data view field names.
+  */
+  display?: string;
 }
 
 export type ValueToStringConverter = (
@@ -51,7 +57,7 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
 
 export type CustomCellRenderer = Record<
   string,
-  (props: DataGridCellValueElementProps) => React.ReactNode
+  (props: DataGridCellValueElementProps) => ReactElement
 >;
 
 export interface CustomGridColumnProps {

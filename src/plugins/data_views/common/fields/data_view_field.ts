@@ -298,6 +298,10 @@ export class DataViewField implements DataViewFieldBase {
    * Returns true if field is sortable
    */
   public get sortable() {
+    if (this.scripted && this.spec.type === 'date') {
+      return false;
+    }
+
     return (
       this.name === '_score' ||
       ((this.spec.indexed || this.aggregatable) && this.kbnFieldType.sortable)

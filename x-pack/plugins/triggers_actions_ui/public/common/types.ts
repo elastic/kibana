@@ -7,12 +7,6 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
-export interface Comparator {
-  text: string;
-  value: string;
-  requiredValues: number;
-}
-
 export type ValidNormalizedTypes = `${Exclude<
   KBN_FIELD_TYPES,
   | KBN_FIELD_TYPES.UNKNOWN

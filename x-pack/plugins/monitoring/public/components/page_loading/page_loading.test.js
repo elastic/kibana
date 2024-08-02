@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { PageLoading } from '.';
 
 describe('PageLoading', () => {
   test('should show a simple page loading component', () => {
-    expect(renderWithIntl(<PageLoading />)).toMatchSnapshot();
+    expect(renderWithI18nProvider(<PageLoading />)).toMatchSnapshot();
   });
 });

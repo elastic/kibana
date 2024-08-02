@@ -36,5 +36,6 @@
     "@kbn/field-utils",
     "@kbn/react-field",
     "@kbn/shared-ux-utility",
+    "@kbn/unified-field-list",
   ]
 }

@@ -7,33 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-export const doLogsEndpointActionDsExists = async ({
-  esClient,
-  logger,
-  dataStreamName,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  dataStreamName: string;
-}): Promise<boolean> => {
-  try {
-    const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate(
-      {
-        name: dataStreamName,
-      },
-      { meta: true }
-    );
-    return doesIndexTemplateExist.statusCode !== 404;
-  } catch (error) {
-    const errorType = error?.type ?? '';
-    if (errorType !== 'resource_not_found_exception') {
-      logger.error(error);
-      throw error;
-    }
-    return false;
-  }
-};
-
 export const doesLogsEndpointActionsIndexExist = async ({
   esClient,
   logger,

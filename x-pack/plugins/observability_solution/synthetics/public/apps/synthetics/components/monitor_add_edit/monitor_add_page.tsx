@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { useCloneMonitor } from './hooks/use_clone_monitor';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
 import { DisabledCallout } from '../monitors_page/management/disabled_callout';
@@ -33,6 +34,8 @@ export const MonitorAddPage = () => {
 
   const canUsePublicLocations = useCanUsePublicLocations();
 
+  const { data: cloneMonitor, loading: cloneMonitorLoading } = useCloneMonitor();
+
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getServiceLocations());
@@ -43,12 +46,22 @@ export const MonitorAddPage = () => {
     return <LocationsLoadingError />;
   }
 
-  if (!locationsLoaded) {
+  if (!locationsLoaded || cloneMonitorLoading) {
     return <LoadingState />;
   }
 
   return (
-    <MonitorForm space={space?.id}>
+    <MonitorForm
+      space={space?.id}
+      defaultValues={
+        cloneMonitor
+          ? {
+              ...cloneMonitor,
+              name: `${cloneMonitor.name} - copy`,
+            }
+          : undefined
+      }
+    >
       <DisabledCallout />
       <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />

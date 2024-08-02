@@ -210,6 +210,16 @@ export const FLEET_AGENT_LIST_PAGE = {
   },
 };
 
+export const ASSETS_PAGE = {
+  TAB: 'tab-assets',
+  getButtonId(type: string) {
+    return `fleetAssetsAccordion.button.${type}`;
+  },
+  getContentId(type: string, id?: string | number) {
+    return `fleetAssetsAccordion.content.${type}${id ? `.${id}` : ''}`;
+  },
+};
+
 export const FLEET_SERVER_HOST_FLYOUT = {
   NAME_INPUT: 'fleetServerHostsFlyout.nameInput',
   DEFAULT_SWITCH: 'fleetServerHostsFlyout.isDefaultSwitch',

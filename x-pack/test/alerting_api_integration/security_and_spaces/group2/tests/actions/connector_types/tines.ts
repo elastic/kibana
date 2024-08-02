@@ -229,7 +229,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [storyId]: expected value of type [number] but got [undefined])',
           });
@@ -273,7 +273,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.storyId]: expected value of type [number] but got [undefined])',
           });
@@ -297,7 +297,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.name]: expected value of type [string] but got [undefined])',
           });
@@ -321,7 +321,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.path]: expected value of type [string] but got [undefined])',
           });
@@ -345,7 +345,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.secret]: expected value of type [string] but got [undefined])',
           });

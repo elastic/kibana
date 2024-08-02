@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { createMaintenanceWindow } from '../application/maintenance_window/methods/create/create_maintenance_window';
 import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
@@ -33,6 +33,7 @@ import {
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface MaintenanceWindowClientConstructorOptions {
+  readonly uiSettings: IUiSettingsClient;
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
@@ -52,6 +53,7 @@ export class MaintenanceWindowClient {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       getModificationMetadata: this.getModificationMetadata.bind(this),
+      uiSettings: options.uiSettings,
     };
   }
 

@@ -159,7 +159,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.dashboard.waitForRenderComplete();
 
-        await PageObjects.dashboard.clickClone();
+        await PageObjects.dashboard.duplicateDashboard();
 
         await PageObjects.dashboard.waitForRenderComplete();
 

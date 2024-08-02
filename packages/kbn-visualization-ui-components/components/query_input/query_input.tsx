@@ -21,7 +21,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { useDebouncedValue } from '../debounced_value';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export interface QueryInputServices {
   http: HttpStart;

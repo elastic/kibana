@@ -426,7 +426,13 @@
             "text": "IHttpConfig"
           },
           ", options: GetServerListenerOptions) => ",
-          "ServerListener"
+          {
+            "pluginId": "@kbn/server-http-tools",
+            "scope": "common",
+            "docId": "kibKbnServerHttpToolsPluginApi",
+            "section": "def-common.ServerListener",
+            "text": "ServerListener"
+          }
         ],
         "path": "packages/kbn-server-http-tools/src/get_listener.ts",
         "deprecated": false,
@@ -721,6 +727,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/server-http-tools",
+            "id": "def-common.IHttpConfig.protocol",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "\"http1\" | \"http2\""
+            ],
+            "path": "packages/kbn-server-http-tools/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/server-http-tools",
             "id": "def-common.IHttpConfig.host",
             "type": "string",
             "tags": [],
@@ -1003,7 +1023,115 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.ServerListener",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerListener",
+        "description": [
+          "\nComposite type of all possible kind of Listener types.\n\nUnfortunately, there's no real common interface between all those concrete classes,\nas `net.Server` and `tls.Server` don't list all the APIs we're using (such as event binding)"
+        ],
+        "signature": [
+          "Http2Server",
+          " | ",
+          "Http2SecureServer",
+          " | ",
+          "Server",
+          "<typeof ",
+          "IncomingMessage",
+          ", typeof ",
+          "ServerResponse",
+          "> | ",
+          "Server",
+          "<typeof ",
+          "IncomingMessage",
+          ", typeof ",
+          "ServerResponse",
+          ">"
+        ],
+        "path": "packages/kbn-server-http-tools/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.ServerProtocol",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerProtocol",
+        "description": [],
+        "signature": [
+          "\"http1\" | \"http2\""
+        ],
+        "path": "packages/kbn-server-http-tools/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.TLS_V1",
+        "type": "string",
+        "tags": [],
+        "label": "TLS_V1",
+        "description": [],
+        "signature": [
+          "\"TLSv1\""
+        ],
+        "path": "packages/kbn-server-http-tools/src/ssl/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.TLS_V1_1",
+        "type": "string",
+        "tags": [],
+        "label": "TLS_V1_1",
+        "description": [],
+        "signature": [
+          "\"TLSv1.1\""
+        ],
+        "path": "packages/kbn-server-http-tools/src/ssl/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.TLS_V1_2",
+        "type": "string",
+        "tags": [],
+        "label": "TLS_V1_2",
+        "description": [],
+        "signature": [
+          "\"TLSv1.2\""
+        ],
+        "path": "packages/kbn-server-http-tools/src/ssl/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.TLS_V1_3",
+        "type": "string",
+        "tags": [],
+        "label": "TLS_V1_3",
+        "description": [],
+        "signature": [
+          "\"TLSv1.3\""
+        ],
+        "path": "packages/kbn-server-http-tools/src/ssl/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/server-http-tools",

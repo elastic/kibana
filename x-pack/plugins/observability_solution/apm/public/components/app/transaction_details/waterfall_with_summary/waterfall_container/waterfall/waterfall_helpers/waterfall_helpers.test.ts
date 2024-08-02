@@ -17,6 +17,11 @@ import {
   IWaterfallError,
   IWaterfallSpanOrTransaction,
   getOrphanTraceItemsCount,
+  buildTraceTree,
+  convertTreeToList,
+  updateTraceTreeNode,
+  IWaterfallNode,
+  IWaterfallNodeFlatten,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import {
@@ -25,113 +30,113 @@ import {
 } from '../../../../../../../../common/waterfall/typings';
 
 describe('waterfall_helpers', () => {
-  describe('getWaterfall', () => {
-    const hits = [
-      {
-        processor: { event: 'transaction' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-node' },
-        transaction: {
-          duration: { us: 49660 },
-          name: 'GET /api',
-          id: 'myTransactionId1',
-        },
-        timestamp: { us: 1549324795784006 },
-      } as Transaction,
-      {
-        parent: { id: 'mySpanIdA' },
-        processor: { event: 'span' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-ruby' },
-        transaction: { id: 'myTransactionId2' },
-        timestamp: { us: 1549324795825633 },
-        span: {
-          duration: { us: 481 },
-          name: 'SELECT FROM products',
-          id: 'mySpanIdB',
-        },
-      } as Span,
-      {
-        parent: { id: 'myTransactionId2' },
-        processor: { event: 'span' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-ruby' },
-        transaction: { id: 'myTransactionId2' },
-        span: {
-          duration: { us: 6161 },
-          name: 'Api::ProductsController#index',
-          id: 'mySpanIdA',
-        },
-        timestamp: { us: 1549324795824504 },
-      } as Span,
-      {
-        parent: { id: 'mySpanIdA' },
-        processor: { event: 'span' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-ruby' },
-        transaction: { id: 'myTransactionId2' },
-        span: {
-          duration: { us: 532 },
-          name: 'SELECT FROM product',
-          id: 'mySpanIdC',
-        },
-        timestamp: { us: 1549324795827905 },
-      } as Span,
-      {
-        parent: { id: 'myTransactionId1' },
-        processor: { event: 'span' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-node' },
-        transaction: { id: 'myTransactionId1' },
-        span: {
-          duration: { us: 47557 },
-          name: 'GET opbeans-ruby:3000/api/products',
-          id: 'mySpanIdD',
-        },
-        timestamp: { us: 1549324795785760 },
-      } as Span,
-      {
-        parent: { id: 'mySpanIdD' },
-        processor: { event: 'transaction' },
-        trace: { id: 'myTraceId' },
-        service: { name: 'opbeans-ruby' },
-        transaction: {
-          duration: { us: 8634 },
-          name: 'Api::ProductsController#index',
-          id: 'myTransactionId2',
-          marks: {
-            agent: {
-              domInteractive: 382,
-              domComplete: 383,
-              timeToFirstByte: 14,
-            },
+  const hits = [
+    {
+      processor: { event: 'transaction' },
+      trace: { id: 'myTraceId' },
+      service: { name: 'opbeans-node' },
+      transaction: {
+        duration: { us: 49660 },
+        name: 'GET /api',
+        id: 'myTransactionId1',
+      },
+      timestamp: { us: 1549324795784006 },
+    } as Transaction,
+    {
+      parent: { id: 'mySpanIdA' },
+      processor: { event: 'span' },
+      trace: { id: 'myTraceId' },
+      service: { name: 'opbeans-ruby' },
+      transaction: { id: 'myTransactionId2' },
+      timestamp: { us: 1549324795825633 },
+      span: {
+        duration: { us: 481 },
+        name: 'SELECT FROM products',
+        id: 'mySpanIdB',
+      },
+    } as Span,
+    {
+      parent: { id: 'myTransactionId2' },
+      processor: { event: 'span' },
+      trace: { id: 'myTraceId' },
+      service: { name: 'opbeans-ruby' },
+      transaction: { id: 'myTransactionId2' },
+      span: {
+        duration: { us: 6161 },
+        name: 'Api::ProductsController#index',
+        id: 'mySpanIdA',
+      },
+      timestamp: { us: 1549324795824504 },
+    } as Span,
+    {
+      parent: { id: 'mySpanIdA' },
+      processor: { event: 'span' },
+      trace: { id: 'myTraceId' },
+      service: { name: 'opbeans-ruby' },
+      transaction: { id: 'myTransactionId2' },
+      span: {
+        duration: { us: 532 },
+        name: 'SELECT FROM product',
+        id: 'mySpanIdC',
+      },
+      timestamp: { us: 1549324795827905 },
+    } as Span,
+    {
+      parent: { id: 'myTransactionId1' },
+      processor: { event: 'span' },
+      trace: { id: 'myTraceId' },
+      service: { name: 'opbeans-node' },
+      transaction: { id: 'myTransactionId1' },
+      span: {
+        duration: { us: 47557 },
+        name: 'GET opbeans-ruby:3000/api/products',
+        id: 'mySpanIdD',
+      },
+      timestamp: { us: 1549324795785760 },
+    } as Span,
+    {
+      parent: { id: 'mySpanIdD' },
+      processor: { event: 'transaction' },
+      trace: { id: 'myTraceId' },
+      service: { name: 'opbeans-ruby' },
+      transaction: {
+        duration: { us: 8634 },
+        name: 'Api::ProductsController#index',
+        id: 'myTransactionId2',
+        marks: {
+          agent: {
+            domInteractive: 382,
+            domComplete: 383,
+            timeToFirstByte: 14,
           },
         },
-        timestamp: { us: 1549324795823304 },
-      } as unknown as Transaction,
-    ];
-    const errorDocs = [
-      {
-        processor: { event: 'error' },
-        parent: { id: 'myTransactionId1' },
-        timestamp: { us: 1549324795810000 },
-        trace: { id: 'myTraceId' },
-        transaction: { id: 'myTransactionId1' },
-        error: {
-          id: 'error1',
-          grouping_key: 'errorGroupingKey1',
-          log: {
-            message: 'error message',
-          },
+      },
+      timestamp: { us: 1549324795823304 },
+    } as unknown as Transaction,
+  ];
+  const errorDocs = [
+    {
+      processor: { event: 'error' },
+      parent: { id: 'myTransactionId1' },
+      timestamp: { us: 1549324795810000 },
+      trace: { id: 'myTraceId' },
+      transaction: { id: 'myTransactionId1' },
+      error: {
+        id: 'error1',
+        grouping_key: 'errorGroupingKey1',
+        log: {
+          message: 'error message',
         },
-        service: { name: 'opbeans-ruby' },
-        agent: {
-          name: 'ruby',
-          version: '2',
-        },
-      } as unknown as APMError,
-    ];
+      },
+      service: { name: 'opbeans-ruby' },
+      agent: {
+        name: 'ruby',
+        version: '2',
+      },
+    } as unknown as APMError,
+  ];
 
+  describe('getWaterfall', () => {
     it('should return full waterfall', () => {
       const apiResp = {
         traceItems: {
@@ -748,6 +753,231 @@ describe('waterfall_helpers', () => {
         } as WaterfallSpan,
       ];
       expect(getOrphanTraceItemsCount(traceItems)).toBe(1);
+    });
+  });
+
+  describe('#trace tree', () => {
+    const waterfall = getWaterfall({
+      traceItems: {
+        traceDocs: hits,
+        errorDocs,
+        exceedsMax: false,
+        spanLinksCountById: {},
+        traceDocsTotal: hits.length,
+        maxTraceItems: 5000,
+      },
+      entryTransaction: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1',
+        },
+        timestamp: { us: 1549324795784006 },
+      } as Transaction,
+    });
+
+    const tree: IWaterfallNode = {
+      id: 'myTransactionId1',
+      item: {
+        docType: 'transaction',
+        doc: {
+          agent: { name: 'nodejs' },
+          processor: { event: 'transaction' },
+          trace: { id: 'myTraceId' },
+          service: { name: 'opbeans-node' },
+          transaction: {
+            duration: { us: 49660 },
+            name: 'GET /api',
+            id: 'myTransactionId1',
+            type: 'request',
+          },
+          timestamp: { us: 1549324795784006 },
+        },
+        id: 'myTransactionId1',
+        duration: 49660,
+        offset: 0,
+        skew: 0,
+        legendValues: { serviceName: 'opbeans-node', spanType: '' },
+        color: '',
+        spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
+      },
+      children: [
+        {
+          id: '0-mySpanIdD-0',
+          item: {
+            docType: 'span',
+            doc: {
+              agent: { name: 'nodejs' },
+              parent: { id: 'myTransactionId1' },
+              processor: { event: 'span' },
+              trace: { id: 'myTraceId' },
+              service: { name: 'opbeans-node' },
+              transaction: { id: 'myTransactionId1' },
+              span: {
+                duration: { us: 47557 },
+                name: 'GET opbeans-ruby:3000/api/products',
+                id: 'mySpanIdD',
+                type: 'request',
+              },
+              timestamp: { us: 1549324795785760 },
+            },
+            id: 'mySpanIdD',
+            parentId: 'myTransactionId1',
+            duration: 47557,
+            offset: 1754,
+            skew: 0,
+            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            color: '',
+            spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
+          },
+          children: [],
+          childrenToLoad: 1,
+          level: 1,
+          expanded: false,
+          hasInitializedChildren: false,
+        },
+      ],
+      level: 0,
+      childrenToLoad: 1,
+      expanded: true,
+      hasInitializedChildren: true,
+    };
+
+    describe('buildTraceTree', () => {
+      it('should build the trace tree correctly', () => {
+        const result = buildTraceTree({
+          waterfall,
+          path: {
+            criticalPathSegmentsById: {},
+            showCriticalPath: false,
+          },
+          maxLevelOpen: 1,
+          isOpen: true,
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId1' }),
+            level: 0,
+            expanded: true,
+            hasInitializedChildren: true,
+          })
+        );
+
+        expect(result?.children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'mySpanIdD' }),
+            level: 1,
+            expanded: false,
+            childrenToLoad: 1,
+            children: [],
+            hasInitializedChildren: false,
+          })
+        );
+      });
+    });
+
+    describe('convertTreeToList', () => {
+      it('should convert the trace tree to a list correctly', () => {
+        const result = convertTreeToList(tree);
+
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'myTransactionId1' }),
+              level: 0,
+              expanded: true,
+              hasInitializedChildren: true,
+              childrenToLoad: 1,
+            }),
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'mySpanIdD' }),
+              level: 1,
+              expanded: false,
+              hasInitializedChildren: false,
+              childrenToLoad: 1,
+            }),
+          ])
+        );
+      });
+    });
+
+    describe('updateTraceTreeNode', () => {
+      it('should update the "mySpanIdD" node setting "expanded" to true', () => {
+        const updatedNode: IWaterfallNodeFlatten = {
+          id: '0-mySpanIdD-0',
+          item: {
+            docType: 'span',
+            doc: {
+              agent: { name: 'nodejs' },
+              parent: { id: 'myTransactionId1' },
+              processor: { event: 'span' },
+              trace: { id: 'myTraceId' },
+              service: { name: 'opbeans-node' },
+              transaction: { id: 'myTransactionId1' },
+              span: {
+                duration: { us: 47557 },
+                name: 'GET opbeans-ruby:3000/api/products',
+                id: 'mySpanIdD',
+                type: 'request',
+              },
+              timestamp: { us: 1549324795785760 },
+            },
+            id: 'mySpanIdD',
+            parentId: 'myTransactionId1',
+            duration: 47557,
+            offset: 1754,
+            skew: 0,
+            legendValues: { serviceName: 'opbeans-node', spanType: '' },
+            color: '',
+            spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
+          },
+          childrenToLoad: 1,
+          level: 1,
+          expanded: true,
+          hasInitializedChildren: false,
+        };
+
+        const result = updateTraceTreeNode({
+          root: tree,
+          updatedNode,
+          waterfall,
+          path: {
+            criticalPathSegmentsById: {},
+            showCriticalPath: false,
+          },
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId1' }),
+            level: 0,
+            expanded: true,
+            hasInitializedChildren: true,
+          })
+        );
+
+        expect(result?.children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'mySpanIdD' }),
+            level: 1,
+            expanded: true,
+            hasInitializedChildren: true,
+          })
+        );
+
+        expect(result?.children[0].children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId2' }),
+            level: 2,
+            expanded: false,
+            hasInitializedChildren: false,
+          })
+        );
+      });
     });
   });
 });

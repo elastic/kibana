@@ -78,10 +78,9 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             isDisabled={false}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="New"
               id="xpack.ml.calendarsList.table.newButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
           <EuiButton
@@ -92,10 +91,9 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Delete"
               id="xpack.ml.calendarsList.table.deleteButtonLabel"
-              values={Object {}}
             />
           </EuiButton>,
         ],

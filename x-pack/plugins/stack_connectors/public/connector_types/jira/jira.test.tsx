@@ -89,9 +89,7 @@ describe('jira action params validation', () => {
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
-        'subActionParams.incident.otherFields': [
-          'Additional fields field must be a valid JSON object.',
-        ],
+        'subActionParams.incident.otherFields': ['Invalid JSON.'],
       },
     });
   });

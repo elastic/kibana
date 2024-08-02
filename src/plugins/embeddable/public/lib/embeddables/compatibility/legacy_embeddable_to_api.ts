@@ -103,7 +103,7 @@ export const legacyEmbeddableToApi = (
   /**
    * Performance tracking
    */
-  const onPhaseChange = new BehaviorSubject<PhaseEvent | undefined>(undefined);
+  const phase$ = new BehaviorSubject<PhaseEvent | undefined>(undefined);
 
   let loadingStartTime = 0;
   subscriptions.add(
@@ -132,7 +132,7 @@ export const legacyEmbeddableToApi = (
         })
       )
       .subscribe((statusOutput) => {
-        onPhaseChange.next(statusOutput);
+        phase$.next(statusOutput);
       })
   );
 
@@ -252,7 +252,7 @@ export const legacyEmbeddableToApi = (
       dataLoading,
       blockingError,
 
-      onPhaseChange,
+      phase$,
 
       onEdit,
       isEditingEnabled,

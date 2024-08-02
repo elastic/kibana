@@ -148,6 +148,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-log-level',
-    schema: z.nativeEnum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
+    schema: z.enum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
   },
 ];

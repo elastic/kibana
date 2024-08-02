@@ -153,6 +153,73 @@ describe('CrowdstrikeConnector', () => {
     });
   });
 
+  describe('getResponseErrorMessage', () => {
+    it('returns errorData message when errorData is present', () => {
+      const error = {
+        response: {
+          data: {
+            errors: [{ message: 'Test error message', code: 400 }],
+          },
+        },
+      };
+
+      // @ts-expect-error testing protected method
+      const result = connector.getResponseErrorMessage(error);
+
+      expect(result).toBe('Test error message');
+    });
+
+    it('returns URL not found message when cause code is ENOTFOUND', () => {
+      const error = {
+        cause: {
+          code: 'ENOTFOUND',
+          hostname: 'api.crowdstrike.com111',
+        },
+      };
+
+      // @ts-expect-error testing protected method
+      const result = connector.getResponseErrorMessage(error);
+
+      expect(result).toBe('URL not found: api.crowdstrike.com111');
+    });
+
+    it('returns Connection Refused message when cause code is ECONNREFUSED', () => {
+      const error = {
+        cause: {
+          code: 'ECONNREFUSED',
+          port: 5555,
+          address: 'localhost',
+        },
+      };
+
+      // @ts-expect-error testing protected method
+      const result = connector.getResponseErrorMessage(error);
+
+      expect(result).toBe('Connection Refused: localhost:5555');
+    });
+
+    it('returns Unknown API Error message when error response status is undefined', () => {
+      const error = {};
+      // @ts-expect-error testing protected method
+      const result = connector.getResponseErrorMessage(error);
+
+      expect(result).toBe('Unknown API Error: {}');
+    });
+
+    it('returns API Error message when error response data is present', () => {
+      const error = {
+        response: {
+          status: 400,
+          data: { message: 'Test API error' },
+        },
+      };
+      // @ts-expect-error testing protected method
+      const result = connector.getResponseErrorMessage(error);
+
+      expect(result).toBe('API Error: {"message":"Test API error"}');
+    });
+  });
+
   describe('getTokenRequest', () => {
     it('should make a POST request to the correct URL with correct headers', async () => {
       const mockResponse = { data: { access_token: 'testToken' } };

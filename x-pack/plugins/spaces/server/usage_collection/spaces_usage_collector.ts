@@ -13,6 +13,7 @@ import type {
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
 
+import type { SolutionView } from '../../common';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
 
@@ -46,6 +47,14 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
+  const knownSolutions: Array<SolutionView | 'unset'> = [
+    'classic',
+    'es',
+    'oblt',
+    'security',
+    'unset',
+  ];
+
   const resp = (await esClient.search({
     index: kibanaIndex,
     body: {
@@ -65,6 +74,13 @@ async function getSpacesUsage(
             size: knownFeatureIds.length,
           },
         },
+        solution: {
+          terms: {
+            field: 'space.solution',
+            size: knownSolutions.length,
+            missing: 'unset',
+          },
+        },
       },
       size: 0,
     },
@@ -74,11 +90,17 @@ async function getSpacesUsage(
 
   const count = hits?.total?.value ?? 0;
   const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];
+  const solutionBuckets = aggregations?.solution?.buckets ?? [];
 
-  const initialCounts = knownFeatureIds.reduce((acc, featureId) => {
+  const initialCounts = knownFeatureIds.reduce<Record<string, number>>((acc, featureId) => {
     acc[featureId] = 0;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
+
+  const initialSolutionCounts = knownSolutions.reduce<Record<string, number>>((acc, solution) => {
+    acc[solution] = 0;
+    return acc;
+  }, {});
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -89,6 +111,15 @@ async function getSpacesUsage(
     initialCounts
   );
 
+  const solutions = solutionBuckets.reduce<Record<string, number>>(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    (acc, { key, doc_count }) => {
+      acc[key] = doc_count;
+      return acc;
+    },
+    initialSolutionCounts
+  );
+
   const usesFeatureControls = Object.values(disabledFeatures).some(
     (disabledSpaceCount) => disabledSpaceCount > 0
   );
@@ -97,6 +128,7 @@ async function getSpacesUsage(
     count,
     usesFeatureControls,
     disabledFeatures,
+    solutions,
   } as UsageData;
 }
 
@@ -117,6 +149,7 @@ export interface UsageData extends UsageStats {
   enabled: boolean;
   count?: number;
   usesFeatureControls?: boolean;
+  solutions: Record<string, number>;
   disabledFeatures: {
     // "feature": number;
     [key: string]: number | undefined;
@@ -170,6 +203,38 @@ export function getSpacesUsageCollector(
         _meta: {
           description:
             'Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls.',
+        },
+      },
+      solutions: {
+        classic: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solution set to classic.',
+          },
+        },
+        es: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solution set to search.',
+          },
+        },
+        oblt: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solution set to observability.',
+          },
+        },
+        security: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solution set to security.',
+          },
+        },
+        unset: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces without solution set.',
+          },
         },
       },
       disabledFeatures: {

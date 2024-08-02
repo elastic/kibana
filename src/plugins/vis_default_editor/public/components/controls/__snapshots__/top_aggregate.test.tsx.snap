@@ -10,10 +10,9 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
   isInvalid={false}
   label={
     <React.Fragment>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Aggregate with"
         id="visDefaultEditor.controls.aggregateWithLabel"
-        values={Object {}}
       />
        
       <EuiIconTip

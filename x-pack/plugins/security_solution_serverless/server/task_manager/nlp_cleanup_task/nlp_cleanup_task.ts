@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Tier } from '../../types';
 import { ProductTier } from '../../../common/product';
 import { NLP_CLEANUP_TASK_EVENT } from '../../telemetry/event_based_telemetry';
@@ -78,9 +78,10 @@ export class NLPCleanupTask {
             return {
               run: async () => {
                 if (this.productTier === ProductTier.complete) {
-                  throwUnrecoverableError(
-                    new Error('Task no longer needed for current productTier, disabling...')
+                  this.logger.info(
+                    `Task ${taskInstance.id} no longer needed for current productTier, disabling...`
                   );
+                  return getDeleteTaskRunResult();
                 }
                 return this.runTask(taskInstance, core);
               },
@@ -134,7 +135,7 @@ export class NLPCleanupTask {
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
       // old task, return
-      throwUnrecoverableError(new Error('Outdated task version'));
+      return getDeleteTaskRunResult();
     }
 
     const [{ elasticsearch }] = await core.getStartServices();

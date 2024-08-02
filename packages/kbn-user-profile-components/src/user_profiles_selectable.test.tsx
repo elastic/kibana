@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { UserProfile } from './user_profile';
 

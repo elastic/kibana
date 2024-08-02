@@ -217,7 +217,31 @@ describe('CoreKibanaRequest', () => {
     });
 
     describe('route.protocol property', () => {
-      it('return a static value for now as only http1 is supported', () => {
+      it('return the correct value for http/1.0 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/1.1 requests', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '1.1',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+      it('return the correct value for http/2 requests', () => {
         const request = hapiMocks.createRequest({
           raw: {
             req: {
@@ -227,7 +251,7 @@ describe('CoreKibanaRequest', () => {
         });
         const kibanaRequest = CoreKibanaRequest.from(request);
 
-        expect(kibanaRequest.protocol).toEqual('http1');
+        expect(kibanaRequest.protocol).toEqual('http2');
       });
     });
 

@@ -1,16 +1,29 @@
-FLOOR
+## FLOOR
 
-Syntax
-Parameters
-number
-Numeric expression. If null, the function returns null.
-DescriptionRound a number down to the nearest integer.
-This is a noop for long (including unsigned) and integer.
-For double this picks the closest double value to the integer
-similar to Math.floor.
-Supported types
-Example
+The `FLOOR` function in ES|QL is used to round a number down to the nearest integer. This operation is a no-op for long (including unsigned) and integer types. For double types, this function picks the closest double value to the integer, similar to the `Math.floor` function in JavaScript.
+
+### Syntax
+
+`FLOOR(number)`
+
+#### Parameters
+
+- `number`: Numeric expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how to use the `FLOOR` function in ES|QL:
+
 ```esql
 ROW a=1.8
-| EVAL a=FLOOR(a)
+| EVAL a = FLOOR(a)
 ```
+
+In this example, the `FLOOR` function is used to round down the value of `a` (1.8) to the nearest integer (1).
+
+```esql
+ROW b=3.14159
+| EVAL b = FLOOR(b)
+```
+
+In this second example, the `FLOOR` function is used to round down the value of `b` (3.14159) to the nearest integer (3).

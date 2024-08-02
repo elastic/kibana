@@ -23,7 +23,7 @@ import type {
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { ScopedClusterClient } from './scoped_cluster_client';
-import { getDefaultHeaders } from './headers';
+import { getDefaultHeaders, AUTHORIZATION_HEADER, ES_SECONDARY_AUTH_HEADER } from './headers';
 import {
   createInternalErrorHandler,
   type InternalUnauthorizedErrorHandler,
@@ -78,28 +78,43 @@ export class ClusterClient implements ICustomClusterClient {
       kibanaVersion,
     });
     this.rootScopedClient = configureClient(config, {
+      scoped: true,
       logger,
       type,
       getExecutionContext,
-      scoped: true,
       agentFactoryProvider,
       kibanaVersion,
     });
   }
 
   asScoped(request: ScopeableRequest) {
-    const scopedHeaders = this.getScopedHeaders(request);
+    const createScopedClient = () => {
+      const scopedHeaders = this.getScopedHeaders(request);
 
-    const transportClass = createTransport({
-      getExecutionContext: this.getExecutionContext,
-      getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-    });
+      const transportClass = createTransport({
+        getExecutionContext: this.getExecutionContext,
+        getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
+      });
 
-    const scopedClient = this.rootScopedClient.child({
-      headers: scopedHeaders,
-      Transport: transportClass,
+      return this.rootScopedClient.child({
+        headers: scopedHeaders,
+        Transport: transportClass,
+      });
+    };
+
+    const createSecondaryScopedClient = () => {
+      const secondaryAuthHeaders = this.getSecondaryAuthHeaders(request);
+
+      return this.asInternalUser.child({
+        headers: secondaryAuthHeaders,
+      });
+    };
+
+    return new ScopedClusterClient({
+      asInternalUser: this.asInternalUser,
+      asCurrentUserFactory: createScopedClient,
+      asSecondaryAuthUserFactory: createSecondaryScopedClient,
     });
-    return new ScopedClusterClient(this.asInternalUser, scopedClient);
   }
 
   public async close() {
@@ -129,7 +144,7 @@ export class ClusterClient implements ICustomClusterClient {
     if (isRealRequest(request)) {
       const requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
-      const authHeaders = this.authHeaders ? this.authHeaders.get(request) : {};
+      const authHeaders = this.authHeaders?.get(request) ?? {};
 
       scopedHeaders = {
         ...filterHeaders(requestHeaders, this.config.requestHeadersWhitelist),
@@ -144,6 +159,27 @@ export class ClusterClient implements ICustomClusterClient {
       ...getDefaultHeaders(this.kibanaVersion),
       ...this.config.customHeaders,
       ...scopedHeaders,
+    };
+  }
+
+  private getSecondaryAuthHeaders(request: ScopeableRequest): Headers {
+    const headerSource = isRealRequest(request)
+      ? this.authHeaders?.get(request) ?? {}
+      : request.headers;
+    const authorizationHeader = Object.entries(headerSource).find(([key, value]) => {
+      return key.toLowerCase() === AUTHORIZATION_HEADER && value !== undefined;
+    });
+
+    if (!authorizationHeader) {
+      throw new Error(
+        `asSecondaryAuthUser called from a client scoped to a request without 'authorization' header.`
+      );
+    }
+
+    return {
+      ...getDefaultHeaders(this.kibanaVersion),
+      ...this.config.customHeaders,
+      [ES_SECONDARY_AUTH_HEADER]: authorizationHeader[1],
     };
   }
 }

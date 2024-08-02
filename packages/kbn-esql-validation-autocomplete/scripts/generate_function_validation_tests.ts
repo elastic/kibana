@@ -15,7 +15,7 @@ import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionDefinitions } from '../src/definitions/functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../src/definitions/literals';
+import { timeUnits } from '../src/definitions/literals';
 import { nonNullable } from '../src/shared/helpers';
 import {
   SupportedFieldType,
@@ -24,6 +24,8 @@ import {
   isSupportedFieldType,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
+import { getMaxMinNumberOfParams } from '../src/validation/helpers';
+import { ESQL_NUMBER_TYPES, isNumericType, isStringType } from '../src/shared/esql_types';
 
 export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
 
@@ -51,6 +53,8 @@ function generateTestsForEvalFunction(definition: FunctionDefinition) {
   generateWhereCommandTestsForEvalFunction(definition, testCases);
   generateEvalCommandTestsForEvalFunction(definition, testCases);
   generateSortCommandTestsForEvalFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -60,6 +64,8 @@ function generateTestsForAggFunction(definition: FunctionDefinition) {
   generateSortCommandTestsForAggFunction(definition, testCases);
   generateWhereCommandTestsForAggFunction(definition, testCases);
   generateEvalCommandTestsForAggFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -67,7 +73,132 @@ function generateTestsForGroupingFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
   generateStatsCommandTestsForGroupingFunction(definition, testCases);
   generateSortCommandTestsForGroupingFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
+}
+
+function generateNullAcceptanceTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const { max, min } = getMaxMinNumberOfParams(definition);
+  const numberOfArgsToTest = max === Infinity ? min : max;
+  const signatureWithGreatestNumberOfParams = definition.signatures.find(
+    (signature) => signature.params.length === numberOfArgsToTest
+  )!;
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  // test that the function accepts nulls
+  testCases.set(
+    `from a_index | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'null' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+
+  testCases.set(
+    `row nullVar = null | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'nullVar' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+}
+
+/**
+ * Tests for strings being casted to dates
+ *
+ * @param definition
+ * @param testCases
+ * @returns
+ */
+function generateImplicitDateCastingTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
+    signature.params.some(
+      (param, i) =>
+        (param.type === 'date' || param.type === 'date_period') &&
+        !definition.signatures.some((def) => isStringType(getParamAtPosition(def, i)?.type)) // don't count parameters that already accept a string
+    )
+  );
+
+  if (!allSignaturesWithDateParams.length) {
+    // no signatures contain date params
+    return;
+  }
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  for (const signature of allSignaturesWithDateParams) {
+    const mappedParams = getFieldMapping(signature.params);
+
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: '"2022"' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+  }
 }
 
 function generateRowCommandTestsForEvalFunction(
@@ -170,8 +301,8 @@ function generateWhereCommandTestsForEvalFunction(
   // TODO: not sure why there's this constraint...
   const supportedFunction = signatures.some(
     ({ returnType, params }) =>
-      ['number', 'string'].includes(returnType) &&
-      params.every(({ type }) => ['number', 'string'].includes(type))
+      [...ESQL_NUMBER_TYPES, 'string'].includes(returnType) &&
+      params.every(({ type }) => [...ESQL_NUMBER_TYPES, 'string'].includes(type))
   );
 
   if (!supportedFunction) {
@@ -181,12 +312,12 @@ function generateWhereCommandTestsForEvalFunction(
   const supportedSignatures = signatures.filter(({ returnType }) =>
     // TODO — not sure why the tests have this limitation... seems like any type
     // that can be part of a boolean expression should be allowed in a where clause
-    ['number', 'string'].includes(returnType)
+    [...ESQL_NUMBER_TYPES, 'string'].includes(returnType)
   );
   for (const { params, returnType, ...restSign } of supportedSignatures) {
     const correctMapping = getFieldMapping(params);
     testCases.set(
-      `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
+      `from a_index | where ${!isNumericType(returnType) ? 'length(' : ''}${
         // hijacking a bit this function to produce a function call
         getFunctionSignatures(
           {
@@ -196,7 +327,7 @@ function generateWhereCommandTestsForEvalFunction(
           },
           { withTypes: false }
         )[0].declaration
-      }${returnType !== 'number' ? ')' : ''} > 0`,
+      }${!isNumericType(returnType) ? ')' : ''} > 0`,
       []
     );
 
@@ -207,7 +338,7 @@ function generateWhereCommandTestsForEvalFunction(
       supportedTypesAndFieldNames
     );
     testCases.set(
-      `from a_index | where ${returnType !== 'number' ? 'length(' : ''}${
+      `from a_index | where ${!isNumericType(returnType) ? 'length(' : ''}${
         // hijacking a bit this function to produce a function call
         getFunctionSignatures(
           {
@@ -217,7 +348,7 @@ function generateWhereCommandTestsForEvalFunction(
           },
           { withTypes: false }
         )[0].declaration
-      }${returnType !== 'number' ? ')' : ''} > 0`,
+      }${!isNumericType(returnType) ? ')' : ''} > 0`,
       expectedErrors
     );
   }
@@ -227,7 +358,7 @@ function generateWhereCommandTestsForAggFunction(
   { name, alias, signatures, ...defRest }: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
-  // statsSignatures.some(({ returnType, params }) => ['number'].includes(returnType))
+  // statsSignatures.some(({ returnType, params }) => [...ESQL_NUMBER_TYPES].includes(returnType))
   for (const { params, ...signRest } of signatures) {
     const fieldMapping = getFieldMapping(params);
 
@@ -262,9 +393,11 @@ function generateWhereCommandTestsForAggFunction(
 }
 
 function generateEvalCommandTestsForEvalFunction(
-  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  definition: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
+  const { name, signatures, alias, ...defRest } = definition;
+
   for (const { params, ...signRest } of signatures) {
     const fieldMapping = getFieldMapping(params);
     testCases.set(
@@ -401,32 +534,16 @@ function generateEvalCommandTestsForEvalFunction(
 
   // test that additional args are spotted
 
-  const getNumberOfParams = (signature: FunctionDefinition['signatures'][number]) => ({
-    all: signature.params.length,
-    required: signature.params.filter(({ optional }) => !optional).length,
-  });
-
-  // get the signature with the greatest number of params
-  const [first, ...rest] = signatures;
-  let signatureWithGreatestNumberOfParams = first;
-  let { all: maxNumberOfArgs, required: minNumberOfArgs } = getNumberOfParams(first);
-
-  for (const signature of rest) {
-    const numberOfParams = signature.params.length;
-    if (numberOfParams > signatureWithGreatestNumberOfParams.params.length) {
-      signatureWithGreatestNumberOfParams = signature;
-    }
-
-    maxNumberOfArgs = Math.max(maxNumberOfArgs, numberOfParams);
-    const numberOfRequiredParams = signature.params.filter(({ optional }) => !optional).length;
-    minNumberOfArgs = Math.min(minNumberOfArgs, numberOfRequiredParams);
-  }
+  const { max: maxNumberOfArgs, min: minNumberOfArgs } = getMaxMinNumberOfParams(definition);
+  const signatureWithGreatestNumberOfParams = signatures.find(
+    (signature) => signature.params.length === maxNumberOfArgs
+  )!;
 
   const fieldMappingWithOneExtraArg = getFieldMapping(
     signatureWithGreatestNumberOfParams.params
   ).concat({
     name: 'extraArg',
-    type: 'number',
+    type: 'integer',
   });
 
   // get the expected args from the first signature in case of errors
@@ -544,7 +661,7 @@ function generateStatsCommandTestsForAggFunction(
     testCases.set(`from a_index | stats var = ${correctSignature}`, []);
     testCases.set(`from a_index | stats ${correctSignature}`, []);
 
-    if (signRest.returnType === 'number') {
+    if (isNumericType(signRest.returnType)) {
       testCases.set(`from a_index | stats var = round(${correctSignature})`, []);
       testCases.set(`from a_index | stats round(${correctSignature})`, []);
       testCases.set(
@@ -597,8 +714,8 @@ function generateStatsCommandTestsForAggFunction(
     }
 
     // test only numeric functions for now
-    if (params[0].type === 'number') {
-      const nestedBuiltin = 'numberField / 2';
+    if (isNumericType(params[0].type)) {
+      const nestedBuiltin = 'doubleField / 2';
       const fieldMappingWithNestedBuiltinFunctions = getFieldMapping(params);
       fieldMappingWithNestedBuiltinFunctions[0].name = nestedBuiltin;
 
@@ -610,16 +727,16 @@ function generateStatsCommandTestsForAggFunction(
         },
         { withTypes: false }
       )[0].declaration;
-      // from a_index | STATS aggFn( numberField / 2 )
+      // from a_index | STATS aggFn( doubleField / 2 )
       testCases.set(`from a_index | stats ${fnSignatureWithBuiltinString}`, []);
       testCases.set(`from a_index | stats var0 = ${fnSignatureWithBuiltinString}`, []);
-      testCases.set(`from a_index | stats avg(numberField), ${fnSignatureWithBuiltinString}`, []);
+      testCases.set(`from a_index | stats avg(doubleField), ${fnSignatureWithBuiltinString}`, []);
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithBuiltinString}`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithBuiltinString}`,
         []
       );
 
-      const nestedEvalAndBuiltin = 'round(numberField / 2)';
+      const nestedEvalAndBuiltin = 'round(doubleField / 2)';
       const fieldMappingWithNestedEvalAndBuiltinFunctions = getFieldMapping(params);
       fieldMappingWithNestedBuiltinFunctions[0].name = nestedEvalAndBuiltin;
 
@@ -631,18 +748,18 @@ function generateStatsCommandTestsForAggFunction(
         },
         { withTypes: false }
       )[0].declaration;
-      // from a_index | STATS aggFn( round(numberField / 2) )
+      // from a_index | STATS aggFn( round(doubleField / 2) )
       testCases.set(`from a_index | stats ${fnSignatureWithEvalAndBuiltinString}`, []);
       testCases.set(`from a_index | stats var0 = ${fnSignatureWithEvalAndBuiltinString}`, []);
       testCases.set(
-        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString}`,
+        `from a_index | stats avg(doubleField), ${fnSignatureWithEvalAndBuiltinString}`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
         []
       );
-      // from a_index | STATS aggFn(round(numberField / 2) ) BY round(numberField / 2)
+      // from a_index | STATS aggFn(round(doubleField / 2) ) BY round(doubleField / 2)
       testCases.set(
         `from a_index | stats ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}`,
         []
@@ -652,19 +769,19 @@ function generateStatsCommandTestsForAggFunction(
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
+        `from a_index | stats avg(doubleField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+        `from a_index | stats avg(doubleField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
         []
       );
       testCases.set(
-        `from a_index | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+        `from a_index | stats avg(doubleField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
         []
       );
     }
@@ -682,7 +799,7 @@ function generateStatsCommandTestsForAggFunction(
         .filter(({ constantOnly }) => !constantOnly)
         .map(
           (_) =>
-            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
+            `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(doubleField)] of type [double]`
         );
       testCases.set(
         `from a_index | stats var = ${
@@ -849,9 +966,17 @@ function generateSortCommandTestsForAggFunction(
 const generateSortCommandTestsForGroupingFunction = generateSortCommandTestsForAggFunction;
 
 const fieldTypesToConstants: Record<SupportedFieldType, string> = {
-  string: '"a"',
-  number: '5',
-  date: 'now()',
+  text: '"a"',
+  keyword: '"a"',
+  double: '5.5',
+  integer: '5',
+  long: '5',
+  unsigned_long: '5',
+  counter_integer: '5',
+  counter_long: '5',
+  counter_double: '5.5',
+  date: 'to_datetime("2021-01-01T00:00:00Z")',
+  date_period: 'to_date_period("2021-01-01/2021-01-02")',
   boolean: 'true',
   version: 'to_version("1.0.0")',
   ip: 'to_ip("127.0.0.1")',
@@ -887,8 +1012,8 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
 }
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
-
 const toInteger = evalFunctionDefinitions.find(({ name }) => name === 'to_integer')!;
+const toDoubleSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_double')!;
 const toStringSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_string')!;
 const toDateSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_datetime')!;
 const toBooleanSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_boolean')!;
@@ -903,10 +1028,12 @@ const toCartesianShapeSignature = evalFunctionDefinitions.find(
 )!;
 const toVersionSignature = evalFunctionDefinitions.find(({ name }) => name === 'to_version')!;
 
+// We don't have full list for long, unsigned_long, etc.
 const nestedFunctions: Record<SupportedFieldType, string> = {
-  number: prepareNestedFunction(toInteger),
-  string: prepareNestedFunction(toStringSignature),
-  date: prepareNestedFunction(toDateSignature),
+  double: prepareNestedFunction(toDoubleSignature),
+  integer: prepareNestedFunction(toInteger),
+  text: prepareNestedFunction(toStringSignature),
+  keyword: prepareNestedFunction(toStringSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
   ip: prepareNestedFunction(toIpSignature),
   version: prepareNestedFunction(toVersionSignature),
@@ -914,6 +1041,8 @@ const nestedFunctions: Record<SupportedFieldType, string> = {
   geo_shape: prepareNestedFunction(toGeoShapeSignature),
   cartesian_point: prepareNestedFunction(toCartesianPointSignature),
   cartesian_shape: prepareNestedFunction(toCartesianShapeSignature),
+  // @ts-expect-error
+  datetime: prepareNestedFunction(toDateSignature),
 };
 
 function getFieldName(
@@ -929,14 +1058,10 @@ function getFieldName(
 }
 
 const literals = {
-  chrono_literal: chronoLiterals[0].name,
-  time_literal: timeLiterals[0].name,
+  time_literal: timeUnits[0],
 };
 
-function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
-  if (typeString === 'chrono_literal') {
-    return literals[typeString];
-  }
+function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
@@ -974,6 +1099,7 @@ function getFieldMapping(
     number: '5',
     date: 'now()',
   };
+
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
     if (isSupportedFieldType(typeString)) {
@@ -1000,7 +1126,7 @@ function getFieldMapping(
     }
     if (/literal$/.test(typeString) && useLiterals) {
       return {
-        name: getLiteralType(typeString as 'chrono_literal' | 'time_literal'),
+        name: getLiteralType(typeString as 'time_literal'),
         type,
         ...rest,
       };
@@ -1012,7 +1138,7 @@ function getFieldMapping(
         ...rest,
       };
     }
-    return { name: 'stringField', type, ...rest };
+    return { name: 'textField', type, ...rest };
   });
 }
 
@@ -1113,8 +1239,12 @@ function generateIncorrectlyTypedParameters(
       }
       const fieldName = wrongFieldMapping[i].name;
       if (
-        fieldName === 'numberField' &&
-        signatures.every((signature) => getParamAtPosition(signature, i)?.type !== 'string')
+        fieldName === 'doubleField' &&
+        signatures.every(
+          (signature) =>
+            getParamAtPosition(signature, i)?.type !== 'keyword' ||
+            getParamAtPosition(signature, i)?.type !== 'text'
+        )
       ) {
         return;
       }

@@ -21,23 +21,23 @@ import { validateExpression } from './validation';
 const logThresholdDefaultActionMessage = i18n.translate(
   'xpack.infra.logs.alerting.threshold.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active.
+'{{rule.name}}' is active.
 
-\\{\\{^context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\}\\{\\{context.matchingDocuments\\}\\} log entries have matched the following conditions: \\{\\{context.conditions\\}\\}\\{\\{/context.isRatio\\}\\}
-\\{\\{#context.isRatio\\}\\}\\{\\{#context.group\\}\\}\\{\\{context.group\\}\\} - \\{\\{/context.group\\}\\} Ratio of the count of log entries matching \\{\\{context.numeratorConditions\\}\\} to the count of log entries matching \\{\\{context.denominatorConditions\\}\\} was \\{\\{context.ratio\\}\\}\\{\\{/context.isRatio\\}\\}
+'{{^context.isRatio}}{{#context.group}}{{context.group}}' - '{{/context.group}}{{context.matchingDocuments}}' log entries have matched the following conditions: '{{context.conditions}}{{/context.isRatio}}'
+'{{#context.isRatio}}{{#context.group}}{{context.group}}' - '{{/context.group}}' Ratio of the count of log entries matching '{{context.numeratorConditions}}' to the count of log entries matching '{{context.denominatorConditions}}' was '{{context.ratio}}{{/context.isRatio}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 const logThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.logs.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+    defaultMessage: `'{{rule.name}}' has recovered.
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );

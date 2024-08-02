@@ -89,7 +89,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
             : this.content_field[hit._index as string];
 
         // we need to iterate over the _source object to get the value of complex key definition such as metadata.source
-        const valueForSelectedField = getValueForSelectedField(hit._source, pageContentFieldKey);
+        const valueForSelectedField = getValueForSelectedField(hit, pageContentFieldKey);
 
         return new Document({
           pageContent: valueForSelectedField,

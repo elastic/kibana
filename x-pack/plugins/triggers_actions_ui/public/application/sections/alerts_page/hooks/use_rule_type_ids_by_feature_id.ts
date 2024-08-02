@@ -8,7 +8,7 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import { mapValues } from 'lodash';
-import { observabilityFeatureIds } from '../../alerts_table/constants';
+import { observabilityFeatureIds, stackFeatureIds } from '../../alerts_table/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
 import { RuleTypeIndex } from '../../../../types';
 
@@ -33,10 +33,14 @@ export const useRuleTypeIdsByFeatureId = (ruleTypesIndex: RuleTypeIndex) =>
     const map = Array.from(ruleTypesIndex.entries()).reduce<RuleTypeIdsByFeatureId<Set<string>>>(
       (types, [key, value]) => {
         let producer = value.producer as keyof RuleTypeIdsByFeatureId;
-        // All o11y apps are listed under 'observability' to create a grouped filter
-        producer = observabilityFeatureIds.includes(producer)
-          ? AlertConsumers.OBSERVABILITY
-          : producer;
+        // Some o11y apps are listed under 'observability' to create a grouped filter
+        if (observabilityFeatureIds.includes(producer)) {
+          producer = AlertConsumers.OBSERVABILITY;
+        }
+        // Stack includes ML in this context
+        if (stackFeatureIds.includes(producer)) {
+          producer = AlertConsumers.STACK_ALERTS;
+        }
         // Multi consumer rule type ids should be listed both in Observability and Stack alerts
         if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(value.id)) {
           (types[AlertConsumers.OBSERVABILITY] =

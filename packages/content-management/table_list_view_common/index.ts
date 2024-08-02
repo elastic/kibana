@@ -11,6 +11,8 @@ import type { SavedObjectsReference } from '@kbn/content-management-content-edit
 export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
+  updatedBy?: string;
+  createdAt?: string;
   createdBy?: string;
   managed?: boolean;
   references: SavedObjectsReference[];

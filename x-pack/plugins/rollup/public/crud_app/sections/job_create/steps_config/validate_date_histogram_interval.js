@@ -38,7 +38,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
       return [
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidCalendarInterval"
-          defaultMessage="The '{unit}' unit only allows values of 1. Try {suggestion}."
+          defaultMessage="The ''{unit}'' unit only allows values of 1. Try {suggestion}."
           values={{
             unit,
             suggestion: (

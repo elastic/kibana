@@ -30,19 +30,17 @@ exports[`Should render default props 1`] = `
     }
   >
     <EuiPopoverTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Configure join metrics"
         id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
-        values={Object {}}
       />
     </EuiPopoverTitle>
     <EuiFormHelpText
       className="mapJoinExpressionHelpText"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
         id="xpack.maps.layerPanel.metricsExpression.helpText"
-        values={Object {}}
       />
     </EuiFormHelpText>
     <MetricsEditor
@@ -92,19 +90,17 @@ exports[`Should render metrics expression for metrics 1`] = `
     }
   >
     <EuiPopoverTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Configure join metrics"
         id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
-        values={Object {}}
       />
     </EuiPopoverTitle>
     <EuiFormHelpText
       className="mapJoinExpressionHelpText"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
         id="xpack.maps.layerPanel.metricsExpression.helpText"
-        values={Object {}}
       />
     </EuiFormHelpText>
     <MetricsEditor

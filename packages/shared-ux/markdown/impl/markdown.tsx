@@ -84,9 +84,6 @@ export const Markdown = ({
 
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {
-    if (!children && !markdownContent) {
-      throw new Error('Markdown content is required in [readOnly] mode');
-    }
     return (
       <EuiMarkdownFormat
         textSize={'relative'}
@@ -99,7 +96,7 @@ export const Markdown = ({
         // There was a trick to pass style as a part of props in the legacy React <Markdown> component
         style={restProps.style}
       >
-        {children ?? markdownContent!}
+        {children ?? markdownContent ?? ''}
       </EuiMarkdownFormat>
     );
   }

@@ -75,6 +75,7 @@ export const getCategoryRequest = (
     timeFieldName,
     undefined,
     query,
+    undefined,
     wrap,
     undefined,
     undefined,
@@ -97,10 +98,10 @@ export const fetchCategories = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   fieldNames: string[],
-  logger: Logger,
+  logger?: Logger,
   // The default value of 1 means no sampling will be used
   sampleProbability: number = 1,
-  emitError: (m: string) => void,
+  emitError?: (m: string) => void,
   abortSignal?: AbortSignal
 ): Promise<FetchCategoriesResponse[]> => {
   const randomSamplerWrapper = createRandomSamplerWrapper({
@@ -122,14 +123,19 @@ export const fetchCategories = async (
 
   function reportError(fieldName: string, error: unknown) {
     if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch category aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch category aggregation for fieldName "${fieldName}".`);
+      if (logger) {
+        logger.error(
+          `Failed to fetch category aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+            error,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch category aggregation for fieldName "${fieldName}".`);
+      }
     }
   }
 

@@ -12,8 +12,8 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from '../column_types';
 import { getErrorsForDateReference } from './utils';
-import type { OperationDefinition } from '..';
-import { combineErrorMessages, getFormatFromPreviousColumn } from '../helpers';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
+import { getFormatFromPreviousColumn } from '../helpers';
 import { FormBasedLayer } from '../../../types';
 
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
@@ -90,26 +90,37 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
       return true;
     },
     getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
-      return combineErrorMessages([
-        getErrorsForDateReference(layer, columnId, NORMALIZE_BY_UNIT_NAME),
-        !(layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit
-          ? [
-              i18n.translate('xpack.lens.indexPattern.timeScale.missingUnit', {
-                defaultMessage: 'No unit specified for normalize by unit.',
-              }),
-            ]
-          : [],
+      const errors: FieldBasedOperationErrorMessage[] = getErrorsForDateReference(
+        layer,
+        columnId,
+        NORMALIZE_BY_UNIT_NAME
+      );
+
+      if (!(layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit) {
+        errors.push({
+          uniqueId: '',
+          message: i18n.translate('xpack.lens.indexPattern.timeScale.missingUnit', {
+            defaultMessage: 'No unit specified for normalize by unit.',
+          }),
+        });
+      }
+
+      if (
         ['s', 'm', 'h', 'd'].indexOf(
-          (layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit || 's'
+          (layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit ?? 's'
         ) === -1
-          ? [
-              i18n.translate('xpack.lens.indexPattern.timeScale.wrongUnit', {
-                defaultMessage: 'Unknown unit specified: use s, m, h or d.',
-              }),
-            ]
-          : [],
-      ]);
+      ) {
+        errors.push({
+          uniqueId: '',
+          message: i18n.translate('xpack.lens.indexPattern.timeScale.wrongUnit', {
+            defaultMessage: 'Unknown unit specified: use s, m, h or d.',
+          }),
+        });
+      }
+
+      return errors;
     },
+
     filterable: false,
     shiftable: false,
   };

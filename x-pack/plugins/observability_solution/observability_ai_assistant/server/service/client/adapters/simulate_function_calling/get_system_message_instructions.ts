@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONTEXT_FUNCTION_NAME } from '../../../../functions/context';
 import { FunctionDefinition } from '../../../../../common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
@@ -17,7 +18,7 @@ export function getSystemMessageInstructions({
     return `In this environment, you have access to a set of tools you can use to answer the user's question.
 
     ${
-      functions?.find((fn) => fn.name === 'context')
+      functions?.find((fn) => fn.name === CONTEXT_FUNCTION_NAME)
         ? `The "context" tool is ALWAYS used after a user question. Even if it was used before, your job is to answer the last user question,
     even if the "context" tool was executed after that. Consider the tools you need to answer the user's question.`
         : ''
@@ -33,45 +34,37 @@ export function getSystemMessageInstructions({
 
     Given the following tool:
 
-    {
-      "name": "my_tool",
-      "description: "A tool to call",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "myProperty": {
-            "type": "string"
-          }
-        }
-      }
-    }
+    ${JSON.stringify({
+      name: 'my_tool',
+      description: 'A tool to call',
+      parameters: {
+        type: 'object',
+        properties: {
+          myProperty: {
+            type: 'string',
+          },
+        },
+      },
+    })}
 
     Use it the following way:
 
     ${TOOL_USE_START}
     \`\`\`json
-    {
-      "name": "my_tool",
-      "input": {
-        "myProperty": "myValue"
-      }
-    }
+    ${JSON.stringify({ name: 'my_tool', input: { myProperty: 'myValue' } })}
     \`\`\`\
     ${TOOL_USE_END}
 
     Given the following tool:
-    {
-      "name": "my_tool_without_parameters",
-      "description": "A tool to call without parameters",
-    }
+    ${JSON.stringify({
+      name: 'my_tool_without_parameters',
+      description: 'A tool to call without parameters',
+    })}
 
     Use it the following way: 
     ${TOOL_USE_START}
     \`\`\`json
-    {
-      "name": "my_tool_without_parameters",
-      "input": {}
-    }
+    ${JSON.stringify({ name: 'my_tool_without_parameters', input: {} })}
     \`\`\`\
     ${TOOL_USE_END}
 

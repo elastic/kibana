@@ -17,20 +17,18 @@ exports[`AddData render 1`] = `
         <h2
           id="homDataAdd__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Get started by adding integrations"
             id="home.addData.sectionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
       <EuiSpacer />
       <EuiText>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, play with a sample data set."
             id="home.addData.text"
-            values={Object {}}
           />
         </p>
       </EuiText>
@@ -62,10 +60,9 @@ exports[`AddData render 1`] = `
               iconType="plusInCircle"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Add integrations"
                 id="home.addData.addDataButtonLabel"
-                values={Object {}}
               />
             </EuiButton>
           </RedirectAppLinks>
@@ -78,10 +75,9 @@ exports[`AddData render 1`] = `
             href="#/tutorial_directory/sampleData"
             iconType="documents"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Try sample data"
               id="home.addData.sampleDataButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -93,10 +89,9 @@ exports[`AddData render 1`] = `
             href="#/tutorial_directory/fileDataViz"
             iconType="importAction"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Upload a file"
               id="home.addData.uploadFileButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

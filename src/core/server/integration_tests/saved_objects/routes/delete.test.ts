@@ -55,7 +55,8 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
     const config = setupConfig();
-    registerDeleteRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerDeleteRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

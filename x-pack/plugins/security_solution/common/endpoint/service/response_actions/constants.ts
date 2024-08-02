@@ -7,13 +7,13 @@
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
-export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
+export type ResponseActionStatus = (typeof RESPONSE_ACTION_STATUS)[number];
 
 export const RESPONSE_ACTION_TYPE = ['automated', 'manual'] as const;
-export type ResponseActionType = typeof RESPONSE_ACTION_TYPE[number];
+export type ResponseActionType = (typeof RESPONSE_ACTION_TYPE)[number];
 
 export const RESPONSE_ACTION_AGENT_TYPE = ['endpoint', 'sentinel_one', 'crowdstrike'] as const;
-export type ResponseActionAgentType = typeof RESPONSE_ACTION_AGENT_TYPE[number];
+export type ResponseActionAgentType = (typeof RESPONSE_ACTION_AGENT_TYPE)[number];
 
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
@@ -27,11 +27,10 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'get-file',
   'execute',
   'upload',
-  // TODO:  for API changes in a subsequent PR
-  // 'scan',
+  'scan',
 ] as const;
 
-export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
+export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
   'isolate',
@@ -41,7 +40,7 @@ export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiComma
 ];
 
 export type EnabledAutomatedResponseActionsCommands =
-  typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];
+  (typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)[number];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -54,11 +53,10 @@ export const ENDPOINT_CAPABILITIES = [
   'get_file',
   'execute',
   'upload_file',
-  // TODO:  for API changes in a subsequent PR
-  // 'scan',
+  'scan',
 ] as const;
 
-export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
+export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
 
 /**
  * The list of possible console command names that generate a Response Action to be dispatched
@@ -67,17 +65,16 @@ export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
 export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'release',
+  'processes',
   'kill-process',
   'suspend-process',
-  'processes',
   'get-file',
   'execute',
   'upload',
-  // TODO: for API changes in a subsequent PR
-  // 'scan',
+  'scan',
 ] as const;
 
-export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
+export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'
@@ -102,8 +99,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   'get-file': 'writeFileOperations',
   execute: 'writeExecuteOperations',
   upload: 'writeFileOperations',
-  // TODO:  for API changes in a subsequent PR
-  // scan: 'writeScanOperations',
+  scan: 'writeScanOperations',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
@@ -117,8 +113,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   'kill-process': 'kill-process',
   'suspend-process': 'suspend-process',
   upload: 'upload',
-  // TODO:  for API changes in a subsequent PR
-  // scan: 'scan',
+  scan: 'scan',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
@@ -132,8 +127,7 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   'kill-process': 'kill-process',
   'suspend-process': 'suspend-process',
   upload: 'upload',
-  // TODO:  for API changes in a subsequent PR
-  // scan: 'scan',
+  scan: 'scan',
 });
 
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
@@ -147,8 +141,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   'kill-process': 'kill_process',
   'suspend-process': 'suspend_process',
   upload: 'upload_file',
-  // TODO:  for API changes in a subsequent PR
-  // scan: 'scan',
+  scan: 'scan',
 });
 
 /**
@@ -165,8 +158,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   processes: 'canGetRunningProcesses',
   'kill-process': 'canKillProcess',
   'suspend-process': 'canSuspendProcess',
-  // TODO:  for API changes in a subsequent PR
-  // scan: 'canWriteScanOperations',
+  scan: 'canWriteScanOperations',
 });
 
 // 4 hrs in seconds
@@ -182,3 +174,14 @@ export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentT
     sentinel_one: 'Elastic@123',
     crowdstrike: 'tbd..',
   });
+
+/**
+ * Map of Agent Type to alert field that holds the Agent ID for that agent type
+ */
+export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
+  Record<ResponseActionAgentType, string>
+> = Object.freeze({
+  endpoint: 'agent.id',
+  sentinel_one: 'observer.serial_number',
+  crowdstrike: 'device.id',
+});

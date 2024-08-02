@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
+          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
+          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id!);
 
           // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
           // as this route intentionally has a waitFor within it and should only return when the query has

@@ -164,7 +164,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('stays on listing page if title matches two dashboards', async function () {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.saveDashboard('two words', { needsConfirm: true });
+        await PageObjects.dashboard.saveDashboard('two words', {
+          saveAsNew: true,
+          needsConfirm: true,
+        });
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl + '&title=two%20words';

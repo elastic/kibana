@@ -10,7 +10,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ApplicationStart } from '@kbn/core/public';
-import { NotificationsSetup, IUiSettingsClient } from '@kbn/core/public';
+import { NotificationsSetup, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -48,6 +48,8 @@ export interface AppServices {
   application: ApplicationStart;
   license: ILicense | null;
   consolePlugin?: ConsolePluginStart;
+  overlays: OverlayStart;
+  http: HttpStart;
 }
 
 type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;

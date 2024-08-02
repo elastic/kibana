@@ -43,9 +43,6 @@
           "_id" : "rC2jSncB1VO1nvgvsKx6",
           "_score" : null,
           "_source" : {
-            "agent" : {
-              "type" : "metricbeat"
-            },
             "logstash_stats" : {
               "logstash" : {
                 "version" : "7.8.0",

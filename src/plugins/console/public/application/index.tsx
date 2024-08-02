@@ -27,7 +27,7 @@ import { ServicesContextProvider, EditorContextProvider, RequestContextProvider 
 import { createApi, createEsHostService } from './lib';
 import { ConsoleStartServices } from '../types';
 
-export interface BootDependencies {
+export interface BootDependencies extends ConsoleStartServices {
   http: HttpSetup;
   docLinkVersion: string;
   notifications: NotificationsSetup;
@@ -36,7 +36,7 @@ export interface BootDependencies {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isMonacoEnabled: boolean;
-  startServices: ConsoleStartServices;
+  isDevMode: boolean;
 }
 
 export async function renderApp({
@@ -48,7 +48,8 @@ export async function renderApp({
   docLinks,
   autocompleteInfo,
   isMonacoEnabled,
-  startServices,
+  isDevMode,
+  ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -71,6 +72,7 @@ export async function renderApp({
     <KibanaRenderContextProvider {...startServices}>
       <ServicesContextProvider
         value={{
+          ...startServices,
           docLinkVersion,
           docLinks,
           services: {
@@ -86,8 +88,8 @@ export async function renderApp({
           },
           config: {
             isMonacoEnabled,
+            isDevMode,
           },
-          startServices,
         }}
       >
         <RequestContextProvider>

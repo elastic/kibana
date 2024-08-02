@@ -83,13 +83,13 @@ export const EditField = React.memo(
                   <h2 data-test-subj="flyoutTitle">
                     {isMultiField
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.editMultiFieldTitle', {
-                          defaultMessage: "Edit multi-field '{fieldName}'",
+                          defaultMessage: "Edit multi-field ''{fieldName}''",
                           values: {
                             fieldName: limitStringLength(field.source.name),
                           },
                         })
                       : i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldTitle', {
-                          defaultMessage: "Edit field '{fieldName}'",
+                          defaultMessage: "Edit field ''{fieldName}''",
                           values: {
                             fieldName: limitStringLength(field.source.name),
                           },

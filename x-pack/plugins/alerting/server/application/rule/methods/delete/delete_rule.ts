@@ -114,6 +114,11 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
 
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,
+    context.backfillClient.deleteBackfillForRules({
+      ruleIds: [id],
+      namespace: context.namespace,
+      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+    }),
     apiKeyToInvalidate && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
           { apiKeys: [apiKeyToInvalidate] },

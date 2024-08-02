@@ -26,6 +26,8 @@ import {
   createAPMTransactionErrorRateIndicator,
   createSLO,
 } from './fixtures/slo';
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('TransformManager', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -44,7 +46,13 @@ describe('TransformManager', () => {
         const generators: Record<IndicatorTypes, TransformGenerator> = {
           'sli.apm.transactionDuration': new DummyTransformGenerator(),
         };
-        const service = new DefaultTransformManager(generators, esClientMock, loggerMock, spaceId);
+        const service = new DefaultTransformManager(
+          generators,
+          esClientMock,
+          loggerMock,
+          spaceId,
+          dataViewsService
+        );
 
         await expect(
           service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
@@ -60,7 +68,8 @@ describe('TransformManager', () => {
           generators,
           esClientMock,
           loggerMock,
-          spaceId
+          spaceId,
+          dataViewsService
         );
 
         await expect(
@@ -80,7 +89,8 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
-        spaceId
+        spaceId,
+        dataViewsService
       );
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
@@ -101,7 +111,8 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
-        spaceId
+        spaceId,
+        dataViewsService
       );
 
       await transformManager.preview('slo-transform-id');
@@ -120,7 +131,8 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
-        spaceId
+        spaceId,
+        dataViewsService
       );
 
       await transformManager.start('slo-transform-id');
@@ -139,7 +151,8 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
-        spaceId
+        spaceId,
+        dataViewsService
       );
 
       await transformManager.stop('slo-transform-id');
@@ -158,7 +171,8 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
-        spaceId
+        spaceId,
+        dataViewsService
       );
 
       await transformManager.uninstall('slo-transform-id');
@@ -178,7 +192,8 @@ describe('TransformManager', () => {
         generators,
         esClientMock,
         loggerMock,
-        spaceId
+        spaceId,
+        dataViewsService
       );
 
       await transformManager.uninstall('slo-transform-id');
@@ -189,13 +204,21 @@ describe('TransformManager', () => {
 });
 
 class DummyTransformGenerator extends TransformGenerator {
-  getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
+  async getTransformParams(
+    slo: SLODefinition,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     return {} as TransformPutTransformRequest;
   }
 }
 
 class FailTransformGenerator extends TransformGenerator {
-  getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
+  getTransformParams(
+    slo: SLODefinition,
+    spaceId: string,
+    dataViewService: DataViewsService
+  ): Promise<TransformPutTransformRequest> {
     throw new Error('Some error');
   }
 }

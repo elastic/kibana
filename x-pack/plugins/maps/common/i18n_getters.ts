@@ -57,7 +57,7 @@ export function getDataViewSelectPlaceholder() {
 
 export function getDataViewNotFoundMessage(id: string) {
   return i18n.translate('xpack.maps.dataView.notFoundMessage', {
-    defaultMessage: `Unable to find data view '{id}'`,
+    defaultMessage: `Unable to find data view ''{id}''`,
     values: { id },
   });
 }

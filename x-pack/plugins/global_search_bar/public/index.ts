@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializer } from '@kbn/core/public';
 import { GlobalSearchBarPlugin } from './plugin';
 
-export const plugin: PluginInitializer<{}, {}, {}, {}> = () => new GlobalSearchBarPlugin();
+export const plugin: PluginInitializer<{}, {}, {}, {}> = (initializerContext) =>
+  new GlobalSearchBarPlugin(initializerContext);

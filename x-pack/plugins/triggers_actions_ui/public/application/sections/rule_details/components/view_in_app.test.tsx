@@ -7,8 +7,9 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
@@ -27,7 +28,7 @@ describe('view in app', () => {
       let component: ReactWrapper;
       await act(async () => {
         // use mount as we need useEffect to run
-        component = mount(<ViewInApp rule={rule} />);
+        component = mountWithIntl(<ViewInApp rule={rule} />);
 
         await waitForUseEffect();
 
@@ -47,7 +48,7 @@ describe('view in app', () => {
       let component: ReactWrapper;
       act(async () => {
         // use mount as we need useEffect to run
-        component = mount(<ViewInApp rule={rule} />);
+        component = mountWithIntl(<ViewInApp rule={rule} />);
 
         await waitForUseEffect();
 

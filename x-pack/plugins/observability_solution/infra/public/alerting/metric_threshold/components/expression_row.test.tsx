@@ -9,7 +9,7 @@ import { ResolvedDataView } from '../../../utils/data_view';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
@@ -88,7 +88,7 @@ describe('ExpressionRow', () => {
   it('should display thresholds as a percentage for pct metrics', async () => {
     const expression = {
       metric: 'system.cpu.user.pct',
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
@@ -107,7 +107,7 @@ describe('ExpressionRow', () => {
   it('should display thresholds as a decimal for all other metrics', async () => {
     const expression = {
       metric: 'system.load.1',
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
@@ -125,7 +125,7 @@ describe('ExpressionRow', () => {
   it('should render a helpText for the of expression', async () => {
     const expression = {
       metric: 'system.load.1',
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',

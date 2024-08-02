@@ -32,8 +32,13 @@ describe('Versioned router', () => {
 
   it('provides the expected metadata', () => {
     const versionedRouter = CoreVersionedRouter.from({ router });
-    versionedRouter.get({ path: '/test/{id}', access: 'internal' });
-    versionedRouter.post({ path: '/test', access: 'internal' });
+    versionedRouter.get({ path: '/test/{id}', access: 'internal', deprecated: true });
+    versionedRouter.post({
+      path: '/test',
+      access: 'internal',
+      summary: 'Post test',
+      description: 'Post test description',
+    });
     versionedRouter.delete({ path: '/test', access: 'internal' });
     expect(versionedRouter.getRoutes()).toMatchInlineSnapshot(`
       Array [
@@ -42,6 +47,7 @@ describe('Versioned router', () => {
           "method": "get",
           "options": Object {
             "access": "internal",
+            "deprecated": true,
           },
           "path": "/test/{id}",
         },
@@ -50,6 +56,8 @@ describe('Versioned router', () => {
           "method": "post",
           "options": Object {
             "access": "internal",
+            "description": "Post test description",
+            "summary": "Post test",
           },
           "path": "/test",
         },

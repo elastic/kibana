@@ -55,10 +55,10 @@ describe('wrapSuppressedEsqlAlerts', () => {
       },
     });
 
-    expect(alerts[0]._id).toEqual('d94fb11e6062d7dce881ea07d952a1280398663a');
-    expect(alerts[0]._source[ALERT_UUID]).toEqual('d94fb11e6062d7dce881ea07d952a1280398663a');
+    expect(alerts[0]._id).toEqual('ed7fbf575371c898e0f0aea48cdf0bf1865939a9');
+    expect(alerts[0]._source[ALERT_UUID]).toEqual('ed7fbf575371c898e0f0aea48cdf0bf1865939a9');
     expect(alerts[0]._source[ALERT_URL]).toContain(
-      'http://somekibanabaseurl.com/app/security/alerts/redirect/d94fb11e6062d7dce881ea07d952a1280398663a?index=.alerts-security.alerts-default'
+      'http://somekibanabaseurl.com/app/security/alerts/redirect/ed7fbf575371c898e0f0aea48cdf0bf1865939a9?index=.alerts-security.alerts-default'
     );
     expect(alerts[0]._source[ALERT_SUPPRESSION_DOCS_COUNT]).toEqual(0);
     expect(alerts[0]._source[ALERT_INSTANCE_ID]).toEqual(

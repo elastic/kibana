@@ -33,20 +33,20 @@ import { validateCustomThreshold } from '../components/custom_threshold/componen
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active.
+'{{rule.name}}' is active.
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 const thresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+    defaultMessage: `'{{rule.name}}' has recovered.
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );

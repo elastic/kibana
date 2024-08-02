@@ -33,13 +33,11 @@ export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  availableFields$: AvailableFields$;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 export type DataFetch$ = Observable<{
   options: {
     reset: boolean;
@@ -152,7 +150,7 @@ export function getDataStateContainer({
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications } = services;
+  const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
 
@@ -180,7 +178,6 @@ export function getDataStateContainer({
     main$: new BehaviorSubject<DataMainMsg>(initialState),
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
-    availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>(initialState),
   };
 
   let autoRefreshDone: AutoRefreshDoneFn | undefined;
@@ -248,6 +245,12 @@ export function getDataStateContainer({
             });
             return;
           }
+
+          await profilesManager.resolveDataSourceProfile({
+            dataSource: getAppState().dataSource,
+            dataView: getSavedSearch().searchSource.getField('index'),
+            query: getAppState().query,
+          });
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;

@@ -6,25 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { EOL, hostname } from 'node:os';
+import url, { URL } from 'node:url';
+import type { Duration } from 'moment';
 import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
+import { IHttpConfig, SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
-import type { ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
-
-import { hostname, EOL } from 'node:os';
-import url, { URL } from 'node:url';
-
-import type { Duration } from 'moment';
+import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
-import { CspConfigType, CspConfig } from './csp';
+import { CspConfig, CspConfigType } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
-  securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
+  securityResponseHeadersSchema,
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
+import { PermissionsPolicyConfigType } from './permissions_policy';
 
 const SECOND = 1000;
 
@@ -80,7 +79,9 @@ const configSchema = schema.object(
       },
     }),
     cdn: schema.object({
-      url: schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL })),
+      url: schema.nullable(
+        schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL }))
+      ),
     }),
     oas: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
@@ -121,6 +122,9 @@ const configSchema = schema.object(
         }
       },
     }),
+    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+      defaultValue: 'http1',
+    }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -141,6 +145,9 @@ const configSchema = schema.object(
     }),
     payloadTimeout: schema.number({
       defaultValue: 20 * SECOND,
+    }),
+    http2: schema.object({
+      allowUnsecure: schema.boolean({ defaultValue: false }),
     }),
     compression: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -257,6 +264,13 @@ const configSchema = schema.object(
         return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
       }
 
+      if (rawConfig.protocol === 'http2' && !rawConfig.http2.allowUnsecure) {
+        const err = ensureValidTLSConfigForH2C(rawConfig.ssl);
+        if (err) {
+          return err;
+        }
+      }
+
       if (
         rawConfig.ssl.enabled &&
         rawConfig.ssl.redirectHttpFromPort !== undefined &&
@@ -283,6 +297,7 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
 export class HttpConfig implements IHttpConfig {
   public name: string;
   public autoListen: boolean;
+  public protocol: HttpProtocol;
   public host: string;
   public keepaliveTimeout: number;
   public socketTimeout: number;
@@ -329,14 +344,16 @@ export class HttpConfig implements IHttpConfig {
   constructor(
     rawHttpConfig: HttpConfigType,
     rawCspConfig: CspConfigType,
-    rawExternalUrlConfig: ExternalUrlConfig
+    rawExternalUrlConfig: ExternalUrlConfig,
+    rawPermissionsPolicyConfig: PermissionsPolicyConfigType
   ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
     const { securityResponseHeaders, disableEmbedding } = parseRawSecurityResponseHeadersConfig(
-      rawHttpConfig.securityResponseHeaders
+      rawHttpConfig.securityResponseHeaders,
+      rawPermissionsPolicyConfig
     );
     this.securityResponseHeaders = securityResponseHeaders;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
@@ -350,6 +367,7 @@ export class HttpConfig implements IHttpConfig {
     );
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
+    this.protocol = rawHttpConfig.protocol;
     this.basePath = rawHttpConfig.basePath;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
@@ -375,4 +393,17 @@ export class HttpConfig implements IHttpConfig {
 
 const convertHeader = (entry: any): string => {
   return typeof entry === 'object' ? JSON.stringify(entry) : String(entry);
+};
+
+const ensureValidTLSConfigForH2C = (tlsConfig: TypeOf<typeof sslSchema>): string | undefined => {
+  if (!tlsConfig.enabled) {
+    return `http2 requires TLS to be enabled. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup`;
+  }
+  if (
+    !tlsConfig.supportedProtocols.includes(TLS_V1_2) &&
+    !tlsConfig.supportedProtocols.includes(TLS_V1_3)
+  ) {
+    return `http2 requires 'ssl.supportedProtocols' to include ${TLS_V1_2} or ${TLS_V1_3}. Use 'http2.allowUnsecure: true' to allow running http2 without a valid h2c setup`;
+  }
+  return undefined;
 };

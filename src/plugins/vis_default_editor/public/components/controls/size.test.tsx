@@ -63,7 +63,7 @@ describe('SizeParamEditor', () => {
 
   it('should set new parsed value', () => {
     const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
-    const input = comp.find('[type="number"]');
+    const input = comp.find('input[type="number"]');
     input.simulate('change', { target: { value: '3' } });
 
     expect(defaultProps.setValue).toBeCalledWith(3);
@@ -76,7 +76,7 @@ describe('SizeParamEditor', () => {
 
   it('should call setTouched on blur', () => {
     const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
-    comp.find('[type="number"]').simulate('blur');
+    comp.find('input[type="number"]').simulate('blur');
 
     expect(defaultProps.setTouched).toHaveBeenCalledTimes(1);
   });

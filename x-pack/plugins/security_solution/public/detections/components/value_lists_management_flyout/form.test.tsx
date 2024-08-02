@@ -27,7 +27,7 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
   container,
   file
 ) => {
-  const fileChange = container.find('EuiFilePicker').prop('onChange');
+  const fileChange = container.find('EuiFilePickerClass').last().prop('onChange');
   await waitFor(() => {
     if (fileChange) {
       fileChange({ item: () => file } as unknown as FormEvent);

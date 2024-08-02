@@ -44,7 +44,7 @@ export class RequestFlyout extends PureComponent<Props> {
               {id ? (
                 <FormattedMessage
                   id="xpack.watcher.requestFlyout.namedTitle"
-                  defaultMessage="Request for '{id}'"
+                  defaultMessage="Request for ''{id}''"
                   values={{ id }}
                 />
               ) : (

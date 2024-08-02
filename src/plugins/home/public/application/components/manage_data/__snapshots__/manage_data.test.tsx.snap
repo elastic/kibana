@@ -20,10 +20,9 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
         <h2
           id="homDataManage__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Management"
             id="home.manageData.sectionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -113,10 +112,9 @@ exports[`ManageData render 1`] = `
         <h2
           id="homDataManage__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Management"
             id="home.manageData.sectionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -154,10 +152,9 @@ exports[`ManageData render 1`] = `
               href=""
               iconType="wrench"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Dev Tools"
                 id="home.manageData.devToolsButtonLabel"
-                values={Object {}}
               />
             </EuiButtonEmpty>
           </RedirectAppLinks>
@@ -186,10 +183,9 @@ exports[`ManageData render 1`] = `
               href=""
               iconType="gear"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Stack Management"
                 id="home.manageData.stackManagementButtonLabel"
-                values={Object {}}
               />
             </EuiButtonEmpty>
           </RedirectAppLinks>

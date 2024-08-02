@@ -20,6 +20,7 @@ import {
   type OverrideFieldGroupDetails,
   FieldsGroupNames,
   ExistenceFetchStatus,
+  AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -43,9 +44,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
-  additionalFieldGroups?: {
-    smartFields?: FieldsGroup<T>['fields'];
-  };
+  additionalFieldGroups?: AdditionalFieldGroups<T>;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {

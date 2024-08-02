@@ -37,13 +37,15 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  */
 export interface EmbeddablePackageState {
   type: string;
+  /**
+   * For react embeddables, this input must be runtime state.
+   */
   input: object;
   embeddableId?: string;
   size?: {
     width?: number;
     height?: number;
   };
-
   /**
    * Pass current search session id when navigating to an editor,
    * Editors could use it continue previous search session

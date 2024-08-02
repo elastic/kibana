@@ -27,6 +27,9 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
     async createPolicyButton() {
       return await testSubjects.find('createPolicyButton');
     },
+    async clickCreatePolicyButton() {
+      return await testSubjects.click('createPolicyButton');
+    },
     async fillNewPolicyForm(policy: Policy) {
       const {
         policyName,

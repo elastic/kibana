@@ -109,7 +109,7 @@ const CalloutSummaryComponent: React.FC<Props> = ({
     <>
       {showInvalidCallout(partitionedFieldMetadata.incompatible) && (
         <>
-          <IncompatibleCallout enrichedFieldMetadata={partitionedFieldMetadata.incompatible} />
+          <IncompatibleCallout ecsBasedFieldMetadata={partitionedFieldMetadata.incompatible} />
           <EuiSpacer size="s" />
         </>
       )}

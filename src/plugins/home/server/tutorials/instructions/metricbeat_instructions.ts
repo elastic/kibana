@@ -82,7 +82,7 @@ export const createMetricbeatInstructions = memoize(
             'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm',
           ],
           textPost: i18n.translate(
-            'home.tutorials.common.metricbeatInstructions.install.debTextPost',
+            'home.tutorials.common.metricbeatInstructions.install.rpmTextPost',
             {
               defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
               values: { link: 'https://www.elastic.co/downloads/beats/metricbeat' },

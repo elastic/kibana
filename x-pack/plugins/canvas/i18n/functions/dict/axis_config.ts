@@ -57,7 +57,7 @@ export const errors = {
   invalidPosition: (position: string) =>
     new Error(
       i18n.translate('xpack.canvas.functions.axisConfig.invalidPositionErrorMessage', {
-        defaultMessage: "Invalid position: '{position}'",
+        defaultMessage: "Invalid position: ''{position}''",
         values: {
           position,
         },
@@ -67,7 +67,7 @@ export const errors = {
     new Error(
       i18n.translate('xpack.canvas.functions.axisConfig.invalidMinDateStringErrorMessage', {
         defaultMessage:
-          "Invalid date string: '{min}'. 'min' must be a number, date in ms, or ISO8601 date string",
+          "Invalid date string: ''{min}''. 'min' must be a number, date in ms, or ISO8601 date string",
         values: {
           min,
         },
@@ -77,7 +77,7 @@ export const errors = {
     new Error(
       i18n.translate('xpack.canvas.functions.axisConfig.invalidMaxPositionErrorMessage', {
         defaultMessage:
-          "Invalid date string: '{max}'. 'max' must be a number, date in ms, or ISO8601 date string",
+          "Invalid date string: ''{max}''. 'max' must be a number, date in ms, or ISO8601 date string",
         values: {
           max,
         },

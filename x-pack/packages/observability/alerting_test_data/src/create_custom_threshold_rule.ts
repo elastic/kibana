@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FIRED_ACTIONS_ID } from './constants';
 import { createRule } from './create_rule';
@@ -38,7 +36,7 @@ export const createCustomThresholdRule = async (
     params: {
       criteria: ruleParams.params?.criteria || [
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           threshold: [1],
           timeSize: 1,
           timeUnit: 'm',

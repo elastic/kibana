@@ -62,6 +62,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
+      it('returns lastActivity as undefined when user does not have access to the data stream', async () => {
+        const resp = await callApiAs('viewerUser', `${type}-${dataset}-${namespace}`);
+        expect(resp.body.lastActivity).to.be(undefined);
+
+        // userPrivileges.canMonitor should be false for readUser
+        expect(resp.body.userPrivileges?.canMonitor).to.be(false);
+      });
+
       it('returns error when dataStream param is not provided', async () => {
         const expectedMessage = 'Data Stream name cannot be empty';
         const err = await expectToReject<DatasetQualityApiError>(() =>

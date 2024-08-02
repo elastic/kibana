@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import {
   unifiedSearchBarPlaceholder,
@@ -29,7 +28,6 @@ export function DependenciesInventory() {
         searchBarPlaceholder={unifiedSearchBarPlaceholder}
         searchBarBoolFilter={searchBarBoolFilter}
       />
-      <EuiSpacer size="s" />
       <DependenciesInventoryTable />
     </>
   );

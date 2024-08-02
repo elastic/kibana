@@ -15,8 +15,7 @@ import { useGetCaseConnectors } from './use_get_case_connectors';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/174356
-describe.skip('useGetCaseConnectors', () => {
+describe('useGetCaseConnectors', () => {
   const caseId = 'test-id';
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
@@ -31,11 +30,13 @@ describe.skip('useGetCaseConnectors', () => {
 
   it('calls getCaseConnectors with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
-    const { waitForNextUpdate } = renderHook(() => useGetCaseConnectors(caseId), {
+    const { waitFor } = renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith('test-id', abortCtrl.signal);
   });
@@ -49,11 +50,12 @@ describe.skip('useGetCaseConnectors', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseConnectors(caseId), {
+    const { waitFor } = renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

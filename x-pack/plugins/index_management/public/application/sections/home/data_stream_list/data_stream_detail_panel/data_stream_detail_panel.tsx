@@ -129,7 +129,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
-  const { history } = useAppContext();
+  const { history, config } = useAppContext();
   let indicesLink;
 
   let content;
@@ -314,7 +314,10 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Effective data retention',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
-          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.`,
+          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canEnableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
+          values: {
+            canEnableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
+          },
         }),
         content: (
           <ConditionalWrap

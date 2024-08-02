@@ -25,6 +25,7 @@ const configSchema = schema.object({
   deployments_url: schema.string({ defaultValue: '/deployments' }),
   deployment_url: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
+  organization_id: schema.maybe(schema.string()),
   billing_url: schema.maybe(schema.string()),
   performance_url: schema.maybe(schema.string()),
   users_and_roles_url: schema.maybe(schema.string()),
@@ -33,12 +34,18 @@ const configSchema = schema.object({
   projects_url: offeringBasedSchema({ serverless: schema.string({ defaultValue: '/projects/' }) }),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  onboarding: schema.maybe(
+    schema.object({
+      default_solution: schema.maybe(schema.string()),
+    })
+  ),
   serverless: schema.maybe(
     schema.object(
       {
         project_id: schema.maybe(schema.string()),
         project_name: schema.maybe(schema.string()),
         project_type: schema.maybe(schema.string()),
+        orchestrator_target: schema.maybe(schema.string()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -55,6 +62,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     deployments_url: true,
     deployment_url: true,
     id: true,
+    organization_id: true,
     billing_url: true,
     users_and_roles_url: true,
     performance_url: true,
@@ -67,6 +75,10 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
       project_id: true,
       project_name: true,
       project_type: true,
+      orchestrator_target: true,
+    },
+    onboarding: {
+      default_solution: true,
     },
   },
   schema: configSchema,

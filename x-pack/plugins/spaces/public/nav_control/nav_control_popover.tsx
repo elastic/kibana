@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
 import type { Space } from '../../common';
+import type { EventTracker } from '../analytics';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -37,6 +38,8 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   theme: WithEuiThemeProps['theme'];
+  solutionNavExperiment: Promise<boolean>;
+  eventTracker: EventTracker;
 }
 
 interface State {
@@ -44,6 +47,7 @@ interface State {
   loading: boolean;
   activeSpace: Space | null;
   spaces: Space[];
+  isSolutionNavEnabled: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
@@ -58,6 +62,7 @@ class NavControlPopoverUI extends Component<Props, State> {
       loading: false,
       activeSpace: null,
       spaces: [],
+      isSolutionNavEnabled: false,
     };
   }
 
@@ -69,12 +74,14 @@ class NavControlPopoverUI extends Component<Props, State> {
         });
       },
     });
+
+    this.props.solutionNavExperiment.then((isEnabled) => {
+      this.setState({ isSolutionNavEnabled: isEnabled });
+    });
   }
 
   public componentWillUnmount() {
-    if (this.activeSpace$) {
-      this.activeSpace$.unsubscribe();
-    }
+    this.activeSpace$?.unsubscribe();
   }
 
   public render() {
@@ -103,6 +110,8 @@ class NavControlPopoverUI extends Component<Props, State> {
           navigateToApp={this.props.navigateToApp}
           navigateToUrl={this.props.navigateToUrl}
           activeSpace={this.state.activeSpace}
+          isSolutionNavEnabled={this.state.isSolutionNavEnabled}
+          eventTracker={this.props.eventTracker}
         />
       );
     }

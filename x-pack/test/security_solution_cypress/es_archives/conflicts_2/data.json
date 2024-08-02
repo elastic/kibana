@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "tNWLUIYBpykOpthsMsB9",
-    "index": "conflicts-0002",
+    "index": "auditbeat-conflicts-0002",
     "source": {
       "@timestamp": "2023-02-14T03:45:06.527Z",
       "doc_id": false,
@@ -16,7 +16,7 @@
   "type": "doc",
   "value": {
     "id": "ttWLUIYBpykOpthsUMAD",
-    "index": "conflicts-0002",
+    "index": "auditbeat-conflicts-0002",
     "source": {
       "@timestamp": "2023-02-14T04:45:06.527Z",
       "doc_id": true,

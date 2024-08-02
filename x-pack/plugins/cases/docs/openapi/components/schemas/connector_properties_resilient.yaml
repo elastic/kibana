@@ -9,9 +9,8 @@ type: object
 properties:
   fields:
     description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-    type:
-      - "object"
-      - "null"
+    type: object
+    nullable: true
     required:
       - issueTypes
       - severityCode
@@ -33,7 +32,6 @@ properties:
   type:
     description: The type of connector.
     type: string
-    examples:
-      - .resilient
+    example: .resilient
     enum:
       - .resilient

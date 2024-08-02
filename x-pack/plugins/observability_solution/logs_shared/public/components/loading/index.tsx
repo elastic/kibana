@@ -20,7 +20,7 @@ export class LogsSharedLoadingPanel extends React.PureComponent<LogsSharedLoadin
   public render() {
     const { height, text, width } = this.props;
     return (
-      <LogsSharedLoadingStaticPanel style={{ height, width }}>
+      <LogsSharedLoadingStaticPanel style={{ height, width }} role="row">
         <LogsSharedLoadingStaticContentPanel>
           <EuiPanel>
             <EuiLoadingChart size="m" />

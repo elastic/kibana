@@ -31,12 +31,12 @@ export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleP
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `Elasticsearch query rule '\\{\\{rule.name\\}\\}' is active:
+        defaultMessage: `Elasticsearch query rule '{{rule.name}}' is active:
 
-- Value: \\{\\{context.value\\}\\}
-- Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{rule.params.timeWindowSize\\}\\}\\{\\{rule.params.timeWindowUnit\\}\\}
-- Timestamp: \\{\\{context.date\\}\\}
-- Link: \\{\\{context.link\\}\\}`,
+- Value: '{{context.value}}'
+- Conditions Met: '{{context.conditions}}' over '{{rule.params.timeWindowSize}}''{{rule.params.timeWindowUnit}}'
+- Timestamp: '{{context.date}}'
+- Link: '{{context.link}}'`,
       }
     ),
     requiresAppContext: false,

@@ -17,154 +17,332 @@
     "objects": []
   },
   "common": {
-    "classes": [
+    "classes": [],
+    "functions": [
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedDate",
-        "type": "Class",
+        "id": "def-common.__IntlProvider",
+        "type": "Function",
         "tags": [],
-        "label": "FormattedDate",
-        "description": [],
-        "signature": [
-          "ReactIntl.FormattedDate extends React.Component<ReactIntl.FormattedDate.Props, {}, any>"
+        "label": "__IntlProvider",
+        "description": [
+          "\nAdded for now while doing the i18n upgrade.\nTODO: remove in a separate PR and update the 200+ test files we have using this to simply\nuse the `I18nProvider` and the `IntlShape` instead of `InjectedIntl`."
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedHTMLMessage",
-        "type": "Class",
-        "tags": [],
-        "label": "FormattedHTMLMessage",
-        "description": [],
         "signature": [
-          "ReactIntl.FormattedHTMLMessage extends React.Component<ReactIntl.FormattedMessage.Props, {}, any>"
+          "({ children, }: React.PropsWithChildren<React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>>) => JSX.Element"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedMessage",
-        "type": "Class",
-        "tags": [],
-        "label": "FormattedMessage",
-        "description": [],
-        "signature": [
-          "ReactIntl.FormattedMessage extends React.Component<ReactIntl.FormattedMessage.Props, {}, any>"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedNumber",
-        "type": "Class",
-        "tags": [],
-        "label": "FormattedNumber",
-        "description": [],
-        "signature": [
-          "ReactIntl.FormattedNumber extends React.Component<ReactIntl.FormattedNumber.Props, {}, any>"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedPlural",
-        "type": "Class",
-        "tags": [],
-        "label": "FormattedPlural",
-        "description": [],
-        "signature": [
-          "ReactIntl.FormattedPlural extends React.Component<ReactIntl.FormattedPlural.Props, {}, any>"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedRelative",
-        "type": "Class",
-        "tags": [],
-        "label": "FormattedRelative",
-        "description": [],
-        "signature": [
-          "ReactIntl.FormattedRelative extends React.Component<ReactIntl.FormattedRelative.Props, {}, any>"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedTime",
-        "type": "Class",
-        "tags": [],
-        "label": "FormattedTime",
-        "description": [],
-        "signature": [
-          "ReactIntl.FormattedTime extends React.Component<ReactIntl.FormattedTime.Props, {}, any>"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.IntlProvider",
-        "type": "Class",
-        "tags": [],
-        "label": "IntlProvider",
-        "description": [],
-        "signature": [
-          "ReactIntl.IntlProvider extends React.Component<ReactIntl.IntlProvider.Props, {}, any>"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.IntlProvider.getChildContext",
-            "type": "Function",
+            "id": "def-common.__IntlProvider.$1",
+            "type": "CompoundType",
             "tags": [],
-            "label": "getChildContext",
+            "label": "{\n  children,\n}",
             "description": [],
             "signature": [
-              "() => { intl: ReactIntl.InjectedIntl; }"
+              "React.PropsWithChildren<React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>>"
             ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
+            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.FormattedDate",
+        "type": "Function",
+        "tags": [],
+        "label": "FormattedDate",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<Intl.DateTimeFormatOptions & ",
+          "CustomFormatConfig",
+          "<string> & { value: string | number | Date | undefined; children?(formattedDate: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+        ],
+        "path": "node_modules/react-intl/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedDate.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedDate.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
-      }
-    ],
-    "functions": [
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.FormattedNumber",
+        "type": "Function",
+        "tags": [],
+        "label": "FormattedNumber",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<Omit<",
+          "NumberFormatOptions",
+          ", \"localeMatcher\"> & ",
+          "CustomFormatConfig",
+          "<\"number\"> & { value: number; children?(formattedNumber: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+        ],
+        "path": "node_modules/react-intl/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedNumber.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedNumber.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.FormattedPlural",
+        "type": "Function",
+        "tags": [],
+        "label": "FormattedPlural",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<Props>"
+        ],
+        "path": "node_modules/react-intl/src/components/plural.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedPlural.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedPlural.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.FormattedRelative",
+        "type": "Function",
+        "tags": [],
+        "label": "FormattedRelative",
+        "description": [
+          "\nMimic `FormattedRelative` previous behavior from formatJS v2"
+        ],
+        "signature": [
+          "({ value: valueInput, updateIntervalInSeconds, }: ",
+          {
+            "pluginId": "@kbn/i18n-react",
+            "scope": "common",
+            "docId": "kibKbnI18nReactPluginApi",
+            "section": "def-common.FormattedRelativeProps",
+            "text": "FormattedRelativeProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedRelative.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value: valueInput,\n  updateIntervalInSeconds,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/i18n-react",
+                "scope": "common",
+                "docId": "kibKbnI18nReactPluginApi",
+                "section": "def-common.FormattedRelativeProps",
+                "text": "FormattedRelativeProps"
+              }
+            ],
+            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.FormattedRelativeTime",
+        "type": "Function",
+        "tags": [],
+        "label": "FormattedRelativeTime",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          "Props",
+          ">"
+        ],
+        "path": "node_modules/react-intl/src/components/relative.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedRelativeTime.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedRelativeTime.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.FormattedTime",
+        "type": "Function",
+        "tags": [],
+        "label": "FormattedTime",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<Intl.DateTimeFormatOptions & ",
+          "CustomFormatConfig",
+          "<string> & { value: string | number | Date | undefined; children?(formattedTime: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+        ],
+        "path": "node_modules/react-intl/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedTime.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/i18n-react",
+            "id": "def-common.FormattedTime.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/i18n-react",
         "id": "def-common.I18nProvider",
@@ -208,9 +386,13 @@
         "label": "injectIntl",
         "description": [],
         "signature": [
-          "(component: React.ComponentType<P & ReactIntl.InjectedIntlProps>, options: ReactIntl.InjectIntlConfig | undefined) => React.ComponentClass<Pick<P, Exclude<keyof P, \"intl\">>, any> & { WrappedComponent: React.ComponentType<P & ReactIntl.InjectedIntlProps>; }"
+          "(WrappedComponent: React.ComponentType<P>, options: ",
+          "Opts",
+          "<IntlPropName, false> | undefined) => React.FC<",
+          "WithIntlProps",
+          "<P>> & { WrappedComponent: React.ComponentType<P>; }"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,12 +401,12 @@
             "id": "def-common.injectIntl.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "component",
+            "label": "WrappedComponent",
             "description": [],
             "signature": [
-              "React.ComponentType<P & ReactIntl.InjectedIntlProps>"
+              "React.ComponentType<P>"
             ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
+            "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -237,9 +419,10 @@
             "label": "options",
             "description": [],
             "signature": [
-              "ReactIntl.InjectIntlConfig | undefined"
+              "Opts",
+              "<IntlPropName, false> | undefined"
             ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
+            "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -250,589 +433,149 @@
       },
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.intlShape",
+        "id": "def-common.injectIntl",
         "type": "Function",
         "tags": [],
-        "label": "intlShape",
+        "label": "injectIntl",
         "description": [],
         "signature": [
-          "ReactIntl.IntlShape"
+          "(WrappedComponent: React.ComponentType<P>, options: ",
+          "Opts",
+          "<IntlPropName, true> | undefined) => React.ForwardRefExoticComponent<React.PropsWithoutRef<",
+          "WithIntlProps",
+          "<React.PropsWithChildren<P>>> & React.RefAttributes<T>> & { WrappedComponent: React.ComponentType<P>; }"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.intlShape.$1",
-            "type": "Uncategorized",
+            "id": "def-common.injectIntl.$1",
+            "type": "CompoundType",
             "tags": [],
-            "label": "props",
+            "label": "WrappedComponent",
             "description": [],
             "signature": [
-              "object"
+              "React.ComponentType<P>"
             ],
-            "path": "node_modules/@types/react/node_modules/@types/prop-types/index.d.ts",
+            "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           },
           {
             "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.intlShape.$2",
-            "type": "string",
+            "id": "def-common.injectIntl.$2",
+            "type": "Object",
             "tags": [],
-            "label": "propName",
+            "label": "options",
             "description": [],
-            "path": "node_modules/@types/react/node_modules/@types/prop-types/index.d.ts",
+            "signature": [
+              "Opts",
+              "<IntlPropName, true> | undefined"
+            ],
+            "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.intlShape.$3",
-            "type": "string",
-            "tags": [],
-            "label": "componentName",
-            "description": [],
-            "path": "node_modules/@types/react/node_modules/@types/prop-types/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.intlShape.$4",
-            "type": "string",
-            "tags": [],
-            "label": "location",
-            "description": [],
-            "path": "node_modules/@types/react/node_modules/@types/prop-types/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.intlShape.$5",
-            "type": "string",
-            "tags": [],
-            "label": "propFullName",
-            "description": [],
-            "path": "node_modules/@types/react/node_modules/@types/prop-types/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/i18n-react",
+        "id": "def-common.useIntl",
+        "type": "Function",
+        "tags": [],
+        "label": "useIntl",
+        "description": [],
+        "signature": [
+          "() => ",
+          "IntlShape"
+        ],
+        "path": "node_modules/react-intl/src/components/useIntl.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.InjectedIntl",
+        "id": "def-common.FormattedRelativeProps",
         "type": "Interface",
         "tags": [],
-        "label": "InjectedIntl",
+        "label": "FormattedRelativeProps",
         "description": [],
-        "signature": [
-          "ReactIntl.InjectedIntl"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatDate",
-            "type": "Function",
+            "id": "def-common.FormattedRelativeProps.value",
+            "type": "CompoundType",
             "tags": [],
-            "label": "formatDate",
+            "label": "value",
             "description": [],
             "signature": [
-              "(value: ReactIntl.DateSource, options?: ReactIntl.IntlComponent.DateTimeFormatProps | undefined) => string"
+              "string | number | Date"
             ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatDate.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "ReactIntl.DateSource"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatDate.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "ReactIntl.IntlComponent.DateTimeFormatProps | undefined"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatTime",
-            "type": "Function",
-            "tags": [],
-            "label": "formatTime",
-            "description": [],
-            "signature": [
-              "(value: ReactIntl.DateSource, options?: ReactIntl.IntlComponent.DateTimeFormatProps | undefined) => string"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatTime.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "ReactIntl.DateSource"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatTime.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "ReactIntl.IntlComponent.DateTimeFormatProps | undefined"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatRelative",
-            "type": "Function",
-            "tags": [],
-            "label": "formatRelative",
-            "description": [],
-            "signature": [
-              "(value: ReactIntl.DateSource, options?: (ReactIntl.FormattedRelative.PropsBase & { now?: any; }) | undefined) => string"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatRelative.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "ReactIntl.DateSource"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatRelative.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "(ReactIntl.FormattedRelative.PropsBase & { now?: any; }) | undefined"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatNumber",
-            "type": "Function",
-            "tags": [],
-            "label": "formatNumber",
-            "description": [],
-            "signature": [
-              "(value: number, options?: ReactIntl.FormattedNumber.PropsBase | undefined) => string"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatNumber.$1",
-                "type": "number",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatNumber.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "ReactIntl.FormattedNumber.PropsBase | undefined"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatPlural",
-            "type": "Function",
-            "tags": [],
-            "label": "formatPlural",
-            "description": [],
-            "signature": [
-              "(value: number, options?: ReactIntl.FormattedPlural.Base | undefined) => keyof ReactIntl.FormattedPlural.PropsBase"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatPlural.$1",
-                "type": "number",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatPlural.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "ReactIntl.FormattedPlural.Base | undefined"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatMessage",
-            "type": "Function",
-            "tags": [],
-            "label": "formatMessage",
-            "description": [],
-            "signature": [
-              "(messageDescriptor: ReactIntl.FormattedMessage.MessageDescriptor, values?: { [key: string]: ReactIntl.MessageValue; } | undefined) => string"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatMessage.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "messageDescriptor",
-                "description": [],
-                "signature": [
-                  "ReactIntl.FormattedMessage.MessageDescriptor"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatMessage.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "values",
-                "description": [],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/i18n-react",
-                    "id": "def-common.InjectedIntl.formatMessage.$2.Unnamed",
-                    "type": "IndexSignature",
-                    "tags": [],
-                    "label": "[key: string]: MessageValue",
-                    "description": [],
-                    "signature": [
-                      "[key: string]:  ReactIntl.MessageValue"
-                    ],
-                    "path": "node_modules/@types/react-intl/index.d.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formatHTMLMessage",
-            "type": "Function",
-            "tags": [],
-            "label": "formatHTMLMessage",
-            "description": [],
-            "signature": [
-              "(messageDescriptor: ReactIntl.FormattedMessage.MessageDescriptor, values?: { [key: string]: ReactIntl.MessageValue; } | undefined) => string"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatHTMLMessage.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "messageDescriptor",
-                "description": [],
-                "signature": [
-                  "ReactIntl.FormattedMessage.MessageDescriptor"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.formatHTMLMessage.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "values",
-                "description": [],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/i18n-react",
-                    "id": "def-common.InjectedIntl.formatHTMLMessage.$2.Unnamed",
-                    "type": "IndexSignature",
-                    "tags": [],
-                    "label": "[key: string]: MessageValue",
-                    "description": [],
-                    "signature": [
-                      "[key: string]:  ReactIntl.MessageValue"
-                    ],
-                    "path": "node_modules/@types/react-intl/index.d.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.locale",
-            "type": "string",
-            "tags": [],
-            "label": "locale",
-            "description": [],
-            "path": "node_modules/@types/react-intl/index.d.ts",
+            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.formats",
-            "type": "Any",
+            "id": "def-common.FormattedRelativeProps.updateIntervalInSeconds",
+            "type": "number",
             "tags": [],
-            "label": "formats",
+            "label": "updateIntervalInSeconds",
             "description": [],
             "signature": [
-              "any"
+              "number | undefined"
             ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
+            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.messages",
-            "type": "Object",
-            "tags": [],
-            "label": "messages",
-            "description": [],
-            "signature": [
-              "{ [id: string]: string; }"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.defaultLocale",
-            "type": "string",
-            "tags": [],
-            "label": "defaultLocale",
-            "description": [],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.defaultFormats",
-            "type": "Any",
-            "tags": [],
-            "label": "defaultFormats",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.now",
-            "type": "Function",
-            "tags": [],
-            "label": "now",
-            "description": [],
-            "signature": [
-              "() => number"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntl.onError",
-            "type": "Function",
-            "tags": [],
-            "label": "onError",
-            "description": [],
-            "signature": [
-              "(error: string) => void"
-            ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/i18n-react",
-                "id": "def-common.InjectedIntl.onError.$1",
-                "type": "string",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "node_modules/@types/react-intl/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.InjectedIntlProps",
+        "id": "def-common.IntlShape",
         "type": "Interface",
         "tags": [],
-        "label": "InjectedIntlProps",
+        "label": "IntlShape",
         "description": [],
         "signature": [
-          "ReactIntl.InjectedIntlProps"
+          "IntlShape",
+          " extends ",
+          "ResolvedIntlConfig",
+          ",",
+          "IntlFormatters",
+          "<React.ReactNode>"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "node_modules/react-intl/src/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/i18n-react",
-            "id": "def-common.InjectedIntlProps.intl",
+            "id": "def-common.IntlShape.formatters",
             "type": "Object",
             "tags": [],
-            "label": "intl",
+            "label": "formatters",
             "description": [],
             "signature": [
-              "ReactIntl.InjectedIntl"
+              "Formatters"
             ],
-            "path": "node_modules/@types/react-intl/index.d.ts",
+            "path": "node_modules/react-intl/src/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -841,113 +584,63 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": [
+    "misc": [
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedDate",
-        "type": "Object",
+        "id": "def-common.InjectedIntl",
+        "type": "Type",
         "tags": [],
-        "label": "FormattedDate",
+        "label": "InjectedIntl",
         "description": [],
         "signature": [
-          "typeof ReactIntl.FormattedDate"
+          "IntlShape"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedMessage",
-        "type": "Object",
+        "id": "def-common.MemoizedFormattedMessage",
+        "type": "CompoundType",
         "tags": [],
-        "label": "FormattedMessage",
+        "label": "MemoizedFormattedMessage",
         "description": [],
         "signature": [
-          "typeof ReactIntl.FormattedMessage"
+          "React.ComponentClass<",
+          "Props",
+          "<Record<string, string | number | boolean | {} | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "FormatXMLElementFn",
+          "<React.ReactNode, React.ReactNode> | null | undefined>>, any> | React.FunctionComponent<",
+          "Props",
+          "<Record<string, string | number | boolean | {} | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "FormatXMLElementFn",
+          "<React.ReactNode, React.ReactNode> | null | undefined>>>"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "node_modules/react-intl/src/components/message.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedNumber",
-        "type": "Object",
+        "id": "def-common.WrappedComponentProps",
+        "type": "Type",
         "tags": [],
-        "label": "FormattedNumber",
+        "label": "WrappedComponentProps",
         "description": [],
         "signature": [
-          "typeof ReactIntl.FormattedNumber"
+          "{ [k in IntlPropName]: ",
+          "IntlShape",
+          "; }"
         ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedPlural",
-        "type": "Object",
-        "tags": [],
-        "label": "FormattedPlural",
-        "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedPlural"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedRelative",
-        "type": "Object",
-        "tags": [],
-        "label": "FormattedRelative",
-        "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedRelative"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.FormattedTime",
-        "type": "Object",
-        "tags": [],
-        "label": "FormattedTime",
-        "description": [],
-        "signature": [
-          "typeof ReactIntl.FormattedTime"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/i18n-react",
-        "id": "def-common.IntlProvider",
-        "type": "Object",
-        "tags": [],
-        "label": "IntlProvider",
-        "description": [],
-        "signature": [
-          "typeof ReactIntl.IntlProvider"
-        ],
-        "path": "node_modules/@types/react-intl/index.d.ts",
+        "path": "node_modules/react-intl/src/components/injectIntl.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
-    ]
+    ],
+    "objects": []
   }
 }

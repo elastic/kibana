@@ -8,11 +8,11 @@
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import { renderSearchError } from '@kbn/search-errors';
 import React from 'react';
-import { RemovableUserMessage } from '../types';
+import { UserMessage } from '../types';
 
 export function getOriginalRequestErrorMessages(
   error: ExpressionRenderError | null
-): RemovableUserMessage[] {
+): UserMessage[] {
   const errorMessages: Array<string | { short: string; long: React.ReactNode }> = [];
   if (error && 'original' in error && error.original) {
     const searchErrorDisplay = renderSearchError(error.original);

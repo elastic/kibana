@@ -8,7 +8,6 @@
 // Enzyme helpers
 export { mountAsync } from './mount_async';
 export { mountWithIntl } from './mount_with_i18n';
-export { shallowWithIntl } from './shallow_with_i18n';
 export { rerender } from './enzyme_rerender';
 export {
   getPageHeader,

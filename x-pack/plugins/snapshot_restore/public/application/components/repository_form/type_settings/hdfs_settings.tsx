@@ -360,7 +360,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             aria-label={i18n.translate(
               'xpack.snapshotRestore.repositoryForm.typeHDFS.configurationAriaLabel',
               {
-                defaultMessage: `Additional configuration for HDFS repository '{name}'`,
+                defaultMessage: `Additional configuration for HDFS repository ''{name}''`,
                 values: { name },
               }
             )}

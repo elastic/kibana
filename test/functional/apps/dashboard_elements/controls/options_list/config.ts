@@ -17,5 +17,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Dashboard Elements - Controls Options List tests',
     },
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        // disabling the monaco editor to run tests for ace
+        `--console.dev.enableMonaco=false`,
+      ],
+    },
   };
 }

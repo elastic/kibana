@@ -78,8 +78,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
       });
     });
 
-    // https://github.com/elastic/kibana/issues/179687
-    describe('When risk engine is enabled', { tags: ['@skipInServerlessMKI'] }, () => {
+    describe('When risk engine is enabled', () => {
       beforeEach(() => {
         login();
         mockRiskEngineEnabled();
@@ -103,6 +102,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
       describe('With host risk data', () => {
         before(() => {
+          cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
           cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         });
 
@@ -145,11 +145,11 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
         describe('With alerts data', () => {
           before(() => {
+            deleteAlertsAndRules();
             createRule(getNewRule());
           });
 
           beforeEach(() => {
-            login();
             visitWithTimeRange(ALERTS_URL);
             waitForAlertsToPopulate();
             visitWithTimeRange(ENTITY_ANALYTICS_URL);
@@ -242,7 +242,6 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
           });
 
           beforeEach(() => {
-            login();
             visitWithTimeRange(ALERTS_URL);
             waitForAlertsToPopulate();
             visitWithTimeRange(ENTITY_ANALYTICS_URL);

@@ -26,7 +26,6 @@ import {
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
 import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
 import { OS_TITLES } from '../../../../common/translations';
@@ -50,15 +49,13 @@ import {
 } from '../../translations';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
-import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
+import {
+  getArtifactTagsByPolicySelection,
+  isArtifactGlobal,
+} from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
@@ -111,8 +108,8 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     const showAssignmentSection = useMemo(() => {
@@ -125,7 +122,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
 
@@ -422,9 +419,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = change.isGlobal
-          ? [GLOBAL_ARTIFACT_TAG]
-          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+        const tags = getArtifactTagsByPolicySelection(change);
 
         const nextItem = { ...item, tags };
 

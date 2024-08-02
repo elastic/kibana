@@ -14,3 +14,4 @@ export * from './src/is_valid_date_math';
 export * from './src/required_optional';
 export * from './src/safe_parse_result';
 export * from './src/stringify_zod_error';
+export * from './src/build_route_validation_with_zod';

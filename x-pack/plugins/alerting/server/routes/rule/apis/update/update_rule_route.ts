@@ -17,7 +17,7 @@ import {
   updateBodySchemaV1,
   updateParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { Rule } from '../../../../application/rule/types';
 import { transformUpdateBodyV1 } from './transforms';
@@ -33,11 +33,20 @@ export const updateRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
       options: {
         access: 'public',
-        description: `Update a rule`,
+        summary: `Update a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        body: updateBodySchemaV1,
-        params: updateParamsSchemaV1,
+        request: {
+          body: updateBodySchemaV1,
+          params: updateParamsSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => ruleResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     handleDisabledApiKeysError(

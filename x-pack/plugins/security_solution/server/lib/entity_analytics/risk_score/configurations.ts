@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 import {
@@ -135,11 +136,24 @@ export const getIndexPatternDataStream = (namespace: string): IIndexPatternStrin
   alias: `${riskScoreBaseIndexName}.${riskScoreBaseIndexName}-${namespace}`,
 });
 
-export const getTransformOptions = ({ dest, source }: { dest: string; source: string[] }) => ({
+export type TransformOptions = Omit<TransformPutTransformRequest, 'transform_id'>;
+
+/**
+ * WARNING: We must increase the version when changing any configuration
+ *
+ * The risk engine starts the transforms executions after writing the documents to the risk score index.
+ * So the transform don't need to run on a schedule.
+ */
+export const getTransformOptions = ({
+  dest,
+  source,
+}: {
+  dest: string;
+  source: string[];
+}): Omit<TransformPutTransformRequest, 'transform_id'> => ({
   dest: {
     index: dest,
   },
-  frequency: '1h',
   latest: {
     sort: '@timestamp',
     unique_key: [`host.name`, `user.name`],
@@ -147,10 +161,20 @@ export const getTransformOptions = ({ dest, source }: { dest: string; source: st
   source: {
     index: source,
   },
+  frequency: '1h', // 1h is the maximum value
   sync: {
     time: {
-      delay: '2s',
+      delay: '0s', // It doesn't have any delay because the risk engine writes the documents to the index and schedules the transform synchronously.
       field: '@timestamp',
     },
+  },
+  settings: {
+    unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
+  },
+  _meta: {
+    version: 2, // When this field is updated we automatically update the transform
+
+    managed: true, // Metadata that identifies the transform. It has no functionality
+    managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
   },
 });

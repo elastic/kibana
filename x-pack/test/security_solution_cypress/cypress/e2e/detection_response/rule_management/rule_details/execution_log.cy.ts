@@ -22,7 +22,8 @@ import { getNewRule } from '../../../../objects/rule';
 import { EXECUTION_SHOWING } from '../../../../screens/rule_details';
 import { manualRuleRun } from '../../../../tasks/api_calls/backfill';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/184360
+describe.skip(
   'Event log',
   {
     tags: ['@ess', '@serverless'],
@@ -60,7 +61,7 @@ describe(
 
       cy.waitUntil(
         () => {
-          cy.log('Waiting for assignees to appear in popover');
+          cy.log('Waiting for execution logs to appear in execution log table');
           refreshRuleExecutionTable();
           return getExecutionLogTableRow().then((rows) => {
             return rows.length === 2;

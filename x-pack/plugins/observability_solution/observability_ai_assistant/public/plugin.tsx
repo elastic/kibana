@@ -29,6 +29,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
+import { aiAssistantCapabilities } from '../common/capabilities';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -61,7 +62,10 @@ export class ObservabilityAIAssistantPlugin
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,
-      enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      enabled:
+        coreStart.application.capabilities.observabilityAIAssistant[
+          aiAssistantCapabilities.show
+        ] === true,
     }));
 
     const withProviders = <P extends {}, R = {}>(

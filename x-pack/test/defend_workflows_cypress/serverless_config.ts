@@ -15,7 +15,7 @@ import { DefendWorkflowsCypressCliTestRunner } from './runner';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const defendWorkflowsCypressConfig = await readConfigFile(
     require.resolve(
-      '../../test_serverless/functional/test_suites/security/cypress/security_config.base.ts'
+      '@kbn/test-suites-serverless/functional/test_suites/security/cypress/security_config.base'
     )
   );
   const config = defendWorkflowsCypressConfig.getAll();
@@ -51,6 +51,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
           'servers.elasticsearch.port'
         )}`,
+
+        // Enable Fleet server standalone so that no checks are done to see if fleet-server has
+        // registered with Kibana and we are able to access the Agents page of Fleet
+        '--xpack.fleet.internal.fleetServerStandalone=true',
+
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,

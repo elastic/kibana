@@ -22,6 +22,7 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
+  unprocessableContent: jest.fn(),
   customError: jest.fn(),
 });
 

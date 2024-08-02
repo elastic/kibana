@@ -46,7 +46,7 @@ export const useUpdateConnector = (): UseUpdateConnectorReturnValue => {
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
             {
-              defaultMessage: "Updated '{connectorName}'",
+              defaultMessage: "Updated ''{connectorName}''",
               values: {
                 connectorName: res.name,
               },

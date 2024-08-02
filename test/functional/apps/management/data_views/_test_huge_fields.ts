@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('test large number of fields', function () {
     this.tags(['skipCloud']);
 
-    const EXPECTED_FIELD_COUNT = '10005';
+    const EXPECTED_FIELD_COUNT = '10006';
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader']);
       await esArchiver.emptyKibanaIndex();

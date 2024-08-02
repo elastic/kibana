@@ -7,6 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { BackLink } from './back_link';
 
@@ -16,7 +17,9 @@ describe('BackLink', () => {
     const queryParams = new URLSearchParams();
     queryParams.set('observabilityOnboardingLink', expectedUrl);
     const { getByText, getByRole } = render(
-      <BackLink queryParams={queryParams} href="/app/integrations" />
+      <I18nProvider>
+        <BackLink queryParams={queryParams} href="/app/integrations" />
+      </I18nProvider>
     );
     expect(getByText('Back to selection')).toBeInTheDocument();
     expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
@@ -27,7 +30,9 @@ describe('BackLink', () => {
     const queryParams = new URLSearchParams();
     queryParams.set('observabilityOnboardingLink', expectedUrl);
     const { getByText, getByRole } = render(
-      <BackLink queryParams={queryParams} href="/app/integrations" />
+      <I18nProvider>
+        <BackLink queryParams={queryParams} href="/app/integrations" />
+      </I18nProvider>
     );
     expect(getByText('Back to selection')).toBeInTheDocument();
     expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
@@ -36,7 +41,9 @@ describe('BackLink', () => {
   it('renders back to integrations link', () => {
     const queryParams = new URLSearchParams();
     const { getByText, getByRole } = render(
-      <BackLink queryParams={queryParams} href="/app/integrations" />
+      <I18nProvider>
+        <BackLink queryParams={queryParams} href="/app/integrations" />
+      </I18nProvider>
     );
     expect(getByText('Back to integrations')).toBeInTheDocument();
     expect(getByRole('link').getAttribute('href')).toBe('/app/integrations');

@@ -22,7 +22,12 @@ import {
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
-import { createServiceError, getPushedDate, prepareIncident } from './utils';
+import {
+  createServiceError,
+  getPushedDate,
+  prepareIncident,
+  throwIfAdditionalFieldsNotSupported,
+} from './utils';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
@@ -186,6 +191,7 @@ export const createExternalService: ServiceFactory = ({
 
   const createIncident = async ({ incident }: ExternalServiceParamsCreate) => {
     try {
+      throwIfAdditionalFieldsNotSupported(useTableApi, incident);
       await checkIfApplicationIsInstalled();
 
       const res = await request({
@@ -219,6 +225,7 @@ export const createExternalService: ServiceFactory = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParamsUpdate) => {
     try {
+      throwIfAdditionalFieldsNotSupported(useTableApi, incident);
       await checkIfApplicationIsInstalled();
 
       const res = await request({

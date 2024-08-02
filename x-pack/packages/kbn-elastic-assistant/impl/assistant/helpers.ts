@@ -10,7 +10,7 @@ import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { ClientMessage } from '../assistant_context/types';
-import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
+import { enterpriseMessaging } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
@@ -57,8 +57,7 @@ export const mergeBaseWithPersistedConversations = (
 
 export const getBlockBotConversation = (
   conversation: Conversation,
-  isAssistantEnabled: boolean,
-  isFlyoutMode: boolean
+  isAssistantEnabled: boolean
 ): Conversation => {
   if (!isAssistantEnabled) {
     if (
@@ -76,7 +75,7 @@ export const getBlockBotConversation = (
 
   return {
     ...conversation,
-    messages: [...conversation.messages, ...(!isFlyoutMode ? WELCOME_CONVERSATION.messages : [])],
+    messages: conversation.messages,
   };
 };
 
@@ -101,21 +100,14 @@ interface OptionalRequestParams {
 }
 
 export const getOptionalRequestParams = ({
-  isEnabledRAGAlerts,
   alertsIndexPattern,
   size,
 }: {
-  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
   const optionalSize = size ? { size } : undefined;
-
-  // the settings toggle must be enabled:
-  if (!isEnabledRAGAlerts) {
-    return {}; // don't send any optional params
-  }
 
   return {
     ...optionalAlertsIndexPattern,
@@ -123,10 +115,4 @@ export const getOptionalRequestParams = ({
   };
 };
 
-export const hasParsableResponse = ({
-  isEnabledRAGAlerts,
-  isEnabledKnowledgeBase,
-}: {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
-}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

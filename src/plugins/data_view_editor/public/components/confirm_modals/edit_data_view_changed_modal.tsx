@@ -36,7 +36,7 @@ export const editDataViewModal = ({
             title: i18n.translate(
               'indexPatternEditor.editDataView.editConfirmationModal.editHeader',
               {
-                defaultMessage: `Edit '{name}'`,
+                defaultMessage: `Edit ''{name}''`,
                 values: {
                   name: dataViewName,
                 },

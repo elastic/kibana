@@ -6,10 +6,9 @@ exports[`Should render join editor 1`] = `
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Joins"
         id="xpack.maps.layerPanel.joinEditor.title"
-        values={Object {}}
       />
        
       <JoinDocumentationPopover />

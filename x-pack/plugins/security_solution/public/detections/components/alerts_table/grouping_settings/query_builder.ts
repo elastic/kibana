@@ -8,7 +8,7 @@
 import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup, getGroupingQuery } from '@kbn/grouping';
-import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 
 interface AlertsGroupingQueryParams {
   additionalFilters: Array<{

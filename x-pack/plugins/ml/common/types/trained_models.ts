@@ -176,6 +176,7 @@ export interface TrainedModelDeploymentStatsResponse {
     threads_per_allocation: number;
     number_of_allocations: number;
   }>;
+  reason?: string;
 }
 
 export interface AllocatedModel {
@@ -299,4 +300,9 @@ export interface MemoryStatsResponse {
 export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
+}
+
+export interface ModelDownloadState {
+  total_parts: number;
+  downloaded_parts: number;
 }

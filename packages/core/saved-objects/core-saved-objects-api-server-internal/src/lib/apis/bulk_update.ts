@@ -82,10 +82,12 @@ export const performBulkUpdate = async <T>(
     common: commonHelper,
     encryption: encryptionHelper,
     migration: migrationHelper,
+    user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const { migrationVersionCompatibility } = options;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
+  const updatedBy = userHelper.getCurrentUserProfileUid();
   const time = getCurrentTime();
 
   let bulkGetRequestIndexCounter = 0;
@@ -120,6 +122,7 @@ export const performBulkUpdate = async <T>(
     const documentToSave = {
       [type]: attributes,
       updated_at: time,
+      updated_by: updatedBy,
       ...(Array.isArray(references) && { references }),
     };
 
@@ -304,6 +307,7 @@ export const performBulkUpdate = async <T>(
         namespaces,
         attributes: updatedAttributes,
         updated_at: time,
+        updated_by: updatedBy,
         ...(Array.isArray(documentToSave.references) && { references: documentToSave.references }),
       });
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
@@ -364,7 +368,7 @@ export const performBulkUpdate = async <T>(
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { [type]: attributes, references, updated_at } = documentToSave;
+      const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
       const { originId } = rawMigratedUpdatedDoc._source;
       return {
@@ -373,6 +377,7 @@ export const performBulkUpdate = async <T>(
         ...(namespaces && { namespaces }),
         ...(originId && { originId }),
         updated_at,
+        updated_by,
         version: encodeVersion(seqNo, primaryTerm),
         attributes,
         references,

@@ -22,19 +22,21 @@ export class Build {
   }
 
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
+    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${variant}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
 
   getPlatformArchivePath(platform: Platform) {
     const ext = platform.isWindows() ? 'zip' : 'tar.gz';
+    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
     return this.config.resolveFromRepo(
       'target',
-      `${this.name}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      `${this.name}${variant}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 

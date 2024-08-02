@@ -65,7 +65,7 @@ export const UPLOAD_ERROR = i18n.translate('xpack.securitySolution.lists.valueLi
 
 export const uploadSuccessMessage = (fileName: string) =>
   i18n.translate('xpack.securitySolution.lists.valueListsImportSuccess', {
-    defaultMessage: "Value list '{fileName}' was imported",
+    defaultMessage: "Value list ''{fileName}'' was imported",
     values: { fileName },
   });
 

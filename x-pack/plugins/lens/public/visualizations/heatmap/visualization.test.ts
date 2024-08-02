@@ -626,6 +626,7 @@ describe('heatmap', () => {
             "longMessage": "Configuration for the horizontal axis is missing.",
             "severity": "error",
             "shortMessage": "Missing Horizontal axis.",
+            "uniqueId": "heatmap_x_missing_axis",
           },
         ]
       `);

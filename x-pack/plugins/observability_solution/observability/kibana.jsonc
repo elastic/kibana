@@ -39,7 +39,8 @@
       "dashboard",
       "expressions",
       "logsExplorer",
-      "licensing"
+      "licensing",
+      "navigation"
     ],
     "optionalPlugins": [
       "discover",

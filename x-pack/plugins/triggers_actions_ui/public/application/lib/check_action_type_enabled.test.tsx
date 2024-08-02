@@ -63,10 +63,9 @@ describe('checkActionTypeEnabled', () => {
             href="https://www.elastic.co/subscriptions"
             target="_blank"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="View license options"
               id="xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseLinkTitle"
-              values={Object {}}
             />
           </EuiLink>
         </EuiCard>,

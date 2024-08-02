@@ -7,14 +7,19 @@
 
 import { lastValueFrom } from 'rxjs';
 
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
+import { createDefaultSpace } from './default_space/create_default_space';
 import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
+
+jest.mock('./default_space/create_default_space');
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
@@ -75,6 +80,25 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing, usageCollection });
 
       expect(usageCollection.getCollectorByType('spaces')).toBeDefined();
+    });
+
+    it('can setup space with default solution', async () => {
+      const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
+      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const features = featuresPluginMock.createSetup();
+      const licensing = licensingMock.createSetup();
+      const cloud = {
+        ...cloudMock.createSetup(),
+        apm: {},
+        onboarding: { defaultSolution: 'security' },
+      } as CloudSetup;
+
+      const plugin = new SpacesPlugin(initializerContext);
+      plugin.setup(core, { features, licensing, cloud });
+
+      expect(createDefaultSpace).toHaveBeenCalledWith(
+        expect.objectContaining({ solution: 'security' })
+      );
     });
   });
 

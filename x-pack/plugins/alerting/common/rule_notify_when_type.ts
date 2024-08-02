@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-export const RuleNotifyWhenTypeValues = [
-  'onActionGroupChange',
-  'onActiveAlert',
-  'onThrottleInterval',
-] as const;
-export type RuleNotifyWhenType = typeof RuleNotifyWhenTypeValues[number];
-
-export enum RuleNotifyWhen {
-  CHANGE = 'onActionGroupChange',
-  ACTIVE = 'onActiveAlert',
-  THROTTLE = 'onThrottleInterval',
-}
+import type { RuleNotifyWhenType } from '@kbn/alerting-types';
+import { RuleNotifyWhenTypeValues } from '@kbn/alerting-types';
 
 export function validateNotifyWhenType(notifyWhen: string) {
   if (RuleNotifyWhenTypeValues.includes(notifyWhen as RuleNotifyWhenType)) {
@@ -24,3 +14,6 @@ export function validateNotifyWhenType(notifyWhen: string) {
   }
   return `string is not a valid RuleNotifyWhenType: ${notifyWhen}`;
 }
+
+export type { RuleNotifyWhenType } from '@kbn/alerting-types';
+export { RuleNotifyWhenTypeValues, RuleNotifyWhen } from '@kbn/alerting-types';

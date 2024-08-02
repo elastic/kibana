@@ -7,10 +7,10 @@
  */
 
 import { CoreSetup } from '@kbn/core/server';
-import { getUiSettingFn as getCommonUiSettingFn } from '../../common';
+import { getUiSettingFnServer } from '../../common';
 
 export function getUiSettingFn({ getStartServices }: Pick<CoreSetup, 'getStartServices'>) {
-  return getCommonUiSettingFn({
+  return getUiSettingFnServer({
     async getStartDependencies(getKibanaRequest) {
       const [{ savedObjects, uiSettings }] = await getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(getKibanaRequest());

@@ -22,7 +22,7 @@ const hitToSavedObject = (hit: estypes.SearchHit<any>): SavedObject => {
   const type = hit._source.type;
   return {
     type,
-    id: hit._id,
+    id: hit._id!,
     references: [],
     attributes: hit._source[type],
   };

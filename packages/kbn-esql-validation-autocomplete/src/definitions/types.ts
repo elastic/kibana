@@ -8,10 +8,20 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
+// Currently, partial of the full list
+// https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
 export const supportedFieldTypes = [
-  'number',
+  'double',
+  'unsigned_long',
+  'long',
+  'integer',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
   'date',
-  'string',
+  'date_period',
+  'text',
+  'keyword',
   'boolean',
   'ip',
   'cartesian_point',
@@ -24,25 +34,47 @@ export const supportedFieldTypes = [
 export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
   supportedFieldTypes.includes(type as SupportedFieldType);
 
-export type SupportedFieldType = typeof supportedFieldTypes[number];
+export type SupportedFieldType = (typeof supportedFieldTypes)[number];
 
 export type FunctionParameterType =
   | SupportedFieldType
+  | 'string'
   | 'null'
   | 'any'
   | 'chrono_literal'
   | 'time_literal'
-  | 'number[]'
+  | 'time_duration'
+  | 'double[]'
+  | 'unsigned_long[]'
+  | 'long[]'
+  | 'integer[]'
+  | 'counter_integer[]'
+  | 'counter_long[]'
+  | 'counter_double[]'
   | 'string[]'
+  | 'keyword[]'
+  | 'text[]'
   | 'boolean[]'
   | 'any[]'
-  | 'date[]';
+  | 'datetime[]'
+  | 'date_period[]';
 
 export type FunctionReturnType =
-  | 'number'
+  | 'double'
+  | 'unsigned_long'
+  | 'long'
+  | 'integer'
+  | 'int'
+  | 'counter_integer'
+  | 'counter_long'
+  | 'counter_double'
   | 'date'
+  | 'date_period'
+  | 'time_duration'
   | 'any'
   | 'boolean'
+  | 'text'
+  | 'keyword'
   | 'string'
   | 'cartesian_point'
   | 'cartesian_shape'
@@ -158,4 +190,4 @@ export type SignatureType =
   | CommandOptionsDefinition['signature'];
 export type SignatureArgType = SignatureType['params'][number];
 
-export type FunctionArgSignature = FunctionDefinition['signatures'][number]['params'][number];
+export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];

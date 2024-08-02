@@ -78,18 +78,6 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
     description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle', {
-      defaultMessage: 'Resource ID',
-    }),
-    description: data.resource.id,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle', {
-      defaultMessage: 'Resource Name',
-    }),
-    description: data.resource.name,
-  },
-  {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),

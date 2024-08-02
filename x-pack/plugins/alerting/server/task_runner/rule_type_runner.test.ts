@@ -23,7 +23,13 @@ import { publicRuleResultServiceMock } from '../monitoring/rule_result_service.m
 import { wrappedScopedClusterClientMock } from '../lib/wrap_scoped_cluster_client.mock';
 import { wrappedSearchSourceClientMock } from '../lib/wrap_search_source_client.mock';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  createTaskRunError,
+  TaskErrorSource,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const alertsClient = alertsClientMock.create();
@@ -241,7 +247,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -347,7 +352,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -409,7 +413,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -622,6 +625,43 @@ describe('RuleTypeRunner', () => {
       expect(alertsClient.logAlerts).not.toHaveBeenCalled();
     });
 
+    test('should return user error when rule type executor throws a user error', async () => {
+      const err = createTaskRunError(new Error('fail'), TaskErrorSource.USER);
+      ruleType.executor.mockImplementationOnce(() => {
+        throw err;
+      });
+
+      const { error } = await ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          dataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          wrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType,
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+
+      expect(getErrorSource(error!)).toEqual(TaskErrorSource.USER);
+    });
+
     test('should handle reaching alert limit when rule type executor succeeds', async () => {
       alertsClient.hasReachedAlertLimit.mockReturnValueOnce(true);
       ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
@@ -718,7 +758,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -831,7 +870,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -938,7 +976,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -1041,7 +1078,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,
@@ -1144,7 +1180,6 @@ describe('RuleTypeRunner', () => {
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
       expect(alertsClient.processAlerts).toHaveBeenCalledWith({
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
         alertDelay: 0,
         ruleRunMetricsStore,

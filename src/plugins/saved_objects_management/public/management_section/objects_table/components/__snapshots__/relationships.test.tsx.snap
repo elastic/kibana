@@ -188,10 +188,9 @@ exports[`Relationships should render errors 1`] = `
     <EuiCallOut
       color="danger"
       title={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Error"
           id="savedObjectsManagement.objectsTable.relationships.renderErrorMessage"
-          values={Object {}}
         />
       }
     >

@@ -50,7 +50,7 @@ export const CreateEditField = withRouter(
     if (mode === 'edit' && !spec) {
       const message = i18n.translate('indexPatternManagement.editDataView.scripted.noFieldLabel', {
         defaultMessage:
-          "'{dataViewTitle}' data view doesn't have a scripted field called '{fieldName}'",
+          "''{dataViewTitle}'' data view doesn't have a scripted field called ''{fieldName}''",
         values: { dataViewTitle: indexPattern.title, fieldName },
       });
       notifications.toasts.addWarning(message);

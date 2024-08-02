@@ -20,6 +20,12 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
       case_id: schema.string({ minLength: 1 }),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    summary: `Get all alerts for a case`,
+    tags: ['oas-tag:cases'],
+    // description: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you\'re seeking.',
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseId = request.params.case_id;

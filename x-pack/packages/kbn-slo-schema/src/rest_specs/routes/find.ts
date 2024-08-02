@@ -14,6 +14,9 @@ const sortBySchema = t.union([
   t.literal('error_budget_remaining'),
   t.literal('sli_value'),
   t.literal('status'),
+  t.literal('burn_rate_5m'),
+  t.literal('burn_rate_1h'),
+  t.literal('burn_rate_1d'),
 ]);
 
 const findSLOParamsSchema = t.partial({

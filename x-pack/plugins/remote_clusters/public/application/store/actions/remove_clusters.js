@@ -25,7 +25,7 @@ function getErrorTitle(count, name = null) {
   if (count === 1) {
     if (name) {
       return i18n.translate('xpack.remoteClusters.removeAction.errorSingleNotificationTitle', {
-        defaultMessage: `Error removing remote cluster '{name}'`,
+        defaultMessage: `Error removing remote cluster ''{name}''`,
         values: { name },
       });
     }
@@ -85,7 +85,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
     if (itemsDeleted.length === 1) {
       toasts.addSuccess(
         i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
-          defaultMessage: `Remote cluster '{name}' was removed`,
+          defaultMessage: `Remote cluster ''{name}'' was removed`,
           values: { name: itemsDeleted[0] },
         })
       );

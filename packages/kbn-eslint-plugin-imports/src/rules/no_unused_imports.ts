@@ -130,9 +130,11 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
     }
 
     return {
-      'Program:exit': () => {
+      'Program:exit': (node) => {
         const unusedByImport = new Map<SomeImportNode, Scope.Definition[]>();
-        for (const { importParent, def } of findUnusedImportDefs(context.getScope())) {
+        for (const { importParent, def } of findUnusedImportDefs(
+          context.sourceCode.getScope(node)
+        )) {
           const group = unusedByImport.get(importParent);
           if (group) {
             group.push(def);

@@ -1,7 +1,8 @@
 title: Update case configuration request
-description: External connection details, such as the closure type and default connector for cases.
+description: >
+  You can update settings such as the closure type, custom fields, templates, and the default connector for cases.
 type: object
-required: 
+required:
   - version
 properties:
   closure_type:
@@ -19,7 +20,6 @@ properties:
   customFields:
     type: array
     description: Custom fields case configuration.
-    x-technical-preview: true
     items:
       type: object
       required:
@@ -29,10 +29,11 @@ properties:
         - type
       properties:
         $ref: 'case_configure_customfields.yaml'
+  templates:
+    $ref: 'templates.yaml'
   version:
     description: >
       The version of the connector.
       To retrieve the version value, use the get configuration API.
     type: string
-    examples:
-      - WzIwMiwxXQ==
+    example: WzIwMiwxXQ==

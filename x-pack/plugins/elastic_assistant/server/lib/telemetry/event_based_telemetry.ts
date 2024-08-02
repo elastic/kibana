@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/analytics-client';
+import type { EventTypeOpts } from '@kbn/core/server';
 
 export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   model: string;
@@ -71,26 +71,12 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
 };
 
 export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
   model?: string;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is Knowledge Base enabled',
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG Alerts enabled',
-      },
-    },
     assistantStreamingEnabled: {
       type: 'boolean',
       _meta: {
@@ -115,8 +101,6 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
 
 export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   errorMessage: string;
-  isEnabledKnowledgeBase: boolean;
-  isEnabledRAGAlerts: boolean;
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
   model?: string;
@@ -127,18 +111,6 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Error message from Elasticsearch',
-      },
-    },
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is Knowledge Base enabled',
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG Alerts enabled',
       },
     },
     assistantStreamingEnabled: {
@@ -163,9 +135,121 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<{
+  actionTypeId: string;
+  alertsContextCount: number;
+  alertsCount: number;
+  configuredAlertsCount: number;
+  discoveriesGenerated: number;
+  durationMs: number;
+  model?: string;
+  provider?: string;
+}> = {
+  eventType: 'attack_discovery_success',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    alertsContextCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of alerts sent as context to the LLM',
+        optional: false,
+      },
+    },
+    alertsCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of unique alerts referenced in the attack discoveries',
+        optional: false,
+      },
+    },
+    configuredAlertsCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of alerts configured by the user',
+        optional: false,
+      },
+    },
+    discoveriesGenerated: {
+      type: 'integer',
+      _meta: {
+        description: 'Quantity of attack discoveries generated',
+        optional: false,
+      },
+    },
+    durationMs: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of request in ms',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<{
+  actionTypeId: string;
+  errorMessage: string;
+  model?: string;
+  provider?: string;
+}> = {
+  eventType: 'attack_discovery_error',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message from Elasticsearch',
+      },
+    },
+
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
   INVOKE_ASSISTANT_ERROR_EVENT,
+  ATTACK_DISCOVERY_SUCCESS_EVENT,
+  ATTACK_DISCOVERY_ERROR_EVENT,
 ];

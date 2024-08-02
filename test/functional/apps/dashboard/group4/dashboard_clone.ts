@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.dashboard.saveDashboard(dashboardName);
 
-      await PageObjects.dashboard.clickClone();
+      await PageObjects.dashboard.duplicateDashboard();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
@@ -41,6 +41,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
+    });
+
+    it('Clone should suggest a unique title', async function () {
+      await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
+      await PageObjects.dashboard.duplicateDashboard();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount('dashboard', `${dashboardName} (2)`, 1);
+    });
+
+    it('Clone should always increment from the last duplicated dashboard with a unique title', async function () {
+      await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
+      // force dashboard duplicate id to increment out of logical progression bounds
+      await PageObjects.dashboard.duplicateDashboard(`${dashboardName} (20)`);
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await listingTable.searchAndExpectItemsCount('dashboard', `${dashboardName} (20)`, 1);
+      // load dashboard with duplication id 1
+      await PageObjects.dashboard.loadSavedDashboard(clonedDashboardName);
+      // run normal clone
+      await PageObjects.dashboard.duplicateDashboard();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      // clone gets duplication id, that picks off from last duplicated dashboard
+      await listingTable.searchAndExpectItemsCount('dashboard', `${dashboardName} (21)`, 1);
     });
   });
 }

@@ -23,7 +23,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
-    const transformParams = this.generator.generate(slo);
+    const transformParams = await this.generator.generate(slo);
     try {
       await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
         logger: this.logger,
@@ -40,7 +40,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
     return transformParams.transform_id;
   }
 
-  inspect(slo: SLODefinition): TransformPutTransformRequest {
+  async inspect(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     return this.generator.generate(slo);
   }
 

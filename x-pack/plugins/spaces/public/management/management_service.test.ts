@@ -11,9 +11,13 @@ import type { ManagementSection } from '@kbn/management-plugin/public';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
 import { ManagementService } from './management_service';
+import { getRolesAPIClientMock } from './roles_api_client.mock';
+import { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
+
+const eventTracker = new EventTracker({ reportEvent: jest.fn() });
 
 describe('ManagementService', () => {
   const config: ConfigType = {
@@ -36,6 +40,9 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        getRolesAPIClient: getRolesAPIClientMock,
+        solutionNavExperiment: Promise.resolve(false),
+        eventTracker,
       });
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
@@ -55,6 +62,9 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        getRolesAPIClient: getRolesAPIClientMock,
+        solutionNavExperiment: Promise.resolve(false),
+        eventTracker,
       });
     });
   });
@@ -75,6 +85,9 @@ describe('ManagementService', () => {
           .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
         config,
+        getRolesAPIClient: jest.fn(),
+        solutionNavExperiment: Promise.resolve(false),
+        eventTracker,
       });
 
       service.stop();

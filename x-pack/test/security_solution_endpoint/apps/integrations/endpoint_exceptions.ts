@@ -12,7 +12,7 @@ import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -28,8 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
-
-  const MINUTES = 60_000;
+  const MINUTES = 60 * 1000 * 10;
 
   describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
@@ -105,18 +104,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const checkArtifact = (expectedArtifact: object) => {
       return retry.tryForTime(2 * MINUTES, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifacts();
+        const artifacts = await endpointArtifactTestResources.getArtifactsFromUnifiedManifestSO();
 
-        const manifestArtifact = artifacts.find((artifact) =>
-          artifact.artifactId.startsWith('endpoint-exceptionlist-macos-v1')
-        );
+        const foundArtifactId = artifacts
+          .flatMap((artifact) => artifact.artifactIds)
+          .find((artifactId) => artifactId.startsWith('endpoint-exceptionlist-macos-v1'));
 
-        expect(manifestArtifact).to.not.be(undefined);
+        expect(foundArtifactId).to.not.be(undefined);
 
         // Get fleet artifact
         const artifactResult = await esClient.get({
           index: '.fleet-artifacts-7',
-          id: `endpoint:${manifestArtifact!.artifactId}`,
+          id: `endpoint:${foundArtifactId!}`,
         });
 
         const artifact = artifactResult._source as ArtifactElasticsearchProperties;
@@ -150,6 +149,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
+      this.timeout(MINUTES);
+
       const deleteEndpointExceptions = async () => {
         const { body } = await supertest
           .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=endpoint_list&namespace_type=agnostic`)

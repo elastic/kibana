@@ -16,15 +16,14 @@ import {
   SnapshotMetricType,
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
-import type { InfraConfig } from '../../../../common/plugin_config_types';
-import {
-  Comparator,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-} from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
-} from '../../../../common/http_api/snapshot_api';
+} from '../../../../common/http_api';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -54,16 +53,15 @@ import {
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
+const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(Object.values(Comparator)) as Type<Comparator>,
+  comparator: oneOfLiterals(comparators) as Type<COMPARATORS>,
   timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-  warningComparator: schema.maybe(oneOfLiterals(Object.values(Comparator))) as Type<
-    Comparator | undefined
-  >,
+  warningComparator: schema.maybe(oneOfLiterals(comparators)) as Type<COMPARATORS | undefined>,
   customMetric: schema.maybe(
     schema.object({
       type: schema.literal('custom'),

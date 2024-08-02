@@ -1148,7 +1148,6 @@
       "describe('useNavigateFindings')",
       "  it('creates a URL to findings page with correct path, filter and dataViewId')",
       "  it('creates a URL to findings page with correct path and negated filter')",
-      "  it('creates a URL to findings resource page with correct path and filter')",
       "  it('creates a URL to vulnerabilities page with correct path, filter and dataViewId')"
     ],
     "testSuits": [
@@ -1177,16 +1176,6 @@
         "rawLine": "  it('creates a URL to findings page with correct path and negated filter', () => {",
         "line": "  it('creates a URL to findings page with correct path and negated filter')",
         "label": "creates a URL to findings page with correct path and negated filter",
-        "indent": 2,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "creates-a-url-to-findings-resource-page-with-correct-path-and-filter",
-        "rawLine": "  it('creates a URL to findings resource page with correct path and filter', () => {",
-        "line": "  it('creates a URL to findings resource page with correct path and filter')",
-        "label": "creates a URL to findings resource page with correct path and filter",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
@@ -1229,16 +1218,6 @@
             "rawLine": "  it('creates a URL to findings page with correct path and negated filter', () => {",
             "line": "  it('creates a URL to findings page with correct path and negated filter')",
             "label": "creates a URL to findings page with correct path and negated filter",
-            "indent": 2,
-            "type": "it",
-            "isSkipped": false,
-            "isTodo": false
-          },
-          {
-            "id": "creates-a-url-to-findings-resource-page-with-correct-path-and-filter",
-            "rawLine": "  it('creates a URL to findings resource page with correct path and filter', () => {",
-            "line": "  it('creates a URL to findings resource page with correct path and filter')",
-            "label": "creates a URL to findings resource page with correct path and filter",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
@@ -5696,6 +5675,190 @@
     ]
   },
   {
+    "filePath": "x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx",
+    "fileName": "no_findings_states.test.tsx",
+    "directory": "x-pack/plugins/cloud_security_posture",
+    "tags": [
+      "UT"
+    ],
+    "lines": [
+      "describe('NoFindingsStates')",
+      "  it('should show the indexing notification when CSPM is not installed and KSPM is indexing')",
+      "  it('should show the indexing notification when KSPM is not installed and CSPM is indexing')",
+      "  it('should show the indexing timout notification when CSPM is status is index-timeout')",
+      "  it('should show the indexing timout notification when KSPM is status is index-timeout')",
+      "  it('should show the unprivileged notification when CSPM is status is index-timeout')",
+      "  it('should show the unprivileged notification when KSPM is status is index-timeout')",
+      "  it('should show the not-installed notification when CSPM and KSPM status is not-installed')"
+    ],
+    "testSuits": [
+      {
+        "id": "nofindingsstates",
+        "rawLine": "describe('NoFindingsStates', () => {",
+        "line": "describe('NoFindingsStates')",
+        "label": "NoFindingsStates",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-indexing-notification-when-cspm-is-not-installed-and-kspm-is-indexing",
+        "rawLine": "  it('should show the indexing notification when CSPM is not installed and KSPM is indexing', async () => {",
+        "line": "  it('should show the indexing notification when CSPM is not installed and KSPM is indexing')",
+        "label": "should show the indexing notification when CSPM is not installed and KSPM is indexing",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-indexing-notification-when-kspm-is-not-installed-and-cspm-is-indexing",
+        "rawLine": "  it('should show the indexing notification when KSPM is not installed and CSPM is indexing', async () => {",
+        "line": "  it('should show the indexing notification when KSPM is not installed and CSPM is indexing')",
+        "label": "should show the indexing notification when KSPM is not installed and CSPM is indexing",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-indexing-timout-notification-when-cspm-is-status-is-index-timeout",
+        "rawLine": "  it('should show the indexing timout notification when CSPM is status is index-timeout', async () => {",
+        "line": "  it('should show the indexing timout notification when CSPM is status is index-timeout')",
+        "label": "should show the indexing timout notification when CSPM is status is index-timeout",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-indexing-timout-notification-when-kspm-is-status-is-index-timeout",
+        "rawLine": "  it('should show the indexing timout notification when KSPM is status is index-timeout', async () => {",
+        "line": "  it('should show the indexing timout notification when KSPM is status is index-timeout')",
+        "label": "should show the indexing timout notification when KSPM is status is index-timeout",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-unprivileged-notification-when-cspm-is-status-is-index-timeout",
+        "rawLine": "  it('should show the unprivileged notification when CSPM is status is index-timeout', async () => {",
+        "line": "  it('should show the unprivileged notification when CSPM is status is index-timeout')",
+        "label": "should show the unprivileged notification when CSPM is status is index-timeout",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-unprivileged-notification-when-kspm-is-status-is-index-timeout",
+        "rawLine": "  it('should show the unprivileged notification when KSPM is status is index-timeout', async () => {",
+        "line": "  it('should show the unprivileged notification when KSPM is status is index-timeout')",
+        "label": "should show the unprivileged notification when KSPM is status is index-timeout",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-the-not-installed-notification-when-cspm-and-kspm-status-is-not-installed",
+        "rawLine": "  it('should show the not-installed notification when CSPM and KSPM status is not-installed', async () => {",
+        "line": "  it('should show the not-installed notification when CSPM and KSPM status is not-installed')",
+        "label": "should show the not-installed notification when CSPM and KSPM status is not-installed",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "nofindingsstates",
+        "rawLine": "describe('NoFindingsStates', () => {",
+        "line": "describe('NoFindingsStates')",
+        "label": "NoFindingsStates",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-show-the-indexing-notification-when-cspm-is-not-installed-and-kspm-is-indexing",
+            "rawLine": "  it('should show the indexing notification when CSPM is not installed and KSPM is indexing', async () => {",
+            "line": "  it('should show the indexing notification when CSPM is not installed and KSPM is indexing')",
+            "label": "should show the indexing notification when CSPM is not installed and KSPM is indexing",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-show-the-indexing-notification-when-kspm-is-not-installed-and-cspm-is-indexing",
+            "rawLine": "  it('should show the indexing notification when KSPM is not installed and CSPM is indexing', async () => {",
+            "line": "  it('should show the indexing notification when KSPM is not installed and CSPM is indexing')",
+            "label": "should show the indexing notification when KSPM is not installed and CSPM is indexing",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-show-the-indexing-timout-notification-when-cspm-is-status-is-index-timeout",
+            "rawLine": "  it('should show the indexing timout notification when CSPM is status is index-timeout', async () => {",
+            "line": "  it('should show the indexing timout notification when CSPM is status is index-timeout')",
+            "label": "should show the indexing timout notification when CSPM is status is index-timeout",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-show-the-indexing-timout-notification-when-kspm-is-status-is-index-timeout",
+            "rawLine": "  it('should show the indexing timout notification when KSPM is status is index-timeout', async () => {",
+            "line": "  it('should show the indexing timout notification when KSPM is status is index-timeout')",
+            "label": "should show the indexing timout notification when KSPM is status is index-timeout",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-show-the-unprivileged-notification-when-cspm-is-status-is-index-timeout",
+            "rawLine": "  it('should show the unprivileged notification when CSPM is status is index-timeout', async () => {",
+            "line": "  it('should show the unprivileged notification when CSPM is status is index-timeout')",
+            "label": "should show the unprivileged notification when CSPM is status is index-timeout",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-show-the-unprivileged-notification-when-kspm-is-status-is-index-timeout",
+            "rawLine": "  it('should show the unprivileged notification when KSPM is status is index-timeout', async () => {",
+            "line": "  it('should show the unprivileged notification when KSPM is status is index-timeout')",
+            "label": "should show the unprivileged notification when KSPM is status is index-timeout",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-show-the-not-installed-notification-when-cspm-and-kspm-status-is-not-installed",
+            "rawLine": "  it('should show the not-installed notification when CSPM and KSPM status is not-installed', async () => {",
+            "line": "  it('should show the not-installed notification when CSPM and KSPM status is not-installed')",
+            "label": "should show the not-installed notification when CSPM and KSPM status is not-installed",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx",
     "fileName": "benchmarks_table.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
@@ -7321,6 +7484,169 @@
             "rawLine": "  it('Display success state when result request is resolved', async () => {",
             "line": "  it('Display success state when result request is resolved')",
             "label": "Display success state when result request is resolved",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx",
+    "fileName": "use_change_csp_rule_state.test.tsx",
+    "directory": "x-pack/plugins/cloud_security_posture",
+    "tags": [
+      "UT"
+    ],
+    "lines": [
+      "describe('use_change_csp_rule_state')",
+      "  it('should call http.post with the correct parameters')",
+      "  it('should cancel queries and update query data onMutate')",
+      "  it('should invalidate queries onSettled')",
+      "  it('should restore previous query data onError')",
+      "  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState')",
+      "  it('creates the new cache with rules in a unmute state')"
+    ],
+    "testSuits": [
+      {
+        "id": "use_change_csp_rule_state",
+        "rawLine": "describe('use_change_csp_rule_state', () => {",
+        "line": "describe('use_change_csp_rule_state')",
+        "label": "use_change_csp_rule_state",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-call-http.post-with-the-correct-parameters",
+        "rawLine": "  it('should call http.post with the correct parameters', async () => {",
+        "line": "  it('should call http.post with the correct parameters')",
+        "label": "should call http.post with the correct parameters",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-cancel-queries-and-update-query-data-onmutate",
+        "rawLine": "  it('should cancel queries and update query data onMutate', async () => {",
+        "line": "  it('should cancel queries and update query data onMutate')",
+        "label": "should cancel queries and update query data onMutate",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-invalidate-queries-onsettled",
+        "rawLine": "  it('should invalidate queries onSettled', async () => {",
+        "line": "  it('should invalidate queries onSettled')",
+        "label": "should invalidate queries onSettled",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-restore-previous-query-data-onerror",
+        "rawLine": "  it('should restore previous query data onError', async () => {",
+        "line": "  it('should restore previous query data onError')",
+        "label": "should restore previous query data onError",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "creates-the-new-set-of-cache-rules-in-a-muted-state-when-calling-createruleswithupdatedstate",
+        "rawLine": "  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState', async () => {",
+        "line": "  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState')",
+        "label": "creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "creates-the-new-cache-with-rules-in-a-unmute-state",
+        "rawLine": "  it('creates the new cache with rules in a unmute state', async () => {",
+        "line": "  it('creates the new cache with rules in a unmute state')",
+        "label": "creates the new cache with rules in a unmute state",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "use_change_csp_rule_state",
+        "rawLine": "describe('use_change_csp_rule_state', () => {",
+        "line": "describe('use_change_csp_rule_state')",
+        "label": "use_change_csp_rule_state",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "should-call-http.post-with-the-correct-parameters",
+            "rawLine": "  it('should call http.post with the correct parameters', async () => {",
+            "line": "  it('should call http.post with the correct parameters')",
+            "label": "should call http.post with the correct parameters",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-cancel-queries-and-update-query-data-onmutate",
+            "rawLine": "  it('should cancel queries and update query data onMutate', async () => {",
+            "line": "  it('should cancel queries and update query data onMutate')",
+            "label": "should cancel queries and update query data onMutate",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-invalidate-queries-onsettled",
+            "rawLine": "  it('should invalidate queries onSettled', async () => {",
+            "line": "  it('should invalidate queries onSettled')",
+            "label": "should invalidate queries onSettled",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "should-restore-previous-query-data-onerror",
+            "rawLine": "  it('should restore previous query data onError', async () => {",
+            "line": "  it('should restore previous query data onError')",
+            "label": "should restore previous query data onError",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "creates-the-new-set-of-cache-rules-in-a-muted-state-when-calling-createruleswithupdatedstate",
+            "rawLine": "  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState', async () => {",
+            "line": "  it('creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState')",
+            "label": "creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState",
+            "indent": 2,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "creates-the-new-cache-with-rules-in-a-unmute-state",
+            "rawLine": "  it('creates the new cache with rules in a unmute state', async () => {",
+            "line": "  it('creates the new cache with rules in a unmute state')",
+            "label": "creates the new cache with rules in a unmute state",
             "indent": 2,
             "type": "it",
             "isSkipped": false,
@@ -10683,12 +11009,11 @@
     "tags": [
       "FTR",
       "SERVERLESS",
-      "API INTEGRATION",
-      "HAS SKIP"
+      "API INTEGRATION"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
-      "    describe.skip('STATUS = INDEXED TEST')",
+      "    describe('STATUS = INDEXED TEST')",
       "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`)",
       "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`)",
       "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`)"
@@ -10706,12 +11031,12 @@
       },
       {
         "id": "status-=-indexed-test",
-        "rawLine": "    describe.skip('STATUS = INDEXED TEST', () => {",
-        "line": "    describe.skip('STATUS = INDEXED TEST')",
+        "rawLine": "    describe('STATUS = INDEXED TEST', () => {",
+        "line": "    describe('STATUS = INDEXED TEST')",
         "label": "STATUS = INDEXED TEST",
         "indent": 4,
         "type": "describe",
-        "isSkipped": true,
+        "isSkipped": false,
         "isTodo": false
       },
       {
@@ -10758,12 +11083,12 @@
         "children": [
           {
             "id": "status-=-indexed-test",
-            "rawLine": "    describe.skip('STATUS = INDEXED TEST', () => {",
-            "line": "    describe.skip('STATUS = INDEXED TEST')",
+            "rawLine": "    describe('STATUS = INDEXED TEST', () => {",
+            "line": "    describe('STATUS = INDEXED TEST')",
             "label": "STATUS = INDEXED TEST",
             "indent": 4,
             "type": "describe",
-            "isSkipped": true,
+            "isSkipped": false,
             "isTodo": false,
             "children": [
               {
@@ -10773,7 +11098,7 @@
                 "label": "Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
@@ -10783,7 +11108,7 @@
                 "label": "Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               },
               {
@@ -10793,7 +11118,7 @@
                 "label": "Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": true,
+                "isSkipped": false,
                 "isTodo": false
               }
             ]
@@ -13679,6 +14004,151 @@
     ]
   },
   {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/benchmark.ts",
+    "fileName": "benchmark.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR",
+      "HAS SKIP"
+    ],
+    "lines": [
+      "  describe('Access with custom roles')",
+      "    it.skip('Access with valid user role')",
+      "    it.skip('Access with invalid user role')",
+      "    describe('Access with custom roles - rule page')",
+      "      it('Access with valid user role')",
+      "      it.skip('Access with invalid user role')"
+    ],
+    "testSuits": [
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "  describe('Access with custom roles', async () => {",
+        "line": "  describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-valid-user-role",
+        "rawLine": "    it.skip('Access with valid user role', async () => {",
+        "line": "    it.skip('Access with valid user role')",
+        "label": "Access with valid user role",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-invalid-user-role",
+        "rawLine": "    it.skip('Access with invalid user role', async () => {});",
+        "line": "    it.skip('Access with invalid user role')",
+        "label": "Access with invalid user role",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-custom-roles---rule-page",
+        "rawLine": "    describe('Access with custom roles - rule page', async () => {",
+        "line": "    describe('Access with custom roles - rule page')",
+        "label": "Access with custom roles - rule page",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-valid-user-role",
+        "rawLine": "      it('Access with valid user role', async () => {",
+        "line": "      it('Access with valid user role')",
+        "label": "Access with valid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-invalid-user-role",
+        "rawLine": "      it.skip('Access with invalid user role', async () => {});",
+        "line": "      it.skip('Access with invalid user role')",
+        "label": "Access with invalid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": true,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "  describe('Access with custom roles', async () => {",
+        "line": "  describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "access-with-valid-user-role",
+            "rawLine": "    it.skip('Access with valid user role', async () => {",
+            "line": "    it.skip('Access with valid user role')",
+            "label": "Access with valid user role",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "access-with-invalid-user-role",
+            "rawLine": "    it.skip('Access with invalid user role', async () => {});",
+            "line": "    it.skip('Access with invalid user role')",
+            "label": "Access with invalid user role",
+            "indent": 4,
+            "type": "it",
+            "isSkipped": true,
+            "isTodo": false
+          },
+          {
+            "id": "access-with-custom-roles---rule-page",
+            "rawLine": "    describe('Access with custom roles - rule page', async () => {",
+            "line": "    describe('Access with custom roles - rule page')",
+            "label": "Access with custom roles - rule page",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "access-with-valid-user-role",
+                "rawLine": "      it('Access with valid user role', async () => {",
+                "line": "      it('Access with valid user role')",
+                "label": "Access with valid user role",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "access-with-invalid-user-role",
+                "rawLine": "      it.skip('Access with invalid user role', async () => {});",
+                "line": "      it.skip('Access with invalid user role')",
+                "label": "Access with invalid user role",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": true,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts",
     "fileName": "cis_integration_cnvm.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
@@ -15516,6 +15986,7 @@
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
       "FTR",
+      "HAS SKIP",
       "HAS TODO"
     ],
     "lines": [
@@ -15523,7 +15994,10 @@
       "    describe('Kubernetes Dashboard')",
       "      it('displays accurate summary compliance score')",
       "    describe('TODO - Cloud Dashboard', () => {",
-      "      it('todo - displays accurate summary compliance score', async () => {});"
+      "      it('todo - displays accurate summary compliance score', async () => {});",
+      "    describe('Access with custom roles')",
+      "      it('Access with valid user role')",
+      "      it.skip('todo - Access with invalid user role')"
     ],
     "testSuits": [
       {
@@ -15574,6 +16048,36 @@
         "indent": 6,
         "type": "it",
         "isSkipped": false,
+        "isTodo": true
+      },
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "    describe('Access with custom roles', async () => {",
+        "line": "    describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-valid-user-role",
+        "rawLine": "      it('Access with valid user role', async () => {",
+        "line": "      it('Access with valid user role')",
+        "label": "Access with valid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "todo---access-with-invalid-user-role",
+        "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
+        "line": "      it.skip('todo - Access with invalid user role')",
+        "label": "todo - Access with invalid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": true,
         "isTodo": true
       }
     ],
@@ -15628,6 +16132,38 @@
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
+                "isTodo": true
+              }
+            ]
+          },
+          {
+            "id": "access-with-custom-roles",
+            "rawLine": "    describe('Access with custom roles', async () => {",
+            "line": "    describe('Access with custom roles')",
+            "label": "Access with custom roles",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "access-with-valid-user-role",
+                "rawLine": "      it('Access with valid user role', async () => {",
+                "line": "      it('Access with valid user role')",
+                "label": "Access with valid user role",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "todo---access-with-invalid-user-role",
+                "rawLine": "      it.skip('todo - Access with invalid user role', async () => {});",
+                "line": "      it.skip('todo - Access with invalid user role')",
+                "label": "todo - Access with invalid user role",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": true,
                 "isTodo": true
               }
             ]
@@ -16393,7 +16929,10 @@
       "      it('Remove fields from the Findings DataTable')",
       "      it('Reset fields to default')",
       "    describe('Findings Page - support muting rules')",
-      "      it(`verify only enabled rules appears`)"
+      "      it(`verify only enabled rules appears`)",
+      "    describe('Access with custom roles')",
+      "      it('Access with valid user role')",
+      "      it('Access with invalid user role')"
     ],
     "testSuits": [
       {
@@ -16561,6 +17100,36 @@
         "rawLine": "      it(`verify only enabled rules appears`, async () => {",
         "line": "      it(`verify only enabled rules appears`)",
         "label": "verify only enabled rules appears",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "    describe('Access with custom roles', async () => {",
+        "line": "    describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-valid-user-role",
+        "rawLine": "      it('Access with valid user role', async () => {",
+        "line": "      it('Access with valid user role')",
+        "label": "Access with valid user role",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "access-with-invalid-user-role",
+        "rawLine": "      it('Access with invalid user role', async () => {",
+        "line": "      it('Access with invalid user role')",
+        "label": "Access with invalid user role",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -16745,6 +17314,38 @@
             "rawLine": "      it(`verify only enabled rules appears`, async () => {",
             "line": "      it(`verify only enabled rules appears`)",
             "label": "verify only enabled rules appears",
+            "indent": 6,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          }
+        ]
+      },
+      {
+        "id": "access-with-custom-roles",
+        "rawLine": "    describe('Access with custom roles', async () => {",
+        "line": "    describe('Access with custom roles')",
+        "label": "Access with custom roles",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "access-with-valid-user-role",
+            "rawLine": "      it('Access with valid user role', async () => {",
+            "line": "      it('Access with valid user role')",
+            "label": "Access with valid user role",
+            "indent": 6,
+            "type": "it",
+            "isSkipped": false,
+            "isTodo": false
+          },
+          {
+            "id": "access-with-invalid-user-role",
+            "rawLine": "      it('Access with invalid user role', async () => {",
+            "line": "      it('Access with invalid user role')",
+            "label": "Access with invalid user role",
             "indent": 6,
             "type": "it",
             "isSkipped": false,

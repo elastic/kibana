@@ -90,7 +90,6 @@ export function startDiffingDashboardState(
   const reactEmbeddableUnsavedChanges = this.children$.pipe(
     map((children) => Object.keys(children)),
     distinctUntilChanged(deepEqual),
-    debounceTime(CHANGE_CHECK_DEBOUNCE),
 
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {
@@ -107,6 +106,7 @@ export function startDiffingDashboardState(
         )
       );
     }),
+    debounceTime(CHANGE_CHECK_DEBOUNCE),
     map((children) => children.filter((child) => Boolean(child.unsavedChanges)))
   );
 
@@ -118,18 +118,17 @@ export function startDiffingDashboardState(
     startWith(null),
     debounceTime(CHANGE_CHECK_DEBOUNCE),
     switchMap(() => {
-      return new Observable<Partial<DashboardContainerInput>>((observer) => {
+      return (async () => {
         const {
           explicitInput: currentInput,
           componentState: { lastSavedInput },
         } = this.getState();
-        getDashboardUnsavedChanges
-          .bind(this)(lastSavedInput, currentInput)
-          .then((unsavedChanges) => {
-            if (observer.closed) return;
-            observer.next(unsavedChanges);
-          });
-      });
+        const unsavedChanges = await getDashboardUnsavedChanges.bind(this)(
+          lastSavedInput,
+          currentInput
+        );
+        return unsavedChanges;
+      })();
     })
   );
 

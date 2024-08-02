@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -60,7 +61,6 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { getRuleReducer } from '../../rule_form/rule_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
-import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { runRule } from '../../../lib/run_rule';
 import {
   getConfirmDeletionButtonText,
@@ -465,24 +465,25 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiCallOut color="danger" data-test-subj="ruleErrorBanner" size="s" iconType="rule">
-                <p>
-                  <EuiIcon color="danger" type="warning" />
-                  &nbsp;
-                  <b>{getRuleStatusErrorReasonText()}</b>&#44;&nbsp;
-                  {rule.executionStatus.error?.message}
-                  &nbsp;
-                  <EuiLink
-                    href={`${http.basePath.get()}/app/management/stack/license_management`}
-                    color="primary"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-                      defaultMessage="Manage license"
-                    />
-                  </EuiLink>
-                </p>
+              <EuiCallOut
+                color="danger"
+                data-test-subj="ruleErrorBanner"
+                size="s"
+                iconType="error"
+                title={getRuleStatusErrorReasonText()}
+              >
+                <EuiText size="xs">{rule.executionStatus.error?.message}</EuiText>
+                <EuiSpacer size="s" />
+                <EuiLink
+                  href={`${http.basePath.get()}/app/management/stack/license_management`}
+                  color="primary"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
+                    defaultMessage="Manage license"
+                  />
+                </EuiLink>
               </EuiCallOut>
             </EuiFlexItem>
           </EuiFlexGroup>

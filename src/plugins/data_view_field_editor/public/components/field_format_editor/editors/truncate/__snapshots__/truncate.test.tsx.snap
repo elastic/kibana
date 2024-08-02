@@ -9,10 +9,9 @@ exports[`TruncateFormatEditor should render normally 1`] = `
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Field length"
         id="indexPatternFieldEditor.truncate.lengthLabel"
-        values={Object {}}
       />
     }
     labelType="label"

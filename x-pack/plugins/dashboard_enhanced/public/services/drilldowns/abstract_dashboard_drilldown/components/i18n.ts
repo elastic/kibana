@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const txtDestinationDashboardNotFound = (dashboardId?: string) =>
   i18n.translate('xpack.dashboard.drilldown.errorDestinationDashboardIsMissing', {
     defaultMessage:
-      "Destination dashboard ('{dashboardId}') no longer exists. Choose another dashboard.",
+      "Destination dashboard (''{dashboardId}'') no longer exists. Choose another dashboard.",
     values: {
       dashboardId,
     },

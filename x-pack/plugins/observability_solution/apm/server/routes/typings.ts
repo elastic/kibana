@@ -56,6 +56,8 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canCreateJob'
       | 'access:ml:canCloseJob'
       | 'access:ai_assistant'
+      | 'oas-tag:APM agent keys'
+      | 'oas-tag:APM annotations'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
     disableTelemetry?: boolean;

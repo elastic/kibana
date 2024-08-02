@@ -75,7 +75,7 @@ exports[`Footer multiple features, multiple layers: mouseover (unlocked) should 
       <EuiTextColor
         color="subdued"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="{pageNumber} of {total}"
           id="xpack.maps.tooltip.pageNumerText"
           values={
@@ -131,7 +131,7 @@ exports[`Footer multiple features, single layer: mouseover (unlocked) should onl
       <EuiTextColor
         color="subdued"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="{pageNumber} of {total}"
           id="xpack.maps.tooltip.pageNumerText"
           values={

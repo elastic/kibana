@@ -36,25 +36,23 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
   ControlEmbeddable
 >;
 
-export type ControlEmbeddable<
+export interface ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
+> extends IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
   selectionsToFilters?: (
     input: Partial<TControlEmbeddableInput>
   ) => Promise<ControlGroupFilterOutput>;
-};
+}
 
-export interface IClearableControl<
-  TClearableControlEmbeddableInput extends ControlInput = ControlInput
-> extends ControlEmbeddable {
+export interface CanClearSelections {
   clearSelections: () => void;
 }
 
-export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
-  return Boolean((control as IClearableControl).clearSelections);
+export const isClearableControl = (control: unknown): control is CanClearSelections => {
+  return typeof (control as CanClearSelections).clearSelections === 'function';
 };
 
 /**

@@ -22,7 +22,7 @@ for (int i = 0; i < inputs.length; i++) {
   double current_score = inputs[i].score / Math.pow(i + 1, params.p);
 
   if (i < 10) {
-    inputs[i]["contribution"] = 100 * current_score / params.risk_cap;
+    inputs[i]['contribution'] = current_score / params.risk_cap;
     results['risk_inputs'].add(inputs[i]);
   }
 
@@ -36,6 +36,6 @@ for (int i = 0; i < inputs.length; i++) {
 }
 
 results['score'] *= params.global_identifier_type_weight;
-results['normalized_score'] = 100 * results['score'] / params.risk_cap;
+results['normalized_score'] = results['score'] / params.risk_cap;
 
 return results;

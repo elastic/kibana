@@ -71,7 +71,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
@@ -296,8 +296,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_id]
-                          ? policyShards[packagePolicy.policy_id]
+                        shard: policyShards[packagePolicy.policy_ids[0]] // TODO
+                          ? policyShards[packagePolicy.policy_ids[0]]
                           : 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
@@ -312,7 +312,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToAdd.map((agentPolicyId) => {
-              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
+              );
 
               if (packagePolicy) {
                 return packagePolicyService?.update(
@@ -329,8 +331,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_id]
-                          ? policyShards[packagePolicy.policy_id]
+                        shard: policyShards[packagePolicy.policy_ids[0]] // TODO
+                          ? policyShards[packagePolicy.policy_ids[0]]
                           : 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }

@@ -85,7 +85,6 @@ export async function getFullAgentPolicy(
     downloadSourceUri,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
-
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -118,7 +117,8 @@ export async function getFullAgentPolicy(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
-    agentPolicy.namespace
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
   );
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
@@ -191,6 +191,10 @@ export async function getFullAgentPolicy(
       signature: '',
     },
   };
+
+  if (agentPolicy.space_id) {
+    fullAgentPolicy.namespaces = [agentPolicy.space_id];
+  }
 
   const dataPermissions =
     (await storedPackagePoliciesToAgentPermissions(
@@ -487,8 +491,8 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (output.type === outputType.Elasticsearch && standalone) {
-    newOutput.username = '${ES_USERNAME}';
-    newOutput.password = '${ES_PASSWORD}';
+    // adding a place_holder as API_KEY
+    newOutput.api_key = '${API_KEY}';
   }
 
   if (output.type === outputType.RemoteElasticsearch) {

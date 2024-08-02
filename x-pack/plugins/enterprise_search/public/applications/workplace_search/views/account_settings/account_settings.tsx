@@ -5,31 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { useValues } from 'kea';
-
-import type { AuthenticatedUser } from '@kbn/security-plugin/public';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { PersonalDashboardLayout } from '../../components/layout';
 import { ACCOUNT_SETTINGS_TITLE } from '../../constants';
 
 export const AccountSettings: React.FC = () => {
-  const { security } = useValues(KibanaLogic);
-
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
-
-  useEffect(() => {
-    if (security) {
-      security.authc
-        .getCurrentUser()
-        .then(setCurrentUser)
-        .catch(() => {
-          setCurrentUser(null);
-        });
-    }
-  }, [security?.authc]);
+  const { user: currentUser, security } = useValues(KibanaLogic);
 
   const PersonalInfo = useMemo(() => security?.uiApi.components.getPersonalInfo, [security?.uiApi]);
   const ChangePassword = useMemo(

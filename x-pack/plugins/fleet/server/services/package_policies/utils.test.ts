@@ -37,6 +37,7 @@ describe('Package Policy Utils', () => {
           version: '1.0.0',
         },
         policy_id: '444-555-666',
+        policy_ids: ['444-555-666'],
         revision: 1,
         secret_references: [],
         updated_at: '2024-01-25T15:21:13.389Z',

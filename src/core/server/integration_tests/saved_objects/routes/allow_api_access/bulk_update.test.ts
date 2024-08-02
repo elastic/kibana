@@ -50,7 +50,8 @@ describe('PUT /api/saved_objects/_bulk_update with allowApiAccess true', () => {
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
-    registerBulkUpdateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerBulkUpdateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

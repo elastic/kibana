@@ -1,191 +1,170 @@
-CIDR_MATCH
-CIDR_MATCH
+# ES|QL Operators
 
-Syntax
-Parameters
-ip
-IP address of type ip (both IPv4 and IPv6 are supported).
-blockX
-CIDR block to test the IP against.
-DescriptionReturns true if the provided IP is contained in one of the provided CIDR blocks.Supported types
-Example
-```esql
-FROM hosts
-| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
-| KEEP card, host, ip0, ip1
-```
+ES|QL supports a variety of operators that can be used in queries. These operators can be categorized into binary operators, unary operators, logical operators, and others.
 
-ENDS_WITH
-ENDS_WITH
+## Binary Operators
 
-Syntax
-Parameters
-str
-String expression. If null, the function returns null.
-suffix
-String expression. If null, the function returns null.
-DescriptionReturns a boolean that indicates whether a keyword string ends with another string.Supported types
-Example
+Binary operators in ES|QL include equality, inequality, less than, less than or equal to, greater than, greater than or equal to, add, subtract, multiply, divide, and modulus.
+
+### Equality
+
+The equality operator (`==`) checks if two values are equal. 
+
 ```esql
 FROM employees
-| KEEP last_name
-| EVAL ln_E = ENDS_WITH(last_name, "d")
+| WHERE first_name == "John"
 ```
 
-STARTS_WITH
-STARTS_WITH
+### Inequality
 
-Syntax
-Parameters
-str
-String expression. If null, the function returns null.
-prefix
-String expression. If null, the function returns null.
-DescriptionReturns a boolean that indicates whether a keyword string starts with another string.Supported types
-Example
+The inequality operator (`!=`) checks if two values are not equal.
+
 ```esql
 FROM employees
-| KEEP last_name
-| EVAL ln_S = STARTS_WITH(last_name, "B")
+| WHERE salary != 50000
 ```
 
-Binary operators
-Binary operators
+### Less Than
 
+The less than operator (`<`) checks if one value is less than another.
 
-Equality
-Equality
+```esql
+FROM employees
+| WHERE age < 30
+```
 
+### Less Than or Equal To
 
-Supported types:Supported types
+The less than or equal to operator (`<=`) checks if one value is less than or equal to another.
 
-Inequality !=
-Inequality !=
+```esql
+FROM employees
+| WHERE years_of_experience <= 5
+```
 
+### Greater Than
 
-Supported types:Supported types
+The greater than operator (`>`) checks if one value is greater than another.
 
-Less than <
-Less than <
+```esql
+FROM employees
+| WHERE salary > 50000
+```
 
+### Greater Than or Equal To
 
-Supported types
+The greater than or equal to operator (`>=`) checks if one value is greater than or equal to another.
 
-Less than or equal to <=
-Less than or equal to <=
+```esql
+FROM employees
+| WHERE age >= 30
+```
 
+### Add
 
-Supported types
+The add operator (`+`) adds two values together.
 
-Greater than >
-Greater than >
+```esql
+FROM employees
+| EVAL total_compensation = salary + bonus
+```
 
+### Subtract
 
-Supported types
+The subtract operator (`-`) subtracts one value from another.
 
-Greater than or equal to >=
-Greater than or equal to >=
+```esql
+FROM employees
+| EVAL years_until_retirement = 65 - age
+```
 
+### Multiply
 
-Supported types
+The multiply operator (`*`) multiplies two values.
 
-Add +
-Add +
+```esql
+FROM employees
+| EVAL yearly_bonus = monthly_bonus * 12
+```
 
+### Divide
 
-Supported types
+The divide operator (`/`) divides one value by another.
 
-Subtract -
-Subtract -
+```esql
+FROM employees
+| EVAL hourly_wage = salary / 2080
+```
 
+### Modulus
 
-Supported types
+The modulus operator (`%`) returns the remainder of a division operation.
 
-Multiply *
-Multiply *
+```esql
+FROM employees
+| EVAL odd_or_even = employee_id % 2
+```
 
+## Unary Operators
 
-Supported types
+ES|QL supports one unary operator, negation (`-`), which negates a value.
 
-Divide /
-Divide /
+```esql
+FROM employees
+| EVAL negative_salary = -salary
+```
 
+## Logical Operators
 
-Supported types
+ES|QL supports the logical operators `AND`, `OR`, and `NOT`.
 
-Modulus %
-Modulus %
+```esql
+FROM employees
+| WHERE salary > 50000 AND years_of_experience <= 5
+```
 
+## Other Operators
 
-Supported types
+### IS NULL and IS NOT NULL
 
-Unary operators
-Unary operators
+The `IS NULL` and `IS NOT NULL` predicates check if a value is null or not null, respectively.
 
-The only unary operators is negation (-):
-Supported types:Supported types
-
-Logical operators
-Logical operators
-
-The following logical operators are supported:
-AND
-OR
-NOT
-
-IS NULL and IS NOT NULL predicates
-IS NULL and IS NOT NULL predicates
-
-For NULL comparison, use the IS NULL and IS NOT NULL predicates:
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
-| KEEP first_name, last_name
-| SORT first_name
-| LIMIT 3
 ```
+
+### Cast (::)
+
+The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
 
 ```esql
-FROM employees
-| WHERE is_rehired IS NOT NULL
-| STATS COUNT(emp_no)
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
 ```
 
-IN
-IN
+### IN
 
-The IN operator allows testing whether a field or expression equals
-an element in a list of literals, fields or expressions:
+The `IN` operator checks if a field or expression equals an element in a list of literals, fields, or expressions.
+
 ```esql
 ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
 
-LIKE
-LIKE
+### LIKE
 
-Use LIKE to filter data based on string patterns using wildcards. LIKE
-usually acts on a field placed on the left-hand side of the operator, but it can
-also act on a constant (literal) expression. The right-hand side of the operator
-represents the pattern.The following wildcard characters are supported:
-* matches zero or more characters.
-? matches one character.
-Supported types
+The `LIKE` operator filters data based on string patterns using wildcards.
+
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
-| KEEP first_name, last_name
 ```
 
-RLIKE
-RLIKE
+### RLIKE
 
-Use RLIKE to filter data based on string patterns using using
-regular expressions. RLIKE usually acts on a field placed on
-the left-hand side of the operator, but it can also act on a constant (literal)
-expression. The right-hand side of the operator represents the pattern.Supported types
+The `RLIKE` operator filters data based on string patterns using regular expressions.
+
 ```esql
 FROM employees
 | WHERE first_name RLIKE ".leja.*"
-| KEEP first_name, last_name
 ```

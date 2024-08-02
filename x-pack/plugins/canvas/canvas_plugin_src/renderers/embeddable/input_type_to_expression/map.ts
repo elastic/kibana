@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MapEmbeddableInput } from '@kbn/maps-plugin/public';
+import { MapSerializedState } from '@kbn/maps-plugin/public';
 
-export function toExpression(input: MapEmbeddableInput & { savedObjectId: string }): string {
+export function toExpression(input: MapSerializedState & { id: string }): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedMap');

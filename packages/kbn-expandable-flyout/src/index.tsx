@@ -31,6 +31,10 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
    * Allows for custom styles to be passed to the EuiFlyout component
    */
   customStyles?: Interpolation<Theme>;
+  /**
+   * Callback function to let application's code the flyout is closed
+   */
+  onClose?: EuiFlyoutProps['onClose'];
 }
 
 /**
@@ -66,7 +70,6 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     ? mostRecentPreview?.params?.banner
     : undefined;
 
-  const showBackButton = !!preview && preview.length > 1;
   const previewSection = useMemo(
     () => registeredPanels.find((panel) => panel.key === mostRecentPreview?.id),
     [mostRecentPreview, registeredPanels]
@@ -93,7 +96,12 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       {...flyoutProps}
       size={flyoutWidth}
       ownFocus={false}
-      onClose={closeFlyout}
+      onClose={(e) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      }}
       css={customStyles}
     >
       <EuiFlexGroup
@@ -120,7 +128,6 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
       {showPreview ? (
         <PreviewSection
           component={previewSection.component({ ...(mostRecentPreview as FlyoutPanelProps) })}
-          showBackButton={showBackButton}
           leftPosition={previewSectionLeft}
           banner={previewBanner}
         />

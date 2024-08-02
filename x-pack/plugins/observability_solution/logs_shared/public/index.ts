@@ -33,8 +33,6 @@ export {
   useLogHighlightsStateContext,
 } from './containers/logs/log_highlights';
 export type { LogSummaryBuckets, WithSummaryProps } from './containers/logs/log_summary';
-export { useLogSummary, WithSummary } from './containers/logs/log_summary';
-export { useLogEntryFlyout } from './components/logging/log_entry_flyout';
 
 // Shared components
 export type { LogAIAssistantDocument } from './components/log_ai_assistant/log_ai_assistant';
@@ -46,10 +44,13 @@ export {
   iconColumnId,
   useColumnWidths,
 } from './components/logging/log_text_stream/log_entry_column';
-export { LogEntryFlyout } from './components/logging/log_entry_flyout';
 export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 export type { LogStreamProps } from './components/log_stream/log_stream';
 
+export const WithSummary = dynamic(() => import('./containers/logs/log_summary/with_summary'));
+export const LogEntryFlyout = dynamic(
+  () => import('./components/logging/log_entry_flyout/log_entry_flyout')
+);
 export const LogAIAssistant = dynamic(
   () => import('./components/log_ai_assistant/log_ai_assistant')
 );

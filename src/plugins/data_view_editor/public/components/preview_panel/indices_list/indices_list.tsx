@@ -27,7 +27,8 @@ import {
 import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE, MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 
 export interface IndicesListProps {
   indices: MatchedItem[];
@@ -205,10 +206,18 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
           <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
-              return (
+              const badge = (
                 <EuiBadge key={`index_${key}_tag_${tag.key}`} color={tag.color}>
                   {tag.name}
                 </EuiBadge>
+              );
+
+              return tag.key === INDEX_PATTERN_TYPE.ROLLUP ? (
+                <>
+                  &nbsp;<RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
+                </>
+              ) : (
+                badge
               );
             })}
           </EuiTableRowCell>

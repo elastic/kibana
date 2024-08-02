@@ -29,10 +29,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
-    async clickCloseFlyoutButton() {
-      return testSubjects.click('euiFlyoutCloseButton');
-    },
-
     async getBetaBadgeExists() {
       return testSubjects.exists('infra-beta-badge');
     },
@@ -133,8 +129,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
       await testSubjects.existOrFail('embeddablePanelAction-openInLens');
-      // forces the modal to close
-      await element.click();
     },
 
     // KPIs

@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Serverless observability API - feature flags', function () {
     loadTestFile(require.resolve('./custom_threshold_rule'));
     loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./platform_security'));
     loadTestFile(require.resolve('../common/platform_security/roles_routes_feature_flag.ts'));
   });
 }

@@ -2,6 +2,7 @@ title: Create connector request body properties
 description: The properties vary depending on the connector type.
 oneOf:
   - $ref: 'create_connector_request_bedrock.yaml'
+  - $ref: 'create_connector_request_gemini.yaml'
   - $ref: 'create_connector_request_cases_webhook.yaml'
   - $ref: 'create_connector_request_d3security.yaml'
   - $ref: 'create_connector_request_email.yaml'
@@ -28,6 +29,7 @@ discriminator:
   propertyName: connector_type_id
   mapping:
     .bedrock: 'create_connector_request_bedrock.yaml'
+    .gemini: 'create_connector_request_gemini.yaml'
     .cases-webhook: 'create_connector_request_cases_webhook.yaml'
     .d3security: 'create_connector_request_d3security.yaml'
     .email: 'create_connector_request_email.yaml'

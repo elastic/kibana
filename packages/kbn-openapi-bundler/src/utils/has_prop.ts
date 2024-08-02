@@ -8,7 +8,7 @@
 
 import { isPlainObjectType } from './is_plain_object_type';
 
-export function hasProp<Property extends string, Value extends string | number | boolean>(
+export function hasProp<Property extends string, Value = string | number | boolean>(
   node: unknown,
   propName: Property,
   propValue?: Value

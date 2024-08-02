@@ -32,7 +32,7 @@ export API_KEY="${apiKey}"`,
   },
   iconType: 'curl.svg',
   id: Languages.CURL,
-  ingestData: ({ ingestPipeline }) => `curl -X POST "\$\{ES_URL\}/_bulk?pretty"${
+  ingestData: ({ ingestPipeline }) => `curl -X POST "\$\{ES_URL\}/_bulk?pretty${
     ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
   }" \\
   -H "Authorization: ApiKey "\$\{API_KEY\}"" \\

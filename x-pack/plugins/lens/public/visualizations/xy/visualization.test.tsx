@@ -6,8 +6,7 @@
  */
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
-import { Position } from '@elastic/charts';
-import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
+import { LegendValue, Position } from '@elastic/charts';
 import {
   Operation,
   OperationDescriptor,
@@ -54,13 +53,13 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
+import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -230,7 +229,7 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
+                "paletteId": "eui_amsterdam_color_blind",
                 "specialAssignments": Array [
                   Object {
                     "color": Object {
@@ -612,7 +611,7 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: [XYLegendValue.CurrentAndLastValue],
+            legendStats: [LegendValue.CurrentAndLastValue],
           },
         };
 
@@ -3144,6 +3143,7 @@ describe('xy_visualization', () => {
                 "longMessage": "",
                 "severity": "error",
                 "shortMessage": "Annotations require a time based chart to work. Add a date histogram.",
+                "uniqueId": "annotation_missing_date_histogram",
               },
             ]
           `);
@@ -3295,7 +3295,7 @@ describe('xy_visualization', () => {
               },
             ],
             "fixableInEditor": true,
-            "longMessage": <FormattedMessage
+            "longMessage": <Memo(MemoizedFormattedMessage)
               defaultMessage="{label} contains array values. Your visualization may not render as expected."
               id="xpack.lens.xyVisualization.arrayValues"
               values={
@@ -3308,6 +3308,7 @@ describe('xy_visualization', () => {
             />,
             "severity": "warning",
             "shortMessage": "",
+            "uniqueId": "xy_rendering_values_array",
           }
         `);
       });
@@ -3412,7 +3413,7 @@ describe('xy_visualization', () => {
             fixableInEditor: false,
             severity: 'info',
             shortMessage: 'Layers ignoring global filters',
-            uniqueId: 'ignoring-global-filters-layers',
+            uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
           })
         );
       });

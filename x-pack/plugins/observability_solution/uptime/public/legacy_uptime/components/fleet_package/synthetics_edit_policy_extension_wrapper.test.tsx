@@ -45,7 +45,7 @@ const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
   description: '',
   namespace: 'default',
-  policy_id: 'ae774160-8e49-11eb-aba5-99269d21ba6e',
+  policy_ids: ['ae774160-8e49-11eb-aba5-99269d21ba6e'],
   enabled: true,
   inputs: [
     {

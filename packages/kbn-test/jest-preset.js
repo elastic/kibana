@@ -66,6 +66,7 @@ module.exports = {
     '<rootDir>/packages/kbn-test/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/packages/kbn-test/src/jest/setup/mocks.eui.js',
     '<rootDir>/packages/kbn-test/src/jest/setup/react_testing_library.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
     process.env.CI ? '<rootDir>/packages/kbn-test/src/jest/setup/disable_console_logs.js' : [],
   ].flat(),
 

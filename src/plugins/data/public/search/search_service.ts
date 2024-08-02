@@ -264,6 +264,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
+      dataViews: indexPatterns,
       onResponse: (request, response, options) => {
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;

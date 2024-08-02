@@ -84,6 +84,11 @@ export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
 
+export interface AdditionalFieldGroups<T extends FieldListItem = FieldListItem> {
+  smartFields?: FieldsGroup<T>['fields'];
+  fallbackFields?: Record<string, string[]>;
+}
+
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 
 export interface RenderFieldItemParams<T extends FieldListItem> {

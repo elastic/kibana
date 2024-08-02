@@ -75,9 +75,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Create pipeline', () => {
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('ingestPipelines');
+      });
+
       afterEach(async () => {
-        // Delete the pipeline that was created
-        await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        const pipeline = await es.ingest.getPipeline({ id: TEST_PIPELINE_NAME });
+
+        // Only if the pipeline exists between runs, we delete it
+        if (pipeline) {
+          await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        }
       });
 
       it('Creates a pipeline', async () => {

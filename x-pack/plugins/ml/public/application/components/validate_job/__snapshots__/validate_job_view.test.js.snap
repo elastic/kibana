@@ -12,10 +12,9 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Validate Job"
         id="xpack.ml.validateJob.validateJobButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </div>
@@ -34,10 +33,9 @@ exports[`ValidateJob renders the button 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Validate Job"
         id="xpack.ml.validateJob.validateJobButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </div>
@@ -56,10 +54,9 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
       onClick={[Function]}
       size="s"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Validate Job"
         id="xpack.ml.validateJob.validateJobButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </div>

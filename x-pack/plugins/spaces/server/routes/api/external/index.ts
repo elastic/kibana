@@ -36,13 +36,14 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   // In the serverless environment, Spaces are enabled but are effectively hidden from the user. We
   // do not support more than 1 space: the default space. These HTTP APIs for creating, deleting,
   // updating, and manipulating saved objects across multiple spaces are not needed.
+  initPutSpacesApi(deps);
+  initDeleteSpacesApi(deps);
+  initPostSpacesApi(deps);
+  initCopyToSpacesApi(deps);
+  initUpdateObjectsSpacesApi(deps);
+  initGetShareableReferencesApi(deps);
+
   if (!deps.isServerless) {
-    initPutSpacesApi(deps);
-    initDeleteSpacesApi(deps);
-    initPostSpacesApi(deps);
-    initCopyToSpacesApi(deps);
-    initUpdateObjectsSpacesApi(deps);
-    initGetShareableReferencesApi(deps);
     initDisableLegacyUrlAliasesApi(deps);
   }
 }

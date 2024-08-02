@@ -10,10 +10,9 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
   isInvalid={false}
   label={
     <React.Fragment>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Size"
         id="visDefaultEditor.controls.sizeLabel"
-        values={Object {}}
       />
     </React.Fragment>
   }

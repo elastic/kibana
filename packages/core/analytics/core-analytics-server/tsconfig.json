@@ -10,9 +10,7 @@
   "include": [
     "**/*.ts"
   ],
-  "kbn_references": [
-    "@kbn/analytics-client"
-  ],
+  "kbn_references": [],
   "exclude": [
     "target/**/*",
   ]

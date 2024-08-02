@@ -86,7 +86,7 @@ export interface RouteConfigOptionsBody {
    *
    * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
-  output?: typeof validBodyOutput[number];
+  output?: (typeof validBodyOutput)[number];
 
   /**
    * Determines if the incoming payload is processed or presented raw. Available values:
@@ -99,6 +99,16 @@ export interface RouteConfigOptionsBody {
    */
   parse?: boolean | 'gunzip';
 }
+
+/**
+ * Route access level.
+ *
+ * Public routes are stable and intended for external access and are subject to
+ * stricter change management and have long term maintenance windows.
+ *
+ * @remark On serverless access to internal routes is restricted.
+ */
+export type RouteAccess = 'public' | 'internal';
 
 /**
  * Additional route options.
@@ -133,7 +143,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *
    * Defaults to 'internal' If not declared,
    */
-  access?: 'public' | 'internal';
+  access?: RouteAccess;
 
   /**
    * Additional metadata tag strings to attach to the route.
@@ -160,8 +170,42 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     idleSocket?: number;
   };
 
-  /** A short, human-friendly description of this endpoint */
+  /**
+   * Short summary of this route. Required for all routes used in OAS documentation.
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   * })
+   * ```
+   */
+  summary?: string;
+
+  /**
+   * Optional API description, which supports [CommonMark](https://spec.commonmark.org) markdown formatting
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   *  description: `Foo resources require **X** and **Y** `read` permissions to access.`,
+   * })
+   * ```
+   */
   description?: string;
+
+  /**
+   * Setting this to `true` declares this route to be deprecated. Consumers SHOULD
+   * refrain from usage of this route.
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   */
+  deprecated?: boolean;
 }
 
 /**

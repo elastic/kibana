@@ -143,7 +143,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
             {policyName ? (
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyJsonFlyout.namedTitle"
-                defaultMessage="Request for '{policyName}'"
+                defaultMessage="Request for ''{policyName}''"
                 values={{ policyName }}
               />
             ) : (

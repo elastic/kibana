@@ -6,12 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../common/lib';
 import { createRule } from './helpers/alerting_api_helper';
@@ -78,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [7500000],
                 timeSize: 5,
                 timeUnit: 'm',

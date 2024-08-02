@@ -21,13 +21,9 @@ export default function (providerContext: FtrProviderContext) {
 
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertest');
-    const dockerServers = getService('dockerServers');
-    const server = dockerServers.get('registry');
-
     let pkgVersion: string;
 
     before(async () => {
-      if (!server.enabled) return;
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
         .set('kbn-xsrf', 'xxxx')
@@ -53,7 +49,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      if (!server.enabled) return;
       return supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx');

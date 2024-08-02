@@ -7,6 +7,7 @@
 
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type {
   GetEnrollmentAPIKeysRequestSchema,
@@ -23,19 +24,25 @@ import type {
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { appContextService } from '../../services';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
+  const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const soClient = (await context.core).savedObjects.client;
 
   try {
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       kuery: request.query.kuery,
+      spaceId: useSpaceAwareness
+        ? soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING
+        : undefined,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated
@@ -59,7 +66,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   const soClient = savedObjects.client;
   const esClient = elasticsearch.client.asInternalUser;
   try {
-    // validate policy id
+    // validate policy exists in the current space
     await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
@@ -85,9 +92,18 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
-    await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
+    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const currentNamespace =
+      coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+    await APIKeyService.deleteEnrollmentApiKey(
+      esClient,
+      request.params.keyId,
+      false,
+      useSpaceAwareness ? currentNamespace : undefined
+    );
 
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
@@ -106,9 +122,19 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
   try {
-    const apiKey = await APIKeyService.getEnrollmentAPIKey(esClient, request.params.keyId);
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const currentNamespace =
+      coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+
+    const apiKey = await APIKeyService.getEnrollmentAPIKey(
+      esClient,
+      request.params.keyId,
+      useSpaceAwareness ? currentNamespace : undefined
+    );
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };
 
     return response.ok({ body });

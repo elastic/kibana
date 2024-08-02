@@ -9,10 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../../common/lib/kibana';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
-import type { GenerationInterval } from '../../types';
 
 const BACKGROUND_COLOR_LIGHT = '#E6F1FA';
 const BACKGROUND_COLOR_DARK = '#0B2030';

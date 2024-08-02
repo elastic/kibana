@@ -69,12 +69,12 @@ export const validateKibanaPrivileges = (
   const validationErrors = kibanaPrivileges.flatMap((priv) => {
     const forAllSpaces = priv.spaces.includes(ALL_SPACES_ID);
 
-    return Object.entries(priv.feature ?? {}).flatMap(([featureId, feature]) => {
+    return Object.entries(priv.feature ?? {}).flatMap(([featureId, featurePrivileges]) => {
       const errors: string[] = [];
-      const kibanaFeature = kibanaFeatures.find((f) => f.id === featureId);
+      const kibanaFeature = kibanaFeatures.find((f) => f.id === featureId && !f.hidden);
       if (!kibanaFeature) return errors;
 
-      if (feature.includes('all')) {
+      if (featurePrivileges.includes('all')) {
         if (kibanaFeature.privileges?.all.disabled) {
           errors.push(`Feature [${featureId}] does not support privilege [all].`);
         }
@@ -88,7 +88,7 @@ export const validateKibanaPrivileges = (
         }
       }
 
-      if (feature.includes('read')) {
+      if (featurePrivileges.includes('read')) {
         if (kibanaFeature.privileges?.read.disabled) {
           errors.push(`Feature [${featureId}] does not support privilege [read].`);
         }
@@ -103,12 +103,25 @@ export const validateKibanaPrivileges = (
       }
 
       kibanaFeature.subFeatures.forEach((subFeature) => {
-        if (
+        // Check if the definition includes any sub-feature privileges.
+        const subFeaturePrivileges = subFeature.privilegeGroups.flatMap((group) =>
+          group.privileges.filter((privilege) => featurePrivileges.includes(privilege.id))
+        );
+
+        // If the definition includes any disabled sub-feature privileges, return an error.
+        const disabledSubFeaturePrivileges = subFeaturePrivileges.filter(
+          (privilege) => privilege.disabled
+        );
+        if (disabledSubFeaturePrivileges.length > 0) {
+          errors.push(
+            `Feature [${featureId}] does not support specified sub-feature privileges [${disabledSubFeaturePrivileges
+              .map((privilege) => privilege.id)
+              .join(', ')}].`
+          );
+        } else if (
           subFeature.requireAllSpaces &&
           !forAllSpaces &&
-          subFeature.privilegeGroups.some((group) =>
-            group.privileges.some((privilege) => feature.includes(privilege.id))
-          )
+          subFeaturePrivileges.length > 0
         ) {
           errors.push(
             `Sub-feature privilege [${kibanaFeature.name} - ${

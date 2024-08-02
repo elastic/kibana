@@ -1009,6 +1009,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
     description: `Created by script: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [
       {
@@ -1028,7 +1029,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '1m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1056,7 +1057,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1084,7 +1085,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1112,7 +1113,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1140,7 +1141,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
                 type: 'text',
               },
               interval: {
-                value: '5m',
+                value: '30s',
                 type: 'text',
               },
               tags: {
@@ -1236,6 +1237,7 @@ export const addEndpointIntegrationToAgentPolicy = async ({
     description: `Created by: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [
       {

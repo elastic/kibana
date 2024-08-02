@@ -209,6 +209,9 @@ const registerHttpRequestMockHelpers = (
   const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
 
+  const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -238,6 +241,7 @@ const registerHttpRequestMockHelpers = (
     setGetFieldsFromIndices,
     setGetPrivilegesResponse,
     setCreateEnrichPolicy,
+    setInferenceModels,
   };
 };
 

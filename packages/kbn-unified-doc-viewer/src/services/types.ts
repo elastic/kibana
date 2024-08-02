@@ -49,6 +49,7 @@ export interface DocViewRenderProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
+  decreaseAvailableHeightBy?: number;
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
@@ -83,7 +84,7 @@ export interface FieldRecordLegacy {
   action: {
     isActive: boolean;
     onFilter?: DocViewFilterFn;
-    onToggleColumn: (field: string) => void;
+    onToggleColumn: ((field: string) => void) | undefined;
     flattenedField: unknown;
   };
   field: {

@@ -107,7 +107,9 @@ export const derivativeOperation: OperationDefinition<
         return dataLayerErrors.join(', ');
       }
     }
-    return checkForDateHistogram(layer, opName)?.join(', ');
+    return checkForDateHistogram(layer, opName)
+      .map((e) => e.message)
+      .join(', ');
   },
   timeScalingMode: 'optional',
   filterable: true,

@@ -34,7 +34,7 @@ export const ComponentTemplatesDeleteModal = ({
               ? i18n.translate(
                   'xpack.idxMgmt.home.componentTemplates.deleteModal.successDeleteSingleNotificationMessageText',
                   {
-                    defaultMessage: "Deleted component template '{componentTemplateName}'",
+                    defaultMessage: "Deleted component template ''{componentTemplateName}''",
                     values: { componentTemplateName: componentTemplatesToDelete[0] },
                   }
                 )
@@ -67,7 +67,7 @@ export const ComponentTemplatesDeleteModal = ({
             : i18n.translate(
                 'xpack.idxMgmt.home.componentTemplates.deleteModal.errorNotificationMessageText',
                 {
-                  defaultMessage: "Error deleting component template '{name}'",
+                  defaultMessage: "Error deleting component template ''{name}''",
                   values: { name: (errors && errors[0].name) || componentTemplatesToDelete[0] },
                 }
               );

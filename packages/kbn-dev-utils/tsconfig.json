@@ -15,6 +15,8 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/repo-packages",
+    "@kbn/some-dev-log",
+    "@kbn/stdio-dev-helpers",
   ],
   "exclude": [
     "target/**/*",

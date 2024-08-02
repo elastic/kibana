@@ -9,9 +9,10 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {
@@ -57,7 +58,7 @@ describe('ExpressionRow', () => {
 
   it('should display thresholds as a percentage for pct metrics', async () => {
     const expression: MetricExpression = {
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       metrics: [
         {
           name: 'A',
@@ -82,7 +83,7 @@ describe('ExpressionRow', () => {
 
   it('should display thresholds as a decimal for all other metrics', async () => {
     const expression = {
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       metrics: [
         {
           name: 'A',

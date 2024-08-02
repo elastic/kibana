@@ -93,6 +93,7 @@ export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): New
   description: '',
   namespace: 'default',
   policy_id: '',
+  policy_ids: [''],
   enabled: true,
   inputs: [
     {
@@ -135,6 +136,7 @@ export const getCloudDefendPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): Packag
   description: '',
   namespace: 'default',
   policy_id: '',
+  policy_ids: [''],
   enabled: true,
   inputs: [
     {

@@ -7,16 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
-import { useCapabilities } from '../../hooks/use_capabilities';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
+import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
@@ -24,11 +23,11 @@ export function SloEditPage() {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { hasWriteCapabilities } = useCapabilities();
-  const { isError: hasErrorInGlobalDiagnosis } = useFetchSloGlobalDiagnosis();
+  const { sloId } = useParams<{ sloId: string | undefined }>();
+
+  const { data: permissions } = usePermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
 
-  const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
   const { data: slo } = useFetchSloDetails({ sloId });
@@ -60,9 +59,15 @@ export function SloEditPage() {
     },
   ]);
 
-  if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
-    navigateToUrl(basePath.prepend(paths.slos));
-  }
+  useEffect(() => {
+    if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slosWelcome));
+    }
+
+    if (permissions?.hasAllWriteRequested === false) {
+      navigateToUrl(basePath.prepend(paths.slos));
+    }
+  }, [hasRightLicense, permissions, navigateToUrl, basePath]);
 
   return (
     <ObservabilityPageTemplate

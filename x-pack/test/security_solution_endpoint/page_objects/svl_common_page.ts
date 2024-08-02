@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 /** copied from `x-pack/test_serverless/functional/page_objects` in order to be able to login when testing against serverless,
  *  without importing from a different project

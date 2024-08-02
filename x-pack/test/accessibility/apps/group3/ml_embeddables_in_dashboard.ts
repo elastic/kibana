@@ -81,8 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/183196
-      describe.skip(testData.suiteSuffix, function () {
+      describe(testData.suiteSuffix, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
@@ -98,6 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
+          // FIXME remove sleep when https://github.com/elastic/kibana/issues/187587 if fixed
+          await PageObjects.common.sleep(3000);
           await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout('ml_anomaly_charts');
           await a11y.testAppSnapshot();
         });

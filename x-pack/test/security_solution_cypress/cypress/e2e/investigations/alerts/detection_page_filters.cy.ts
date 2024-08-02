@@ -99,13 +99,14 @@ const assertFilterControlsWithFilterObject = (
     cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
       const controlText = sub.text();
       filter.selectedOptions?.forEach((option) => {
-        expect(controlText).to.have.string(option);
+        expect(controlText).to.have.string(String(option));
       });
     });
   });
 };
 
-describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/167914
+describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());

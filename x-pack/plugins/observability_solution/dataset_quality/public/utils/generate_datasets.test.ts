@@ -41,12 +41,18 @@ describe('generateDatasets', () => {
       size: '82.1kb',
       sizeBytes: 84160,
       integration: 'system',
+      userPrivileges: {
+        canMonitor: true,
+      },
     },
     {
       name: 'logs-synth-default',
       lastActivity: 1712911241117,
       size: '62.5kb',
       sizeBytes: 64066,
+      userPrivileges: {
+        canMonitor: true,
+      },
     },
   ];
 
@@ -115,6 +121,7 @@ describe('generateDatasets', () => {
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
+        userPrivileges: undefined,
         namespace: indexNameToDataStreamParts(degradedDocs[0].dataset).namespace,
         title:
           integrations[0].datasets[indexNameToDataStreamParts(degradedDocs[0].dataset).dataset],
@@ -133,6 +140,7 @@ describe('generateDatasets', () => {
         lastActivity: undefined,
         size: undefined,
         sizeBytes: undefined,
+        userPrivileges: undefined,
         namespace: indexNameToDataStreamParts(degradedDocs[1].dataset).namespace,
         title: indexNameToDataStreamParts(degradedDocs[1].dataset).dataset,
         integration: undefined,
@@ -192,6 +200,9 @@ describe('generateDatasets', () => {
       size: '82.1kb',
       sizeBytes: 84160,
       integration: 'system',
+      userPrivileges: {
+        canMonitor: true,
+      },
     };
 
     const datasets = generateDatasets([nonDefaultDataset], undefined, integrations);

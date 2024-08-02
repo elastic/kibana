@@ -64,4 +64,5 @@ const EMBED_TITLE_LABEL = i18n.translate('xpack.exploratoryView.expView.heading.
 
 const EMBED_LABEL = i18n.translate('xpack.exploratoryView.expView.heading.embed', {
   defaultMessage: 'Embed <></>',
+  ignoreTag: true,
 });

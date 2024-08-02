@@ -34,6 +34,7 @@ describe('useFilesTableColumns', () => {
       Array [
         Object {
           "data-test-subj": "cases-files-table-filename",
+          "field": "name",
           "name": "Name",
           "render": [Function],
           "width": "60%",
