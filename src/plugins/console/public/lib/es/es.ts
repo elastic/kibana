@@ -49,7 +49,7 @@ export async function send({
     const url = new URL(kibanaRequestUrl);
     const { pathname, searchParams } = url;
     const query = Object.fromEntries(searchParams.entries());
-    const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
+    const body = ['post', 'put', 'patch', 'delete'].includes(httpMethod) ? data : null;
 
     return await http[httpMethod]<HttpResponse>(pathname, {
       body,
