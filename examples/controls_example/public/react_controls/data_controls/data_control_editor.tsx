@@ -5,7 +5,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -146,7 +146,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(
     initialState.controlType
   );
-  const [controlEditorValid, setControlEditorValid] = useState<boolean>(false);
+  const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
   // const editorConfig = controlGroup.getEditorConfig();
@@ -181,19 +181,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     };
   }, [editorState.dataViewId]);
 
-  useEffect(() => {
-    setControlEditorValid(
-      Boolean(editorState.fieldName) && Boolean(selectedDataView) && Boolean(selectedControlType)
-    );
-  }, [editorState.fieldName, setControlEditorValid, selectedDataView, selectedControlType]);
-
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType || !editorState.fieldName || !fieldRegistry) return;
-
     const controlFactory = getControlFactory(selectedControlType) as DataControlFactory;
     const CustomSettings = controlFactory.CustomOptionsComponent;
 
     if (!CustomSettings) return;
+
     return (
       <EuiDescribedFormGroup
         ratio="third"
@@ -210,13 +204,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          currentState={editorState}
+          initialState={initialState}
+          field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
-          setControlEditorValid={setControlEditorValid}
+          setControlEditorValid={setControlOptionsValid}
+          parentApi={controlGroup}
         />
       </EuiDescribedFormGroup>
     );
-  }, [fieldRegistry, selectedControlType, editorState]);
+  }, [fieldRegistry, selectedControlType, initialState, editorState, controlGroup]);
 
   return (
     <>
@@ -295,6 +291,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     if (!currentTitle || currentTitle === newDefaultTitle) {
                       setPanelTitle(newDefaultTitle);
                     }
+
+                    setControlOptionsValid(true); // reset options state
                   }}
                   selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
                 />
@@ -407,7 +405,14 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               data-test-subj="control-editor-save"
               iconType="check"
               color="primary"
-              disabled={!controlEditorValid}
+              disabled={
+                !(
+                  controlOptionsValid &&
+                  Boolean(editorState.fieldName) &&
+                  Boolean(selectedDataView) &&
+                  Boolean(selectedControlType)
+                )
+              }
               onClick={() => {
                 onSave(editorState, selectedControlType!);
               }}

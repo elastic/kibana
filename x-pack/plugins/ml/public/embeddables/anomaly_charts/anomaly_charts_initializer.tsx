@@ -101,57 +101,59 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
           errors={jobIdsErrors}
         />
         <EuiSpacer size="s" />
-        <EuiForm>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.anomalyChartsEmbeddable.panelTitleLabel"
-                defaultMessage="Panel title"
-              />
-            }
-            isInvalid={!isPanelTitleValid}
-          >
-            <EuiFieldText
-              data-test-subj="panelTitleInput"
-              id="panelTitle"
-              name="panelTitle"
-              value={panelTitle}
-              onChange={(e) => {
-                titleManuallyChanged.current = true;
-                setPanelTitle(e.target.value);
-              }}
-              isInvalid={!isPanelTitleValid}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            isInvalid={!isMaxSeriesToPlotValid}
-            error={
-              !isMaxSeriesToPlotValid ? (
+        {jobIds.length > 0 ? (
+          <EuiForm>
+            <EuiFormRow
+              label={
                 <FormattedMessage
-                  id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
-                  defaultMessage="Maximum number of series to plot must be between 1 and 50."
+                  id="xpack.ml.anomalyChartsEmbeddable.panelTitleLabel"
+                  defaultMessage="Panel title"
                 />
-              ) : undefined
-            }
-            label={
-              <FormattedMessage
-                id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotLabel"
-                defaultMessage="Maximum number of series to plot"
+              }
+              isInvalid={!isPanelTitleValid}
+            >
+              <EuiFieldText
+                data-test-subj="panelTitleInput"
+                id="panelTitle"
+                name="panelTitle"
+                value={panelTitle}
+                onChange={(e) => {
+                  titleManuallyChanged.current = true;
+                  setPanelTitle(e.target.value);
+                }}
+                isInvalid={!isPanelTitleValid}
               />
-            }
-          >
-            <EuiFieldNumber
-              data-test-subj="mlAnomalyChartsInitializerMaxSeries"
-              id="selectMaxSeriesToPlot"
-              name="selectMaxSeriesToPlot"
-              value={maxSeriesToPlot}
-              onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
-              min={1}
-              max={MAX_ANOMALY_CHARTS_ALLOWED}
-            />
-          </EuiFormRow>
-        </EuiForm>
+            </EuiFormRow>
+
+            <EuiFormRow
+              isInvalid={!isMaxSeriesToPlotValid}
+              error={
+                !isMaxSeriesToPlotValid ? (
+                  <FormattedMessage
+                    id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
+                    defaultMessage="Maximum number of series to plot must be between 1 and 50."
+                  />
+                ) : undefined
+              }
+              label={
+                <FormattedMessage
+                  id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotLabel"
+                  defaultMessage="Maximum number of series to plot"
+                />
+              }
+            >
+              <EuiFieldNumber
+                data-test-subj="mlAnomalyChartsInitializerMaxSeries"
+                id="selectMaxSeriesToPlot"
+                name="selectMaxSeriesToPlot"
+                value={maxSeriesToPlot}
+                onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
+                min={1}
+                max={MAX_ANOMALY_CHARTS_ALLOWED}
+              />
+            </EuiFormRow>
+          </EuiForm>
+        ) : null}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

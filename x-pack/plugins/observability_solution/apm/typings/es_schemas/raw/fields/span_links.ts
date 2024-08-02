@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export interface SpanLink {
-  trace: { id: string };
-  span: { id: string };
-}
+export type { SpanLink } from '@kbn/apm-types/es_schemas_raw';

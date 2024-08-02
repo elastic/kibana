@@ -76,6 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
+import { isStringType } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -879,6 +880,7 @@ function validateColumnForCommand(
 
       if (columnParamsWithInnerTypes.length) {
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
+          if (innerType === 'string' && isStringType(columnRef.type)) return false;
           return innerType !== 'any' && innerType !== columnRef.type;
         });
         if (hasSomeWrongInnerTypes) {
