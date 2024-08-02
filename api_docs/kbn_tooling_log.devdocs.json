@@ -1036,7 +1036,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"write\" | \"verbose\""
+              "\"error\" | \"info\" | \"warning\" | \"success\" | \"write\" | \"debug\" | \"verbose\""
             ],
             "path": "packages/kbn-tooling-log/src/message.ts",
             "deprecated": false,

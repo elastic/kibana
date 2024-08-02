@@ -21,7 +21,7 @@ const CONFIG_FIELDS_TO_EXPOSE = [
 
 export type ConfigStat = Pick<
   TaskManagerConfig,
-  'max_workers' | 'poll_interval' | typeof CONFIG_FIELDS_TO_EXPOSE[number]
+  'max_workers' | 'poll_interval' | (typeof CONFIG_FIELDS_TO_EXPOSE)[number]
 >;
 
 export function createConfigurationAggregator(

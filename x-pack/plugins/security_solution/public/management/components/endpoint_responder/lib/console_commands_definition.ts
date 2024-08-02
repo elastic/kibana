@@ -551,6 +551,7 @@ const adjustCommandsForSentinelOne = ({
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
+  const isProcessesEnabled = featureFlags.responseActionsSentinelOneProcessesEnabled;
 
   return commandList.map((command) => {
     // Kill-Process: adjust command to accept only `processName`
@@ -574,6 +575,7 @@ const adjustCommandsForSentinelOne = ({
     if (
       command.name === 'status' ||
       (command.name === 'kill-process' && !isKillProcessEnabled) ||
+      (command.name === 'processes' && !isProcessesEnabled) ||
       !isAgentTypeAndActionSupported(
         'sentinel_one',
         RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],

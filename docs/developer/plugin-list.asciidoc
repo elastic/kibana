@@ -487,7 +487,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
-|The cloud plugin adds Cloud-specific features to Kibana.
+|The cloud plugin exposes Cloud-specific metadata to Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_chat/README.md[cloudChat]
@@ -588,7 +588,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fields_metadata/README.md[fieldsMetadata]
-|The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
+|The @kbn/fields-metadata-plugin is designed to provide a centralized and asynchronous way to consume field metadata across Kibana. This plugin addresses the need for on-demand retrieval of field metadata from static ECS/Metadata definitions and integration manifests, with the flexibility to extend to additional resolution sources in the future.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
@@ -644,6 +644,10 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
+|undefined
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate_app/README.md[investigateApp]
 |undefined
 
 

@@ -10,7 +10,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'unifiedFieldList',
+    'svlCommonPage',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -18,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getRowIndicatorProvider', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
@@ -30,8 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dataSource: { type: 'esql' },
         query: { esql: 'from logstash* | sort @timestamp desc' },
       });
-      await PageObjects.common.navigateToApp('discover', {
-        hash: `/?_a=${state}`,
+      await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        ensureCurrentUrl: false,
       });
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -50,8 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dataSource: { type: 'esql' },
         query: { esql: 'from my-example* | sort @timestamp desc' },
       });
-      await PageObjects.common.navigateToApp('discover', {
-        hash: `/?_a=${state}`,
+      await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        ensureCurrentUrl: false,
       });
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // my-example* has a log.level field, but it's not matching the logs profile, so the color indicator should not be rendered
@@ -66,8 +73,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `log.level` is not null',
         },
       });
-      await PageObjects.common.navigateToApp('discover', {
-        hash: `/?_a=${state}`,
+      await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+        ensureCurrentUrl: false,
       });
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // in this case it's matching the logs data source profile and has a log.level field, so the color indicator should be rendered

@@ -30,7 +30,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
@@ -63,7 +63,7 @@ export interface SyntheticsServerSetup {
 }
 
 export interface SyntheticsPluginsSetupDependencies {
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   alerting: any;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;

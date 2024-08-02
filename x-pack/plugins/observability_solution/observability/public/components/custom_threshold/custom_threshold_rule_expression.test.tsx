@@ -42,7 +42,7 @@ describe('Expression', () => {
 
   async function setup(
     currentOptions?: CustomThresholdPrefillOptions,
-    customRuleParams?: Record<string, unknown>
+    customRuleParams?: Partial<RuleTypeParams & AlertParams>
   ) {
     const ruleParams: RuleTypeParams & AlertParams = {
       criteria: [],
@@ -164,7 +164,8 @@ describe('Expression', () => {
   it('should prefill the rule using the context metadata', async () => {
     const index = 'changedMockedIndex';
     const currentOptions: CustomThresholdPrefillOptions = {
-      alertOnGroupDisappear: false,
+      alertOnGroupDisappear: true,
+      alertOnNoData: true,
       groupBy: ['host.hostname'],
       searchConfiguration: {
         index,
@@ -191,7 +192,8 @@ describe('Expression', () => {
 
     const { ruleParams } = await setup(currentOptions, { searchConfiguration: undefined });
 
-    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnGroupDisappear).toEqual(true);
+    expect(ruleParams.alertOnNoData).toEqual(true);
     expect(ruleParams.groupBy).toEqual(['host.hostname']);
     expect((ruleParams.searchConfiguration.query as Query).query).toBe('foo');
     expect(ruleParams.searchConfiguration.index).toBe(index);
@@ -209,6 +211,68 @@ describe('Expression', () => {
         timeUnit: 'h',
       },
     ]);
+  });
+
+  it('should only set alertOnGroupDisappear to true if there is a group by field', async () => {
+    const customRuleParams: Partial<RuleTypeParams & AlertParams> = {
+      groupBy: ['host.hostname'],
+    };
+
+    const { ruleParams, wrapper } = await setup({}, customRuleParams);
+
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: true },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(true);
+    expect(ruleParams.alertOnNoData).toEqual(false);
+
+    // Uncheck
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: false },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnNoData).toEqual(false);
+  });
+
+  it('should only set alertOnNoData to true if there is no group by', async () => {
+    const { ruleParams, wrapper } = await setup();
+
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: true },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnNoData).toEqual(true);
+
+    // Uncheck
+    act(() => {
+      wrapper
+        .find('[data-test-subj="thresholdRuleAlertOnNoDataCheckbox"]')
+        .at(1)
+        .prop('onChange')?.({
+        target: { checked: false },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
+    expect(ruleParams.alertOnNoData).toEqual(false);
   });
 
   it('should show an error message when searchSource throws an error', async () => {

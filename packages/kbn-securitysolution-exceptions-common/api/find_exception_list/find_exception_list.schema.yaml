@@ -3,14 +3,12 @@ info:
   title: Find exception lists API endpoint
   version: '2023-10-31'
 paths:
-  /api/exception_lists/items/_find:
+  /api/exception_lists/_find:
     get:
       x-labels: [serverless, ess]
       operationId: FindExceptionLists
       x-codegen-enabled: true
       summary: Finds exception lists
-      tags:
-        - Exceptions API
       parameters:
         - name: filter
           in: query

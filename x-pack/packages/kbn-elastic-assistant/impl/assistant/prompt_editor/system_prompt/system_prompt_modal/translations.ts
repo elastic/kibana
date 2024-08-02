@@ -65,7 +65,7 @@ export const SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION = i18n.translate(
 export const SYSTEM_PROMPT_DEFAULT_CONVERSATIONS_HELP_TEXT = i18n.translate(
   'xpack.elasticAssistant.assistant.promptEditor.systemPrompt.settings.defaultConversationsHelpText',
   {
-    defaultMessage: 'Conversations that should use this System Prompt by default',
+    defaultMessage: 'Conversations that should use this System Prompt by default.',
   }
 );
 

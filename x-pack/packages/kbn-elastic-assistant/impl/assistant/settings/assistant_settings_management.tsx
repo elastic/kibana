@@ -5,29 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiAvatar,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageTemplate,
-  EuiTitle,
-  useEuiShadow,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
-import { KnowledgeBaseSettings, EvaluationSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
-import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 import { ConnectorsSettingsManagement } from '../../connectorland/connector_settings_management';
 import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
@@ -43,13 +29,11 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
-import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
+import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
+import { EvaluationSettings } from '.';
 
 interface Props {
-  conversations: Record<string, Conversation>;
-  conversationsLoaded: boolean;
   selectedConversation: Conversation;
-  refetchConversations: () => void;
 }
 
 /**
@@ -57,148 +41,27 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({
-    conversations,
-    conversationsLoaded,
-    refetchConversations,
-    selectedConversation: defaultSelectedConversation,
-  }) => {
+  ({ selectedConversation: defaultSelectedConversation }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
-      toasts,
     } = useAssistantContext();
 
-    const { data: anonymizationFields } = useFetchAnonymizationFields();
-
-    const { data: allPrompts } = useFetchPrompts();
-
-    // Connector details
     const { data: connectors } = useLoadConnectors({
       http,
     });
     const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-    const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
-
-    const {
-      conversationSettings,
-      setConversationSettings,
-      knowledgeBase,
-      quickPromptSettings,
-      systemPromptSettings,
-      assistantStreamingEnabled,
-      setUpdatedAssistantStreamingEnabled,
-      setUpdatedKnowledgeBaseSettings,
-      setUpdatedQuickPromptSettings,
-      setPromptsBulkActions,
-      saveSettings,
-      conversationsSettingsBulkActions,
-      updatedAnonymizationData,
-      setConversationsSettingsBulkActions,
-      anonymizationFieldsBulkActions,
-      setAnonymizationFieldsBulkActions,
-      setUpdatedAnonymizationData,
-      setUpdatedSystemPromptSettings,
-      promptsBulkActions,
-      resetSettings,
-    } = useSettingsUpdater(
-      conversations,
-      allPrompts,
-      conversationsLoaded,
-      anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
-    );
-
-    const quickPrompts = useMemo(
-      () =>
-        quickPromptSettings.length === 0
-          ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
-          : quickPromptSettings,
-      [allPrompts.data, quickPromptSettings]
-    );
-
-    const systemPrompts = useMemo(
-      () =>
-        systemPromptSettings.length === 0
-          ? allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
-          : systemPromptSettings,
-      [allPrompts.data, systemPromptSettings]
-    );
-
-    // Local state for saving previously selected items so tab switching is friendlier
-    // Conversation Selection State
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
-      () => {
-        return conversationSettings[defaultSelectedConversation.title];
-      }
-    );
-
-    const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
-      setSelectedConversation(conversation);
-    }, []);
-
-    useEffect(() => {
-      if (selectedConversation != null) {
-        setSelectedConversation(
-          // conversationSettings has title as key, sometime has id as key
-          conversationSettings[selectedConversation.id] ||
-            conversationSettings[selectedConversation.title]
-        );
-      }
-    }, [conversationSettings, selectedConversation]);
 
     useEffect(() => {
       if (selectedSettingsTab == null) {
         setSelectedSettingsTab(CONNECTORS_TAB);
       }
     }, [selectedSettingsTab, setSelectedSettingsTab]);
-
-    // Quick Prompt Selection State
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
-    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
-      setSelectedQuickPrompt(quickPrompt);
-    }, []);
-    useEffect(() => {
-      if (selectedQuickPrompt != null) {
-        setSelectedQuickPrompt(
-          quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name)
-        );
-      }
-    }, [quickPromptSettings, selectedQuickPrompt]);
-
-    // System Prompt Selection State
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
-    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
-      setSelectedSystemPrompt(systemPrompt);
-    }, []);
-    useEffect(() => {
-      if (selectedSystemPrompt != null) {
-        setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
-      }
-    }, [selectedSystemPrompt, systemPromptSettings]);
-
-    const handleSave = useCallback(
-      async (shouldRefetchConversation?: boolean) => {
-        await saveSettings();
-        toasts?.addSuccess({
-          iconType: 'check',
-          title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-        });
-        setHasPendingChanges(false);
-        if (shouldRefetchConversation) {
-          refetchConversations();
-        }
-      },
-      [refetchConversations, saveSettings, toasts]
-    );
-
-    const onSaveButtonClicked = useCallback(() => {
-      handleSave(true);
-    }, [handleSave]);
 
     const tabsConfig = useMemo(
       () => [
@@ -247,18 +110,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       }));
     }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
 
-    const handleChange = useCallback(
-      (callback) => (value: unknown) => {
-        setHasPendingChanges(true);
-        callback(value);
-      },
-      []
-    );
-
-    const onCancelClick = useCallback(() => {
-      resetSettings();
-      setHasPendingChanges(false);
-    }, [resetSettings]);
     return (
       <>
         <EuiPageTemplate.Header
@@ -275,7 +126,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
                 `}
               />
               <EuiTitle size="m" className="eui-displayInlineBlock">
-                <h2>{i18n.SECURITY_AI_SETTINGS}</h2>
+                <span>{i18n.SECURITY_AI_SETTINGS}</span>
               </EuiTitle>
             </>
           }
@@ -294,100 +145,22 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
-              allSystemPrompts={systemPromptSettings}
-              assistantStreamingEnabled={assistantStreamingEnabled}
               connectors={connectors}
-              conversationSettings={conversationSettings}
-              conversationsLoaded={conversationsLoaded}
-              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               defaultConnector={defaultConnector}
-              handleSave={handleSave}
-              onCancelClick={onCancelClick}
-              onSelectedConversationChange={onHandleSelectedConversationChange}
-              selectedConversation={selectedConversation}
-              setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
-              setConversationSettings={setConversationSettings}
-              setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+              defaultSelectedConversation={defaultSelectedConversation}
             />
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
             <SystemPromptSettingsManagement
               connectors={connectors}
-              conversationSettings={conversationSettings}
-              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               defaultConnector={defaultConnector}
-              handleSave={handleSave}
-              onCancelClick={onCancelClick}
-              onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
-              resetSettings={resetSettings}
-              selectedSystemPrompt={selectedSystemPrompt}
-              setConversationSettings={setConversationSettings}
-              setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-              setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
-              systemPromptSettings={systemPrompts}
-              promptsBulkActions={promptsBulkActions}
-              setPromptsBulkActions={setPromptsBulkActions}
             />
           )}
-          {selectedSettingsTab === QUICK_PROMPTS_TAB && (
-            <QuickPromptSettingsManagement
-              handleSave={handleSave}
-              onCancelClick={onCancelClick}
-              onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
-              quickPromptSettings={quickPrompts}
-              resetSettings={resetSettings}
-              selectedQuickPrompt={selectedQuickPrompt}
-              setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
-              promptsBulkActions={promptsBulkActions}
-              setPromptsBulkActions={setPromptsBulkActions}
-            />
-          )}
-          {selectedSettingsTab === ANONYMIZATION_TAB && (
-            <AnonymizationSettingsManagement
-              anonymizationFields={updatedAnonymizationData}
-              anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
-              defaultPageSize={5}
-              setAnonymizationFieldsBulkActions={handleChange(setAnonymizationFieldsBulkActions)}
-              setUpdatedAnonymizationData={handleChange(setUpdatedAnonymizationData)}
-            />
-          )}
-          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
-            <KnowledgeBaseSettings
-              knowledgeBase={knowledgeBase}
-              setUpdatedKnowledgeBaseSettings={handleChange(setUpdatedKnowledgeBaseSettings)}
-            />
-          )}
+          {selectedSettingsTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
+          {selectedSettingsTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
+          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && <KnowledgeBaseSettingsManagement />}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
-        {hasPendingChanges && (
-          <EuiPageTemplate.BottomBar paddingSize="s" position="fixed" data-test-subj="bottom-bar">
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="cross"
-                  data-test-subj="cancel-button"
-                  onClick={onCancelClick}
-                >
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  type="submit"
-                  data-test-subj="save-button"
-                  onClick={onSaveButtonClicked}
-                  iconType="check"
-                  fill
-                >
-                  {i18n.SAVE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageTemplate.BottomBar>
-        )}
       </>
     );
   }

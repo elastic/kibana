@@ -45,13 +45,6 @@
     "intialize-server:explore": "node scripts/index.js server explore trial_license_complete_tier",
     "run-tests:explore": "node scripts/index.js runner explore trial_license_complete_tier",
 
-    "genai:server:serverless": "npm run initialize-server:genai:trial_complete invoke_ai serverless",
-    "genai:runner:serverless": "npm run run-tests:genai:trial_complete invoke_ai serverless serverlessEnv",
-    "genai:qa:serverless": "npm run run-tests:genai:trial_complete invoke_ai serverless qaPeriodicEnv",
-    "genai:qa:serverless:release": "npm run run-tests:genai:trial_complete invoke_ai serverless qaEnv",
-    "genai:server:ess": "npm run initialize-server:genai:trial_complete invoke_ai ess",
-    "genai:runner:ess": "npm run run-tests:genai:trial_complete invoke_ai ess essEnv",
-
     "nlp_cleanup_task:complete:server:serverless": "npm run initialize-server:genai:trial_complete nlp_cleanup_task serverless",
     "nlp_cleanup_task:complete:runner:serverless": "npm run run-tests:genai:trial_complete nlp_cleanup_task serverless serverlessEnv",
     "nlp_cleanup_task:complete:qa:serverless": "npm run run-tests:genai:trial_complete nlp_cleanup_task serverless qaPeriodicEnv",

@@ -92,7 +92,6 @@ const basicTimeline: TimelineModel = {
   },
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',

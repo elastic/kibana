@@ -48,10 +48,21 @@ export const getPersistedConversation = async ({
   logger.debug(`conversationId: ${conversationId}`);
 
   const messages = getLangChainMessages(conversation.messages ?? []);
+
+  if (!state.input) {
+    const lastMessage = messages?.splice(-1)[0];
+    return {
+      conversation,
+      messages,
+      chatTitle: conversation.title,
+      input: lastMessage?.content as string,
+    };
+  }
+
   return {
     conversation,
     messages,
     chatTitle: conversation.title,
-    input: !state.input ? conversation.messages?.slice(-1)[0].content : state.input,
+    input: state.input,
   };
 };
