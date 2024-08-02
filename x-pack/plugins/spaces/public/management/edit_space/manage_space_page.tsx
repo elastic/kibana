@@ -57,7 +57,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
-  solutionNavExperiment?: Promise<boolean>;
+  allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
 }
 
@@ -74,7 +74,6 @@ interface State {
     isInvalid: boolean;
     error?: string;
   };
-  isSolutionNavEnabled: boolean;
 }
 
 export class ManageSpacePage extends Component<Props, State> {
@@ -91,7 +90,6 @@ export class ManageSpacePage extends Component<Props, State> {
         color: getSpaceColor({}),
       },
       features: [],
-      isSolutionNavEnabled: false,
       haveDisabledFeaturesChanged: false,
       hasSolutionViewChanged: false,
     };
@@ -118,10 +116,6 @@ export class ManageSpacePage extends Component<Props, State> {
         }),
       });
     }
-
-    this.props.solutionNavExperiment?.then((isEnabled) => {
-      this.setState({ isSolutionNavEnabled: isEnabled });
-    });
   }
 
   public async componentDidUpdate(previousProps: Props, prevState: State) {
@@ -201,7 +195,7 @@ export class ManageSpacePage extends Component<Props, State> {
           validator={this.validator}
         />
 
-        {this.state.isSolutionNavEnabled && (
+        {!!this.props.allowSolutionVisibility && (
           <>
             <EuiSpacer size="l" />
             <SolutionView space={this.state.space} onChange={this.onSpaceChange} />

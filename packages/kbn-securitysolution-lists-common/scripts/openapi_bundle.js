@@ -26,6 +26,13 @@ const ROOT = resolve(__dirname, '..');
           title: 'Security Solution Lists API (Elastic Cloud Serverless)',
           description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
         },
+        tags: [
+          {
+            name: 'Security Solution Lists API',
+            description:
+              'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
+          },
+        ],
       },
     },
   });
@@ -43,6 +50,13 @@ const ROOT = resolve(__dirname, '..');
           title: 'Security Solution Lists API (Elastic Cloud and self-hosted)',
           description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
         },
+        tags: [
+          {
+            name: 'Security Solution Lists API',
+            description:
+              'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
+          },
+        ],
       },
     },
   });

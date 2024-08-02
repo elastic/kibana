@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import {
   ControlGroupChainingSystem,
   ControlWidth,
@@ -22,7 +23,10 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import {
+  apiHasSaveNotification,
+  combineCompatibleChildrenApis,
+} from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   PublishesDataViews,
@@ -32,14 +36,10 @@ import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup } from './serialization_utils';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlGroupUnsavedChanges,
-} from './types';
+import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -52,7 +52,14 @@ export const getControlGroupEmbeddableFactory = (services: {
   > = {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
-    buildEmbeddable: async (initialState, buildApi, uuid, parentApi, setApi) => {
+    buildEmbeddable: async (
+      initialRuntimeState,
+      buildApi,
+      uuid,
+      parentApi,
+      setApi,
+      lastSavedRuntimeState
+    ) => {
       const {
         initialChildControlState,
         defaultControlGrow,
@@ -61,7 +68,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         chainingSystem,
         autoApplySelections,
         ignoreParentSettings,
-      } = initialState;
+      } = initialRuntimeState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
       const controlsManager = initControlsManager(initialChildControlState);
@@ -88,20 +95,36 @@ export const getControlGroupEmbeddableFactory = (services: {
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
-      /** TODO: Handle unsaved changes
-       * - Each child has an unsaved changed behaviour subject it pushes to
-       * - The control group listens to all of them (anyChildHasUnsavedChanges) and publishes its
-       *   own unsaved changes if either one of its children has unsaved changes **or** one of
-       *   the control group settings changed.
-       * - Children should **not** publish unsaved changes based on their output filters or selections.
-       *   Instead, the control group will handle unsaved changes for filters.
-       */
-      const unsavedChanges = new BehaviorSubject<Partial<ControlGroupUnsavedChanges> | undefined>(
-        undefined
+      const unsavedChanges = initializeControlGroupUnsavedChanges(
+        controlsManager.api.children$,
+        {
+          ...controlsManager.comparators,
+          autoApplySelections: [
+            autoApplySelections$,
+            (next: boolean) => autoApplySelections$.next(next),
+          ],
+          chainingSystem: [
+            chainingSystem$,
+            (next: ControlGroupChainingSystem) => chainingSystem$.next(next),
+          ],
+          ignoreParentSettings: [
+            ignoreParentSettings$,
+            (next: ParentIgnoreSettings | undefined) => ignoreParentSettings$.next(next),
+            fastIsEqual,
+          ],
+          labelPosition: [labelPosition$, (next: ControlStyle) => labelPosition$.next(next)],
+        },
+        controlsManager.snapshotControlsRuntimeState,
+        parentApi,
+        lastSavedRuntimeState
       );
 
       const api = setApi({
         ...controlsManager.api,
+        getLastSavedControlState: (controlUuid: string) => {
+          return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
+        },
+        ...unsavedChanges.api,
         ...selectionsManager.api,
         controlFetch$: (controlUuid: string) =>
           controlFetch$(
@@ -116,10 +139,6 @@ export const getControlGroupEmbeddableFactory = (services: {
         ignoreParentSettings$,
         autoApplySelections$,
         allowExpensiveQueries$,
-        unsavedChanges,
-        resetUnsavedChanges: () => {
-          // TODO: Implement this
-        },
         snapshotRuntimeState: () => {
           // TODO: Remove this if it ends up being unnecessary
           return {} as unknown as ControlGroupRuntimeState;
@@ -159,6 +178,9 @@ export const getControlGroupEmbeddableFactory = (services: {
         width,
         dataViews,
         labelPosition: labelPosition$,
+        saveNotification$: apiHasSaveNotification(parentApi)
+          ? parentApi.saveNotification$
+          : undefined,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
