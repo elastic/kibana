@@ -63,8 +63,6 @@ describe('TextBasedLanguagesEditor', () => {
       query: { esql: 'from test' },
       onTextLangQueryChange: jest.fn(),
       onTextLangQuerySubmit: jest.fn(),
-      isHelpMenuOpen: false,
-      setIsHelpMenuOpen: jest.fn(),
     };
   });
   it('should  render the editor component', async () => {
