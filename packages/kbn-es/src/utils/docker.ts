@@ -414,7 +414,6 @@ ${message}`;
       },
     }
   );
-  // TODO: Retry here on "connection refused"
 }
 
 /**
