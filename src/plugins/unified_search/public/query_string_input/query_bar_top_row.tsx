@@ -49,11 +49,7 @@ import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
-import {
-  DataViewPicker,
-  DataViewPickerProps,
-  OnSaveTextLanguageQueryProps,
-} from '../dataview_picker';
+import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -169,7 +165,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
@@ -235,7 +230,6 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
-    const [isESQLInlineDocsOpen, setIsESQLInlineDocsOpen] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -638,11 +632,8 @@ export const QueryBarTopRow = React.memo(
           <DataViewPicker
             {...props.dataViewPickerComponentProps}
             trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-            onTextLangQuerySubmit={props.onTextLangQuerySubmit}
             textBasedLanguage={textBasedLanguage}
-            onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
             isDisabled={props.isDisabled}
-            openESQLInlineDocs={() => setIsESQLInlineDocsOpen(true)}
           />
         </EuiFlexItem>
       );
@@ -754,8 +745,6 @@ export const QueryBarTopRow = React.memo(
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
-            isHelpMenuOpen={isESQLInlineDocsOpen}
-            setIsHelpMenuOpen={setIsESQLInlineDocsOpen}
           />
         )
       );

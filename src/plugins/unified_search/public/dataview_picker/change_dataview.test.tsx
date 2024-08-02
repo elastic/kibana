@@ -14,7 +14,6 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
 import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
@@ -87,7 +86,6 @@ describe('DataView component', () => {
         'data-test-subj': 'dataview-trigger',
       },
       onChangeDataView: jest.fn(),
-      onTextLangQuerySubmit: jest.fn(),
     };
   });
 
@@ -131,20 +129,6 @@ describe('DataView component', () => {
     );
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(addDataViewSpy).toHaveBeenCalled();
-  });
-
-  it('should render the text based languages button if languages are given', async () => {
-    const component = mount(
-      wrapDataViewComponentInContext(
-        {
-          ...props,
-          textBasedLanguages: [TextBasedLanguages.ESQL],
-        },
-        false
-      )
-    );
-    const text = component.find('[data-test-subj="select-text-based-language-btn"]');
-    expect(text.length).not.toBe(0);
   });
 
   it('should properly handle ad hoc data views', async () => {
