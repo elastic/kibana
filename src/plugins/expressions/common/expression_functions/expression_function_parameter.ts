@@ -34,18 +34,18 @@ export class ExpressionFunctionParameter<T = unknown> {
 
     this.name = name;
     this.required = !!required;
-    this.help = help || '';
-    this.types = types || [];
+    this.help = help ?? '';
+    this.types = types ?? [];
     this.default = arg.default;
-    this.aliases = aliases || [];
+    this.aliases = aliases ?? [];
     this.deprecated = !!deprecated;
     this.multi = !!multi;
-    this.options = options || [];
+    this.options = options ?? [];
     this.resolve = resolve == null ? true : resolve;
     this.strict = strict;
   }
 
   accepts(type: string) {
-    return !this.types?.length || this.types.includes(type as TypeString<T>);
+    return !this.types?.length || (this.types as string[]).includes(type as TypeString<T>);
   }
 }

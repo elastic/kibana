@@ -113,17 +113,17 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.type = type;
     this.aliases = aliases || [];
     this.fn = fn as ExpressionFunction['fn'];
-    this.help = help || '';
-    this.inputTypes = inputTypes || context?.types;
+    this.help = help ?? '';
+    this.inputTypes = inputTypes ?? context?.types;
     this.allowCache = !!allowCache;
-    this.disabled = disabled || false;
+    this.disabled = disabled ?? false;
     this.deprecated = !!deprecated;
-    this.telemetry = telemetry || ((s, c) => c);
-    this.inject = inject || identity;
-    this.extract = extract || ((s) => ({ state: s, references: [] }));
-    this.migrations = migrations || {};
+    this.telemetry = telemetry ?? ((s, c) => c);
+    this.inject = inject ?? identity;
+    this.extract = extract ?? ((s) => ({ state: s, references: [] }));
+    this.migrations = migrations ?? {};
 
-    for (const [key, arg] of Object.entries(args || {})) {
+    for (const [key, arg] of Object.entries(args ?? {})) {
       this.args[key as keyof typeof args] = new ExpressionFunctionParameter(key, arg);
     }
   }
