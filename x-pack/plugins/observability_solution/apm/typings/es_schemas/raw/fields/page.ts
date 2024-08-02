@@ -6,6 +6,4 @@
  */
 
 // only for RUM agent: shared by error and transaction
-export interface Page {
-  url: string;
-}
+export type { Page } from '@kbn/apm-types/es_schemas_raw';
