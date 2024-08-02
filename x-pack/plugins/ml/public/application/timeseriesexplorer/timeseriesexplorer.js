@@ -141,22 +141,35 @@ export class TimeSeriesExplorer extends React.Component {
    */
   static contextType = context;
 
+  dataViewsService;
+  toastNotificationService;
+  mlApiServices;
+  mlForecastService;
+  mlIndexUtils;
+  mlJobService;
+  mlResultsService;
   mlTimeSeriesExplorer;
   mlTimeSeriesSearchService;
-  mlForecastService;
-  mlResultsService;
-  mlIndexUtils;
 
-  constructor(props, context) {
-    super(props);
-    console.log('TimeSeriesExplorer context', context);
-    this.dataViewsService = context.services.data.dataViews;
+  constructor(props, constructorContext) {
+    super(props, constructorContext);
+    this.dataViewsService = constructorContext.services.data.dataViews;
     this.toastNotificationService = toastNotificationServiceProvider(
-      context.services.notifications.toasts
+      constructorContext.services.notifications.toasts
     );
-    this.mlJobService = mlJobServiceFactory(
-      this.toastNotificationService,
-      context.services.mlServices.mlApiServices
+    this.mlApiServices = constructorContext.services.mlServices.mlApiServices;
+    this.mlForecastService = forecastServiceFactory(this.mlApiServices);
+    this.mlIndexUtils = indexServiceFactory(this.dataViewsService);
+    this.mlJobService = mlJobServiceFactory(this.toastNotificationService, this.mlApiServices);
+    this.mlResultsService = mlResultsServiceProvider(this.mlApiServices);
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
+      constructorContext.services.uiSettings,
+      this.mlApiServices,
+      this.mlResultsService
+    );
+    this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
+      this.mlResultsService,
+      this.mlApiServices
     );
   }
 
@@ -318,7 +331,7 @@ export class TimeSeriesExplorer extends React.Component {
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
-    const ml = this.context.services.mlServices.mlApiServices;
+    const ml = this.mlApiServices;
     return ml.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
@@ -732,19 +745,6 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentDidMount() {
     const mlJobService = this.mlJobService;
-    const { mlApiServices } = this.context.services.mlServices;
-    this.mlResultsService = mlResultsServiceProvider(mlApiServices);
-    this.mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
-      this.mlResultsService,
-      mlApiServices
-    );
-    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
-      this.context.services.uiSettings,
-      mlApiServices,
-      this.mlResultsService
-    );
-    this.mlIndexUtils = indexServiceFactory(this.context.services.data.dataViews);
-    this.mlForecastService = forecastServiceFactory(mlApiServices);
     // if timeRange used in the url is incorrect
     // perhaps due to user's advanced setting using incorrect date-maths
     const { invalidTimeRangeError } = this.props;
