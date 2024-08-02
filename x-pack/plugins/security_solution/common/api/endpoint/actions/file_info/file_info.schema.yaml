@@ -8,34 +8,25 @@ paths:
       summary: File Info schema
       operationId: EndpointFileInfo
       description: Get file info
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       x-labels:
         - ess
         - serverless
       parameters:
-        - name: query
+        - name: action_id
           in: path
           required: true
           schema:
-            $ref: '#/components/schemas/FileInfoRequestParams'
+            type: string
+        - name: file_id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
-
-components:
-  schemas:
-    FileInfoRequestParams:
-      type: object
-      required:
-        - action_id
-        - file_id
-      properties:
-        action_id:
-          type: string
-        file_id:
-          type: string
-
+                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

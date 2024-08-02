@@ -16,8 +16,14 @@
 
 import { z } from 'zod';
 
-export type FileInfoRequestParams = z.infer<typeof FileInfoRequestParams>;
-export const FileInfoRequestParams = z.object({
+import { SuccessResponse } from '../../model/schema/common.gen';
+
+export type EndpointFileInfoRequestParams = z.infer<typeof EndpointFileInfoRequestParams>;
+export const EndpointFileInfoRequestParams = z.object({
   action_id: z.string(),
   file_id: z.string(),
 });
+export type EndpointFileInfoRequestParamsInput = z.input<typeof EndpointFileInfoRequestParams>;
+
+export type EndpointFileInfoResponse = z.infer<typeof EndpointFileInfoResponse>;
+export const EndpointFileInfoResponse = SuccessResponse;
