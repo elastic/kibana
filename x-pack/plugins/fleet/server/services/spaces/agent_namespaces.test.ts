@@ -9,7 +9,7 @@ import { appContextService } from '../app_context';
 
 import type { Agent } from '../../types';
 
-import { agentsKueryNamespaceFilter, isAgentInNamespace } from './namespace';
+import { agentsKueryNamespaceFilter, isAgentInNamespace } from './agent_namespaces';
 
 jest.mock('../app_context');
 
@@ -37,22 +37,32 @@ describe('isAgentInNamespace', () => {
     });
 
     describe('when the namespace is defined', () => {
-      it('returns true if the agent namespaces include the namespace', () => {
+      it('returns true in a custom space if the agent namespaces include the namespace', () => {
         const agent = { id: '123', namespaces: ['default', 'space1'] } as Agent;
         expect(isAgentInNamespace(agent, 'space1')).toEqual(true);
       });
 
-      it('returns false if the agent namespaces do not include the namespace', () => {
+      it('returns false in a custom space if the agent namespaces do not include the namespace', () => {
         const agent = { id: '123', namespaces: ['default', 'space1'] } as Agent;
         expect(isAgentInNamespace(agent, 'space2')).toEqual(false);
       });
 
-      it('returns false if the agent has zero length namespaces', () => {
+      it('returns true in the default space if the agent has zero length namespaces', () => {
+        const agent = { id: '123', namespaces: [] as string[] } as Agent;
+        expect(isAgentInNamespace(agent, 'default')).toEqual(true);
+      });
+
+      it('returns false in a custom space if the agent has zero length namespaces', () => {
         const agent = { id: '123', namespaces: [] as string[] } as Agent;
         expect(isAgentInNamespace(agent, 'space1')).toEqual(false);
       });
 
-      it('returns false if the agent does not have namespaces', () => {
+      it('returns true in the default space if the agent does not have namespaces', () => {
+        const agent = { id: '123' } as Agent;
+        expect(isAgentInNamespace(agent, 'default')).toEqual(true);
+      });
+
+      it('returns false in a custom space if the agent does not have namespaces', () => {
         const agent = { id: '123' } as Agent;
         expect(isAgentInNamespace(agent, 'space1')).toEqual(false);
       });
