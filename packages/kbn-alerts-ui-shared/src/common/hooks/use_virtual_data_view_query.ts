@@ -36,7 +36,7 @@ export const useVirtualDataViewQuery = (
   options?: QueryOptionsOverrides<DataViewsContract['create']>
 ) => {
   const query = useQuery({
-    queryKey: queryKeyPrefix.concat(JSON.stringify(indexNames?.sort())),
+    queryKey: queryKeyPrefix.concat(indexNames!),
     queryFn: () =>
       dataViewsService.create({
         title: (indexNames ?? []).join(','),

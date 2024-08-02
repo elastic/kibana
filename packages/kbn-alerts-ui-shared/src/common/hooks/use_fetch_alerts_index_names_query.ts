@@ -31,7 +31,7 @@ export const useFetchAlertsIndexNamesQuery = (
   >
 ) => {
   return useQuery({
-    queryKey: queryKeyPrefix.concat(JSON.stringify(featureIds.sort())),
+    queryKey: queryKeyPrefix.concat(featureIds),
     queryFn: () => fetchAlertsIndexNames({ http, featureIds }),
     enabled: featureIds.length > 0,
     staleTime: 60 * 1000,

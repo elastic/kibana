@@ -37,7 +37,7 @@ export const useFetchAlertsFieldsQuery = (
   );
 
   return useQuery({
-    queryKey: queryKeyPrefix.concat(JSON.stringify(featureIds.sort())),
+    queryKey: queryKeyPrefix.concat(featureIds),
     queryFn: () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
     placeholderData: { browserFields: {}, fields: [] },
     staleTime: 60 * 1000,
