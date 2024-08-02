@@ -17,10 +17,13 @@ import { ProductLine, ProductTier } from './configs';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 jest.mock('./toggle_panel');
 jest.mock('../../../lib/kibana');
-
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 (useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' });
 
 describe('OnboardingComponent', () => {
@@ -41,6 +44,7 @@ describe('OnboardingComponent', () => {
   };
 
   beforeEach(() => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     mockedContext = createAppRootMockRenderer();
     render = () => (renderResult = mockedContext.render(<OnboardingComponent {...props} />));
   });
@@ -72,6 +76,17 @@ describe('OnboardingComponent', () => {
     expect(welcomeHeader).toBeInTheDocument();
     expect(togglePanel).toBeInTheDocument();
   });
+
+  it('should render dataIngestionHubHeader if dataIngestionHubEnabled flag is true', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+    render();
+
+    const dataIngestionHubHeader = renderResult.getByTestId('data-ingestion-hub-header');
+
+    expect(dataIngestionHubHeader).toBeInTheDocument();
+  });
+
   describe('AVC 2024 Results banner', () => {
     it('should render on the page', () => {
       render();
