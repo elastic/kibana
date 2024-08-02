@@ -631,7 +631,8 @@ Index Management by running this series of requests in Console:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/inference/README.md[inference]
-|undefined
+|The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and
+external LLM APIs. Its goals are:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
