@@ -572,14 +572,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'system.core.softirq.pct',
           'system.core.steal.pct',
           'system.cpu.nice.pct',
-          'system.cpu.idle.pct',
         ];
 
         for (const field of fields) {
           await pageObjects.infraHome.addCustomMetric(field);
         }
         const metricsCount = await pageObjects.infraHome.getMetricsContextMenuItemsCount();
-        // there are 6 default metrics in the context menu for hosts
+        // there are 7 default metrics in the context menu for hosts
         expect(metricsCount).to.eql(20);
 
         await pageObjects.infraHome.ensureCustomMetricAddButtonIsDisabled();
