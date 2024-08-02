@@ -9,8 +9,6 @@ paths:
       operationId: GetExceptionListItem
       x-codegen-enabled: true
       summary: Gets an exception list item
-      tags:
-        - Exceptions API
       parameters:
         - name: id
           in: query
