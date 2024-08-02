@@ -110,6 +110,21 @@ export class Walker {
     return params;
   };
 
+  public static readonly find = (
+    node: WalkerAstNode,
+    predicate: (node: ESQLProperNode) => boolean
+  ): ESQLProperNode | undefined => {
+    let found: ESQLProperNode | undefined;
+    Walker.walk(node, {
+      visitAny: (child) => {
+        if (!found && predicate(child)) {
+          found = child;
+        }
+      },
+    });
+    return found;
+  };
+
   /**
    * Finds the first function that matches the predicate.
    *
