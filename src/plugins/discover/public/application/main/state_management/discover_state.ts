@@ -369,6 +369,7 @@ export function getDiscoverStateContainer({
         language: 'kuery',
         query: '',
       },
+      columns: [],
       dataSource: {
         type: DataSourceType.DataView,
         dataViewId,
@@ -383,6 +384,7 @@ export function getDiscoverStateContainer({
       dataSource: {
         type: DataSourceType.Esql,
       },
+      columns: [],
     });
   };
 
