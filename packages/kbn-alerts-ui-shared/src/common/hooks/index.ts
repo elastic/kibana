@@ -8,12 +8,6 @@
 
 export * from './use_alerts_data_view';
 export * from './use_create_rule';
-export * from './use_fetch_alerts_fields_query';
-export {
-  queryKeyPrefix as fetchAlertsIndexNamesQueryKeyPrefix,
-  useFetchAlertsIndexNamesQuery,
-  type UseFetchAlertsIndexNamesQueryParams,
-} from './use_fetch_alerts_index_names_query';
 export * from './use_get_alerts_group_aggregations_query';
 export * from './use_health_check';
 export * from './use_load_alerting_framework_health';
@@ -22,9 +16,4 @@ export * from './use_load_ui_config';
 export * from './use_load_ui_health';
 export * from './use_resolve_rule';
 export * from './use_rule_aad_fields';
-export {
-  queryKeyPrefix as searchAlertsQueryKeyPrefix,
-  useSearchAlertsQuery,
-  type UseSearchAlertsQueryParams,
-} from './use_search_alerts_query';
 export * from './use_update_rule';

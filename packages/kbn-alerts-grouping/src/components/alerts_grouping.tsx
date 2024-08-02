@@ -20,7 +20,7 @@ import type { Filter } from '@kbn/es-query';
 import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useAlertsDataView } from '@kbn/alerts-ui-shared';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AlertsGroupingLevel, AlertsGroupingLevelProps } from './alerts_grouping_level';
 import { AlertsGroupingProps } from '../types';

@@ -11,7 +11,7 @@ import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { useAlertsDataView } from '@kbn/alerts-ui-shared';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';

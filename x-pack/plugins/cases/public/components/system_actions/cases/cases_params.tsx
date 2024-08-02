@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiComboBox,
 } from '@elastic/eui';
-import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';

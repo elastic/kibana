@@ -175,7 +175,7 @@ export const useColumns = ({
     }
   );
 
-  const chosenAlertFields = useMemo<BrowserFields>(
+  const selectedAlertsFields = useMemo<BrowserFields>(
     () => alertsFields ?? fieldsQuery.data?.browserFields ?? {},
     [alertsFields, fieldsQuery.data?.browserFields]
   );
@@ -260,7 +260,7 @@ export const useColumns = ({
 
   const onToggleColumn = useCallback(
     (columnId: string): void => {
-      const column = euiColumnFactory(columnId, chosenAlertFields, defaultColumns);
+      const column = euiColumnFactory(columnId, selectedAlertsFields, defaultColumns);
 
       const newColumns = toggleColumn({
         column,
@@ -276,19 +276,19 @@ export const useColumns = ({
       setVisibleColumns(newVisibleColumns);
       setColumnsAndSave(newColumns, newVisibleColumns);
     },
-    [chosenAlertFields, columns, defaultColumns, setColumnsAndSave, visibleColumns]
+    [selectedAlertsFields, columns, defaultColumns, setColumnsAndSave, visibleColumns]
   );
 
   const onResetColumns = useCallback(() => {
     const populatedDefaultColumns = populateColumns(
       defaultColumns,
-      chosenAlertFields,
+      selectedAlertsFields,
       defaultColumns
     );
     const newVisibleColumns = populatedDefaultColumns.map((pdc) => pdc.id);
     setVisibleColumns(newVisibleColumns);
     setColumnsAndSave(populatedDefaultColumns, newVisibleColumns);
-  }, [chosenAlertFields, defaultColumns, setColumnsAndSave]);
+  }, [selectedAlertsFields, defaultColumns, setColumnsAndSave]);
 
   const onColumnResize = useCallback(
     ({ columnId, width }: EuiDataGridOnColumnResizeData) => {
@@ -311,7 +311,7 @@ export const useColumns = ({
       columns,
       visibleColumns,
       isBrowserFieldDataLoading: fieldsQuery.isLoading,
-      browserFields: chosenAlertFields,
+      browserFields: selectedAlertsFields,
       onToggleColumn,
       onResetColumns,
       onChangeVisibleColumns: setColumnsByColumnIds,
@@ -322,7 +322,7 @@ export const useColumns = ({
       columns,
       visibleColumns,
       fieldsQuery.isLoading,
-      chosenAlertFields,
+      selectedAlertsFields,
       onToggleColumn,
       onResetColumns,
       setColumnsByColumnIds,
