@@ -13,9 +13,11 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { retryRequestIfConflicts } from './utils';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
+  const log = getService('log');
   const security = getService('security');
   const spaces = getService('spaces');
   const deployment = getService('deployment');
@@ -55,11 +57,14 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   async function saveAdvancedSetting(username: string, password: string, spaceId?: string) {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
-    return await supertest
-      .post(`${basePath}/internal/kibana/settings`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
-      .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } })
+    const sendRequest = async () =>
+      await supertest
+        .post(`${basePath}/internal/kibana/settings`)
+        .auth(username, password)
+        .set('kbn-xsrf', 'foo')
+        .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } });
+
+    return await retryRequestIfConflicts(log, 'saveAdvancedSetting', sendRequest)
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }
@@ -67,19 +72,21 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   async function saveTelemetrySetting(username: string, password: string, spaceId?: string) {
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
-    return await supertest
-      .post(`${basePath}/internal/telemetry/optIn`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send({ enabled: true })
+    const sendRequest = async () =>
+      await supertest
+        .post(`${basePath}/internal/telemetry/optIn`)
+        .auth(username, password)
+        .set('kbn-xsrf', 'foo')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send({ enabled: true });
+
+    return await retryRequestIfConflicts(log, 'saveTelemetrySetting', sendRequest)
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/176445
-  describe.skip('feature controls', () => {
+  describe('feature controls', () => {
     it(`settings can be saved with the advancedSettings: ["all"] feature privilege`, async () => {
       const username = 'settings_all';
       const roleName = 'settings_all';
