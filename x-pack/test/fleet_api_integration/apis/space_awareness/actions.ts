@@ -19,7 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('actions', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/189805
+  describe.skip('actions', async function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
