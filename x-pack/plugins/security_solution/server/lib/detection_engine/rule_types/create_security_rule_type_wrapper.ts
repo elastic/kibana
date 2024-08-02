@@ -130,7 +130,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
-            startedAtOverridden,
             services,
             spaceId,
             state,
