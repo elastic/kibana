@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Get Asset Criticality Privileges Schema
+  title: Get Risk Engine Privileges Schema
   version: '1'
 paths:
-  /internal/asset_criticality/privileges:
+  /internal/risk_engine/privileges:
     get:
       x-labels: [ess, serverless]
       x-internal: true
       x-codegen-enabled: true
-      operationId: AssetCriticalityGetPrivileges
-      summary: Get Asset Criticality Privileges
+      operationId: RiskEngineGetPrivileges
+      summary: Get Risk Engine Privileges
       responses:
         '200':
           description: Successful response
@@ -20,7 +20,7 @@ paths:
               example:
                 elasticsearch:
                   index:
-                    '.asset-criticality.asset-criticality-*':
+                    'risk-score.risk-score-*':
                       read: true
                       write: false
                 has_all_required: false

@@ -195,7 +195,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('csp:toast-success-link');
         await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageTitle = await testSubjects.find('header-page-title');
-        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        // Rule page title is not immediately available, so we need to retry until it is
+        await retry.try(async () => {
+          expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        });
       });
     });
     describe('Rule details', () => {
