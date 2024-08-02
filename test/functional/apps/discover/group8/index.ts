@@ -20,6 +20,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
+    loadTestFile(require.resolve('./_default_route'));
     loadTestFile(require.resolve('./_hide_announcements'));
   });
 }
