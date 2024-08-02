@@ -8,7 +8,7 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 
 export type {
-  MetricsDataPluginSetup,
+  MetricsDataAccessPluginSetup as MetricsDataPluginSetup,
   GetMetricIndicesOptions,
   UpdateMetricIndicesOptions,
   DefaultMetricIndicesHandler,
@@ -16,7 +16,7 @@ export type {
 
 export { metricsDataSourceSavedObjectName } from './saved_objects/metrics_data_source';
 
-export { MetricsDataClient } from './client';
+export { MetricsDataAccessServices } from './services';
 export { MetricsDataClientMock } from './client_mock';
 
 export async function plugin(context: PluginInitializerContext) {

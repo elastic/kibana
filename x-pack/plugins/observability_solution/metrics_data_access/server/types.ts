@@ -8,13 +8,15 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
-import { MetricsDataClient } from './client';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { MetricsDataAccessServices } from './services';
+import { PLUGIN_ID } from '../common';
 
-export interface MetricsDataPluginSetup {
-  client: MetricsDataClient;
+export interface MetricsDataAccessPluginSetup {
+  services: MetricsDataAccessServices;
 }
 
-export interface MetricsDataPluginStartDeps {
+export interface MetricsDataAccessPluginStartDeps {
   data: DataPluginStart;
 }
 
@@ -29,3 +31,7 @@ export type UpdateMetricIndicesOptions = GetMetricIndicesOptions & {
 export type DefaultMetricIndicesHandler =
   | ((options: GetMetricIndicesOptions) => Promise<string>)
   | null;
+
+export type MetricsDataAccessRouterHandlerContext = CustomRequestHandlerContext<{
+  [PLUGIN_ID]: { getMetricsIndices: () => Promise<string> };
+}>;

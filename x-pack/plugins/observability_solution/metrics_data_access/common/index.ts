@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export const PLUGIN_ID = 'metricsDataAccess';
+export const PLUGIN_NAME = 'metricsDataAccess';
+
 export {
   inventoryModels,
   findInventoryModel,

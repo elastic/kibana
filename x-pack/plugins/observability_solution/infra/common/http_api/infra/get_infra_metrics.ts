@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLiteralValueFromUndefinedRT, inRangeRt, dateRt } from '@kbn/io-ts-utils';
+import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const InfraMetricTypeRT = rt.keyof({
@@ -16,13 +16,6 @@ export const InfraMetricTypeRT = rt.keyof({
   memoryFree: null,
   rx: null,
   tx: null,
-  rxV2: null,
-  txV2: null,
-});
-
-export const RangeRT = rt.type({
-  from: dateRt,
-  to: dateRt,
 });
 
 export const InfraAssetMetadataTypeRT = rt.keyof({
@@ -48,9 +41,10 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   }),
   rt.type({
     type: rt.literal('host'),
-    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(20)]),
-    metrics: rt.array(rt.type({ type: InfraMetricTypeRT })),
-    range: RangeRT,
+    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
+    metrics: rt.array(InfraMetricTypeRT),
+    from: isoToEpochRt,
+    to: isoToEpochRt,
   }),
 ]);
 
@@ -78,12 +72,8 @@ export type InfraAssetMetricsItem = rt.TypeOf<typeof InfraAssetMetricsItemRT>;
 
 export type GetInfraMetricsRequestBodyPayload = Omit<
   rt.TypeOf<typeof GetInfraMetricsRequestBodyPayloadRT>,
-  'limit' | 'range'
+  'limit'
 > & {
-  limit?: number;
-  range: {
-    from: string;
-    to: string;
-  };
+  limit: number;
 };
 export type GetInfraMetricsResponsePayload = rt.TypeOf<typeof GetInfraMetricsResponsePayloadRT>;

@@ -16,7 +16,7 @@ import {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
-import type { MetricsDataPluginStartDeps } from '../../../types';
+import type { MetricsDataAccessPluginStartDeps } from '../../../types';
 import {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
@@ -33,9 +33,12 @@ interface FrozenIndexParams {
 
 export class KibanaFramework {
   public router: IRouter<RequestHandlerContext>;
-  private core: CoreSetup<MetricsDataPluginStartDeps>;
+  private core: CoreSetup<MetricsDataAccessPluginStartDeps>;
 
-  constructor(core: CoreSetup<MetricsDataPluginStartDeps>, router: IRouter<RequestHandlerContext>) {
+  constructor(
+    core: CoreSetup<MetricsDataAccessPluginStartDeps>,
+    router: IRouter<RequestHandlerContext>
+  ) {
     this.router = router;
     this.core = core;
   }

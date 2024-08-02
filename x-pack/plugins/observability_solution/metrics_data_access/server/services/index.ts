@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MetricsDataClient } from './client';
+export { MetricsDataAccessServices } from './services';

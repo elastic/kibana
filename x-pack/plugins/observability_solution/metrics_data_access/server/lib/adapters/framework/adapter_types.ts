@@ -25,7 +25,7 @@ import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';
-import { MetricsDataPluginSetup } from '../../../types';
+import { MetricsDataAccessPluginSetup } from '../../../types';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -39,7 +39,7 @@ export interface InfraServerPluginSetupDeps {
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   ml?: MlPluginSetup;
-  metricsDataAccess: MetricsDataPluginSetup;
+  metricsDataAccess: MetricsDataAccessPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {

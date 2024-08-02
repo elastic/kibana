@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import { MetricsDataClient } from '../client';
+import { IRouter } from '@kbn/core-http-server';
+import { MetricsDataAccessRouterHandlerContext } from '../types';
 
-export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
-  router: IRouter<T>;
-  metricsClient: MetricsDataClient;
+export type MetricsDataAccessRouter = IRouter<MetricsDataAccessRouterHandlerContext>;
+export interface SetupRouteOptions {
+  router: MetricsDataAccessRouter;
 }

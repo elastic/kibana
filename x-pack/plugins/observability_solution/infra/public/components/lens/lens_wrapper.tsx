@@ -95,6 +95,7 @@ export const LensWrapper = ({
         position: relative;
         overflow: hidden;
         height: 100%;
+        display: flex;
         .echMetric {
           border-radius: ${euiTheme.border.radius.medium};
           pointer-events: none;

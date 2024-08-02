@@ -5,39 +5,50 @@
  * 2.0.
  */
 
+import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
 import {
-  CoreSetup,
-  PluginInitializerContext,
-  Plugin,
-  RequestHandlerContext,
-} from '@kbn/core/server';
-import { MetricsDataPluginSetup, MetricsDataPluginStartDeps } from './types';
-import { MetricsDataClient } from './client';
+  MetricsDataAccessPluginSetup,
+  MetricsDataAccessPluginStartDeps,
+  MetricsDataAccessRouterHandlerContext,
+} from './types';
+import { MetricsDataAccessServices } from './services';
 import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
-import { initMetricExplorerRoute } from './routes/metrics_explorer';
-import { initMetricIndicesRoute } from './routes/metric_indices';
+import { registerRoutes } from './routes/register_routes';
+import { PLUGIN_ID } from '../common';
 
-export class MetricsDataPlugin implements Plugin<MetricsDataPluginSetup, {}, {}, {}> {
-  private metricsClient: MetricsDataClient | null = null;
-
+export class MetricsDataPlugin implements Plugin<MetricsDataAccessPluginSetup, {}, {}, {}> {
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<MetricsDataPluginStartDeps>) {
-    const router = core.http.createRouter();
+  public setup(core: CoreSetup<MetricsDataAccessPluginStartDeps>) {
+    const router = core.http.createRouter<MetricsDataAccessRouterHandlerContext>();
     const framework = new KibanaFramework(core, router);
 
-    initMetricExplorerRoute(framework);
-    initMetricIndicesRoute<RequestHandlerContext>({
-      router,
-      metricsClient: new MetricsDataClient(),
-    });
+    const services = new MetricsDataAccessServices();
 
     core.savedObjects.registerType(metricsDataSourceSavedObjectType);
 
-    this.metricsClient = new MetricsDataClient();
+    core.http.registerRouteHandlerContext<MetricsDataAccessRouterHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      async (context) => {
+        const getMetricsIndices = async () => {
+          const coreContext = await context.core;
+          const metricsIndices = await services.getMetricIndices({
+            savedObjectsClient: coreContext.savedObjects.client,
+          });
+          return metricsIndices;
+        };
+
+        return {
+          getMetricsIndices,
+        };
+      }
+    );
+
+    registerRoutes({ framework, router });
+
     return {
-      client: this.metricsClient,
+      services,
     };
   }
 

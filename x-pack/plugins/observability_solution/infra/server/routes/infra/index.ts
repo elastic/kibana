@@ -7,16 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-
-import type { BoolQuery } from '@kbn/es-query';
 import {
-  type GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsRequestBodyPayloadRT,
   GetInfraMetricsResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import {
-  type GetInfraAssetCountRequestBodyPayload,
-  type GetInfraAssetCountRequestParamsPayload,
   GetInfraAssetCountRequestBodyPayloadRT,
   GetInfraAssetCountResponsePayloadRT,
   GetInfraAssetCountRequestParamsPayloadRT,
@@ -26,6 +21,7 @@ import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client'
 import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { getApmDataAccessServices } from '../../lib/helpers/get_apm_data_access_services';
 
 export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   const validateMetricsBody = createRouteValidationFunction(GetInfraMetricsRequestBodyPayloadRT);
@@ -40,26 +36,24 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         body: validateMetricsBody,
       },
     },
-    async (requestContext, request, response) => {
-      const params: GetInfraMetricsRequestBodyPayload = request.body;
+    async (context, request, response) => {
+      const { from, to, metrics, limit, type, query } = request.body;
 
       try {
-        const infraMetricsClient = await getInfraMetricsClient({
-          framework,
-          request,
-          metricsDataAccess: libs.metricsClient,
-          requestContext,
-        });
-
-        const alertsClient = await getInfraAlertsClient({
-          getStartServices: libs.getStartServices,
-          request,
-        });
+        const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
+        const alertsClient = await getInfraAlertsClient({ libs, request });
+        const apmDataAccessServices = await getApmDataAccessServices({ request, libs, context });
 
         const hosts = await getHosts({
-          infraMetricsClient,
+          from,
+          to,
+          metrics,
+          limit,
+          type,
+          query,
           alertsClient,
-          params,
+          infraMetricsClient,
+          apmDataAccessServices,
         });
 
         return response.ok({
@@ -97,25 +91,21 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         params: validateCountParams,
       },
     },
-    async (requestContext, request, response) => {
-      const body: GetInfraAssetCountRequestBodyPayload = request.body;
-      const params: GetInfraAssetCountRequestParamsPayload = request.params;
+    async (context, request, response) => {
+      const { body, params } = request;
       const { assetType } = params;
       const { query, from, to } = body;
 
       try {
-        const infraMetricsClient = await getInfraMetricsClient({
-          framework,
-          request,
-          metricsDataAccess: libs.metricsClient,
-          requestContext,
-        });
+        const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
+        const apmDataAccessServices = await getApmDataAccessServices({ request, libs, context });
 
         const assetCount = await getHostsCount({
-          infraMetricsClient,
-          query: (query?.bool as BoolQuery) ?? undefined,
+          query,
           from,
           to,
+          infraMetricsClient,
+          apmDataAccessServices,
         });
 
         return response.ok({

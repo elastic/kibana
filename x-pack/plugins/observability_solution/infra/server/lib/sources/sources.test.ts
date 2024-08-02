@@ -6,8 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
-import { InfraConfig } from '../../types';
+import { MetricsDataAccessServices } from '@kbn/metrics-data-access-plugin/server';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import { InfraSources } from './sources';
 
@@ -15,8 +14,9 @@ describe('the InfraSources lib', () => {
   describe('getSourceConfiguration method', () => {
     test('returns a source configuration if it exists', async () => {
       const sourcesLib = new InfraSources({
-        config: createMockStaticConfiguration(),
-        metricsClient: createMockMetricsDataClient('METRIC_ALIAS'),
+        metricsDataAccess: {
+          services: createMockMetricsDataAccessServices('METRIC_ALIAS'),
+        },
       });
 
       const request: any = createRequestContext({
@@ -52,8 +52,9 @@ describe('the InfraSources lib', () => {
 
     test('adds missing attributes from the default configuration to a source configuration', async () => {
       const sourcesLib = new InfraSources({
-        config: createMockStaticConfiguration(),
-        metricsClient: createMockMetricsDataClient(),
+        metricsDataAccess: {
+          services: createMockMetricsDataAccessServices('METRIC_ALIAS'),
+        },
       });
 
       const request: any = createRequestContext({
@@ -80,38 +81,11 @@ describe('the InfraSources lib', () => {
   });
 });
 
-const createMockStaticConfiguration = (): InfraConfig => ({
-  alerting: {
-    inventory_threshold: {
-      group_by_page_size: 10000,
-    },
-    metric_threshold: {
-      group_by_page_size: 10000,
-    },
-  },
-  inventory: {
-    compositeSize: 2000,
-  },
-  featureFlags: {
-    customThresholdAlertsEnabled: false,
-    logsUIEnabled: true,
-    metricsExplorerEnabled: true,
-    osqueryEnabled: true,
-    inventoryThresholdAlertRuleEnabled: true,
-    metricThresholdAlertRuleEnabled: true,
-    logThresholdAlertRuleEnabled: true,
-    alertsAndRulesDropdownEnabled: true,
-    profilingEnabled: false,
-    ruleFormV2Enabled: false,
-  },
-  enabled: true,
-});
-
-const createMockMetricsDataClient = (metricAlias: string = 'metrics-*,metricbeat-*') =>
+const createMockMetricsDataAccessServices = (metricAlias: string = 'metrics-*,metricbeat-*') =>
   ({
     getMetricIndices: jest.fn().mockResolvedValue(metricAlias),
     updateMetricIndices: jest.fn(),
-  } as unknown as MetricsDataClient);
+  } as unknown as MetricsDataAccessServices);
 
 const createRequestContext = (savedObject?: SavedObject<unknown>) => {
   return {

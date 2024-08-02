@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsDataClient } from './client/client';
+import { MetricsDataAccessServices } from './services/services';
 
 export const MetricsDataClientMock = {
   create: () =>
@@ -19,5 +19,5 @@ export const MetricsDataClientMock = {
         references: [],
       })),
       setDefaultMetricIndicesHandler: jest.fn(),
-    } as unknown as MetricsDataClient),
+    } as unknown as MetricsDataAccessServices),
 };

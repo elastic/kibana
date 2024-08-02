@@ -18,7 +18,7 @@ import {
 
 export const DEFAULT_METRIC_INDICES = 'metrics-*,metricbeat-*';
 
-export class MetricsDataClient {
+export class MetricsDataAccessServices {
   private readonly defaultSavedObjectId = 'default';
   private getDefaultMetricIndices: DefaultMetricIndicesHandler = null;
 

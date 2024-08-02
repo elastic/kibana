@@ -15,7 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
+import type { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,
@@ -23,7 +23,6 @@ import {
   InfraStaticSourceConfiguration,
 } from '../../../common/source_configuration/source_configuration';
 import { SourceConfigurationSavedObjectRT } from '.';
-import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError } from './errors';
 import {
@@ -32,19 +31,18 @@ import {
 } from './saved_object_references';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 
-interface Libs {
-  config: InfraConfig;
-  metricsClient: MetricsDataClient;
+interface InfraSourcesParams {
+  metricsDataAccess: MetricsDataPluginSetup;
 }
 
 // extract public interface
 export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export class InfraSources {
-  private readonly libs: Libs;
+  private readonly metricsDataAccess: MetricsDataPluginSetup;
 
-  constructor(libs: Libs) {
-    this.libs = libs;
+  constructor(params: InfraSourcesParams) {
+    this.metricsDataAccess = params.metricsDataAccess;
   }
 
   public async getInfraSourceConfiguration(
@@ -82,7 +80,7 @@ export class InfraSources {
       savedObjectsClient,
       sourceId
     );
-    const metricAlias = await this.libs.metricsClient.getMetricIndices({
+    const metricAlias = await this.metricsDataAccess.services.getMetricIndices({
       savedObjectsClient,
     });
     sourceConfiguration.configuration.metricAlias = metricAlias;
@@ -108,7 +106,7 @@ export class InfraSources {
       })
     );
 
-    await this.libs.metricsClient.updateMetricIndices({
+    await this.metricsDataAccess.services.updateMetricIndices({
       savedObjectsClient,
       metricIndices: newSourceConfiguration.metricAlias,
     });
@@ -163,7 +161,7 @@ export class InfraSources {
       })
     );
 
-    await this.libs.metricsClient.updateMetricIndices({
+    await this.metricsDataAccess.services.updateMetricIndices({
       savedObjectsClient,
       metricIndices: updatedSourceConfiguration.configuration.metricAlias!,
     });

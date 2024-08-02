@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SetupRouteOptions } from '../types';
 import { MetricIndicesAPIResponse } from '../../../common/http_api/metric_indices';
@@ -43,19 +42,20 @@ function getIndexStatus(client: ElasticsearchClient, index: string) {
     );
 }
 
-export function initMetricIndicesRoute<T extends RequestHandlerContext>({
-  router,
-  metricsClient,
-}: SetupRouteOptions<T>) {
+export function initMetricIndicesRoute({ router }: SetupRouteOptions) {
   router.get<unknown, unknown, MetricIndicesAPIResponse>(
     {
       path: `/api/metrics/indices`,
       validate: false,
     },
     async (context, _req, res) => {
-      const savedObjectsClient = (await context.core).savedObjects.client;
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const metricIndices = await metricsClient.getMetricIndices({ savedObjectsClient });
+      const [coreContext, metricsDataAccessContext] = await Promise.all([
+        context.core,
+        context.metricsDataAccess,
+      ]);
+
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const metricIndices = await metricsDataAccessContext.getMetricsIndices();
       const metricIndicesStatus = await getIndexStatus(esClient, metricIndices);
       return res.ok({
         body: { metricIndices, metricIndicesExist: metricIndicesStatus !== 'missing' },
