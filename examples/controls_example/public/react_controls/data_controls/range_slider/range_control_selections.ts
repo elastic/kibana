@@ -19,9 +19,11 @@ export function initializeRangeControlSelections(
   return {
     hasInitialSelections: initialState.value !== undefined,
     value$: value$ as PublishingSubject<RangeValue | undefined>,
-    setValue: (nextValue: RangeValue | undefined) => {
-      value$.next(nextValue);
-      onSelectionChange();
+    setValue: (next: RangeValue | undefined) => {
+      if (value$.value !== next) {
+        value$.next(next);
+        onSelectionChange();
+      }
     },
   };
 }

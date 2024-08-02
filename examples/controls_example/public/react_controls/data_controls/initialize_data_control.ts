@@ -185,12 +185,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
     isEditingEnabled: () => true,
     untilFiltersReady: async () => {
       return new Promise((resolve) => {
-        combineLatest([defaultControl.api.blockingError, filters$])
+        combineLatest([defaultControl.api.blockingError, filtersReady$])
           .pipe(
-            first(
-              ([blockingError, filters]) =>
-                blockingError !== undefined || (filters?.length ?? 0) > 0
-            )
+            first(([blockingError, filtersReady]) => filtersReady || blockingError !== undefined)
           )
           .subscribe(() => {
             resolve();

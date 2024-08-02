@@ -20,8 +20,10 @@ export function initializeSearchControlSelections(
     hasInitialSelections: initialState.searchString?.length,
     searchString$: searchString$ as PublishingSubject<string | undefined>,
     setSearchString: (next: string | undefined) => {
-      searchString$.next(next);
-      onSelectionChange();
+      if (searchString$.value !== next) {
+        searchString$.next(next);
+        onSelectionChange();
+      }
     },
   };
 }

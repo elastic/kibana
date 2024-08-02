@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
@@ -165,27 +165,29 @@ export const getRangesliderControlFactory = (
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
         rangeControlSelections.value$,
-      ]).subscribe(([dataViews, fieldName, value]) => {
-        const dataView = dataViews?.[0];
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        const gte = parseFloat(value?.[0] ?? '');
-        const lte = parseFloat(value?.[1] ?? '');
+      ])
+        .pipe(debounceTime(0))
+        .subscribe(([dataViews, fieldName, value]) => {
+          const dataView = dataViews?.[0];
+          const dataViewField =
+            dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+          const gte = parseFloat(value?.[0] ?? '');
+          const lte = parseFloat(value?.[1] ?? '');
 
-        let rangeFilter: Filter | undefined;
-        if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
-          const params = {
-            gte,
-            lte,
-          } as RangeFilterParams;
+          let rangeFilter: Filter | undefined;
+          if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
+            const params = {
+              gte,
+              lte,
+            } as RangeFilterParams;
 
-          rangeFilter = buildRangeFilter(dataViewField, params, dataView);
-          rangeFilter.meta.key = fieldName;
-          rangeFilter.meta.type = 'range';
-          rangeFilter.meta.params = params;
-        }
-        dataControl.setters.setOutputFilter(rangeFilter);
-      });
+            rangeFilter = buildRangeFilter(dataViewField, params, dataView);
+            rangeFilter.meta.key = fieldName;
+            rangeFilter.meta.type = 'range';
+            rangeFilter.meta.params = params;
+          }
+          dataControl.setters.setOutputFilter(rangeFilter);
+        });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({

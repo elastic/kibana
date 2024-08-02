@@ -7,6 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import deepEqual from 'react-fast-compare';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { OptionsListControlState } from './types';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
@@ -21,6 +22,11 @@ export function initializeOptionsListSelections(
   const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
   const exclude$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
 
+  const selectedOptionsComparatorFunction = (
+    a: OptionsListSelection[] | undefined,
+    b: OptionsListSelection[] | undefined
+  ) => deepEqual(a ?? [], b ?? []);
+
   return {
     clearSelections: () => {
       selectedOptions$.next(undefined);
@@ -30,19 +36,26 @@ export function initializeOptionsListSelections(
     },
     hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
     selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
+    selectedOptionsComparatorFunction,
     setSelectedOptions: (next: OptionsListSelection[] | undefined) => {
-      selectedOptions$.next(next);
-      onSelectionChange();
+      if (selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
+        selectedOptions$.next(next);
+        onSelectionChange();
+      }
     },
     existsSelected$: existsSelected$ as PublishingSubject<boolean | undefined>,
     setExistsSelected: (next: boolean | undefined) => {
-      existsSelected$.next(next);
-      onSelectionChange();
+      if (existsSelected$.value !== next) {
+        existsSelected$.next(next);
+        onSelectionChange();
+      }
     },
     exclude$: exclude$ as PublishingSubject<boolean | undefined>,
     setExclude: (next: boolean | undefined) => {
-      exclude$.next(next);
-      onSelectionChange();
+      if (exclude$.value !== next) {
+        exclude$.next(next);
+        onSelectionChange();
+      }
     },
   };
 }

@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect } from 'react';
-import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
@@ -206,27 +205,29 @@ export const getOptionsListControlFactory = (
         optionsListControlSelections.selectedOptions$,
         optionsListControlSelections.existsSelected$,
         optionsListControlSelections.exclude$,
-      ]).subscribe(([dataViews, fieldName, selections, existsSelected, exclude]) => {
-        const dataView = dataViews?.[0];
-        const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+      ])
+        .pipe(debounceTime(0))
+        .subscribe(([dataViews, fieldName, selections, existsSelected, exclude]) => {
+          const dataView = dataViews?.[0];
+          const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
 
-        let newFilter: Filter | undefined;
-        if (dataView && field) {
-          if (existsSelected) {
-            newFilter = buildExistsFilter(field, dataView);
-          } else if (selections && selections.length > 0) {
-            newFilter =
-              selections.length === 1
-                ? buildPhraseFilter(field, selections[0], dataView)
-                : buildPhrasesFilter(field, selections, dataView);
+          let newFilter: Filter | undefined;
+          if (dataView && field) {
+            if (existsSelected) {
+              newFilter = buildExistsFilter(field, dataView);
+            } else if (selections && selections.length > 0) {
+              newFilter =
+                selections.length === 1
+                  ? buildPhraseFilter(field, selections[0], dataView)
+                  : buildPhrasesFilter(field, selections, dataView);
+            }
           }
-        }
-        if (newFilter) {
-          newFilter.meta.key = field?.name;
-          if (exclude) newFilter.meta.negate = true;
-        }
-        dataControl.setters.setOutputFilter(newFilter);
-      });
+          if (newFilter) {
+            newFilter.meta.key = field?.name;
+            if (exclude) newFilter.meta.negate = true;
+          }
+          dataControl.setters.setOutputFilter(newFilter);
+        });
 
       const api = buildApi(
         {
@@ -273,7 +274,7 @@ export const getOptionsListControlFactory = (
           selectedOptions: [
             optionsListControlSelections.selectedOptions$,
             optionsListControlSelections.setSelectedOptions,
-            (a, b) => deepEqual(a ?? [], b ?? []),
+            optionsListControlSelections.selectedOptionsComparatorFunction,
           ],
           singleSelect: [singleSelect$, (selected) => singleSelect$.next(selected)],
           sort: [
