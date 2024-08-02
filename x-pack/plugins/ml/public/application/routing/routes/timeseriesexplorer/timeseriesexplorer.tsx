@@ -55,7 +55,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
     jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz()),
+    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz(uiSettings)),
   });
 
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);

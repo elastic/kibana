@@ -6,21 +6,17 @@
  */
 
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
-  config: IUiSettingsClient | null;
 }
 
 const cache: DependencyCache = {
   timefilter: null,
-  config: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.timefilter = deps.timefilter || null;
-  cache.config = deps.config || null;
 }
 
 export function getTimefilter() {
@@ -28,13 +24,6 @@ export function getTimefilter() {
     throw new Error("timefilter hasn't been initialized");
   }
   return cache.timefilter.timefilter;
-}
-
-export function getUiSettings() {
-  if (cache.config === null) {
-    throw new Error("uiSettings hasn't been initialized");
-  }
-  return cache.config;
 }
 
 export function clearCache() {

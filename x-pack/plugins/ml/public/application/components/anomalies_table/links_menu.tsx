@@ -105,6 +105,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       share,
       application,
       uiActions,
+      uiSettings,
       notifications: { toasts },
     },
   } = kibana;
@@ -154,7 +155,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
-    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
+      getDateFormatTz(uiSettings)
+    );
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
     const anomalyBucketEnd = anomalyBucketStartMoment
       .add(anomaly.source.bucket_span, 'seconds')
@@ -195,7 +198,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       sourceIndicesWithGeoFields[anomaly.jobId]
     );
     // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
-    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
+    const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
+      getDateFormatTz(uiSettings)
+    );
     const anomalyBucketStart = anomalyBucketStartMoment
       .subtract(anomaly.source.bucket_span, 'seconds')
       .toISOString();

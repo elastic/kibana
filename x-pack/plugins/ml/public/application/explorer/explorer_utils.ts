@@ -24,9 +24,10 @@ import {
   type MlRecordForInfluencer,
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
-
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { IUiSettingsClient } from '@kbn/core/public';
+
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -40,7 +41,6 @@ import {
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import type { MlJobService } from '../services/job_service';
-import { getUiSettings } from '../util/dependency_cache';
 
 import type { SwimlaneType } from './explorer_constants';
 import {
@@ -250,8 +250,7 @@ export function getInfluencers(mlJobService: MlJobService, selectedJobs: any[]):
   return influencers;
 }
 
-export function getDateFormatTz(): string {
-  const uiSettings = getUiSettings();
+export function getDateFormatTz(uiSettings: IUiSettingsClient): string {
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = uiSettings.get('dateFormat:tz');
   const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();

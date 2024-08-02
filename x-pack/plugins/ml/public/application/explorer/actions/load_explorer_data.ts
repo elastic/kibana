@@ -18,6 +18,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
   getDateFormatTz,
@@ -31,7 +32,7 @@ import {
   loadOverallAnnotations,
 } from '../explorer_utils';
 import type { ExplorerState } from '../reducers';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApiContext, useUiSettings } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
@@ -95,6 +96,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
 const loadExplorerDataProvider = (
+  uiSettings: IUiSettingsClient,
   mlApiServices: MlApiServices,
   mlJobService: MlJobService,
   mlResultsService: MlResultsService,
@@ -124,7 +126,7 @@ const loadExplorerDataProvider = (
 
     const timerange = getSelectionTimeRange(selectedCells, bounds);
 
-    const dateFormatTz = getDateFormatTz();
+    const dateFormatTz = getDateFormatTz(uiSettings);
 
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData
@@ -214,6 +216,7 @@ const loadExplorerDataProvider = (
 };
 
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
+  const uiSettings = useUiSettings();
   const timefilter = useTimefilter();
   const mlApiServices = useMlApiContext();
   const mlJobService = useMlJobService();
@@ -223,6 +226,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
 
     return loadExplorerDataProvider(
+      uiSettings,
       mlApiServices,
       mlJobService,
       mlResultsService,
