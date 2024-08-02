@@ -6,28 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { TimeRange } from '@kbn/es-query';
-import { StateComparators } from '@kbn/presentation-publishing';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import dateMath from '@kbn/datemath';
+import { TimeRange } from '@kbn/es-query';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { ControlGroupApi } from '../control_group/types';
+import { getMockedControlGroupApi } from '../mocks/control_mocks';
 import { ControlApiRegistration } from '../types';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
 import { TimesliderControlApi, TimesliderControlState } from './types';
 
 describe('TimesliderControlApi', () => {
   const uuid = 'myControl1';
+
   const dashboardApi = {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
-  const controlGroupApi = {
-    autoApplySelections$: new BehaviorSubject(true),
-    parentApi: dashboardApi,
-  } as unknown as ControlGroupApi;
+  const controlGroupApi = getMockedControlGroupApi(dashboardApi);
+
   const dataStartServiceMock = dataPluginMock.createStartContract();
   dataStartServiceMock.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();

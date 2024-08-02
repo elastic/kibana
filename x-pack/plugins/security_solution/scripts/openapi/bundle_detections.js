@@ -26,6 +26,13 @@ const ROOT = resolve(__dirname, '../..');
           description:
             'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
         },
+        tags: [
+          {
+            name: 'Security Solution Detections API',
+            description:
+              'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+          },
+        ],
       },
     },
   });
@@ -44,6 +51,13 @@ const ROOT = resolve(__dirname, '../..');
           description:
             'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
         },
+        tags: [
+          {
+            name: 'Security Solution Detections API',
+            description:
+              'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
+          },
+        ],
       },
     },
   });

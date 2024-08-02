@@ -36,7 +36,10 @@ const getLocalSession = (storage: Storage): PartialChatForm => {
   }
 };
 
-const setLocalSession = (state: PartialChatForm, storage: Storage) => {
+const setLocalSession = (formState: PartialChatForm, storage: Storage) => {
+  // omit question from the session state
+  const { question, ...state } = formState;
+
   storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
 };
 

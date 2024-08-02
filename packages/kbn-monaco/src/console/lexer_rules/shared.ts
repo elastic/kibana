@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { buildSqlRules, buildSqlStartRule, sqlLanguageAttributes } from './nested_sql';
 import { monaco } from '../../..';
 import { globals } from '../../common/lexer_rules';
 import { buildXjsonRules } from '../../xjson/lexer_rules/xjson';
@@ -87,21 +88,26 @@ export const matchTokensWithEOL = (
   };
 };
 
-export const xjsonRules = { ...buildXjsonRules('json_root') };
-// @ts-expect-error include comments into json
-xjsonRules.json_root = [{ include: '@comments' }, ...xjsonRules.json_root];
+const xjsonRules = { ...buildXjsonRules('json_root') };
+
 xjsonRules.json_root = [
+  // @ts-expect-error include comments into json
+  { include: '@comments' },
   // @ts-expect-error include variables into json
   matchToken('variable.template', /("\${\w+}")/),
+  // @ts-expect-error include a rule to start sql highlighting
+  buildSqlStartRule(),
   ...xjsonRules.json_root,
 ];
 
+const sqlRules = buildSqlRules();
 /*
  Lexer rules that are shared between the Console editor and the Console output panel.
  */
 export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
   ...(globals as any),
   defaultToken: 'invalid',
+  ...sqlLanguageAttributes,
   tokenizer: {
     root: [
       // warning comment
@@ -127,5 +133,7 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
     ],
     // include json rules
     ...xjsonRules,
+    // include sql rules
+    ...sqlRules,
   },
 };

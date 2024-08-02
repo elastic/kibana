@@ -71,6 +71,22 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
         },
       };
     },
+    getDefaultAppState: () => () => ({
+      columns: [
+        {
+          name: '@timestamp',
+          width: 212,
+        },
+        {
+          name: 'log.level',
+          width: 150,
+        },
+        {
+          name: 'message',
+        },
+      ],
+      rowHeight: 5,
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;

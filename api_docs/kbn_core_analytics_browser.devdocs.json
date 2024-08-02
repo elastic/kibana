@@ -627,6 +627,18 @@
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
+                "plugin": "@kbn/shared-ux-chrome-navigation",
+                "path": "packages/shared-ux/chrome/navigation/src/analytics/event_tracker.ts"
+              },
+              {
+                "plugin": "@kbn/shared-ux-chrome-navigation",
+                "path": "packages/shared-ux/chrome/navigation/src/services.tsx"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/analytics/event_tracker.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/utils/recall/recall_and_score.ts"
               },
@@ -975,8 +987,16 @@
                 "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/management/management_service.test.ts"
+              },
+              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/service/create_chat_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/shared-ux-chrome-navigation",
+                "path": "packages/shared-ux/chrome/navigation/mocks/storybook.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -1595,6 +1615,10 @@
               {
                 "plugin": "licensing",
                 "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/public/analytics/register_analytics_context.ts"
               },
               {
                 "plugin": "security",

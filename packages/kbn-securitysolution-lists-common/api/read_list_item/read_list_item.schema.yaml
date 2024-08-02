@@ -9,8 +9,6 @@ paths:
       operationId: GetListItem
       x-codegen-enabled: true
       summary: Gets a list item
-      tags:
-        - List item API
       parameters:
         - name: id
           in: query

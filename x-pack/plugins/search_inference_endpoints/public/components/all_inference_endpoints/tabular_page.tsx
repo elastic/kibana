@@ -108,7 +108,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       actions: [
         {
           render: (inferenceEndpoint: InferenceEndpointUI) => (
-            <CopyIDAction inferenceId={inferenceEndpoint.endpoint.inference_id} />
+            <CopyIDAction modelId={inferenceEndpoint.endpoint.model_id} />
           ),
         },
         {

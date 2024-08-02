@@ -82,4 +82,15 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new ApmDataAccessPlugin(initializerContext);
 }
 
-export type { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
+export type {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+  ApmDataAccessServices,
+  ApmDataAccessServicesParams,
+  APMEventClientConfig,
+  APMEventESSearchRequest,
+  APMLogEventESSearchRequest,
+  DocumentSourcesRequest,
+} from './types';
+
+export { APMEventClient } from './lib/helpers';

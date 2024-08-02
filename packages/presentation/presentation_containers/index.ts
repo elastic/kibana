@@ -13,6 +13,8 @@ export {
   type HasRuntimeChildState,
   type HasSerializedChildState,
 } from './interfaces/child_state';
+export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
+export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initialize_unsaved_changes';
 export {
   apiHasSaveNotification,
   type HasSaveNotification,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { BrowserField } from '../../containers/source';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
-export type EventFieldsData = BrowserField & TimelineEventsDetailsItem;
+export type EventFieldsData = FieldSpec & TimelineEventsDetailsItem;
 
 export interface FieldsData {
   field: string;
@@ -20,7 +20,7 @@ export interface FieldsData {
 export interface EnrichedFieldInfo {
   data: FieldsData | EventFieldsData;
   eventId: string;
-  fieldFromBrowserField?: Partial<BrowserField>;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   scopeId: string;
   values: string[] | null | undefined;
   linkValue?: string;

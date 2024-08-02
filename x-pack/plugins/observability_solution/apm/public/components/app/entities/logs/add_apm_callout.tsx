@@ -83,6 +83,7 @@ export function AddAPMCallOut() {
             data-test-subj="apmAddApmCallOutLearnMoreButton"
             iconType="popout"
             iconSide="right"
+            target="_blank"
             href="https://www.elastic.co/observability/application-performance-monitoring"
           >
             {i18n.translate('xpack.apm.addAPMCallOut.linkToElasticcoButtonEmptyLabel', {

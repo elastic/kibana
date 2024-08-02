@@ -9,8 +9,6 @@ paths:
       operationId: GetListIndex
       x-codegen-enabled: true
       summary: Get list data stream existence status
-      tags:
-        - List API
       responses:
         200:
           description: Successful response

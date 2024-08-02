@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
+import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
 import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
@@ -390,16 +391,29 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
 
-  await execa('docker', ['pull', image], {
-    // inherit is required to show Docker pull output
-    stdio: ['ignore', 'inherit', 'pipe'],
-  }).catch(({ message }) => {
-    const errorMessage = `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
+  await pRetry(
+    async () => {
+      await execa('docker', ['pull', image], {
+        // inherit is required to show Docker pull output
+        stdio: ['ignore', 'inherit', 'pipe'],
+      }).catch(({ message }) => {
+        const errorMessage = `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
 ${message}`;
-    throw createCliError(errorMessage);
-  });
+        throw createCliError(errorMessage);
+      });
+    },
+    {
+      retries: 2,
+      onFailedAttempt: (error) => {
+        // Only retry if `connection refused` is found in the error message.
+        if (!error?.message?.includes('connection refused')) {
+          throw error;
+        }
+      },
+    }
+  );
 }
 
 /**

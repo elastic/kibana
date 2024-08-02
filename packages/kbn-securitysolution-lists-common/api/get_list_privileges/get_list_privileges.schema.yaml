@@ -9,8 +9,6 @@ paths:
       operationId: GetListPrivileges
       x-codegen-enabled: true
       summary: Gets list privileges
-      tags:
-        - List API
       responses:
         200:
           description: Successful response

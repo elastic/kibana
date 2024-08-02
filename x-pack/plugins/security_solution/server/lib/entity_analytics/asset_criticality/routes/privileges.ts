@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { AssetCriticalityGetPrivilegesResponse } from '../../../../../common/api/entity_analytics';
 import {
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   APP_ID,
@@ -38,7 +39,11 @@ export const assetCriticalityInternalPrivilegesRoute = (
         version: API_VERSIONS.internal.v1,
         validate: false,
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<AssetCriticalityGetPrivilegesResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);

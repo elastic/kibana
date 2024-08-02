@@ -7,9 +7,11 @@
  */
 
 import {
+  apiHasRuntimeChildState,
   apiIsPresentationContainer,
   HasSerializedChildState,
   HasSnapshottableState,
+  initializeUnsavedChanges,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
@@ -23,7 +25,6 @@ import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switchMap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
-import { initializeReactEmbeddableState } from './react_embeddable_state';
 import {
   BuildReactEmbeddableApiRegistration,
   DefaultEmbeddableApi,
@@ -115,11 +116,18 @@ export const ReactEmbeddableRenderer = <
         };
 
         const buildEmbeddable = async () => {
-          const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
-            SerializedState,
-            RuntimeState,
-            Api
-          >(uuid, factory, parentApi);
+          const serializedState = parentApi.getSerializedStateForChild(uuid);
+          const lastSavedRuntimeState = serializedState
+            ? await factory.deserializeState(serializedState)
+            : ({} as RuntimeState);
+
+          // If the parent provides runtime state for the child (usually as a state backup or cache),
+          // we merge it with the last saved runtime state.
+          const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
+            ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
+            : ({} as Partial<RuntimeState>);
+
+          const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
 
           const buildApi = (
             apiRegistration: BuildReactEmbeddableApiRegistration<
@@ -152,32 +160,34 @@ export const ReactEmbeddableRenderer = <
                         : Promise.resolve(apiRegistration.serializeState());
                     })
                   )
-                  .subscribe((serializedState) => {
-                    onAnyStateChange(serializedState);
+                  .subscribe((nextSerializedState) => {
+                    onAnyStateChange(nextSerializedState);
                   })
               );
             }
 
-            const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
-              startStateDiffing(comparators);
+            const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
+              lastSavedRuntimeState,
+              parentApi,
+              comparators
+            );
 
             const fullApi = setApi({
               ...apiRegistration,
-              unsavedChanges,
-              resetUnsavedChanges,
-              snapshotRuntimeState,
+              ...unsavedChanges.api,
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
-            cleanupFunction.current = () => cleanup();
+            cleanupFunction.current = () => unsavedChanges.cleanup();
             return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 
           const { api, Component } = await factory.buildEmbeddable(
-            initialState,
+            initialRuntimeState,
             buildApi,
             uuid,
             parentApi,
-            setApi
+            setApi,
+            lastSavedRuntimeState
           );
 
           if (apiPublishesDataLoading(api)) {

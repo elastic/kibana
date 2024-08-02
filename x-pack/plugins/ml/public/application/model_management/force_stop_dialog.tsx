@@ -41,7 +41,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
         // Filter out deployments that are used by inference services
         .filter((deploymentId) => {
           if (!model.inference_apis) return true;
-          return !model.inference_apis.some((inference) => inference.inference_id === deploymentId);
+          return !model.inference_apis.some((inference) => inference.model_id === deploymentId);
         })
     );
   }, [model]);
@@ -110,7 +110,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
   ]);
 
   const inferenceServiceIDs = useMemo<string[]>(() => {
-    return (model.inference_apis ?? []).map((inference) => inference.inference_id);
+    return (model.inference_apis ?? []).map((inference) => inference.model_id);
   }, [model]);
 
   return (

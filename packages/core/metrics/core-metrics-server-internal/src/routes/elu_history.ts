@@ -44,7 +44,8 @@ export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<Op
 
   router.versioned
     .get({
-      access: 'public', // Public but needs to remain undocumented
+      access: 'internal',
+      enableQueryVersion: true,
       path: '/api/_elu_history',
       options: {
         authRequired: false,
@@ -52,7 +53,7 @@ export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<Op
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: false,
       },
       async (ctx, req, res) => {

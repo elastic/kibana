@@ -49,7 +49,7 @@ const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
 describe('NavControlPopover', () => {
-  async function setup(spaces: Space[], isSolutionNavEnabled = false, activeSpace?: Space) {
+  async function setup(spaces: Space[], allowSolutionVisibility = false, activeSpace?: Space) {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
@@ -66,7 +66,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        solutionNavExperiment={Promise.resolve(isSolutionNavEnabled)}
+        allowSolutionVisibility={allowSolutionVisibility}
         eventTracker={eventTracker}
       />
     );
@@ -89,7 +89,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        solutionNavExperiment={Promise.resolve(false)}
+        allowSolutionVisibility={false}
         eventTracker={eventTracker}
       />
     );
@@ -115,7 +115,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        solutionNavExperiment={Promise.resolve(false)}
+        allowSolutionVisibility={false}
         eventTracker={eventTracker}
       />
     );
@@ -283,7 +283,7 @@ describe('NavControlPopover', () => {
     ];
 
     const activeSpace = spaces[0];
-    const wrapper = await setup(spaces, true /** isSolutionEnabled **/, activeSpace);
+    const wrapper = await setup(spaces, true /** allowSolutionVisibility **/, activeSpace);
 
     await act(async () => {
       wrapper.find(EuiHeaderSectionItemButton).find('button').simulate('click');

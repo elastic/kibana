@@ -28,6 +28,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Actions List schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/action_log/{agent_id}':
     get:
       operationId: EndpointGetActionAuditLog
@@ -50,6 +52,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get action audit log schema
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action_status:
     get:
       operationId: EndpointGetActionsStatus
@@ -70,6 +74,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Actions status schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}':
     get:
       operationId: EndpointGetActionsDetails
@@ -87,6 +93,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Action details schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}/file/{file_id}/download`':
     get:
       operationId: EndpointFileDownload
@@ -104,6 +112,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: File Download schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}/file/{file_id}`':
     get:
       operationId: EndpointFileInfo
@@ -121,6 +131,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: File Info schema
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/execute:
     post:
       operationId: EndpointExecuteAction
@@ -138,6 +150,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Execute Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/get_file:
     post:
       operationId: EndpointGetFileAction
@@ -155,6 +169,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get File Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/isolate:
     post:
       operationId: EndpointIsolateHostAction
@@ -183,6 +199,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Isolate host Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/kill_process:
     post:
       operationId: EndpointKillProcessAction
@@ -200,6 +218,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Kill process Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
       operationId: EndpointGetRunningProcessesAction
@@ -228,6 +248,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Running Processes Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/scan:
     post:
       operationId: EndpointScanAction
@@ -245,6 +267,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Scan Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/state:
     get:
       operationId: EndpointGetActionsState
@@ -256,6 +280,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Action State schema
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/suspend_process:
     post:
       operationId: EndpointSuspendProcessAction
@@ -273,6 +299,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Suspend process Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
       operationId: EndpointUnisolateHostAction
@@ -301,6 +329,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Unisolate host Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/action/upload:
     post:
       operationId: EndpointUploadAction
@@ -318,6 +348,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Upload Action
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/metadata:
     get:
       operationId: GetEndpointMetadataList
@@ -335,6 +367,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Metadata List schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/metadata/{id}':
     get:
       operationId: GetEndpointMetadata
@@ -355,6 +389,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Metadata schema
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/metadata/transforms:
     get:
       operationId: GetEndpointMetadataTransform
@@ -366,6 +402,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Metadata Transform schema
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/policy_response:
     get:
       operationId: GetPolicyResponse
@@ -386,6 +424,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Policy Response schema
+      tags:
+        - Security Solution Endpoint Management API
   /api/endpoint/policy/summaries:
     get:
       operationId: GetAgentPolicySummary
@@ -409,6 +449,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get Agent Policy Summary schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/protection_updates_note/{package_policy_id}':
     get:
       operationId: GetProtectionUpdatesNote
@@ -426,6 +468,8 @@ paths:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: OK
       summary: Get Protection Updates Note schema
+      tags:
+        - Security Solution Endpoint Management API
     post:
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
@@ -451,6 +495,8 @@ paths:
                 $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: OK
       summary: Create Update Protection Updates Note schema
+      tags:
+        - Security Solution Endpoint Management API
   '/api/endpoint/suggestions/{suggestion_type}':
     post:
       operationId: GetEndpointSuggestions
@@ -485,6 +531,8 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get suggestions
+      tags:
+        - Security Solution Endpoint Management API
 components:
   schemas:
     AgentId:
@@ -863,3 +911,6 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: Interact with and manage endpoints running the Elastic Defend integration.
+    name: Security Solution Endpoint Management API

@@ -23,7 +23,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
   return (
     <EuiFlexGroup gutterSize="xs" direction="column">
       <EuiFlexItem>
-        <strong>{endpoint.inference_id}</strong>
+        <strong>{endpoint.model_id}</strong>
       </EuiFlexItem>
       <EuiFlexItem css={{ textWrap: 'wrap' }}>
         <EndpointModelInfo endpoint={endpoint} />

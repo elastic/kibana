@@ -18,6 +18,7 @@ import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
+
 /**
  * Hook to take care of ES|QL state transformations when a new result is returned
  * If necessary this is setting displayed columns and selected data view
@@ -29,106 +30,122 @@ export function useEsqlMode({
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
 }) {
-  const prev = useRef<{
-    query: string;
-    recentlyUpdatedToColumns: string[];
-  }>({
-    recentlyUpdatedToColumns: [],
-    query: '',
-  });
-  const initialFetch = useRef<boolean>(true);
   const savedSearch = useSavedSearchInitial();
+  const prev = useRef<{
+    initialFetch: boolean;
+    query: string;
+    allColumns: string[];
+    defaultColumns: string[];
+  }>({
+    initialFetch: true,
+    query: '',
+    allColumns: [],
+    defaultColumns: [],
+  });
 
   const cleanup = useCallback(() => {
-    if (prev.current.query) {
-      // cleanup when it's not an ES|QL query
-      prev.current = {
-        recentlyUpdatedToColumns: [],
-        query: '',
-      };
-      initialFetch.current = true;
+    if (!prev.current.query) {
+      return;
     }
+
+    // cleanup when it's not an ES|QL query
+    prev.current = {
+      initialFetch: true,
+      query: '',
+      allColumns: [],
+      defaultColumns: [],
+    };
   }, []);
 
   useEffect(() => {
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
         switchMap(async (next) => {
-          const { query } = next;
-          if (!query || next.fetchStatus === FetchStatus.ERROR) {
+          const { query: nextQuery } = next;
+
+          if (!nextQuery || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
 
-          const sendComplete = () => {
-            stateContainer.dataState.data$.documents$.next({
-              ...next,
-              fetchStatus: FetchStatus.COMPLETE,
-            });
-          };
-
-          const { viewMode } = stateContainer.appState.getState();
-          const isEsqlQuery = isOfAggregateQueryType(query);
-
-          if (isEsqlQuery) {
-            const hasResults = Boolean(next.result?.length);
-
-            if (next.fetchStatus !== FetchStatus.PARTIAL) {
-              return;
-            }
-
-            let nextColumns: string[] = prev.current.recentlyUpdatedToColumns;
-
-            if (hasResults) {
-              const firstRow = next.result![0];
-              const firstRowColumns = Object.keys(firstRow.raw);
-
-              if (hasTransformationalCommand(query.esql)) {
-                nextColumns = firstRowColumns.slice(0, MAX_NUM_OF_COLUMNS);
-              } else {
-                nextColumns = [];
-              }
-            }
-
-            if (initialFetch.current) {
-              initialFetch.current = false;
-              prev.current.query = query.esql;
-              prev.current.recentlyUpdatedToColumns = nextColumns;
-            }
-
-            const indexPatternChanged =
-              getIndexPatternFromESQLQuery(query.esql) !==
-              getIndexPatternFromESQLQuery(prev.current.query);
-
-            const addColumnsToState =
-              indexPatternChanged || !isEqual(nextColumns, prev.current.recentlyUpdatedToColumns);
-
-            const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-
-            if (!indexPatternChanged && !addColumnsToState && !changeViewMode) {
-              sendComplete();
-              return;
-            }
-
-            prev.current.query = query.esql;
-            prev.current.recentlyUpdatedToColumns = nextColumns;
-
-            // just change URL state if necessary
-            if (addColumnsToState || changeViewMode) {
-              const nextState = {
-                ...(addColumnsToState && { columns: nextColumns }),
-                ...(changeViewMode && { viewMode: undefined }),
-              };
-              await stateContainer.appState.replaceUrlState(nextState);
-            }
-
-            sendComplete();
-          } else {
+          if (!isOfAggregateQueryType(nextQuery)) {
             // cleanup for a "regular" query
             cleanup();
+            return;
           }
+
+          if (next.fetchStatus !== FetchStatus.PARTIAL) {
+            return;
+          }
+
+          let nextAllColumns = prev.current.allColumns;
+          let nextDefaultColumns = prev.current.defaultColumns;
+
+          if (next.result?.length) {
+            nextAllColumns = Object.keys(next.result[0].raw);
+
+            if (hasTransformationalCommand(nextQuery.esql)) {
+              nextDefaultColumns = nextAllColumns.slice(0, MAX_NUM_OF_COLUMNS);
+            } else {
+              nextDefaultColumns = [];
+            }
+          }
+
+          if (prev.current.initialFetch) {
+            prev.current.initialFetch = false;
+            prev.current.query = nextQuery.esql;
+            prev.current.allColumns = nextAllColumns;
+            prev.current.defaultColumns = nextDefaultColumns;
+          }
+
+          const indexPatternChanged =
+            getIndexPatternFromESQLQuery(nextQuery.esql) !==
+            getIndexPatternFromESQLQuery(prev.current.query);
+
+          const allColumnsChanged = !isEqual(nextAllColumns, prev.current.allColumns);
+
+          const changeDefaultColumns =
+            indexPatternChanged || !isEqual(nextDefaultColumns, prev.current.defaultColumns);
+
+          const { viewMode } = stateContainer.appState.getState();
+          const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
+
+          if (indexPatternChanged) {
+            stateContainer.internalState.transitions.setResetDefaultProfileState({
+              columns: true,
+              rowHeight: true,
+            });
+          } else if (allColumnsChanged) {
+            stateContainer.internalState.transitions.setResetDefaultProfileState({
+              columns: true,
+              rowHeight: false,
+            });
+          }
+
+          prev.current.allColumns = nextAllColumns;
+
+          if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
+            prev.current.query = nextQuery.esql;
+            prev.current.defaultColumns = nextDefaultColumns;
+
+            // just change URL state if necessary
+            if (changeDefaultColumns || changeViewMode) {
+              const nextState = {
+                ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+                ...(changeViewMode && { viewMode: undefined }),
+              };
+
+              await stateContainer.appState.replaceUrlState(nextState);
+            }
+          }
+
+          stateContainer.dataState.data$.documents$.next({
+            ...next,
+            fetchStatus: FetchStatus.COMPLETE,
+          });
         })
       )
       .subscribe();
+
     return () => {
       // cleanup for e.g. when savedSearch is switched
       cleanup();

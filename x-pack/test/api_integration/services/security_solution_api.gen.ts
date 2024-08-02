@@ -78,9 +78,6 @@ import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/com
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
-import { InternalCreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/internal_create_asset_criticality.gen';
-import { InternalDeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/internal_delete_asset_criticality.gen';
-import { InternalGetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/internal_get_asset_criticality.gen';
 import { ManageAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
@@ -124,6 +121,13 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    assetCriticalityGetPrivileges() {
+      return supertest
+        .get('/internal/asset_criticality/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Create new detection rules in bulk.
@@ -607,30 +611,6 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    internalCreateAssetCriticalityRecord(props: InternalCreateAssetCriticalityRecordProps) {
-      return supertest
-        .post('/internal/asset_criticality')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    internalDeleteAssetCriticalityRecord(props: InternalDeleteAssetCriticalityRecordProps) {
-      return supertest
-        .delete('/internal/asset_criticality')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    internalGetAssetCriticalityRecord(props: InternalGetAssetCriticalityRecordProps) {
-      return supertest
-        .get('/internal/asset_criticality')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
     internalUploadAssetCriticalityRecords() {
       return supertest
         .post('/internal/asset_criticality/upload_csv')
@@ -756,6 +736,13 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    riskEngineGetPrivileges() {
+      return supertest
+        .get('/internal/risk_engine/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     rulePreview(props: RulePreviewProps) {
       return supertest
@@ -972,15 +959,6 @@ export interface ImportTimelinesProps {
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
-}
-export interface InternalCreateAssetCriticalityRecordProps {
-  body: InternalCreateAssetCriticalityRecordRequestBodyInput;
-}
-export interface InternalDeleteAssetCriticalityRecordProps {
-  query: InternalDeleteAssetCriticalityRecordRequestQueryInput;
-}
-export interface InternalGetAssetCriticalityRecordProps {
-  query: InternalGetAssetCriticalityRecordRequestQueryInput;
 }
 export interface ManageAlertTagsProps {
   body: ManageAlertTagsRequestBodyInput;

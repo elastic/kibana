@@ -28,6 +28,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Find live queries
+      tags:
+        - Security Solution Osquery API
     post:
       operationId: OsqueryCreateLiveQuery
       requestBody:
@@ -44,6 +46,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Create a live query
+      tags:
+        - Security Solution Osquery API
   '/api/osquery/live_queries/{id}':
     get:
       operationId: OsqueryGetLiveQueryDetails
@@ -66,6 +70,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Get live query details
+      tags:
+        - Security Solution Osquery API
   '/api/osquery/live_queries/{id}/results/{actionId}':
     get:
       operationId: OsqueryGetLiveQueryResults
@@ -93,6 +99,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Get live query results
+      tags:
+        - Security Solution Osquery API
   /api/osquery/packs:
     get:
       operationId: OsqueryFindPacks
@@ -110,6 +118,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Find packs
+      tags:
+        - Security Solution Osquery API
     post:
       operationId: OsqueryCreatePacks
       requestBody:
@@ -126,6 +136,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Create a packs
+      tags:
+        - Security Solution Osquery API
   '/api/osquery/packs/{id}':
     delete:
       operationId: OsqueryDeletePacks
@@ -143,6 +155,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Delete packs
+      tags:
+        - Security Solution Osquery API
     get:
       operationId: OsqueryGetPacksDetails
       parameters:
@@ -159,6 +173,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Get packs details
+      tags:
+        - Security Solution Osquery API
     put:
       operationId: OsqueryUpdatePacks
       parameters:
@@ -181,6 +197,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Update packs
+      tags:
+        - Security Solution Osquery API
   /api/osquery/saved_queries:
     get:
       operationId: OsqueryFindSavedQueries
@@ -198,6 +216,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Find saved queries
+      tags:
+        - Security Solution Osquery API
     post:
       operationId: OsqueryCreateSavedQuery
       requestBody:
@@ -214,6 +234,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Create a saved query
+      tags:
+        - Security Solution Osquery API
   '/api/osquery/saved_queries/{id}':
     delete:
       operationId: OsqueryDeleteSavedQuery
@@ -231,6 +253,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Delete saved query
+      tags:
+        - Security Solution Osquery API
     get:
       operationId: OsqueryGetSavedQueryDetails
       parameters:
@@ -247,6 +271,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Get saved query details
+      tags:
+        - Security Solution Osquery API
     put:
       operationId: OsqueryUpdateSavedQuery
       parameters:
@@ -269,6 +295,8 @@ paths:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
           description: OK
       summary: Update saved query
+      tags:
+        - Security Solution Osquery API
 components:
   schemas:
     ArrayQueries:
@@ -588,3 +616,6 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: 'Run live queries, manage packs and saved queries.'
+    name: Security Solution Osquery API

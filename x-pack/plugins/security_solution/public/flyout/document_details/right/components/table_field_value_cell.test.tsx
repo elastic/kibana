@@ -7,8 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
@@ -88,7 +87,7 @@ describe('TableFieldValueCell', () => {
     };
     const messageValues = ['Endpoint network event'];
 
-    const messageFieldFromBrowserField: BrowserField = {
+    const messageFieldFromBrowserField: FieldSpec = {
       aggregatable: false,
       name: 'message',
       readFromDocValues: false,
@@ -121,8 +120,8 @@ describe('TableFieldValueCell', () => {
     });
   });
 
-  describe('when `BrowserField` metadata IS available', () => {
-    const hostIpFieldFromBrowserField: BrowserField = {
+  describe('when `FieldSpec` metadata IS available', () => {
+    const hostIpFieldFromBrowserField: FieldSpec = {
       aggregatable: true,
       name: 'host.ip',
       readFromDocValues: false,

@@ -13,6 +13,7 @@ import { EuiInputPopover } from '@elastic/eui';
 import {
   apiHasParentApi,
   apiPublishesDataLoading,
+  getUnchangingComparator,
   getViewModeSubject,
   useBatchedPublishingSubjects,
   ViewMode,
@@ -185,7 +186,6 @@ export const getTimesliderControlFactory = (
       const viewModeSubject =
         getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      // overwrite the `width` attribute because time slider should always have a width of large
       const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
 
       const dashboardDataLoading$ =
@@ -243,6 +243,7 @@ export const getTimesliderControlFactory = (
         },
         {
           ...defaultControl.comparators,
+          width: getUnchangingComparator(),
           ...timeRangePercentage.comparators,
           isAnchored: [isAnchored$, setIsAnchored],
         }

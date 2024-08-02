@@ -731,7 +731,7 @@ describe('<IndexDetailsPage />', () => {
           httpRequestsMockHelpers.setInferenceModels({
             data: [
               {
-                inference_id: customInferenceModel,
+                model_id: customInferenceModel,
                 task_type: 'sparse_embedding',
                 service: 'elser',
                 service_settings: {
