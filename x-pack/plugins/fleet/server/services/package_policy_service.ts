@@ -227,7 +227,7 @@ export interface PackagePolicyClient {
   fetchAllItemIds(
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemIdsOptions
-  ): AsyncIterable<string[]>;
+  ): Promise<AsyncIterable<string[]>>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policies
@@ -237,7 +237,7 @@ export interface PackagePolicyClient {
   fetchAllItems(
     soClient: SavedObjectsClientContract,
     options?: PackagePolicyClientFetchAllItemsOptions
-  ): AsyncIterable<PackagePolicy[]>;
+  ): Promise<AsyncIterable<PackagePolicy[]>>;
 }
 
 export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;

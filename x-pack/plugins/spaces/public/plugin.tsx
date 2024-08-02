@@ -22,6 +22,7 @@ import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
 import type { SpacesApi } from './types';
 import { getUiApi } from './ui_api';
+import { GetAllSpacesOptions } from '../common';
 
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
@@ -70,6 +71,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       }),
       getActiveSpace$: () => this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
+      getSpaces: (options?: GetAllSpacesOptions) => this.spacesManager.getSpaces(options),
       hasOnlyDefaultSpace,
     };
 

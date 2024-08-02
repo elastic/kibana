@@ -17,10 +17,10 @@ import type {
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 
 import { PUBLIC_API_ACCESS } from '../../../common/constants';
-
+import { appContextService } from '../app_context';
 import type { FleetRequestHandlerContext } from '../..';
-
 import { getRequestStore } from '../request_store';
+import { getSettings } from '../settings';
 
 import type { FleetVersionedRouteConfig } from './types';
 
@@ -35,8 +35,6 @@ import {
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
-import { getSettings } from '../settings';
-import { appContextService } from '..';
 
 function withDefaultPublicAccess<Method extends RouteMethod>(
   options: FleetVersionedRouteConfig<Method>
