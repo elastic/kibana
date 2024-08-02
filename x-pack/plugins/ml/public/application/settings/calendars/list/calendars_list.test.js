@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen, waitFor } from '@testing-library/react';
 import { cloneDeep } from 'lodash';
-
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { CalendarsList } from './calendars_list';
 
@@ -120,30 +118,25 @@ const props = {
 
 describe('CalendarsList', () => {
   test('Renders calendar list with calendars', async () => {
-    let wrapper;
+    render(<CalendarsList {...props} />);
 
-    await act(async () => {
-      wrapper = mountWithIntl(<CalendarsList {...props} />);
+    await waitFor(() => {
+      // Select element by data-test-subj and assert text content
+      const calendarsListHeaderElement = screen.getByTestId('mockCalendarsListHeader');
+      expect(calendarsListHeaderElement).toHaveTextContent('2');
+
+      // Select element by data-test-subj and assert data attributes
+      const calendarsListTableElement = screen.getByTestId('mockCalendarsListTable');
+      const calendarListData = JSON.parse(
+        calendarsListTableElement.getAttribute('data-calendar-list')
+      );
+
+      const expectedCalendarsData = cloneDeep(mockCalendars);
+      expectedCalendarsData[0].events_length = 1;
+      expectedCalendarsData[0].job_ids_string = 'farequote';
+      expectedCalendarsData[1].events_length = 1;
+      expectedCalendarsData[1].job_ids_string = 'test';
+      expect(calendarListData).toEqual(expectedCalendarsData);
     });
-
-    await act(async () => {
-      // Force a re-render to ensure the state updates are applied
-      wrapper.update();
-    });
-
-    // Select element by data-test-subj and assert text content
-    const calendarsListHeaderElement = wrapper.find('[data-test-subj="mockCalendarsListHeader"]');
-    expect(calendarsListHeaderElement.text()).toBe('2');
-
-    // Select element by data-test-subj and assert data attributes
-    const calendarsListTableElement = wrapper.find('[data-test-subj="mockCalendarsListTable"]');
-    const calendarListData = JSON.parse(calendarsListTableElement.prop('data-calendar-list'));
-
-    const expectedCalendarsData = cloneDeep(mockCalendars);
-    expectedCalendarsData[0].events_length = 1;
-    expectedCalendarsData[0].job_ids_string = 'farequote';
-    expectedCalendarsData[1].events_length = 1;
-    expectedCalendarsData[1].job_ids_string = 'test';
-    expect(calendarListData).toEqual(expectedCalendarsData);
   });
 });
