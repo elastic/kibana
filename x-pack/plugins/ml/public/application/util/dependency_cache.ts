@@ -9,7 +9,6 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ApplicationStart,
-  I18nStart,
   DocLinksStart,
   ChromeRecentlyAccessed,
 } from '@kbn/core/public';
@@ -23,7 +22,6 @@ export interface DependencyCache {
   recentlyAccessed: ChromeRecentlyAccessed | null;
   fieldFormats: FieldFormatsStart | null;
   application: ApplicationStart | null;
-  i18n: I18nStart | null;
   maps: MapsStartApi | null;
 }
 
@@ -34,7 +32,6 @@ const cache: DependencyCache = {
   recentlyAccessed: null,
   fieldFormats: null,
   application: null,
-  i18n: null,
   maps: null,
 };
 
@@ -45,7 +42,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.recentlyAccessed = deps.recentlyAccessed || null;
   cache.fieldFormats = deps.fieldFormats || null;
   cache.application = deps.application || null;
-  cache.i18n = deps.i18n || null;
 }
 
 export function getTimefilter() {
@@ -88,13 +84,6 @@ export function getApplication() {
     throw new Error("application hasn't been initialized");
   }
   return cache.application;
-}
-
-export function getI18n() {
-  if (cache.i18n === null) {
-    throw new Error("i18n hasn't been initialized");
-  }
-  return cache.i18n;
 }
 
 export function clearCache() {
