@@ -150,7 +150,7 @@ const VulnerabilitiesCountComponent = ({
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
         css={css`
-          margin-left: ${euiTheme.size.s}};
+          margin-left: ${euiTheme.size.s};
         `}
         color="hollow"
         data-test-subj={VULNERABILITIES_GROUPING_COUNTER}
