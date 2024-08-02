@@ -211,7 +211,7 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'integer',
               name: '123',
             },
             {
@@ -244,7 +244,7 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'integer',
               name: '1',
             },
             {
@@ -264,7 +264,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'decimal',
               name: '3.14',
             },
           ]);
@@ -288,12 +288,12 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '2',
                   },
                 ],
@@ -318,12 +318,12 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '2',
                   },
                 ],
@@ -333,7 +333,7 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'decimal',
                     name: '3.3',
                   },
                 ],
@@ -342,17 +342,17 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
                 name: '1',
               },
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
                 name: '2',
               },
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'decimal',
                 name: '3.3',
               },
             ]);
@@ -511,7 +511,7 @@ describe('structurally can walk all nodes', () => {
 
       describe('cast expression', () => {
         test('can visit cast expression', () => {
-          const query = 'FROM index | STATS a = 123::number';
+          const query = 'FROM index | STATS a = 123::integer';
           const { ast } = getAstAndSyntaxErrors(query);
 
           const casts: ESQLInlineCast[] = [];
@@ -523,10 +523,10 @@ describe('structurally can walk all nodes', () => {
           expect(casts).toMatchObject([
             {
               type: 'inlineCast',
-              castType: 'number',
+              castType: 'integer',
               value: {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
                 value: 123,
               },
             },
@@ -592,8 +592,7 @@ describe('Walker.params', () => {
   });
 
   test('can collect all params from grouping functions', () => {
-    const query =
-      'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?earliest,?latest)';
+    const query = 'ROW x=1, time=2024-07-10 | stats z = avg(x) by bucket(time, 20, ?start,?end)';
     const { ast } = getAstAndSyntaxErrors(query);
     const params = Walker.params(ast);
 
@@ -602,13 +601,13 @@ describe('Walker.params', () => {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'earliest',
+        value: 'start',
       },
       {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'latest',
+        value: 'end',
       },
     ]);
   });

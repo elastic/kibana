@@ -218,7 +218,6 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     }
 
     const fleetPluginStart = await plugins.fleet.start();
-    const securityPluginStart = await plugins.security.start();
 
     const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersion] = await Promise.all([
       saveObservabilityOnboardingFlow({
@@ -230,10 +229,9 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
         },
       }),
       createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
-      securityPluginStart.authc.apiKeys.create(
-        request,
-        createInstallApiKey(`onboarding_install_${name}`)
-      ),
+      (
+        await context.resolve(['core'])
+      ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
       getAgentVersion(fleetPluginStart, kibanaVersion),
     ]);
 

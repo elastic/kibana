@@ -12,12 +12,14 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { EventTracker } from '../analytics';
 import type { SpacesManager } from '../spaces_manager';
 
 export function initSpacesNavControl(
   spacesManager: SpacesManager,
   core: CoreStart,
-  solutionNavExperiment: Promise<boolean>
+  solutionNavExperiment: Promise<boolean>,
+  eventTracker: EventTracker
 ) {
   core.chrome.navControls.registerLeft({
     order: 1000,
@@ -43,6 +45,7 @@ export function initSpacesNavControl(
               navigateToApp={core.application.navigateToApp}
               navigateToUrl={core.application.navigateToUrl}
               solutionNavExperiment={solutionNavExperiment}
+              eventTracker={eventTracker}
             />
           </Suspense>
         </KibanaRenderContextProvider>,

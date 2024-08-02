@@ -35,7 +35,7 @@ function addToVariables(
   if (isColumnItem(oldArg) && isColumnItem(newArg)) {
     const newVariable: ESQLVariable = {
       name: newArg.name,
-      type: 'number' /* fallback to number */,
+      type: 'double' /* fallback to number */,
       location: newArg.location,
     };
     // Now workout the exact type
@@ -107,7 +107,7 @@ function addVariableFromAssignment(
     const rightHandSideArgType = getAssignRightHandSideType(assignOperation.args[1], fields);
     addToVariableOccurrencies(variables, {
       name: assignOperation.args[0].name,
-      type: rightHandSideArgType || 'number' /* fallback to number */,
+      type: rightHandSideArgType || 'double' /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }
@@ -125,7 +125,7 @@ function addVariableFromExpression(
       queryString,
       expressionOperation.location
     );
-    const expressionType = 'number';
+    const expressionType = 'double';
     addToVariableOccurrencies(variables, {
       name: forwardThinkingVariableName,
       type: expressionType,

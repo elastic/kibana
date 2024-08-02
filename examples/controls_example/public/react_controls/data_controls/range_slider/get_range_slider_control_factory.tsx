@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import deepEqual from 'react-fast-compare';
-
+import React, { useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory } from '../types';
+import { DataControlFactory, DataControlServices } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
@@ -25,11 +22,10 @@ import {
   RangesliderControlState,
   RangeValue,
   RANGE_SLIDER_CONTROL_TYPE,
-  Services,
 } from './types';
 
 export const getRangesliderControlFactory = (
-  services: Services
+  services: DataControlServices
 ): DataControlFactory<RangesliderControlState, RangesliderControlApi> => {
   return {
     type: RANGE_SLIDER_CONTROL_TYPE,
@@ -60,7 +56,7 @@ export const getRangesliderControlFactory = (
         </>
       );
     },
-    buildControl: (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
@@ -71,13 +67,12 @@ export const getRangesliderControlFactory = (
         value$.next(nextValue);
       }
 
-      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
+      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
         {
           step: step$,
-          value: value$,
         },
         controlGroupApi,
         services
@@ -127,10 +122,7 @@ export const getRangesliderControlFactory = (
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(
-          distinctUntilChanged(deepEqual),
-          skip(1) // skip first filter output because it will have been applied in initialize
-        )
+        .pipe(skip(1))
         .subscribe(() => {
           step$.next(1);
           value$.next(undefined);
@@ -208,14 +200,17 @@ export const getRangesliderControlFactory = (
         selectionHasNoResults$.next(hasNoResults);
       });
 
+      if (initialState.value !== undefined) {
+        await dataControl.untilFiltersInitialized();
+      }
+
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, dataViews, fieldName, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
-              dataControl.api.dataViews,
-              dataControl.stateManager.fieldName,
+              dataControl.api.fieldFormatter,
               max$,
               min$,
               selectionHasNoResults$,
@@ -232,17 +227,6 @@ export const getRangesliderControlFactory = (
               outputFilterSubscription.unsubscribe();
             };
           }, []);
-
-          const fieldFormatter = useMemo(() => {
-            const dataView = dataViews?.[0];
-            if (!dataView) {
-              return undefined;
-            }
-            const fieldSpec = dataView.getFieldByName(fieldName);
-            return fieldSpec
-              ? dataView.getFormatterForField(fieldSpec).getConverterFor('text')
-              : undefined;
-          }, [dataViews, fieldName]);
 
           return (
             <RangeSliderControl

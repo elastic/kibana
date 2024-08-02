@@ -20,7 +20,6 @@ const {
   applyDeltaToColumnWidth,
   changeViewMode,
   removeColumn,
-  toggleDetailPanel,
   updateColumnOrder,
   updateColumns,
   updateColumnWidth,
@@ -44,7 +43,6 @@ const tableActionTypes = new Set([
   updateShowBuildingBlockAlertsFilter.type,
   updateTotalCount.type,
   updateIsLoading.type,
-  toggleDetailPanel.type,
 ]);
 
 export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{}, State> =

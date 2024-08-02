@@ -148,7 +148,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('detection-rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/187719
+  describe.skip('detection-rules', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
@@ -180,7 +181,9 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('sender configuration', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/178918
+  // FLAKY: https://github.com/elastic/kibana/issues/187720
+  describe.skip('sender configuration', () => {
     it('should use legacy sender by default', async () => {
       // launch a random task and verify it uses the new configuration
       const task = await mockAndScheduleDetectionRulesTask();
@@ -255,7 +258,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('endpoint-diagnostics', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189192
+  describe.skip('endpoint-diagnostics', () => {
     it('should execute when scheduled', async () => {
       await mockAndScheduleEndpointDiagnosticsTask();
 
@@ -294,7 +298,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('endpoint-meta-telemetry', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/189330
+  describe.skip('endpoint-meta-telemetry', () => {
     beforeEach(async () => {
       await initEndpointIndices(esClient);
     });
@@ -683,7 +688,8 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('telemetry-prebuilt-rule-alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/188234
+  describe.skip('telemetry-prebuilt-rule-alerts', () => {
     it('should execute when scheduled', async () => {
       await mockAndSchedulePrebuiltRulesTask();
 

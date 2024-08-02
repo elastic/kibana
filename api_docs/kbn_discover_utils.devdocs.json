@@ -1146,7 +1146,7 @@
             "section": "def-common.LogDocumentOverview",
             "text": "LogDocumentOverview"
           },
-          ") => { field: \"message\" | \"error.message\" | \"event.original\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
+          ") => { field: \"message\" | \"event.original\" | \"error.message\"; value: string | undefined; } | { field: undefined; value?: undefined; }"
         ],
         "path": "packages/kbn-discover-utils/src/utils/get_message_field_with_fallbacks.ts",
         "deprecated": false,
@@ -1274,9 +1274,9 @@
           "({\n  uiSettings,\n  isEsqlMode,\n}: { uiSettings: ",
           {
             "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-common.IUiSettingsClient",
+            "section": "def-public.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
           "; isEsqlMode: boolean; }) => boolean"
@@ -1306,9 +1306,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-common.IUiSettingsClient",
+                    "section": "def-public.IUiSettingsClient",
                     "text": "IUiSettingsClient"
                   }
                 ],

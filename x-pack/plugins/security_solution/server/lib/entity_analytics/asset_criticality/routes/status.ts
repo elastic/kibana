@@ -7,7 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
+import type { GetAssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics';
 import {
   ASSET_CRITICALITY_INTERNAL_STATUS_URL,
   APP_ID,
@@ -55,7 +55,7 @@ export const assetCriticalityInternalStatusRoute = (
             },
           });
 
-          const body: AssetCriticalityStatusResponse = {
+          const body: GetAssetCriticalityStatusResponse = {
             asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
           };
           return response.ok({

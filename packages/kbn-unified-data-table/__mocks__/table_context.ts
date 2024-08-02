@@ -15,6 +15,7 @@ import { DataTableContext } from '../src/table_context';
 import { convertValueToString } from '../src/utils/convert_value_to_string';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { UseSelectedDocsState } from '../src/hooks/use_selected_docs';
 
 const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableContext => {
   const usedRows = rows.map((row) => {
@@ -28,8 +29,9 @@ const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableCo
     onFilter: jest.fn(),
     dataView,
     isDarkMode: false,
-    selectedDocs: [],
-    setSelectedDocs: jest.fn(),
+    selectedDocsState: buildSelectedDocsState([]),
+    pageIndex: 0,
+    pageSize: 10,
     valueToStringConverter: (rowIndex, columnId, options) =>
       convertValueToString({
         rowIndex,
@@ -45,3 +47,21 @@ const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableCo
 export const dataTableContextMock = buildTableContext(dataViewMock, esHitsMock);
 
 export const dataTableContextComplexMock = buildTableContext(dataViewComplexMock, esHitsComplex);
+
+export function buildSelectedDocsState(selectedDocIds: string[]): UseSelectedDocsState {
+  const selectedDocsSet = new Set(selectedDocIds);
+
+  return {
+    isDocSelected: (docId: string) => selectedDocsSet.has(docId),
+    getCountOfSelectedDocs: (docIds: string[]) =>
+      docIds.reduce((acc, docId) => (selectedDocsSet.has(docId) ? acc + 1 : acc), 0),
+    hasSelectedDocs: selectedDocsSet.size > 0,
+    selectedDocIds,
+    toggleDocSelection: jest.fn(),
+    selectAllDocs: jest.fn(),
+    selectMoreDocs: jest.fn(),
+    deselectSomeDocs: jest.fn(),
+    replaceSelectedDocs: jest.fn(),
+    clearAllSelectedDocs: jest.fn(),
+  };
+}

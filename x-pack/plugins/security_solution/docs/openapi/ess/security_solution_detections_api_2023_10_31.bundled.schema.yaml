@@ -91,6 +91,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+          description: Not found
         '500':
           content:
             application/json:
@@ -131,6 +132,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
+          description: Not found
         '500':
           content:
             application/json:
@@ -4102,7 +4104,6 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
       required:
-        - group
         - id
         - params
     NormalizedRuleError:
@@ -4900,7 +4901,6 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
       required:
         - action_type_id
-        - group
         - id
         - params
     RuleActionAlertsFilter:
@@ -6926,4 +6926,3 @@ components:
       type: http
 security:
   - BasicAuth: []
-tags: !<tag:yaml.org,2002:js/undefined> ''
