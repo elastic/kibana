@@ -2707,7 +2707,7 @@ const logDefinition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && arg.value < 0) {
+      if (isLiteralItem(arg) && typeof arg.value === 'number' && arg.value < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2790,7 +2790,7 @@ const log10Definition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && arg.value < 0) {
+      if (isLiteralItem(arg) && typeof arg.value === 'number' && arg.value < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
