@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { METRICSET_NAME, METRICSET_INTERVAL } from '@kbn/apm-types/es_fields';
+import { RollupInterval } from '../../../../common/rollup';
 
 export function getDocumentTypeFilterForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean
@@ -17,9 +18,11 @@ export function getDocumentTypeFilterForServiceDestinationStatistics(
           bool: {
             filter: termQuery(METRICSET_NAME, 'service_destination'),
             must_not: {
-              terms: {
-                [METRICSET_INTERVAL]: ['10m', '60m'],
-              },
+              ...termsQuery(
+                METRICSET_INTERVAL,
+                RollupInterval.TenMinutes,
+                RollupInterval.SixtyMinutes
+              ),
             },
           },
         },

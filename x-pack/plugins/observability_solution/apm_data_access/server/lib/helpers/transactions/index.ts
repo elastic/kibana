@@ -12,6 +12,8 @@ import {
   METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
 } from '@kbn/apm-types/es_fields';
+import { existsQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { RollupInterval } from '../../../../common/rollup';
 
 // The function returns Document type filter for 1m Transaction Metrics
 export function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions: boolean) {
@@ -19,10 +21,14 @@ export function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransact
     ? [
         {
           bool: {
-            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            filter: [...existsQuery(TRANSACTION_DURATION_HISTOGRAM)],
             must_not: [
-              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
-              { term: { [METRICSET_NAME]: 'service_transaction' } },
+              ...termsQuery(
+                METRICSET_INTERVAL,
+                RollupInterval.TenMinutes,
+                RollupInterval.SixtyMinutes
+              ),
+              ...termQuery(METRICSET_NAME, 'service_transaction'),
             ],
           },
         },
@@ -33,7 +39,7 @@ export function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransact
 export function isDurationSummaryNotSupportedFilter(): QueryDslQueryContainer {
   return {
     bool: {
-      must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+      must_not: [...existsQuery(TRANSACTION_DURATION_SUMMARY)],
     },
   };
 }
