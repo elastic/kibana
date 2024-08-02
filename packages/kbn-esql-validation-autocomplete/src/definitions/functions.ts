@@ -4511,6 +4511,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -4526,6 +4527,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'text',
@@ -4541,6 +4543,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'version',
@@ -4549,6 +4552,7 @@ const mvSortDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
+
   examples: ['ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")'],
 };
 

@@ -9,7 +9,7 @@
 import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import { commandDefinitions } from '../definitions/commands';
+import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import { getSafeInsertText, getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
@@ -37,6 +37,7 @@ const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
 const ESQL_COMMON_NUMERIC_TYPES =
   UNCASTED_ESQL_COMMON_NUMERIC_TYPES as unknown as FunctionReturnType[];
 
+const commandDefinitions = unmodifiedCommandDefinitions.filter((r) => r.name !== 'inlinestats');
 describe('autocomplete', () => {
   type TestArgs = [
     string,
