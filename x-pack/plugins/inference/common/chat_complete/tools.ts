@@ -13,8 +13,6 @@ interface CustomToolChoice<TName extends string = string> {
   function: TName;
 }
 
-type ToolChoice<TName extends string = string> = ToolChoiceType | CustomToolChoice<TName>;
-
 type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'] extends {
   function: infer TToolName;
 }
@@ -36,6 +34,8 @@ type ToolResponseOf<TName extends string, TToolDefinition extends ToolDefinition
   TName,
   TToolDefinition extends { schema: ToolSchema } ? FromToolSchema<TToolDefinition['schema']> : {}
 >;
+
+export type ToolChoice<TName extends string = string> = ToolChoiceType | CustomToolChoice<TName>;
 
 export interface ToolDefinition {
   description: string;

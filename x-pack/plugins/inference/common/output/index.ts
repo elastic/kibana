@@ -34,6 +34,14 @@ export type OutputEvent<TId extends string = string, TOutput extends Output = Ou
   | OutputUpdateEvent<TId>
   | OutputCompleteEvent<TId, TOutput>;
 
+/**
+ * Generate a response with the LLM for a prompt, optionally based on a schema.
+ *
+ * @param {string} id The id of the operation
+ * @param {string} options.connectorId The ID of the connector that is to be used.
+ * @param {string} options.input The prompt for the LLM
+ * @param {ToolSchema} [options.schema] The schema the response from the LLM should adhere to.
+ */
 export type OutputAPI = <
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined

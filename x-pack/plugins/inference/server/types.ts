@@ -29,11 +29,34 @@ export interface InferenceStartDependencies {
 export interface InferenceServerSetup {}
 
 export interface InferenceClient {
+  /**
+   * `chatComplete` requests the LLM to generate a response to
+   * a prompt or conversation, which might be plain text
+   * or a tool call, or a combination of both.
+   */
   chatComplete: ChatCompleteAPI;
+  /**
+   * `output` asks the LLM to generate a structured (JSON)
+   * response based on a schema and a prompt or conversation.
+   */
   output: OutputAPI;
+  /**
+   * `getConnectorById` returns an inference connector by id.
+   * Non-inference connectors will throw an error.
+   */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
 }
 
+interface InferenceClientCreateOptions {
+  request: KibanaRequest;
+}
+
 export interface InferenceServerStart {
-  getClient: (options: { request: KibanaRequest }) => InferenceClient;
+  /**
+   * Creates an inference client, scoped to a request.
+   *
+   * @param options {@link InferenceClientCreateOptions}
+   * @returns {@link InferenceClient}
+   */
+  getClient: (options: InferenceClientCreateOptions) => InferenceClient;
 }
