@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
+import { act } from '@testing-library/react';
+
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+
+import { RuleActionPanel } from './rule_action_panel';
+
 jest.mock('../../../services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
@@ -19,22 +28,17 @@ const mockTestFilter = {
     jobs: ['farequote'],
   },
 };
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    filters: {
-      filters: () => {
-        return Promise.resolve(mockTestFilter);
+const kibanaReactContextMock = createKibanaReactContext({
+  mlServices: {
+    mlApiServices: {
+      filters: {
+        filters: () => {
+          return Promise.resolve(mockTestFilter);
+        },
       },
     },
   },
-}));
-
-import React from 'react';
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
-
-import { RuleActionPanel } from './rule_action_panel';
+});
 
 describe('RuleActionPanel', () => {
   const job = {
@@ -117,9 +121,15 @@ describe('RuleActionPanel', () => {
       ruleIndex: 0,
     };
 
-    const component = shallowWithIntl(<RuleActionPanel {...props} />);
+    const component = mountWithIntl(
+      <kibanaReactContextMock.Provider>
+        <RuleActionPanel {...props} />
+      </kibanaReactContextMock.Provider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(component.text()).toBe(
+      'Ruleskip result when actual is less than 1ActionsUpdate rule condition from 1 toUpdateEdit ruleDelete rule'
+    );
   });
 
   test('renders panel for rule with scope, value in filter list', () => {
@@ -128,19 +138,40 @@ describe('RuleActionPanel', () => {
       ruleIndex: 1,
     };
 
-    const component = shallowWithIntl(<RuleActionPanel {...props} />);
+    const component = mountWithIntl(
+      <kibanaReactContextMock.Provider>
+        <RuleActionPanel {...props} />
+      </kibanaReactContextMock.Provider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(component.text()).toBe(
+      'Ruleskip model update when airline is not in eu-airlinesActionsEdit ruleDelete rule'
+    );
   });
 
-  test('renders panel for rule with a condition and scope, value not in filter list', () => {
+  test('renders panel for rule with a condition and scope, value not in filter list', async () => {
     const props = {
       ...requiredProps,
       ruleIndex: 1,
     };
 
-    const wrapper = shallowWithIntl(<RuleActionPanel {...props} />);
-    wrapper.setState({ showAddToFilterListLink: true });
-    expect(wrapper).toMatchSnapshot();
+    let wrapper;
+
+    await act(async () => {
+      wrapper = mountWithIntl(
+        <kibanaReactContextMock.Provider>
+          <RuleActionPanel {...props} />
+        </kibanaReactContextMock.Provider>
+      );
+    });
+
+    await act(async () => {
+      // Force a re-render to ensure the state updates are applied
+      wrapper.update();
+    });
+
+    expect(wrapper.text()).toBe(
+      'Ruleskip model update when airline is not in eu-airlinesActionsAdd AAL to eu-airlinesEdit ruleDelete rule'
+    );
   });
 });
