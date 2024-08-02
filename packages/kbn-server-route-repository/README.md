@@ -15,7 +15,7 @@ There are three main functions that make up this package:
 
 Once the routes have been created and put into a plain object (the "repository"), this repository can then be passed to `registerRoutes` which also accepts the dependencies to be injected into each route handler. `registerRoutes` handles the creation of the Core HTTP router, as well as the final registration of the routes with versioning and request validation.
 
-By exporting the type of the repository from the server to the browser (make sure you use a `type` import), we can pass that as a generic argument to `createRepositoryClient` and get back a thin but strongly typed wrapper around the Core HTTP service, with auto completion for the available routes and type checking for the request parameters required by each specific route. You can also add a generic type for which additional options the client should pass with each request.
+By exporting the type of the repository from the server to the browser (make sure you use a `type` import), we can pass that as a generic argument to `createRepositoryClient` and get back a thin but strongly typed wrapper around the Core HTTP service, with auto completion for the available routes, type checking for the request parameters required by each specific route and response type inference. You can also add a generic type for which additional options the client should pass with each request.
 
 ## Basic example
 
@@ -35,7 +35,7 @@ export const createMyPluginServerRoute = createServerRouteFactory<
 >();
 ```
 
-The two generic arguments are optional, this example shows a "default" setup which exposes what Core HTTP would normally provide plus a logger.
+The two generic arguments are optional, this example shows a "default" setup which exposes what Core HTTP would normally provide (`request`, `context`, `response`) plus a logger.
 
 Next, let's create a minimal route.
 
@@ -92,20 +92,21 @@ import { DefaultClientOptions } from '@kbn/server-route-repository-utils';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import type { MyPluginRouteRepository } from '../server/plugin';
 
-export type MyPluginRepositoryClient = ReturnType<typeof createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>>;
+export type MyPluginRepositoryClient = 
+  ReturnType<typeof createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>>;
 
 class MyPlugin implements Plugin {
     public setup(core: CoreSetup) {
-       const myPluginRepositoryClient = createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>(core);
+        const myPluginRepositoryClient = createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>(core);
 
         myPluginRepositoryClient('GET /internal/my_plugin/route').then(console.log);
     }
 }
 ```
 
-This example prints 'Hello, my route!' and the type of response is **inferred** to this.
+This example prints 'Hello, my route!' and the type of the response is **inferred** to this.
 
-We pass in the type of the repository we _type_ imported from the server. The second generic parameter for `createRepositoryClient` is optional.  
+We pass in the type of the repository that we (_type_) imported from the server. The second generic parameter for `createRepositoryClient` is optional.  
 We also export the type of the client itself so we can use it to type the client as we pass it around.  
 
 When using the client, the first argument is the route to call and this is auto completed to only the available routes.
@@ -222,7 +223,8 @@ export interface MyPluginRouteDependencies {
     myDependency: MyDependency;
 }
 
-export const createMyPluginServerRoute = createServerRouteFactory<DefaultRouteHandlerResources & MyPluginRouteDependencies>();
+export const createMyPluginServerRoute = 
+  createServerRouteFactory<DefaultRouteHandlerResources & MyPluginRouteDependencies>();
 ```
 
 If you don't want your route to have access to the default resources, you could pass in only `MyPluginRouteDependencies`.
@@ -313,7 +315,8 @@ interface MyPluginClientOptions {
     makeSafe: boolean;
 }
 
-export type MyPluginRepositoryClient = ReturnType<typeof createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions & MyPluginClientOptions>>;
+export type MyPluginRepositoryClient =
+  ReturnType<typeof createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions & MyPluginClientOptions>>;
 
 class MyPlugin implements Plugin {
     public setup(core: CoreSetup) {
