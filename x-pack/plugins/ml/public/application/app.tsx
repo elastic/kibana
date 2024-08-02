@@ -164,7 +164,6 @@ export const renderApp = (
     timefilter: deps.data.query.timefilter,
     config: coreStart.uiSettings!,
     docLinks: coreStart.docLinks!,
-    recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     maps: deps.maps,
   });
 

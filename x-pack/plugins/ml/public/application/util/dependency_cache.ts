@@ -6,14 +6,13 @@
  */
 
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, DocLinksStart, ChromeRecentlyAccessed } from '@kbn/core/public';
+import type { IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
   docLinks: DocLinksStart | null;
-  recentlyAccessed: ChromeRecentlyAccessed | null;
   maps: MapsStartApi | null;
 }
 
@@ -21,7 +20,6 @@ const cache: DependencyCache = {
   timefilter: null,
   config: null,
   docLinks: null,
-  recentlyAccessed: null,
   maps: null,
 };
 
@@ -29,7 +27,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.timefilter = deps.timefilter || null;
   cache.config = deps.config || null;
   cache.docLinks = deps.docLinks || null;
-  cache.recentlyAccessed = deps.recentlyAccessed || null;
 }
 
 export function getTimefilter() {
@@ -51,13 +48,6 @@ export function getUiSettings() {
     throw new Error("uiSettings hasn't been initialized");
   }
   return cache.config;
-}
-
-export function getRecentlyAccessed() {
-  if (cache.recentlyAccessed === null) {
-    throw new Error("recentlyAccessed hasn't been initialized");
-  }
-  return cache.recentlyAccessed;
 }
 
 export function clearCache() {
