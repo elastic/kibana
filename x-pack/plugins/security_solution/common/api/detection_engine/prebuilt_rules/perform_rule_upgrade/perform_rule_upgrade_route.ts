@@ -178,7 +178,3 @@ export const PerformRuleUpgradeRequestBody = z.union([
   UpgradeAllRulesRequest,
   UpgradeSpecificRulesRequest,
 ]);
-export type PerformRuleUpgradeRequestBodyInput = z.input<typeof PerformRuleUpgradeRequestBody>;
-
-export type PerformRuleUpgradeResponse = z.infer<typeof PerformRuleUpgradeResponse>;
-export const PerformRuleUpgradeResponse = PerformRuleUpgradeResponseBody;

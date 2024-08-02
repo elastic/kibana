@@ -149,6 +149,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
                 break;
               case PickVersionValuesEnum.TARGET:
                 targetRules.push(target);
+                break;
               case PickVersionValuesEnum.MERGED:
                 // TODO: Implement functionality to handle MERGED
                 targetRules.push(target);
