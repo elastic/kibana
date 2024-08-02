@@ -37,7 +37,9 @@ type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/servi
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_DIRECTION = 'desc';
 
-const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
+type MainStatisticsApiResponseWithRequestId = MainStatisticsApiResponse & { requestId: string };
+
+const INITIAL_DATA: MainStatisticsApiResponseWithRequestId = {
   services: [],
   requestId: '',
 };
@@ -84,10 +86,12 @@ function useServicesEntitiesMainStatisticsFetcher() {
 }
 
 function useServicesEntitiesDetailedStatisticsFetcher({
-  mainStatisticsFetch,
+  mainStatisticsData,
+  mainStatisticsStatus,
   services,
 }: {
-  mainStatisticsFetch: ReturnType<typeof useServicesEntitiesMainStatisticsFetcher>;
+  mainStatisticsData: MainStatisticsApiResponseWithRequestId;
+  mainStatisticsStatus: FETCH_STATUS;
   services: ServiceListItem[];
 }) {
   const {
@@ -103,8 +107,6 @@ function useServicesEntitiesDetailedStatisticsFetcher({
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
   });
-
-  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
   const timeseriesDataFetch = useProgressiveFetcher(
     (callApmApi) => {
@@ -148,8 +150,7 @@ function useServicesEntitiesDetailedStatisticsFetcher({
 export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
-  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+  const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
   const { tourState, updateTourState } = useEntityManagerEnablementContext();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
@@ -161,7 +162,8 @@ export function MultiSignalInventory() {
   });
 
   const { timeseriesDataFetch } = useServicesEntitiesDetailedStatisticsFetcher({
-    mainStatisticsFetch,
+    mainStatisticsData,
+    mainStatisticsStatus,
     services: mainStatisticsData.services,
   });
 
