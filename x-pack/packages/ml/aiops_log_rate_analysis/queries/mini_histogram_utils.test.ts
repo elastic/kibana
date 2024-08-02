@@ -46,7 +46,7 @@ describe('getMiniHistogramDataFromAggResponse', () => {
 
     // aggregation response mock
     const aggResponseMock: Record<string, MiniHistogramAgg> = {
-      histogram_0: {
+      mini_histogram_0: {
         doc_count: 0,
         mini_histogram: {
           buckets: Object.entries(getDateHistogramBuckets()).map(([key, value]) => ({
