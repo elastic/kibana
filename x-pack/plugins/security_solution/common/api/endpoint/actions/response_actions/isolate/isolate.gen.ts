@@ -16,7 +16,16 @@
 
 import type { z } from 'zod';
 
-import { NoParametersRequestSchema } from '../model/schema/common.gen';
+import { SuccessResponse, NoParametersRequestSchema } from '../../../model/schema/common.gen';
 
 export type IsolateRouteRequestBody = z.infer<typeof IsolateRouteRequestBody>;
 export const IsolateRouteRequestBody = NoParametersRequestSchema;
+
+export type EndpointIsolateActionRequestBody = z.infer<typeof EndpointIsolateActionRequestBody>;
+export const EndpointIsolateActionRequestBody = IsolateRouteRequestBody;
+export type EndpointIsolateActionRequestBodyInput = z.input<
+  typeof EndpointIsolateActionRequestBody
+>;
+
+export type EndpointIsolateActionResponse = z.infer<typeof EndpointIsolateActionResponse>;
+export const EndpointIsolateActionResponse = SuccessResponse;

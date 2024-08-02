@@ -16,7 +16,7 @@
 
 import type { z } from 'zod';
 
-import { BaseActionSchema, SuccessResponse } from '../model/schema/common.gen';
+import { BaseActionSchema, SuccessResponse } from '../../../model/schema/common.gen';
 
 export type EndpointIsolateRedirectRequestBody = z.infer<typeof EndpointIsolateRedirectRequestBody>;
 export const EndpointIsolateRedirectRequestBody = BaseActionSchema;

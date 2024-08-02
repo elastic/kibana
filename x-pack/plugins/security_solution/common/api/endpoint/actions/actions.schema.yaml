@@ -41,28 +41,6 @@ paths:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
-  /api/endpoint/action/isolate:
-    post:
-      summary: Isolate host Action
-      operationId: EndpointIsolateHostAction
-      x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
-
   /api/endpoint/action/unisolate:
     post:
       summary: Unisolate host Action
