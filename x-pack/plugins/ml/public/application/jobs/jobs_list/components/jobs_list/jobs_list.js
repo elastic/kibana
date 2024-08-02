@@ -338,6 +338,7 @@ export class JobsListUI extends Component {
           defaultMessage: 'Actions',
         }),
         actions: actionsMenuContent(
+          this.props.kibana.services.application,
           this.mlJobService,
           this.props.showEditJobFlyout,
           this.props.showDatafeedChartFlyout,

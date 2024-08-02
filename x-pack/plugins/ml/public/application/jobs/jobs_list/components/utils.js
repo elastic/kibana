@@ -12,7 +12,7 @@ import {
   getToastNotificationService,
   toastNotificationServiceProvider,
 } from '../../../services/toast_notification_service';
-import { getApplication, getToastNotifications } from '../../../util/dependency_cache';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
@@ -214,7 +214,7 @@ function showResults(resp, action) {
   }
 }
 
-export async function cloneJob(mlJobService, jobId) {
+export async function cloneJob(application, mlJobService, jobId) {
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
       loadJobForCloning(jobId),
@@ -275,7 +275,7 @@ export async function cloneJob(mlJobService, jobId) {
       );
     }
 
-    getApplication().navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
+    application.navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {
     getToastNotificationService().displayErrorToast(
       error,
