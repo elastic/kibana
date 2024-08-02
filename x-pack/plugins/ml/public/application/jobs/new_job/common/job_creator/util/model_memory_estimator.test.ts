@@ -14,18 +14,6 @@ import type { MlApiServices } from '../../../../../services/ml_api_service';
 import type { JobCreator } from '../job_creator';
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('../../../../../services/ml_api_service', () => {
-  return {
-    ml: {
-      calculateModelMemoryLimit$: jest.fn(() => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { of } = require('rxjs');
-        return of({ modelMemoryLimit: '15MB' });
-      }),
-    },
-  };
-});
-
 describe('delay', () => {
   let clock: SinonFakeTimers;
   let modelMemoryEstimator: ReturnType<typeof modelMemoryEstimatorProvider>;
@@ -44,7 +32,11 @@ describe('delay', () => {
       wizardInitialized$,
     } as unknown as JobCreator;
     mockMlApiServices = {
-      calculateModelMemoryLimit$: jest.fn(),
+      calculateModelMemoryLimit$: jest.fn(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { of } = require('rxjs');
+        return of({ modelMemoryLimit: '15MB' });
+      }),
     } as unknown as MlApiServices;
 
     modelMemoryEstimator = modelMemoryEstimatorProvider(
