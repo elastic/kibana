@@ -100,7 +100,11 @@ export const getRangesliderControlFactory = (
         },
         {
           ...dataControl.comparators,
-          step: [step$, (nextStep: number | undefined) => step$.next(nextStep)],
+          step: [
+            step$,
+            (nextStep: number | undefined) => step$.next(nextStep),
+            (a, b) => (a ?? 1) === (b ?? 1),
+          ],
           value: [value$, setValue],
         }
       );
@@ -237,7 +241,7 @@ export const getRangesliderControlFactory = (
               max={max}
               min={min}
               onChange={setValue}
-              step={step}
+              step={step ?? 1}
               value={value}
               uuid={uuid}
             />
