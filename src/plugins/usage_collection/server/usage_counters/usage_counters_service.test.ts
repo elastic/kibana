@@ -76,9 +76,7 @@ describe('UsageCountersService', () => {
     expect(registerUsageCountersRollupsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         logger: expect.any(Object),
-        usageCounters: {
-          getUsageCounterByDomainId: expect.any(Function),
-        },
+        getRegisteredUsageCounters: expect.any(Function),
         internalRepository: expect.any(Object),
       })
     );
