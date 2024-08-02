@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { isSolutionNavEnabled } from './is_solution_nav_enabled';
+export { CustomHeader } from './custom_header';
+export { Header } from './header';
