@@ -7,7 +7,6 @@
 
 import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, DocLinksStart, ChromeRecentlyAccessed } from '@kbn/core/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 
 export interface DependencyCache {
@@ -15,7 +14,6 @@ export interface DependencyCache {
   config: IUiSettingsClient | null;
   docLinks: DocLinksStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
-  fieldFormats: FieldFormatsStart | null;
   maps: MapsStartApi | null;
 }
 
@@ -24,7 +22,6 @@ const cache: DependencyCache = {
   config: null,
   docLinks: null,
   recentlyAccessed: null,
-  fieldFormats: null,
   maps: null,
 };
 
@@ -33,7 +30,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.config = deps.config || null;
   cache.docLinks = deps.docLinks || null;
   cache.recentlyAccessed = deps.recentlyAccessed || null;
-  cache.fieldFormats = deps.fieldFormats || null;
 }
 
 export function getTimefilter() {
@@ -62,13 +58,6 @@ export function getRecentlyAccessed() {
     throw new Error("recentlyAccessed hasn't been initialized");
   }
   return cache.recentlyAccessed;
-}
-
-export function getFieldFormats() {
-  if (cache.fieldFormats === null) {
-    throw new Error("fieldFormats hasn't been initialized");
-  }
-  return cache.fieldFormats;
 }
 
 export function clearCache() {

@@ -162,7 +162,6 @@ export const renderApp = (
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
-    fieldFormats: deps.fieldFormats,
     config: coreStart.uiSettings!,
     docLinks: coreStart.docLinks!,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
