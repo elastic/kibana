@@ -109,7 +109,7 @@ export function initAPIAuthorization(
         }
       }
 
-      return { type: OnPostAuthResultType.next, authzResult: kibanaPrivileges };
+      return { type: OnPostAuthResultType.authzResult, authzResult: kibanaPrivileges };
     }
 
     const tags = request.route.options.tags;

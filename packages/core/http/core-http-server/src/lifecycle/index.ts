@@ -24,6 +24,7 @@ export type {
   OnPostAuthNextResult,
   OnPostAuthToolkit,
   OnPostAuthResult,
+  OnPostAuthAuthzResult,
 } from './on_post_auth';
 export { OnPostAuthResultType } from './on_post_auth';
 

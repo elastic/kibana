@@ -26,6 +26,7 @@ export type {
   AuthToolkit,
   OnPostAuthHandler,
   OnPostAuthNextResult,
+  OnPostAuthAuthzResult,
   OnPostAuthToolkit,
   OnPostAuthResult,
   OnPreAuthHandler,

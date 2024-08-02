@@ -10,6 +10,7 @@ import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hap
 import type { Logger } from '@kbn/logging';
 import type {
   OnPostAuthNextResult,
+  OnPostAuthAuthzResult,
   OnPostAuthToolkit,
   OnPostAuthResult,
   OnPostAuthHandler,
@@ -29,6 +30,9 @@ const postAuthResult = {
   },
   isNext(result: OnPostAuthResult): result is OnPostAuthNextResult {
     return result && result.type === OnPostAuthResultType.next;
+  },
+  isAuthzResult(result: OnPostAuthResult): result is OnPostAuthAuthzResult {
+    return result && result.type === OnPostAuthResultType.authzResult;
   },
 };
 
@@ -54,14 +58,16 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
       }
 
       if (postAuthResult.isNext(result)) {
-        if (result.authzResult) {
-          Object.defineProperty(request.app, 'authzResult', {
-            value: deepFreeze(result.authzResult),
-            configurable: false,
-            writable: false,
-            enumerable: false,
-          });
-        }
+        return responseToolkit.continue;
+      }
+
+      if (postAuthResult.isAuthzResult(result)) {
+        Object.defineProperty(request.app, 'authzResult', {
+          value: deepFreeze(result.authzResult),
+          configurable: false,
+          writable: false,
+          enumerable: false,
+        });
 
         return responseToolkit.continue;
       }

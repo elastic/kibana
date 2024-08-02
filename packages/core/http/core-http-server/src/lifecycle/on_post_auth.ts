@@ -13,6 +13,7 @@ import type { IKibanaResponse, KibanaRequest, LifecycleResponseFactory } from '.
  */
 export enum OnPostAuthResultType {
   next = 'next',
+  authzResult = 'authzResult',
 }
 
 /**
@@ -20,13 +21,17 @@ export enum OnPostAuthResultType {
  */
 export interface OnPostAuthNextResult {
   type: OnPostAuthResultType.next;
-  authzResult?: Record<string, boolean>;
+}
+
+export interface OnPostAuthAuthzResult {
+  type: OnPostAuthResultType.authzResult;
+  authzResult: Record<string, boolean>;
 }
 
 /**
  * @public
  */
-export type OnPostAuthResult = OnPostAuthNextResult;
+export type OnPostAuthResult = OnPostAuthNextResult | OnPostAuthAuthzResult;
 
 /**
  * @public
