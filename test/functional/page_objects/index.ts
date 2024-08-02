@@ -36,6 +36,7 @@ import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
+import { SolutionNavigationProvider } from './solution_navigation';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -52,6 +53,7 @@ export const pageObjects = {
   newsfeed: NewsfeedPageObject,
   settings: SettingsPageObject,
   share: SharePageObject,
+  solutionNavigation: SolutionNavigationProvider,
   legacyDataTableVis: LegacyDataTableVisPageObject,
   login: LoginPageObject,
   timelion: TimelionPageObject,
