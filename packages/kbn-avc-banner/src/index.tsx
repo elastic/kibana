@@ -6,13 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import avcBannerBackground from './avc_banner_background.svg';
+
+// Logic to hide banner at EOY 2024
+export const useIsStillYear2024: () => boolean = () => {
+  return useMemo(() => {
+    return new Date().getFullYear() === 2024;
+  }, []);
+};
 
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
