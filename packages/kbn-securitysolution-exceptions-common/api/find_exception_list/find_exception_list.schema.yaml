@@ -9,8 +9,6 @@ paths:
       operationId: FindExceptionLists
       x-codegen-enabled: true
       summary: Finds exception lists
-      tags:
-        - Exceptions API
       parameters:
         - name: filter
           in: query
