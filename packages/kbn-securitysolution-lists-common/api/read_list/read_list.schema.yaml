@@ -9,8 +9,6 @@ paths:
       operationId: GetList
       x-codegen-enabled: true
       summary: Retrieves a list using its id field
-      tags:
-        - List API
       parameters:
         - name: id
           in: query
