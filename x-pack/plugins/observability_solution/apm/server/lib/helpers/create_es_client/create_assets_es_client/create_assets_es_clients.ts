@@ -11,6 +11,7 @@ import {
   MsearchMultisearchBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ENTITY_HISTORY, ENTITY_LATEST } from '@kbn/entities-data-access-plugin/common';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { MinimalAPMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 import { EntityType } from '../../../../routes/entities/types';
@@ -53,19 +54,6 @@ export async function createEntitiesESClient({
 
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-  const {
-    latestIndexPattern: entitiesLatestIndexPattern,
-    historyIndexPattern: entitiesHistoryIndexPattern,
-  } = await entitiesDataAccessStart.services.indexPatternService.indexPatternByType(
-    EntityType.SERVICE,
-    {
-      soClient: coreContext.savedObjects.client,
-    }
-  );
-  if (!entitiesLatestIndexPattern || !entitiesHistoryIndexPattern) {
-    throw new Error('Failed to resolve entity index patterns');
-  }
-
   function search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
     indexName: string,
     operationName: string,
@@ -93,28 +81,61 @@ export async function createEntitiesESClient({
   }
 
   return {
-    searchLatest<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    async searchLatest<
+      TDocument = unknown,
+      TSearchRequest extends ESSearchRequest = ESSearchRequest
+    >(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      return search(entitiesLatestIndexPattern, operationName, searchRequest);
+      const { latestIndexPattern: entitiesLatestIndexPattern } =
+        await entitiesDataAccessStart.services.indexPatternService.indexPatternByType(
+          EntityType.SERVICE,
+          {
+            datasets: [ENTITY_LATEST],
+            soClient: coreContext.savedObjects.client,
+          }
+        );
+
+      return search(entitiesLatestIndexPattern!, operationName, searchRequest);
     },
 
-    searchHistory<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
+    async searchHistory<
+      TDocument = unknown,
+      TSearchRequest extends ESSearchRequest = ESSearchRequest
+    >(
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      return search(entitiesHistoryIndexPattern, operationName, searchRequest);
+      const { historyIndexPattern: entitiesHistoryIndexPattern } =
+        await entitiesDataAccessStart.services.indexPatternService.indexPatternByType(
+          EntityType.SERVICE,
+          {
+            datasets: [ENTITY_HISTORY],
+            soClient: coreContext.savedObjects.client,
+          }
+        );
+
+      return search(entitiesHistoryIndexPattern!, operationName, searchRequest);
     },
 
     async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
       allSearches: TSearchRequest[]
     ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+      const { latestIndexPattern: entitiesLatestIndexPattern } =
+        await entitiesDataAccessStart.services.indexPatternService.indexPatternByType(
+          EntityType.SERVICE,
+          {
+            datasets: [ENTITY_LATEST],
+            soClient: coreContext.savedObjects.client,
+          }
+        );
+
       const searches = allSearches
         .map((params) => {
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [entitiesLatestIndexPattern],
+              index: [entitiesLatestIndexPattern!],
             },
             {
               ...params.body,
