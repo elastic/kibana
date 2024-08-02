@@ -6,18 +6,22 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
 
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
-import { TimelineTypeEnum, persistFavoriteSchema } from '../../../../../../common/api/timeline';
+import {
+  type PersistFavoriteRouteResponse,
+  PersistFavoriteRouteRequestBody,
+  TimelineTypeEnum,
+} from '../../../../../../common/api/timeline';
 
 export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
   router.versioned
@@ -32,7 +36,7 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: Co
       {
         version: '2023-10-31',
         validate: {
-          request: { body: buildRouteValidationWithExcess(persistFavoriteSchema) },
+          request: { body: buildRouteValidationWithZod(PersistFavoriteRouteRequestBody) },
         },
       },
       async (context, request, response) => {
@@ -51,12 +55,14 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter, _: Co
             timelineType || TimelineTypeEnum.default
           );
 
-          return response.ok({
-            body: {
-              data: {
-                persistFavorite: timeline,
-              },
+          const body: PersistFavoriteRouteResponse = {
+            data: {
+              persistFavorite: timeline,
             },
+          };
+
+          return response.ok({
+            body,
           });
         } catch (err) {
           const error = transformError(err);

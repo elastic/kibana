@@ -17,7 +17,6 @@ import type {
   TimelineResponse,
   TimelineErrorResponse,
   ImportTimelineResultSchema,
-  ResponseFavoriteTimeline,
   AllTimelinesResponse,
   SingleTimelineResponse,
   SingleTimelineResolveResponse,
@@ -29,7 +28,7 @@ import {
   TimelineErrorResponseType,
   importTimelineResultSchema,
   allTimelinesResponse,
-  responseFavoriteTimeline,
+  PersistFavoriteRouteResponse,
   SingleTimelineResponseType,
   type TimelineType,
   TimelineTypeEnum,
@@ -105,11 +104,8 @@ const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSche
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const decodeResponseFavoriteTimeline = (respTimeline?: ResponseFavoriteTimeline) =>
-  pipe(
-    responseFavoriteTimeline.decode(respTimeline),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
+  PersistFavoriteRouteResponse.parse(respTimeline);
 
 const postTimeline = async ({
   timeline,
@@ -469,7 +465,7 @@ export const persistFavorite = async ({
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
 
-  const response = await KibanaServices.get().http.patch<ResponseFavoriteTimeline>(
+  const response = await KibanaServices.get().http.patch<PersistFavoriteRouteResponse>(
     TIMELINE_FAVORITE_URL,
     {
       method: 'PATCH',

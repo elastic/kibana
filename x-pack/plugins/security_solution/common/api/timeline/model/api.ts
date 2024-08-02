@@ -19,6 +19,8 @@ import type { DataProviderType } from './components.gen';
 import {
   BareNote,
   DataProviderTypeEnum,
+  FavoriteTimelineResponse,
+  type FavoriteTimelineResult,
   type Note,
   RowRendererId,
   RowRendererIdEnum,
@@ -36,6 +38,7 @@ export {
   BareNote,
   DataProviderType,
   DataProviderTypeEnum,
+  FavoriteTimelineResponse,
   Note,
   RowRendererId,
   RowRendererIdEnum,
@@ -482,27 +485,6 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 );
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
-
-const favoriteTimelineResult = runtimeTypes.partial({
-  fullName: unionWithNullType(runtimeTypes.string),
-  userName: unionWithNullType(runtimeTypes.string),
-  favoriteDate: unionWithNullType(runtimeTypes.number),
-});
-
-export type FavoriteTimelineResult = runtimeTypes.TypeOf<typeof favoriteTimelineResult>;
-
-export const responseFavoriteTimeline = runtimeTypes.partial({
-  savedObjectId: runtimeTypes.string,
-  version: runtimeTypes.string,
-  code: unionWithNullType(runtimeTypes.number),
-  message: unionWithNullType(runtimeTypes.string),
-  templateTimelineId: unionWithNullType(runtimeTypes.string),
-  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-  favorite: unionWithNullType(runtimeTypes.array(favoriteTimelineResult)),
-});
-
-export type ResponseFavoriteTimeline = runtimeTypes.TypeOf<typeof responseFavoriteTimeline>;
 
 export const pageInfoTimeline = runtimeTypes.type({
   pageIndex: runtimeTypes.number,

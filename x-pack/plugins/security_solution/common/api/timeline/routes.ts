@@ -23,3 +23,8 @@ export {
   ExportTimelinesRequestQuery,
   ExportTimelinesRequestBody,
 } from './export_timelines/export_timelines_route.gen';
+
+export {
+  PersistFavoriteRouteResponse,
+  PersistFavoriteRouteRequestBody,
+} from './persist_favorite/persist_favorite_route.gen';

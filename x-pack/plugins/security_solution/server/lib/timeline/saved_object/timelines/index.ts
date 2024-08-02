@@ -23,7 +23,7 @@ import type {
   ExportTimelineNotFoundError,
   PageInfoTimeline,
   ResponseTimelines,
-  ResponseFavoriteTimeline,
+  FavoriteTimelineResponse,
   ResponseTimeline,
   SortTimeline,
   TimelineResult,
@@ -312,7 +312,7 @@ export const persistFavorite = async (
   templateTimelineId: string | null,
   templateTimelineVersion: number | null,
   timelineType: TimelineType
-): Promise<ResponseFavoriteTimeline> => {
+): Promise<FavoriteTimelineResponse> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const fullName = request.user?.full_name ?? '';
   try {
