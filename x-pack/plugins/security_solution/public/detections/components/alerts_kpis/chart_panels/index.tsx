@@ -9,8 +9,6 @@ import type { Filter, Query } from '@kbn/es-query';
 import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
@@ -65,21 +63,18 @@ const ChartPanelsComponent: React.FC<Props> = ({
   const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
     DETECTIONS_ALERTS_CHARTS_PANEL_ID
   );
-  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
   const {
     alertViewSelection,
     countTableStackBy0,
     countTableStackBy1,
     groupBySelection,
-    isTreemapPanelExpanded,
     riskChartStackBy0,
     riskChartStackBy1,
     setAlertViewSelection,
     setCountTableStackBy0,
     setCountTableStackBy1,
     setGroupBySelection,
-    setIsTreemapPanelExpanded,
     setRiskChartStackBy0,
     setRiskChartStackBy1,
     setTrendChartStackBy,
@@ -149,37 +144,25 @@ const ChartPanelsComponent: React.FC<Props> = ({
   );
 
   const title = useMemo(() => {
-    if (isAlertsPageChartsEnabled) {
-      return isExpanded ? (
-        <ChartSelectContainer>
-          <ChartSelect
-            alertViewSelection={alertViewSelection}
-            setAlertViewSelection={setAlertViewSelection}
-          />
-        </ChartSelectContainer>
-      ) : (
-        <ChartCollapse
-          groupBySelection={groupBySelection}
-          filters={alertsDefaultFilters}
-          query={query}
-          signalIndexName={signalIndexName}
-          runtimeMappings={runtimeMappings}
+    return isExpanded ? (
+      <ChartSelectContainer>
+        <ChartSelect
+          alertViewSelection={alertViewSelection}
+          setAlertViewSelection={setAlertViewSelection}
         />
-      );
-    } else {
-      return (
-        <ChartSelectContainer>
-          <ChartSelect
-            alertViewSelection={alertViewSelection}
-            setAlertViewSelection={setAlertViewSelection}
-          />
-        </ChartSelectContainer>
-      );
-    }
+      </ChartSelectContainer>
+    ) : (
+      <ChartCollapse
+        groupBySelection={groupBySelection}
+        filters={alertsDefaultFilters}
+        query={query}
+        signalIndexName={signalIndexName}
+        runtimeMappings={runtimeMappings}
+      />
+    );
   }, [
     alertViewSelection,
     setAlertViewSelection,
-    isAlertsPageChartsEnabled,
     isExpanded,
     groupBySelection,
     alertsDefaultFilters,
@@ -230,7 +213,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               chartOptionsContextMenu={chartOptionsContextMenu}
               extraActions={resetGroupByFieldAction}
               filters={alertsDefaultFilters}
-              inspectTitle={isAlertsPageChartsEnabled ? i18n.COUNTS : i18n.TABLE}
+              inspectTitle={i18n.COUNTS}
               panelHeight={CHART_PANEL_HEIGHT}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
@@ -259,13 +242,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
               chartOptionsContextMenu={chartOptionsContextMenu}
               height={CHART_PANEL_HEIGHT}
               inspectTitle={i18n.TREEMAP}
-              isPanelExpanded={isAlertsPageChartsEnabled ? isExpanded : isTreemapPanelExpanded}
+              isPanelExpanded={isExpanded}
               filters={alertsDefaultFilters}
               query={query}
               riskSubAggregationField="kibana.alert.risk_score"
-              setIsPanelExpanded={
-                isAlertsPageChartsEnabled ? setIsExpanded : setIsTreemapPanelExpanded
-              }
+              setIsPanelExpanded={setIsExpanded}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
               setStackByField1={updateCommonStackBy1}
@@ -281,7 +262,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
         </FullHeightFlexItem>
       )}
 
-      {isAlertsPageChartsEnabled && alertViewSelection === 'charts' && (
+      {alertViewSelection === 'charts' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
             <EuiSkeletonText lines={10} data-test-subj="chartsLoadingSpinner" />
