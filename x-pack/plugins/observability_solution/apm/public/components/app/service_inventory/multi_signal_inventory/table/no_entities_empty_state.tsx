@@ -64,7 +64,7 @@ export function NoEntitiesEmptyState() {
             <p>
               {i18n.translate('xpack.apm.noEntitiesEmptyState.description', {
                 defaultMessage:
-                  'It can take up to a couple of minutes for your services to show. Try refreshing the page in a minute. ',
+                  'It can take up to a couple of minutes for your services to show. Try refreshing the page in a minute.',
               })}
             </p>
             <EuiLink
