@@ -46,7 +46,6 @@ jest.mock('./services', () => {
     fn: () => ({ type: 'render', as: 'test' }),
     name: 'testrender',
     args: {},
-    help: '',
   };
   service.registerFunction(testFn);
 

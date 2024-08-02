@@ -41,7 +41,6 @@ export const createTileMapFn = (): TileMapExpressionFunctionDefinition => ({
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
     },
   },
   async fn(input, args) {

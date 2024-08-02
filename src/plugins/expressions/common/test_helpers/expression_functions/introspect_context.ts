@@ -21,7 +21,6 @@ export const introspectContext: ExpressionFunctionDefinition<
       types: ['string'],
     },
   },
-  help: '',
   fn: (input, args, context) => {
     return {
       type: 'any',

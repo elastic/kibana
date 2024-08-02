@@ -38,7 +38,6 @@ export const createInputControlVisFn = (): InputControlExpressionFunctionDefinit
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
     },
   },
   fn(input, args) {

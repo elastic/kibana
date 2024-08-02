@@ -134,7 +134,6 @@ export const manualRangeEventAnnotation: ExpressionFunctionDefinition<
     },
     outside: {
       types: ['boolean'],
-      help: '',
       required: false,
     },
     label: {

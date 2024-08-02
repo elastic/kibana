@@ -100,7 +100,6 @@ describe('Execution abortion tests', () => {
           types: ['number'],
         },
       },
-      help: '',
       fn: async (input, args, { abortSignal }) => {
         started();
         await new Promise((r) => {

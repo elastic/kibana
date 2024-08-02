@@ -22,45 +22,35 @@ export interface FormatColumnArgs {
 export const formatColumn: FormatColumnExpressionFunction = {
   name: 'lens_format_column',
   type: 'datatable',
-  help: '',
   args: {
     format: {
       types: ['string'],
-      help: '',
       required: true,
     },
     columnId: {
       types: ['string'],
-      help: '',
       required: true,
     },
     decimals: {
       types: ['number'],
-      help: '',
     },
     suffix: {
       types: ['string'],
-      help: '',
     },
     parentFormat: {
       types: ['string'],
-      help: '',
     },
     compact: {
       types: ['boolean'],
-      help: '',
     },
     pattern: {
       types: ['string'],
-      help: '',
     },
     fromUnit: {
       types: ['string'],
-      help: '',
     },
     toUnit: {
       types: ['string'],
-      help: '',
     },
   },
   inputTypes: ['datatable'],

@@ -33,12 +33,12 @@ export function switchFn(): ExpressionFunctionDefinition<
         resolve: false,
         multi: true,
         required: true,
-        help: argHelp.case!,
+        help: argHelp.case,
       },
       default: {
         aliases: ['finally'],
         resolve: false,
-        help: argHelp.default!,
+        help: argHelp.default,
       },
     },
     fn: function fn(input, args): Observable<unknown> {

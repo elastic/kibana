@@ -13,35 +13,28 @@ export const getTimeScale = (
 ): TimeScaleExpressionFunction => ({
   name: 'lens_time_scale',
   type: 'datatable',
-  help: '',
   args: {
     dateColumnId: {
       types: ['string'],
-      help: '',
     },
     inputColumnId: {
       types: ['string'],
-      help: '',
       required: true,
     },
     outputColumnId: {
       types: ['string'],
-      help: '',
       required: true,
     },
     outputColumnName: {
       types: ['string'],
-      help: '',
     },
     targetUnit: {
       types: ['string'],
       options: ['s', 'm', 'h', 'd'],
-      help: '',
       required: true,
     },
     reducedTimeRange: {
       types: ['string'],
-      help: '',
     },
   },
   inputTypes: ['datatable'],

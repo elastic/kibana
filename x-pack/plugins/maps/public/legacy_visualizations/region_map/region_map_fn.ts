@@ -41,7 +41,6 @@ export const createRegionMapFn = (): RegionMapExpressionFunctionDefinition => ({
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
     },
   },
   async fn(input, args) {

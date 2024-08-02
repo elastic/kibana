@@ -52,12 +52,10 @@ export const getTimelionVisualizationConfig = (
       types: ['string'],
       aliases: ['_'],
       default: '".es(*)"',
-      help: '',
     },
     interval: {
       types: ['string'],
       default: 'auto',
-      help: '',
     },
     ariaLabel: {
       types: ['string'],

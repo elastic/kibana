@@ -50,21 +50,17 @@ export function palette(): PaletteExpressionFunctionDefinition {
         types: ['string'],
         options: ['above', 'below', 'all', 'none'],
         default: 'above',
-        help: '',
       },
       rangeMin: {
         types: ['number'],
-        help: '',
       },
       rangeMax: {
         types: ['number'],
-        help: '',
       },
       range: {
         types: ['string'],
         options: ['number', 'percent'],
         default: 'percent',
-        help: '',
       },
       gradient: {
         types: ['boolean'],

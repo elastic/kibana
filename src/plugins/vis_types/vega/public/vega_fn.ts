@@ -55,7 +55,6 @@ export const createVegaFn = (
     spec: {
       types: ['string'],
       default: '',
-      help: '',
     },
   },
   async fn(input, args, context) {

@@ -73,11 +73,9 @@ export const aggFilter = (): FunctionDefinition => ({
     },
     timeWindow: {
       types: ['string'],
-      help: '',
     },
     timeShift: {
       types: ['string'],
-      help: '',
     },
     json: {
       types: ['string'],

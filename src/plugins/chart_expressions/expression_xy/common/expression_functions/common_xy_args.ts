@@ -40,7 +40,6 @@ export const commonXYArgs: CommonXYFn['args'] = {
   emphasizeFitting: {
     types: ['boolean'],
     default: false,
-    help: '',
   },
   valueLabels: {
     types: ['string'],

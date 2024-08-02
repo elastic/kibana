@@ -17,7 +17,6 @@ export const sleep: ExpressionFunctionDefinition<'sleep', unknown, { time: numbe
       types: ['number'],
     },
   },
-  help: '',
   fn: async (input, args, context) => {
     await new Promise((r) => setTimeout(r, args.time));
     return input;

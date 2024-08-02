@@ -52,40 +52,31 @@ export const getDatatable = (
     },
     description: {
       types: ['string'],
-      help: '',
     },
     columns: {
       types: ['lens_datatable_column'],
-      help: '',
       multi: true,
     },
     sortingColumnId: {
       types: ['string'],
-      help: '',
     },
     sortingDirection: {
       types: ['string'],
-      help: '',
     },
     fitRowToContent: {
       types: ['boolean'],
-      help: '',
     },
     rowHeightLines: {
       types: ['number'],
-      help: '',
     },
     headerRowHeight: {
       types: ['string'],
-      help: '',
     },
     headerRowHeightLines: {
       types: ['number'],
-      help: '',
     },
     pageSize: {
       types: ['number'],
-      help: '',
     },
   },
   async fn(...args) {

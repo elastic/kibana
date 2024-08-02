@@ -30,15 +30,12 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
   args: {
     title: {
       types: ['string'],
-      help: '',
     },
     description: {
       types: ['string'],
-      help: '',
     },
     layerId: {
       types: ['string'],
-      help: '',
     },
     emsField: {
       types: ['string'],
