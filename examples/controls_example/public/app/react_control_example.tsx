@@ -40,6 +40,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { OPTIONS_LIST_CONTROL_TYPE } from '../react_controls/data_controls/options_list_control/constants';
 import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
@@ -58,13 +59,14 @@ const toggleViewButtons = [
   },
 ];
 
+const optionsListId = 'optionsList1';
 const searchControlId = 'searchControl1';
 const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
     type: SEARCH_CONTROL_TYPE,
-    order: 2,
+    order: 3,
     grow: true,
     width: 'medium',
     explicitInput: {
@@ -92,12 +94,25 @@ const controlGroupPanels = {
   },
   [timesliderControlId]: {
     type: TIMESLIDER_CONTROL_TYPE,
-    order: 0,
+    order: 4,
     grow: true,
     width: 'medium',
     explicitInput: {
       id: timesliderControlId,
-      title: 'Time slider',
+      enhancements: {},
+    },
+  },
+  [optionsListId]: {
+    type: OPTIONS_LIST_CONTROL_TYPE,
+    order: 2,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: searchControlId,
+      fieldName: 'agent.keyword',
+      title: 'Agent',
+      grow: true,
+      width: 'medium',
       enhancements: {},
     },
   },
@@ -383,6 +398,11 @@ export const ReactControlExample = ({
               },
               {
                 name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
+                type: 'index-pattern',
+                id: WEB_LOGS_DATA_VIEW_ID,
+              },
+              {
+                name: `controlGroup_${optionsListId}:optionsListControlDataView`,
                 type: 'index-pattern',
                 id: WEB_LOGS_DATA_VIEW_ID,
               },
