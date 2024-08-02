@@ -17,12 +17,8 @@ import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { RangeSliderStrings } from './range_slider_strings';
-import {
-  RangesliderControlApi,
-  RangesliderControlState,
-  RangeValue,
-  RANGE_SLIDER_CONTROL_TYPE,
-} from './types';
+import { RangesliderControlApi, RangesliderControlState, RANGE_SLIDER_CONTROL_TYPE } from './types';
+import { initializeRangeControlSelections } from './range_control_selections';
 
 export const getRangesliderControlFactory = (
   services: DataControlServices
@@ -62,10 +58,6 @@ export const getRangesliderControlFactory = (
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
-      const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
-      function setValue(nextValue: RangeValue | undefined) {
-        value$.next(nextValue);
-      }
 
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
@@ -76,6 +68,11 @@ export const getRangesliderControlFactory = (
         },
         controlGroupApi,
         services
+      );
+
+      const rangeControlSelections = initializeRangeControlSelections(
+        initialState,
+        dataControl.setters.onSelectionChange
       );
 
       const api = buildApi(
@@ -89,13 +86,13 @@ export const getRangesliderControlFactory = (
               rawState: {
                 ...dataControlState,
                 step: step$.getValue(),
-                value: value$.getValue(),
+                value: rangeControlSelections.value$.getValue(),
               },
               references, // does not have any references other than those provided by the data control serializer
             };
           },
           clearSelections: () => {
-            value$.next(undefined);
+            rangeControlSelections.setValue(undefined);
           },
         },
         {
@@ -105,7 +102,7 @@ export const getRangesliderControlFactory = (
             (nextStep: number | undefined) => step$.next(nextStep),
             (a, b) => (a ?? 1) === (b ?? 1),
           ],
-          value: [value$, setValue],
+          value: [rangeControlSelections.value$, rangeControlSelections.setValue],
         }
       );
 
@@ -129,7 +126,7 @@ export const getRangesliderControlFactory = (
         .pipe(skip(1))
         .subscribe(() => {
           step$.next(1);
-          value$.next(undefined);
+          rangeControlSelections.setValue(undefined);
         });
 
       const max$ = new BehaviorSubject<number | undefined>(undefined);
@@ -167,7 +164,7 @@ export const getRangesliderControlFactory = (
       const outputFilterSubscription = combineLatest([
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
-        value$,
+        rangeControlSelections.value$,
       ]).subscribe(([dataViews, fieldName, value]) => {
         const dataView = dataViews?.[0];
         const dataViewField =
@@ -187,7 +184,7 @@ export const getRangesliderControlFactory = (
           rangeFilter.meta.type = 'range';
           rangeFilter.meta.params = params;
         }
-        api.setOutputFilter(rangeFilter);
+        dataControl.setters.setOutputFilter(rangeFilter);
       });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
@@ -204,8 +201,8 @@ export const getRangesliderControlFactory = (
         selectionHasNoResults$.next(hasNoResults);
       });
 
-      if (initialState.value !== undefined) {
-        await dataControl.untilFiltersInitialized();
+      if (rangeControlSelections.hasInitialSelections) {
+        await dataControl.api.untilFiltersReady();
       }
 
       return {
@@ -219,7 +216,7 @@ export const getRangesliderControlFactory = (
               min$,
               selectionHasNoResults$,
               step$,
-              value$
+              rangeControlSelections.value$
             );
 
           useEffect(() => {
@@ -240,7 +237,7 @@ export const getRangesliderControlFactory = (
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}
-              onChange={setValue}
+              onChange={rangeControlSelections.setValue}
               step={step ?? 1}
               value={value}
               uuid={uuid}
