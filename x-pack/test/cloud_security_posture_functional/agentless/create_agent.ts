@@ -53,11 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
-      await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-      await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-      await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-      await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-      await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
+      await cisIntegration.selectSetupTechnology('agentless');
+      await cisIntegration.selectAwsCredentials('direct');
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -87,20 +84,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
-      await cisIntegration.clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-      await cisIntegration.clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-      await cisIntegration.selectValue(SETUP_TECHNOLOGY_SELECTOR, 'agent-based');
-
-      await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
-      await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
-
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      const agentPolicyName = await cisIntegration.getAgentPolicyName();
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
+        integrationPolicyName
+      );
+      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(agentPolicyName);
     });
   });
 }

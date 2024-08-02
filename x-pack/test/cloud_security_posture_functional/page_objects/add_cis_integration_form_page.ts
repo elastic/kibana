@@ -373,8 +373,13 @@ export function AddCisIntegrationFormPageProvider({
 
   const getFirstCspmIntegrationPageAgent = async () => {
     const agentList = await testSubjects.findAll('agentPolicyNameLink');
-    // this is assuming that the agent was just created therefor should be the first element
+    // this is assuming that the agent was just created therefore should be the first element
     return await agentList[0].getVisibleText();
+  };
+
+  const getAgentPolicyName = async () => {
+    const agentPolicyName = await testSubjects.find('createAgentPolicyNameField');
+    return await agentPolicyName.getAttribute('value');
   };
 
   return {
@@ -418,5 +423,6 @@ export function AddCisIntegrationFormPageProvider({
     inputIntegrationName,
     getFirstCspmIntegrationPageIntegration,
     getFirstCspmIntegrationPageAgent,
+    getAgentPolicyName,
   };
 }
