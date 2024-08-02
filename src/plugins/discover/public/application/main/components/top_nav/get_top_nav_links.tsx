@@ -65,7 +65,10 @@ export const getTopNavLinks = ({
     testId: 'discoverAlertsButton',
   };
 
-  const esqLToggle = {
+  /**
+   * Switches from ES|QL to classic mode and vice versa
+   */
+  const esqLDataViewTransitionToggle = {
     id: 'esql',
     label: isEsqlMode
       ? i18n.translate('discover.localMenu.localMenu.switchToClassicTitle', {
@@ -278,7 +281,7 @@ export const getTopNavLinks = ({
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
 
   if (services.uiSettings.get(ENABLE_ESQL)) {
-    entries.push({ data: esqLToggle, order: 0 });
+    entries.push({ data: esqLDataViewTransitionToggle, order: 0 });
   }
 
   if (!defaultMenu?.newItem?.disabled) {
