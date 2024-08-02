@@ -68,6 +68,7 @@ describe.skip('Case View Page files tab', () => {
         caseId: basicCase.id,
         page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page + 1,
         perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
+        searchByType: [],
       })
     );
   });
@@ -92,6 +93,7 @@ describe.skip('Case View Page files tab', () => {
         caseId: basicCase.id,
         page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
         perPage: targetPagination,
+        searchByType: [],
       })
     );
   });
@@ -109,6 +111,33 @@ describe.skip('Case View Page files tab', () => {
         page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
         perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
         searchTerm: 'Foobar',
+        searchByType: [],
+      })
+    );
+  });
+
+  it('search by type triggers calls to useGetCaseFiles', async () => {
+    appMockRender.render(<CaseViewFiles caseData={caseData} />);
+
+    expect(await screen.findByTestId('cases-files-table')).toBeInTheDocument();
+
+    const typeFilterButton = screen.getByTestId('cases-files-filter-type');
+    
+    expect(typeFilterButton).toBeInTheDocument();
+    await userEvent.click(typeFilterButton);
+
+    const typePDF = screen.getByTestId('cases-files-filter-type-PDF');
+
+    expect(typePDF).toBeInTheDocument();
+    typePDF.style.pointerEvents = 'auto';
+    await userEvent.click(typePDF);
+
+    await waitFor(() =>
+      expect(useGetCaseFilesMock).toHaveBeenCalledWith({
+        caseId: basicCase.id,
+        page: DEFAULT_CASE_FILES_FILTERING_OPTIONS.page,
+        perPage: DEFAULT_CASE_FILES_FILTERING_OPTIONS.perPage,
+        searchByType: ['application/pdf'],
       })
     );
   });

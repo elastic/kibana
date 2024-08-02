@@ -24,6 +24,7 @@ export interface CaseFilesFilteringOptions {
   page: number;
   perPage: number;
   searchTerm?: string;
+  searchByType?: string[];
 }
 
 export interface GetCaseFilesParams extends CaseFilesFilteringOptions {
@@ -35,18 +36,20 @@ export const useGetCaseFiles = ({
   page,
   perPage,
   searchTerm,
+  searchByType,
 }: GetCaseFilesParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
   const { owner } = useCasesContext();
   const { showErrorToast } = useCasesToast();
   const { client: filesClient } = useFilesContext();
 
   return useQuery(
-    casesQueriesKeys.caseFiles(caseId, { page, perPage, searchTerm }),
+    casesQueriesKeys.caseFiles(caseId, { page, perPage, searchTerm, searchByType }),
     () => {
       return filesClient.list({
         kind: constructFileKindIdByOwner(owner[0] as Owner),
         page: page + 1,
         ...(searchTerm && { name: `*${searchTerm}*` }),
+        ...(searchByType && searchByType.length > 0 && { mimeType: searchByType }),
         perPage,
         meta: { caseIds: [caseId] },
       });

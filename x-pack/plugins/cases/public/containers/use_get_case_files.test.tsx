@@ -22,6 +22,7 @@ const hookParams = {
   page: 1,
   perPage: 1,
   searchTerm: 'foobar',
+  searchByType: [],
 };
 
 const expectedCallParams = {
