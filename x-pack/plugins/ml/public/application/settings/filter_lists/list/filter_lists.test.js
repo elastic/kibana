@@ -14,7 +14,7 @@ import { FilterLists } from './filter_lists';
 // Mocking the child components to just assert that they get the data
 // received via the async call using mlApiServices in the main component.
 jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
+  HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
 }));
 jest.mock('./header', () => ({
   FilterListsHeader: ({ totalCount }) => (
@@ -84,11 +84,15 @@ describe('Filter Lists', () => {
       expect(screen.getByTestId('mockFilterListsHeader')).toHaveTextContent('1');
     });
 
+    // Assert that the child components receive the data based on async calls and kibana context.
     const filterListsTableElement = screen.getByTestId('mockFilterListsTable');
     expect(filterListsTableElement).toHaveAttribute(
       'data-filter-lists',
       JSON.stringify([mockTestFilter])
     );
     expect(filterListsTableElement).toHaveAttribute('data-selected-filter-lists', '[]');
+
+    const helpMenuElement = screen.getByTestId('mockHelpMenu');
+    expect(helpMenuElement).toHaveAttribute('data-link', 'https://customRules');
   });
 });

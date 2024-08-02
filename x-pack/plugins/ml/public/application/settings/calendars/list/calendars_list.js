@@ -17,7 +17,6 @@ import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
 
 export class CalendarsListUI extends Component {
@@ -108,7 +107,7 @@ export class CalendarsListUI extends Component {
     const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
-    const helpLink = getDocLinks().links.ml.calendars;
+    const helpLink = this.props.kibana.services.docLinks.links.ml.calendars;
 
     if (this.state.isDestroyModalVisible) {
       destroyModal = (

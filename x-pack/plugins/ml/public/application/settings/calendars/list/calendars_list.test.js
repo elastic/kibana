@@ -6,20 +6,30 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
+import { cloneDeep } from 'lodash';
+
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { CalendarsList } from './calendars_list';
 
+// Mocking the child components to just assert that they get the data
+// received via the async call using mlApiServices in the main component.
 jest.mock('../../../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
+  HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
 }));
-
-jest.mock('../../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    links: {
-      ml: { calendars: jest.fn() },
-    },
-  }),
+jest.mock('./header', () => ({
+  CalendarsListHeader: ({ totalCount }) => (
+    <div data-test-subj="mockCalendarsListHeader">{totalCount}</div>
+  ),
+}));
+jest.mock('./table', () => ({
+  CalendarsListTable: ({ calendarsList }) => (
+    <div
+      data-test-subj="mockCalendarsListTable"
+      data-calendar-list={JSON.stringify(calendarsList)}
+    />
+  ),
 }));
 
 jest.mock('../../../capabilities/check_capabilities', () => ({
@@ -36,101 +46,104 @@ jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
 }));
 
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x) => x };
-});
+const mockCalendars = [
+  {
+    calendar_id: 'farequote-calendar',
+    job_ids: ['farequote'],
+    description: 'test ',
+    events: [
+      {
+        description: 'Downtime feb 9 2017 10:10 to 10:30',
+        start_time: 1486656600000,
+        end_time: 1486657800000,
+        calendar_id: 'farequote-calendar',
+        event_id: 'Ee-YgGcBxHgQWEhCO_xj',
+      },
+    ],
+  },
+  {
+    calendar_id: 'this-is-a-new-calendar',
+    job_ids: ['test'],
+    description: 'new calendar',
+    events: [
+      {
+        description: 'New event!',
+        start_time: 1544076000000,
+        end_time: 1544162400000,
+        calendar_id: 'this-is-a-new-calendar',
+        event_id: 'ehWKhGcBqHkXuWNrIrSV',
+      },
+    ],
+  },
+];
+// need to pass in a copy of mockCalendars because it will be mutated
+const mockCalendarsFn = jest.fn(() => Promise.resolve(cloneDeep(mockCalendars)));
+const mockKibanaProp = {
+  services: {
+    docLinks: { links: { ml: { calendars: 'https://calendars' } } },
+    mlServices: { mlApiServices: { calendars: mockCalendarsFn } },
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            disableTimeRangeSelector: jest.fn(),
+            disableAutoRefreshSelector: jest.fn(),
+          },
+        },
+      },
+    },
+    notifications: {
+      toasts: {
+        addDanger: jest.fn(),
+      },
+    },
+  },
+};
 
-const mockCalendars = jest.fn(() => Promise.resolve([]));
+const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (type) => {
     const EnhancedType = (props) => {
-      return React.createElement(type, {
+      return mockReact.createElement(type, {
         ...props,
-        kibana: {
-          services: {
-            mlServices: { mlApiServices: { calendars: mockCalendars } },
-          },
-        },
+        kibana: mockKibanaProp,
       });
     };
     return EnhancedType;
   },
 }));
 
-const testingState = {
-  loading: false,
-  calendars: [
-    {
-      calendar_id: 'farequote-calendar',
-      job_ids: ['farequote'],
-      description: 'test ',
-      events: [
-        {
-          description: 'Downtime feb 9 2017 10:10 to 10:30',
-          start_time: 1486656600000,
-          end_time: 1486657800000,
-          calendar_id: 'farequote-calendar',
-          event_id: 'Ee-YgGcBxHgQWEhCO_xj',
-        },
-      ],
-    },
-    {
-      calendar_id: 'this-is-a-new-calendar',
-      job_ids: ['test'],
-      description: 'new calendar',
-      events: [
-        {
-          description: 'New event!',
-          start_time: 1544076000000,
-          end_time: 1544162400000,
-          calendar_id: 'this-is-a-new-calendar',
-          event_id: 'ehWKhGcBqHkXuWNrIrSV',
-        },
-      ],
-    },
-  ],
-  isDestroyModalVisible: false,
-  calendarId: null,
-  selectedForDeletion: [],
-  nodesAvailable: true,
-};
-
 const props = {
   canCreateCalendar: true,
   canDeleteCalendar: true,
-  kibana: {
-    services: {
-      data: {
-        query: {
-          timefilter: {
-            timefilter: {
-              disableTimeRangeSelector: jest.fn(),
-              disableAutoRefreshSelector: jest.fn(),
-            },
-          },
-        },
-      },
-      notifications: {
-        toasts: {
-          addDanger: () => {},
-        },
-      },
-    },
-  },
 };
 
 describe('CalendarsList', () => {
-  test('loads calendars on mount', () => {
-    shallowWithIntl(<CalendarsList {...props} />);
+  test('Renders calendar list with calendars', async () => {
+    let wrapper;
 
-    expect(mockCalendars).toHaveBeenCalled();
-  });
+    await act(async () => {
+      wrapper = mountWithIntl(<CalendarsList {...props} />);
+    });
 
-  test('Renders calendar list with calendars', () => {
-    const wrapper = shallowWithIntl(<CalendarsList {...props} />);
-    wrapper.instance().setState(testingState);
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    await act(async () => {
+      // Force a re-render to ensure the state updates are applied
+      wrapper.update();
+    });
+
+    // Select element by data-test-subj and assert text content
+    const calendarsListHeaderElement = wrapper.find('[data-test-subj="mockCalendarsListHeader"]');
+    expect(calendarsListHeaderElement.text()).toBe('2');
+
+    // Select element by data-test-subj and assert data attributes
+    const calendarsListTableElement = wrapper.find('[data-test-subj="mockCalendarsListTable"]');
+    const calendarListData = JSON.parse(calendarsListTableElement.prop('data-calendar-list'));
+
+    const expectedCalendarsData = cloneDeep(mockCalendars);
+    expectedCalendarsData[0].events_length = 1;
+    expectedCalendarsData[0].job_ids_string = 'farequote';
+    expectedCalendarsData[1].events_length = 1;
+    expectedCalendarsData[1].job_ids_string = 'test';
+    expect(calendarListData).toEqual(expectedCalendarsData);
   });
 });
