@@ -155,7 +155,7 @@ describe('Artifacts pages', { tags: ['@ess', '@serverless', '@skipInServerlessMK
           // Submit edit artifact form
           cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
 
-          for (const checkResult of testData.create.checkResults) {
+          for (const checkResult of testData.update.checkResults) {
             cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
           }
 
