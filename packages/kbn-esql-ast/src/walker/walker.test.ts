@@ -846,6 +846,39 @@ describe('Walker.find()', () => {
   });
 });
 
+describe('Walker.findAll()', () => {
+  test('find all "fn" functions', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.findAll(
+      getAstAndSyntaxErrors(query).ast!,
+      (node) => node.type === 'function' && node.name === 'fn'
+    );
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 1,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 2,
+          },
+        ],
+      },
+    ]);
+  });
+});
+
 describe('Walker.hasFunction()', () => {
   test('can find assignment expression', () => {
     const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
