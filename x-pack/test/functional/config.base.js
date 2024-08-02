@@ -146,6 +146,9 @@ export default async function ({ readConfigFile }) {
       snapshotRestore: {
         pathname: '/app/management/data/snapshot_restore',
       },
+      spacesManagement: {
+        pathname: '/app/management/kibana/spaces',
+      },
       remoteClusters: {
         pathname: '/app/management/data/remote_clusters',
       },

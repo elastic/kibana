@@ -205,7 +205,7 @@ export class AstListener implements ESQLParserListener {
     const command = createCommand('limit', ctx);
     this.ast.push(command);
     if (ctx.getToken(esql_parser.INTEGER_LITERAL, 0)) {
-      const literal = createLiteral('number', ctx.INTEGER_LITERAL());
+      const literal = createLiteral('integer', ctx.INTEGER_LITERAL());
       if (literal) {
         command.args.push(literal);
       }

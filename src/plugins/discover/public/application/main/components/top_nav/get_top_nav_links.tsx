@@ -97,7 +97,7 @@ export const getTopNavLinks = ({
             },
           });
         } else {
-          const queryString = getInitialESQLQuery(dataView?.getIndexPattern());
+          const queryString = getInitialESQLQuery(dataView);
           state.appState.update({
             query: { esql: queryString },
             dataSource: {

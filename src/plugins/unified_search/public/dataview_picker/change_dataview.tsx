@@ -86,7 +86,7 @@ export function ChangeDataView({
     Boolean(textBasedLanguage)
   );
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
-  const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
+  const [selectedDataView, setSelectedDataView] = useState<DataView | undefined>(undefined);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, storage, dataViews, dataViewEditor } = kibana.services;
@@ -113,6 +113,10 @@ export function ChangeDataView({
         adHocDataViews?.map(mapAdHocDataView) ?? [];
 
       setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
+      if (currentDataViewId) {
+        const currentDataview = await data.dataViews.get(currentDataViewId, false);
+        setSelectedDataView(currentDataview);
+      }
     };
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
@@ -269,7 +273,8 @@ export function ChangeDataView({
           selectableProps={selectableProps}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            setSelectedDataViewId(newId);
+            const currentDataview = await data.dataViews.get(newId, false);
+            setSelectedDataView(currentDataview);
             setPopoverIsOpen(false);
             onChangeDataView(newId);
           }}
@@ -297,8 +302,8 @@ export function ChangeDataView({
         language: 'kuery',
         query: '',
       });
-      if (selectedDataViewId) {
-        onChangeDataView(selectedDataViewId);
+      if (selectedDataView?.id) {
+        onChangeDataView(selectedDataView?.id);
       }
       setTriggerLabel(trigger.label);
       if (shouldDismissModal) {
@@ -309,7 +314,7 @@ export function ChangeDataView({
       onChangeDataView,
       onTextLangQuerySubmit,
       onTransitionModalDismiss,
-      selectedDataViewId,
+      selectedDataView?.id,
       trigger.label,
     ]
   );
