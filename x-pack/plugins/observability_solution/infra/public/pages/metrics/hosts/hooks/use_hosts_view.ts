@@ -43,13 +43,15 @@ export const useHostsView = () => {
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
 
-  const baseRequest = useMemo(
+  const payload = useMemo(
     () =>
-      createInfraMetricsRequest({
-        dateRange: parsedDateRange,
-        esQuery: buildQuery(),
-        limit: searchCriteria.limit,
-      }),
+      JSON.stringify(
+        createInfraMetricsRequest({
+          dateRange: parsedDateRange,
+          esQuery: buildQuery(),
+          limit: searchCriteria.limit,
+        })
+      ),
     [buildQuery, parsedDateRange, searchCriteria.limit]
   );
 
@@ -60,7 +62,7 @@ export const useHostsView = () => {
         BASE_INFRA_METRICS_PATH,
         {
           method: 'POST',
-          body: JSON.stringify(baseRequest),
+          body: payload,
         }
       );
       const duration = performance.now() - start;
@@ -72,7 +74,7 @@ export const useHostsView = () => {
       );
       return metricsResponse;
     },
-    [baseRequest, searchCriteria.limit, telemetry]
+    [payload, searchCriteria.limit, telemetry]
   );
 
   return {
