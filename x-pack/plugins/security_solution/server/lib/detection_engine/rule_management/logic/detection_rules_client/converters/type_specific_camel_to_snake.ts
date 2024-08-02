@@ -28,6 +28,7 @@ export const typeSpecificCamelToSnake = (
         event_category_override: params.eventCategoryOverride,
         tiebreaker_field: params.tiebreakerField,
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'esql': {
@@ -36,6 +37,7 @@ export const typeSpecificCamelToSnake = (
         language: params.language,
         query: params.query,
         alert_suppression: convertObjectKeysToSnakeCase(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'threat_match': {
