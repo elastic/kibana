@@ -83,6 +83,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const labelPosition$ = new BehaviorSubject<ControlStyle>( // TODO: Rename `ControlStyle`
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
+      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -114,6 +115,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           ),
         ignoreParentSettings$,
         autoApplySelections$,
+        allowExpensiveQueries$,
         unsavedChanges,
         resetUnsavedChanges: () => {
           // TODO: Implement this
@@ -166,6 +168,22 @@ export const getControlGroupEmbeddableFactory = (services: {
       >(api, 'dataViews', apiPublishesDataViews, []).subscribe((newDataViews) =>
         dataViews.next(newDataViews)
       );
+
+      /** Fetch the allowExpensiveQuries setting for the children to use if necessary */
+      try {
+        const { allowExpensiveQueries } = await services.core.http.get<{
+          allowExpensiveQueries: boolean;
+          // TODO: Rename this route as part of https://github.com/elastic/kibana/issues/174961
+        }>('/internal/controls/optionsList/getExpensiveQueriesSetting', {
+          version: '1',
+        });
+        if (!allowExpensiveQueries) {
+          // only set if this returns false, since it defaults to true
+          allowExpensiveQueries$.next(allowExpensiveQueries);
+        }
+      } catch {
+        // do nothing - default to true on error (which it was initialized to)
+      }
 
       return {
         api,
