@@ -14,6 +14,7 @@ export { numberValidator } from './src/validate_number';
 
 export type {
   FieldsForHistograms,
+  NumericDataItem,
   NumericChartData,
   NumericHistogramField,
 } from './src/fetch_histograms_for_fields';
