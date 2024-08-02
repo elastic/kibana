@@ -12,43 +12,49 @@ import {
   ENTITY_HISTORY,
   ENTITY_LATEST,
   SO_ENTITY_DEFINITION_TYPE,
+  DatasetString,
+  SchemaVersionString,
 } from '../../common';
 
-type SchemaVersionString = `v${number}`;
-
-export interface EntityIndexPatternService {
-  indexPattern(options?: Options): string;
-  indexPatternByDefinitionId(definitionId: string, options?: Options): string;
-  indexPatternByType(
-    type: string,
-    options: Options & { soClient: SavedObjectsClientContract }
-  ): Promise<string>;
-}
-
-export interface Options {
-  datasets?: 'all' | typeof ENTITY_LATEST | typeof ENTITY_HISTORY;
+interface Options {
+  datasets?: DatasetString | DatasetString[] | 'all';
   schemaVersion?: SchemaVersionString | SchemaVersionString[] | 'all';
 }
 
-function translateDatasetsOption(datasets: Options['datasets'], useWildcard = true) {
+interface Result {
+  latestIndexPattern?: string;
+  historyIndexPattern?: string;
+}
+
+export interface EntityIndexPatternService {
+  indexPattern(options?: Options): Result;
+  indexPatternByDefinitionId(definitionId: string | string[], options?: Options): Result;
+  indexPatternByType(
+    type: string | string[],
+    options: Options & { soClient: SavedObjectsClientContract }
+  ): Promise<Result>;
+}
+
+function translateDatasetsOption(datasets: Options['datasets']) {
   if (!datasets || datasets === 'all') {
-    if (useWildcard) {
-      return ['*'] as const;
-    }
-    return [ENTITY_LATEST, ENTITY_HISTORY] as const;
+    return [ENTITY_LATEST, ENTITY_HISTORY];
   }
-  return [datasets] as const;
+  return Array.isArray(datasets) ? datasets : [datasets];
 }
 
 function translateSchemaVersionOption(schemaVersion: Options['schemaVersion']) {
   if (!schemaVersion || schemaVersion === 'all') {
     return ['*'] as const;
   }
-
   return Array.isArray(schemaVersion) ? schemaVersion : [schemaVersion];
 }
 
-async function findAllDefinitionsByType(type: string, soClient: SavedObjectsClientContract) {
+async function findAllDefinitionsByType(
+  type: string | string[],
+  soClient: SavedObjectsClientContract
+) {
+  const types = Array.isArray(type) ? type : [type];
+
   let total = 0;
   let page = 1;
   const definitions = [];
@@ -57,7 +63,7 @@ async function findAllDefinitionsByType(type: string, soClient: SavedObjectsClie
     const response = await soClient.find<EntityDefinition>({
       page,
       type: SO_ENTITY_DEFINITION_TYPE,
-      filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.type:(${type})`,
+      filter: `${SO_ENTITY_DEFINITION_TYPE}.attributes.type:(${types.join(' or ')})`,
     });
 
     definitions.push(...response.saved_objects.map(({ attributes }) => attributes.id));
@@ -68,51 +74,72 @@ async function findAllDefinitionsByType(type: string, soClient: SavedObjectsClie
   return definitions;
 }
 
-export function createIndexPatternService(): EntityIndexPatternService {
-  function indexPattern(options?: Options) {
-    const datasets = translateDatasetsOption(options?.datasets);
-    const schemaVersion = translateSchemaVersionOption(options?.schemaVersion);
+function splitByDataset(indices: string[]) {
+  const latestIndices = indices.filter((index) => index.includes(`.${ENTITY_LATEST}.`));
+  const historyIndices = indices.filter((index) => index.includes(`.${ENTITY_HISTORY}.`));
 
-    return datasets
+  const result: Result = {};
+
+  if (latestIndices.length !== 0) {
+    result.latestIndexPattern = latestIndices.join(',');
+  }
+
+  if (historyIndices.length !== 0) {
+    result.historyIndexPattern = historyIndices.join(',');
+  }
+
+  return result;
+}
+
+function indexPattern(options?: Options): Result {
+  const datasets = translateDatasetsOption(options?.datasets);
+  const schemaVersion = translateSchemaVersionOption(options?.schemaVersion);
+
+  return splitByDataset(
+    datasets
       .map((dataset) =>
         schemaVersion.map((version) => `.${ENTITY_BASE_PREFIX}.${version}.${dataset}.*`)
       )
       .flat()
-      .join(',');
-  }
+  );
+}
 
-  function indexPatternByDefinitionId(definitionId: string, options?: Options) {
-    const datasets = translateDatasetsOption(options?.datasets, false);
-    const schemaVersion = translateSchemaVersionOption(options?.schemaVersion);
+function indexPatternByDefinitionId(definitionId: string | string[], options?: Options): Result {
+  const datasets = translateDatasetsOption(options?.datasets);
+  const schemaVersion = translateSchemaVersionOption(options?.schemaVersion);
+  const definitionIds = Array.isArray(definitionId) ? definitionId : [definitionId];
 
-    return datasets
-      .map((dataset) =>
-        schemaVersion.map(
-          (version) =>
-            `.${ENTITY_BASE_PREFIX}.${version}.${dataset}.${definitionId}${
-              dataset === 'history' ? '.*' : ''
-            }`
+  return splitByDataset(
+    definitionIds
+      .map((id) =>
+        datasets.map((dataset) =>
+          schemaVersion.map(
+            (version) =>
+              `.${ENTITY_BASE_PREFIX}.${version}.${dataset}.${id}${
+                dataset === 'history' ? '.*' : ''
+              }`
+          )
         )
       )
       .flat()
-      .join(',');
+      .flat()
+  );
+}
+
+async function indexPatternByType(
+  type: string | string[],
+  options: Options & { soClient: SavedObjectsClientContract }
+): Promise<Result> {
+  const definitionIds = await findAllDefinitionsByType(type, options.soClient);
+
+  if (definitionIds.length === 0) {
+    throw new Error(`No entity definitions found for type ${type}`);
   }
 
-  async function indexPatternByType(
-    type: string,
-    options: Options & { soClient: SavedObjectsClientContract }
-  ) {
-    const definitionIds = await findAllDefinitionsByType(type, options.soClient);
+  return indexPatternByDefinitionId(definitionIds, options);
+}
 
-    if (definitionIds.length === 0) {
-      throw new Error(`No entity definitions found for type ${type}`);
-    }
-
-    return definitionIds
-      .map((definitionId) => indexPatternByDefinitionId(definitionId, options))
-      .join(',');
-  }
-
+export function createIndexPatternService(): EntityIndexPatternService {
   return {
     indexPattern,
     indexPatternByDefinitionId,

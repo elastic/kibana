@@ -11,3 +11,5 @@ export {
   ENTITY_LATEST,
   SO_ENTITY_DEFINITION_TYPE,
 } from './constants';
+
+export type { SchemaVersionString, DatasetString } from './constants';

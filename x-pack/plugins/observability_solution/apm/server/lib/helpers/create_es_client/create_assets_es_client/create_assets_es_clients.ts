@@ -53,16 +53,18 @@ export async function createEntitiesESClient({
 
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-  const [entitiesLatestIndexPattern, historyLatestIndexPattern] = await Promise.all([
-    entitiesDataAccessStart.services.indexPatternService.indexPatternByType(EntityType.SERVICE, {
-      datasets: 'latest',
+  const {
+    latestIndexPattern: entitiesLatestIndexPattern,
+    historyIndexPattern: entitiesHistoryIndexPattern,
+  } = await entitiesDataAccessStart.services.indexPatternService.indexPatternByType(
+    EntityType.SERVICE,
+    {
       soClient: coreContext.savedObjects.client,
-    }),
-    entitiesDataAccessStart.services.indexPatternService.indexPatternByType(EntityType.SERVICE, {
-      datasets: 'history',
-      soClient: coreContext.savedObjects.client,
-    }),
-  ]);
+    }
+  );
+  if (!entitiesLatestIndexPattern || !entitiesHistoryIndexPattern) {
+    throw new Error('Failed to resolve entity index patterns');
+  }
 
   function search<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(
     indexName: string,
@@ -102,7 +104,7 @@ export async function createEntitiesESClient({
       operationName: string,
       searchRequest: TSearchRequest
     ): Promise<InferSearchResponseOf<TDocument, TSearchRequest>> {
-      return search(historyLatestIndexPattern, operationName, searchRequest);
+      return search(entitiesHistoryIndexPattern, operationName, searchRequest);
     },
 
     async msearch<TDocument = unknown, TSearchRequest extends ESSearchRequest = ESSearchRequest>(

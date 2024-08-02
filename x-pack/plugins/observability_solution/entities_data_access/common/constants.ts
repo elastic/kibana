@@ -9,4 +9,7 @@ export const ENTITY_BASE_PREFIX = 'entities' as const;
 export const ENTITY_HISTORY = 'history' as const;
 export const ENTITY_LATEST = 'latest' as const;
 
+export type SchemaVersionString = `v${number}`;
+export type DatasetString = typeof ENTITY_LATEST | typeof ENTITY_HISTORY;
+
 export const SO_ENTITY_DEFINITION_TYPE = 'entity-definition';
