@@ -25,6 +25,14 @@ export async function validatePrototypeDocument(
       ? await readDocument(prototypeDocumentOrString)
       : prototypeDocumentOrString;
 
+  if (prototypeDocument.servers && !Array.isArray(prototypeDocument.servers)) {
+    throw new Error(`Prototype document's ${chalk.bold('servers')} must be an array`);
+  }
+
+  if (prototypeDocument.tags && !Array.isArray(prototypeDocument.tags)) {
+    throw new Error(`Prototype document's ${chalk.bold('tags')} must be an array`);
+  }
+
   if (prototypeDocument.security && !prototypeDocument.components?.securitySchemes) {
     throw new Error(
       `Prototype document must contain ${chalk.bold(
