@@ -1255,11 +1255,6 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) {
     if (!indexPattern.id) return;
-    /*
-    if (!(await this.getCanSave())) {
-      throw new DataViewInsufficientAccessError(indexPattern.id);
-    }
-    */
 
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
