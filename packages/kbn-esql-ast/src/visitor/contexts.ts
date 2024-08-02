@@ -18,11 +18,12 @@ import type {
   ESQLAstNodeWithArgs,
   ESQLColumn,
   ESQLCommandOption,
+  ESQLDecimalLiteral,
   ESQLFunction,
   ESQLInlineCast,
+  ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
-  ESQLNumberLiteral,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -260,10 +261,14 @@ export class LimitCommandVisitorContext<
   /**
    * @returns The first numeric literal argument of the command.
    */
-  public numericLiteral(): ESQLNumberLiteral | undefined {
+  public numericLiteral(): ESQLIntegerLiteral | ESQLDecimalLiteral | undefined {
     const arg = firstItem(this.node.args);
 
-    if (arg && arg.type === 'literal' && arg.literalType === 'number') {
+    if (
+      arg &&
+      arg.type === 'literal' &&
+      (arg.literalType === 'integer' || arg.literalType === 'decimal')
+    ) {
       return arg;
     }
   }

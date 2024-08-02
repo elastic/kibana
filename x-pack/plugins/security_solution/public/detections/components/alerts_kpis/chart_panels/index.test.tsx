@@ -149,7 +149,6 @@ const resetGroupByFields = () => {
 describe('ChartPanels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -163,19 +162,7 @@ describe('ChartPanels', () => {
     });
   });
 
-  test('it renders the chart selector when alertsPageChartsEnabled is false', async () => {
-    render(
-      <TestProviders>
-        <ChartPanels {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('chartSelect')).toBeInTheDocument();
-    });
-  });
-
-  test('it renders the chart selector tabs when alertsPageChartsEnabled is true and toggle is true', async () => {
+  test('when toggle is true, renders the chart selector tabs', async () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
     render(
@@ -189,7 +176,7 @@ describe('ChartPanels', () => {
     });
   });
 
-  test('it renders the chart collapse when alertsPageChartsEnabled is true and toggle is false', async () => {
+  test('when toggle is false, renders the chart collapse', async () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
     render(
@@ -465,7 +452,6 @@ describe('ChartPanels', () => {
       ...defaultAlertSettings,
       alertViewSelection: 'charts',
     });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     render(
       <TestProviders>
         <ChartPanels {...defaultProps} isLoadingIndexPattern={true} />
