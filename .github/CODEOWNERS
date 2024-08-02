@@ -46,6 +46,7 @@ x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
@@ -1741,8 +1742,9 @@ packages/react @elastic/appex-sharedux
 /plugins/data_views/docs/openapi              @elastic/platform-docs
 oas_docs/.spectral.yaml                       @elastic/platform-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
-oas_docs/kibana.serverless.yaml               @elastic/platform-docs
+oas_docs/kibana.info.yaml                     @elastic/platform-docs
 oas_docs/makefile                             @elastic/platform-docs
+oas_docs/overlays                             @elastic/platform-docs
 
 # Plugin manifests
 /src/plugins/**/kibana.jsonc @elastic/kibana-core
