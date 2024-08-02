@@ -56,8 +56,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   hasChanged: () => boolean;
   /**
-   * Initializes the state by the given saved search and starts syncing the state with the URL
-   * @param currentSavedSearch
+   * Initializes the app state and starts syncing it with the URL
    */
   initAndSync: () => () => void;
   /**
