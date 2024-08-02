@@ -1767,10 +1767,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.4.0":
-  version "95.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.4.0.tgz#57ac111c2a3e8125db244928a95787bbb2f318c8"
-  integrity sha512-UXmn+xgJj4pwq6MV7xMjM79GN+taTv7LBfrtRfurGwhkmvXJrOjMXWq+mfR8rU44lOS2R4AwzH5gcCBjAafLsA==
+"@elastic/eui@95.5.0":
+  version "95.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.5.0.tgz#a138a17279b06cd076bd400f246ef377afe44453"
+  integrity sha512-znXhppkr8UNuppxNFu1IGHq3Q8EfMBDtXTYXU/JK5ELgGz0Rd8Syhaw3TJSBoiwufATcmSrFbXCF2grXbY07Kw==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -16518,10 +16518,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.7.1:
-  version "4.7.1"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.7.1.tgz#39c30172db7d4d2e9af4dd87fc35f5f5171788b3"
-  integrity sha512-2OWhcjKD6O+S9ZuvywFiqXM7ifHnSUxaOTmCzprxEf/VfBonEBEfyyQ5Omymtm4xQ5Mqh18xKRUBNT74Xup0VQ==
+elastic-apm-node@^4.7.2:
+  version "4.7.2"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.7.2.tgz#880b3df8e2266aac70f6370f916b0e66d5063455"
+  integrity sha512-9jsvAeHU6wztM+qUWJvgJCgdCVUI1sfg6a9quXmgkcjUJmRDJG0trfTScELZrfK5VJBQ88LVl05Q0nJW2j6TsA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"

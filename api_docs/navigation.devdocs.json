@@ -98,7 +98,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(_core: ",
+              "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "public",
@@ -124,7 +124,7 @@
                 "id": "def-public.NavigationPublicPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "_core",
+                "label": "core",
                 "description": [],
                 "signature": [
                   {
