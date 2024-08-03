@@ -19,6 +19,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
+import type { EventTracker } from '../analytics';
 import type { ConfigType } from '../config';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
@@ -28,12 +29,12 @@ interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
-  solutionNavExperiment: Promise<boolean>;
+  eventTracker: EventTracker;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, config, solutionNavExperiment }: CreateParams) {
+  create({ getStartServices, spacesManager, config, eventTracker }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -51,7 +52,7 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome } = coreStart;
+        const { notifications, application, chrome, http } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -63,10 +64,11 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
             />
           );
         };
@@ -89,7 +91,8 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
             />
           );
         };
@@ -116,7 +119,8 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              solutionNavExperiment={solutionNavExperiment}
+              allowSolutionVisibility={config.allowSolutionVisibility}
+              eventTracker={eventTracker}
             />
           );
         };
