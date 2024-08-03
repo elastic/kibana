@@ -68,7 +68,7 @@ export const ESQLDetailsPanel = (props: ESQLDetailsPanelProps) => {
             dataFormattedForFieldBrowser={timelineData}
             eventId={data.id}
             scopeId={scopeId}
-            columnsProvider={columnsProvider}
+            getColumns={columnsProvider}
           />
         ),
       },

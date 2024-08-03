@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import memoizeOne from 'memoize-one';
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';

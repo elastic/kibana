@@ -170,6 +170,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           });
         } else {
           openFlyout({
+            shouldSync: false,
             right: {
               id: ESQLDetailsPanelKey,
               params: {
