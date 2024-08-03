@@ -249,11 +249,7 @@ describe('taskTypeDictionary', () => {
       expect(logger.error).toHaveBeenCalledWith(
         `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,Normal => 50`
       );
-      expect(() => {
-        definitions.get('foo');
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported task type \\"foo\\". Supported types are "`
-      );
+      expect(definitions.get('foo')).toEqual(undefined);
     });
 
     it('uses task cost if specified', () => {

@@ -120,6 +120,7 @@ export function ApmMainTemplate({
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
   const showCustomEmptyState =
     !hasApmData &&
+    !isLoading &&
     isEntityCentricExperienceSettingEnabled &&
     serviceInventoryViewLocalStorageSetting === ServiceInventoryView.classic;
 
