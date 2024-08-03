@@ -6,15 +6,9 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getSourcererScopeId } from '../../../../helpers';
-import { SecurityCellActionType } from '../../../../app/actions/constants';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { FlyoutCellActions } from '../../../shared/components/flyout_cell_actions';
 
 interface CellActionsProps {
   /**
@@ -41,25 +35,16 @@ interface CellActionsProps {
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
 
-  const data = useMemo(() => ({ field, value }), [field, value]);
-  const metadata = useMemo(() => ({ scopeId, isObjectArray }), [scopeId, isObjectArray]);
-  const disabledActionTypes = useMemo(
-    () => (isPreview ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN] : []),
-    [isPreview]
-  );
-
   return (
-    <SecurityCellActions
-      data={data}
-      mode={CellActionsMode.HOVER_RIGHT}
-      triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-      visibleCellActions={6}
-      sourcererScopeId={getSourcererScopeId(scopeId)}
-      metadata={metadata}
-      disabledActionTypes={disabledActionTypes}
+    <FlyoutCellActions
+      field={field}
+      value={value}
+      isObjectArray={isObjectArray}
+      scopeId={scopeId}
+      isPreview={isPreview}
     >
       {children}
-    </SecurityCellActions>
+    </FlyoutCellActions>
   );
 };
 

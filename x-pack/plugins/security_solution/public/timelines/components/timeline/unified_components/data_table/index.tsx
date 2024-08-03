@@ -14,6 +14,7 @@ import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { ESQLDetailsPanelKey } from '../../../../../flyout/esql_details/constants';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
@@ -154,22 +155,36 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventData._id,
-              indexName: eventData.ecs._index ?? '',
-              scopeId: timelineId,
+        const params = {
+          scopeId: timelineId,
+          id: isTextBasedQuery ? eventData?.raw?._id : eventData._id,
+          indexName: isTextBasedQuery ? eventData?.raw?._index : eventData?.ecs?._index,
+        };
+
+        if (params.id && params.indexName) {
+          openFlyout({
+            right: {
+              id: DocumentDetailsRightPanelKey,
+              params,
             },
-          },
-        });
+          });
+        } else {
+          openFlyout({
+            right: {
+              id: ESQLDetailsPanelKey,
+              params: {
+                scopeId: timelineId,
+                data: eventData,
+              },
+            },
+          });
+        }
         telemetry.reportDetailsFlyoutOpened({
           location: timelineId,
           panel: 'right',
         });
       },
-      [openFlyout, timelineId, telemetry]
+      [isTextBasedQuery, telemetry, timelineId, openFlyout]
     );
 
     const onSetExpandedDoc = useCallback(
@@ -398,7 +413,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
-            renderDocumentView={isTextBasedQuery ? undefined : EmptyComponent}
+            renderDocumentView={EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
             useNewFieldsApi={true}

@@ -15,14 +15,12 @@ import { CellActions } from '../components/cell_actions';
 import * as i18n from '../../../../common/components/event_details/translations';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
-import { EventFieldsBrowser } from '../../../../common/components/event_details/event_fields_browser';
-import { TimelineTabs } from '../../../../../common/types';
+import { FlyoutTableTab } from '../../../shared/components/flyout_table_tab';
 
 export const getColumns: ColumnsProvider = ({
   browserFields,
   eventId,
   contextId,
-  scopeId,
   getLinkValue,
   isDraggable,
 }) => [
@@ -76,14 +74,11 @@ export const TableTab = memo(() => {
     useDocumentDetailsContext();
 
   return (
-    <EventFieldsBrowser
+    <FlyoutTableTab
       browserFields={browserFields}
-      data={dataFormattedForFieldBrowser}
+      dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
       eventId={eventId}
-      isDraggable={false}
-      timelineTabType={TimelineTabs.query}
       scopeId={scopeId}
-      isReadOnly={false}
       columnsProvider={getColumns}
     />
   );

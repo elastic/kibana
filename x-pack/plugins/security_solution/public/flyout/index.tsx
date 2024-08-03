@@ -41,6 +41,9 @@ import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right
 import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
+import { ESQLDetailsPanelKey } from './esql_details/constants';
+import type { ESQLDetailsPanelProps } from './esql_details/types';
+import { ESQLDetailsPanel } from './esql_details/esql_right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -130,6 +133,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: NetworkPanelKey,
     component: (props) => <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} />,
+  },
+  {
+    key: ESQLDetailsPanelKey,
+    component: (props) => <ESQLDetailsPanel {...(props as ESQLDetailsPanelProps)} />,
   },
 ];
 

@@ -322,7 +322,6 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
             onSort={onSort}
             dataLoadingState={dataLoadingState}
             totalCount={data.rows.length}
-            showExpandedDetails={false}
             activeTab={TimelineTabs.esql}
             isTextBasedQuery={true}
             dataView={esqlDataView ?? securityDataView}

@@ -37,3 +37,6 @@ export const HEADER_ACTIONS_TEST_ID = `${FLYOUT_NAVIGATION_TEST_ID}Actions` as c
 export const TITLE_HEADER_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Icon`;
 export const TITLE_HEADER_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const TITLE_LINK_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}LinkIcon`;
+
+export const JSON_TAB_CONTENT_TEST_ID = 'jsonView' as const;
+export const JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID = `${PREFIX}JsonTabCopyToClipboard` as const;
