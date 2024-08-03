@@ -1212,9 +1212,6 @@ export class DataViewsService {
    */
 
   async createSavedObject(dataView: AbstractDataView, overwrite = false) {
-    if (!(await this.getCanSave())) {
-      throw new DataViewInsufficientAccessError();
-    }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
     if (dupe) {
@@ -1226,18 +1223,27 @@ export class DataViewsService {
     }
 
     const body = dataView.getAsSavedObjectBody();
+    try {
+      const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
+        body,
+        {
+          id: dataView.id,
+          initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
+          overwrite,
+        }
+      )) as SavedObject<DataViewAttributes>;
 
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
-      id: dataView.id,
-      initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
-      overwrite,
-    })) as SavedObject<DataViewAttributes>;
-
-    if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      if (this.savedObjectsCache) {
+        this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      }
+      dataView.version = response.version;
+      dataView.namespaces = response.namespaces || [];
+    } catch (err) {
+      if (err?.body?.statusCode === 403) {
+        throw new DataViewInsufficientAccessError();
+      }
+      throw err;
     }
-    dataView.version = response.version;
-    dataView.namespaces = response.namespaces || [];
   }
 
   /**

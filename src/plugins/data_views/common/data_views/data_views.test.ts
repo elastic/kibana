@@ -602,12 +602,16 @@ describe('IndexPatterns', () => {
 
   test('createAndSave will throw if insufficient access', async () => {
     const title = 'kibana-*';
+    savedObjectsClientNoAccess.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClientNoAccess.create = jest.fn().mockRejectedValue({ body: { statusCode: 403 } });
 
     await expect(indexPatternsNoAccess.createAndSave({ title })).rejects.toMatchSnapshot();
   });
 
   test('createAndSaveDataViewLazy will throw if insufficient access', async () => {
     const title = 'kibana-*';
+    savedObjectsClientNoAccess.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClientNoAccess.create = jest.fn().mockRejectedValue({ body: { statusCode: 403 } });
 
     await expect(
       indexPatternsNoAccess.createAndSaveDataViewLazy({ title })
