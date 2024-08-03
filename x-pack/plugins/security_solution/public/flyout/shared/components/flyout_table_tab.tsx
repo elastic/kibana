@@ -5,42 +5,194 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { getOr, sortBy } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
+import { css } from '@emotion/react';
+import { type EuiBasicTableColumn, EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { ColumnsProvider } from '../../../common/components/event_details/event_fields_browser';
-import { EventFieldsBrowser } from '../../../common/components/event_details/event_fields_browser';
-import { TimelineTabs } from '../../../../common/types';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
+import { getAllFieldsByName } from '../../../common/containers/source';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
+import { isInTableScope, isTimelineScope } from '../../../helpers';
+
+const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
+
+const PLACEHOLDER = i18n.translate('xpack.securitySolution.flyout.table.filterPlaceholderLabel', {
+  defaultMessage: 'Filter by field or value...',
+});
+
+export const FIELD = i18n.translate('xpack.securitySolution.flyout.table.fieldCellLabel', {
+  defaultMessage: 'Field',
+});
+
+export const VALUE = i18n.translate('xpack.securitySolution.flyout.table.valueCellLabel', {
+  defaultMessage: 'Value',
+});
 
 /**
- * Table view displayed in the document details expandable flyout right section
+ * Defines the behavior of the search input that appears above the table of data
  */
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
+const search = {
+  box: {
+    incremental: true,
+    placeholder: PLACEHOLDER,
+    schema: true,
+    'data-test-subj': TABLE_TAB_SEARCH_INPUT_TEST_ID,
+  },
+};
+
+/**
+ * Retrieve the correct field from the BrowserField
+ */
+export const getFieldFromBrowserField = memoizeOne(
+  (field: string, browserFields: BrowserFields): FieldSpec | undefined => {
+    const category = getCategory(field);
+
+    return browserFields[category]?.fields?.[field] as FieldSpec;
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
+
+export type ColumnsProvider = (providerOptions: {
+  /**
+   * An object containing fields by type
+   */
+  browserFields: BrowserFields;
+  /**
+   * Id of the document
+   */
+  eventId: string;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   */
+  scopeId: string;
+  /**
+   * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
+   */
+  getLinkValue: (field: string) => string | null;
+}) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;
+
+/**
+ * Table view displayed in the document details expandable flyout right section Table tab
+ */
 export const FlyoutTableTab = memo(
   ({
     eventId,
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
-    columnsProvider,
+    getColumns,
   }: {
     eventId: string;
     browserFields: BrowserFields;
     dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
     scopeId: string;
-    columnsProvider: ColumnsProvider;
+    getColumns: ColumnsProvider;
   }) => {
+    const smallFontSize = useEuiFontSize('xs').fontSize;
+
+    const [pagination, setPagination] = useState<{ pageIndex: number }>({
+      pageIndex: 0,
+    });
+    const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
+      setPagination({ pageIndex: index });
+    }, []);
+
+    const getScope = useMemo(() => {
+      if (isTimelineScope(scopeId)) {
+        return timelineSelectors.getTimelineByIdSelector();
+      } else if (isInTableScope(scopeId)) {
+        return dataTableSelectors.getTableByIdSelector();
+      }
+    }, [scopeId]);
+
+    const defaults = useMemo(
+      () => (isTimelineScope(scopeId) ? timelineDefaults : tableDefaults),
+      [scopeId]
+    );
+
+    const columnHeaders = useDeepEqualSelector((state) => {
+      const { columns } = (getScope && getScope(state, scopeId)) ?? defaults;
+      return columns;
+    });
+
+    const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
+
+    const items = useMemo(
+      () =>
+        sortBy(['field'], dataFormattedForFieldBrowser).map((item, i) => ({
+          ...item,
+          ...fieldsByName[item.field],
+          valuesConcatenated: item.values != null ? item.values.join() : '',
+          ariaRowindex: i + 1,
+        })),
+      [dataFormattedForFieldBrowser, fieldsByName]
+    );
+
+    const getLinkValue = useCallback(
+      (field: string) => {
+        const columnHeader = columnHeaders.find((col) => col.id === field);
+        if (!columnHeader || !columnHeader.linkField) {
+          return null;
+        }
+        const linkFieldData = (dataFormattedForFieldBrowser ?? []).find(
+          (d) => d.field === columnHeader.linkField
+        );
+        const linkFieldValue = getOr(null, 'originalValue', linkFieldData);
+        return Array.isArray(linkFieldValue) ? linkFieldValue[0] : linkFieldValue;
+      },
+      [dataFormattedForFieldBrowser, columnHeaders]
+    );
+
+    // forces the rows of the table to render smaller fonts
+    const onSetRowProps = useCallback(
+      ({ field }: TimelineEventsDetailsItem) => ({
+        className: 'flyout-table-row-small-font',
+        'data-test-subj': `flyout-table-row-${field}`,
+      }),
+      []
+    );
+
+    const columns = useMemo(
+      () =>
+        getColumns({
+          browserFields,
+          eventId,
+          scopeId,
+          getLinkValue,
+        }),
+      [getColumns, browserFields, eventId, scopeId, getLinkValue]
+    );
+
     return (
-      <EventFieldsBrowser
-        browserFields={browserFields}
-        data={dataFormattedForFieldBrowser}
-        eventId={eventId}
-        isDraggable={false}
-        timelineTabType={TimelineTabs.query} // This is done to allow filter actions to update the query tab only
-        scopeId={scopeId}
-        isReadOnly={false}
-        columnsProvider={columnsProvider}
+      <EuiInMemoryTable
+        items={items}
+        itemId="field"
+        columns={columns}
+        onTableChange={onTableChange}
+        pagination={{
+          ...pagination,
+          pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+        }}
+        rowProps={onSetRowProps}
+        search={search}
+        sorting={false}
+        data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        css={css`
+          .euiTableRow {
+            font-size: ${smallFontSize};
+          }
+        `}
       />
     );
   }
 );
+
 FlyoutTableTab.displayName = 'FlyoutTableTab';

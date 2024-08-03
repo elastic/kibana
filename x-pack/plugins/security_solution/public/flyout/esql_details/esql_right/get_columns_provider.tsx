@@ -6,38 +6,40 @@
  */
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import * as i18n from '../../../common/components/event_details/translations';
-import { getFieldFromBrowserField } from '../../../common/components/event_details/columns';
-import type { ColumnsProvider } from '../../../common/components/event_details/event_fields_browser';
-import { FieldNameCell } from '../../../common/components/event_details/table/field_name_cell';
-import { FieldValueCell } from '../../../common/components/event_details/table/field_value_cell';
+
 import type { EventFieldsData } from '../../../common/components/event_details/types';
 import { FlyoutCellActions } from '../../shared/components/flyout_cell_actions';
+import {
+  getFieldFromBrowserField,
+  type ColumnsProvider,
+  FIELD,
+  VALUE,
+} from '../../shared/components/flyout_table_tab';
+import { TableFieldNameCell } from '../../shared/components/table_field_name_cell';
+import { TableFieldValueCell } from '../../shared/components/table_field_value_cell';
 
 // TODO: De-dupe with other getColumnsProvider as the only thing that needs to be different is the cell actions
 export const getColumnsProvider =
   (scopeId: string): ColumnsProvider =>
-  ({ browserFields, eventId, contextId, getLinkValue, isDraggable }) =>
+  ({ browserFields, eventId, getLinkValue }) =>
     [
       {
         field: 'field',
         name: (
           <EuiText size="xs">
-            <strong>{i18n.FIELD}</strong>
+            <strong>{FIELD}</strong>
           </EuiText>
         ),
         width: '30%',
         render: (field, data) => {
-          return (
-            <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
-          );
+          return <TableFieldNameCell dataType={(data as EventFieldsData).type} field={field} />;
         },
       },
       {
         field: 'values',
         name: (
           <EuiText size="xs">
-            <strong>{i18n.VALUE}</strong>
+            <strong>{VALUE}</strong>
           </EuiText>
         ),
         width: '70%',
@@ -51,13 +53,12 @@ export const getColumnsProvider =
               value={values}
               isObjectArray={data.isObjectArray}
             >
-              <FieldValueCell
-                contextId={contextId}
+              <TableFieldValueCell
+                contextId={scopeId}
                 data={data as EventFieldsData}
                 eventId={eventId}
                 fieldFromBrowserField={fieldFromBrowserField}
                 getLinkValue={getLinkValue}
-                isDraggable={isDraggable}
                 values={values}
               />
             </FlyoutCellActions>

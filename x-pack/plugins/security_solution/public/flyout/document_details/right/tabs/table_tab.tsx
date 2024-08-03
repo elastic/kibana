@@ -6,43 +6,50 @@
  */
 
 import React, { memo } from 'react';
+import memoizeOne from 'memoize-one';
 import { EuiText } from '@elastic/eui';
-import { getFieldFromBrowserField } from '../../../../common/components/event_details/columns';
+import { i18n } from '@kbn/i18n';
+import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { TableFieldNameCell } from '../../../shared/components/table_field_name_cell';
+import { TableFieldValueCell } from '../../../shared/components/table_field_value_cell';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
-import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
 import { CellActions } from '../components/cell_actions';
-import * as i18n from '../../../../common/components/event_details/translations';
 import { useDocumentDetailsContext } from '../../shared/context';
-import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
-import { FlyoutTableTab } from '../../../shared/components/flyout_table_tab';
+import type { ColumnsProvider } from '../../../shared/components/flyout_table_tab';
+import { FlyoutTableTab, FIELD, VALUE } from '../../../shared/components/flyout_table_tab';
 
-export const getColumns: ColumnsProvider = ({
-  browserFields,
-  eventId,
-  contextId,
-  getLinkValue,
-  isDraggable,
-}) => [
+/**
+ * Retrieve the correct field from the BrowserField
+ */
+export const getFieldFromBrowserField = memoizeOne(
+  (field: string, browserFields: BrowserFields): FieldSpec | undefined => {
+    const category = getCategory(field);
+
+    return browserFields[category]?.fields?.[field] as FieldSpec;
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
+
+export const getColumns: ColumnsProvider = ({ browserFields, eventId, scopeId, getLinkValue }) => [
   {
     field: 'field',
     name: (
       <EuiText size="xs">
-        <strong>{i18n.FIELD}</strong>
+        <strong>{FIELD}</strong>
       </EuiText>
     ),
     width: '30%',
     render: (field, data) => {
-      return (
-        <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
-      );
+      return <TableFieldNameCell dataType={(data as EventFieldsData).type} field={field} />;
     },
   },
   {
     field: 'values',
     name: (
       <EuiText size="xs">
-        <strong>{i18n.VALUE}</strong>
+        <strong>{VALUE}</strong>
       </EuiText>
     ),
     width: '70%',
@@ -50,13 +57,12 @@ export const getColumns: ColumnsProvider = ({
       const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
       return (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
-          <FieldValueCell
-            contextId={contextId}
+          <TableFieldValueCell
+            contextId={scopeId}
             data={data as EventFieldsData}
             eventId={eventId}
             fieldFromBrowserField={fieldFromBrowserField}
             getLinkValue={getLinkValue}
-            isDraggable={isDraggable}
             values={values}
           />
         </CellActions>
@@ -66,9 +72,8 @@ export const getColumns: ColumnsProvider = ({
 ];
 
 /**
- * Table view displayed in the document details expandable flyout right section
+ * Table view displayed in the document details expandable flyout right section Table tab
  */
-// TODO: MOVE TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export const TableTab = memo(() => {
   const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
     useDocumentDetailsContext();
@@ -79,7 +84,7 @@ export const TableTab = memo(() => {
       dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
       eventId={eventId}
       scopeId={scopeId}
-      columnsProvider={getColumns}
+      getColumns={getColumns}
     />
   );
 });

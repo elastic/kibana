@@ -38,5 +38,7 @@ export const TITLE_HEADER_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSu
 export const TITLE_HEADER_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const TITLE_LINK_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}LinkIcon`;
 
+export const TABLE_TAB_CONTENT_TEST_ID = `${PREFIX}DocumentTable` as const;
+export const TABLE_TAB_SEARCH_INPUT_TEST_ID = `${PREFIX}DocumentTableSearchInput` as const;
 export const JSON_TAB_CONTENT_TEST_ID = 'jsonView' as const;
 export const JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID = `${PREFIX}JsonTabCopyToClipboard` as const;
