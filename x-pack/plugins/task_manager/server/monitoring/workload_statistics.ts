@@ -273,8 +273,8 @@ export function createWorkloadAggregator({
       let totalCost = 0;
       const taskTypeSummary = taskTypes.reduce((acc, bucket) => {
         const value = bucket as TaskTypeWithStatusBucket;
-        try {
-          const taskDef = taskDefinitions.get(value.key as string);
+        const taskDef = taskDefinitions.get(value.key as string);
+        if (taskDef) {
           const cost = value.doc_count * taskDef?.cost ?? TaskCost.Normal;
 
           totalCost += cost;
@@ -285,7 +285,7 @@ export function createWorkloadAggregator({
               status: mapValues(keyBy(value.status.buckets, 'key'), 'doc_count'),
             },
           });
-        } catch (err) {
+        } else {
           // task type is not registered with dictionary, do not add to summary
           return acc;
         }
@@ -556,10 +556,10 @@ interface DateRangeBucket {
 function getTotalCost(taskTypeBuckets: TaskTypeBucket[], definitions: TaskTypeDictionary): number {
   let cost = 0;
   for (const bucket of taskTypeBuckets) {
-    try {
-      const taskDef = definitions.get(bucket.key as string);
+    const taskDef = definitions.get(bucket.key as string);
+    if (taskDef) {
       cost += bucket.doc_count * taskDef?.cost ?? TaskCost.Normal;
-    } catch (err) {
+    } else {
       // task type is not registered with dictionary, do not add to cost
     }
   }

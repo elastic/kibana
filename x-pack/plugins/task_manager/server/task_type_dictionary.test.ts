@@ -284,11 +284,7 @@ describe('taskTypeDictionary', () => {
       expect(logger.error).toHaveBeenCalledWith(
         `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,ExtraLarge => 10`
       );
-      expect(() => {
-        definitions.get('foo');
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported task type \\"foo\\". Supported types are "`
-      );
+      expect(definitions.get('foo')).toEqual(undefined);
     });
 
     it('throws error when registering duplicate task type', () => {
