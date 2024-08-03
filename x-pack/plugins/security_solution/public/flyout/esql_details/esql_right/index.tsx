@@ -92,7 +92,6 @@ export const ESQLDetailsPanel = (props: ESQLDetailsPanelProps) => {
     return tabs.find((obj) => obj.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);
 
-
   return (
     <>
       <FlyoutHeader hasBorder>
