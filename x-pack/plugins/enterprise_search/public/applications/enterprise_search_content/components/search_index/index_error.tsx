@@ -93,7 +93,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
     const fetchErrors = async () => {
       const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
       const endpoints = await ml?.mlApi?.inferenceModels.getAllInferenceEndpoints();
-      if (!trainedModelStats || !endpoints) {
+      if (!trainedModelStats || !endpoints?.endpoints) {
         return [];
       }
 
