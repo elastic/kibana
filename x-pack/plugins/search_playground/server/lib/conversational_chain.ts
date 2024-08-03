@@ -236,6 +236,10 @@ class ConversationalChainFn {
                   type: 'prompt_token_count',
                   count: getTokenEstimateFromMessages(msg),
                 });
+                data.appendMessageAnnotation({
+                  type: 'search_query',
+                  question,
+                });
               }
             },
             // callback for prompt based models (Bedrock uses ActionsClientLlm)
