@@ -107,7 +107,8 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
               error: i18n.translate(
                 'xpack.enterpriseSearch.indexOverview.indexErrors.missingModelError',
                 {
-                  defaultMessage: 'Inference endpoint not found for inference endpoint {inferenceId}',
+                  defaultMessage:
+                    'Inference endpoint not found for inference endpoint {inferenceId}',
                   values: {
                     inferenceId: field.source.inference_id as string,
                   },
