@@ -76,6 +76,7 @@
     "@kbn/data-views-plugin",
     "@kbn/core-http-router-server-internal",
     "@kbn/presentation-publishing",
+    "@kbn/securitysolution-rules",
   ],
   "exclude": [
     "target/**/*",
