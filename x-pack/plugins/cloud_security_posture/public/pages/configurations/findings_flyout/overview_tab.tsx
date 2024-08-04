@@ -26,7 +26,7 @@ import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_PATTERN,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
 } from '../../../../common/constants';
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -166,7 +166,7 @@ export const OverviewTab = ({
   ruleFlyoutLink: string;
 }) => {
   const { discover } = useKibana().services;
-  const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const latestFindingsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
 
   const discoverIndexLink = useMemo(
     () =>
