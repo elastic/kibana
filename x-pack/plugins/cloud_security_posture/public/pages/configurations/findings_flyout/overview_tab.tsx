@@ -25,8 +25,8 @@ import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
@@ -99,9 +99,9 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
       defaultMessage: 'Index',
     }),
     description: discoverIndexLink ? (
-      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+      <EuiLink href={discoverIndexLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
     ) : (
-      LATEST_FINDINGS_INDEX_DEFAULT_NS
+      CDR_MISCONFIGURATIONS_INDEX_PATTERN
     ),
   },
 ];
