@@ -18,6 +18,7 @@ import { DatasetQualityFtrContextProvider } from './common/services';
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');
   const synthtrace = getService('logSynthtraceEsClient');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const esClient = getService('es');
   const start = '2023-12-11T18:00:00.000Z';
@@ -50,7 +51,7 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
     let internalReqHeader: InternalRequestHeader;
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       return synthtrace.index([
         timerange(start, end)
           .interval('1m')

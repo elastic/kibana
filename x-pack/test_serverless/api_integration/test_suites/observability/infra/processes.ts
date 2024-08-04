@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('API /metrics/process_list', () => {
     let roleAuthc: RoleCredentials;
@@ -35,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('works', async () => {
       const response = await supertestWithoutAuth
         .post('/api/metrics/process_list')
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send(
           ProcessListAPIRequestRT.encode({

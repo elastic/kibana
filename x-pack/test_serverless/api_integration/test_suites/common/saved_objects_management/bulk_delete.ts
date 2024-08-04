@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
@@ -61,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return 200 for an existing object', async () => {
       const response = await supertestWithoutAuth
         .post(endpoint)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send([validObject])
         .expect(200);
@@ -73,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return error for invalid object type', async () => {
       const response = await supertestWithoutAuth
         .post(endpoint)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send([invalidObject])
         .expect(200);
@@ -84,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return mix of successes and errors', async () => {
       const response = await supertestWithoutAuth
         .post(endpoint)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send([validObject, invalidObject])
         .expect(200);

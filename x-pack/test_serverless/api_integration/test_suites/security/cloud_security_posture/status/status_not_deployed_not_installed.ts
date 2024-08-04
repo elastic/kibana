@@ -16,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
 
   describe('GET /internal/cloud_security_posture/status', function () {
@@ -28,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalRequestHeader = svlUserManager.getInternalRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {

@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -24,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     it(`returns a 400 when an invalid app id is provided`, async () => {
       const { body } = await supertestWithoutAuth
         .post('/api/core/capabilities')
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .send({
           applications: ['dashboard', 'discover', 'bad%app'],
         })

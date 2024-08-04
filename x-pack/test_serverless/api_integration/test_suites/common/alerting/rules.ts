@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAdmin: RoleCredentials;
@@ -52,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);

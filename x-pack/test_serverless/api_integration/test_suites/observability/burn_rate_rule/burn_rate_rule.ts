@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const sloApi = getService('sloApi');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
@@ -42,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {

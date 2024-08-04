@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
 
   describe('find_cases', () => {
@@ -27,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('403 when calling find cases API', async () => {
       await supertestWithoutAuth
         .get(`${CASES_URL}/_find`)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(403);
     });

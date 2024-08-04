@@ -65,6 +65,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe.skip('Rule details', () => {
     let ruleIdList: string[];
     let connectorIdList: string[];
+
+    const svlCommonApi = getService('svlCommonApi');
     const svlUserManager = getService('svlUserManager');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     let roleAuthc: RoleCredentials;
@@ -72,7 +74,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await svlCommonPage.loginAsViewer();
     });
 

@@ -11,6 +11,7 @@ import { dataViewConfig } from '../../constants';
 import { RoleCredentials, InternalRequestHeader } from '../../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -19,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);

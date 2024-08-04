@@ -15,6 +15,7 @@ import { APMFtrContextProvider } from '../common/services';
 export default function ({ getService }: APMFtrContextProvider) {
   const apmApiClient = getService('apmApiClient');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const synthtrace = getService('synthtrace');
 
   const start = new Date('2024-06-01T00:00:00.000Z').getTime();
@@ -51,7 +52,7 @@ export default function ({ getService }: APMFtrContextProvider) {
           })
         );
 
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
 
       return synthtraceEsClient.index(Readable.from(Array.from(events)));

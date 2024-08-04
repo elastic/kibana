@@ -13,6 +13,7 @@ const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .post(`/api/saved_objects/_import`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(200);
@@ -91,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns the correct count for each included types', async () => {
         const { body } = await supertestWithoutAuth
           .post(apiUrl)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             typesToInclude: ['visualization'],
@@ -120,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns the count for each included types', async () => {
         const { body } = await supertestWithoutAuth
           .post(apiUrl)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             typesToInclude: defaultTypes,
@@ -138,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('only returns count for types to include', async () => {
         const { body } = await supertestWithoutAuth
           .post(apiUrl)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             typesToInclude: ['dashboard', 'search'],
@@ -154,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('filters on title when `searchString` is provided', async () => {
         const { body } = await supertestWithoutAuth
           .post(apiUrl)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             typesToInclude: defaultTypes,
@@ -173,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('includes all requested types even when none match the search', async () => {
         const { body } = await supertestWithoutAuth
           .post(apiUrl)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .send({
             typesToInclude: ['dashboard', 'search', 'visualization'],

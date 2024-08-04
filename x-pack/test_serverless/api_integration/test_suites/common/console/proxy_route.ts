@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertestWithoutAuth
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
           .set('kbn-xsrf', 'true')
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader);
         expect(response.header).to.have.property('warning');
       });

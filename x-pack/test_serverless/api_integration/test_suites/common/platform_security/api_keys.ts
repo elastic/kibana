@@ -12,6 +12,7 @@ import { RoleCredentials } from '../../../../shared/services';
 export default function ({ getService }: FtrProviderContext) {
   let roleMapping: { id: string; name: string; api_key: string; encoded: string };
   const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;

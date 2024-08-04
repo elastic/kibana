@@ -14,6 +14,7 @@ import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/se
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('filter fields', () => {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await es.index({
         index: 'helloworld1',
         refresh: true,

@@ -12,6 +12,7 @@ import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/
 const API_BASE_PATH = '/api/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlTemplatesHelpers = getService('svlTemplatesHelpers');
@@ -29,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Index templates', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {

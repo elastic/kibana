@@ -14,6 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
   const es = getService('es');
@@ -31,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('return apiKeys', async () => {
         const { body } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/api_keys`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
@@ -78,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.cookieHeader)
           .send(createBody)
           .expect(200);
@@ -91,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.cookieHeader)
           .send(createBody)
           .expect(200);
@@ -104,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send(createBody)
           .set(roleAuthc.cookieHeader)
           .expect(200);

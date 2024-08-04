@@ -31,6 +31,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -53,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
 
     beforeEach(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalRequestHeader = svlUserManager.getInternalRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
 
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');

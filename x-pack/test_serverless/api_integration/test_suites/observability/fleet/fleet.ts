@@ -14,6 +14,7 @@ import {
 } from '../../common/fleet/default_setup';
 
 export default function (ctx: FtrProviderContext) {
+  const svlCommonApi = ctx.getService('svlCommonApi');
   const svlUserManager = ctx.getService('svlUserManager');
   const supertestWithoutAuth = ctx.getService('supertestWithoutAuth');
 
@@ -24,7 +25,7 @@ export default function (ctx: FtrProviderContext) {
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       defaultFleetServerHostUrl = await expectDefaultFleetServer(ctx);
       expect(defaultFleetServerHostUrl).not.toBe('');
 

@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const es = getService('es');
   const rules = getService('rules');
   const testIndex = `test-index`;
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('stack connectors', function () {
     before(async () => {
@@ -39,13 +39,13 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         },
         secrets: {},
         connectorTypeId: '.index',
-        additionalRequestHeaders: svlUserManager.getInternalRequestHeader(),
+        additionalRequestHeaders: svlCommonApi.getInternalRequestHeader(),
       });
     });
 
     after(async () => {
-      await rules.api.deleteAllRules(svlUserManager.getInternalRequestHeader());
-      await actions.api.deleteAllConnectors(svlUserManager.getInternalRequestHeader());
+      await rules.api.deleteAllRules(svlCommonApi.getInternalRequestHeader());
+      await actions.api.deleteAllConnectors(svlCommonApi.getInternalRequestHeader());
       await es.indices.delete({ index: testIndex });
     });
 

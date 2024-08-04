@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     // fails on MKI, see https://github.com/elastic/kibana/issues/184273
     this.tags(['failsOnMKI']);
     const svlUserManager = getService('svlUserManager');
+    const svlCommonApi = getService('svlCommonApi');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     const esSupertest = getService('esSupertest');
@@ -61,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
     let internalRequestHeader: InternalRequestHeader;
 
     before(async () => {
-      internalRequestHeader = svlUserManager.getInternalRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     async function enablementPut(role: RoleName = 'admin', expectedStatus: number = 200) {

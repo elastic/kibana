@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         // it('login', async () => {
         //   const { body, status } = await supertestWithoutAuth
         //     .post('/internal/security/login')
-        //     .set(svlUserManager.getInternalRequestHeader()).set(roleAuthc.apiKeyHeader)
+        //     .set(svlCommonApi.getInternalRequestHeader()).set(roleAuthc.apiKeyHeader)
         //   svlCommonApi.assertApiNotFound(body, status);
         // });
 

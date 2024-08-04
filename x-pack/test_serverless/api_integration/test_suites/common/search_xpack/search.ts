@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   // but within Serverless tests it's typed as `supertest.SuperTest<supertest.Test>`. This causes TS errors
   // when accessing `loginResponse.headers`, so we cast it as `any` here to match the original tests.
   const supertestNoAuth = getService('supertestWithoutAuth') as any;
+  const svlCommonApi = getService('svlCommonApi');
 
   const shardDelayAgg = (delay: string) => ({
     aggs: {
@@ -69,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .set(roleAuthc.apiKeyHeader)
           .send({
@@ -98,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .set(roleAuthc.apiKeyHeader)
           .send({
@@ -128,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -155,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post(`/internal/search/ese/${id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             // TODO: API requests in Serverless require internal request headers
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set('kbn-xsrf', 'foo')
             .send({})
             .expect(200);
@@ -175,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -199,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({})
           .expect(200);
@@ -214,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(omit(svlUserManager.getInternalRequestHeader(), 'kbn-xsrf'))
+          .set(omit(svlCommonApi.getInternalRequestHeader(), 'kbn-xsrf'))
           .send({
             params: {
               body: {
@@ -234,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese/123`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -257,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -277,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -306,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
         const loginResponse = await supertestNoAuth
           .post('/internal/security/login')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'basic',
@@ -322,7 +323,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .set('Cookie', sessionCookie!.cookieString())
           .send({
@@ -350,7 +351,7 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(404);
@@ -361,7 +362,7 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`/internal/search/ese/123`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(400);
@@ -378,7 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -402,7 +403,7 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`/internal/search/ese/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(200);
@@ -412,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({})
           .expect(404);
@@ -425,7 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
@@ -452,7 +453,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post(`/internal/search/ese/${id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, '1')
             // TODO: API requests in Serverless require internal request headers
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set('kbn-xsrf', 'foo')
             .send({})
             .expect(200);
@@ -468,7 +469,7 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`/internal/search/ese/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(200);
@@ -478,7 +479,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post(`/internal/search/ese/${id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           // TODO: API requests in Serverless require internal request headers
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set('kbn-xsrf', 'foo')
           .send({})
           .expect(404);

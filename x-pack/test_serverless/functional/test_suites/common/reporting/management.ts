@@ -21,6 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
   let roleName: string;
   let internalReqHeader: InternalRequestHeader;
@@ -58,7 +59,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before('initialize saved object archive', async () => {
       roleName = 'admin';
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope(roleName);
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });

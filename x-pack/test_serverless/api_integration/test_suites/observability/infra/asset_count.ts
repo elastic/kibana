@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   const fetchHostsCount = async ({
     params,
@@ -38,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     const { assetType } = params;
     const response = await supertestWithoutAuth
       .post(`/api/infra/${assetType}/count`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
       .expect(200);

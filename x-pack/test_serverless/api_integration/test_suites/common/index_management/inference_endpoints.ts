@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const service = 'elser';
 
   const modelId = '.elser_model_2';
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -29,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe.skip('Inference endpoints', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
       try {

@@ -14,6 +14,8 @@ const INTERNAL_API_BASE_PATH = '/internal/index_management';
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
+
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -26,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       try {
         await es.indices.create({
           index: INDEX_A_NAME,

@@ -15,7 +15,7 @@ type Options = Partial<ClusterPutComponentTemplateRequest> | { _kbnMeta: Record<
 
 export function SvlComponentTemplatesApi({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   const createComponentTemplate = async (
     name: string,
@@ -24,20 +24,20 @@ export function SvlComponentTemplatesApi({ getService }: FtrProviderContext) {
   ) =>
     await supertestWithoutAuth
       .post(`${API_BASE_PATH}/component_templates`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({ name, ...options });
 
   const getAllComponentTemplates = async (roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .get(`${API_BASE_PATH}/component_templates`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const getOneComponentTemplate = async (name: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .get(`${API_BASE_PATH}/component_templates/${name}`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const updateComponentTemplate = async (
@@ -47,7 +47,7 @@ export function SvlComponentTemplatesApi({ getService }: FtrProviderContext) {
   ) =>
     await supertestWithoutAuth
       .get(`${API_BASE_PATH}/component_templates/${name}`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({
         name,
@@ -57,13 +57,13 @@ export function SvlComponentTemplatesApi({ getService }: FtrProviderContext) {
   const deleteComponentTemplate = async (name: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .delete(`${API_BASE_PATH}/component_templates/${name}`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const getComponentTemplateDatastreams = async (name: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .get(`${API_BASE_PATH}/component_templates/${name}/datastreams`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   return {

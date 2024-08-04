@@ -52,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const transform = getService('transform');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('create_slo', () => {
     // DATE_VIEW should match the index template:
@@ -82,19 +83,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await supertest
         .delete('/api/observability/slos/my-custom-id1')
-        .set(svlUserManager.getInternalRequestHeader());
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await supertest
         .delete('/api/observability/slos/my-custom-id2')
-        .set(svlUserManager.getInternalRequestHeader());
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await supertest
         .delete('/api/observability/slos/my-custom-id3')
-        .set(svlUserManager.getInternalRequestHeader());
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await supertest
         .delete('/api/observability/slos/my-custom-id4')
-        .set(svlUserManager.getInternalRequestHeader());
+        .set(svlCommonApi.getInternalRequestHeader());
 
       await esDeleteAllIndices([infraDataIndex]);
       await cleanup({ esClient, logger });

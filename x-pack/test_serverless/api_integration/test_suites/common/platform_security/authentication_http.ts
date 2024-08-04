@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('security/authentication/http', function () {
@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(allowedPath)
             .set('Authorization', `Bearer ${jsonWebToken}`)
             .set('ES-Client-Authentication', 'SharedSecret my_super_secret')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .expect(200);
         }
 
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/internal/security/me')
           .set('Authorization', `Bearer ${jsonWebToken}`)
           .set('ES-Client-Authentication', 'SharedSecret my_super_secret')
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(401);
       });
     });

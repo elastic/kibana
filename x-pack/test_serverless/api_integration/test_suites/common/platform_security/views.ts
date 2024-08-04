@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/views', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         xit('login', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/login')
-            .set(internalReqHeader)
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         xit('get login state', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/login_state')
-            .set(internalReqHeader)
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('access agreement', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/security/access_agreement')
-            .set(internalReqHeader)
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get access agreement state', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/internal/security/access_agreement/state')
-            .set(internalReqHeader)
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('login', async () => {
           const { status } = await supertestWithoutAuth
             .get('/login')
-            .set(internalReqHeader)
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).toBe(302);
         });
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('get login state', async () => {
           const { status } = await supertestWithoutAuth
             .get('/internal/security/login_state')
-            .set(internalReqHeader)
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           expect(status).toBe(200);
         });

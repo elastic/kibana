@@ -11,12 +11,12 @@ import { RoleCredentials } from '../../../shared/services';
 
 export function SvlClusterNodesApi({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   const getNodesPlugins = (roleAuthc: RoleCredentials) =>
     supertestWithoutAuth
       .get(`${API_BASE_PATH}/nodes/plugins`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   return {

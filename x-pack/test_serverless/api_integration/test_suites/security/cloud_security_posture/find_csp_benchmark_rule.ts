@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
 
   // find csp benchmark rule tests
@@ -32,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalRequestHeader = svlUserManager.getInternalRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
     });
 
     after(async () => {

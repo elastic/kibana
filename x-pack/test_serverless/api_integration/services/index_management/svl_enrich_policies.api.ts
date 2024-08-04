@@ -11,24 +11,24 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlEnrichPoliciesApi({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   const getAllEnrichPolicies = async (roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .get(`${INTERNAL_API_BASE_PATH}/enrich_policies`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const executeEnrichPolicy = async (name: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .put(`${INTERNAL_API_BASE_PATH}/enrich_policies/${name}`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const removeEnrichPolicy = async (name: string, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .delete(`${INTERNAL_API_BASE_PATH}/enrich_policies/${name}`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   return {

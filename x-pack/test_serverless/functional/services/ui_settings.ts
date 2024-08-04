@@ -9,14 +9,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 import { RoleCredentials } from '../../shared/services';
 
 export function UISettingsServiceProvider({ getService }: FtrProviderContext) {
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   return {
     async setUiSetting(role: RoleCredentials, settingId: string, value: unknown) {
       await supertestWithoutAuth
         .post(`/internal/kibana/settings/${settingId}`)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(role.apiKeyHeader)
         .send({ value })
         .expect(200);
@@ -24,7 +24,7 @@ export function UISettingsServiceProvider({ getService }: FtrProviderContext) {
     async deleteUISetting(role: RoleCredentials, settingId: string) {
       await supertestWithoutAuth
         .delete(`/internal/kibana/settings/${settingId}`)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(role.apiKeyHeader)
         .expect(200);
     },

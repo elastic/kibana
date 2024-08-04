@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
-  const svlUserManager = getService('svlUserManager');
 
   describe('security', function () {
     describe('route access', () => {
@@ -19,14 +18,14 @@ export default function ({ getService }: FtrProviderContext) {
           it('get role', async () => {
             const { body, status } = await supertest
               .get('/api/security/role/superuser')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertResponseStatusCode(200, status, body);
           });
 
           it('get all roles', async () => {
             const { body, status } = await supertest
               .get('/api/security/role')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertResponseStatusCode(200, status, body);
           });
         });
@@ -35,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
           it('delete role', async () => {
             const { body, status } = await supertest
               .delete('/api/security/role/superuser')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
 
             svlCommonApi.assertResponseStatusCode(410, status, body);
           });
@@ -53,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             const { body, status } = await supertest
               .put('/api/security/role/myRole')
               .send(role)
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
 
             svlCommonApi.assertResponseStatusCode(410, status, body);
           });

@@ -8,6 +8,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
+
   describe('security/authorization', function () {
     describe('available features', () => {
       const svlUserManager = getService('svlUserManager');
@@ -22,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('composite features', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges?includeActions=true')
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(adminCredentials)
           .expect(200);
 

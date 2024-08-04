@@ -18,6 +18,7 @@ const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 const TEST_SETTING = 'testSetting';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -28,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Creating a test setting
       await supertestWithoutAuth
         .post(`/internal/kibana/settings/${TEST_SETTING}`)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({ value: 100 })
         .expect(200);
@@ -43,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns list of settings', async () => {
           const { body } = await supertestWithoutAuth
             .get('/internal/kibana/settings')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
@@ -57,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('validates value', async () => {
           const { body } = await supertestWithoutAuth
             .post(`/internal/kibana/settings/${DEFAULT_COLUMNS_SETTING}`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ value: 100 })
             .expect(400);
@@ -73,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('sets value of a setting', async () => {
           await supertestWithoutAuth
             .post(`/internal/kibana/settings/${TEST_SETTING}`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ value: 999 })
             .expect(200);
@@ -81,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           // Verify that the setting has a new value
           const { body } = await supertestWithoutAuth
             .get('/internal/kibana/settings')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
@@ -94,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('validates value', async () => {
           const { body } = await supertestWithoutAuth
             .post('/internal/kibana/settings')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ changes: { [TEST_SETTING]: 100, [DEFAULT_COLUMNS_SETTING]: 100 } })
             .expect(400);
@@ -110,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('sets values of settings', async () => {
           await supertestWithoutAuth
             .post(`/internal/kibana/settings`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ changes: { [TEST_SETTING]: 500 } })
             .expect(200);
@@ -118,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           // Verify that the setting has a new value
           const { body } = await supertestWithoutAuth
             .get('/internal/kibana/settings')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
@@ -131,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns correct validation error message for invalid value', async () => {
           const { body } = await supertestWithoutAuth
             .post(`/internal/kibana/settings/${DEFAULT_COLUMNS_SETTING}/validate`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ value: 100 })
             .expect(200);
@@ -145,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns no validation error message for valid value', async () => {
           const { body } = await supertestWithoutAuth
             .post(`/internal/kibana/settings/${DEFAULT_COLUMNS_SETTING}/validate`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ value: ['test'] })
             .expect(200);
@@ -158,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns a 404 for non-existing key', async () => {
           const { body } = await supertestWithoutAuth
             .post(`/internal/kibana/settings/nonExisting/validate`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ value: ['test'] })
             .expect(404);
@@ -173,7 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns a 400 for a null value', async () => {
           const { body } = await supertestWithoutAuth
             .post(`/internal/kibana/settings/${DEFAULT_COLUMNS_SETTING}/validate`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .send({ value: null })
             .expect(400);
@@ -190,14 +191,14 @@ export default function ({ getService }: FtrProviderContext) {
         it('deletes setting', async () => {
           await supertestWithoutAuth
             .delete(`/internal/kibana/settings/${TEST_SETTING}`)
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
           // Verify that the setting is not returned in the Get response anymore
           const { body } = await supertestWithoutAuth
             .get('/internal/kibana/settings')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader)
             .expect(200);
 

@@ -13,6 +13,7 @@ import { InternalRequestHeader, RoleCredentials } from '../../../../shared/servi
 export default function ({ getService }: FtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');
   const log = getService('log');
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -21,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Ingest Pipelines', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
       await ingestPipelines.api.deletePipelines();

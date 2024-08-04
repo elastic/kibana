@@ -15,14 +15,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const ml = getService('ml');
   const sampleData = getService('sampleData');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('response ops docs', function () {
     this.tags(['responseOps']);
 
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData(
-        svlUserManager.getInternalRequestHeader()
+        svlCommonApi.getInternalRequestHeader()
       );
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.testResources.disableKibanaAnnouncements();
@@ -31,7 +31,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     after(async () => {
       await sampleData.testResources.removeAllKibanaSampleData(
-        svlUserManager.getInternalRequestHeader()
+        svlCommonApi.getInternalRequestHeader()
       );
       await ml.testResources.resetKibanaTimeZone();
       await ml.testResources.resetKibanaAnnouncements();

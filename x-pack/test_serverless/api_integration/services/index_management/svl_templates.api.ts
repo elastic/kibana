@@ -12,14 +12,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlTemplatesApi({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   let templatesCreated: Array<{ name: string; isLegacy?: boolean }> = [];
 
   const getAllTemplates = (roleAuthc: RoleCredentials) =>
     supertestWithoutAuth
       .get(`${API_BASE_PATH}/index_templates`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const getOneTemplate = (name: string, isLegacy: boolean = false) =>
@@ -29,7 +29,7 @@ export function SvlTemplatesApi({ getService }: FtrProviderContext) {
     templatesCreated.push({ name: template.name, isLegacy: template._kbnMeta.isLegacy });
     return supertestWithoutAuth
       .post(`${API_BASE_PATH}/index_templates`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(template);
   };
@@ -40,7 +40,7 @@ export function SvlTemplatesApi({ getService }: FtrProviderContext) {
   ) =>
     await supertestWithoutAuth
       .post(`${API_BASE_PATH}/delete_index_templates`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({ templates });
 
@@ -51,7 +51,7 @@ export function SvlTemplatesApi({ getService }: FtrProviderContext) {
   ) =>
     await supertestWithoutAuth
       .put(`${API_BASE_PATH}/index_templates/${templateName}`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(payload);
 
@@ -68,7 +68,7 @@ export function SvlTemplatesApi({ getService }: FtrProviderContext) {
   const simulateTemplate = async (payload: TemplateSerialized, roleAuthc: RoleCredentials) =>
     await supertestWithoutAuth
       .post(`${API_BASE_PATH}/index_templates/simulate`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(payload);
 

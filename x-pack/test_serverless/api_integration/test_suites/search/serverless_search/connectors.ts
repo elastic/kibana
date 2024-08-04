@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
+  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
@@ -27,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns list of connectors', async () => {
         const { body } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/connectors`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
 

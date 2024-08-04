@@ -75,13 +75,14 @@ async function uploadSourcemap(
 export default function ({ getService }: APMFtrContextProvider) {
   const apmApiClient = getService('apmApiClient');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('apm feature flags', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
-      internalReqHeader = svlUserManager.getInternalRequestHeader();
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 

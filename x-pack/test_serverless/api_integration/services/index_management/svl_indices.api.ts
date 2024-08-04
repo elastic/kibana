@@ -10,7 +10,7 @@ import { RoleCredentials } from '../../../shared/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlIndicesApi({ getService }: FtrProviderContext) {
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const executeActionOnIndices =
@@ -28,7 +28,7 @@ export function SvlIndicesApi({ getService }: FtrProviderContext) {
 
       return await supertestWithoutAuth
         .post(`${API_BASE_PATH}/indices/${urlParam}`)
-        .set(svlUserManager.getInternalRequestHeader())
+        .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send({ indices, ...args });
     };
@@ -63,13 +63,13 @@ export function SvlIndicesApi({ getService }: FtrProviderContext) {
   const list = async (roleAuthc: RoleCredentials) =>
     supertestWithoutAuth
       .get(`${API_BASE_PATH}/indices`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader);
 
   const reload = async (roleAuthc: RoleCredentials, indexNames?: string[]) =>
     await supertestWithoutAuth
       .post(`${API_BASE_PATH}/indices/reload`)
-      .set(svlUserManager.getInternalRequestHeader())
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({ indexNames });
 

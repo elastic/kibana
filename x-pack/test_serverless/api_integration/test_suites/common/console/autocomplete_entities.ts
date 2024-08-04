@@ -10,7 +10,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default ({ getService }: FtrProviderContext) => {
+  const svlCommonApi = getService('svlCommonApi');
   const consoleService = getService('console');
+
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let internalRequestHeader: InternalRequestHeader;
@@ -44,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalRequestHeader = svlUserManager.getInternalRequestHeader();
+      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       ({
         helpers: {
           createIndex,
