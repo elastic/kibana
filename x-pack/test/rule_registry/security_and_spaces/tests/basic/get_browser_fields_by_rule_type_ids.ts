@@ -6,12 +6,7 @@
  */
 
 import expect from 'expect';
-import {
-  APM_RULE_TYPE_IDS,
-  UPTIME_RULE_TYPE_IDS,
-  INFRA_RULE_TYPE_IDS,
-  LOG_RULE_TYPE_IDS,
-} from '@kbn/rule-data-utils';
+import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { superUser, obsOnlySpacesAll, secOnlyRead } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -41,10 +36,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Alert - Get browser fields by rule type IDs', () => {
     const ruleTypeIds = [
-      ...APM_RULE_TYPE_IDS,
-      ...UPTIME_RULE_TYPE_IDS,
-      ...INFRA_RULE_TYPE_IDS,
-      ...LOG_RULE_TYPE_IDS,
+      ...OBSERVABILITY_RULE_TYPE_IDS,
+      '.es-query',
+      'xpack.ml.anomaly_detection_alert',
     ];
 
     before(async () => {
@@ -56,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Users:', () => {
-      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y ruleTypeIds`, async () => {
+      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y ruleTypeIds that has access to`, async () => {
         const resp = await getBrowserFieldsByFeatureId(obsOnlySpacesAll, ruleTypeIds);
 
         expect(Object.keys(resp.browserFields)).toEqual([
@@ -74,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
-      it(`${superUser.username} should be able to get browser fields for o11y ruleTypeIds`, async () => {
+      it(`${superUser.username} should be able to get browser fields for all o11y ruleTypeIds`, async () => {
         const resp = await getBrowserFieldsByFeatureId(superUser, ruleTypeIds);
 
         expect(Object.keys(resp.browserFields)).toEqual([
@@ -90,6 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           'monitor',
           'observer',
           'orchestrator',
+          'slo',
           'tls',
           'url',
         ]);

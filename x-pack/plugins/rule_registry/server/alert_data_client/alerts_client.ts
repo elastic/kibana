@@ -1183,6 +1183,7 @@ export class AlertsClient {
         });
       }
     }
+
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,

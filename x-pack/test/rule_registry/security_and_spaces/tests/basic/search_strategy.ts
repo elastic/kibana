@@ -113,10 +113,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
         );
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
 
       it('should return alerts from siem rules', async () => {
