@@ -8,7 +8,10 @@
 import { type CoreSetup, type Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
-import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE, STATUS_ROUTE_PATH } from '../../common/constants';
+import {
+  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+  CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH,
+} from '../../common/constants';
 import type {
   CspRequestHandlerContext,
   CspServerPluginStart,
@@ -49,7 +52,7 @@ export function setupRoutes({
   defineGetCspBenchmarkRulesStatesRoute(router);
 
   core.http.registerOnPreRouting(async (request, response, toolkit) => {
-    if (request.url.pathname === STATUS_ROUTE_PATH) {
+    if (request.url.pathname.includes(CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH)) {
       try {
         const [coreStart, startDeps] = await core.getStartServices();
         const esClient = coreStart.elasticsearch.client.asInternalUser;
