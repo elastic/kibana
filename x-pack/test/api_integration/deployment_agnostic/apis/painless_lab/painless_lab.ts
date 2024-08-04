@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/painless_lab';
@@ -15,7 +15,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
-  let internalHeaders;
+  let internalHeaders: InternalRequestHeader;
 
   describe('Painless Lab Routes', function () {
     before(async () => {

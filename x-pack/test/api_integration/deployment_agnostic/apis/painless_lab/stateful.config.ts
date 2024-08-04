@@ -10,10 +10,8 @@ import { createStatefulTestConfig } from '../../stateful.config.base';
 export default createStatefulTestConfig({
   testFiles: [require.resolve('.')],
   junit: {
-    reportName: 'Stateful Observability - Painless lab - API Integration Tests',
+    reportName: 'Stateful - Painless lab - API Integration Tests',
   },
-  suiteTags: { exclude: ['skipSvlOblt'] },
-
   // extra arguments
   esServerArgs: [],
   kbnServerArgs: [],
