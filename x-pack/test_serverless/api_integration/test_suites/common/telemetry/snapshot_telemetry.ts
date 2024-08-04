@@ -18,6 +18,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');
+  const svlCommonApi = getService('svlCommonApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlUserManager = getService('svlUserManager');
 
@@ -57,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body } = await supertestWithoutAuth
         .get('/api/telemetry/v2/config')
-        .set(svlUserManager.getCommonRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
 

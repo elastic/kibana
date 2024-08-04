@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('logout (deprecated)', async () => {
           const { body, status } = await supertestWithoutAuth
             .get('/api/security/v1/logout')
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .set(roleAuthc.apiKeyHeader);
           svlCommonApi.assertApiNotFound(body, status);
         });
@@ -45,14 +45,14 @@ export default function ({ getService }: FtrProviderContext) {
         it('get current user (deprecated)', async () => {
           const { body, status } = await supertest
             .get('/internal/security/v1/me')
-            .set(svlUserManager.getInternalRequestHeader());
+            .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
 
         it('acknowledge access agreement', async () => {
           const { body, status } = await supertest
             .post('/internal/security/access_agreement/acknowledge')
-            .set(svlUserManager.getInternalRequestHeader());
+            .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
 
@@ -60,56 +60,56 @@ export default function ({ getService }: FtrProviderContext) {
           it('OIDC implicit', async () => {
             const { body, status } = await supertest
               .get('/api/security/oidc/implicit')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC implicit (deprecated)', async () => {
             const { body, status } = await supertest
               .get('/api/security/v1/oidc/implicit')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC implicit.js', async () => {
             const { body, status } = await supertest
               .get('/internal/security/oidc/implicit.js')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC callback', async () => {
             const { body, status } = await supertest
               .get('/api/security/oidc/callback')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC callback (deprecated)', async () => {
             const { body, status } = await supertest
               .get('/api/security/v1/oidc')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC login', async () => {
             const { body, status } = await supertest
               .post('/api/security/oidc/initiate_login')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC login (deprecated)', async () => {
             const { body, status } = await supertest
               .post('/api/security/v1/oidc')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
 
           it('OIDC 3rd party login', async () => {
             const { body, status } = await supertest
               .get('/api/security/oidc/initiate_login')
-              .set(svlUserManager.getInternalRequestHeader());
+              .set(svlCommonApi.getInternalRequestHeader());
             svlCommonApi.assertApiNotFound(body, status);
           });
         });
@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('SAML callback (deprecated)', async () => {
           const { body, status } = await supertest
             .post('/api/security/v1/saml')
-            .set(svlUserManager.getInternalRequestHeader());
+            .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
       });
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertest
             .get('/internal/security/me')
-            .set(svlUserManager.getCommonRequestHeader()));
+            .set(svlCommonApi.getCommonRequestHeader()));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -142,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertest
             .get('/internal/security/me')
-            .set(svlUserManager.getInternalRequestHeader()));
+            .set(svlCommonApi.getInternalRequestHeader()));
           // expect success because we're using the internal header
           expect(body).toEqual({
             authentication_provider: { name: '__http__', type: 'http' },
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertest
             .post('/internal/security/login')
-            .set(svlUserManager.getCommonRequestHeader()));
+            .set(svlCommonApi.getCommonRequestHeader()));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
             statusCode: 400,
@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertest
             .post('/internal/security/login')
-            .set(svlUserManager.getInternalRequestHeader()));
+            .set(svlCommonApi.getInternalRequestHeader()));
           expect(status).not.toBe(404);
         });
       });
@@ -195,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('SAML callback', async () => {
           const { body, status } = await supertest
             .post('/api/security/saml/callback')
-            .set(svlUserManager.getCommonRequestHeader())
+            .set(svlCommonApi.getCommonRequestHeader())
             .send({
               SAMLResponse: '',
             });

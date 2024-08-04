@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const testSubjects = getService('testSubjects');
 
   describe('types with `visibleInManagement` ', () => {
@@ -44,8 +44,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to export them directly by id', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set(svlUserManager.getCommonRequestHeader())
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -65,8 +65,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to export them directly by type', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set(svlUserManager.getCommonRequestHeader())
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             type: ['test-not-visible-in-management'],
             excludeExportDetails: true,
@@ -83,8 +83,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to import them', async () => {
         await supertest
           .post('/api/saved_objects/_import')
-          .set(svlUserManager.getCommonRequestHeader())
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .attach('file', join(__dirname, './exports/_import_non_visible_in_management.ndjson'))
           .expect(200)
           .then((resp) => {
@@ -114,8 +114,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_allowed_types')
-            .set(svlUserManager.getCommonRequestHeader())
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .then((response: Response) => {
               types = response.body.types as SavedObjectManagementTypeInfo[];

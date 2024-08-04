@@ -16,13 +16,12 @@ export function SecuritySolutionServerlessUtils({
 }: FtrProviderContext): SecuritySolutionUtils {
   const svlUserManager = getService('svlUserManager');
   const lifecycle = getService('lifecycle');
+  const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
   const log = getService('log');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
-  const commonRequestHeader = {
-    'kbn-xsrf': 'some-xsrf-token',
-  };
+  const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
   const kbnUrl = formatUrl({
     ...config.get('servers.kibana'),
     auth: false,
@@ -51,8 +50,6 @@ export function SecuritySolutionServerlessUtils({
 
   return {
     getUsername: async (role = 'admin') => {
-      // load service to call it outside mocha context
-      await svlUserManager.init();
       const { username } = await svlUserManager.getUserData(role);
 
       return username;
@@ -62,8 +59,6 @@ export function SecuritySolutionServerlessUtils({
      */
     createSuperTest: async (role = 'admin') => {
       cleanCredentials(role);
-      // load service to call it outside mocha context
-      await svlUserManager.init();
       const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
       rolesCredentials.set(role, credentials);
 

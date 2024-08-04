@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SamlToolsProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
 
   return {
@@ -27,7 +27,7 @@ export function SamlToolsProvider({ getService }: FtrProviderContext) {
       });
       const samlAuthenticationResponse = await supertestWithoutAuth
         .post('/api/security/saml/callback')
-        .set(svlUserManager.getCommonRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .send({
           SAMLResponse: await createSAMLResponse({
             username,

@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kbnServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   const testSubjects = getService('testSubjects');
 
   describe('types with `hiddenFromHttpApis` ', () => {
@@ -62,8 +62,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await supertest
               .post(URL)
               .send([notHiddenFromHttpApisType])
-              .set(svlUserManager.getCommonRequestHeader())
-              .set(svlUserManager.getInternalRequestHeader())
+              .set(svlCommonApi.getCommonRequestHeader())
+              .set(svlCommonApi.getInternalRequestHeader())
               .expect(200)
               .then((response: Response) => {
                 expect(response.body).to.have.length(1);
@@ -78,8 +78,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await supertest
               .post(URL)
               .send([hiddenFromHttpApisType])
-              .set(svlUserManager.getCommonRequestHeader())
-              .set(svlUserManager.getInternalRequestHeader())
+              .set(svlCommonApi.getCommonRequestHeader())
+              .set(svlCommonApi.getInternalRequestHeader())
               .expect(200)
               .then((response: Response) => {
                 expect(response.body).to.have.length(1);
@@ -94,8 +94,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await supertest
               .post(URL)
               .send([hiddenFromHttpApisType, notHiddenFromHttpApisType])
-              .set(svlUserManager.getCommonRequestHeader())
-              .set(svlUserManager.getInternalRequestHeader())
+              .set(svlCommonApi.getCommonRequestHeader())
+              .set(svlCommonApi.getInternalRequestHeader())
               .expect(200)
               .expect(200)
               .then((response: Response) => {
@@ -113,8 +113,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('returns saved objects registered as hidden from the http Apis', async () => {
           await supertest
             .get(`/api/kibana/management/saved_objects/_find?type=${hiddenFromHttpApisType.type}`)
-            .set(svlUserManager.getCommonRequestHeader())
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .then((resp) => {
               expect(
@@ -140,8 +140,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('allows to export them directly by id', async () => {
           await supertest
             .post('/api/saved_objects/_export')
-            .set(svlUserManager.getCommonRequestHeader())
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .send({
               objects: [
                 {
@@ -161,8 +161,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('allows to export them directly by type', async () => {
           await supertest
             .post('/api/saved_objects/_export')
-            .set(svlUserManager.getCommonRequestHeader())
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .send({
               type: ['test-hidden-from-http-apis-importable-exportable'],
               excludeExportDetails: true,
@@ -182,8 +182,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('allows to import them', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .set(svlUserManager.getCommonRequestHeader())
-            .set(svlUserManager.getInternalRequestHeader())
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .attach('file', join(__dirname, './exports/_import_hidden_from_http_apis.ndjson'))
             .expect(200)
             .then((resp) => {

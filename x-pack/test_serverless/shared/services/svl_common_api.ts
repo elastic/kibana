@@ -10,7 +10,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function SvlCommonApiServiceProvider({ getService }: FtrProviderContext) {
+  const svlUserManager = getService('svlUserManager');
   return {
+    getCommonRequestHeader() {
+      return svlUserManager.getCommonRequestHeader();
+    },
+
+    getInternalRequestHeader() {
+      return svlUserManager.getInternalRequestHeader();
+    },
+
     assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
       expect(actualStatus).to.eql(
         expectedStatus,
