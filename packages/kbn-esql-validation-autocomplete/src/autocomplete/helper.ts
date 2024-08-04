@@ -80,3 +80,15 @@ export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinit
     text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
   }));
 }
+
+export function getSupportedTypesForBinaryOperators(
+  fnDef: FunctionDefinition | undefined,
+  previousType: string
+) {
+  // Retrieve list of all 'right' supported types that match the left hand side of the function
+  return fnDef && Array.isArray(fnDef?.signatures)
+    ? fnDef.signatures
+        .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
+        .map(({ params }) => params[1].type)
+    : [previousType];
+}

@@ -92,12 +92,8 @@ export function useSetupTechnology({
   isEditPage?: boolean;
 }) {
   const { cloud } = useStartServices();
-  const {
-    isAgentlessEnabled,
-    isAgentlessIntegration,
-    isAgentlessCloudEnabled,
-    isAgentlessServerlessEnabled,
-  } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessCloudEnabled, isAgentlessServerlessEnabled } =
+    useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const newAgentBasedPolicy = useRef<NewAgentPolicy>(newAgentPolicy);
@@ -107,6 +103,7 @@ export function useSetupTechnology({
   const [newAgentlessPolicy, setNewAgentlessPolicy] = useState<AgentPolicy | NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
       supports_agentless: true,
+      monitoring_enabled: [],
     })
   );
 
@@ -134,12 +131,6 @@ export function useSetupTechnology({
     updateAgentPolicies,
     setNewAgentPolicy,
   ]);
-
-  useEffect(() => {
-    if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
-      setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
-    }
-  }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
 
   // tech debt: remove this useEffect when Serverless uses the Agentless API
   // https://github.com/elastic/security-team/issues/9781
