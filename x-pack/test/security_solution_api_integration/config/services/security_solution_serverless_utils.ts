@@ -50,6 +50,8 @@ export function SecuritySolutionServerlessUtils({
 
   return {
     getUsername: async (role = 'admin') => {
+      // load service to call it outside mocha context
+      await svlUserManager.init();
       const { username } = await svlUserManager.getUserData(role);
 
       return username;
@@ -59,6 +61,8 @@ export function SecuritySolutionServerlessUtils({
      */
     createSuperTest: async (role = 'admin') => {
       cleanCredentials(role);
+      // load service to call it outside mocha context
+      await svlUserManager.init();
       const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
       rolesCredentials.set(role, credentials);
 
