@@ -18,6 +18,7 @@ export const JsonTab = ({ data }: { data: CspFinding }) => (
     <CodeEditor
       isCopyable
       allowFullScreen
+      enableFindAction
       languageId={XJsonLang.ID}
       value={JSON.stringify(data, null, 2)}
       options={{

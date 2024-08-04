@@ -61,7 +61,7 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
 
-    return <CspEvaluationBadge type={finding.result?.evaluation} />;
+    return <CspEvaluationBadge type={finding?.result?.evaluation} />;
   },
   'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
