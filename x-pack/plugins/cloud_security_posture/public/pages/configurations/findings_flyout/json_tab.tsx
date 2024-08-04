@@ -14,7 +14,7 @@ const offsetTopHeight = 120;
 const offsetBottomHeight = 72;
 
 export const JsonTab = ({ data }: { data: CspFinding }) => (
-  <div style={{ position: 'absolute', inset: 0, top: offsetTopHeight, bottom: offsetBottomHeight }}>
+  <div style={{ position: 'absolute', inset: 0 }}>
     <CodeEditor
       isCopyable
       allowFullScreen
