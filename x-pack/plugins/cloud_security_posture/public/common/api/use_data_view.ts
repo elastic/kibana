@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { CspClientPluginStartDeps } from '../../types';
 
 /**
@@ -18,7 +19,7 @@ export const useDataView = (dataViewId: string) => {
     spaces,
   } = useKibana<CspClientPluginStartDeps>().services;
   return useQuery(['useDataView', dataViewId], async () => {
-    const currentSpaceId = spaces ? (await spaces.getActiveSpace()).id : 'default';
+    const currentSpaceId = spaces ? (await spaces.getActiveSpace()).id : DEFAULT_SPACE_ID;
     const dataViewIdCurrentSpace = `${dataViewId}-${currentSpaceId}`;
     const dataView = await dataViews.get(dataViewIdCurrentSpace);
     if (!dataView) {

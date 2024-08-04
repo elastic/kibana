@@ -8,7 +8,7 @@ import React from 'react';
 import Chance from 'chance';
 import { Vulnerabilities } from './vulnerabilities';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
@@ -58,7 +58,7 @@ beforeEach(() => {
     status: 'success',
     data: createStubDataView({
       spec: {
-        id: CSP_LATEST_FINDINGS_DATA_VIEW,
+        id: CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
       },
     }),
   });
