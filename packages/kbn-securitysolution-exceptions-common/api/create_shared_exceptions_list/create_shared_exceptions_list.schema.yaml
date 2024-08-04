@@ -9,8 +9,6 @@ paths:
       operationId: CreateSharedExceptionList
       x-codegen-enabled: true
       summary: Creates a shared exception list
-      tags:
-        - Exceptions API
       requestBody:
         required: true
         content:
