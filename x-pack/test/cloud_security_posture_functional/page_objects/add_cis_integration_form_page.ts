@@ -17,6 +17,10 @@ export function AddCisIntegrationFormPageProvider({
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
 
+  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
+  const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+  const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
+
   const cisAzure = {
     getPostInstallArmTemplateModal: async () => {
       return await testSubjects.find('postInstallAzureArmTemplateModal');
@@ -246,6 +250,25 @@ export function AddCisIntegrationFormPageProvider({
     await advancedAccordian.click();
   };
 
+  const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
+    await clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+    await clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+
+    const agentOption = await testSubjects.find(
+      setupTechnology === 'agentless'
+        ? 'setup-technology-agentless-option'
+        : 'setup-technology-agent-based-option'
+    );
+    await agentOption.click();
+  };
+  const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
+    await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+    await selectValue(
+      AWS_CREDENTIAL_SELECTOR,
+      credentialType === 'direct' ? 'direct_access_keys' : 'temporary_keys'
+    );
+  };
+
   const clickOptionButton = async (text: string) => {
     const optionToBeClicked = await findOptionInPage(text);
     await optionToBeClicked.scrollIntoView();
@@ -356,6 +379,8 @@ export function AddCisIntegrationFormPageProvider({
     getIntegrationFormEditPage,
     findOptionInPage,
     clickOptionButton,
+    selectAwsCredentials,
+    selectSetupTechnology,
     clickSaveButton,
     clickSaveIntegrationButton,
     clickAccordianButton,
