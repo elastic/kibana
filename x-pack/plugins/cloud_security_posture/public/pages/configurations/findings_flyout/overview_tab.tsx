@@ -110,7 +110,8 @@ const getDetailsList = (
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
       defaultMessage: 'Source',
     }),
-    description: getDatasetDisplayName(data.data_stream?.dataset) || EMPTY_VALUE,
+    description:
+      getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {

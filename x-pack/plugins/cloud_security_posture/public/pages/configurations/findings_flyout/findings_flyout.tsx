@@ -201,7 +201,8 @@ const isNativeCspFinding = (finding: CspFinding) => finding.data_stream.dataset 
 
 const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
   const { euiTheme } = useEuiTheme();
-  const datasetDisplayName = getDatasetDisplayName(finding.data_stream.dataset);
+  const datasetDisplayName =
+    getDatasetDisplayName(finding.data_stream.dataset) || finding.data_stream.dataset;
 
   return (
     <EuiCallOut
