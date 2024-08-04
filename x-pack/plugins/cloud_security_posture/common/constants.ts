@@ -48,7 +48,7 @@ export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
 export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN =
   'logs-cloud_security_posture.findings_latest-default';
 export const CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN =
-  'logs-*_latest_misconfigurations_cdr,logs-wiz.cloud_configuration_finding_latest-default';
+  'logs-*_latest_misconfigurations_cdr';
 export const CDR_MISCONFIGURATIONS_INDEX_PATTERN = `${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN},${CDR_LATEST_THIRD_PARTY_MISCONFIGURATIONS_INDEX_PATTERN}`;
 
 export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
