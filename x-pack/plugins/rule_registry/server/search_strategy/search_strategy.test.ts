@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
@@ -18,6 +18,8 @@ import type { RuleRegistrySearchRequest } from '../../common';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
 import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
+import { Boom } from '@hapi/boom';
+import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
 jest.mock('../lib/get_is_kibana_request');
 
@@ -129,9 +131,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    const result = await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    const result = await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
 
     expect(result).toEqual(response);
   });
@@ -150,9 +152,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    const result = await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    const result = await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     expect(result).toBe(EMPTY_RESPONSE);
   });
 
@@ -170,9 +173,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     expect(getAuthzFilterSpy).not.toHaveBeenCalled();
   });
 
@@ -191,14 +195,19 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
     let err;
+
     try {
-      await strategy
-        .search(request, options, deps as unknown as SearchStrategyDependencies)
-        .toPromise();
+      await lastValueFrom(
+        strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+      );
     } catch (e) {
       err = e;
     }
-    expect(err).toBeDefined();
+
+    expect(err.statusCode).toBe(400);
+    expect(err.message).toBe(
+      'The privateRuleRegistryAlertsSearchStrategy search strategy is unable to accommodate requests containing multiple rule types with mixed authorization.'
+    );
   });
 
   it('should use internal user when requesting o11y alerts as RBAC is applied', async () => {
@@ -214,9 +223,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
     expect(searchStrategySearch).not.toHaveBeenCalled();
   });
@@ -235,9 +245,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     expect(data.search.searchAsInternalUser.search as jest.Mock).not.toHaveBeenCalled();
     expect(searchStrategySearch).toHaveBeenCalled();
   });
@@ -259,9 +270,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
     expect(
       (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.size
@@ -291,9 +303,10 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     expect((data.search.searchAsInternalUser.search as jest.Mock).mock.calls.length).toBe(1);
     expect(
       (data.search.searchAsInternalUser.search as jest.Mock).mock.calls[0][0].params.body.sort
@@ -316,21 +329,24 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
     const arg0 = searchStrategySearch.mock.calls[0][0];
     expect(arg0.params.body.fields.length).toEqual(
       // +2 because of fields.push({ field: 'kibana.alert.*', include_unmapped: false }); and
       // fields.push({ field: 'signal.*', include_unmapped: false });
       ALERT_EVENTS_FIELDS.length + 2
     );
+
     expect.arrayContaining([
       expect.objectContaining({
         x: 2,
         y: 3,
       }),
     ]);
+
     expect(arg0).toEqual(
       expect.objectContaining({
         id: undefined,
@@ -377,9 +393,9 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
 
-    await strategy
-      .search(request, options, deps as unknown as SearchStrategyDependencies)
-      .toPromise();
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
 
     const arg0 = searchStrategySearch.mock.calls[0][0];
     expect(arg0.params.body.fields.length).toEqual(
@@ -387,6 +403,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       // fields.push({ field: 'signal.*', include_unmapped: false }); + my-super-field
       ALERT_EVENTS_FIELDS.length + 3
     );
+
     expect(arg0).toEqual(
       expect.objectContaining({
         id: undefined,
@@ -414,5 +431,89 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
         }),
       })
     );
+  });
+
+  it('should handle Boom errors correctly', async () => {
+    getAuthzFilterSpy.mockRejectedValue(new Boom('boom error message', { statusCode: 400 }));
+
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query'],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    let err;
+
+    try {
+      await lastValueFrom(
+        strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+      );
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err.statusCode).toBe(400);
+    expect(err.message).toBe('boom error message');
+  });
+
+  it('should handle KbnSearchError errors correctly', async () => {
+    getAuthzFilterSpy.mockRejectedValue(new KbnSearchError('kbn search error message', 403));
+
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query'],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    let err;
+
+    try {
+      await lastValueFrom(
+        strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+      );
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err.statusCode).toBe(403);
+    expect(err.message).toBe('kbn search error message');
+  });
+
+  it('should convert errors to KbnSearchError errors correctly', async () => {
+    getAuthzFilterSpy.mockRejectedValue(new Error('plain error message'));
+
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query'],
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    let err;
+
+    try {
+      await lastValueFrom(
+        strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+      );
+    } catch (e) {
+      err = e;
+    }
+
+    expect(err.statusCode).toBe(500);
+    expect(err.message).toBe('plain error message');
   });
 });

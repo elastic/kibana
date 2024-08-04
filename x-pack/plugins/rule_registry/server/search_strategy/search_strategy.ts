@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import Boom from '@hapi/boom';
 import { map, mergeMap, catchError } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
@@ -20,6 +22,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { buildAlertFieldsRequest } from '@kbn/alerts-as-data-utils';
 import { partition } from 'lodash';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
+import { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 import type { RuleRegistrySearchRequest, RuleRegistrySearchResponse } from '../../common';
 import { MAX_ALERT_SEARCH_SIZE } from '../../common/constants';
 import { AlertAuditAction, alertAuditEvent } from '..';
@@ -61,8 +64,9 @@ export const ruleRegistrySearchStrategyProvider = (
       );
 
       if (isAnyRuleTypeESAuthorized && !isEachRuleTypeESAuthorized) {
-        throw new Error(
-          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple rule types with mixed authorization.`
+        throw new KbnSearchError(
+          `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is unable to accommodate requests containing multiple rule types with mixed authorization.`,
+          400
         );
       }
 
@@ -135,6 +139,7 @@ export const ruleRegistrySearchStrategyProvider = (
                   },
                 }),
           };
+
           let fields = request?.fields ?? [];
           fields.push({ field: 'kibana.alert.*', include_unmapped: false });
 
@@ -192,7 +197,6 @@ export const ruleRegistrySearchStrategyProvider = (
           return response;
         }),
         catchError((err) => {
-          // check if auth error, if yes, write to ecs logger
           if (securityAuditLogger != null && err?.output?.statusCode === 403) {
             securityAuditLogger.log(
               alertAuditEvent({
@@ -203,7 +207,15 @@ export const ruleRegistrySearchStrategyProvider = (
             );
           }
 
-          throw err;
+          if (Boom.isBoom(err)) {
+            throw new KbnSearchError(err.output.payload.message, err.output.statusCode);
+          }
+
+          if (err instanceof KbnSearchError) {
+            throw err;
+          }
+
+          throw new KbnSearchError(err.message, 500);
         })
       );
     },
