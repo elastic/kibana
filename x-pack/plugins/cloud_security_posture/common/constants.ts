@@ -12,6 +12,7 @@ import {
   VulnSeverity,
 } from './types_old';
 
+export const CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH = '/internal/cloud_security_posture/';
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
 export const STATUS_API_CURRENT_VERSION = '1';
 
