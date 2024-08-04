@@ -12,16 +12,18 @@ import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context
 const API_BASE_PATH = '/api/painless_lab';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const svlUserManager = getService('svlUserManager');
+  const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
+  let internalHeaders;
 
   describe('Painless Lab Routes', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalHeaders = samlAuth.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('Execute', () => {
       it('should execute a valid painless script', async () => {
@@ -30,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/execute`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(internalHeaders)
           .set(roleAuthc.apiKeyHeader)
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(script)
@@ -47,7 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/execute`)
-          .set(svlUserManager.getInternalRequestHeader())
+          .set(internalHeaders)
           .set('Content-Type', 'application/json;charset=UTF-8')
           .set(roleAuthc.apiKeyHeader)
           .send(invalidScript)

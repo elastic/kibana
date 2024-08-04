@@ -9,15 +9,26 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-export function SvlCommonApiServiceProvider({ getService }: FtrProviderContext) {
-  const svlUserManager = getService('svlUserManager');
-  return {
-    getCommonRequestHeader() {
-      return svlUserManager.getCommonRequestHeader();
-    },
+const COMMON_REQUEST_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
 
-    getInternalRequestHeader() {
-      return svlUserManager.getInternalRequestHeader();
+const INTERNAL_REQUEST_HEADERS = {
+  ...COMMON_REQUEST_HEADERS,
+  'x-elastic-internal-origin': 'kibana',
+};
+
+export type InternalRequestHeader = typeof INTERNAL_REQUEST_HEADERS;
+
+export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
+  return {
+    // call it from 'samlAuth' service when tests are migrated to deployment-agnostic
+    getCommonRequestHeader() {
+      return COMMON_REQUEST_HEADERS;
+    },
+    // call it from 'samlAuth' service when tests are migrated to deployment-agnostic
+    getInternalRequestHeader(): InternalRequestHeader {
+      return INTERNAL_REQUEST_HEADERS;
     },
 
     assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
