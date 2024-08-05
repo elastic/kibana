@@ -19,20 +19,20 @@ import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
 import {
-  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
   InfraAssetMetricType,
 } from '../../../../../common/http_api';
 import { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
-  { type: 'cpuTotal' },
-  { type: 'diskSpaceUsage' },
-  { type: 'memory' },
-  { type: 'memoryFree' },
-  { type: 'normalizedLoad1m' },
-  { type: 'rx' },
-  { type: 'tx' },
+const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
+  'cpu',
+  'diskSpaceUsage',
+  'memory',
+  'memoryFree',
+  'normalizedLoad1m',
+  'rxV2',
+  'txV2',
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
@@ -99,13 +99,11 @@ const createInfraMetricsRequest = ({
   esQuery: { bool: BoolQuery };
   dateRange: StringDateRange;
   limit: number;
-}): GetInfraMetricsRequestBodyPayload => ({
+}): GetInfraMetricsRequestBodyPayloadClient => ({
   type: 'host',
   query: esQuery,
-  range: {
-    from: dateRange.from,
-    to: dateRange.to,
-  },
+  from: dateRange.from,
+  to: dateRange.to,
   metrics: HOST_TABLE_METRICS,
   limit,
 });

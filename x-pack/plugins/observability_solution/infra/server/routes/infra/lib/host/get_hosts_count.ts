@@ -5,31 +5,50 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { BoolQuery } from '@kbn/es-query';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { castArray } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
+import { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_services';
+import { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
-import {
-  HOST_NAME_FIELD,
-  EVENT_MODULE,
-  METRICSET_MODULE,
-  SYSTEM_INTEGRATION,
-} from '../../../../../common/constants';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { assertQueryStructure } from '../utils';
+import { maybeGetHostsFromApm } from './get_apm_host_names';
+import { getFilterByIntegration } from '../helpers/query';
 
 export async function getHostsCount({
   infraMetricsClient,
+  apmDataAccessServices,
   query,
   from,
   to,
-}: {
+}: GetInfraAssetCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
-  query?: BoolQuery;
-  from: string;
-  to: string;
+  apmDataAccessServices: ApmDataAccessServicesWrapper;
 }) {
-  const queryFilter = query?.filter ?? [];
-  const queryBool = query ?? {};
+  assertQueryStructure(query);
 
-  const params = {
+  const apmHostNames = await maybeGetHostsFromApm({
+    infraMetricsClient,
+    apmDataAccessServices,
+    from,
+    to,
+    query,
+  });
+
+  const filters: estypes.QueryDslQueryContainer[] =
+    apmHostNames.length > 0
+      ? [
+          {
+            bool: {
+              should: [...termsQuery(HOST_NAME_FIELD, ...apmHostNames), ...castArray(query)],
+            },
+          },
+        ]
+      : castArray(query);
+  // apmHostNames.length > 0 ? termsQuery(HOST_NAME_FIELD, ...apmHostNames) : castArray(query);
+
+  const result = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
     body: {
@@ -37,20 +56,7 @@ export async function getHostsCount({
       track_total_hits: false,
       query: {
         bool: {
-          ...queryBool,
-          filter: [
-            ...queryFilter,
-            ...rangeQuery(new Date(from).getTime(), new Date(to).getTime()),
-            {
-              bool: {
-                should: [
-                  ...termQuery(EVENT_MODULE, SYSTEM_INTEGRATION),
-                  ...termQuery(METRICSET_MODULE, SYSTEM_INTEGRATION),
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [...filters, ...rangeQuery(from, to), ...getFilterByIntegration('system')],
         },
       },
       aggs: {
@@ -61,9 +67,7 @@ export async function getHostsCount({
         },
       },
     },
-  };
-
-  const result = await infraMetricsClient.search(params);
+  });
 
   return result.aggregations?.count.value ?? 0;
 }

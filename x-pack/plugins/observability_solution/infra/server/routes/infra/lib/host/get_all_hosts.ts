@@ -5,58 +5,31 @@
  * 2.0.
  */
 
-import type {
-  GetInfraMetricsRequestBodyPayload,
-  InfraAssetMetadataType,
-} from '../../../../../common/http_api/infra';
-import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION_NAME } from '../constants';
-import type { GetHostsArgs } from '../types';
-import { createFilters, getInventoryModelAggregations } from '../helpers/query';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { InfraAssetMetadataType } from '../../../../../common/http_api';
+import { METADATA_AGGREGATION_NAME } from '../constants';
+import type { GetHostParameters } from '../types';
+import { getFilterByIntegration, getInventoryModelAggregations } from '../helpers/query';
 import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
-export const getAllHosts = async (
-  { infraMetricsClient, params }: GetHostsArgs,
-  hostNamesShortList: string[] = []
-) => {
-  const query = createQuery(params, hostNamesShortList);
-  const response = await infraMetricsClient.search(query);
-
-  const result = (response.aggregations?.nodes.buckets ?? [])
-    .sort((a, b) => {
-      const aValue = getMetricValue(a?.cpuTotal) ?? 0;
-      const bValue = getMetricValue(b?.cpuTotal) ?? 0;
-      return bValue - aValue;
-    })
-    .map((bucket) => {
-      const metadata = (bucket?.metadata.top ?? [])
-        .flatMap((top) => Object.entries(top.metrics))
-        .map(([key, value]) => ({
-          name: key as InfraAssetMetadataType,
-          value: typeof value === 'string' && value.trim().length === 0 ? null : value,
-        }));
-
-      const metrics = params.metrics.map((metric) => ({
-        name: metric.type,
-        value: metric.type in bucket ? getMetricValue(bucket[metric.type]) ?? 0 : null,
-      }));
-
-      return {
-        name: bucket?.key as string,
-        metadata,
-        metrics,
-      };
-    });
-
-  return result;
-};
-
-const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortList: string[]) => {
+export const getAllHosts = async ({
+  infraMetricsClient,
+  from,
+  to,
+  limit,
+  type,
+  metrics,
+  hostNamesShortList,
+}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'type' | 'metrics'> & {
+  hostNamesShortList: string[];
+}) => {
   const metricAggregations = getInventoryModelAggregations(
-    params.type,
-    params.metrics.map((p) => p.type)
+    type,
+    metrics.map((metric) => metric)
   );
 
-  return {
+  const response = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
     body: {
@@ -64,19 +37,20 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
       track_total_hits: false,
       query: {
         bool: {
-          filter: createFilters({
-            params,
-            hostNamesShortList,
-          }),
+          filter: [
+            ...termsQuery(HOST_NAME_FIELD, ...hostNamesShortList),
+            ...rangeQuery(from, to),
+            ...getFilterByIntegration('system'),
+          ],
         },
       },
       aggs: {
         nodes: {
           terms: {
-            field: BUCKET_KEY,
-            size: params.limit ?? MAX_SIZE,
+            field: HOST_NAME_FIELD,
+            size: limit,
             order: {
-              _key: 'asc' as const,
+              _key: 'asc',
             },
           },
           aggs: {
@@ -96,7 +70,7 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
                 ],
                 size: 1,
                 sort: {
-                  '@timestamp': 'desc' as const,
+                  '@timestamp': 'desc',
                 },
               },
             },
@@ -104,7 +78,33 @@ const createQuery = (params: GetInfraMetricsRequestBodyPayload, hostNamesShortLi
         },
       },
     },
-  };
+  });
+
+  const result = (response.aggregations?.nodes.buckets ?? [])
+    .sort((a, b) => {
+      const aValue = getMetricValue(a?.cpu) ?? 0;
+      const bValue = getMetricValue(b?.cpu) ?? 0;
+      return bValue - aValue;
+    })
+    .map((bucket) => {
+      const metadata = (bucket?.metadata.top ?? [])
+        .flatMap((top) => Object.entries(top.metrics))
+        .map(([key, value]) => ({
+          name: key as InfraAssetMetadataType,
+          value: typeof value === 'string' && value.trim().length === 0 ? null : value,
+        }));
+
+      return {
+        name: bucket?.key as string,
+        metadata,
+        metrics: metrics.map((metric) => ({
+          name: metric,
+          value: metric in bucket ? getMetricValue(bucket[metric]) ?? 0 : null,
+        })),
+      };
+    });
+
+  return result;
 };
 
 const getMetricValue = (valueObject: unknown): number | null => {

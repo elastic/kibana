@@ -55,6 +55,9 @@ export function createGetHostNames({ apmEventClient }: ApmDataAccessServicesPara
             terms: {
               field: HOST_NAME,
               size: Math.min(size, MAX_SIZE),
+              order: {
+                _key: 'asc',
+              },
             },
           },
         },

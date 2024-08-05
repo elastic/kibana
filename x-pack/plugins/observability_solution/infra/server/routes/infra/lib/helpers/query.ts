@@ -5,39 +5,24 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
-  GetInfraMetricsRequestBodyPayload,
-  InfraAssetMetricType,
-} from '../../../../../common/http_api/infra';
-import { BUCKET_KEY } from '../constants';
+  EVENT_MODULE,
+  METRICSET_MODULE,
+  SYSTEM_INTEGRATION,
+} from '../../../../../common/constants';
+import { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
-export const createFilters = ({
-  params,
-  extraFilter,
-  hostNamesShortList = [],
-}: {
-  params: GetInfraMetricsRequestBodyPayload;
-  hostNamesShortList?: string[];
-  extraFilter?: estypes.QueryDslQueryContainer;
-}) => {
-  const extrafilterClause = extraFilter?.bool?.filter;
-
-  const extraFilterList = !!extrafilterClause
-    ? Array.isArray(extrafilterClause)
-      ? extrafilterClause
-      : [extrafilterClause]
-    : [];
-
+export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {
   return [
-    ...extraFilterList,
-    ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
-    ...rangeQuery(new Date(params.range.from).getTime(), new Date(params.range.to).getTime()),
     {
-      exists: {
-        field: BUCKET_KEY,
+      bool: {
+        should: [
+          ...termQuery(EVENT_MODULE, integration),
+          ...termQuery(METRICSET_MODULE, integration),
+        ],
+        minimum_should_match: 1,
       },
     },
   ];

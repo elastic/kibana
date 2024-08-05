@@ -7,15 +7,36 @@
 
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
 import { getFilteredHosts } from './get_filtered_hosts';
-import { hasFilters } from '../utils';
-import type { GetHostsArgs } from '../types';
+import type { GetHostParameters } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
+import { assertQueryStructure, hasFilters } from '../utils';
+import { maybeGetHostsFromApm } from './get_apm_host_names';
 
-export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsResponsePayload> => {
-  const runFilterQuery = hasFilters(args.params.query);
+export const getHosts = async ({
+  metrics,
+  from,
+  to,
+  limit,
+  type,
+  query,
+  alertsClient,
+  apmDataAccessServices,
+  infraMetricsClient,
+}: GetHostParameters): Promise<GetInfraMetricsResponsePayload> => {
+  const runFilterQuery = hasFilters(query);
   // filter first to prevent filter clauses from impacting the metrics aggregations.
-  const hostNamesShortList = runFilterQuery ? await getFilteredHostNames(args) : [];
+  const hostNamesShortList = runFilterQuery
+    ? await getFilteredHostNames({
+        infraMetricsClient,
+        apmDataAccessServices,
+        from,
+        to,
+        limit,
+        query,
+      })
+    : [];
+
   if (runFilterQuery && hostNamesShortList.length === 0) {
     return {
       type: 'host',
@@ -23,19 +44,22 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     };
   }
 
-  const {
-    range: { from, to },
-    limit,
-  } = args.params;
-
-  const [hostMetrics, alertsCountResponse] = await Promise.all([
-    getAllHosts(args, hostNamesShortList),
+  const [hostMetricsResponse, alertsCountResponse] = await Promise.all([
+    getAllHosts({
+      infraMetricsClient,
+      from,
+      to,
+      limit,
+      type,
+      metrics,
+      hostNamesShortList,
+    }),
     getHostsAlertsCount({
-      alertsClient: args.alertsClient,
+      alertsClient,
       hostNamesShortList,
       from,
       to,
-      maxNumHosts: limit,
+      limit,
     }),
   ]);
 
@@ -44,20 +68,46 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     return acc;
   }, {} as Record<string, { alertsCount: number }>);
 
-  const hosts = hostMetrics.map(({ name, metrics, metadata }) => {
-    const { alertsCount } = alertsByHostName[name] ?? {};
-    return { name, metrics, metadata, alertsCount };
+  const hosts = hostMetricsResponse.map((item) => {
+    const { alertsCount } = alertsByHostName[item.name] ?? {};
+    return { name: item.name, metrics: item.metrics, metadata: item.metadata, alertsCount };
   });
 
   return {
-    type: args.params.type,
+    type,
     nodes: hosts,
   };
 };
 
-const getFilteredHostNames = async (args: GetHostsArgs) => {
-  const filteredHosts = await getFilteredHosts(args);
+const getFilteredHostNames = async ({
+  infraMetricsClient,
+  apmDataAccessServices,
+  from,
+  to,
+  limit,
+  query,
+}: Pick<
+  GetHostParameters,
+  'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query'
+>) => {
+  assertQueryStructure(query);
 
-  const { nodes } = filteredHosts.aggregations ?? {};
-  return nodes?.buckets.map((p) => p.key as string) ?? [];
+  const [hosts, apmHosts] = await Promise.all([
+    getFilteredHosts({
+      infraMetricsClient,
+      query,
+      from,
+      to,
+      limit,
+    }),
+    maybeGetHostsFromApm({
+      infraMetricsClient,
+      apmDataAccessServices,
+      query,
+      from,
+      to,
+    }),
+  ]);
+
+  return [...new Set([...hosts, ...apmHosts])];
 };

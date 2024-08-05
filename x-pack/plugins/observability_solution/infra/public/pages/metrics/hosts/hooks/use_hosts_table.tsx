@@ -362,10 +362,10 @@ export const useHostsTable = () => {
           />
         ),
         width: '12%',
-        field: 'rx',
+        field: 'rxV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
-        render: (avg: number) => formatMetric('rx', avg),
+        render: (avg: number) => formatMetric('rxV2', avg),
         align: 'right',
       },
       {
@@ -377,10 +377,10 @@ export const useHostsTable = () => {
           />
         ),
         width: '12%',
-        field: 'tx',
+        field: 'txV2',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',
-        render: (avg: number) => formatMetric('tx', avg),
+        render: (avg: number) => formatMetric('txV2', avg),
         align: 'right',
       },
     ],

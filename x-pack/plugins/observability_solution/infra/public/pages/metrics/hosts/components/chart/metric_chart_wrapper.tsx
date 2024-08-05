@@ -5,17 +5,14 @@
  * 2.0.
  */
 import React, { useEffect, useRef, CSSProperties } from 'react';
-import {
-  Chart,
-  LEGACY_LIGHT_THEME,
-  Metric,
-  Settings,
-  type MetricWNumber,
-  type MetricWTrend,
-} from '@elastic/charts';
+import { Chart, Metric, Settings, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
 import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ChartPlaceholder } from '../../../../../components/lens';
+import {
+  ChartLoadingProgress,
+  ChartPlaceholder,
+} from '../../../../../components/lens/chart_placeholder';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;
@@ -27,16 +24,19 @@ export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 
 
 export const MetricChartWrapper = React.memo(
   ({ color, extra, id, loading, value, subtitle, title, toolTip, style, ...props }: Props) => {
-    const euiTheme = useEuiTheme();
+    const { euiTheme } = useEuiTheme();
     const loadedOnce = useRef(false);
+
+    const {
+      services: { charts },
+    } = useKibanaContextForPlugin();
+
+    const baseTheme = charts.theme.useChartsBaseTheme();
 
     useEffect(() => {
       if (!loadedOnce.current && !loading) {
         loadedOnce.current = true;
       }
-      return () => {
-        loadedOnce.current = false;
-      };
     }, [loading]);
 
     const metricsData: MetricWNumber = {
@@ -49,32 +49,41 @@ export const MetricChartWrapper = React.memo(
     };
 
     return (
-      <EuiPanel {...props} hasShadow={false} paddingSize="none" data-test-subj={id}>
+      <EuiPanel
+        {...props}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj={id}
+        css={css`
+          display: flex;
+          position: relative;
+        `}
+      >
         {loading && !loadedOnce.current ? (
-          <ChartPlaceholder style={style} />
+          <ChartPlaceholder />
         ) : (
-          <EuiToolTip
-            className="eui-fullWidth"
-            delay="regular"
-            content={toolTip}
-            anchorClassName="eui-fullWidth"
-          >
-            <Chart
-              size={style}
-              css={css`
-                .echMetric {
-                  border-radius: ${euiTheme.euiTheme.border.radius.medium};
-                  pointer-events: none;
-                }
-              `}
+          <>
+            <EuiToolTip
+              className="eui-fullWidth"
+              delay="regular"
+              content={toolTip}
+              anchorClassName="eui-fullWidth"
             >
-              <Settings
-                // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                baseTheme={LEGACY_LIGHT_THEME}
-              />
-              <Metric id={id} data={[[metricsData]]} />
-            </Chart>
-          </EuiToolTip>
+              <Chart
+                size={style}
+                css={css`
+                  .echMetric {
+                    border-radius: ${euiTheme.border.radius.medium};
+                    pointer-events: none;
+                  }
+                `}
+              >
+                {loading && <ChartLoadingProgress hasTopMargin={false} />}
+                <Settings baseTheme={baseTheme} />
+                <Metric id={id} data={[[metricsData]]} />
+              </Chart>
+            </EuiToolTip>
+          </>
         )}
       </EuiPanel>
     );
