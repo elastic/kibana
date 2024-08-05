@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { z } from 'zod';
 import {
   Plugin,
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
-  IKibanaResponse,
   Logger,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { upgradeBuiltInEntityDefinitions } from '@kbn/entityManager-plugin/server/lib/entities/upgrade_entity_definition';
 import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { entityDefinitionSchema } from '@kbn/entities-schema';
 
 interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -35,16 +37,22 @@ export class FixturePlugin implements Plugin<void, void, {}, FixtureStartDeps> {
     core.http.createRouter().post(
       {
         path: '/api/entities/upgrade_builtin_definitions',
-        validate: false,
+        validate: {
+          body: buildRouteValidationWithZod(
+            z.object({
+              definitions: z.array(entityDefinitionSchema),
+            })
+          ),
+        },
       },
       async (
         context: RequestHandlerContext,
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
-      ): Promise<IKibanaResponse<any>> => {
+      ) => {
         const [coreStart, { encryptedSavedObjects, security }] = await core.getStartServices();
 
-        await upgradeBuiltInEntityDefinitions({
+        const result = await upgradeBuiltInEntityDefinitions({
           definitions: req.body.definitions,
           server: {
             encryptedSavedObjects,
@@ -56,7 +64,7 @@ export class FixturePlugin implements Plugin<void, void, {}, FixtureStartDeps> {
           },
         });
 
-        return res.ok({ body: { success: true } });
+        return res.ok({ body: result });
       }
     );
   }

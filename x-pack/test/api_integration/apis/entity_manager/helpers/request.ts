@@ -7,13 +7,16 @@
 
 import { Agent } from 'supertest';
 import { EntityDefinition } from '@kbn/entities-schema';
-
+import { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 export interface Auth {
   username: string;
   password: string;
 }
 
-export const getInstalledDefinitions = async (supertest: Agent, auth?: Auth) => {
+export const getInstalledDefinitions = async (
+  supertest: Agent,
+  auth?: Auth
+): Promise<{ definitions: EntityDefinitionWithState[] }> => {
   let req = supertest.get('/internal/entities/definition').set('kbn-xsrf', 'xxx');
   if (auth) {
     req = req.auth(auth.username, auth.password);
@@ -36,4 +39,16 @@ export const uninstallDefinition = (supertest: Agent, id: string) => {
     .set('kbn-xsrf', 'xxx')
     .send()
     .expect(200);
+};
+
+export const upgradeBuiltinDefinitions = async (
+  supertest: Agent,
+  definitions: EntityDefinition[]
+): Promise<{ success: boolean }> => {
+  const response = await supertest
+    .post('/api/entities/upgrade_builtin_definitions')
+    .set('kbn-xsrf', 'xxx')
+    .send({ definitions })
+    .expect(200);
+  return response.body;
 };

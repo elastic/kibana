@@ -93,10 +93,14 @@ export class EntityManagerServerPlugin
         // the api key validation requires a check against the cluster license
         // which is lazily loaded. we ensure it gets loaded before the update
         await firstValueFrom(plugins.licensing.license$);
-        return upgradeBuiltInEntityDefinitions({
+        const { success } = await upgradeBuiltInEntityDefinitions({
           definitions: builtInDefinitions,
           server: this.server!,
         });
+
+        if (success) {
+          this.logger.info('Builtin definitions were successfully upgraded');
+        }
       })
       .catch((err) => this.logger.error(err));
 

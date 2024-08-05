@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { EntityDefinition } from '@kbn/entities-schema';
 import {
   entityDefinition as mockDefinition,
   entityDefinitionWithBackfill as mockBackfillDefinition,
@@ -25,14 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { definitions } = await getInstalledDefinitions(supertest);
         expect(definitions.length).to.eql(2);
-        expect(
-          definitions.find((definition: EntityDefinition) => definition.id === mockDefinition.id)
-        );
-        expect(
-          definitions.find(
-            (definition: EntityDefinition) => definition.id === mockBackfillDefinition.id
-          )
-        );
+        expect(definitions.find((definition) => definition.id === mockDefinition.id));
+        expect(definitions.find((definition) => definition.id === mockBackfillDefinition.id));
 
         await uninstallDefinition(supertest, mockDefinition.id);
         await uninstallDefinition(supertest, mockBackfillDefinition.id);

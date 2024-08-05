@@ -23,6 +23,7 @@ import {
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { updateEntityDefinition } from './save_entity_definition';
 import { startTransform } from './start_transform';
+import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
 
 export interface UpgradeDefinitionParams {
   esClient: ElasticsearchClient;
@@ -86,20 +87,18 @@ export async function upgradeBuiltInEntityDefinitions({
 }: {
   definitions: EntityDefinition[];
   server: EntityManagerServerSetup;
-}) {
+}): Promise<
+  { success: true; definitions: EntityDefinition[] } | { success: false; reason: string }
+> {
   const { logger } = server;
   const apiKey = await readEntityDiscoveryAPIKey(server);
   if (!apiKey) {
-    logger.debug('No API key found, skipping built-in definition upgrade');
-    return;
+    return { success: false, reason: ERROR_API_KEY_NOT_FOUND };
   }
 
   const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
   if (!isValid) {
-    logger.error(
-      `Stored API key is not valid, skipping built-in definition upgrade. Re-enable Entity discovery to update privileges`
-    );
-    return;
+    return { success: false, reason: ERROR_API_KEY_NOT_VALID };
   }
 
   logger.debug(`Starting built-in definitions upgrade`);
@@ -146,5 +145,6 @@ export async function upgradeBuiltInEntityDefinitions({
     });
   });
 
-  return Promise.all(updatePromises);
+  const updatedDefinitions = await Promise.all(updatePromises);
+  return { success: true, definitions: updatedDefinitions };
 }
