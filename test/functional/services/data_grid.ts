@@ -485,6 +485,13 @@ export class DataGridService extends FtrService {
     return value;
   }
 
+  public async getCustomRowHeightNumber(scope: 'row' | 'header' = 'row') {
+    const input = await this.testSubjects.find(
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_lineCountNumber`
+    );
+    return Number(await input.getAttribute('value'));
+  }
+
   public async changeRowHeightValue(newValue: string) {
     const buttonGroup = await this.testSubjects.find(
       'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
