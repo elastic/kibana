@@ -45,7 +45,7 @@ interface UpdateConversationTitleProps {
   updatedTitle: string;
 }
 
-interface UseConversation {
+export interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;

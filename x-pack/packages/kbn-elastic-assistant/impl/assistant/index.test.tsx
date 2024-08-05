@@ -127,7 +127,7 @@ describe('Assistant', () => {
   });
 
   describe('persistent storage', () => {
-    it('should refetchConversationsState after settings save button click', async () => {
+    it('should refetchCurrentUserConversations after settings save button click', async () => {
       const chatSendSpy = jest.spyOn(all, 'useChatSend');
       const setConversationTitle = jest.fn();
 
@@ -181,7 +181,7 @@ describe('Assistant', () => {
       );
     });
 
-    it('should refetchConversationsState after settings save button click, but do not update convos when refetch returns bad results', async () => {
+    it('should refetchCurrentUserConversations after settings save button click, but do not update convos when refetch returns bad results', async () => {
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: mockData,
         isLoading: false,
@@ -230,7 +230,7 @@ describe('Assistant', () => {
         expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
       });
     });
-    it('should refetchConversationsState after clear chat history button click', async () => {
+    it('should refetchCurrentUserConversations after clear chat history button click', async () => {
       renderAssistant();
       fireEvent.click(screen.getByTestId('chat-context-menu'));
       fireEvent.click(screen.getByTestId('clear-chat'));

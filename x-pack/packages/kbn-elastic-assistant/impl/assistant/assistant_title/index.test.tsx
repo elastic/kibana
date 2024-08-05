@@ -15,7 +15,7 @@ const testProps = {
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
   selectedConversation: undefined,
   onChange: jest.fn(),
-  refetchConversationsState: jest.fn(),
+  refetchCurrentUserConversations: jest.fn(),
 };
 
 describe('AssistantTitle', () => {

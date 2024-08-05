@@ -20,6 +20,7 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex, orderBy } from 'lodash';
+import { ChatRefactor } from '../../use_chat_refactor';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 
@@ -33,7 +34,7 @@ interface Props {
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
-  refetchConversationsState: () => Promise<void>;
+  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
 }
 
 const getCurrentConversationIndex = (

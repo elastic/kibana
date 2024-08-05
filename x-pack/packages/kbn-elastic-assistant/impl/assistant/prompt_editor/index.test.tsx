@@ -27,7 +27,7 @@ const mockSelectedEventPromptContext: SelectedPromptContext = {
 
 const defaultProps: Props = {
   conversation: undefined,
-  editingSystemPromptId: undefined,
+  currentSystemPromptId: undefined,
   isNewConversation: true,
   isSettingsModalVisible: false,
   onSystemPromptSelectionChange: jest.fn(),

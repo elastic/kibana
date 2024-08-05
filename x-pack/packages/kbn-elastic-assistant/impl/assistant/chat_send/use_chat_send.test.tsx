@@ -20,7 +20,7 @@ jest.mock('../use_send_message');
 jest.mock('../use_conversation');
 jest.mock('../../..');
 
-const setEditingSystemPromptId = jest.fn();
+const setCurrentSystemPromptId = jest.fn();
 const setSelectedPromptContexts = jest.fn();
 const setUserPrompt = jest.fn();
 const sendMessage = jest.fn();
@@ -40,11 +40,12 @@ export const testProps: UseChatSendProps = {
     anonymousPaths: {},
     externalUrl: {},
   } as unknown as HttpSetup,
-  editingSystemPromptId: defaultSystemPrompt.id,
-  setEditingSystemPromptId,
+  currentSystemPromptId: defaultSystemPrompt.id,
+  setCurrentSystemPromptId,
   setSelectedPromptContexts,
   setUserPrompt,
   setCurrentConversation,
+  refetchCurrentUserConversations: jest.fn(),
 };
 const robotMessage = { response: 'Response message from the robot', isError: false };
 const reportAssistantMessageSent = jest.fn();
@@ -78,7 +79,7 @@ describe('use chat send', () => {
       expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation);
       expect(setCurrentConversation).toHaveBeenCalled();
     });
-    expect(setEditingSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
+    expect(setCurrentSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
   it('handlePromptChange updates prompt successfully', () => {
     const { result } = renderHook(() => useChatSend(testProps), {
@@ -87,12 +88,12 @@ describe('use chat send', () => {
     result.current.handlePromptChange('new prompt');
     expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
   });
-  it('handleSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
+  it('handleChatSend sends message with context prompt when a valid prompt text is provided', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleSendMessage(promptText);
+    result.current.handleChatSend(promptText);
 
     await waitFor(() => {
       expect(sendMessage).toHaveBeenCalled();
@@ -102,7 +103,7 @@ describe('use chat send', () => {
       );
     });
   });
-  it('handleSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
+  it('handleChatSend sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(
       () =>
@@ -112,7 +113,7 @@ describe('use chat send', () => {
       }
     );
 
-    result.current.handleSendMessage(promptText);
+    result.current.handleChatSend(promptText);
 
     await waitFor(() => {
       expect(sendMessage).toHaveBeenCalled();
@@ -143,7 +144,7 @@ describe('use chat send', () => {
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleSendMessage(promptText);
+    result.current.handleChatSend(promptText);
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {

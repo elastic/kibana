@@ -9,6 +9,8 @@ import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { PromptResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
+import { ChatRefactor } from '../use_chat_refactor';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
@@ -21,10 +23,11 @@ import { getDefaultSystemPrompt, getDefaultNewSystemPrompt } from '../use_conver
 export interface UseChatSendProps {
   allSystemPrompts: PromptResponse[];
   currentConversation?: Conversation;
-  editingSystemPromptId: string | undefined;
+  currentSystemPromptId: string | undefined;
   http: HttpSetup;
+  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
   selectedPromptContexts: Record<string, SelectedPromptContext>;
-  setEditingSystemPromptId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
@@ -36,8 +39,8 @@ export interface UseChatSend {
   abortStream: () => void;
   handleOnChatCleared: () => Promise<void>;
   handlePromptChange: (prompt: string) => void;
-  handleSendMessage: (promptText: string) => void;
   handleRegenerateResponse: () => void;
+  handleChatSend: (promptText: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -49,10 +52,11 @@ export interface UseChatSend {
 export const useChatSend = ({
   allSystemPrompts,
   currentConversation,
-  editingSystemPromptId,
+  currentSystemPromptId,
   http,
+  refetchCurrentUserConversations,
   selectedPromptContexts,
-  setEditingSystemPromptId,
+  setCurrentSystemPromptId,
   setSelectedPromptContexts,
   setUserPrompt,
   setCurrentConversation,
@@ -80,7 +84,7 @@ export const useChatSend = ({
         );
         return;
       }
-      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
+      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === currentSystemPromptId);
 
       const userMessage = getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
@@ -149,7 +153,7 @@ export const useChatSend = ({
       allSystemPrompts,
       assistantTelemetry,
       currentConversation,
-      editingSystemPromptId,
+      currentSystemPromptId,
       http,
       selectedPromptContexts,
       sendMessage,
@@ -193,7 +197,7 @@ export const useChatSend = ({
     });
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
-  const handleOnChatCleared = useCallback(async () => {
+  const onChatCleared = useCallback(async () => {
     const defaultSystemPromptId =
       getDefaultSystemPrompt({
         allSystemPrompts,
@@ -208,22 +212,37 @@ export const useChatSend = ({
         setCurrentConversation(updatedConversation);
       }
     }
-    setEditingSystemPromptId(defaultSystemPromptId);
+    setCurrentSystemPromptId(defaultSystemPromptId);
   }, [
     allSystemPrompts,
     clearConversation,
     currentConversation,
     setCurrentConversation,
-    setEditingSystemPromptId,
+    setCurrentSystemPromptId,
     setSelectedPromptContexts,
     setUserPrompt,
   ]);
 
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchCurrentUserConversations();
+  }, [onChatCleared, refetchCurrentUserConversations]);
+
+  const handleChatSend = useCallback(
+    async (promptText: string) => {
+      await handleSendMessage(promptText);
+      if (currentConversation?.title === NEW_CHAT) {
+        await refetchCurrentUserConversations();
+      }
+    },
+    [currentConversation, handleSendMessage, refetchCurrentUserConversations]
+  );
+
   return {
-    abortStream,
     handleOnChatCleared,
+    handleChatSend,
+    abortStream,
     handlePromptChange,
-    handleSendMessage,
     handleRegenerateResponse,
     isLoading,
   };

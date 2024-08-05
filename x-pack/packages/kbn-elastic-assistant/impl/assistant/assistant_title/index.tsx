@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ChatRefactor } from '../use_chat_refactor';
 import type { Conversation } from '../../..';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
@@ -20,8 +21,8 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 export const AssistantTitle: React.FC<{
   title?: string;
   selectedConversation: Conversation | undefined;
-  refetchConversationsState: () => Promise<void>;
-}> = ({ title, selectedConversation, refetchConversationsState }) => {
+  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
+}> = ({ title, selectedConversation, refetchCurrentUserConversations }) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
@@ -35,10 +36,10 @@ export const AssistantTitle: React.FC<{
           conversationId: selectedConversation.id,
           updatedTitle,
         });
-        await refetchConversationsState();
+        await refetchCurrentUserConversations();
       }
     },
-    [refetchConversationsState, selectedConversation, updateConversationTitle]
+    [refetchCurrentUserConversations, selectedConversation, updateConversationTitle]
   );
 
   useEffect(() => {

@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
+import { ChatRefactor } from '../use_chat_refactor';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
@@ -43,7 +44,7 @@ interface OwnProps {
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
-  refetchConversationsState: () => Promise<void>;
+  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
   refetchPrompts?: (
@@ -72,7 +73,7 @@ export const AssistantHeader: React.FC<Props> = ({
   onConversationSelected,
   conversations,
   conversationsLoaded,
-  refetchConversationsState,
+  refetchCurrentUserConversations,
   onConversationCreate,
   isAssistantEnabled,
   refetchPrompts,
@@ -164,7 +165,7 @@ export const AssistantHeader: React.FC<Props> = ({
               onConversationSelected={onConversationSelected}
               conversations={conversations}
               conversationsLoaded={conversationsLoaded}
-              refetchConversationsState={refetchConversationsState}
+              refetchCurrentUserConversations={refetchCurrentUserConversations}
               refetchPrompts={refetchPrompts}
             />
           </EuiFlexItem>
@@ -199,7 +200,7 @@ export const AssistantHeader: React.FC<Props> = ({
             <AssistantTitle
               title={selectedConversation?.title}
               selectedConversation={selectedConversation}
-              refetchConversationsState={refetchConversationsState}
+              refetchCurrentUserConversations={refetchCurrentUserConversations}
             />
           </EuiFlexItem>
 

@@ -20,7 +20,7 @@ import { SelectedPromptContexts } from './selected_prompt_contexts';
 
 export interface Props {
   conversation: Conversation | undefined;
-  editingSystemPromptId: string | undefined;
+  currentSystemPromptId: string | undefined;
   isNewConversation: boolean;
   isSettingsModalVisible: boolean;
   promptContexts: Record<string, PromptContext>;
@@ -40,7 +40,7 @@ const PreviewText = styled(EuiText)`
 
 const PromptEditorComponent: React.FC<Props> = ({
   conversation,
-  editingSystemPromptId,
+  currentSystemPromptId,
   isNewConversation,
   isSettingsModalVisible,
   promptContexts,
@@ -58,7 +58,7 @@ const PromptEditorComponent: React.FC<Props> = ({
           <SystemPrompt
             allSystemPrompts={allSystemPrompts}
             conversation={conversation}
-            editingSystemPromptId={editingSystemPromptId}
+            currentSystemPromptId={currentSystemPromptId}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             isSettingsModalVisible={isSettingsModalVisible}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -81,7 +81,7 @@ const PromptEditorComponent: React.FC<Props> = ({
       isNewConversation,
       allSystemPrompts,
       conversation,
-      editingSystemPromptId,
+      currentSystemPromptId,
       onSystemPromptSelectionChange,
       isSettingsModalVisible,
       setIsSettingsModalVisible,

@@ -26,7 +26,7 @@ export interface Props extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCl
  */
 export const ChatSend: React.FC<Props> = ({
   handlePromptChange,
-  handleSendMessage,
+  handleChatSend,
   isDisabled,
   isLoading,
   shouldRefocusPrompt,
@@ -42,9 +42,9 @@ export const ChatSend: React.FC<Props> = ({
   const promptValue = useMemo(() => (isDisabled ? '' : userPrompt ?? ''), [isDisabled, userPrompt]);
 
   const onSendMessage = useCallback(() => {
-    handleSendMessage(promptTextAreaRef.current?.value?.trim() ?? '');
+    handleChatSend(promptTextAreaRef.current?.value?.trim() ?? '');
     handlePromptChange('');
-  }, [handleSendMessage, promptTextAreaRef, handlePromptChange]);
+  }, [handleChatSend, promptTextAreaRef, handlePromptChange]);
 
   useAutosizeTextArea(promptTextAreaRef?.current, promptValue);
 
@@ -66,7 +66,7 @@ export const ChatSend: React.FC<Props> = ({
         `}
       >
         <PromptTextArea
-          onPromptSubmit={handleSendMessage}
+          onPromptSubmit={handleChatSend}
           ref={promptTextAreaRef}
           handlePromptChange={handlePromptChange}
           value={promptValue}
