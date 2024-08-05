@@ -5,7 +5,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -80,9 +80,18 @@ const CompatibleControlTypesComponent = ({
   const dataControlFactories = useMemo(() => {
     return getAllControlTypes()
       .map((type) => getControlFactory(type))
-      .filter((factory) => {
-        return isDataControlFactory(factory);
-      });
+      .filter((factory) => isDataControlFactory(factory))
+      .sort(
+        (
+          { order: orderA = 0, getDisplayName: getDisplayNameA },
+          { order: orderB = 0, getDisplayName: getDisplayNameB }
+        ) => {
+          const orderComparison = orderB - orderA; // sort descending by order
+          return orderComparison === 0
+            ? getDisplayNameA().localeCompare(getDisplayNameB()) // if equal order, compare display names
+            : orderComparison;
+        }
+      );
   }, []);
 
   return (
@@ -146,7 +155,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(
     initialState.controlType
   );
-  const [controlEditorValid, setControlEditorValid] = useState<boolean>(false);
+  const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
   // const editorConfig = controlGroup.getEditorConfig();
@@ -181,19 +190,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     };
   }, [editorState.dataViewId]);
 
-  useEffect(() => {
-    setControlEditorValid(
-      Boolean(editorState.fieldName) && Boolean(selectedDataView) && Boolean(selectedControlType)
-    );
-  }, [editorState.fieldName, setControlEditorValid, selectedDataView, selectedControlType]);
-
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType || !editorState.fieldName || !fieldRegistry) return;
-
     const controlFactory = getControlFactory(selectedControlType) as DataControlFactory;
     const CustomSettings = controlFactory.CustomOptionsComponent;
 
     if (!CustomSettings) return;
+
     return (
       <EuiDescribedFormGroup
         ratio="third"
@@ -210,13 +213,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          currentState={editorState}
+          initialState={initialState}
+          field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
-          setControlEditorValid={setControlEditorValid}
+          setControlEditorValid={setControlOptionsValid}
+          parentApi={controlGroup}
         />
       </EuiDescribedFormGroup>
     );
-  }, [fieldRegistry, selectedControlType, editorState]);
+  }, [fieldRegistry, selectedControlType, initialState, editorState, controlGroup]);
 
   return (
     <>
@@ -287,14 +292,31 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   dataView={selectedDataView}
                   onSelectField={(field) => {
                     setEditorState({ ...editorState, fieldName: field.name });
-                    setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
 
+                    /**
+                     * make sure that the new field is compatible with the selected control type and, if it's not,
+                     * reset the selected control type to the **first** compatible control type
+                     */
+                    const newCompatibleControlTypes =
+                      fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
+                    if (
+                      !selectedControlType ||
+                      !newCompatibleControlTypes.includes(selectedControlType!)
+                    ) {
+                      setSelectedControlType(newCompatibleControlTypes[0]);
+                    }
+
+                    /**
+                     * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
+                     */
                     const newDefaultTitle = field.displayName ?? field.name;
                     setDefaultPanelTitle(newDefaultTitle);
                     const currentTitle = editorState.title;
                     if (!currentTitle || currentTitle === newDefaultTitle) {
                       setPanelTitle(newDefaultTitle);
                     }
+
+                    setControlOptionsValid(true); // reset options state
                   }}
                   selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
                 />
@@ -367,7 +389,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* )} */}
           </EuiDescribedFormGroup>
           {CustomSettingsComponent}
-          {/* {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null} */}
           {initialState.controlId && (
             <>
               <EuiSpacer size="l" />
@@ -407,7 +428,14 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               data-test-subj="control-editor-save"
               iconType="check"
               color="primary"
-              disabled={!controlEditorValid}
+              disabled={
+                !(
+                  controlOptionsValid &&
+                  Boolean(editorState.fieldName) &&
+                  Boolean(selectedDataView) &&
+                  Boolean(selectedControlType)
+                )
+              }
               onClick={() => {
                 onSave(editorState, selectedControlType!);
               }}

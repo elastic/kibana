@@ -2016,6 +2016,7 @@ class TimeseriesChartIntl extends Component {
     return (
       <>
         <RuleEditorFlyout
+          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
@@ -2035,6 +2036,7 @@ class TimeseriesChartIntl extends Component {
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}
+                selectedJob={this.props.selectedJob}
                 bounds={this.props.bounds}
                 showMapsLink={false}
                 showViewSeriesLink={false}
