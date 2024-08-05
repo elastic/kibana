@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(definitionsResponse.definitions.length).to.eql(latestBuiltInDefinitions.length);
       expect(
         isInstalledAndRunning(mockBuiltInEntityDefinition, definitionsResponse.definitions)
-      ).to.eql(true);
+      ).to.ok();
 
       await disableEntityDiscovery(authorizedUser, 200);
     });
