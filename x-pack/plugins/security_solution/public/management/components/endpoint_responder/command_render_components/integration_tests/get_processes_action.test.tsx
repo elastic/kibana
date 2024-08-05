@@ -314,7 +314,7 @@ describe('When using processes action from response actions console', () => {
 
       await waitFor(() => {
         expect(renderResult.getByTestId('getProcessesSuccessCallout').textContent).toEqual(
-          'Click here to download(ZIP file passcode: Elastic@123).' +
+          'Click here to download' +
             'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
         );
       });
