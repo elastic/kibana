@@ -26,7 +26,7 @@ export function useGetKnowledgeBaseEntries({
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],
     queryFn: async ({ signal }) => {
       if (!signal) {
-        return Promise.reject('Abort signal missing');
+        throw new Error('Abort signal missing');
       }
 
       return observabilityAIAssistantApi(`GET /internal/observability_ai_assistant/kb/entries`, {
