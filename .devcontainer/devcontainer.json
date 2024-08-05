@@ -6,9 +6,6 @@
   },
   "customizations": {
     "vscode": {
-      "settings": {
-        "terminal.integrated.shell.linux": "/usr/bin/zsh"
-      },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "ms-azuretools.vscode-docker",

@@ -28,8 +28,11 @@ setup_fips() {
 
 setup_shell() {
   if [ -n "$SHELL" ] && [ -x "$SHELL" ]; then
-    echo "Using shell: $SHELL"
     sudo chsh -s "$SHELL" vscode
+
+    if [ "$0" != "$CURRENT_SHELL" ]; then
+      exec "$SHELL"
+    fi
   else
     echo "Shell is not set or not executable, using bash"
   fi
