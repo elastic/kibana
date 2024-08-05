@@ -28,7 +28,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { get, isEqual } from 'lodash';
+import { get, isEqual, isNil, omitBy } from 'lodash';
 import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
@@ -259,13 +259,32 @@ export const getVisualizeEmbeddableFactory: (deps: {
           async (value) => {
             serializedVis$.next(value);
           },
-          (a, b) => isEqual(a, b),
+          (a, b) => {
+            const visA = a
+              ? {
+                  ...a,
+                  data: omitBy(a.data, isNil),
+                  params: omitBy(a.params, isNil),
+                }
+              : {};
+            const visB = b
+              ? { ...b, data: omitBy(b.data, isNil), params: omitBy(b.params, isNil) }
+              : {};
+            return isEqual(visA, visB);
+          },
         ],
-        savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
+        savedObjectId: [
+          savedObjectId$,
+          (value) => savedObjectId$.next(value),
+          (a, b) => {
+            if (!a && !b) return true;
+            return a === b;
+          },
+        ],
         savedObjectProperties: [
           savedObjectProperties$,
           (value) => savedObjectProperties$.next(value),
-          (a, b) => isEqual(a, b),
+          isEqual,
         ],
         linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
       }
