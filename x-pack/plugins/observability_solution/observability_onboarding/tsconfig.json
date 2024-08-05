@@ -41,7 +41,6 @@
     "@kbn/discover-plugin",
     "@kbn/utility-types",
     "@kbn/spaces-plugin",
-    "@kbn/ebt",
     "@kbn/deeplinks-analytics",
     "@kbn/custom-integrations-plugin",
     "@kbn/server-route-repository-utils"

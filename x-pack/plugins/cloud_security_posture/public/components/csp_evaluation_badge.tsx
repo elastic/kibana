@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { statusColors } from '../common/constants';
 
 interface Props {
-  type: 'passed' | 'failed';
+  type?: 'passed' | 'failed';
 }
 
 // 'fail' / 'pass' are same chars length, but not same width size.
@@ -37,8 +37,10 @@ export const CspEvaluationBadge = ({ type }: Props) => (
   >
     {type === 'failed' ? (
       <FormattedMessage id="xpack.csp.cspEvaluationBadge.failLabel" defaultMessage="Fail" />
-    ) : (
+    ) : type === 'passed' ? (
       <FormattedMessage id="xpack.csp.cspEvaluationBadge.passLabel" defaultMessage="Pass" />
+    ) : (
+      <FormattedMessage id="xpack.csp.cspEvaluationBadge.naLabel" defaultMessage="N/A" />
     )}
   </EuiBadge>
 );

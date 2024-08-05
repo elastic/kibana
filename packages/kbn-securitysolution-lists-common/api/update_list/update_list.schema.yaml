@@ -9,8 +9,6 @@ paths:
       operationId: UpdateList
       x-codegen-enabled: true
       summary: Updates a list
-      tags:
-        - List API
       requestBody:
         description: List's properties
         required: true
