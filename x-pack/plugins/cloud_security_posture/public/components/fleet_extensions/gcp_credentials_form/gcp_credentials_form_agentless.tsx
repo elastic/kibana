@@ -51,13 +51,13 @@ const GoogleCloudShellCredentialsGuide = (props: {
       <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="xpack.fleet.googleCloudShellCredentials.guide.description"
+          id="xpack.csp.googleCloudShellCredentials.guide.description"
           defaultMessage="The Google Cloud Shell Command below will generate a Service Account Credentials JSON key to set up access for assessing your GCP environment's security posture. Learn more about {learnMore}."
           values={{
             learnMore: (
               <Link url={GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL}>
                 <FormattedMessage
-                  id="xpack.fleet.googleCloudShellCredentials.guide.learnMoreLinkText"
+                  id="xpack.csp.googleCloudShellCredentials.guide.learnMoreLinkText"
                   defaultMessage="Google Cloud Shell"
                 />
               </Link>
@@ -69,7 +69,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
           <ol>
             <li>
               <FormattedMessage
-                id="xpack.fleet.googleCloudShellCredentials.guide.steps.launch"
+                id="xpack.csp.googleCloudShellCredentials.guide.steps.launch"
                 defaultMessage="Log into your {googleCloudConsole}"
                 values={{
                   googleCloudConsole: <strong>Google Cloud Console</strong>,
@@ -81,12 +81,13 @@ const GoogleCloudShellCredentialsGuide = (props: {
               <>
                 {props?.isOrganization ? (
                   <FormattedMessage
-                    id="xpack.fleet.googleCloudShellCredentials.guide.steps.copyWithOrgId"
+                    id="xpack.csp.googleCloudShellCredentials.guide.steps.copyWithOrgId"
                     defaultMessage="Replace <PROJECT_ID> and <ORG_ID_VALUE> in the following command with your project ID and organization ID then copy the command"
+                    ignoreTag
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.fleet.googleCloudShellCredentials.guide.steps.copyWithProjectId"
+                    id="xpack.csp.googleCloudShellCredentials.guide.steps.copyWithProjectId"
                     defaultMessage="Replace <PROJECT_ID> in the following command with your project ID then copy the command"
                     ignoreTag
                   />
@@ -99,7 +100,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
             </li>
             <li>
               <FormattedMessage
-                id="xpack.fleet.googleCloudShellCredentials.guide.steps.cloudShellButton"
+                id="xpack.csp.googleCloudShellCredentials.guide.steps.cloudShellButton"
                 defaultMessage="Click the {cloudShellButton} button above and login into your account"
                 values={{
                   cloudShellButton: <strong>Launch Google Cloud Shell</strong>,
@@ -110,7 +111,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="xpack.fleet.googleCloudShellCredentials.guide.steps.confirmation"
+                id="xpack.csp.googleCloudShellCredentials.guide.steps.confirmation"
                 defaultMessage="Check {trustRepo} and click {confirmButton}"
                 values={{
                   confirmButton: <strong>Confirm</strong>,
@@ -122,7 +123,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="xpack.fleet.googleCloudShellCredentials.guide.steps.runCloudShellScript"
+                id="xpack.csp.googleCloudShellCredentials.guide.steps.runCloudShellScript"
                 defaultMessage="Paste and run command in the {googleCloudShell} terminal"
                 values={{
                   googleCloudShell: <strong>Google Cloud Shell</strong>,
@@ -133,7 +134,7 @@ const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="xpack.fleet.googleCloudShellCredentials.guide.steps.copyJsonServiceKey"
+                id="xpack.csp.googleCloudShellCredentials.guide.steps.copyJsonServiceKey"
                 defaultMessage="Run {catCommand} to view the service account key. Copy and paste Credentials JSON below"
                 values={{
                   catCommand: <code>cat KEY_FILE.json</code>,
@@ -195,7 +196,7 @@ export const GcpCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
+              id="xpack.csp.cspIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."
             />
           </EuiCallOut>

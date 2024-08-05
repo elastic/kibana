@@ -83,8 +83,8 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.login"
-                defaultMessage="Log in as an admin in the AWS account you want to onboard"
+                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.singleLogin"
+                defaultMessage="Log in as an {admin} in the AWS account you want to onboard"
                 values={{
                   admin: <strong>admin</strong>,
                 }}
