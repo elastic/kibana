@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Get list privileges API endpoint
+  title: Read list privileges API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/privileges:
     get:
       x-labels: [serverless, ess]
-      operationId: GetListPrivileges
+      operationId: ReadListPrivileges
       x-codegen-enabled: true
       summary: Gets list privileges
       responses:

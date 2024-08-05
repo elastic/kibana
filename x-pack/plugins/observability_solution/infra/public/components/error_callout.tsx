@@ -17,8 +17,7 @@ import {
 import { KQLSyntaxError } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 interface Props {
   error: Error;
