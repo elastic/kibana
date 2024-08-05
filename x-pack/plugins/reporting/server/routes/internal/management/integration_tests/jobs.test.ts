@@ -254,7 +254,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         .expect(403);
     });
 
-    it('when a job is incomplete', async () => {
+    it('when a job is incomplete, "internal" API endpoint should return 200 response', async () => {
       mockEsClient.search.mockResponseOnce(
         getHits({
           jobtype: mockJobTypeUnencoded,
@@ -267,13 +267,13 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(503)
+        .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
         .expect('Retry-After', '30')
         .then(({ text }) => expect(text).toEqual('pending'));
     });
 
-    it('when a job fails', async () => {
+    it('when a job fails, "internal" API endpoint should return 200 response', async () => {
       mockEsClient.search.mockResponse(
         getHits({
           jobtype: mockJobTypeUnencoded,
@@ -287,7 +287,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       await server.start();
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-        .expect(500)
+        .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8')
         .then(({ body }) =>
           expect(body.message).toEqual('Reporting generation failed: job failure message')
