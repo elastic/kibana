@@ -18,6 +18,10 @@ export const ControlGroupStrings = {
       defaultMessage: 'Cancel',
     }),
   management: {
+    getAddControlTitle: () =>
+      i18n.translate('controls.controlGroup.management.addControl', {
+        defaultMessage: 'Add control',
+      }),
     getApplyButtonTitle: (hasUnappliedSelections: boolean) =>
       hasUnappliedSelections
         ? i18n.translate('controls.controlGroup.management.applyButtonTooltip.enabled', {

@@ -8,11 +8,11 @@
 
 import { omit } from 'lodash';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { BehaviorSubject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE, getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { ControlStyle } from '@kbn/controls-plugin/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi } from '@kbn/presentation-publishing';
@@ -24,61 +24,57 @@ import {
   ControlGroupCreationOptions,
   ControlGroupRendererApi,
   ControlGroupRendererState,
+  ControlGroupSettings,
 } from './types';
 
 export interface ControlGroupRendererProps {
-  filters?: Filter[];
   getCreationOptions?: (
     initialInput: Partial<ControlGroupRendererState>,
     builder: ControlGroupInputBuilder
   ) => Promise<Partial<ControlGroupCreationOptions>>;
+  filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query;
   loading?: boolean;
+  labelPosition?: ControlStyle;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlGroupRendererProps>(
-  ({ getCreationOptions, filters, timeRange, query, loading = false }, ref) => {
+  ({ getCreationOptions, filters, timeRange, query }, ref) => {
+    const id = useMemo(() => uuidv4(), []);
+    const [apiLoading, setApiLoading] = useState<boolean>(true);
+    const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
+    useImperativeHandle(ref, () => controlGroup as ControlGroupRendererApi, [controlGroup]);
+
     const searchApi = useSearchApi({
       filters,
       query,
       timeRange,
     });
 
-    const loadingApi = useMemo(() => {
-      return {
-        dataLoading: new BehaviorSubject<boolean>(loading),
-      };
-      // loadingonly used as initial values. Changes do not effect memoized value
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-      loadingApi.dataLoading.next(loading);
-    }, [loading, loadingApi.dataLoading]);
-
     const [serializedState, setSerializedState] = useState<
       ControlGroupSerializedState | undefined
     >();
-    const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
-
-    useImperativeHandle(ref, () => controlGroup ?? null, [controlGroup]);
-    const id = useMemo(() => uuidv4(), []);
+    const [controlGroupSettings, setControlGroupSettings] = useState<
+      ControlGroupSettings | undefined
+    >(undefined);
 
     // onMount
     useEffect(() => {
       let cancelled = false;
       (async () => {
-        const { initialInput, settings, fieldFilterPredicate } =
+        const { initialInput, settings } =
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
           {};
-        console.log({ initialInput, settings, fieldFilterPredicate });
-        if (!cancelled)
+        if (!cancelled) {
           setSerializedState({
             ...omit(initialInput, ['panels', 'ignoreParentSettings']),
             panelsJSON: JSON.stringify(initialInput?.panels ?? {}),
             ignoreParentSettingsJSON: JSON.stringify(initialInput?.ignoreParentSettings ?? {}),
           } as ControlGroupSerializedState);
+          setControlGroupSettings(settings);
+          setApiLoading(false);
+        }
       })();
       return () => {
         cancelled = true;
@@ -87,22 +83,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-      // if (!controlGroup) return;
-      // if (
-      //   (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
-      //   !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
-      //   !isEqual(controlGroup.getInput().query, query)
-      // ) {
-      //   controlGroup.updateInput({
-      //     timeRange,
-      //     query,
-      //     filters,
-      //   });
-      // }
-    }, [query, filters, controlGroup, timeRange]);
-
-    return !serializedState ? (
+    return apiLoading ? (
       <EuiLoadingSpinner />
     ) : (
       <ReactEmbeddableRenderer<
@@ -114,88 +95,14 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           ...searchApi,
-          ...loadingApi,
-          getSerializedStateForChild: () => ({ rawState: serializedState }),
+          getSerializedStateForChild: () => ({ rawState: serializedState! }),
         })}
         onApiAvailable={(childApi) => {
-          setControlGroup({
-            ...childApi,
-            onFiltersPublished$: childApi.filters$.pipe(
-              map((newFilters: Filter[] | undefined): Filter[] => newFilters ?? [])
-            ),
-          });
+          childApi.settings$.next(controlGroupSettings); // set settings via creation options
+          setControlGroup(childApi);
         }}
         hidePanelChrome
       />
     );
-
-    // onMount
-    // useEffect(() => {
-    //   let canceled = false;
-    //   let destroyControlGroup: () => void;
-
-    //   (async () => {
-    //     const factory = await getReactEmbeddableFactory<
-    //       ControlGroupSerializedState,
-    //       ControlGroupRuntimeState,
-    //       ControlGroupApi
-    //     >(CONTROL_GROUP_TYPE);
-
-    // const { initialInput, settings, fieldFilterPredicate } =
-    //   (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
-    //   {};
-    //     const newControlGroup = (await factory?.create(
-    //       {
-    //         id,
-    //         ...getDefaultControlGroupInput(),
-    //         ...initialInput,
-    //       },
-    //       undefined,
-    //       {
-    //         ...settings,
-    //         lastSavedInput: {
-    //           ...getDefaultControlGroupPersistableInput(),
-    //           ...pick(initialInput, persistableControlGroupInputKeys),
-    //         },
-    //       },
-    //       fieldFilterPredicate
-    //     )) as ControlGroupContainer;
-
-    //     if (canceled) {
-    //       newControlGroup.destroy();
-    //       controlGroup?.destroy();
-    //       return;
-    //     }
-
-    //     if (controlGroupDomRef.current) {
-    //       newControlGroup.render(controlGroupDomRef.current);
-    //     }
-    //     setControlGroup(newControlGroup);
-    //     destroyControlGroup = () => newControlGroup.destroy();
-    //   })();
-    //   return () => {
-    //     canceled = true;
-    //     destroyControlGroup?.();
-    //   };
-    //   // exhaustive deps disabled because we want the control group to be created only on first render.
-    //   // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, []);
-
-    // useEffect(() => {
-    //   if (!controlGroup) return;
-    //   if (
-    //     (timeRange && !isEqual(controlGroup.getInput().timeRange, timeRange)) ||
-    //     !compareFilters(controlGroup.getInput().filters ?? [], filters ?? []) ||
-    //     !isEqual(controlGroup.getInput().query, query)
-    //   ) {
-    //     controlGroup.updateInput({
-    //       timeRange,
-    //       query,
-    //       filters,
-    //     });
-    //   }
-    // }, [query, filters, controlGroup, timeRange]);
-
-    // return <div ref={controlGroupDomRef} />;
   }
 );

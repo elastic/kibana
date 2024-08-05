@@ -41,7 +41,7 @@ export type DataControlApi = DefaultControlApi &
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
 > {
-  initialState: Omit<State, 'fieldName'>;
+  initialState: Omit<State, 'fieldName' | 'dataViewId'>;
   field: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;

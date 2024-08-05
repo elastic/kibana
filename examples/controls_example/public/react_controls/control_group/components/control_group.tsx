@@ -61,11 +61,11 @@ export function ControlGroup({
   hasUnappliedSelections,
 }: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [autoApplySelections, controlsInOrder] = useBatchedPublishingSubjects(
+  const [autoApplySelections, controlsInOrder, settings] = useBatchedPublishingSubjects(
     controlGroupApi.autoApplySelections$,
-    controlsManager.controlsInOrder$
+    controlsManager.controlsInOrder$,
+    controlGroupApi.settings$
   );
-
   /** Handle drag and drop */
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -97,6 +97,11 @@ export function ControlGroup({
       ignore = true;
     };
   }, [controlGroupApi]);
+
+  const showAppendedButtonGroup = useMemo(
+    () => settings?.showAddButton || !autoApplySelections,
+    [settings, autoApplySelections]
+  );
 
   const ApplyButtonComponent = useMemo(() => {
     return (
@@ -167,15 +172,41 @@ export function ControlGroup({
             </DragOverlay>
           </DndContext>
         </EuiFlexItem>
-        {isInitialized && !autoApplySelections && (
-          <EuiFlexItem grow={false} className="controlGroup--endButtonGroup">
-            {hasUnappliedSelections ? (
-              ApplyButtonComponent
-            ) : (
-              <EuiToolTip content={ControlGroupStrings.management.getApplyButtonTitle(false)}>
-                {ApplyButtonComponent}
-              </EuiToolTip>
-            )}
+
+        {isInitialized && showAppendedButtonGroup && (
+          <EuiFlexItem
+            grow={false}
+            className="controlGroup--endButtonGroup"
+            data-test-subj="controlGroup--endButtonGroup"
+          >
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              {settings?.showAddButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                    <EuiButtonIcon
+                      size="m"
+                      iconSize="m"
+                      display="base"
+                      iconType={'plusInCircle'}
+                      data-test-subj="controlGroup--addControlButton"
+                      aria-label={ControlGroupStrings.management.getAddControlTitle(settings)}
+                      onClick={() => controlGroupApi.openAddDataControlFlyout()}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {!autoApplySelections && (
+                <EuiFlexItem grow={false}>
+                  {hasUnappliedSelections ? (
+                    ApplyButtonComponent
+                  ) : (
+                    <EuiToolTip content={ControlGroupStrings.management.getApplyButtonTitle(false)}>
+                      {ApplyButtonComponent}
+                    </EuiToolTip>
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

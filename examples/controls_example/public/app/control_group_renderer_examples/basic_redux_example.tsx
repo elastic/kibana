@@ -8,16 +8,22 @@
 
 import React, { useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ControlGroupRenderer, ControlStyle, ControlGroupAPI } from '@kbn/controls-plugin/public';
-import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group';
+import { DEFAULT_CONTROL_STYLE } from '@kbn/controls-plugin/common';
+import { ControlStyle } from '@kbn/controls-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  AwaitingControlGroupAPI,
+  ControlGroupRenderer,
+} from '../../react_controls/control_group/external_api';
+import { ControlGroupApi } from '../../react_controls/control_group/types';
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   const [controlGroupAPI, setControlGroupApi] = useState<AwaitingControlGroupAPI>(null);
+  const [selectedLabelPostion, setSelectedLabelPosition] =
+    useState<ControlStyle>(DEFAULT_CONTROL_STYLE);
 
-  const Buttons = ({ api }: { api: ControlGroupAPI }) => {
-    const controlStyle = api.select((state) => state.explicitInput.controlStyle);
+  const Buttons = ({ api }: { api: ControlGroupApi }) => {
     return (
       <EuiButtonGroup
         legend="Text style"
@@ -33,8 +39,8 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
             value: 'twoLine' as ControlStyle,
           },
         ]}
-        idSelected={controlStyle}
-        onChange={(id, value) => api.dispatch.setControlStyle(value)}
+        idSelected={selectedLabelPostion}
+        onChange={(id, value) => setSelectedLabelPosition(value)}
         type="single"
       />
     );

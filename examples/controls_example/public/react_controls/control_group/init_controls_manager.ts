@@ -35,7 +35,14 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
+export function initControlsManager(
+  initialControlPanelsState: ControlPanelsState,
+  parentApi?: unknown
+) {
+  // const lastUsedDataViewId$ = new BehaviorSubject<string | undefined>(
+  //   parentApi?.lastUsedDataViewId$.getValue()
+  // );
+
   const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
   const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
@@ -171,6 +178,11 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
       },
       removePanel,
       replacePanel: async (panelId, newPanel) => {
+        // console.log('replacePanel', newPanel);
+        // if (lastUsedDataViewId$.getValue !== newPanel.initialState?.dataViewId) {
+        //   lastUsedDataViewId$.next(newPanel.initialState?.dataViewId);
+        // }
+
         const index = controlsInOrder$.value.findIndex(({ id }) => id === panelId);
         removePanel(panelId);
         const controlApi = await addNewPanel(

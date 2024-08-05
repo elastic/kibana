@@ -193,9 +193,6 @@ export const getTimesliderControlFactory = (
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
           ? controlGroupApi.parentApi.dataLoading
           : new BehaviorSubject<boolean | undefined>(false);
-      dashboardDataLoading$.subscribe((test) => {
-        console.log('dashboardDataLoading$', test);
-      });
 
       const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
         // debounce to give time for panels to start loading if they are going to load from time changes

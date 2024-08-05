@@ -27,9 +27,10 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
+import { ControlGroupSettings } from './external_api/types';
 
 /**
  * ----------------------------------------------------------------
@@ -41,6 +42,11 @@ import { ControlFetchContext } from './control_fetch/control_fetch';
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
   labelPosition: PublishingSubject<ControlStyle>;
 };
+
+export type ControlInputTransform = (
+  newState: Partial<ControlGroupSerializedState>,
+  controlType: string
+) => Partial<ControlGroupSerializedState>;
 
 export type ControlGroupUnsavedChanges = Omit<
   ControlGroupRuntimeState,
@@ -66,6 +72,12 @@ export type ControlGroupApi = PresentationContainer &
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
+
+    // lastUsedDataViewId$: PublishingSubject<string | undefined>;
+    settings$: BehaviorSubject<ControlGroupSettings | undefined>; // Used only for the control group renderer component
+    openAddDataControlFlyout: (settings?: {
+      controlInputTransform?: ControlInputTransform;
+    }) => void;
   };
 
 /**
@@ -83,13 +95,6 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   ignoreParentSettings?: ParentIgnoreSettings;
 
   initialChildControlState: ControlPanelsState<State>;
-
-  /** TODO: Handle the editor config, which is used with the control group renderer component */
-  editorConfig?: {
-    hideDataViewSelector?: boolean;
-    hideWidthSettings?: boolean;
-    hideAdditionalSettings?: boolean;
-  };
 }
 
 export interface ControlGroupSerializedState

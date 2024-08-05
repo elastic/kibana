@@ -53,12 +53,12 @@ export const EditExample = () => {
       },
     };
 
-    if (controlGroupAPI) {
-      const disabledActions: string[] = Object.keys(
-        pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
-      );
-      controlGroupAPI.updateInput({ disabledActions });
-    }
+    // if (controlGroupAPI) {
+    //   const disabledActions: string[] = Object.keys(
+    //     pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
+    //   );
+    //   controlGroupAPI.updateInput({ disabledActions });
+    // }
 
     setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
   }
@@ -67,7 +67,7 @@ export const EditExample = () => {
     if (!controlGroupAPI) return;
 
     setIsSaving(true);
-    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.getInput()));
+    localStorage.setItem(INPUT_KEY, JSON.stringify(controlGroupAPI.serializeState()));
 
     // simulated async save await
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -135,6 +135,7 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
+                if (!controlGroupAPI) return;
                 controlGroupAPI!.openAddDataControlFlyout({ controlInputTransform });
               }}
             >

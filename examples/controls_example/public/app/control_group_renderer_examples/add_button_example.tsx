@@ -10,7 +10,7 @@ import React from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer } from '../../react_controls/control_group/external_api';
 
 export const AddButtonExample = ({ dataViewId }: { dataViewId: string }) => {
   return (

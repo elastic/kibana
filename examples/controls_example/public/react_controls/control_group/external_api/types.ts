@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { ControlInputTransform } from '@kbn/controls-plugin/common';
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
-import { PublishesFilters } from '@kbn/presentation-publishing';
-import { Observable } from 'rxjs';
 import {
   ControlGroupApi,
-  ControlGroupRuntimeState,
   ControlGroupSerializedState,
   ControlPanelState,
   SerializedControlPanelState,
 } from '../types';
 
-export type ControlGroupRendererApi = Omit<ControlGroupApi, keyof PublishesFilters> & {
-  onFiltersPublished$: Observable<Filter[]>; // filters$ -> onFiltersPublished$ to keep API consistent
+export type ControlGroupRendererApi = ControlGroupApi & {
+  openAddDataControlFlyout: (options?: {
+    controlInputTransform?: ControlInputTransform;
+    onSave?: (id: string) => void;
+  }) => void;
 };
 
 export type AwaitingControlGroupApi = ControlGroupRendererApi | null;
@@ -38,8 +38,12 @@ export type ControlGroupRendererState = Omit<
 
 export interface ControlGroupSettings {
   showAddButton?: boolean;
-  staticDataViewId?: string;
-  editorConfig?: ControlGroupRuntimeState['editorConfig'];
+  editorConfig?: {
+    hideDataViewSelector?: boolean;
+    hideWidthSettings?: boolean;
+    hideAdditionalSettings?: boolean;
+    fieldFilterPredicate?: FieldFilterPredicate;
+  };
 }
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
@@ -47,5 +51,4 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
 export interface ControlGroupCreationOptions {
   initialInput?: Partial<ControlGroupRendererState>;
   settings?: ControlGroupSettings;
-  fieldFilterPredicate?: FieldFilterPredicate;
 }

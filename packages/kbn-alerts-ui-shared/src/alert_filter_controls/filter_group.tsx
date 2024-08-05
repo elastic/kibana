@@ -343,15 +343,13 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       return {
         initialInput,
         settings: {
-          showAddButton: false,
-          staticDataViewId: dataViewId ?? '',
           editorConfig: {
             hideWidthSettings: true,
             hideDataViewSelector: true,
             hideAdditionalSettings: true,
           },
+          fieldFilterPredicate,
         },
-        fieldFilterPredicate,
       } as ControlGroupCreationOptions;
     },
     [

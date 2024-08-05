@@ -23,11 +23,7 @@ import {
   EuiToolTip,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import {
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-plugin/common';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -42,19 +38,18 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import { ControlGroupApi } from '../../react_controls/control_group/types';
+import {
+  clearControlGroupRuntimeState,
+  getControlGroupRuntimeState,
+  setControlGroupRuntimeState,
+} from './runtime_control_group_state';
 import {
   clearControlGroupSerializedState,
   getControlGroupSerializedState,
   setControlGroupSerializedState,
   WEB_LOGS_DATA_VIEW_ID,
 } from './serialized_control_group_state';
-import {
-  clearControlGroupRuntimeState,
-  getControlGroupRuntimeState,
-  setControlGroupRuntimeState,
-} from './runtime_control_group_state';
-import { ControlGroupApi } from '../../react_controls/control_group/types';
-import { openDataControlEditor } from '../../react_controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
@@ -139,7 +134,7 @@ export const ReactControlExample = ({
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },
-      lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
+      lastUsedDataViewId$: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
       saveNotification$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -317,24 +312,7 @@ export const ReactControlExample = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
-                openDataControlEditor({
-                  initialState: {
-                    grow: DEFAULT_CONTROL_GROW,
-                    width: DEFAULT_CONTROL_WIDTH,
-                    dataViewId: dashboardApi.lastUsedDataViewId.getValue(),
-                  },
-                  onSave: ({ type: controlType, state: initialState }) => {
-                    controlGroupApi.addNewPanel({
-                      panelType: controlType,
-                      initialState,
-                    });
-                  },
-                  controlGroupApi,
-                  services: {
-                    core,
-                    dataViews: dataViewsService,
-                  },
-                });
+                controlGroupApi.openAddDataControlFlyout();
               }}
               size="s"
             >

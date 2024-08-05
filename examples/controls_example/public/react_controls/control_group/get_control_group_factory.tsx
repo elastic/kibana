@@ -40,6 +40,8 @@ import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState 
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
+import { ControlGroupSettings } from './external_api/types';
+import { openDataControlEditor } from '../data_controls/open_data_control_editor';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -91,6 +93,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
+      const settings$ = new BehaviorSubject<ControlGroupSettings | undefined>(undefined);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -121,6 +124,29 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
+        settings$,
+        openAddDataControlFlyout: (settings) => {
+          const { controlInputTransform } = settings ?? {
+            controlInputTransform: (state) => state,
+          };
+          openDataControlEditor({
+            initialState: {
+              grow: api.grow.getValue(),
+              width: api.width.getValue(),
+            },
+            onSave: ({ type: controlType, state: initialState }) => {
+              api.addNewPanel({
+                panelType: controlType,
+                initialState: controlInputTransform!(
+                  initialState as Partial<ControlGroupSerializedState>,
+                  controlType
+                ),
+              });
+            },
+            controlGroupApi: api,
+          });
+        },
+        // lastUsedDataViewId$,
         getLastSavedControlState: (controlUuid: string) => {
           return lastSavedRuntimeState.initialChildControlState[controlUuid] ?? {};
         },

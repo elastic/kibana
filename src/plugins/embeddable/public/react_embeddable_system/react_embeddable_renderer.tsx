@@ -117,11 +117,9 @@ export const ReactEmbeddableRenderer = <
 
         const buildEmbeddable = async () => {
           const serializedState = parentApi.getSerializedStateForChild(uuid);
-          console.log('before');
           const lastSavedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
             : ({} as RuntimeState);
-          console.log('after');
 
           // If the parent provides runtime state for the child (usually as a state backup or cache),
           // we merge it with the last saved runtime state.
