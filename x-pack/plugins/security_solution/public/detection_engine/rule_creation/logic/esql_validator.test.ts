@@ -103,4 +103,19 @@ describe('parseEsqlQuery', () => {
       isMissingMetadataOperator: false,
     });
   });
+
+  it('returns error when query is syntactically invalid', () => {
+    isAggregatingQueryMock.mockReturnValueOnce(false);
+
+    expect(parseEsqlQuery('aaa bbbb ssdasd')).toEqual({
+      errors: expect.arrayContaining([
+        expect.objectContaining({
+          message:
+            "SyntaxError: mismatched input 'aaa' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+        }),
+      ]),
+      isEsqlQueryAggregating: false,
+      isMissingMetadataOperator: true,
+    });
+  });
 });

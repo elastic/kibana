@@ -188,6 +188,18 @@ describe(
 
         cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
       });
+
+      it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
+        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5 test';
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        getDefineContinueButton().click();
+
+        cy.get(ESQL_QUERY_BAR).contains(
+          `Error validating ES|QL: "SyntaxError: extraneous input 'test' expecting <EOF>"`
+        );
+      });
     });
 
     describe('ES|QL investigation fields', () => {

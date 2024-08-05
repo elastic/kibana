@@ -52,8 +52,7 @@ const constructSyntaxError = (error: Error) => {
  * checks whether query has metadata _id operator
  */
 export const computeHasMetadataOperator = (ast: ESQLAst) => {
-  const commands = ast.filter((a) => a.type === 'command');
-  const fromCommand = commands.find((command) => command.name === 'from');
+  const fromCommand = ast.find((astItem) => astItem.type === 'command' && astItem.name === 'from');
 
   // Check whether the `from` command has `metadata` operator
   const metadataOption = fromCommand?.args.find(

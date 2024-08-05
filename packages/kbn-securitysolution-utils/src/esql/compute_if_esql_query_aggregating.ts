@@ -9,8 +9,7 @@
 import { ESQLAst, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 export const isAggregatingQuery = (ast: ESQLAst): boolean => {
-  const commands = ast.filter((a) => a.type === 'command');
-  return !!commands.find((command) => command.name === 'stats');
+  return ast.some((astItem) => astItem.type === 'command' && astItem.name === 'stats');
 };
 
 /**
