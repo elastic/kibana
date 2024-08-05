@@ -15,7 +15,7 @@ import { type UsageCountersServiceSetup } from '../usage_counters';
 
 export async function storeUiReport(
   internalRepository: ISavedObjectsRepository,
-  counters: UsageCountersServiceSetup,
+  usageCounters: UsageCountersServiceSetup,
   report: ReportSchemaType
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
@@ -61,7 +61,8 @@ export async function storeUiReport(
       const { appName, eventName, total, type } = metric;
 
       const counter =
-        counters.getUsageCounterByDomainId(appName) ?? counters.createUsageCounter(appName);
+        usageCounters.getUsageCounterByDomainId(appName) ??
+        usageCounters.createUsageCounter(appName);
 
       counter.incrementCounter({
         counterName: eventName,
