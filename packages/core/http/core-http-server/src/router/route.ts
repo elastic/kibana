@@ -51,10 +51,15 @@ export interface AuthzDisabled {
   reason: string;
 }
 
+export interface RouteAuthc {
+  enabled: boolean | 'optional';
+  reason?: string;
+}
+
 export type RouteAuthz = AuthzEnabled | AuthzDisabled;
 export interface RouteSecurity {
   authz: RouteAuthz;
-  authRequired?: boolean;
+  authRequired?: RouteAuthc;
 }
 
 /**

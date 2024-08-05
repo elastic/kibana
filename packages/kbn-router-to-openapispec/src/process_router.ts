@@ -38,12 +38,8 @@ interface PrivilegeGroups {
 }
 
 const extractAuthzDescription = (route: InternalRouterRoute) => {
-  if (!route?.security?.authz) {
+  if (!route?.security?.authz || (route.security.authz as AuthzDisabled).enabled === false) {
     return '';
-  }
-
-  if ((route.security.authz as AuthzDisabled).enabled === false) {
-    return `Route authz is disabled. ${(route.security?.authz as AuthzDisabled).reason ?? ''}`;
   }
 
   const privileges = (route?.security?.authz as AuthzEnabled).requiredPrivileges;

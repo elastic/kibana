@@ -171,9 +171,13 @@ export interface AuthzDisabled {
 }
 
 export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+export interface RouteAuthc {
+  enabled: boolean | 'optional';
+  reason?: string;
+}
 export interface RouteSecurity {
   authz: RouteAuthz;
-  authRequired?: boolean;
+  authc?: RouteAuthc;
 }
 
 /** @internal */
