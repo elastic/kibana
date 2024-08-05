@@ -32,12 +32,12 @@ export const ControlGroupRendererExamples = ({
 
   return dataViews && dataViews.length > 0 && !error ? (
     <>
-      <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
+      {/* <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
       <EuiSpacer size="xl" />
       <EditExample />
       <EuiSpacer size="xl" />
       <BasicReduxExample dataViewId={dataViews[0].id!} />
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="xl" /> */}
       <AddButtonExample dataViewId={dataViews[0].id!} />
     </>
   ) : (

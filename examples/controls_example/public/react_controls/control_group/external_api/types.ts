@@ -12,6 +12,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import type {
   ControlGroupApi,
   ControlGroupSerializedState,
+  ControlGroupSettings,
   ControlInputTransform,
   ControlPanelState,
   SerializedControlPanelState,
@@ -37,16 +38,6 @@ export type ControlGroupRendererState = Omit<
   viewMode?: ViewMode;
   ignoreParentSettings?: ParentIgnoreSettings;
 };
-
-export interface ControlGroupSettings {
-  showAddButton?: boolean;
-  editorConfig?: {
-    hideDataViewSelector?: boolean;
-    hideWidthSettings?: boolean;
-    hideAdditionalSettings?: boolean;
-    fieldFilterPredicate?: FieldFilterPredicate;
-  };
-}
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 

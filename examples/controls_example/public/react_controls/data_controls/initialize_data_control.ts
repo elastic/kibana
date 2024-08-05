@@ -146,7 +146,6 @@ export const initializeDataControl = <EditorState extends object = {}>(
 
     // open the editor to get the new state
     openDataControlEditor<DefaultDataControlState & EditorState>({
-      services,
       onSave: ({ type: newType, state: newState }) => {
         if (newType === controlType) {
           // apply the changes from the new state via the state manager

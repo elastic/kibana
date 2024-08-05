@@ -51,6 +51,7 @@ interface Props {
   };
   hasUnappliedSelections: boolean;
   labelPosition: ControlStyle;
+  showAddButton?: boolean;
 }
 
 export function ControlGroup({
@@ -58,13 +59,13 @@ export function ControlGroup({
   controlGroupApi,
   controlsManager,
   labelPosition,
+  showAddButton,
   hasUnappliedSelections,
 }: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [autoApplySelections, controlsInOrder, settings] = useBatchedPublishingSubjects(
+  const [autoApplySelections, controlsInOrder] = useBatchedPublishingSubjects(
     controlGroupApi.autoApplySelections$,
-    controlsManager.controlsInOrder$,
-    controlGroupApi.settings$
+    controlsManager.controlsInOrder$
   );
   /** Handle drag and drop */
   const sensors = useSensors(
@@ -99,8 +100,8 @@ export function ControlGroup({
   }, [controlGroupApi]);
 
   const showAppendedButtonGroup = useMemo(
-    () => settings?.showAddButton || !autoApplySelections,
-    [settings, autoApplySelections]
+    () => showAddButton || !autoApplySelections,
+    [showAddButton, autoApplySelections]
   );
 
   const ApplyButtonComponent = useMemo(() => {
@@ -180,7 +181,7 @@ export function ControlGroup({
             data-test-subj="controlGroup--endButtonGroup"
           >
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              {settings?.showAddButton && (
+              {showAddButton && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
                     <EuiButtonIcon
@@ -189,7 +190,7 @@ export function ControlGroup({
                       display="base"
                       iconType={'plusInCircle'}
                       data-test-subj="controlGroup--addControlButton"
-                      aria-label={ControlGroupStrings.management.getAddControlTitle(settings)}
+                      aria-label={ControlGroupStrings.management.getAddControlTitle()}
                       onClick={() => controlGroupApi.openAddDataControlFlyout()}
                     />
                   </EuiToolTip>

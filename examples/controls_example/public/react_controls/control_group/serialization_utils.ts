@@ -62,5 +62,6 @@ export const deserializeControlGroup = (
     labelPosition: state.rawState.controlStyle, // Rename "controlStyle" to "labelPosition"
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
+    settings: state.rawState.settings,
   };
 };

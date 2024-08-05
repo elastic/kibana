@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import {
+  CONTROL_GROUP_TYPE,
   ControlGroupChainingSystem,
   ControlWidth,
-  CONTROL_GROUP_TYPE,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
@@ -28,20 +25,22 @@ import {
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import {
-  apiPublishesDataViews,
   PublishesDataViews,
+  apiPublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import fastIsEqual from 'fast-deep-equal';
+import React, { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { openDataControlEditor } from '../data_controls/open_data_control_editor';
+import { ControlGroup } from './components/control_group';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
+import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
+import { initSelectionsManager } from './selections_manager';
 import { deserializeControlGroup } from './serialization_utils';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
-import { ControlGroup } from './components/control_group';
-import { initSelectionsManager } from './selections_manager';
-import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
-import { ControlGroupSettings } from './external_api/types';
-import { openDataControlEditor } from '../data_controls/open_data_control_editor';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -62,6 +61,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       setApi,
       lastSavedRuntimeState
     ) => {
+      console.log('initialRuntimeState', initialRuntimeState);
       const {
         initialChildControlState,
         defaultControlGrow,
@@ -93,7 +93,6 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialLabelPosition ?? DEFAULT_CONTROL_STYLE // TODO: Rename `DEFAULT_CONTROL_STYLE`
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
-      const settings$ = new BehaviorSubject<ControlGroupSettings | undefined>(undefined);
       const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
@@ -125,8 +124,8 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const api = setApi({
         ...controlsManager.api,
-        settings$,
         disabledActionIds: disabledActionIds$,
+        getEditorConfig: () => initialRuntimeState.settings?.editorConfig,
         setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
         openAddDataControlFlyout: (settings) => {
           const { controlInputTransform } = settings ?? {
@@ -253,6 +252,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
           return (
             <ControlGroup
+              showAddButton={initialRuntimeState?.settings?.showAddButton}
               applySelections={selectionsManager.applySelections}
               controlGroupApi={api}
               controlsManager={controlsManager}

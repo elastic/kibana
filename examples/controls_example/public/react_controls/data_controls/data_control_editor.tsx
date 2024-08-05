@@ -130,10 +130,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   onCancel,
   parentApi: controlGroup,
 }: ControlEditorProps<State>) => {
-  const [defaultGrow, defaultWidth, settings] = useBatchedPublishingSubjects(
+  const [defaultGrow, defaultWidth] = useBatchedPublishingSubjects(
     controlGroup.grow,
-    controlGroup.width,
-    controlGroup.settings$
+    controlGroup.width
     // controlGroup.parentApi?.lastUsedDataViewId, // TODO: Make this work
   );
   const [editorState, setEditorState] = useState<State>(initialState);
@@ -148,9 +147,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     initialState.controlType
   );
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
-
-  /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
-  // const editorConfig = controlGroup.getEditorConfig();
+  const editorConfig = useMemo(() => controlGroup.getEditorConfig(), [controlGroup]);
 
   // TODO: Maybe remove `useAsync` - see https://github.com/elastic/kibana/pull/182842#discussion_r1624909709
   const {
@@ -247,7 +244,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             title={<h2>{DataControlEditorStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
             description={DataControlEditorStrings.manageControl.dataSource.getFormGroupDescription()}
           >
-            {!settings?.editorConfig?.hideDataViewSelector && (
+            {!editorConfig?.hideDataViewSelector && (
               <EuiFormRow
                 label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
               >
@@ -290,8 +287,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               ) : (
                 <FieldPicker
                   filterPredicate={(field: DataViewField) => {
-                    const customPredicate =
-                      settings?.editorConfig?.fieldFilterPredicate?.(field) ?? true;
+                    const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
                     return Boolean(fieldRegistry?.[field.name]) && customPredicate;
                   }}
                   selectedFieldName={editorState.fieldName}
@@ -350,7 +346,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                 }}
               />
             </EuiFormRow>
-            {!settings?.editorConfig?.hideWidthSettings && (
+            {!editorConfig?.hideWidthSettings && (
               <EuiFormRow
                 label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
               >
@@ -379,7 +375,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               </EuiFormRow>
             )}
           </EuiDescribedFormGroup>
-          {!settings?.editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null}
+          {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null}
           {initialState.controlId && (
             <>
               <EuiSpacer size="l" />

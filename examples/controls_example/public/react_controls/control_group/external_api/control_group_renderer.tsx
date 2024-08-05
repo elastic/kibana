@@ -54,9 +54,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
     const [serializedState, setSerializedState] = useState<
       ControlGroupSerializedState | undefined
     >();
-    const [controlGroupSettings, setControlGroupSettings] = useState<
-      ControlGroupSettings | undefined
-    >(undefined);
     const viewMode$ = useMemo(() => new BehaviorSubject<ViewModeType>(ViewMode.VIEW), []);
 
     // onMount
@@ -69,10 +66,10 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         if (!cancelled) {
           setSerializedState({
             ...omit(initialInput, ['panels', 'ignoreParentSettings']),
+            settings,
             panelsJSON: JSON.stringify(initialInput?.panels ?? {}),
             ignoreParentSettingsJSON: JSON.stringify(initialInput?.ignoreParentSettings ?? {}),
           } as ControlGroupSerializedState);
-          setControlGroupSettings(settings);
           if (initialInput?.viewMode) viewMode$.next(initialInput.viewMode);
           setApiLoading(false);
         }
@@ -100,7 +97,6 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
           getSerializedStateForChild: () => ({ rawState: serializedState! }),
         })}
         onApiAvailable={(childApi) => {
-          childApi.settings$.next(controlGroupSettings); // set settings via creation options
           setControlGroup(childApi);
         }}
         hidePanelChrome

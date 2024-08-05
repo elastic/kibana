@@ -28,10 +28,10 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
-import { ControlGroupSettings } from './external_api/types';
+import { FieldFilterPredicate } from './external_api/types';
 
 /**
  * ----------------------------------------------------------------
@@ -76,10 +76,10 @@ export type ControlGroupApi = PresentationContainer &
     untilInitialized: () => Promise<void>;
 
     // lastUsedDataViewId$: PublishingSubject<string | undefined>;
-    settings$: BehaviorSubject<ControlGroupSettings | undefined>; // Used only for the control group renderer component
     openAddDataControlFlyout: (settings?: {
       controlInputTransform?: ControlInputTransform;
     }) => void;
+    getEditorConfig: () => ControlGroupEditorConfig | undefined;
   };
 
 /**
@@ -88,7 +88,20 @@ export type ControlGroupApi = PresentationContainer &
  * ----------------------------------------------------------------
  */
 
-export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
+export interface ControlGroupSettings {
+  showAddButton?: boolean;
+  editorConfig?: ControlGroupEditorConfig;
+}
+
+export interface ControlGroupEditorConfig {
+  hideDataViewSelector?: boolean;
+  hideWidthSettings?: boolean;
+  hideAdditionalSettings?: boolean;
+  fieldFilterPredicate?: FieldFilterPredicate;
+}
+
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState>
+  extends Partial<ControlGroupSettings> {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
@@ -97,12 +110,18 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   ignoreParentSettings?: ParentIgnoreSettings;
 
   initialChildControlState: ControlPanelsState<State>;
+
+  /*
+   * Configuration settings that are never persisted
+   * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
+   */
+  settings?: ControlGroupSettings;
 }
 
 export interface ControlGroupSerializedState
   extends Pick<
     ControlGroupRuntimeState,
-    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth'
+    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth' | 'settings'
   > {
   panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
