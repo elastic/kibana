@@ -83,6 +83,7 @@ export async function runKnowledgeBaseMigration({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) {
+  logger.debug('Knowledge base migration: Running migration');
   if (taskState?.isAborted) {
     throw new Error('Task is aborted');
   }
@@ -111,11 +112,13 @@ export async function runKnowledgeBaseMigration({
       return;
     }
 
+    logger.debug(`Knowledge base migration: Found ${response.hits.hits.length} entries to migrate`);
+
     // Limit the number of concurrent requests to avoid overloading the cluster
     const limiter = pLimit(10);
     const promises = response.hits.hits.map((hit) => {
       return limiter(() => {
-        if (!hit._source) {
+        if (!hit._source || !hit._id) {
           return;
         }
 
