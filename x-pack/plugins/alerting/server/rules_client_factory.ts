@@ -58,6 +58,7 @@ export interface RulesClientFactoryOpts {
   backfillClient: BackfillClient;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
+  securityService: CoreStart['security'];
 }
 
 export class RulesClientFactory {
@@ -83,6 +84,7 @@ export class RulesClientFactory {
   private backfillClient!: BackfillClient;
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
+  private securityService!: CoreStart['security'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -110,10 +112,11 @@ export class RulesClientFactory {
     this.backfillClient = options.backfillClient;
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
+    this.securityService = options.securityService;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
-    const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
+    const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
     const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
@@ -149,11 +152,8 @@ export class RulesClientFactory {
       uiSettings: this.uiSettings,
 
       async getUserName() {
-        if (!securityPluginStart) {
-          return null;
-        }
-        const user = await securityPluginStart.authc.getCurrentUser(request);
-        return user ? user.username : null;
+        const user = securityService.authc.getCurrentUser(request);
+        return user?.username ?? null;
       },
       async createAPIKey(name: string) {
         if (!securityPluginStart) {
@@ -185,7 +185,7 @@ export class RulesClientFactory {
         if (!securityPluginStart) {
           return false;
         }
-        const user = securityPluginStart.authc.getCurrentUser(request);
+        const user = securityService.authc.getCurrentUser(request);
         return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
       },
       getAuthenticationAPIKey(name: string) {

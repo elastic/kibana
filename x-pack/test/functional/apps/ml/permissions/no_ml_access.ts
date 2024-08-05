@@ -10,8 +10,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'error']);
+  const PageObjects = getPageObjects(['common', 'error', 'dashboard']);
   const ml = getService('ml');
+  const esArchiver = getService('esArchiver');
 
   const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
 
@@ -56,5 +57,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('for user with no ML access and Kibana features access', function () {
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+        await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+        await ml.securityUI.loginAs(USER.ML_DISABLED);
+        await ml.api.cleanMlIndices();
+      });
+
+      after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await ml.securityUI.logout();
+      });
+
+      it('should not register ML embeddables in the dashboard', async () => {
+        await ml.testExecution.logTestStep(
+          'should not contain ML embeddable in the Add panel list'
+        );
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickCreateDashboardPrompt();
+        await ml.dashboardEmbeddables.assertMlSectionExists(false);
+      });
+    });
   });
 }

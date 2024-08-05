@@ -9,15 +9,19 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Profile } from '../types';
 import { ProfileProvider, ProfileService } from '../profile_service';
+import type { RootContext } from './root_profile';
+import type { DataSourceContext } from './data_source_profile';
 
 export enum DocumentType {
   Log = 'log',
   Default = 'default',
 }
 
-export type DocumentProfile = Omit<Profile, 'getCellRenderers'>;
+export type DocumentProfile = Pick<Profile, 'getDocViewer'>;
 
 export interface DocumentProfileProviderParams {
+  rootContext: RootContext;
+  dataSourceContext: DataSourceContext;
   record: DataTableRecord;
 }
 

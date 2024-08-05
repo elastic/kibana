@@ -33,11 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security/authorization', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('route access', () => {
       describe('internal', () => {
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       before(async () => {
         // get auth header for Viewer roleAuthc
-        adminCredentials = await svlUserManager.getApiCredentialsForRole('admin');
+        adminCredentials = await svlUserManager.getM2MApiCredentialsWithRoleScope('admin');
       });
 
       it('all Dashboard and Discover sub-feature privileges are disabled', async () => {

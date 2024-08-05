@@ -118,6 +118,9 @@ export const cli = () => {
 
       // Creating project for the test to run
       const project = await cloudHandler.createSecurityProject(PROJECT_NAME, productTypes);
+      // Check if proxy service is used to define which org executes the tests.
+      const proxyOrg = cloudHandler instanceof ProxyHandler ? project?.proxy_org_name : undefined;
+      log.info(`Proxy Organization used id : ${proxyOrg}`);
 
       if (!project) {
         log.error('Failed to create project.');
@@ -161,6 +164,8 @@ export const cli = () => {
           TEST_CLOUD: testCloud.toString(),
           TEST_ES_URL: testEsUrl,
           TEST_KIBANA_URL: testKibanaUrl,
+          TEST_CLOUD_HOST_NAME: new URL(BASE_ENV_URL).hostname,
+          ROLES_FILENAME_OVERRIDE: proxyOrg ? `${proxyOrg}.json` : undefined,
         };
 
         statusCode = await executeCommand(command, envVars, log);

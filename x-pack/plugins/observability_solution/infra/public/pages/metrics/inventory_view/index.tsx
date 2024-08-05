@@ -10,9 +10,7 @@ import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { FilterBar } from './components/filter_bar';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { LayoutView } from './components/layout_view';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
@@ -53,19 +51,7 @@ export const SnapshotPage = () => {
                   },
                 }}
               >
-                <SnapshotContainer
-                  render={({ loading, nodes, reload, interval }) => (
-                    <>
-                      <FilterBar interval={interval} />
-                      <LayoutView
-                        loading={loading}
-                        nodes={nodes}
-                        reload={reload}
-                        interval={interval}
-                      />
-                    </>
-                  )}
-                />
+                <SnapshotContainer />
               </MetricsPageTemplate>
             </div>
           </WaffleFiltersProvider>

@@ -13,4 +13,4 @@ export enum HttpApiTagOperation {
   Delete = 'Delete',
 }
 
-export type Owner = typeof OWNERS[number];
+export type Owner = (typeof OWNERS)[number];

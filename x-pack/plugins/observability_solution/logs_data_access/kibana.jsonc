@@ -1,11 +1,11 @@
 {
   "type": "plugin",
   "id": "@kbn/logs-data-access-plugin",
-  "owner": "@elastic/obs-ux-logs-team",
+  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-ux-logs-team"],
   "plugin": {
     "id": "logsDataAccess",
     "server": true,
-    "browser": false,
+    "browser": true,
     "requiredPlugins": [
       "data", 
       "dataViews"

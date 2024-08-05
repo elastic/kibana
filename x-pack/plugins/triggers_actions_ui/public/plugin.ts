@@ -448,7 +448,7 @@ export class Plugin
     };
   }
 
-  public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+  public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     import('./application/sections/alerts_table/configuration').then(
       ({ createGenericAlertsTableConfigurations }) => {
         createGenericAlertsTableConfigurations(plugins.fieldFormats).forEach((c) =>
@@ -562,6 +562,7 @@ export class Plugin
       getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => {
         const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
           charts: plugins.charts,
+          uiSettings: core.uiSettings,
         };
         return getAlertSummaryWidgetLazy({ ...props, dependencies });
       },

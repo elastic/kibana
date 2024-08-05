@@ -17,3 +17,7 @@ export const APP_ICON = 'link';
 export const APP_NAME = i18n.translate('links.visTypeAlias.title', {
   defaultMessage: 'Links',
 });
+
+export const DISPLAY_NAME = i18n.translate('links.displayName', {
+  defaultMessage: 'links',
+});

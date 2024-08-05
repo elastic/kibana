@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    describe('Autocomplete behavior', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186501
+    describe.skip('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.monaco.clearEditorText();
       });
@@ -260,21 +261,6 @@ GET _search
         );
         expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
       });
-
-      // not fixed for monaco yet https://github.com/elastic/kibana/issues/184442
-      it.skip('should not activate auto-complete after comma following endpoint in URL', async () => {
-        await PageObjects.console.monaco.enterText('GET _search');
-
-        await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type ","');
-        await PageObjects.console.monaco.enterText(','); // i.e. 'GET _search,'
-
-        await PageObjects.console.sleepForDebouncePeriod();
-        log.debug('Key type Ctrl+SPACE');
-        await PageObjects.console.monaco.pressCtrlSpace();
-
-        expect(await PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(false);
-      });
     });
 
     // not implemented for monaco yet https://github.com/elastic/kibana/issues/184856
@@ -368,6 +354,33 @@ GET _search
             expect(request).to.contain(`${template}`);
           });
         });
+      });
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/186935
+    describe.skip('index fields autocomplete', () => {
+      const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
+
+      before(async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        // create an index with only 1 field
+        await PageObjects.console.monaco.enterText(`PUT ${indexName}/_doc/1\n{\n"test":1\n}`);
+        await PageObjects.console.clickPlay();
+      });
+
+      after(async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        // delete the test index
+        await PageObjects.console.monaco.enterText(`DELETE ${indexName}`);
+        await PageObjects.console.clickPlay();
+      });
+
+      it('fields autocomplete only shows fields of the index', async () => {
+        await PageObjects.console.monaco.clearEditorText();
+        await PageObjects.console.monaco.enterText('GET _search\n{\n"fields": ["');
+
+        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(0)).to.be.eql('test');
+        expect(await PageObjects.console.monaco.getAutocompleteSuggestion(1)).to.be.eql(undefined);
       });
     });
   });

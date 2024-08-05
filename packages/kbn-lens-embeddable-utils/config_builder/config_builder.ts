@@ -49,7 +49,7 @@ export class LensConfigBuilder {
   async build(
     config: LensConfig,
     options: LensConfigOptions = {}
-  ): Promise<LensAttributes | LensEmbeddableInput | undefined> {
+  ): Promise<LensAttributes | LensEmbeddableInput> {
     const { chartType } = config;
     const chartConfig = await this.charts[chartType](config as any, {
       formulaAPI: this.formulaAPI,
@@ -74,6 +74,6 @@ export class LensConfigBuilder {
       } as LensEmbeddableInput;
     }
 
-    return chartState;
+    return chartState as LensAttributes;
   }
 }

@@ -12,6 +12,7 @@
     "@kbn/std",
     "@kbn/utility-types",
     "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/es-errors",
     "@kbn/core-http-server",
     "@kbn/hapi-mocks",

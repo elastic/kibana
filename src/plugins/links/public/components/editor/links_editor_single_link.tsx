@@ -7,8 +7,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
+import React, { useMemo } from 'react';
 
 import {
   EuiText,
@@ -18,74 +17,35 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
-  EuiSkeletonTitle,
   DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
-import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { LinkInfo } from '../../embeddable/types';
-import { validateUrl } from '../external_link/external_link_tools';
-import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
+import { LinkInfo } from './constants';
 import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
-import { DASHBOARD_LINK_TYPE, Link } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE } from '../../../common/content_management';
+import { ResolvedLink } from '../../types';
 
 export const LinksEditorSingleLink = ({
   link,
   editLink,
   deleteLink,
-  parentDashboard,
   dragHandleProps,
 }: {
   editLink: () => void;
   deleteLink: () => void;
-  link: Link;
-  parentDashboard?: DashboardContainer;
+  link: ResolvedLink;
   dragHandleProps?: DraggableProvidedDragHandleProps;
 }) => {
-  const [destinationError, setDestinationError] = useState<Error | undefined>();
-  const parentDashboardTitle = parentDashboard?.select((state) => state.explicitInput.title);
-  const parentDashboardId = parentDashboard?.select((state) => state.componentState.lastSavedId);
-
-  const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
-    if (!link.destination) {
-      setDestinationError(new Error(DashboardLinkStrings.getDashboardErrorLabel()));
-      return;
-    }
-
-    if (link.type === DASHBOARD_LINK_TYPE) {
-      if (parentDashboardId === link.destination) {
-        return link.label || parentDashboardTitle;
-      } else {
-        const dashboard = await fetchDashboard(link.destination)
-          .then((result) => {
-            setDestinationError(undefined);
-            return result;
-          })
-          .catch((error) => setDestinationError(error));
-        return (
-          link.label ||
-          (dashboard ? dashboard.attributes.title : DashboardLinkStrings.getDashboardErrorLabel())
-        );
-      }
-    } else {
-      const { valid, message } = validateUrl(link.destination);
-      if (!valid && message) {
-        setDestinationError(new Error(message));
-      }
-      return link.label || link.destination;
-    }
-  }, [link]);
-
   const LinkLabel = useMemo(() => {
     const labelText = (
       <EuiFlexGroup tabIndex={0} gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon
-            type={destinationError ? 'warning' : LinkInfo[link.type].icon}
-            color={destinationError ? 'warning' : 'text'}
+            type={link.error ? 'warning' : LinkInfo[link.type].icon}
+            color={link.error ? 'warning' : 'text'}
             aria-label={
-              destinationError
+              link.error
                 ? LinksStrings.editor.panelEditor.getBrokenDashboardLinkAriaLabel()
                 : LinkInfo[link.type].type
             }
@@ -93,28 +53,21 @@ export const LinksEditorSingleLink = ({
         </EuiFlexItem>
 
         <EuiFlexItem
-          className={classNames('linksPanelLinkText', {
-            'linksPanelLinkText--noLabel': !link.label,
+          className={classNames('linksPanelEditorLinkText', {
+            'linksPanelEditorLinkText--noLabel': !link.label,
           })}
         >
-          <EuiSkeletonTitle
-            size="xxxs"
-            isLoading={linkLabelLoading}
-            announceLoadedStatus={false}
-            announceLoadingStatus={false}
-          >
-            <EuiText size="s" color={'default'} className="eui-textTruncate">
-              {linkLabel}
-            </EuiText>
-          </EuiSkeletonTitle>
+          <EuiText size="s" color={'default'} className="eui-textTruncate">
+            {link.label || link.title}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
 
     return () =>
-      destinationError ? (
+      link.error ? (
         <EuiToolTip
-          content={destinationError.message}
+          content={link.error.message}
           title={
             link.type === DASHBOARD_LINK_TYPE
               ? DashboardLinkStrings.getDashboardErrorLabel()
@@ -126,15 +79,15 @@ export const LinksEditorSingleLink = ({
       ) : (
         labelText
       );
-  }, [linkLabel, linkLabelLoading, destinationError, link.label, link.type]);
+  }, [link]);
 
   return (
     <EuiPanel
       hasBorder
       hasShadow={false}
-      color={destinationError ? 'warning' : 'plain'}
-      className={`linksPanelLink ${destinationError ? 'linkError' : ''}`}
-      data-test-subj={`panelEditorLink${linkLabelLoading ? '--loading' : ''}`}
+      color={link.error ? 'warning' : 'plain'}
+      className={`linksPanelEditorLink ${link.error ? 'linkError' : ''}`}
+      data-test-subj={`panelEditorLink''}`}
     >
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={false} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -148,7 +101,7 @@ export const LinksEditorSingleLink = ({
             <EuiIcon type="grab" />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem className="linksPanelLinkText">
+        <EuiFlexItem className="linksPanelEditorLinkText">
           <LinkLabel />
         </EuiFlexItem>
 
@@ -160,7 +113,7 @@ export const LinksEditorSingleLink = ({
                   size="xs"
                   iconType="pencil"
                   onClick={editLink}
-                  aria-label={LinksStrings.editor.getEditLinkTitle(linkLabel)}
+                  aria-label={LinksStrings.editor.getEditLinkTitle(link.title)}
                   data-test-subj="panelEditorLink--editBtn"
                 />
               </EuiToolTip>
@@ -170,7 +123,7 @@ export const LinksEditorSingleLink = ({
                 <EuiButtonIcon
                   size="xs"
                   iconType="trash"
-                  aria-label={LinksStrings.editor.getDeleteLinkTitle(linkLabel)}
+                  aria-label={LinksStrings.editor.getDeleteLinkTitle(link.title)}
                   color="danger"
                   onClick={deleteLink}
                   data-test-subj="panelEditorLink--deleteBtn"

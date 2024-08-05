@@ -7,7 +7,7 @@
  */
 
 import { debounceTime, fromEvent, map, merge, of, shareReplay } from 'rxjs';
-import type { AnalyticsClient, RootSchema } from '@kbn/ebt/client';
+import type { AnalyticsClient, RootSchema } from '@elastic/ebt/client';
 
 export interface ViewportSize {
   viewport_width: number;

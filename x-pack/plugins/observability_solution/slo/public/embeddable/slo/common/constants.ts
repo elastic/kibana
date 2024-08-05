@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 export const COMMON_SLO_GROUPING = [
   {
     id: 'slos',
-    getDisplayName: () => 'SLOs',
+    getDisplayName: () =>
+      i18n.translate('xpack.slo.common.constants.grouping.legacy', {
+        defaultMessage: 'Observability',
+      }),
     getIconType: () => {
       return 'visGauge';
     },

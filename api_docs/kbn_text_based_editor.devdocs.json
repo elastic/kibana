@@ -408,15 +408,15 @@
           },
           {
             "parentPluginId": "@kbn/text-based-editor",
-            "id": "def-public.TextBasedLanguagesEditorProps.detectTimestamp",
-            "type": "CompoundType",
+            "id": "def-public.TextBasedLanguagesEditorProps.detectedTimestamp",
+            "type": "string",
             "tags": [],
-            "label": "detectTimestamp",
+            "label": "detectedTimestamp",
             "description": [
               "If it is true, the editor displays the message @timestamp found\nThe text based queries are relying on adhoc dataviews which\ncan have an @timestamp timefield or nothing"
             ],
             "signature": [
-              "boolean | undefined"
+              "string | undefined"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,

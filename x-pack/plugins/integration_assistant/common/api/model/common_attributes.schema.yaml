@@ -66,15 +66,16 @@ components:
       type: string
       description: The input type for the dataStream to pull logs from.
       enum:
-        - aws_cloudwatch
-        - aws_s3
-        - azure_blob_storage
-        - azure_eventhub
+        - aws-cloudwatch
+        - aws-s3
+        - azure-blob-storage
+        - azure-eventhub
+        - cel
         - cloudfoundry
         - filestream
-        - gcp_pubsub
+        - gcp-pubsub
         - gcs
-        - http_endpoint
+        - http-endpoint
         - journald
         - kafka
         - tcp
@@ -143,14 +144,16 @@ components:
           type: string
           description: The logo of the integration.
 
-    PipelineResults:
-      type: array
-      description: An array of pipeline results.
-      items:
-        type: object
-
-    Errors:
-      type: array
-      description: An array of errors.
-      items:
-        type: object
+    LangSmithOptions:
+      type: object
+      description: The LangSmith options object.
+      required:
+        - projectName
+        - apiKey
+      properties:
+        projectName:
+          type: string
+          description: The project name.
+        apiKey:
+          type: string
+          description: The apiKey to use for tracing.

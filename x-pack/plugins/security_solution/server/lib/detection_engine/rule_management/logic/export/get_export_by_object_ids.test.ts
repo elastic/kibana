@@ -15,7 +15,7 @@ import {
   getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../detection_rules_client/converters/internal_rule_to_api_response';
 import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExportByObjectIds } from './get_export_by_object_ids';
 

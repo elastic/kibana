@@ -6,6 +6,7 @@
  */
 
 import { formatNumber } from '@elastic/eui';
+import { getRouterLinkProps, RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import {
   BYTE_NUMBER_FORMAT,
   DEFAULT_DATEPICKER_REFRESH,
@@ -22,25 +23,29 @@ import {
   flyoutSizeText,
 } from '../../../../common/translations';
 import { DataStreamDetails } from '../../../../common/api_types';
+import { NavigationTarget, NavigationSource } from '../../../services/telemetry';
 import { useKibanaContextForPlugin } from '../../../utils';
+import type { useRedirectLink, useDatasetDetailsTelemetry } from '../../../hooks';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
 export function getSummaryKpis({
   dataStreamDetails,
   timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_DATEPICKER_REFRESH },
-  degradedDocsHref,
+  degradedDocsLinkProps,
   hostsLocator,
+  telemetry,
 }: {
   dataStreamDetails?: DataStreamDetails;
   timeRange?: TimeRangeConfig;
-  degradedDocsHref?: string;
+  degradedDocsLinkProps?: ReturnType<typeof useRedirectLink>;
   hostsLocator?: ReturnType<
     typeof useKibanaContextForPlugin
   >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
+  telemetry: ReturnType<typeof useDatasetDetailsTelemetry>;
 }): Array<{
   title: string;
   value: string;
-  link?: { label: string; href: string };
+  link?: { label: string; props: RouterLinkProps };
   userHasPrivilege: boolean;
 }> {
   const services = dataStreamDetails?.services ?? {};
@@ -48,14 +53,17 @@ export function getSummaryKpis({
   const countOfServices = serviceKeys
     .map((key: string) => services[key].length)
     .reduce((a, b) => a + b, 0);
-  const servicesLink = undefined; // TODO: Add link to APM services page when possible
 
-  const degradedDocsLink = degradedDocsHref
-    ? {
-        label: flyoutShowAllText,
-        href: degradedDocsHref,
-      }
-    : undefined;
+  // @ts-ignore // TODO: Add link to APM services page when possible - https://github.com/elastic/kibana/issues/179904
+  const servicesLink = {
+    label: flyoutShowAllText,
+    props: getRouterLinkProps({
+      href: undefined,
+      onClick: () => {
+        telemetry.trackDetailsNavigated(NavigationTarget.Services, NavigationSource.Summary);
+      },
+    }),
+  };
 
   return [
     {
@@ -76,14 +84,20 @@ export function getSummaryKpis({
     {
       title: flyoutServicesText,
       value: formatMetricValueForMax(countOfServices, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT),
-      link: servicesLink,
+      link: undefined,
       userHasPrivilege: true,
     },
-    getHostsKpi(dataStreamDetails?.hosts, timeRange, hostsLocator),
+    getHostsKpi(dataStreamDetails?.hosts, timeRange, telemetry, hostsLocator),
     {
       title: flyoutDegradedDocsText,
       value: formatNumber(dataStreamDetails?.degradedDocsCount ?? 0, NUMBER_FORMAT),
-      link: degradedDocsLink,
+      link:
+        degradedDocsLinkProps && degradedDocsLinkProps.linkProps.href
+          ? {
+              label: flyoutShowAllText,
+              props: degradedDocsLinkProps.linkProps,
+            }
+          : undefined,
       userHasPrivilege: true,
     },
   ];
@@ -92,6 +106,7 @@ export function getSummaryKpis({
 function getHostsKpi(
   dataStreamHosts: DataStreamDetails['hosts'],
   timeRange: TimeRangeConfig,
+  telemetry: ReturnType<typeof useDatasetDetailsTelemetry>,
   hostsLocator?: ReturnType<
     typeof useKibanaContextForPlugin
   >['services']['observabilityShared']['locators']['infra']['hostsLocator']
@@ -120,12 +135,15 @@ function getHostsKpi(
   });
 
   // @ts-ignore // TODO: Add link to Infra Hosts page when possible
-  const hostsLink = hostsUrl
-    ? {
-        label: flyoutShowAllText,
-        href: hostsUrl,
-      }
-    : undefined;
+  const hostsLink = {
+    label: flyoutShowAllText,
+    props: getRouterLinkProps({
+      href: hostsUrl,
+      onClick: () => {
+        telemetry.trackDetailsNavigated(NavigationTarget.Hosts, NavigationSource.Summary);
+      },
+    }),
+  };
 
   return {
     title: flyoutHostsText,

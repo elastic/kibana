@@ -1173,7 +1173,15 @@
               "\nValidates the provided value against this schema.\nIf valid, the resulting output will be returned, otherwise an exception will be thrown."
             ],
             "signature": [
-              "(value: unknown, context?: Record<string, unknown>, namespace?: string | undefined) => V"
+              "(value: unknown, context?: Record<string, unknown>, namespace?: string | undefined, validationOptions?: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.SchemaValidationOptions",
+                "text": "SchemaValidationOptions"
+              },
+              " | undefined) => V"
             ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
@@ -1218,6 +1226,28 @@
                 "description": [],
                 "signature": [
                   "string | undefined"
+                ],
+                "path": "packages/kbn-config-schema/src/types/type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.Type.validate.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "validationOptions",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.SchemaValidationOptions",
+                    "text": "SchemaValidationOptions"
+                  },
+                  " | undefined"
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,
@@ -1606,6 +1636,38 @@
             "tags": [],
             "label": "type",
             "description": [],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-schema",
+        "id": "def-common.SchemaValidationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SchemaValidationOptions",
+        "description": [
+          "\nGlobal validation Options to be provided when calling the `schema.validate()` method."
+        ],
+        "path": "packages/kbn-config-schema/src/types/type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.SchemaValidationOptions.stripUnknownKeys",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stripUnknownKeys",
+            "description": [
+              "\nRemove unknown config keys"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-config-schema/src/types/type.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -284,6 +284,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     },
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
+      fips: deps.security.fips,
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>

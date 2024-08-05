@@ -160,6 +160,7 @@ export function generateTreeWithDAL(
       indices,
       ancestors,
       descendants,
+      agentId,
     }: {
       dataId: string;
       schema: ResolverSchema;
@@ -167,6 +168,7 @@ export function generateTreeWithDAL(
       indices: string[];
       ancestors: number;
       descendants: number;
+      agentId: string;
     }): Promise<ResolverNode[]> {
       return formattedTree.nodes;
     },
@@ -183,8 +185,10 @@ export function generateTreeWithDAL(
             parent: 'process.parent.entity_id',
             ancestry: 'process.Ext.ancestry',
             name: 'process.name',
+            agentId: 'agent.id',
           },
           id: generatedTree.origin.id,
+          agentId: 'mockedAgentId',
         },
       ];
     },

@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SyntheticsServerSetup } from '../../types';
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
   getAllMonitors,
@@ -42,7 +42,7 @@ export interface AlertOverviewStatus
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
   params: StatusRuleParams;
-  esClient: UptimeEsClient;
+  esClient: SyntheticsEsClient;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -59,7 +59,7 @@ export class StatusRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+    this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
     this.server = server;

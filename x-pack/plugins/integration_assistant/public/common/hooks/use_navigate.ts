@@ -6,26 +6,18 @@
  */
 
 import { useCallback } from 'react';
-import { Page } from '../constants';
+import { Page, PagePath } from '../constants';
 import { useKibana } from './use_kibana';
 
 export { Page }; // re-export for convenience
-
-const getPathFromPage = (page: Page): string =>
-  page === Page.landing ? '/create' : `/create/${page}`;
 
 export const useNavigate = () => {
   const { navigateToApp } = useKibana().services.application;
   const navigateToPage = useCallback(
     (page: Page) => {
-      navigateToApp('integrations', { path: getPathFromPage(page) });
+      navigateToApp('integrations', { path: PagePath[page] });
     },
     [navigateToApp]
   );
   return navigateToPage;
-};
-
-export const usePageUrl = (page: Page) => {
-  const { getUrlForApp } = useKibana().services.application;
-  return getUrlForApp('integrations', { path: getPathFromPage(page) });
 };

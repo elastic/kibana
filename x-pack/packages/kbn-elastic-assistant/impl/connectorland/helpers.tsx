@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnector,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
+
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { PRECONFIGURED_CONNECTOR } from './translations';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 enum OpenAiProviderType {
@@ -53,4 +58,19 @@ export const getActionTypeTitle = (actionType: ActionTypeModel): string => {
 const getAzureApiVersionParameter = (url: string): string | undefined => {
   const urlSearchParams = new URLSearchParams(new URL(url).search);
   return urlSearchParams.get('api-version') ?? undefined;
+};
+
+export const getConnectorTypeTitle = (
+  connector: ActionConnector | undefined,
+  actionTypeRegistry: ActionTypeRegistryContract
+) => {
+  if (!connector) {
+    return null;
+  }
+  const connectorTypeTitle =
+    getGenAiConfig(connector)?.apiProvider ??
+    getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+  const actionType = connector.isPreconfigured ? PRECONFIGURED_CONNECTOR : connectorTypeTitle;
+
+  return actionType;
 };

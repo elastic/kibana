@@ -83,7 +83,7 @@ const kafkaSectionsLabels = [
   'Broker settings',
 ];
 
-const remoteEsOutputLabels = ['Hosts', 'Service Token'];
+const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
 describe('EditOutputFlyout', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
@@ -192,7 +192,7 @@ describe('EditOutputFlyout', () => {
   it('should populate secret input with plain text value when editing kafka output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true });
+      .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -232,7 +232,7 @@ describe('EditOutputFlyout', () => {
   it('should populate secret password input with plain text value when editing kafka output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true });
+      .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -273,7 +273,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should populate secret input with plain text value when editing logstash output', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ outputSecretsStorage: true });
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ outputSecretsStorage: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -325,7 +327,7 @@ describe('EditOutputFlyout', () => {
   it('should render the flyout if the output provided is a remote ES output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
+      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -356,7 +358,7 @@ describe('EditOutputFlyout', () => {
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
     jest
       .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
+      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true } as any);
 
     mockedUseFleetStatus.mockReturnValue({
       isLoading: false,
@@ -392,7 +394,7 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should not display remote ES output in type lists if serverless', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true });
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true } as any);
     mockUseStartServices.mockReset();
     mockStartServices(true);
     const { utils } = renderFlyout({

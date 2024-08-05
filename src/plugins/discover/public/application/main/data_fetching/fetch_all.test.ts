@@ -14,7 +14,6 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import {
-  DataAvailableFieldsMsg,
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
@@ -59,9 +58,6 @@ describe('test fetchAll', () => {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
-      availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>({
-        fetchStatus: FetchStatus.UNINITIALIZED,
-      }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
 
@@ -77,6 +73,10 @@ describe('test fetchAll', () => {
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+        },
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -265,6 +265,10 @@ describe('test fetchAll', () => {
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+        },
       }),
     };
     fetchAll(subjects, false, deps);
@@ -383,6 +387,10 @@ describe('test fetchAll', () => {
           expandedDoc: undefined,
           customFilters: [],
           overriddenVisContextAfterInvalidation: undefined,
+          resetDefaultProfileState: {
+            columns: false,
+            rowHeight: false,
+          },
         }),
       };
       fetchAll(subjects, false, deps);

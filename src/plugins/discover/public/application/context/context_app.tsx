@@ -141,7 +141,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
         await fetchContextRows();
       }
 
-      if (analytics) {
+      if (analytics && fetchType) {
         const fetchDuration = window.performance.now() - startTime;
         reportPerformanceMetricEvent(analytics, {
           eventName: 'discoverSurroundingDocsFetch',

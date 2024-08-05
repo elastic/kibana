@@ -9,7 +9,12 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
-import type { OnTimeChangeProps, OnRefreshProps, OnRefreshChangeProps } from '@elastic/eui';
+import type {
+  OnTimeChangeProps,
+  OnRefreshProps,
+  OnRefreshChangeProps,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -78,7 +83,7 @@ import {
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
-import { RuleBackfillsInfo } from '../../../../rule_gaps/components/rule_backfills_info';
+
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
@@ -120,6 +125,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     },
     storage,
     timelines,
+    telemetry,
   } = useKibana().services;
   const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
@@ -453,6 +459,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     renderItem: renderExpandedItem,
   });
 
+  const handleShowSourceEventTimeRange = useCallback(
+    (e: EuiSwitchEvent) => {
+      const isVisible = e.target.checked;
+      onShowSourceEventTimeRange(isVisible);
+      telemetry.reportEventLogShowSourceEventDateRange({
+        isVisible,
+      });
+    },
+    [onShowSourceEventTimeRange, telemetry]
+  );
+
   const executionLogColumns = useMemo(() => {
     const columns = [...EXECUTION_LOG_COLUMNS].filter((item) => {
       if ('field' in item) {
@@ -569,7 +586,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
                 checked={showSourceEventTimeRange}
                 compressed={true}
-                onChange={(e) => onShowSourceEventTimeRange(e.target.checked)}
+                onChange={handleShowSourceEventTimeRange}
               />
             )}
             <UtilitySwitch
@@ -594,9 +611,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
         data-test-subj="executionsTable"
       />
-
-      <EuiSpacer size="xl" />
-      <RuleBackfillsInfo ruleId={ruleId} />
     </EuiPanel>
   );
 };

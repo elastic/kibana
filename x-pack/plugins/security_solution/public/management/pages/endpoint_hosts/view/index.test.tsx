@@ -55,6 +55,8 @@ import { getUserPrivilegesMockDefaultValue } from '../../../../common/components
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
+import { useGetAgentStatus as _useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
+import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -79,6 +81,9 @@ jest.mock('../../../services/policies/ingest', () => {
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   };
 });
+
+jest.mock('../../../hooks/agents/use_get_agent_status');
+const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;
 
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 const timepickerRanges = [
@@ -325,6 +330,18 @@ describe('when on the endpoint list page', () => {
             endpointsResults: hostListData,
             endpointPackagePolicies: ingestPackagePolicies,
           });
+
+          useGetAgentStatusMock.mockImplementation((agentId, agentType) => {
+            return {
+              data: {
+                [agentId]: agentStatusMocks.generateAgentStatus({
+                  agentType,
+                }),
+              },
+              isLoading: false,
+              isFetched: true,
+            };
+          });
         });
       });
       afterEach(() => {
@@ -347,18 +364,19 @@ describe('when on the endpoint list page', () => {
         const total = await renderResult.findByTestId('endpointListTableTotal');
         expect(total.textContent).toEqual('Showing 5 endpoints');
       });
-      it('should display correct status', async () => {
+      it('should agent status', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
+
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
-        expect(hostStatuses[0].textContent).toEqual('Unhealthy');
+        expect(hostStatuses[0].textContent).toEqual('Healthy');
         expect(hostStatuses[1].textContent).toEqual('Healthy');
-        expect(hostStatuses[2].textContent).toEqual('Offline');
-        expect(hostStatuses[3].textContent).toEqual('Updating');
-        expect(hostStatuses[4].textContent).toEqual('Inactive');
+        expect(hostStatuses[2].textContent).toEqual('Healthy');
+        expect(hostStatuses[3].textContent).toEqual('Healthy');
+        expect(hostStatuses[4].textContent).toEqual('Healthy');
       });
 
       it('should display correct policy status', async () => {

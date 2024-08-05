@@ -7,8 +7,12 @@
 
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
-import { useLeftPanelContext } from '../context';
+import { EuiSpacer } from '@elastic/eui';
+import { AddNote } from './add_note';
+import { NotesList } from './notes_list';
+import { fetchNotesByDocumentIds } from '../../../../notes/store/notes.slice';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
@@ -16,13 +20,25 @@ import { useLeftPanelContext } from '../context';
  */
 export const NotesDetails = memo(() => {
   const dispatch = useDispatch();
-  const { eventId } = useLeftPanelContext();
+  const { eventId } = useDocumentDetailsContext();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
 
   useEffect(() => {
-    dispatch(fetchNotesByDocumentId({ documentId: eventId }));
+    dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
   }, [dispatch, eventId]);
 
-  return <></>;
+  return (
+    <>
+      <NotesList eventId={eventId} />
+      {canCreateNotes && (
+        <>
+          <EuiSpacer />
+          <AddNote eventId={eventId} />
+        </>
+      )}
+    </>
+  );
 });
 
 NotesDetails.displayName = 'NotesDetails';

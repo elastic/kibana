@@ -9,10 +9,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import type { PackageInfo } from '../../../../../../../../../common';
+import type { AgentPolicy, PackageInfo } from '../../../../../../../../../common';
 
 export interface Props {
   isLoading: boolean;
@@ -20,6 +21,7 @@ export interface Props {
   selectedPolicyIds: string[];
   setSelectedPolicyIds: (policyIds: string[]) => void;
   packageInfo?: PackageInfo;
+  selectedAgentPolicies: AgentPolicy[];
 }
 
 export const AgentPolicyMultiSelect: React.FunctionComponent<Props> = ({
@@ -27,10 +29,24 @@ export const AgentPolicyMultiSelect: React.FunctionComponent<Props> = ({
   agentPolicyMultiOptions,
   selectedPolicyIds,
   setSelectedPolicyIds,
+  selectedAgentPolicies,
 }) => {
   const selectedOptions = useMemo(() => {
     return agentPolicyMultiOptions.filter((option) => selectedPolicyIds.includes(option.key!));
   }, [agentPolicyMultiOptions, selectedPolicyIds]);
+
+  // managed policies cannot be removed
+  const updateSelectedPolicyIds = useCallback(
+    (ids: string[]) => {
+      setSelectedPolicyIds(
+        uniq([
+          ...selectedAgentPolicies.filter((policy) => policy.is_managed).map((policy) => policy.id),
+          ...ids,
+        ])
+      );
+    },
+    [selectedAgentPolicies, setSelectedPolicyIds]
+  );
 
   return (
     <EuiComboBox
@@ -44,9 +60,9 @@ export const AgentPolicyMultiSelect: React.FunctionComponent<Props> = ({
       )}
       options={agentPolicyMultiOptions}
       selectedOptions={selectedOptions}
-      onChange={(newOptions) => {
-        setSelectedPolicyIds(newOptions.map((option: any) => option.key));
-      }}
+      onChange={(newOptions) =>
+        updateSelectedPolicyIds(newOptions.map((option: any) => option.key))
+      }
       isClearable={true}
       isLoading={isLoading}
     />

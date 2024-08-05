@@ -11,9 +11,9 @@ import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
 import { ActionsClientLlm } from '@kbn/langchain/server';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
 import { AgentExecutor } from './types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
-import { APMTracer } from '../tracers/apm_tracer';
 
 export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
   'Elastic AI Assistant Agent Executor (OpenAI Functions)';
@@ -25,7 +25,7 @@ export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
  * NOTE: This is not to be used in production as-is, and must be used with an OpenAI ConnectorId
  */
 export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
-  actions,
+  actionsClient,
   connectorId,
   esClient,
   esStore,
@@ -36,9 +36,8 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   traceOptions,
 }) => {
   const llm = new ActionsClientLlm({
-    actions,
+    actionsClient,
     connectorId,
-    request,
     llmType,
     logger,
     model: request.body.model,

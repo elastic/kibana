@@ -17,6 +17,8 @@ import { appContextService } from '../app_context';
 
 import { FleetError } from '../../errors';
 
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { ActionRunner } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_action_types';
@@ -131,7 +133,9 @@ export async function updateTagsBatch(
     );
   }
 
-  appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
+  if (appContextService.getLogger().isLevelEnabled('debug')) {
+    appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
+  }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
   const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
@@ -147,6 +151,9 @@ export async function updateTagsBatch(
   const versionConflictCount = res.version_conflicts ?? 0;
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
+  const currentNameSpace = getCurrentNamespace(soClient);
+  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
   // this ensures that the action status count will be accurate
@@ -155,6 +162,7 @@ export async function updateTagsBatch(
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
       .concat(isLastRetry ? versionConflictIds : []),
+    ...namespaces,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total: options.total ?? res.total,
@@ -174,6 +182,7 @@ export async function updateTagsBatch(
       updatedIds.map((id) => ({
         agentId: id,
         actionId,
+        ...namespaces,
       }))
     );
     appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
@@ -186,6 +195,7 @@ export async function updateTagsBatch(
       failures.map((failure) => ({
         agentId: failure.id,
         actionId,
+        namespace: currentNameSpace,
         error: failure.cause.reason,
       }))
     );
@@ -200,6 +210,7 @@ export async function updateTagsBatch(
         versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
+          namespace: currentNameSpace,
           error: 'version conflict on last retry',
         }))
       );

@@ -24,7 +24,7 @@ import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
-  getLogRateAnalysisType,
+  getLogRateAnalysisTypeForHistogram,
   getSnappedTimestamps,
   getSnappedWindowParameters,
   getWindowParametersForTrigger,
@@ -334,7 +334,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             brushSelectionUpdateHandler({
               windowParameters: wpSnap,
               force: true,
-              analysisType: getLogRateAnalysisType(adjustedChartPoints, wpSnap),
+              analysisType: getLogRateAnalysisTypeForHistogram(adjustedChartPoints, wpSnap),
             });
           }
         }
@@ -391,7 +391,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     brushSelectionUpdateHandler({
       windowParameters: wp,
       force: false,
-      analysisType: getLogRateAnalysisType(adjustedChartPoints, wp),
+      analysisType: getLogRateAnalysisTypeForHistogram(adjustedChartPoints, wp),
     });
   }
 

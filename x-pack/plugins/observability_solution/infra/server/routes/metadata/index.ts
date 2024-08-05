@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { throwErrors } from '@kbn/io-ts-utils';
 import {
   InfraMetadataFeature,
   InfraMetadataRequestRT,
@@ -21,7 +22,6 @@ import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
-import { throwErrors } from '../../../common/runtime_types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

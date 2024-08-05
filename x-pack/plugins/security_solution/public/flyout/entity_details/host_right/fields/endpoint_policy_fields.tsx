@@ -10,7 +10,7 @@ import { EuiHealth } from '@elastic/eui';
 
 import type { EntityTableRows } from '../../shared/components/entity_table/types';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { EndpointAgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';
@@ -57,8 +57,9 @@ export const policyFields: EntityTableRows<ObservedEntityData<HostItem>> = [
     label: i18n.FLEET_AGENT_STATUS,
     render: (hostData: ObservedEntityData<HostItem>) =>
       hostData.details.endpoint?.hostInfo ? (
-        <EndpointAgentStatus
-          endpointHostInfo={hostData.details.endpoint?.hostInfo}
+        <AgentStatus
+          agentId={hostData.details.endpoint?.hostInfo.metadata.agent.id}
+          agentType="endpoint"
           data-test-subj="endpointHostAgentStatus"
         />
       ) : (

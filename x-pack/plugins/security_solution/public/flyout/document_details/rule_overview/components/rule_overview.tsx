@@ -73,12 +73,7 @@ export const RuleOverview = memo(() => {
   return ruleLoading ? (
     <FlyoutLoading data-test-subj={RULE_OVERVIEW_LOADING_TEST_ID} />
   ) : rule ? (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      data-test-subj={RULE_OVERVIEW_BODY_TEST_ID}
-      className="eui-yScroll"
-    >
+    <EuiPanel hasBorder={false} hasShadow={false} data-test-subj={RULE_OVERVIEW_BODY_TEST_ID}>
       <RuleTitle rule={rule} isSuppressed={!isExistingRule} />
       <EuiHorizontalRule margin="s" />
       <EuiSpacer size="s" />

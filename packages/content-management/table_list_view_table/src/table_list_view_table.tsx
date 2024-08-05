@@ -37,6 +37,7 @@ import type {
   SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { RecentlyAccessed } from '@kbn/recently-accessed';
 
 import {
   Table,
@@ -52,6 +53,7 @@ import { type SortColumnField, getInitialSorting, saveSorting } from './componen
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
 import { RowActions, TableItemsRowActions } from './types';
+import { sortByRecentlyAccessed } from './components/table_sort_select';
 
 interface ContentEditorConfig
   extends Pick<
@@ -116,6 +118,7 @@ export interface TableListViewTableProps<
    */
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
+  recentlyAccessed?: Pick<RecentlyAccessed, 'get'>;
 
   tableCaption: string;
   /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
@@ -145,6 +148,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
   hasCreatedByMetadata: boolean;
+  hasRecentlyAccessedMetadata: boolean;
   pagination: Pagination;
   tableSort: {
     field: SortColumnField;
@@ -203,10 +207,19 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
   // in the query params. We might want to stop supporting both in a future release (v9.0?)
   stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
 
-  if (sanitizedParams.sort === 'title' || sanitizedParams.sort === 'updatedAt') {
-    const field = sanitizedParams.sort === 'title' ? 'attributes.title' : 'updatedAt';
+  if (
+    sanitizedParams.sort === 'title' ||
+    sanitizedParams.sort === 'updatedAt' ||
+    sanitizedParams.sort === 'accessedAt'
+  ) {
+    const field =
+      sanitizedParams.sort === 'title'
+        ? 'attributes.title'
+        : sanitizedParams.sort === 'accessedAt'
+        ? 'accessedAt'
+        : 'updatedAt';
 
-    stateFromURL.sort = { field, direction: 'asc' };
+    stateFromURL.sort = { field, direction: field === 'attributes.title' ? 'asc' : 'desc' };
 
     if (sanitizedParams.sortdir === 'desc' || sanitizedParams.sortdir === 'asc') {
       stateFromURL.sort.direction = sanitizedParams.sortdir;
@@ -302,6 +315,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   refreshListBouncer,
   setPageDataTestSubject,
   createdByEnabled = false,
+  recentlyAccessed,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -373,6 +387,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       showDeleteModal: false,
       hasUpdatedAtMetadata: false,
       hasCreatedByMetadata: false,
+      hasRecentlyAccessedMetadata: recentlyAccessed ? recentlyAccessed.get().length > 0 : false,
       selectedIds: [],
       searchQuery: { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
@@ -387,7 +402,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         createdBy: [],
       },
     };
-  }, [initialPageSize, entityName]);
+  }, [initialPageSize, entityName, recentlyAccessed]);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -404,6 +419,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     totalItems,
     hasUpdatedAtMetadata,
     hasCreatedByMetadata,
+    hasRecentlyAccessedMetadata,
     pagination,
     tableSort,
     tableFilter,
@@ -433,6 +449,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       }
 
       if (idx === fetchIdx.current) {
+        // when recentlyAccessed is available, we sort the items by the recently accessed items
+        // then this sort will be used as the default sort for the table
+        if (recentlyAccessed && recentlyAccessed.get().length > 0) {
+          response.hits = sortByRecentlyAccessed(response.hits, recentlyAccessed.get());
+        }
+
         dispatch({
           type: 'onFetchItemsSuccess',
           data: {
@@ -448,7 +470,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
+  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -1109,6 +1131,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           searchQuery={searchQuery}
           tableColumns={tableColumns}
           hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+          hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
           tableSort={tableSort}
           tableFilter={tableFilter}
           tableItemsRowActions={tableItemsRowActions}

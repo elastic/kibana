@@ -10,7 +10,7 @@ import { useProcessData } from '../hooks/use_process_data';
 import { SessionPreview } from './session_preview';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -23,15 +23,15 @@ const panelContextValue = {
   indexName: 'indexName',
   browserFields: {},
   dataFormattedForFieldBrowser: [],
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const renderSessionPreview = () =>
   render(
     <TestProviders>
       <TestProvider>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <SessionPreview />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProvider>
     </TestProviders>
   );

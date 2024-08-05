@@ -12,6 +12,7 @@ export * from './data_stream';
 export * from './agents';
 export * from './enrollment_api_keys';
 export * from './epm';
+export * from './standalone_agent_api_key';
 export * from './outputs';
 export * from './settings';
 export * from './setup';

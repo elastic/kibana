@@ -73,7 +73,6 @@ describe('QueryBarDefineRule', () => {
       <TestProviders>
         <Router history={mockHistory}>
           <QueryBarDefineRule
-            browserFields={{}}
             isLoading={false}
             indexPattern={{ fields: [], title: 'title' }}
             onCloseTimelineSearch={jest.fn()}
@@ -96,7 +95,6 @@ describe('QueryBarDefineRule', () => {
         <TestProviders>
           <Router history={mockHistory}>
             <QueryBarDefineRule
-              browserFields={{}}
               isLoading={false}
               indexPattern={{ fields: [], title: 'title' }}
               onCloseTimelineSearch={jest.fn()}
@@ -122,7 +120,6 @@ describe('QueryBarDefineRule', () => {
       <TestProviders>
         <Router history={mockHistory}>
           <QueryBarDefineRule
-            browserFields={{}}
             isLoading={false}
             indexPattern={{ fields: [], title: 'title' }}
             onCloseTimelineSearch={jest.fn()}

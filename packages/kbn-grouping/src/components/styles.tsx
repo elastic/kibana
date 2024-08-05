@@ -22,9 +22,6 @@ export const countCss = css`
 export const statsContainerCss = css`
   font-size: ${euiThemeVars.euiFontSizeXS};
   font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  border-right: ${euiThemeVars.euiBorderThin};
-  margin-right: 16px;
-  padding-right: 16px;
   .smallDot {
     width: 3px !important;
     display: inline-block;

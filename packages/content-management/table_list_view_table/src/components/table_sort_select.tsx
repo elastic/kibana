@@ -16,8 +16,10 @@ import {
   Direction,
   EuiText,
   useEuiTheme,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { State } from '../table_list_view_table';
 
@@ -26,9 +28,15 @@ type SortItem = EuiSelectableOption & {
   direction: Direction;
 };
 
-export type SortColumnField = 'updatedAt' | 'attributes.title';
+export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt';
 
 const i18nText = {
+  accessedDescSort: i18n.translate(
+    'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedLabel',
+    {
+      defaultMessage: 'Recently viewed',
+    }
+  ),
   nameAscSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.nameAscLabel', {
     defaultMessage: 'Name A-Z',
   }),
@@ -57,11 +65,17 @@ const i18nText = {
 
 interface Props {
   hasUpdatedAtMetadata: boolean;
+  hasRecentlyAccessedMetadata: boolean;
   tableSort: State['tableSort'];
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
-export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: Props) {
+export function TableSortSelect({
+  tableSort,
+  hasUpdatedAtMetadata,
+  hasRecentlyAccessedMetadata,
+  onChange,
+}: Props) {
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -80,6 +94,40 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
         append: <EuiIcon type="sortDown" />,
       },
     ];
+
+    if (hasRecentlyAccessedMetadata) {
+      opts = [
+        {
+          label: i18nText.accessedDescSort,
+          column:
+            'accessedAt' /* nonexistent field, used to identify this custom type of sorting */,
+          direction: 'desc',
+          append: (
+            <EuiIconTip
+              aria-label={i18n.translate(
+                'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTipAriaLabel',
+                {
+                  defaultMessage: 'Additional information',
+                }
+              )}
+              position="right"
+              color="inherit"
+              iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
+              css={{ textWrap: 'balance' }}
+              type={'questionInCircle'}
+              content={i18n.translate(
+                'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTip',
+                {
+                  defaultMessage:
+                    'Recently viewed info is stored locally in your browser and is only visible to you.',
+                }
+              )}
+            />
+          ),
+        },
+        ...opts,
+      ];
+    }
 
     if (hasUpdatedAtMetadata) {
       opts = opts.concat([
@@ -100,6 +148,7 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
 
     return opts;
   });
+
   const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
 
   const panelHeaderCSS = css`
@@ -165,8 +214,11 @@ export function TableSortSelect({ tableSort, hasUpdatedAtMetadata, onChange }: P
       <>
         <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>
         <EuiSelectable<SortItem>
-          singleSelection
-          aria-label="some aria label"
+          singleSelection={'always'}
+          aria-label={i18n.translate(
+            'contentManagement.tableList.listing.tableSortSelect.sortingOptionsAriaLabel',
+            { defaultMessage: 'Sorting options' }
+          )}
           options={options}
           onChange={onSelectChange}
           data-test-subj="sortSelect"
@@ -213,4 +265,26 @@ export function saveSorting(
   } catch (e) {
     /* empty */
   }
+}
+
+/**
+ * Default custom sorting for the table when recently accessed info is available
+ * Sorts by recently accessed list first and the by lastUpdatedAt
+ */
+export function sortByRecentlyAccessed<T extends UserContentCommonSchema>(
+  items: T[],
+  recentlyAccessed: Array<{ id: string }>
+) {
+  const recentlyAccessedMap = new Map(recentlyAccessed.map((item, index) => [item.id, index]));
+  return [...items].sort((a, b) => {
+    if (recentlyAccessedMap.has(a.id) && recentlyAccessedMap.has(b.id)) {
+      return recentlyAccessedMap.get(a.id)! - recentlyAccessedMap.get(b.id)!;
+    } else if (recentlyAccessedMap.has(a.id)) {
+      return -1;
+    } else if (recentlyAccessedMap.has(b.id)) {
+      return 1;
+    } else {
+      return a.updatedAt > b.updatedAt ? -1 : 1;
+    }
+  });
 }

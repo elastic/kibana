@@ -17,15 +17,23 @@ describe('getESQLWithSafeLimit()', () => {
   });
 
   it('should add the limit', () => {
-    expect(getESQLWithSafeLimit(' from logs', LIMIT)).toBe('from logs \n| LIMIT 10000');
+    expect(getESQLWithSafeLimit('from logs', LIMIT)).toBe('from logs \n| LIMIT 10000');
     expect(getESQLWithSafeLimit('FROM logs* | LIMIT 5', LIMIT)).toBe(
-      'FROM logs* \n| LIMIT 10000| LIMIT 5'
+      'FROM logs* \n| LIMIT 10000 | LIMIT 5'
     );
     expect(getESQLWithSafeLimit('FROM logs* | SORT @timestamp | LIMIT 5', LIMIT)).toBe(
-      'FROM logs* |SORT @timestamp \n| LIMIT 10000| LIMIT 5'
+      'FROM logs* | SORT @timestamp \n| LIMIT 10000 | LIMIT 5'
     );
     expect(getESQLWithSafeLimit('from logs* | STATS MIN(a) BY b', LIMIT)).toBe(
-      'from logs* \n| LIMIT 10000| STATS MIN(a) BY b'
+      'from logs* \n| LIMIT 10000 | STATS MIN(a) BY b'
+    );
+
+    expect(getESQLWithSafeLimit('from logs* | STATS MIN(a) BY b | SORT b', LIMIT)).toBe(
+      'from logs* \n| LIMIT 10000 | STATS MIN(a) BY b | SORT b'
+    );
+
+    expect(getESQLWithSafeLimit('from logs* // | STATS MIN(a) BY b', LIMIT)).toBe(
+      'from logs* \n| LIMIT 10000 // | STATS MIN(a) BY b'
     );
   });
 });

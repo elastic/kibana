@@ -1,24 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
-.c3 {
-  padding-top: 8px;
-}
-
-.c2 {
-  border: none;
-  background-color: transparent;
-  box-shadow: none;
-}
-
-.c2.euiPanel--plain {
-  background-color: transparent;
-}
-
-.c4 {
-  margin-bottom: 5px;
-}
-
 .c0 {
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -27,7 +9,8 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 }
 
 .c0 . euiDataGridRowCell--controlColumn {
-  height: 40px;
+  height: auto;
+  min-height: 34px;
 }
 
 .c0 .udt--customRow {
@@ -49,34 +32,22 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 }
 
 .c1 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  height: 36px;
+  height: auto;
 }
 
 .c1 .euiDataGridRowCell,
 .c1 .euiDataGridRowCell__content {
-  height: 100%;
+  min-height: 34px;
 }
 
 .c1 .euiDataGridRowCell .unifiedDataTable__rowControl,
 .c1 .euiDataGridRowCell__content .unifiedDataTable__rowControl {
-  margin-top: 0;
-}
-
-.c1 .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
-  padding: 0;
+  margin-top: -4px;
 }
 
 <div>
   <div
-    class="c0 euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
+    class="c0 euiDataGridRow "
     role="row"
   >
     <div
@@ -93,146 +64,12 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
         Cell-0-2
       </div>
     </div>
-    <div
-      class="euiPanel euiPanel--plain c2 udt--customRow emotion-euiPanel-grow-m-plain"
-      data-test-subj="note-cards"
-    >
-      <section
-        class="c3"
-        data-test-subj="note-previews-container"
-      >
-        <div
-          class="euiFlexGroup c4 notes-container-0 emotion-euiFlexGroup-none-flexStart-stretch-column"
-          data-test-subj="notes"
-        >
-          <p
-            class="emotion-euiScreenReaderOnly"
-          >
-            You are viewing notes for the event in row 0. Press the up arrow key when finished to return to the event.
-          </p>
-          <ol
-            class="euiTimeline euiCommentList emotion-euiTimeline-l"
-            data-test-subj="note-comment-list"
-            role="list"
-          >
-            <li
-              class="euiComment emotion-euiTimelineItem-top"
-              data-test-subj="note-preview-id"
-            >
-              <div
-                class="emotion-euiTimelineItemIcon-top"
-              >
-                <div
-                  class="emotion-euiTimelineItemIcon__content"
-                >
-                  <div
-                    aria-label="test"
-                    class="euiAvatar euiAvatar--l euiAvatar--user emotion-euiAvatar-user-l-uppercase"
-                    data-test-subj="avatar"
-                    role="img"
-                    style="background-color: rgb(228, 166, 199); color: rgb(0, 0, 0);"
-                    title="test"
-                  >
-                    <span
-                      aria-hidden="true"
-                    >
-                      t
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="emotion-euiTimelineItemEvent-top"
-              >
-                <figure
-                  class="euiCommentEvent emotion-euiCommentEvent-border-subdued"
-                  data-type="regular"
-                >
-                  <figcaption
-                    class="euiCommentEvent__header emotion-euiCommentEvent__header-border-subdued"
-                  >
-                    <div
-                      class="euiPanel euiPanel--subdued euiPanel--paddingSmall emotion-euiPanel-grow-none-s-subdued"
-                    >
-                      <div
-                        class="euiCommentEvent__headerMain emotion-euiCommentEvent__headerMain"
-                      >
-                        <div
-                          class="euiCommentEvent__headerData emotion-euiCommentEvent__headerData"
-                        >
-                          <div
-                            class="euiCommentEvent__headerUsername emotion-euiCommentEvent__headerUsername"
-                          >
-                            test
-                          </div>
-                          <div
-                            class="euiCommentEvent__headerEvent emotion-euiCommentEvent__headerEvent"
-                          >
-                            added a note
-                          </div>
-                          <div
-                            class="euiCommentEvent__headerTimestamp"
-                          >
-                            <time>
-                              now
-                            </time>
-                          </div>
-                        </div>
-                        <div
-                          class="euiCommentEvent__headerActions emotion-euiCommentEvent__headerActions"
-                        >
-                          <button
-                            aria-label="Delete Note"
-                            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-                            data-test-subj="delete-note"
-                            title="Delete Note"
-                            type="button"
-                          >
-                            <span
-                              aria-hidden="true"
-                              class="euiButtonIcon__icon"
-                              color="inherit"
-                              data-euiicon-type="trash"
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </figcaption>
-                  <div
-                    class="euiCommentEvent__body emotion-euiCommentEvent__body-regular"
-                  >
-                    <div
-                      class="note-content"
-                      tabindex="0"
-                    >
-                      <p
-                        class="emotion-euiScreenReaderOnly"
-                      >
-                        test added a note
-                      </p>
-                      <div
-                        class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
-                      >
-                        <p>
-                          note
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </figure>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </section>
-    </div>
     <div>
       Cell-0-3
     </div>
   </div>
   <div
-    class="c0 euiDataGridRow "
+    class="c0 euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
     role="row"
   >
     <div

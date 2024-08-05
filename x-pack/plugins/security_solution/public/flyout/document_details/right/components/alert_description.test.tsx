@@ -14,7 +14,7 @@ import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
 } from './test_ids';
 import { AlertDescription, RULE_OVERVIEW_BANNER } from './alert_description';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { DocumentDetailsRuleOverviewPanelKey } from '../../shared/constants/panel_keys';
@@ -71,15 +71,15 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
     scopeId: 'scopeId',
     dataFormattedForFieldBrowser,
     getFieldsData: mockGetFieldsData,
-  } as unknown as RightPanelContext);
+  } as unknown as DocumentDetailsContext);
 
-const renderDescription = (panelContext: RightPanelContext) =>
+const renderDescription = (panelContext: DocumentDetailsContext) =>
   render(
     <TestProviders>
       <IntlProvider locale="en">
-        <RightPanelContext.Provider value={panelContext}>
+        <DocumentDetailsContext.Provider value={panelContext}>
           <AlertDescription />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </IntlProvider>
     </TestProviders>
   );

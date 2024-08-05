@@ -7,7 +7,9 @@ properties:
       allowNoIndex:
         $ref: 'allownoindex.yaml'
       fieldAttrs:
-        $ref: 'fieldattrs.yaml'
+        type: object
+        additionalProperties:
+          $ref: 'fieldattrs.yaml'
       fieldFormats:
         $ref: 'fieldformats.yaml'
       fields:
@@ -21,7 +23,9 @@ properties:
       namespaces:
         $ref: 'namespaces.yaml'
       runtimeFieldMap:
-        $ref: 'runtimefieldmap.yaml'
+        type: object
+        additionalProperties:
+          $ref: 'runtimefieldmap.yaml'
       sourceFilters:
         $ref: 'sourcefilters.yaml'
       timeFieldName:
@@ -29,7 +33,7 @@ properties:
       title:
         $ref: 'title.yaml'
       typeMeta:
-        $ref: 'typemeta.yaml'
+        $ref: 'typemeta_response.yaml'
       version:
         type: string
         example: WzQ2LDJd

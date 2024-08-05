@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
       expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
       expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
       expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
   });

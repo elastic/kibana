@@ -14,7 +14,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
@@ -37,7 +37,7 @@ export const RULE_OVERVIEW_BANNER = {
 export const AlertDescription: FC = () => {
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );

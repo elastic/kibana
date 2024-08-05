@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AssetDocumentTab } from './asset_document';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
-import { RightPanelContext } from '../../../document_details/right/context';
-import { mockContextValue } from '../../../document_details/right/mocks/mock_context';
+import { DocumentDetailsContext } from '../../../document_details/shared/context';
+import { mockContextValue } from '../../../document_details/shared/mocks/mock_context';
 import userEvent from '@testing-library/user-event';
 import {
   JSON_TAB_CONTENT_TEST_ID,
@@ -22,9 +22,9 @@ describe('AssetDocumentTab', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={mockContextValue}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <AssetDocumentTab />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -34,9 +34,9 @@ describe('AssetDocumentTab', () => {
   it('should preselect the table tab', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={mockContextValue}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <AssetDocumentTab />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -46,9 +46,9 @@ describe('AssetDocumentTab', () => {
   it('should select json tab when clicked', async () => {
     const { getByTestId, getByTitle } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={mockContextValue}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <AssetDocumentTab />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -60,9 +60,9 @@ describe('AssetDocumentTab', () => {
   it('should select table tab when path tab is table', async () => {
     const { getByTestId, getByTitle } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={mockContextValue}>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
           <AssetDocumentTab path={{ tab: 'table' }} />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 

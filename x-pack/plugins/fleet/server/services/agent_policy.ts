@@ -11,6 +11,7 @@ import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
+  AuthenticatedUser,
   ElasticsearchClient,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -20,7 +21,6 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -107,6 +107,8 @@ import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
+import { isAgentlessEnabled } from './utils/agentless';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -329,7 +331,10 @@ class AgentPolicyService {
     this.checkAgentless(agentPolicy);
 
     await this.requireUniqueName(soClient, agentPolicy);
-
+    await validatePolicyNamespaceForSpace({
+      spaceId: soClient.getCurrentNamespace(),
+      namespace: agentPolicy.namespace,
+    });
     await validateOutputForPolicy(soClient, agentPolicy);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
@@ -592,6 +597,12 @@ class AgentPolicyService {
         name: agentPolicy.name,
       });
     }
+    if (agentPolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        spaceId: soClient.getCurrentNamespace(),
+        namespace: agentPolicy.namespace,
+      });
+    }
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
@@ -733,13 +744,23 @@ class AgentPolicyService {
       );
     }
 
+    const policyNeedsBump = baseAgentPolicy.package_policies || baseAgentPolicy.is_protected;
+
+    // bump revision if agent policy is updated after creation
+    if (policyNeedsBump) {
+      await this.bumpRevision(soClient, esClient, newAgentPolicy.id, {
+        user: options?.user,
+      });
+    } else {
+      await this.deployPolicy(soClient, newAgentPolicy.id);
+    }
+
     // Get updated agent policy with package policies and adjusted tamper protection
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
       throw new AgentPolicyNotFoundError('Copied agent policy not found');
     }
 
-    await this.deployPolicy(soClient, newAgentPolicy.id);
     logger.debug(`Completed copy of agent policy ${id}`);
     return updatedAgentPolicy;
   }
@@ -988,7 +1009,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id} and not status: unenrolled`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
     });
 
     if (total > 0) {
@@ -1008,22 +1029,45 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
-      const packagePoliciesToDelete = this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
+      const { policiesWithSingleAP: packagePoliciesToDelete, policiesWithMultipleAP } =
+        this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
-      await packagePolicyService.delete(
-        soClient,
-        esClient,
-        packagePoliciesToDelete.map((p) => p.id),
-        {
-          force: options?.force,
-          skipUnassignFromAgentPolicies: true,
-        }
-      );
-      logger.debug(
-        `Deleted package policies with ids ${packagePoliciesToDelete
-          .map((policy) => policy.id)
-          .join(', ')}`
-      );
+      if (packagePoliciesToDelete.length > 0) {
+        await packagePolicyService.delete(
+          soClient,
+          esClient,
+          packagePoliciesToDelete.map((p) => p.id),
+          {
+            force: options?.force,
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
+        logger.debug(
+          `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
+            .map((policy) => policy.id)
+            .join(', ')}`
+        );
+      }
+
+      if (policiesWithMultipleAP.length > 0) {
+        await packagePolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          policiesWithMultipleAP.map((policy) => {
+            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+            return {
+              ...policy,
+              policy_id: newPolicyIds[0],
+              policy_ids: newPolicyIds,
+            };
+          })
+        );
+        logger.debug(
+          `Updated package policies with multiple agent policies with ids ${policiesWithMultipleAP
+            .map((policy) => policy.id)
+            .join(', ')}`
+        );
+      }
     }
 
     if (agentPolicy.is_preconfigured && !options?.force) {
@@ -1093,6 +1137,7 @@ class AgentPolicyService {
         '@timestamp': new Date().toISOString(),
         revision_idx: fullPolicy.revision,
         coordinator_idx: 0,
+        namespaces: fullPolicy.namespaces,
         data: fullPolicy as unknown as FleetServerPolicy['data'],
         policy_id: fullPolicy.id,
         default_fleet_server: policy.is_default_fleet_server === true,
@@ -1545,26 +1590,25 @@ class AgentPolicyService {
     }
   }
   private checkAgentless(agentPolicy: Partial<NewAgentPolicy>) {
-    const cloudSetup = appContextService.getCloud();
-    if (
-      (!cloudSetup?.isServerlessEnabled ||
-        !appContextService.getExperimentalFeatures().agentless) &&
-      agentPolicy?.supports_agentless !== undefined
-    ) {
+    if (!isAgentlessEnabled() && agentPolicy?.supports_agentless) {
       throw new AgentPolicyInvalidError(
-        'supports_agentless is only allowed in serverless environments that support the agentless feature'
+        'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
       );
     }
   }
 
-  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]) {
+  private packagePoliciesWithSingleAndMultiplePolicies(packagePolicies: PackagePolicy[]): {
+    policiesWithSingleAP: PackagePolicy[];
+    policiesWithMultipleAP: PackagePolicy[];
+  } {
     // Find package policies that don't have multiple agent policies and mark them for deletion
-    if (appContextService.getExperimentalFeatures().enableReusableIntegrationPolicies) {
-      return packagePolicies.filter(
-        (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
-      );
-    }
-    return packagePolicies;
+    const policiesWithSingleAP = packagePolicies.filter(
+      (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
+    );
+    const policiesWithMultipleAP = packagePolicies.filter(
+      (policy) => policy?.policy_ids && policy?.policy_ids.length > 1
+    );
+    return { policiesWithSingleAP, policiesWithMultipleAP };
   }
 }
 

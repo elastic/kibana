@@ -18,14 +18,23 @@ import { BaseResolverQuery } from './base';
  */
 export class LifecycleQuery extends BaseResolverQuery {
   declare readonly resolverFields: JsonValue[];
+
   constructor({
     schema,
     indexPatterns,
     timeRange,
     isInternalRequest,
     shouldExcludeColdAndFrozenTiers,
+    agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -45,6 +54,9 @@ export class LifecycleQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.id]: nodes },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,

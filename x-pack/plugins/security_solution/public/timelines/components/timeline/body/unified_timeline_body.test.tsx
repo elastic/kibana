@@ -28,16 +28,13 @@ const defaultProps: UnifiedTimelineBodyProps = {
   columns: defaultUdtHeaders,
   dataLoadingState: DataLoadingState.loading,
   events: mockEventsData,
-  expandedDetail: {},
   header: <div />,
   isTextBasedQuery: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
   onChangePage: jest.fn(),
-  onEventClosed: jest.fn(),
   refetch: jest.fn(),
   rowRenderers: [],
-  showExpandedDetails: false,
   sort: [],
   timelineId: 'timeline-1',
   totalCount: 0,
@@ -46,8 +43,6 @@ const defaultProps: UnifiedTimelineBodyProps = {
     activePage: 0,
     querySize: 0,
   },
-  eventIdToNoteIds: {} as Record<string, string[]>,
-  pinnedEventIds: {} as Record<string, boolean>,
 };
 
 const renderTestComponents = (props?: UnifiedTimelineBodyProps) => {
@@ -102,7 +97,7 @@ describe('UnifiedTimelineBody', () => {
 
     expect(MockUnifiedTimelineComponent).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        columns: defaultUdtHeaders,
+        columns: [],
       }),
       {}
     );

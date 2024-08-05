@@ -13,7 +13,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
+import { useTimelineChartTheme } from '../../../hooks/use_timeline_chart_theme';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';

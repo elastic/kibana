@@ -14,6 +14,7 @@ import {
   CARDINALITY_I18N,
   CUSTOM_EQUATION_I18N,
   DOCUMENT_COUNT_I18N,
+  LAST_VALUE_I18N,
   MAX_I18N,
   MIN_I18N,
   PERCENTILE_95_I18N,
@@ -49,6 +50,8 @@ export const getLabel = (criterion: Evaluation) => {
         return CARDINALITY_I18N(criterion.metrics[0].field!);
       case Aggregators.SUM:
         return SUM_I18N(criterion.metrics[0].field!);
+      case Aggregators.LAST_VALUE:
+        return LAST_VALUE_I18N(criterion.metrics[0].field!);
     }
   }
   return criterion.label || CUSTOM_EQUATION_I18N;

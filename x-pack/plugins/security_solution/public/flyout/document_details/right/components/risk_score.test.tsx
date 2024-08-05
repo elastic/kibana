@@ -8,17 +8,17 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { RiskScore } from './risk_score';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
-const renderRiskScore = (contextValue: RightPanelContext) =>
+const renderRiskScore = (contextValue: DocumentDetailsContext) =>
   render(
     <IntlProvider locale="en">
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <RiskScore />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </IntlProvider>
   );
 
@@ -26,7 +26,7 @@ describe('<RiskScore />', () => {
   it('should render risk score information', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderRiskScore(contextValue);
 
@@ -39,7 +39,7 @@ describe('<RiskScore />', () => {
   it('should render empty component if missing getFieldsData value', () => {
     const contextValue = {
       getFieldsData: jest.fn(),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderRiskScore(contextValue);
 
@@ -49,7 +49,7 @@ describe('<RiskScore />', () => {
   it('should render empty component if getFieldsData is invalid', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(() => 123),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderRiskScore(contextValue);
 

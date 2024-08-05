@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
@@ -40,7 +40,7 @@ interface CellActionsProps {
  * Security cell action wrapper for document details flyout
  */
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
-  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useLeftPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const triggerId = isAlert

@@ -23,7 +23,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: NGINX_PROXY,
+  name: `logs-${NGINX_PROXY}@template`,
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };

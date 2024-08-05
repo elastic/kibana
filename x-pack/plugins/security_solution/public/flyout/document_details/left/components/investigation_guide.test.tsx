@@ -8,10 +8,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InvestigationGuide } from './investigation_guide';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
@@ -20,11 +20,11 @@ const NO_DATA_TEXT =
   "There's no investigation guide for this rule. Edit the rule's settingsExternal link(opens in a new tab or window) to add one.";
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
 
-const renderInvestigationGuide = (context: LeftPanelContext = mockContextValue) => (
+const renderInvestigationGuide = (context: DocumentDetailsContext = mockContextValue) => (
   <TestProviders>
-    <LeftPanelContext.Provider value={context}>
+    <DocumentDetailsContext.Provider value={context}>
       <InvestigationGuide />
-    </LeftPanelContext.Provider>
+    </DocumentDetailsContext.Provider>
   </TestProviders>
 );
 

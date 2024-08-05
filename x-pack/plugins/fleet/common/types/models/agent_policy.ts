@@ -194,6 +194,10 @@ export interface FleetServerPolicy {
    */
   coordinator_idx: number;
   /**
+   * The namespaces of the policy
+   */
+  namespaces?: string[];
+  /**
    * The opaque payload.
    */
   data: {
@@ -211,4 +215,9 @@ export interface FleetServerPolicy {
    * Mark agents as inactive if they have not checked in for this many seconds
    */
   inactivity_timeout?: number;
+}
+
+export interface AgentlessApiResponse {
+  id: string;
+  region_id: string;
 }

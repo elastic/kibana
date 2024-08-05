@@ -10,13 +10,13 @@ import type * as InternalUtils from '../utils/internal_utils';
 import type { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
 
 export const mockGetBulkOperationError = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getBulkOperationError']
+  (typeof InternalUtils)['getBulkOperationError']
 >;
 export const mockGetExpectedVersionProperties = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['getExpectedVersionProperties']
+  (typeof InternalUtils)['getExpectedVersionProperties']
 >;
 export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['rawDocExistsInNamespace']
+  (typeof InternalUtils)['rawDocExistsInNamespace']
 >;
 
 jest.mock('../utils/internal_utils', () => {

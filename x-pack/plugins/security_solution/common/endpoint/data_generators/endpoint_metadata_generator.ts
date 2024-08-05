@@ -134,6 +134,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('upload_file');
     }
 
+    // v8.15 introduced `scan` capability
+    if (gte(agentVersion, '8.15.0')) {
+      capabilities.push('scan');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

@@ -11,7 +11,7 @@ import { range, sortBy } from 'lodash';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../../jest_matchers';
 import { getKibanaMigratorTestKit } from '../../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../../test_utils';
+import { parseLogFile } from '../../test_utils';
 import { EsRunner, EsServer } from '../../test_types';
 import {
   getBaseMigratorParams,
@@ -35,7 +35,6 @@ export function createBasicDocumentsMigrationTest({
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const createBaseline = async () => {
