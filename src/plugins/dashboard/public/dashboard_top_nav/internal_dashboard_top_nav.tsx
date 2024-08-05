@@ -18,8 +18,9 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-import type { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb, EuiBadge } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -312,11 +313,21 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
+      const managedBadge = (
+        <EuiBadge
+          key="nav-menu-badge-managed"
+          {...getManagedContentBadge(dashboardManagedBadge.getText())}
+        >
+          {dashboardManagedBadge.getText()}
+        </EuiBadge>
+      ) as unknown as HTMLElement;
+
       const renderCustomBadge = () => (
         <ManagedPopover
           key="managedDashboardDuplicatePopover"
           dashboard={dashboard}
           redirectTo={redirectTo}
+          anchor={managedBadge}
         />
       );
       allBadges.push({

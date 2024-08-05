@@ -7,48 +7,31 @@
  */
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopover,
+  EuiWrappingPopover,
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { DashboardAPI } from '../..';
 import { DashboardRedirect } from '../../dashboard_container/types';
-import { buttonText, dashboardManagedBadge, text } from '../_dashboard_app_strings';
+import { buttonText, text } from '../_dashboard_app_strings';
 
 interface ManagedPopoverProps {
   dashboard: DashboardAPI;
   redirectTo: DashboardRedirect;
+  anchor: HTMLElement;
 }
 
-export const ManagedPopover = ({ dashboard, redirectTo }: ManagedPopoverProps) => {
+export const ManagedPopover = ({ dashboard, redirectTo, anchor }: ManagedPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { badgeText, title, iconType } = getManagedContentBadge(dashboardManagedBadge.getText());
-
-  const button = (
-    <EuiButton
-      size="s"
-      fill
-      color="primary"
-      iconType={iconType}
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      data-test-subj={getManagedContentBadge(dashboardManagedBadge.getText())['data-test-subj']}
-      aria-label={title}
-    >
-      {badgeText}
-    </EuiButton>
-  );
-
   return (
-    <EuiPopover
-      button={button}
+    <EuiWrappingPopover
+      button={anchor}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       className="eui-hideFor--s eui-hideFor--xs"
@@ -81,6 +64,6 @@ export const ManagedPopover = ({ dashboard, redirectTo }: ManagedPopoverProps) =
           <EuiText size="s">{buttonText}</EuiText>
         </EuiButtonEmpty>
       </EuiFlexItem>
-    </EuiPopover>
+    </EuiWrappingPopover>
   );
 };
