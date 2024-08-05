@@ -20,6 +20,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { SyntheticsServerSetup } from '../../types';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import * as agent from '../../routes/settings/private_locations/get_agent_policies';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -53,6 +54,7 @@ describe('SyntheticsPrivateLocation', () => {
     'check.request.method': 'GET',
     username: '',
   } as unknown as HeartbeatConfig;
+  const mockBuildPackagePolicy = jest.fn().mockReturnValue(undefined);
 
   const serverMock: SyntheticsServerSetup = {
     syntheticsEsClient: { search: jest.fn() },
@@ -67,7 +69,8 @@ describe('SyntheticsPrivateLocation', () => {
     fleet: {
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
-        buildPackagePolicyFromPackage: jest.fn(),
+        buildPackagePolicyFromPackage: mockBuildPackagePolicy,
+        bulkCreate: jest.fn(),
       },
     },
     spaces: {
@@ -80,6 +83,73 @@ describe('SyntheticsPrivateLocation', () => {
       elasticsearch: elasticsearchServiceMock.createStart(),
     },
   } as unknown as SyntheticsServerSetup;
+  const agentPolicyNamespace = 'agentPolicyNamespace';
+
+  beforeEach(() => {
+    mockBuildPackagePolicy.mockReturnValue(undefined);
+    jest.spyOn(agent, 'getAgentPolicyAsInternalUser').mockResolvedValue({
+      id: 'policyId',
+      name: 'Test Location',
+      agents: 0,
+      status: 'active',
+      description: 'Test agent policy',
+      namespace: agentPolicyNamespace,
+    });
+  });
+
+  describe('getPolicyNamespace', () => {
+    it('prioritizes config namespace', async () => {
+      const configNamespace = 'nonDefaultSpace';
+      const agentPolicyNamespaces = {};
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = await syntheticsPrivateLocation.getPolicyNamespace(
+        configNamespace,
+        mockPrivateLocation,
+        agentPolicyNamespaces
+      );
+      expect(result).toEqual(configNamespace);
+    });
+
+    it('returns private location namespace when config namespace is default', async () => {
+      const agentPolicyNamespaces = {};
+      const privateLocationNamespace = 'privateLocationNamespace';
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = await syntheticsPrivateLocation.getPolicyNamespace(
+        'default',
+        { ...mockPrivateLocation, namespace: privateLocationNamespace },
+        agentPolicyNamespaces
+      );
+      expect(result).toEqual(privateLocationNamespace);
+    });
+
+    it('returns cached agent policy namespace when available, config namespace is default, and private location namespace is undefined', async () => {
+      const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
+      const agentPolicyNamespaces = {
+        [mockPrivateLocation.id]: agentPolicyNamespaceCached,
+      };
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = await syntheticsPrivateLocation.getPolicyNamespace(
+        'default',
+        mockPrivateLocation,
+        agentPolicyNamespaces
+      );
+      expect(result).toEqual(agentPolicyNamespaceCached);
+    });
+
+    it('falls back to fetching agent policy namespace when undefined in cache', async () => {
+      const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
+      const agentPolicyNamespaces = {
+        notTheCorrectCacheId: agentPolicyNamespaceCached,
+      };
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = await syntheticsPrivateLocation.getPolicyNamespace(
+        'default',
+        mockPrivateLocation,
+        agentPolicyNamespaces
+      );
+      expect(result).toEqual(agentPolicyNamespace);
+    });
+  });
 
   it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for create monitor',
