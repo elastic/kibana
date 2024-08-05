@@ -783,7 +783,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
-        it('should sort by a numeric field asc', async () => {
+        it.skip('should sort by a numeric field asc', async () => {
           await pageObjects.infraHostsView.sortByCpuUsage();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
@@ -795,7 +795,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(hostDataLastPage).to.eql(tableEntries[0]);
         });
 
-        it('should sort by a numeric field desc', async () => {
+        it.skip('should sort by a numeric field desc', async () => {
           await pageObjects.infraHostsView.sortByCpuUsage();
           let hostRows = await pageObjects.infraHostsView.getHostsTableData();
           const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);

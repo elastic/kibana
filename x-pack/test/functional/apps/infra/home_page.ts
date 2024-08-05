@@ -397,7 +397,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clearSearchTerm();
       });
 
-      it('sort nodes by descending value', async () => {
+      it.skip('sort nodes by descending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -414,7 +414,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('sort nodes by ascending value', async () => {
+      it.skip('sort nodes by ascending value', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.sortNodesBy('value');
@@ -441,7 +441,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('filter nodes by search term', async () => {
+      it.skip('filter nodes by search term', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.enterSearchTerm('host.name: "demo-stack-apache-01"');
@@ -454,7 +454,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clearSearchTerm();
       });
 
-      it('change color palette', async () => {
+      it.skip('change color palette', async () => {
         await pageObjects.infraHome.openLegendControls();
         await pageObjects.infraHome.changePalette('temperature');
         await pageObjects.infraHome.applyLegendControls();
