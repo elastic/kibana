@@ -12,13 +12,18 @@ import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favo
 
 export class FavoritesService {
   constructor(
-    private type: string,
-    private userId: string,
-    private deps: {
+    private readonly type: string,
+    private readonly userId: string,
+    private readonly deps: {
       savedObjectClient: SavedObjectsClientContract;
       logger: Logger;
     }
-  ) {}
+  ) {
+    if (!this.userId || !this.type) {
+      // This should never happen, but just in case let's do a runtime check
+      throw new Error('userId and object type are required to use a favorite service');
+    }
+  }
 
   public async getFavorites(): Promise<{ favoriteIds: string[] }> {
     const favoritesSavedObject = await this.getFavoritesSavedObject();
@@ -114,16 +119,6 @@ export class FavoritesService {
   }
 
   private getFavoriteSavedObjectId() {
-    if (!this.userId) {
-      // This should never happen, but it's better to throw an error than to create a saved object with an invalid ID
-      throw new Error('userId is required to create a favorite saved object');
-    }
-
-    if (!this.type) {
-      // This should never happen, but it's better to throw an error than to create a saved object with an invalid ID
-      throw new Error('type is required to create a favorite saved object');
-    }
-
     return `${this.type}:${this.userId}`;
   }
 }
