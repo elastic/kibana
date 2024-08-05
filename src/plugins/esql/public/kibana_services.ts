@@ -17,7 +17,6 @@ export let core: CoreStart;
 
 interface ServiceDeps {
   core: CoreStart;
-  darkMode: boolean;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
@@ -45,14 +44,11 @@ export const setKibanaServices = (
   fieldsMetadata?: FieldsMetadataPublicStart
 ) => {
   core = kibanaCore;
-  core.theme.theme$.subscribe(({ darkMode }) => {
-    servicesReady$.next({
-      core,
-      darkMode,
-      dataViews,
-      expressions,
-      indexManagementApiService: indexManagement?.apiService,
-      fieldsMetadata,
-    });
+  servicesReady$.next({
+    core,
+    dataViews,
+    expressions,
+    indexManagementApiService: indexManagement?.apiService,
+    fieldsMetadata,
   });
 };
