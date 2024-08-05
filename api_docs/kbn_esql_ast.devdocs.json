@@ -2746,7 +2746,9 @@
         "label": "ESQLLiteral",
         "description": [],
         "signature": [
-          "ESQLNumberLiteral",
+          "ESQLDecimalLiteral",
+          " | ",
+          "ESQLIntegerLiteral",
           " | ",
           "ESQLBooleanLiteral",
           " | ",
