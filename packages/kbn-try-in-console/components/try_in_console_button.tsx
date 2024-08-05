@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -25,16 +25,16 @@ export interface TryInConsoleButtonProps {
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
   showIcon?: boolean;
-  link?: boolean;
+  type?: 'link' | 'button' | 'emptyButton';
 }
 export const TryInConsoleButton = ({
   request,
   application,
   consolePlugin,
   sharePlugin,
-  content,
+  content = TRY_IN_CONSOLE,
   showIcon = true,
-  link = false,
+  type = 'emptyButton',
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -64,37 +64,42 @@ export const TryInConsoleButton = ({
     }
   };
 
-  if (link) {
-    return (
-      <EuiLink data-test-subj="tryInConsoleLink" onClick={onClick}>
-        {content ?? TRY_IN_CONSOLE}
-      </EuiLink>
-    );
-  }
-
   const getAriaLabel = () => {
     if (
       consolePlugin?.openEmbeddedConsole !== undefined &&
       consolePlugin?.isEmbeddedConsoleAvailable?.()
     ) {
-      return i18n.translate('tryInConsole.embeddedConsoleButton', {
-        defaultMessage: 'Try the snipped in the Console - opens in embedded console',
+      return i18n.translate('tryInConsole.embeddedConsoleButton.ariaLabel', {
+        defaultMessage: 'Try in Console  - opens in embedded console',
       });
     }
-    return i18n.translate('tryInConsole.inNewTab.button', {
-      defaultMessage: 'Try the below snippet in Console - opens in a new tab',
+    return i18n.translate('tryInConsole.inNewTab.button.ariaLabel', {
+      defaultMessage: 'Try in Console  - opens in a new tab',
     });
   };
 
-  return (
-    <EuiButtonEmpty
-      data-test-subj="tryInConsoleButton"
-      onClick={onClick}
-      iconType={showIcon ? 'popout' : undefined}
-      size="s"
-      aria-label={getAriaLabel()}
-    >
-      {content ?? TRY_IN_CONSOLE}
-    </EuiButtonEmpty>
-  );
+  const commonProps = {
+    'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
+    'aria-label': getAriaLabel(),
+    onClick,
+  };
+  const iconType = showIcon ? 'popout' : undefined;
+
+  switch (type) {
+    case 'link':
+      return <EuiLink {...commonProps}>{content}</EuiLink>;
+    case 'button':
+      return (
+        <EuiButton color="primary" iconType={iconType} size="s" {...commonProps}>
+          {content}
+        </EuiButton>
+      );
+    case 'emptyButton':
+    default:
+      return (
+        <EuiButtonEmpty iconType={iconType} size="s" {...commonProps}>
+          {content}
+        </EuiButtonEmpty>
+      );
+  }
 };

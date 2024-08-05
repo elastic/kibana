@@ -95,7 +95,7 @@ export class TaskPool {
    */
   public getOccupiedWorkersByType(type: string) {
     return [...this.tasksInPool.values()].reduce(
-      (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
+      (count, runningTask) => (runningTask.definition?.type === type ? ++count : count),
       0
     );
   }
@@ -218,7 +218,7 @@ export class TaskPool {
                 )}`
               : ``
           }${
-            taskRunner.definition.timeout
+            taskRunner.definition?.timeout
               ? ` (with timeout set at ${taskRunner.definition.timeout})`
               : ``
           }.`

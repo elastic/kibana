@@ -45,7 +45,7 @@ describe('TryInConsoleButton', () => {
     sharePlugin,
     content,
     showIcon,
-    link,
+    type,
   }: Partial<TryInConsoleButtonProps>) => ({
     application: (application ?? mockApplication) as ApplicationStart,
     sharePlugin: (sharePlugin ?? mockShare) as SharePluginStart | undefined,
@@ -53,7 +53,7 @@ describe('TryInConsoleButton', () => {
     consolePlugin,
     content,
     showIcon,
-    link,
+    type,
   });
   beforeEach(() => {
     jest.resetAllMocks();
@@ -83,7 +83,7 @@ describe('TryInConsoleButton', () => {
     );
   });
   it('can render as a link', async () => {
-    const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats', link: true };
+    const props: Partial<TryInConsoleButtonProps> = { request: 'GET /_stats', type: 'link' };
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 
     expect(wrapper.getByTestId('tryInConsoleLink')).toBeTruthy();
@@ -142,7 +142,7 @@ describe('TryInConsoleButton', () => {
     const props: Partial<TryInConsoleButtonProps> = {
       request: 'GET /_stats',
       content: 'Try my console!!',
-      link: true,
+      type: 'link',
     };
     const wrapper = render(<TryInConsoleButton {...defaultProps(props)} />);
 

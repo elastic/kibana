@@ -489,10 +489,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
         ).to.be('countB, geo.dest');
 
+        await PageObjects.unifiedSearch.switchToDataViewMode();
+
         await PageObjects.unifiedSearch.switchDataView(
           'discover-dataView-switch-link',
-          'logstash-*',
-          true
+          'logstash-*'
         );
 
         await PageObjects.header.waitUntilLoadingHasFinished();

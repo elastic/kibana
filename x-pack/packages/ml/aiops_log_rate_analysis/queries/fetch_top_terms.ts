@@ -25,9 +25,11 @@ import { getRequestBase } from './get_request_base';
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
 // `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
+const TOP_TERM_AGG_PREFIX = 'top_terms_';
+
 export const getTopTermRequest = (
   params: AiopsLogRateAnalysisSchema,
-  fieldName: string,
+  fieldNames: string[],
   { wrap }: RandomSamplerWrapper
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({
@@ -55,19 +57,24 @@ export const getTopTermRequest = (
     ];
   }
 
-  const termAgg: Record<'log_rate_top_terms', estypes.AggregationsAggregationContainer> = {
-    log_rate_top_terms: {
-      terms: {
-        field: fieldName,
-        size: LOG_RATE_ANALYSIS_SETTINGS.TOP_TERMS_FALLBACK_SIZE,
-      },
+  const termAggs = fieldNames.reduce<Record<string, estypes.AggregationsAggregationContainer>>(
+    (aggs, fieldName, index) => {
+      aggs[`${TOP_TERM_AGG_PREFIX}${index}`] = {
+        terms: {
+          field: fieldName,
+          size: LOG_RATE_ANALYSIS_SETTINGS.TOP_TERMS_FALLBACK_SIZE,
+        },
+      };
+
+      return aggs;
     },
-  };
+    {}
+  );
 
   const body = {
     query,
     size: 0,
-    aggs: wrap(termAgg),
+    aggs: wrap(termAggs),
   };
 
   return {
@@ -97,50 +104,36 @@ export const fetchTopTerms = async (
 
   const result: SignificantItem[] = [];
 
-  const settledPromises = await Promise.allSettled(
-    fieldNames.map((fieldName) =>
-      esClient.search(getTopTermRequest(params, fieldName, randomSamplerWrapper), {
-        signal: abortSignal,
-        maxRetries: 0,
-      })
-    )
-  );
+  const resp = await esClient.search(getTopTermRequest(params, fieldNames, randomSamplerWrapper), {
+    signal: abortSignal,
+    maxRetries: 0,
+  });
 
-  function reportError(fieldName: string, error: unknown) {
-    if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch term aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch term aggregation for fieldName "${fieldName}".`);
+  if (resp.aggregations === undefined) {
+    if (!isRequestAbortedError(resp)) {
+      if (logger) {
+        logger.error(
+          `Failed to fetch terms aggregation for field names ${fieldNames.join()}, got: \n${JSON.stringify(
+            resp,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch terms aggregation for field names ${fieldNames.join()}.`);
+      }
     }
+    return result;
   }
 
-  for (const [index, settledPromise] of settledPromises.entries()) {
-    const fieldName = fieldNames[index];
+  const unwrappedResp = randomSamplerWrapper.unwrap(resp.aggregations) as Record<string, Aggs>;
 
-    if (settledPromise.status === 'rejected') {
-      reportError(fieldName, settledPromise.reason);
-      // Still continue the analysis even if individual p-value queries fail.
-      continue;
-    }
+  for (const [index, fieldName] of fieldNames.entries()) {
+    const termBuckets = unwrappedResp[`${TOP_TERM_AGG_PREFIX}${index}`];
 
-    const resp = settledPromise.value;
-
-    if (resp.aggregations === undefined) {
-      reportError(fieldName, resp);
-      // Still continue the analysis even if individual p-value queries fail.
-      continue;
-    }
-
-    const overallResult = (
-      randomSamplerWrapper.unwrap(resp.aggregations) as Record<'log_rate_top_terms', Aggs>
-    ).log_rate_top_terms;
-
-    for (const bucket of overallResult.buckets) {
+    for (const bucket of termBuckets.buckets) {
       result.push({
         key: `${fieldName}:${String(bucket.key)}`,
         type: SIGNIFICANT_ITEM_TYPE.KEYWORD,

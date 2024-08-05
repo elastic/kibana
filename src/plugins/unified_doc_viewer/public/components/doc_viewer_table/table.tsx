@@ -75,7 +75,7 @@ const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 const SEARCH_TEXT = 'discover:searchText';
-const HIDE_NULL_VALUES = 'discover:hideNullValues';
+const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
 const GRID_COLUMN_FIELD_VALUE = 'value';

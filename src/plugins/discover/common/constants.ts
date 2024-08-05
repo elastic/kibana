@@ -21,3 +21,6 @@ export enum VIEW_MODE {
 export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {
   return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
 };
+
+// local storage key for the ES|QL to Dataviews transition modal
+export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';

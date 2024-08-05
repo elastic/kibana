@@ -64,7 +64,8 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/search-types",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]
 }

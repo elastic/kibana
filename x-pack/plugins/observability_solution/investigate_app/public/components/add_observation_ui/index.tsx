@@ -24,13 +24,11 @@ const emptyPreview = css`
 export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const [isExpanded, setIsExpanded] = React.useState(false);
   const [query, setQuery] = React.useState({ esql: '' });
   const [submittedQuery, setSubmittedQuery] = React.useState({ esql: '' });
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
   const resetState = () => {
-    setIsExpanded(false);
     setIsPreviewOpen(false);
     setQuery({ esql: '' });
     setSubmittedQuery({ esql: '' });
@@ -83,11 +81,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
                   }}
                   errors={undefined}
                   warning={undefined}
-                  expandCodeEditor={(expanded: boolean) => {
-                    setIsExpanded(() => expanded);
-                  }}
-                  isCodeEditorExpanded={isExpanded}
-                  hideMinimizeButton={false}
                   editorIsInline={false}
                   hideRunQueryText
                   isLoading={false}

@@ -59,6 +59,7 @@ async function getActionResults(
   try {
     acks = await esClient.search({
       index: AGENT_ACTIONS_RESULTS_INDEX,
+      ignore_unavailable: true,
       query: {
         bool: {
           // There's some perf/caching advantages to using filter over must
@@ -104,6 +105,7 @@ async function getActionResults(
       // query to find errors in action results, cannot do aggregation on text type
       const errorResults = await esClient.search({
         index: AGENT_ACTIONS_RESULTS_INDEX,
+        ignore_unavailable: true,
         track_total_hits: true,
         rest_total_hits_as_int: true,
         query: {
@@ -386,6 +388,7 @@ async function getPolicyChangeActions(
   };
   const agentPoliciesRes = await esClient.search({
     index: AGENT_POLICY_INDEX,
+    ignore_unavailable: true,
     size: getPerPage(options),
     query: addNamespaceFilteringToQuery(query, namespace),
     sort: [

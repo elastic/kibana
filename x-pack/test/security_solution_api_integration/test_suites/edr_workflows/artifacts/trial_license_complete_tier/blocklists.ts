@@ -13,23 +13,29 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   describe('@ess @serverless @skipInServerlessMKI Endpoint artifacts (via lists plugin): Blocklists', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
+    let t1AnalystSupertest: TestAgent;
+    let endpointPolicyManagerSupertest: TestAgent;
+
     before(async () => {
+      t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
+      endpointPolicyManagerSupertest = await utils.createSuperTest(ROLE.endpoint_policy_manager);
+
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
     });
@@ -60,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       let blocklistData: ArtifactTestData;
 
       type BlocklistApiCallsInterface<BodyReturnType = unknown> = Array<{
-        method: keyof Pick<typeof supertest, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
+        method: keyof Pick<TestAgent, 'post' | 'put' | 'get' | 'delete' | 'patch'>;
         info?: string;
         path: string;
         // The body just needs to have the properties we care about in the tests. This should cover most
@@ -156,8 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
             const body = blocklistApiCall.getBody();
 
             body.entries[0].field = 'some.invalid.field';
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -177,8 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -198,8 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -229,8 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -263,8 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -277,8 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.os_types = ['linux', 'windows'];
 
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -292,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
             body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
             // Using superuser here as we need custom license for this action
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -302,8 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
         for (const blocklistApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.endpoint_policy_manager, 'changeme')
+            await endpointPolicyManagerSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody() as object)
               .expect(200);
@@ -313,10 +312,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       // no such role in serverless
       describe('@skipInServerless and user has authorization to read blocklist', function () {
+        let artifactReadSupertest: TestAgent;
+        before(async () => {
+          artifactReadSupertest = await utils.createSuperTest(ROLE.artifact_read_privileges);
+        });
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.artifact_read_privileges, 'changeme')
+            await artifactReadSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody() as object)
               .expect(403);
@@ -325,8 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const blocklistApiCall of needsReadPrivilege) {
           it(`should not error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.artifact_read_privileges, 'changeme')
+            await artifactReadSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody() as object)
               .expect(200);
@@ -341,8 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...needsReadPrivilege,
         ]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
-            await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
-              .auth(ROLE.t1_analyst, 'changeme')
+            await t1AnalystSupertest[blocklistApiCall.method](blocklistApiCall.path)
               .set('kbn-xsrf', 'true')
               .send(blocklistApiCall.getBody() as object)
               .expect(403);

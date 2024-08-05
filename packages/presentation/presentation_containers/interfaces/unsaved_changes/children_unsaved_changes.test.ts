@@ -10,6 +10,7 @@ import { BehaviorSubject, skip } from 'rxjs';
 import { childrenUnsavedChanges$, DEBOUNCE_TIME } from './children_unsaved_changes';
 
 // Failing: See https://github.com/elastic/kibana/issues/189823
+// FLAKY: https://github.com/elastic/kibana/issues/189822
 describe.skip('childrenUnsavedChanges$', () => {
   const child1Api = {
     unsavedChanges: new BehaviorSubject<object | undefined>(undefined),

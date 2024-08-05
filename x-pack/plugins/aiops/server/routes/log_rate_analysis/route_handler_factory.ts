@@ -12,6 +12,7 @@ import type {
   RequestHandler,
   KibanaResponseFactory,
 } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/logging';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -27,7 +28,6 @@ import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
 import { responseStreamFactory } from './response_stream_factory';
-import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream_utils/constants';
 
 /**
  * The log rate analysis route handler sets up `responseStreamFactory`
@@ -82,7 +82,10 @@ export function routeHandlerFactory<T extends ApiVersion>(
           responseStream.pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates and zero docs fallback flag
-          const indexInfo = await analysis.indexInfoHandler();
+          const indexInfo = await withSpan(
+            { name: 'fetch_index_info', type: 'aiops-log-rate-analysis' },
+            () => analysis.indexInfoHandler()
+          );
 
           if (!indexInfo) {
             return;
@@ -90,8 +93,13 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
           // Step 2: Significant categories and terms
           const significantItemsObj = indexInfo.zeroDocsFallback
-            ? await analysis.topItemsHandler(indexInfo)
-            : await analysis.significantItemsHandler(indexInfo);
+            ? await withSpan({ name: 'fetch_top_items', type: 'aiops-log-rate-analysis' }, () =>
+                analysis.topItemsHandler(indexInfo)
+              )
+            : await withSpan(
+                { name: 'fetch_significant_items', type: 'aiops-log-rate-analysis' },
+                () => analysis.significantItemsHandler(indexInfo)
+              );
 
           if (!significantItemsObj) {
             return;
@@ -101,26 +109,31 @@ export function routeHandlerFactory<T extends ApiVersion>(
             significantItemsObj;
 
           // Step 3: Fetch overall histogram
-          const overallTimeSeries = await analysis.overallHistogramHandler();
+          const overallTimeSeries = await withSpan(
+            { name: 'fetch_overall_timeseries', type: 'aiops-log-rate-analysis' },
+            () => analysis.overallHistogramHandler()
+          );
 
-          // Step 4: Smart gropuing
+          // Step 4: Histograms
+          await withSpan(
+            { name: 'significant-item-histograms', type: 'aiops-log-rate-analysis' },
+            () =>
+              analysis.histogramHandler(
+                fieldValuePairsCount,
+                significantCategories,
+                significantTerms,
+                overallTimeSeries
+              )
+          );
+
+          // Step 5: Smart grouping
           if (stateHandler.groupingEnabled()) {
-            await analysis.groupingHandler(
-              significantCategories,
-              significantTerms,
-              overallTimeSeries
+            await withSpan(
+              { name: 'grouping-with-histograms', type: 'aiops-log-rate-analysis' },
+              () =>
+                analysis.groupingHandler(significantCategories, significantTerms, overallTimeSeries)
             );
           }
-
-          stateHandler.loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
-
-          // Step 5: Histograms
-          await analysis.histogramHandler(
-            fieldValuePairsCount,
-            significantCategories,
-            significantTerms,
-            overallTimeSeries
-          );
 
           responseStream.endWithUpdatedLoadingState();
         } catch (e) {

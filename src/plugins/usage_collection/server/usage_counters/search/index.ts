@@ -6,17 +6,4 @@
  * Side Public License, v 1.
  */
 
-/**
- * Roll indices every 24h
- */
-export const ROLL_INDICES_INTERVAL = 24 * 60 * 60 * 1000;
-
-/**
- * Start rolling indices after 5 minutes up
- */
-export const ROLL_INDICES_START = 5 * 60 * 1000;
-
-/**
- * Number of days to keep the Usage counters saved object documents
- */
-export const USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS = 5;
+export { searchUsageCounters } from './search';
