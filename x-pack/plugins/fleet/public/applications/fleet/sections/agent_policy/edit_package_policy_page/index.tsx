@@ -446,6 +446,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
+        isAgentlessEnabled={true}
       />
     </ExtensionWrapper>
   );
