@@ -1,0 +1,853 @@
+openapi: 3.0.3
+info:
+  description: Endpoint Exceptions API allow you to manage Endpoint lists.
+  title: Security Solution Endpoint Exceptions API (Elastic Cloud Serverless)
+  version: '2023-10-31'
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/endpoint_list:
+    post:
+      description: Creates an endpoint list or does nothing if the list already exists
+      operationId: CreateEndpointList
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointList'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Insufficient privileges
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error
+      summary: Creates an endpoint list
+  /api/endpoint_list/items:
+    delete:
+      operationId: DeleteEndpointListItem
+      parameters:
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemId'
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: item_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemHumanId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Insufficient privileges
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Endpoint list item not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error
+      summary: Deletes an endpoint list item
+    get:
+      operationId: ReadEndpointListItem
+      parameters:
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemId'
+        - description: Either `id` or `item_id` must be specified
+          in: query
+          name: item_id
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExceptionListItemHumanId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/EndpointListItem'
+                type: array
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Insufficient privileges
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Endpoint list item not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error
+      summary: Reads an endpoint list item
+    post:
+      operationId: CreateEndpointListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comments:
+                  $ref: '#/components/schemas/ExceptionListItemCommentArray'
+                  default: []
+                description:
+                  $ref: '#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
+                item_id:
+                  $ref: '#/components/schemas/ExceptionListItemHumanId'
+                meta:
+                  $ref: '#/components/schemas/ExceptionListItemMeta'
+                name:
+                  $ref: '#/components/schemas/ExceptionListItemName'
+                os_types:
+                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '#/components/schemas/ExceptionListItemTags'
+                  default: []
+                type:
+                  $ref: '#/components/schemas/ExceptionListItemType'
+              required:
+                - type
+                - name
+                - description
+                - entries
+        description: Exception list item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Insufficient privileges
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Endpoint list item already exists
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error
+      summary: Creates an endpoint list item
+    put:
+      operationId: UpdateEndpointListItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                _version:
+                  type: string
+                comments:
+                  $ref: '#/components/schemas/ExceptionListItemCommentArray'
+                  default: []
+                description:
+                  $ref: '#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '#/components/schemas/ExceptionListItemEntryArray'
+                id:
+                  $ref: '#/components/schemas/ExceptionListItemId'
+                  description: Either `id` or `item_id` must be specified
+                item_id:
+                  $ref: '#/components/schemas/ExceptionListItemHumanId'
+                  description: Either `id` or `item_id` must be specified
+                meta:
+                  $ref: '#/components/schemas/ExceptionListItemMeta'
+                name:
+                  $ref: '#/components/schemas/ExceptionListItemName'
+                os_types:
+                  $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '#/components/schemas/ExceptionListItemTags'
+                type:
+                  $ref: '#/components/schemas/ExceptionListItemType'
+              required:
+                - type
+                - name
+                - description
+                - entries
+        description: Exception list item's properties
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointListItem'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Insufficient privileges
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Endpoint list item not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error
+      summary: Updates an endpoint list item
+  /api/endpoint_list/items/_find:
+    get:
+      operationId: FindEndpointListItems
+      parameters:
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
+            using the `<field name>:<field value>` syntax.
+          in: query
+          name: filter
+          required: false
+          schema:
+            $ref: '#/components/schemas/FindEndpointListItemsFilter'
+        - description: The page number to return
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+        - description: The number of exception list items to return per page
+          in: query
+          name: per_page
+          required: false
+          schema:
+            minimum: 0
+            type: integer
+        - description: Determines which field is used to sort the results
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/NonEmptyString'
+        - description: 'Determines the sort order, which can be `desc` or `asc`'
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - desc
+              - asc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/EndpointListItem'
+                    type: array
+                  page:
+                    minimum: 0
+                    type: integer
+                  per_page:
+                    minimum: 0
+                    type: integer
+                  pit:
+                    type: string
+                  total:
+                    minimum: 0
+                    type: integer
+                required:
+                  - data
+                  - page
+                  - per_page
+                  - total
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
+          description: Invalid input data
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Unsuccessful authentication
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformErrorResponse'
+          description: Insufficient privileges
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Endpoint list not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiemErrorResponse'
+          description: Internal server error
+      summary: Finds endpoint list items
+components:
+  schemas:
+    EndpointList:
+      oneOf:
+        - $ref: '#/components/schemas/ExceptionList'
+        - additionalProperties: false
+          type: object
+    EndpointListItem:
+      $ref: '#/components/schemas/ExceptionListItem'
+    ExceptionList:
+      type: object
+      properties:
+        _version:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        description:
+          $ref: '#/components/schemas/ExceptionListDescription'
+        id:
+          $ref: '#/components/schemas/ExceptionListId'
+        immutable:
+          type: boolean
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListTags'
+        tie_breaker_id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ExceptionListType'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+        version:
+          $ref: '#/components/schemas/ExceptionListVersion'
+      required:
+        - id
+        - list_id
+        - type
+        - name
+        - description
+        - immutable
+        - namespace_type
+        - version
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    ExceptionListDescription:
+      type: string
+    ExceptionListHumanId:
+      $ref: '#/components/schemas/NonEmptyString'
+      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
+    ExceptionListId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItem:
+      type: object
+      properties:
+        _version:
+          type: string
+        comments:
+          $ref: '#/components/schemas/ExceptionListItemCommentArray'
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          type: string
+        description:
+          $ref: '#/components/schemas/ExceptionListItemDescription'
+        entries:
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
+        expire_time:
+          format: date-time
+          type: string
+        id:
+          $ref: '#/components/schemas/ExceptionListItemId'
+        item_id:
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
+        list_id:
+          $ref: '#/components/schemas/ExceptionListHumanId'
+        meta:
+          $ref: '#/components/schemas/ExceptionListItemMeta'
+        name:
+          $ref: '#/components/schemas/ExceptionListItemName'
+        namespace_type:
+          $ref: '#/components/schemas/ExceptionNamespaceType'
+        os_types:
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
+        tags:
+          $ref: '#/components/schemas/ExceptionListItemTags'
+        tie_breaker_id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ExceptionListItemType'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          type: string
+      required:
+        - id
+        - item_id
+        - list_id
+        - type
+        - name
+        - description
+        - entries
+        - namespace_type
+        - comments
+        - tie_breaker_id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+    ExceptionListItemComment:
+      type: object
+      properties:
+        comment:
+          $ref: '#/components/schemas/NonEmptyString'
+        created_at:
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/NonEmptyString'
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        updated_at:
+          format: date-time
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - id
+        - comment
+        - created_at
+        - created_by
+    ExceptionListItemCommentArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListItemComment'
+      type: array
+    ExceptionListItemDescription:
+      type: string
+    ExceptionListItemEntry:
+      anyOf:
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryList'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+        - $ref: '#/components/schemas/ExceptionListItemEntryNested'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
+      discriminator:
+        propertyName: type
+    ExceptionListItemEntryArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListItemEntry'
+      type: array
+    ExceptionListItemEntryExists:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - exists
+          type: string
+      required:
+        - type
+        - field
+        - operator
+    ExceptionListItemEntryList:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        list:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ListId'
+            type:
+              $ref: '#/components/schemas/ListType'
+          required:
+            - id
+            - type
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - list
+          type: string
+      required:
+        - type
+        - field
+        - list
+        - operator
+    ExceptionListItemEntryMatch:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - match
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - type
+        - field
+        - value
+        - operator
+    ExceptionListItemEntryMatchAny:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - match_any
+          type: string
+        value:
+          items:
+            $ref: '#/components/schemas/NonEmptyString'
+          minItems: 1
+          type: array
+      required:
+        - type
+        - field
+        - value
+        - operator
+    ExceptionListItemEntryMatchWildcard:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        operator:
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        type:
+          enum:
+            - wildcard
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - type
+        - field
+        - value
+        - operator
+    ExceptionListItemEntryNested:
+      type: object
+      properties:
+        entries:
+          items:
+            $ref: '#/components/schemas/ExceptionListItemEntryNestedEntryItem'
+          minItems: 1
+          type: array
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        type:
+          enum:
+            - nested
+          type: string
+      required:
+        - type
+        - field
+        - entries
+    ExceptionListItemEntryNestedEntryItem:
+      oneOf:
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+    ExceptionListItemEntryOperator:
+      enum:
+        - excluded
+        - included
+      type: string
+    ExceptionListItemHumanId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItemId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItemMeta:
+      additionalProperties: true
+      type: object
+    ExceptionListItemName:
+      $ref: '#/components/schemas/NonEmptyString'
+    ExceptionListItemOsTypeArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListOsType'
+      type: array
+    ExceptionListItemTags:
+      items:
+        $ref: '#/components/schemas/NonEmptyString'
+      type: array
+    ExceptionListItemType:
+      enum:
+        - simple
+      type: string
+    ExceptionListMeta:
+      additionalProperties: true
+      type: object
+    ExceptionListName:
+      type: string
+    ExceptionListOsType:
+      enum:
+        - linux
+        - macos
+        - windows
+      type: string
+    ExceptionListOsTypeArray:
+      items:
+        $ref: '#/components/schemas/ExceptionListOsType'
+      type: array
+    ExceptionListTags:
+      items:
+        type: string
+      type: array
+    ExceptionListType:
+      enum:
+        - detection
+        - rule_default
+        - endpoint
+        - endpoint_trusted_apps
+        - endpoint_events
+        - endpoint_host_isolation_exceptions
+        - endpoint_blocklists
+      type: string
+    ExceptionListVersion:
+      minimum: 1
+      type: integer
+    ExceptionNamespaceType:
+      description: >
+        Determines whether the exception container is available in all Kibana
+        spaces or just the space
+
+        in which it is created, where:
+
+
+        - `single`: Only available in the Kibana space in which it is created.
+
+        - `agnostic`: Available in all Kibana spaces.
+      enum:
+        - agnostic
+        - single
+      type: string
+    FindEndpointListItemsFilter:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListId:
+      $ref: '#/components/schemas/NonEmptyString'
+    ListType:
+      enum:
+        - binary
+        - boolean
+        - byte
+        - date
+        - date_nanos
+        - date_range
+        - double
+        - double_range
+        - float
+        - float_range
+        - geo_point
+        - geo_shape
+        - half_float
+        - integer
+        - integer_range
+        - ip
+        - ip_range
+        - keyword
+        - long
+        - long_range
+        - shape
+        - short
+        - text
+      type: string
+    NonEmptyString:
+      description: A string that is not empty and does not contain only whitespace
+      minLength: 1
+      pattern: ^(?! *$).+$
+      type: string
+    PlatformErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+      required:
+        - statusCode
+        - error
+        - message
+    SiemErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        status_code:
+          type: integer
+      required:
+        - status_code
+        - message
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
