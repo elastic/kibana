@@ -114,7 +114,7 @@ export function getServiceColumns({
         ) : (
           <ListMetric
             isLoading={timeseriesDataLoading}
-            series={timeseriesData?.currentPeriod?.apm[serviceName]?.latency}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.latency}
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(metrics.latency)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
@@ -140,7 +140,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={asTransactionRate(metrics.throughput)}
             isLoading={timeseriesDataLoading}
-            series={timeseriesData?.currentPeriod?.apm[serviceName]?.throughput}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.throughput}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
@@ -164,7 +164,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
             isLoading={timeseriesDataLoading}
-            series={timeseriesData?.currentPeriod?.apm[serviceName]?.transactionErrorRate}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.failedTransactionRate}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
@@ -212,7 +212,7 @@ export function getServiceColumns({
           <ListMetric
             isLoading={false}
             color={currentPeriodColor}
-            series={timeseriesData?.currentPeriod?.logRate[serviceName] ?? []}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logRate ?? []}
             valueLabel={asDecimalOrInteger(metrics.logRate)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
@@ -261,7 +261,7 @@ export function getServiceColumns({
           <ListMetric
             isLoading={false}
             color={currentPeriodColor}
-            series={timeseriesData?.currentPeriod?.logErrorRate[serviceName] ?? []}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logErrorRate ?? []}
             valueLabel={asPercent(metrics.logErrorRate, 1)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />

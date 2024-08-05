@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { termsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { EntityMetrics } from '../../../common/entities/types';
 import {
   ENTITY_ID,
