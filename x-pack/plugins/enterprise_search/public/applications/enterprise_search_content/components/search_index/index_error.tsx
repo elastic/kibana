@@ -93,6 +93,7 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
     const fetchErrors = async () => {
       const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
       const endpoints = await ml?.mlApi?.inferenceModels.getAllInferenceEndpoints();
+
       if (!trainedModelStats || !endpoints?.endpoints) {
         return [];
       }
@@ -108,8 +109,9 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
                 'xpack.enterpriseSearch.indexOverview.indexErrors.missingModelError',
                 {
                   defaultMessage:
-                    'Inference endpoint not found for inference endpoint {inferenceId}',
+                    'Inference endpoint not found for {inferenceId} in field {fieldName}',
                   values: {
+                    fieldName: field.path,
                     inferenceId: field.source.inference_id as string,
                   },
                 }
