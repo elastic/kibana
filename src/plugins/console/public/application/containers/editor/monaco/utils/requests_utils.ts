@@ -54,16 +54,15 @@ export const getCurlRequest = (
 
       if (containsComments(joinedData)) {
         // if there are comments in the data, we need to strip them out
-        const dataWithoutComments = parse(joinedData);
+        const dataWithoutComments = splitDataIntoJsonObjects(joinedData).map((jsonObject) =>
+          parse(jsonObject)
+        );
         dataAsString = collapseLiteralStrings(JSON.stringify(dataWithoutComments, null, 2));
       } else {
         dataAsString = collapseLiteralStrings(joinedData);
       }
       // We escape single quoted strings that are wrapped in single quoted strings
       curlRequest += dataAsString.replace(/'/g, "'\\''");
-      if (data.length > 1) {
-        curlRequest += '\n';
-      } // end with a new line
       curlRequest += "'";
     } catch (e) {
       throw new Error(`Error parsing data: ${e.message}`);
@@ -214,11 +213,13 @@ export const getAutoIndentedRequests = (
       if (dataLines.some((line) => containsComments(line))) {
         // If data has comments, add it as it is - without formatting
         // TODO: Format requests with comments https://github.com/elastic/kibana/issues/182138
-        formattedTextLines.push(...requestLines);
+        formattedTextLines.push(...dataLines);
       } else {
         // If no comments, indent data
         if (requestLines.length > 1) {
-          formattedTextLines.push(indentData(dataLines));
+          const dataString = dataLines.join('\n');
+          const dataJsons = splitDataIntoJsonObjects(dataString);
+          formattedTextLines.push(...dataJsons.map(indentData));
         }
       }
 
@@ -267,7 +268,7 @@ export const getRequestFromEditor = (
 };
 
 const splitDataIntoJsonObjects = (dataString: string): string[] => {
-  const jsonSplitRegex = /}\s+{/;
+  const jsonSplitRegex = /}\s*{/;
   if (dataString.match(jsonSplitRegex)) {
     return dataString.split(jsonSplitRegex).map((part, index, parts) => {
       let restoredBracketsString = part;
@@ -285,16 +286,16 @@ const splitDataIntoJsonObjects = (dataString: string): string[] => {
   return [dataString];
 };
 
-const cleanUpWhitespaces = (line: string): string => {
+export const cleanUpWhitespaces = (line: string): string => {
   return line.trim().replaceAll(/\s+/g, ' ');
 };
 
-const indentData = (dataLines: string[]): string => {
-  const joinedData = dataLines.join('\n');
+const indentData = (dataString: string): string => {
   try {
-    const parsedData = parse(joinedData);
+    const parsedData = parse(dataString);
+
     return JSON.stringify(parsedData, null, 2);
-  } catch {
-    return joinedData;
+  } catch (e) {
+    return dataString;
   }
 };

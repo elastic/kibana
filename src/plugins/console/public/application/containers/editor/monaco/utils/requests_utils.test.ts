@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { monaco, ParsedRequest } from '@kbn/monaco';
+import type { MetricsTracker } from '../../../../../types';
 import {
+  cleanUpWhitespaces,
   getAutoIndentedRequests,
   getCurlRequest,
   getRequestEndLineNumber,
   replaceRequestVariables,
-  stringifyRequest,
   trackSentRequests,
 } from './requests_utils';
-import { MetricsTracker } from '../../../../../types';
-import { monaco, ParsedRequest } from '@kbn/monaco';
 
 describe('requests_utils', () => {
   const dataObjects = [
@@ -28,35 +28,6 @@ describe('requests_utils', () => {
       test: 'test',
     },
   ];
-  describe('stringifyRequest', () => {
-    const request = {
-      startOffset: 0,
-      endOffset: 11,
-      method: 'get',
-      url: '_search some_text',
-    };
-    it('calls the "removeTrailingWhitespaces" on the url', () => {
-      const stringifiedRequest = stringifyRequest(request);
-      expect(stringifiedRequest.url).toBe('_search');
-    });
-
-    it('normalizes the method to upper case', () => {
-      const stringifiedRequest = stringifyRequest(request);
-      expect(stringifiedRequest.method).toBe('GET');
-    });
-    it('stringifies the request body', () => {
-      const result = stringifyRequest({ ...request, data: [dataObjects[0]] });
-      expect(result.data.length).toBe(1);
-      expect(result.data[0]).toBe(JSON.stringify(dataObjects[0], null, 2));
-    });
-
-    it('works for several request bodies', () => {
-      const result = stringifyRequest({ ...request, data: dataObjects });
-      expect(result.data.length).toBe(2);
-      expect(result.data[0]).toBe(JSON.stringify(dataObjects[0], null, 2));
-      expect(result.data[1]).toBe(JSON.stringify(dataObjects[1], null, 2));
-    });
-  });
 
   describe('replaceRequestVariables', () => {
     const variables = [
@@ -215,9 +186,6 @@ describe('requests_utils', () => {
     ];
 
     const TEST_REQUEST_1 = {
-      method: 'GET',
-      url: '_search',
-      data: [{ query: { match_all: {} } }],
       // Offsets are with respect to the sample editor text
       startLineNumber: 2,
       endLineNumber: 7,
@@ -226,9 +194,6 @@ describe('requests_utils', () => {
     };
 
     const TEST_REQUEST_2 = {
-      method: 'GET',
-      url: '_all',
-      data: [],
       // Offsets are with respect to the sample editor text
       startLineNumber: 10,
       endLineNumber: 10,
@@ -237,10 +202,6 @@ describe('requests_utils', () => {
     };
 
     const TEST_REQUEST_3 = {
-      method: 'POST',
-      url: '/_bulk',
-      // Multi-data
-      data: [{ index: { _index: 'books' } }, { name: '1984' }, { name: 'Atomic habits' }],
       // Offsets are with respect to the sample editor text
       startLineNumber: 15,
       endLineNumber: 23,
@@ -249,11 +210,8 @@ describe('requests_utils', () => {
     };
 
     const TEST_REQUEST_4 = {
-      method: 'GET',
-      url: '_search',
-      data: [{ query: { match_all: {} } }],
       // Offsets are with respect to the sample editor text
-      startLineNumber: 24,
+      startLineNumber: 25,
       endLineNumber: 30,
       startOffset: 1,
       endOffset: 36,
@@ -355,25 +313,24 @@ describe('requests_utils', () => {
       expect(formattedData).toBe(expectedResultLines.join('\n'));
     });
 
-    it('does not auto-indent a request with comments', () => {
-      const requestText = sampleEditorTextLines
-        .slice(TEST_REQUEST_4.startLineNumber - 1, TEST_REQUEST_4.endLineNumber)
+    it(`auto-indents method line but doesn't auto-indent data with comments`, () => {
+      const methodLine = sampleEditorTextLines[TEST_REQUEST_4.startLineNumber - 1];
+      const dataText = sampleEditorTextLines
+        .slice(TEST_REQUEST_4.startLineNumber, TEST_REQUEST_4.endLineNumber)
         .join('\n');
       const formattedData = getAutoIndentedRequests(
         [TEST_REQUEST_4],
-        requestText,
+        `${methodLine}\n${dataText}`,
         sampleEditorTextLines.join('\n')
       );
 
-      expect(formattedData).toBe(requestText);
+      expect(formattedData).toBe(`${cleanUpWhitespaces(methodLine)}\n${dataText}`);
     });
   });
 
   describe('getRequestEndLineNumber', () => {
     const parsedRequest: ParsedRequest = {
       startOffset: 1,
-      method: 'GET',
-      url: '_search',
     };
     it('detects the end of the request when there is a line that starts with a method (next not parsed request)', () => {
       /*
