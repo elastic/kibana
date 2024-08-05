@@ -9,8 +9,6 @@ paths:
       operationId: FindLists
       x-codegen-enabled: true
       summary: Finds lists
-      tags:
-        - List API
       parameters:
         - name: page
           in: query

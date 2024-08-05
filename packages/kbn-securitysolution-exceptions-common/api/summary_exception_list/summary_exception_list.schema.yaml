@@ -9,8 +9,6 @@ paths:
       operationId: GetExceptionListSummary
       x-codegen-enabled: true
       summary: Retrieves an exception list summary
-      tags:
-        - Exceptions API
       parameters:
         - name: id
           in: query
