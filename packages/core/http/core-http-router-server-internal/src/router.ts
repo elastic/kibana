@@ -28,6 +28,7 @@ import type {
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -150,35 +151,6 @@ export type InternalRegistrar<M extends Method, C extends RequestHandlerContextB
   handler: RequestHandler<P, Q, B, C, M>,
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
-
-type Privilege = string;
-
-interface PrivilegeSet {
-  anyRequired?: Privilege[];
-  allRequired?: Privilege[];
-  offering?: string;
-}
-
-type Privileges = Array<Privilege | PrivilegeSet>;
-
-export interface AuthzEnabled {
-  requiredPrivileges: Privileges;
-}
-
-export interface AuthzDisabled {
-  enabled: false;
-  reason: string;
-}
-
-export type RouteAuthz = AuthzEnabled | AuthzDisabled;
-export interface RouteAuthc {
-  enabled: boolean | 'optional';
-  reason?: string;
-}
-export interface RouteSecurity {
-  authz: RouteAuthz;
-  authc?: RouteAuthc;
-}
 
 /** @internal */
 export interface InternalRouterRoute extends RouterRoute {

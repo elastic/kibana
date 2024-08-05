@@ -295,6 +295,7 @@ export class HttpService
                   title: 'Kibana HTTP APIs',
                   version: '0.0.0', // TODO get a better version here
                   filters: { pathStartsWith, excludePathsMatching, access, version },
+                  buildFlavour: this.env.packageInfo.buildFlavor,
                 });
                 return h.response(result);
               } catch (e) {

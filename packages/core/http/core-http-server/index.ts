@@ -110,6 +110,10 @@ export type {
   AuthzDisabled,
   AuthzEnabled,
   RouteAuthz,
+  RouteAuthc,
+  AuthcDisabled,
+  AuthcEnabled,
+  RouteSecurity,
 } from './src/router';
 export {
   validBodyOutput,

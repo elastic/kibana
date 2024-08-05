@@ -37,7 +37,7 @@ interface PrivilegeGroups {
   traditional: PrivilegeGroupValue;
 }
 
-const extractAuthzDescription = (route: InternalRouterRoute) => {
+const extractAuthzDescription = (route: InternalRouterRoute, currentOffering: string) => {
   if (!route?.security?.authz || (route.security.authz as AuthzDisabled).enabled === false) {
     return '';
   }
@@ -94,21 +94,17 @@ const extractAuthzDescription = (route: InternalRouterRoute) => {
       ...offeringGroupedPrivileges.all.anyRequired,
     ];
 
-    return `Route required privileges for ${offering}: ${getPrivilegesDescription(
-      allRequired,
-      anyRequired
-    )}.\n`;
+    return `Route required privileges for: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
   };
 
-  return `[Authz] ${getDescriptionForOffering('serverless')}${getDescriptionForOffering(
-    'traditional'
-  )}`;
+  return `[Authz] ${getDescriptionForOffering(currentOffering)}`;
 };
 
 export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
   getOpId: OperationIdCounter,
+  buildFlavour: string,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
@@ -139,7 +135,7 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      const authzDescription = extractAuthzDescription(route);
+      const authzDescription = extractAuthzDescription(route, buildFlavour);
       const description = `${route.options.description ?? ''}${authzDescription}`;
 
       const operation: OpenAPIV3.OperationObject = {
