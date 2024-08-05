@@ -24,6 +24,7 @@ export interface InternalState {
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
+  isESQLToDataViewTransitionModalVisible?: boolean;
   resetDefaultProfileState: { columns: boolean; rowHeight: boolean };
 }
 
@@ -49,6 +50,9 @@ export interface InternalStateTransitions {
     overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined
   ) => InternalState;
   resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
+  setIsESQLToDataViewTransitionModalVisible: (
+    state: InternalState
+  ) => (isVisible: boolean) => InternalState;
   setResetDefaultProfileState: (
     state: InternalState
   ) => (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => InternalState;
@@ -85,6 +89,11 @@ export function getInternalStateContainer() {
         ...prevState,
         isDataViewLoading: loading,
       }),
+      setIsESQLToDataViewTransitionModalVisible:
+        (prevState: InternalState) => (isVisible: boolean) => ({
+          ...prevState,
+          isESQLToDataViewTransitionModalVisible: isVisible,
+        }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
         savedDataViews: nextDataViewList,
