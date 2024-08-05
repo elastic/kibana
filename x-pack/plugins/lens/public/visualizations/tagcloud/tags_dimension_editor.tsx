@@ -82,7 +82,7 @@ export function TagsDimensionEditor({
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
       style={{ alignItems: 'center' }}

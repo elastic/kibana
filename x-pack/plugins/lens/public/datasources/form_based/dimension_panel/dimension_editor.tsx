@@ -499,7 +499,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   position="left"
                   size="s"
                   type="dot"
-                  color="warning"
+                  color={euiTheme.colors.warning}
                 />
               </EuiFlexItem>
             )}

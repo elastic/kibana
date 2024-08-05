@@ -33,7 +33,6 @@ import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
 
 interface ColorMappingByTermsProps {
-  label?: string;
   isDarkMode: boolean;
   colorMapping?: ColorMapping.Config;
   palette?: PaletteOutput<CustomPaletteParams>;
@@ -46,7 +45,6 @@ interface ColorMappingByTermsProps {
 }
 
 export function ColorMappingByTerms({
-  label,
   isDarkMode,
   colorMapping,
   palette,
@@ -62,12 +60,9 @@ export function ColorMappingByTerms({
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={
-        label ||
-        i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
-          defaultMessage: 'Color mapping',
-        })
-      }
+      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
+        defaultMessage: 'Color mapping',
+      })}
       style={{ alignItems: 'center' }}
       fullWidth
     >

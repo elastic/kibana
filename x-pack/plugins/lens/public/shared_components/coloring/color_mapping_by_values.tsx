@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { PalettePanelContainer } from './palette_panel_container';
 
 interface ColorMappingByValuesProps {
-  label?: string;
   palette: PaletteOutput<CustomPaletteParams>;
   isInlineEditing?: boolean;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
@@ -29,7 +28,6 @@ interface ColorMappingByValuesProps {
 }
 
 export function ColorMappingByValues<T>({
-  label,
   palette,
   isInlineEditing,
   setPalette,
@@ -42,12 +40,9 @@ export function ColorMappingByValues<T>({
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={
-        label ||
-        i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
-          defaultMessage: 'Color mapping',
-        })
-      }
+      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
+        defaultMessage: 'Color mapping',
+      })}
       style={{ alignItems: 'center' }}
       fullWidth
     >

@@ -195,7 +195,7 @@ export function AssignmentsConfig({
                       'coloring.colorMapping.container.mapValuesPromptDescription.mapValuesPromptDetail',
                       {
                         defaultMessage:
-                          'Add new assignments to begin associating terms in your data with specified colors.',
+                          'Add a new assignment to manually associate terms with specified colors.',
                       }
                     )}
                   </p>
@@ -214,7 +214,7 @@ export function AssignmentsConfig({
                 </EuiButton>,
                 <EuiButtonEmpty
                   data-test-subj="lns-colorMapping-assignmentsPromptAddAll"
-                  color="primary"
+                  color="text"
                   size="xs"
                   onClick={onClickAddAllCurrentCategories}
                 >

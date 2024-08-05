@@ -127,7 +127,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {props.accessor === firstNonCollapsedColumnId && (
         <EuiFormRow
           display="columnCompressed"
-          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+          label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
             defaultMessage: 'Color mapping',
           })}
           style={{ alignItems: 'center' }}

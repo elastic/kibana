@@ -258,15 +258,15 @@ function PrimaryMetricEditor(props: SubProps) {
         <EuiFormRow
           display="columnCompressed"
           fullWidth
-          label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
-            defaultMessage: 'Color mode',
+          label={i18n.translate('xpack.lens.metric.colorByValue.label', {
+            defaultMessage: 'Color by value',
           })}
         >
           <EuiButtonGroup
             isFullWidth
             buttonSize="compressed"
-            legend={i18n.translate('xpack.lens.metric.colorMode.label', {
-              defaultMessage: 'Color mode',
+            legend={i18n.translate('xpack.lens.metric.colorByValue.label', {
+              defaultMessage: 'Color by value',
             })}
             data-test-subj="lnsMetric_color_mode_buttons"
             options={[
@@ -319,7 +319,7 @@ function PrimaryMetricEditor(props: SubProps) {
           display="columnCompressed"
           fullWidth
           label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
-            defaultMessage: 'Color',
+            defaultMessage: 'Color mapping',
           })}
         >
           <PalettePanelContainer

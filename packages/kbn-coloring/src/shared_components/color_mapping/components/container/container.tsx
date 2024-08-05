@@ -81,6 +81,7 @@ export function Container({
             >
               <EuiButtonIcon
                 data-test-subj="lns-colorMapping-invertGradient"
+                color="text"
                 iconType="merge"
                 size="xs"
                 aria-label={i18n.translate(

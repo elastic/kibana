@@ -217,9 +217,6 @@ export function TableDimensionEditor(
           {hasDynamicColoring &&
             (isNumeric ? (
               <ColorMappingByValues
-                label={i18n.translate('xpack.lens.paletteTableGradient.label', {
-                  defaultMessage: 'Color',
-                })}
                 palette={activePalette}
                 isInlineEditing={isInlineEditing}
                 setPalette={(newPalette) => {
