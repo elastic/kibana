@@ -15,6 +15,9 @@ import type {
   MappingTypeMapping,
   Name,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { KbnClient } from '@kbn/test';
+import { isServerlessKibanaFlavor } from '../utils/kibana_status';
+import { fetchFleetLatestAvailableAgentVersion } from '../utils/fetch_fleet_version';
 import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
@@ -26,6 +29,7 @@ export interface IndexEndpointRuleAlertsOptions {
   endpointIsolated?: boolean;
   count?: number;
   log?: ToolingLog;
+  kbnClient?: KbnClient;
 }
 
 export interface IndexedEndpointRuleAlerts {
@@ -41,6 +45,7 @@ export interface DeletedIndexedEndpointRuleAlerts {
  * Loads alerts for Endpoint directly into the internal index that the Endpoint Rule would have
  * written them to for a given endpoint
  * @param esClient
+ * @param kbnClient
  * @param endpointAgentId
  * @param endpointHostname
  * @param endpointIsolated
@@ -49,6 +54,7 @@ export interface DeletedIndexedEndpointRuleAlerts {
  */
 export const indexEndpointRuleAlerts = async ({
   esClient,
+  kbnClient,
   endpointAgentId,
   endpointHostname,
   endpointIsolated,
@@ -59,12 +65,20 @@ export const indexEndpointRuleAlerts = async ({
 
   await ensureEndpointRuleAlertsIndexExists(esClient);
 
+  let version = kibanaPackageJson.version;
+  if (kbnClient) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    if (isServerless) {
+      version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    }
+  }
+
   const alertsGenerator = new EndpointRuleAlertGenerator();
   const indexedAlerts: estypes.IndexResponse[] = [];
 
   for (let n = 0; n < count; n++) {
     const alert = alertsGenerator.generate({
-      agent: { id: endpointAgentId },
+      agent: { id: endpointAgentId, version },
       host: { hostname: endpointHostname },
       ...(endpointIsolated ? { Endpoint: { state: { isolation: endpointIsolated } } } : {}),
     });
