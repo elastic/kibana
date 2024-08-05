@@ -40,7 +40,6 @@ export { IS_OPERATOR, EXISTS_OPERATOR } from './types';
 
 export type {
   BeatFields,
-  BrowserField,
   BrowserFields,
   CursorType,
   EqlOptionsData,
