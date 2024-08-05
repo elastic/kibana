@@ -279,7 +279,7 @@ export const DiscoverTopNav = ({
         }
       />
       {isESQLToDataViewTransitionModalVisible && (
-        <ESQLToDataViewTransitionModal closeModal={onESQLToDataViewTransitionModalClose} />
+        <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
       )}
     </>
   );

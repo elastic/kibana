@@ -8,6 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import {
   EuiModal,
   EuiModalBody,
@@ -24,15 +25,13 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
-
 export interface ESQLToDataViewTransitionModalProps {
-  closeModal: (dismissFlag?: boolean, needsSave?: boolean) => void;
+  onClose: (dismissFlag?: boolean, needsSave?: boolean) => void;
 }
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function ESQLToDataViewTransitionModal({
-  closeModal,
+  onClose,
 }: ESQLToDataViewTransitionModalProps) {
   const [dismissModalChecked, setDismissModalChecked] = useState(false);
   const onTransitionModalDismiss = useCallback((e) => {
@@ -41,7 +40,7 @@ export default function ESQLToDataViewTransitionModal({
 
   return (
     <EuiModal
-      onClose={() => closeModal()}
+      onClose={() => onClose()}
       style={{ width: 700 }}
       data-test-subj="discover-esql-to-dataview-modal"
     >
@@ -94,7 +93,7 @@ export default function ESQLToDataViewTransitionModal({
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  onClick={() => closeModal(dismissModalChecked, false)}
+                  onClick={() => onClose(dismissModalChecked, false)}
                   color="danger"
                   iconType="trash"
                   data-test-subj="discover-esql-to-dataview-no-save-btn"
@@ -106,7 +105,7 @@ export default function ESQLToDataViewTransitionModal({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  onClick={() => closeModal(dismissModalChecked, true)}
+                  onClick={() => onClose(dismissModalChecked, true)}
                   fill
                   color="primary"
                   iconType="save"

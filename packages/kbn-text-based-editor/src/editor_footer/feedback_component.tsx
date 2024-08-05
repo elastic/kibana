@@ -10,8 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiIcon, useEuiTheme, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-
-const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
+import { FEEDBACK_LINK } from '@kbn/esql-utils';
 
 export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: boolean }) {
   const { euiTheme } = useEuiTheme();
@@ -27,12 +26,9 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
           >
             <EuiToolTip
               position="top"
-              content={i18n.translate(
-                'textBasedEditor.query.textBasedLanguagesEditor.submitFeedback',
-                {
-                  defaultMessage: 'Submit feedback',
-                }
-              )}
+              content={i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
+                defaultMessage: 'Feedback',
+              })}
             >
               <EuiIcon
                 type="editorComment"
@@ -62,13 +58,9 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
               `}
               data-test-subj="TextBasedLangEditor-feedback-link"
             >
-              {isSpaceReduced
-                ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
-                    defaultMessage: 'Feedback',
-                  })
-                : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
-                    defaultMessage: 'Submit feedback',
-                  })}
+              {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
+                defaultMessage: 'Submit feedback',
+              })}
             </EuiLink>
           </EuiFlexItem>
         </>
