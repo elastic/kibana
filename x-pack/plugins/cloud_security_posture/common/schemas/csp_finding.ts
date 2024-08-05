@@ -6,7 +6,7 @@
  */
 
 // TODO: this needs to be defined in a versioned schema
-import type { EcsEvent } from '@elastic/ecs';
+import type { EcsDataStream, EcsEvent } from '@elastic/ecs';
 import { CspBenchmarkRuleMetadata } from '../types/latest';
 
 export interface CspFinding {
@@ -19,6 +19,7 @@ export interface CspFinding {
   rule: CspBenchmarkRuleMetadata;
   host: CspFindingHost;
   event: EcsEvent;
+  data_stream: EcsDataStream;
   agent: CspFindingAgent;
   ecs: {
     version: string;
