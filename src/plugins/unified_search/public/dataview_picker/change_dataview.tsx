@@ -82,7 +82,7 @@ export function ChangeDataView({
     const fetchDataViews = async () => {
       const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
-        : await data.dataViews.getIdsWithTitle();
+        : (await data.dataViews.getIdsWithTitle()) ?? [];
       const adHocDataViewRefs: DataViewListItemEnhanced[] =
         adHocDataViews?.map(mapAdHocDataView) ?? [];
 
