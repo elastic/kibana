@@ -74,6 +74,7 @@ import {
   TiebreakerField,
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
+import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import {
   Threshold,
   ThresholdAlertSuppression,
@@ -223,6 +224,7 @@ export const EqlOptionalFields = z.object({
   tiebreaker_field: TiebreakerField.optional(),
   timestamp_field: TimestampField.optional(),
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
@@ -260,6 +262,7 @@ export const QueryRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
+  response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
@@ -310,6 +313,7 @@ export const SavedQueryRuleOptionalFields = z.object({
   index: IndexPatternArray.optional(),
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
+  response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
   query: RuleQuery.optional(),
 });
@@ -571,6 +575,7 @@ export const EsqlRuleRequiredFields = z.object({
 export type EsqlRuleOptionalFields = z.infer<typeof EsqlRuleOptionalFields>;
 export const EsqlRuleOptionalFields = z.object({
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;
