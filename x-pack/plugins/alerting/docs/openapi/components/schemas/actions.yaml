@@ -1,7 +1,6 @@
-type: 
-  - "array"
-  - "null"
+type: array
 default: []
+nullable: true
 items:
   type: object
   required:
@@ -38,8 +37,7 @@ items:
               description: Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.
               items:
                 type: integer
-              examples:
-                - [1,2,3,4,5]
+              example: [1,2,3,4,5]
             hours:
               type: object
               description: >
@@ -49,25 +47,21 @@ items:
                 end:
                   type: string
                   description: The end of the time frame in 24-hour notation (`hh:mm`).
-                  examples:
-                    - 17:00
+                  example: 17:00
                 start:
                   type: string
                   description: The start of the time frame in 24-hour notation (`hh:mm`).
-                  examples:
-                    - 08:00
+                  example: 08:00
             timezone:
               type: string
               description: >
                 The ISO time zone for the `hours` values.
                 Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.
-              examples:
-                - Europe/Madrid
+              example: Europe/Madrid
     connector_type_id:
       type: string
       description: The type of connector. This property appears in responses but cannot be set in requests.
-      examples:
-        - .server-log
+      example: .server-log
       readOnly: true
     frequency:
       type: object
@@ -93,13 +87,11 @@ items:
         The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered).
         Each rule type has a list of valid action group names.
         If you don't need to group actions, set to `default`.
-      examples:
-        - default
+      example: default
     id:
       type: string
       description: The identifier for the connector saved object.
-      examples:
-        - 9dca3e00-74f5-11ed-9801-35303b735aef
+      example: 9dca3e00-74f5-11ed-9801-35303b735aef
     params:
       type: object
       description: The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.
@@ -107,5 +99,4 @@ items:
     uuid:
       type: string
       description: A universally unique identifier (UUID) for the action.
-      examples:
-        - 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
+      example: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
