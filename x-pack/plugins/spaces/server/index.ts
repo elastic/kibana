@@ -33,6 +33,7 @@ export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     maxSpaces: true,
     allowFeatureVisibility: true,
+    allowSolutionVisibility: true,
   },
 };
 

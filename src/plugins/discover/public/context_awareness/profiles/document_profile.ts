@@ -17,7 +17,7 @@ export enum DocumentType {
   Default = 'default',
 }
 
-export type DocumentProfile = Omit<Profile, 'getCellRenderers'>;
+export type DocumentProfile = Pick<Profile, 'getDocViewer'>;
 
 export interface DocumentProfileProviderParams {
   rootContext: RootContext;

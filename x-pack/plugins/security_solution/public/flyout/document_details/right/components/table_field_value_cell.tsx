@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { getFieldFormat } from '../../../../common/components/event_details/get_field_format';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { OverflowField } from '../../../../common/components/tables/helpers';
@@ -30,7 +30,7 @@ export interface FieldValueCellProps {
   /**
    * Field retrieved from the BrowserField
    */
-  fieldFromBrowserField?: Partial<BrowserField>;
+  fieldFromBrowserField?: Partial<FieldSpec>;
   /**
    * Value of the link field if it exists. Allows to navigate to other pages like host, user, network...
    */
