@@ -224,7 +224,7 @@ export function getServiceColumns({
       name: (
         <ColumnHeader
           label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-            defaultMessage: 'Log error rate',
+            defaultMessage: 'Log error %',
           })}
           formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
           toolTip={
