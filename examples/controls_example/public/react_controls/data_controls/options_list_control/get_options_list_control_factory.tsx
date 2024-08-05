@@ -353,7 +353,9 @@ export const getOptionsListControlFactory = (
           } else {
             // select option
             if (existsSelected) selections.setExistsSelected(false);
-            selections.setSelectedOptions(selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]);
+            selections.setSelectedOptions(
+              selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]
+            );
           }
         },
       };
@@ -390,7 +392,7 @@ export const getOptionsListControlFactory = (
           return (
             <OptionsListControlContext.Provider
               value={{
-                stateManager: {...stateManager, selectedOptions: selections.selectedOptions$ },
+                stateManager: { ...stateManager, selectedOptions: selections.selectedOptions$ },
                 api: componentApi,
                 displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
               }}

@@ -24,12 +24,12 @@ export function initializeOptionsListSelections(
     b: OptionsListSelection[] | undefined
   ) => deepEqual(a ?? [], b ?? []);
   function setSelectedOptions(next: OptionsListSelection[] | undefined) {
-    if (selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
+    if (!selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
       selectedOptions$.next(next);
       onSelectionChange();
     }
   }
-  
+
   const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
   function setExistsSelected(next: boolean | undefined) {
     if (existsSelected$.value !== next) {

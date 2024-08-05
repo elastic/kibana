@@ -60,7 +60,7 @@ export const OptionsListControl = ({
     api.panelTitle,
     api.fieldFormatter
   );
-  
+
   const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
