@@ -11,6 +11,8 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -19,7 +21,6 @@ import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { findingsTableFieldLabels } from './findings_table_field_labels';
@@ -30,42 +31,26 @@ interface LatestFindingsTableProps {
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
 }
+
 /**
  * Type Guard for checking if the given source is a CspFinding
  */
 const isCspFinding = (source: Record<string, any> | undefined): source is CspFinding => {
-  return source?.result?.evaluation !== undefined;
+  return source?.data_stream?.dataset !== undefined;
 };
 
-const getCspFinding = (source: Record<string, any> | undefined): CspFinding | false => {
-  return isCspFinding(source) && (source as CspFinding);
-};
-
-/**
- * This Wrapper component renders the children if the given row is a CspFinding
- * it uses React's Render Props pattern
- */
-const CspFindingRenderer = ({
-  row,
-  children,
-}: {
-  row: DataTableRecord;
-  children: ({ finding }: { finding: CspFinding }) => JSX.Element;
-}) => {
-  const finding = getCspFinding(row.raw._source);
-  if (!finding) return <></>;
-  return children({ finding });
+const getCspFinding = (source: Record<string, any> | undefined): CspFinding | undefined => {
+  if (isCspFinding(source)) return source as CspFinding;
 };
 
 /**
  * Flyout component for the latest findings table
  */
 const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-  return (
-    <CspFindingRenderer row={row}>
-      {({ finding }) => <FindingsRuleFlyout findings={finding} onClose={onCloseFlyout} />}
-    </CspFindingRenderer>
-  );
+  const finding = row.raw._source;
+  if (!finding || !isCspFinding(finding)) return <></>;
+
+  return <FindingsRuleFlyout finding={finding} onClose={onCloseFlyout} />;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
@@ -73,16 +58,23 @@ const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabe
 });
 
 const customCellRenderer = (rows: DataTableRecord[]) => ({
-  'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => <CspEvaluationBadge type={finding.result.evaluation} />}
-    </CspFindingRenderer>
-  ),
-  '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => <TimestampTableCell timestamp={finding['@timestamp']} />}
-    </CspFindingRenderer>
-  ),
+  'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const finding = getCspFinding(rows[rowIndex].raw._source);
+
+    return <CspEvaluationBadge type={finding?.result?.evaluation} />;
+  },
+  'data_stream.dataset': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const finding = getCspFinding(rows[rowIndex].raw._source);
+    const source = getDatasetDisplayName(finding?.data_stream?.dataset);
+
+    return <>{source || finding?.data_stream?.dataset || ''}</>;
+  },
+  '@timestamp': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const finding = getCspFinding(rows[rowIndex].raw._source);
+    if (!finding?.['@timestamp']) return <></>;
+
+    return <TimestampTableCell timestamp={finding['@timestamp']} />;
+  },
 });
 
 export const LatestFindingsTable = ({

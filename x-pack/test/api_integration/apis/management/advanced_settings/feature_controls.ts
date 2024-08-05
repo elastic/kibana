@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
 import { CSV_QUOTE_VALUES_SETTING } from '@kbn/share-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -16,7 +15,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { retryRequestIfConflicts } from './utils';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
-  const supertest: SuperTest<any> = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const security = getService('security');
   const spaces = getService('spaces');
@@ -58,7 +57,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     const sendRequest = async () =>
-      await supertest
+      await supertestWithoutAuth
         .post(`${basePath}/internal/kibana/settings`)
         .auth(username, password)
         .set('kbn-xsrf', 'foo')
@@ -73,7 +72,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     const sendRequest = async () =>
-      await supertest
+      await supertestWithoutAuth
         .post(`${basePath}/internal/telemetry/optIn`)
         .auth(username, password)
         .set('kbn-xsrf', 'foo')

@@ -75,6 +75,7 @@ export const merge = async ({
     splitDocumentsByVersion: false,
     skipServers: Boolean(prototypeDocument?.servers),
     skipSecurity: Boolean(prototypeDocument?.security),
+    addTags: prototypeDocument?.tags,
   });
   // Only one document is expected when `splitDocumentsByVersion` is set to `false`
   const mergedDocument = Array.from(resultDocumentsMap.values())[0];

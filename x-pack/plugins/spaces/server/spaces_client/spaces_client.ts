@@ -136,6 +136,12 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
+    if (Boolean(space.solution) && !this.config.allowSolutionVisibility) {
+      throw Boom.badRequest(
+        'Unable to create Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
+      );
+    }
+
     if (this.isServerless && space.hasOwnProperty('solution')) {
       throw Boom.badRequest('Unable to create Space, solution property is forbidden in serverless');
     }
@@ -160,6 +166,12 @@ export class SpacesClient implements ISpacesClient {
     if (space.disabledFeatures.length > 0 && !this.config.allowFeatureVisibility) {
       throw Boom.badRequest(
         'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled'
+      );
+    }
+
+    if (Boolean(space.solution) && !this.config.allowSolutionVisibility) {
+      throw Boom.badRequest(
+        'Unable to update Space, the solution property can not be set when xpack.spaces.allowSolutionVisibility setting is disabled'
       );
     }
 
