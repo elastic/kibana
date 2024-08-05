@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const inferenceEndpoints = [
   {
-    inference_id: 'my-elser-model-05',
+    model_id: 'my-elser-model-05',
     task_type: 'sparse_embedding',
     service: 'elser',
     service_settings: {
@@ -26,7 +26,7 @@ const inferenceEndpoints = [
     task_settings: {},
   },
   {
-    inference_id: 'my-elser-model-04',
+    model_id: 'my-elser-model-04',
     task_type: 'sparse_embedding',
     service: 'elser',
     service_settings: {

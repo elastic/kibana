@@ -20,7 +20,6 @@
       "management",
       "usageCollection",
       "cloud",
-      "cloudExperiments"
     ],
     "requiredBundles": [
       "esUiShared",
