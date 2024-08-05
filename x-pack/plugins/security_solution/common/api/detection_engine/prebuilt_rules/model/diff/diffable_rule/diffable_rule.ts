@@ -100,21 +100,21 @@ export type DiffableCustomQueryFields = z.infer<typeof DiffableCustomQueryFields
 export const DiffableCustomQueryFields = z.object({
   type: z.literal('query'),
   kql_query: RuleKqlQuery, // NOTE: new field
-  data_source: RuleDataSource.optional(), // NOTE: new field
+  data_source: RuleDataSource, // NOTE: new field
 });
 
 export type DiffableSavedQueryFields = z.infer<typeof DiffableSavedQueryFields>;
 export const DiffableSavedQueryFields = z.object({
   type: z.literal('saved_query'),
   kql_query: RuleKqlQuery, // NOTE: new field
-  data_source: RuleDataSource.optional(), // NOTE: new field
+  data_source: RuleDataSource, // NOTE: new field
 });
 
 export type DiffableEqlFields = z.infer<typeof DiffableEqlFields>;
 export const DiffableEqlFields = z.object({
   type: z.literal('eql'),
   eql_query: RuleEqlQuery, // NOTE: new field
-  data_source: RuleDataSource.optional(), // NOTE: new field
+  data_source: RuleDataSource, // NOTE: new field
   event_category_override: EventCategoryOverride.optional(),
   timestamp_field: TimestampField.optional(),
   tiebreaker_field: TiebreakerField.optional(),
@@ -135,7 +135,7 @@ export const DiffableThreatMatchFields = z.object({
   threat_query: InlineKqlQuery, // NOTE: new field
   threat_index: ThreatIndex,
   threat_mapping: ThreatMapping,
-  data_source: RuleDataSource.optional(), // NOTE: new field
+  data_source: RuleDataSource, // NOTE: new field
   threat_indicator_path: ThreatIndicatorPath.optional(),
   concurrent_searches: ConcurrentSearches.optional(),
   items_per_search: ItemsPerSearch.optional(),
@@ -146,7 +146,7 @@ export const DiffableThresholdFields = z.object({
   type: z.literal('threshold'),
   kql_query: RuleKqlQuery, // NOTE: new field
   threshold: Threshold,
-  data_source: RuleDataSource.optional(), // NOTE: new field
+  data_source: RuleDataSource, // NOTE: new field
 });
 
 export type DiffableMachineLearningFields = z.infer<typeof DiffableMachineLearningFields>;
@@ -162,7 +162,7 @@ export const DiffableNewTermsFields = z.object({
   kql_query: InlineKqlQuery, // NOTE: new field
   new_terms_fields: NewTermsFields,
   history_window_start: HistoryWindowStart,
-  data_source: RuleDataSource.optional(), // NOTE: new field
+  data_source: RuleDataSource, // NOTE: new field
 });
 
 /**

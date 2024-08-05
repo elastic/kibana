@@ -151,7 +151,7 @@ export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolea
   );
 };
 
-const isIndexPatternDataSourceType = (
+export const isIndexPatternDataSourceType = (
   version: RuleDataSource | undefined
 ): version is Extract<RuleDataSource, { type: DataSourceType.index_patterns }> =>
   version !== undefined && version.type === DataSourceType.index_patterns;
