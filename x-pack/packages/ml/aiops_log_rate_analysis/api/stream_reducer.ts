@@ -15,14 +15,20 @@ import type {
   SignificantItemGroupHistogram,
 } from '@kbn/ml-agg-utils';
 
+import type { WindowParameters } from '../window_parameters';
+import type { LogRateAnalysisType } from '../log_rate_analysis_type';
+
 export interface StreamState {
   ccsWarning: boolean;
+  currentAnalysisType?: LogRateAnalysisType;
+  currentAnalysisWindowParameters?: WindowParameters;
   significantItems: SignificantItem[];
   significantItemsGroups: SignificantItemGroup[];
   errors: string[];
   loaded: number;
   loadingState: string;
-  remainingFieldCandidates?: string[];
+  remainingKeywordFieldCandidates?: string[];
+  remainingTextFieldCandidates?: string[];
   groupsMissing?: boolean;
   zeroDocsFallback: boolean;
 }
@@ -80,14 +86,20 @@ export const logRateAnalysisResultsSlice = createSlice({
     resetGroups: (state) => {
       state.significantItemsGroups = [];
     },
-    resetAll: () => getDefaultState(),
+    // Reset the results but keep the current analysis type and window parameters.
+    resetResults: (state) => ({
+      ...getDefaultState(),
+      currentAnalysisType: state.currentAnalysisType,
+      currentAnalysisWindowParameters: state.currentAnalysisWindowParameters,
+    }),
     updateLoadingState: (
       state,
       action: PayloadAction<{
         ccsWarning: boolean;
         loaded: number;
         loadingState: string;
-        remainingFieldCandidates?: string[];
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
         groupsMissing?: boolean;
       }>
     ) => {
@@ -95,6 +107,15 @@ export const logRateAnalysisResultsSlice = createSlice({
     },
     setZeroDocsFallback: (state, action: PayloadAction<boolean>) => {
       state.zeroDocsFallback = action.payload;
+    },
+    setCurrentAnalysisType: (state, action: PayloadAction<LogRateAnalysisType | undefined>) => {
+      state.currentAnalysisType = action.payload;
+    },
+    setCurrentAnalysisWindowParameters: (
+      state,
+      action: PayloadAction<WindowParameters | undefined>
+    ) => {
+      state.currentAnalysisWindowParameters = action.payload;
     },
   },
 });
@@ -113,9 +134,11 @@ export const {
   addSignificantItemsGroupHistogram,
   addSignificantItemsHistogram,
   ping,
-  resetAll,
+  resetResults,
   resetErrors,
   resetGroups,
+  setCurrentAnalysisType,
+  setCurrentAnalysisWindowParameters,
   setZeroDocsFallback,
   updateLoadingState,
 } = logRateAnalysisResultsSlice.actions;

@@ -50,6 +50,10 @@ export const resourceNames = {
   },
 };
 
+export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
+
+export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
+
 type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
   | {
       text: string;

@@ -22,8 +22,10 @@ export type {
   ESQLSource,
   ESQLColumn,
   ESQLLiteral,
+  ESQLParamLiteral,
   AstProviderFn,
   EditorError,
+  ESQLAstNode,
 } from './src/types';
 
 // Low level functions to parse grammar

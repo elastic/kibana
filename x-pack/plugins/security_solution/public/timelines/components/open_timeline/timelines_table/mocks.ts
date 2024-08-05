@@ -33,4 +33,5 @@ export const getMockTimelinesTableProps = (
   sortField: DEFAULT_SORT_FIELD,
   timelineType: TimelineType.default,
   totalSearchResultsCount: mockOpenTimelineResults.length,
+  tableRef: { current: null },
 });

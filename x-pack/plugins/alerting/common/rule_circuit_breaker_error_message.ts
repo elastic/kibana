@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-const errorMessageHeader = 'Error validating circuit breaker';
+import { errorMessageHeader } from '@kbn/alerting-types';
 
 const getCreateRuleErrorSummary = (name: string) => {
   return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.createSummary', {

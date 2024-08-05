@@ -11,6 +11,5 @@
  * - display the experimental component instead of the stable one
  * - use experimental data views hook instead of the stable one
  */
-export const IS_EXPERIMENTAL_SOURCERER_ENABLED = !!window.localStorage.getItem(
-  'EXPERIMENTAL_SOURCERER_ENABLED'
-);
+export const isExperimentalSourcererEnabled = () =>
+  !!window.localStorage.getItem('EXPERIMENTAL_SOURCERER_ENABLED');

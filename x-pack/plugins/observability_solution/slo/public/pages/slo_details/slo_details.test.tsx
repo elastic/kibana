@@ -33,6 +33,7 @@ import { usePermissions } from '../../hooks/use_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -49,9 +50,9 @@ jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('../../hooks/use_delete_slo_instance');
+jest.mock('@kbn/ebt-tools');
 
 const useKibanaMock = useKibana as jest.Mock;
-
 const useLicenseMock = useLicense as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
@@ -61,8 +62,10 @@ const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useCreateDataViewsMock = useCreateDataView as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
-TagsListMock.mockReturnValue(<div>Tags list</div>);
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+TagsListMock.mockReturnValue(<div>Tags list</div>);
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 

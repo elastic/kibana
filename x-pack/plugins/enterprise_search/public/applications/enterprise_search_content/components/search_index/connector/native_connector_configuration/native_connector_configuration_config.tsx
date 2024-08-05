@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -62,32 +62,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
       subscriptionLink={docLinks.licenseManagement}
       stackManagementLink={http.basePath.prepend('/app/management/stack/license_management')}
     >
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
-          {
-            defaultMessage:
-              'Encryption for data source credentials is unavailable in this version. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
-          }
-        )}
-      </EuiText>
-      <EuiSpacer />
       <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            data-test-subj="entSearchContent-connector-nativeConnector-learnMoreAboutSecurityLink"
-            data-telemetry-id="entSearchContent-connector-nativeConnector-learnMoreAboutSecurityLink"
-            href={docLinks.elasticsearchSecureCluster}
-            target="_blank"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.securityDocumentationLinkLabel',
-              {
-                defaultMessage: 'Learn more about Elasticsearch security',
-              }
-            )}
-          </EuiLink>
-        </EuiFlexItem>
         {nativeConnector.externalAuthDocsUrl && (
           <EuiFlexItem grow={false}>
             <EuiLink

@@ -6,7 +6,8 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
@@ -46,6 +47,7 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
+import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -58,7 +60,6 @@ export const mockSourcererState: SourcererState = {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
-    indexFields: mockIndexFields as FieldSpec[],
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
@@ -69,7 +70,19 @@ export const mockSourcererState: SourcererState = {
 
 export const mockGlobalState: State = {
   app: {
-    notesById: {},
+    notesById: {
+      '1': {
+        created: new Date('2024-07-02T08:32:29.233Z'),
+        id: '1',
+        lastEdit: new Date('2024-07-02T08:32:29.233Z'),
+        note: 'New Note',
+        user: 'elastic',
+        saveObjectId: 'c1a44f63-eb20-4c65-a050-eb9e842d8492',
+        version: 'WzIyNDUsMV0=',
+        eventId: '1',
+        timelineId: 'some-timeline-id',
+      },
+    },
     errors: [
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
@@ -321,6 +334,7 @@ export const mockGlobalState: State = {
     timelineById: {
       [TimelineId.test]: {
         activeTab: TimelineTabs.query,
+        createdBy: 'elastic',
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
@@ -339,9 +353,8 @@ export const mockGlobalState: State = {
           tiebreakerField: '',
           timestampField: '@timestamp',
         },
-        eventIdToNoteIds: {},
+        eventIdToNoteIds: { '1': ['1'] },
         excludedRowRendererIds: [],
-        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -395,7 +408,6 @@ export const mockGlobalState: State = {
         defaultColumns: defaultHeaders,
         dataViewId: 'security-solution-default',
         deletedEventIds: [],
-        expandedDetail: {},
         filters: [],
         indexNames: ['.alerts-security.alerts-default'],
         isSelectAllChecked: false,
@@ -500,4 +512,46 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
+  dataViewPicker: dataViewPickerInitialState,
+  notes: {
+    entities: {
+      '1': {
+        eventId: '1', // should be a valid id based on mockTimelineData
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      },
+    },
+    ids: ['1'],
+    status: {
+      fetchNotesByDocumentIds: ReqStatus.Idle,
+      createNote: ReqStatus.Idle,
+      deleteNotes: ReqStatus.Idle,
+      fetchNotes: ReqStatus.Idle,
+    },
+    error: {
+      fetchNotesByDocumentIds: null,
+      createNote: null,
+      deleteNotes: null,
+      fetchNotes: null,
+    },
+    pagination: {
+      page: 1,
+      perPage: 10,
+      total: 0,
+    },
+    sort: {
+      field: 'created' as const,
+      direction: 'desc' as const,
+    },
+    filter: '',
+    search: '',
+    selectedIds: [],
+    pendingDeleteIds: [],
+  },
 };

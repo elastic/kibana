@@ -8,7 +8,11 @@ paths:
       x-labels: [serverless, ess]
       operationId: ManageAlertTags
       x-codegen-enabled: true
-      summary: Manage alert tags for a one or more alerts
+      summary: Add and remove detection alert tags
+      description: |
+        And tags to detection alerts, and remove them from alerts.
+        > info
+        > You cannot add and remove the same alert tag in the same request.
       tags:
         - Alerts API
       requestBody:

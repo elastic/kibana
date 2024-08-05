@@ -61,6 +61,6 @@ export const createSLoLabel = i18n.translate('xpack.observabilityLogsExplorer.cr
 export const datasetQualityLinkTitle = i18n.translate(
   'xpack.observabilityLogsExplorer.datasetQualityLinkTitle',
   {
-    defaultMessage: 'Datasets',
+    defaultMessage: 'Data sets',
   }
 );

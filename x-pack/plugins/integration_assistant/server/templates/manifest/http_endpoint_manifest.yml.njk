@@ -1,7 +1,9 @@
 - input: http_endpoint
   template_path: http_endpoint.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: listen_address
       type: text

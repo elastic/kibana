@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import type {
+  AuthenticatedUser,
+  KibanaRequest,
+  Logger,
+  RequestHandlerContext,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 

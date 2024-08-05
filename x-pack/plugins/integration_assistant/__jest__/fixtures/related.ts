@@ -163,7 +163,7 @@ export const relatedTestState = {
   ecs: 'testtypes',
   exAnswer: 'testanswer',
   packageName: 'testpackage',
-  dataStreamName: 'testdatastream',
+  dataStreamName: 'testDataStream',
   errors: { test: 'testerror' },
   pipelineResults: [{ test: 'testresult' }],
   finalized: false,

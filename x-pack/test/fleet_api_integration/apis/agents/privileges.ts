@@ -10,11 +10,17 @@ import {
   AGENTS_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
+import {
+  FILE_STORAGE_DATA_AGENT_INDEX,
+  FILE_STORAGE_METADATA_AGENT_INDEX,
+} from '@kbn/fleet-plugin/server/constants';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { generateAgent } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
 import { testUsers } from '../test_users';
+
+const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -177,6 +183,66 @@ export default function (providerContext: FtrProviderContext) {
       });
     };
 
+    const createFileBeforeEach = async () => {
+      await es.index(
+        {
+          id: 'file1.0',
+          refresh: 'wait_for',
+          op_type: 'create',
+          index: FILE_STORAGE_DATA_AGENT_INDEX,
+          document: {
+            bid: 'file1',
+            '@timestamp': new Date().toISOString(),
+            last: true,
+            data: 'test',
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+
+      await es.index(
+        {
+          index: FILE_STORAGE_METADATA_AGENT_INDEX,
+          id: 'file1',
+          refresh: true,
+          op_type: 'create',
+          body: {
+            '@timestamp': new Date().toISOString(),
+            upload_id: 'file1',
+            action_id: `fleet_uploads_test-file1-action`,
+            agent_id: 'agent1',
+            file: {
+              ChunkSize: 4194304,
+              extension: 'zip',
+              hash: {},
+              mime_type: 'application/zip',
+              mode: '0644',
+              name: `elastic-agent-diagnostics-file-name.zip`,
+              path: `/agent/elastic-agent-diagnostics-file-name.zip`,
+              size: 24917,
+              Status: 'READY',
+              type: 'file',
+            },
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+    };
+
+    const deleteFileAfterEach = async () => {
+      await es.deleteByQuery(
+        {
+          index: `${FILE_STORAGE_DATA_AGENT_INDEX},${FILE_STORAGE_METADATA_AGENT_INDEX}`,
+          refresh: true,
+          ignore_unavailable: true,
+          query: {
+            match_all: {},
+          },
+        },
+        ES_INDEX_OPTIONS
+      );
+    };
+
     const ROUTES = [
       // READ scenarios
       {
@@ -203,6 +269,13 @@ export default function (providerContext: FtrProviderContext) {
         method: 'POST',
         path: '/api/fleet/agents/agent1/request_diagnostics',
         scenarios: READ_SCENARIOS,
+      },
+      {
+        method: 'GET',
+        path: '/api/fleet/agents/files/file1/elastic-agent-diagnostics-file-name.zip',
+        scenarios: READ_SCENARIOS,
+        beforeEach: createFileBeforeEach,
+        afterEach: deleteFileAfterEach,
       },
 
       // ALL scenarios
@@ -237,6 +310,13 @@ export default function (providerContext: FtrProviderContext) {
         scenarios: ALL_SCENARIOS,
         beforeEach: updateAgentBeforeEach,
         afterEach: updateAgentAfterEach,
+      },
+      {
+        method: 'DELETE',
+        path: '/api/fleet/agents/files/file1',
+        scenarios: ALL_SCENARIOS,
+        beforeEach: createFileBeforeEach,
+        afterEach: deleteFileAfterEach,
       },
     ];
     before(async () => {

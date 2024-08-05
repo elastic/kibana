@@ -55,6 +55,7 @@ export const saveTemplate = async ({
       body: {
         index_patterns,
         version,
+        // @ts-expect-error Types of property auto_expand_replicas are incompatible.
         settings,
         mappings,
         aliases,

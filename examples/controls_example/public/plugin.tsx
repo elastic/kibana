@@ -17,7 +17,10 @@ import { PLUGIN_ID } from './constants';
 import img from './control_group_image.png';
 import { EditControlAction } from './react_controls/actions/edit_control_action';
 import { registerControlFactory } from './react_controls/control_factory_registry';
+import { OPTIONS_LIST_CONTROL_TYPE } from './react_controls/data_controls/options_list_control/constants';
+import { RANGE_SLIDER_CONTROL_TYPE } from './react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from './react_controls/data_controls/search_control/types';
+import { TIMESLIDER_CONTROL_TYPE } from './react_controls/timeslider_control/types';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -48,6 +51,20 @@ export class ControlsExamplePlugin
       });
     });
 
+    registerControlFactory(OPTIONS_LIST_CONTROL_TYPE, async () => {
+      const [{ getOptionsListControlFactory }, [coreStart, depsStart]] = await Promise.all([
+        import(
+          './react_controls/data_controls/options_list_control/get_options_list_control_factory'
+        ),
+        core.getStartServices(),
+      ]);
+      return getOptionsListControlFactory({
+        core: coreStart,
+        data: depsStart.data,
+        dataViews: depsStart.data.dataViews,
+      });
+    });
+
     registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
       const [{ getSearchControlFactory: getSearchEmbeddableFactory }, [coreStart, depsStart]] =
         await Promise.all([
@@ -57,7 +74,32 @@ export class ControlsExamplePlugin
 
       return getSearchEmbeddableFactory({
         core: coreStart,
-        dataViewsService: depsStart.data.dataViews,
+        data: depsStart.data,
+        dataViews: depsStart.data.dataViews,
+      });
+    });
+
+    registerControlFactory(RANGE_SLIDER_CONTROL_TYPE, async () => {
+      const [{ getRangesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
+        import('./react_controls/data_controls/range_slider/get_range_slider_control_factory'),
+        core.getStartServices(),
+      ]);
+
+      return getRangesliderControlFactory({
+        core: coreStart,
+        data: depsStart.data,
+        dataViews: depsStart.data.dataViews,
+      });
+    });
+
+    registerControlFactory(TIMESLIDER_CONTROL_TYPE, async () => {
+      const [{ getTimesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
+        import('./react_controls/timeslider_control/get_timeslider_control_factory'),
+        core.getStartServices(),
+      ]);
+      return getTimesliderControlFactory({
+        core: coreStart,
+        data: depsStart.data,
       });
     });
 

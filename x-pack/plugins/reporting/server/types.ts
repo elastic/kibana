@@ -9,7 +9,7 @@ import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-cont
 import { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
@@ -21,11 +21,7 @@ import type {
   PngScreenshotOptions as BasePngScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -34,6 +30,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**
  * Plugin Setup Contract
@@ -70,7 +67,6 @@ export interface ReportingStartDeps {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

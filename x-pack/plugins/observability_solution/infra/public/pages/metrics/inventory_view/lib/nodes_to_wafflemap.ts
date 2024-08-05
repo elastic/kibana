@@ -12,7 +12,7 @@ import {
   InfraWaffleMapGroupOfGroups,
   InfraWaffleMapGroupOfNodes,
   InfraWaffleMapNode,
-} from '../../../../lib/lib';
+} from '../../../../common/inventory/types';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 import { SnapshotNodePath, SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 

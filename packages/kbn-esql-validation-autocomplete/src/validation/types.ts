@@ -18,6 +18,10 @@ export interface ESQLVariable {
 export interface ESQLRealField {
   name: string;
   type: string;
+  metadata?: {
+    description?: string;
+    type?: string;
+  };
 }
 
 export interface ESQLPolicy {
@@ -166,6 +170,26 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
+  };
+  noAggFunction: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  expressionNotAggClosed: {
+    message: string;
+    type: {
+      commandName: string;
+      expression: string;
+    };
+  };
+  aggInAggFunction: {
+    message: string;
+    type: {
+      nestedAgg: string;
+    };
   };
 }
 

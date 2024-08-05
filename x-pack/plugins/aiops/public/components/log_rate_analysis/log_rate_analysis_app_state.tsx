@@ -38,6 +38,8 @@ export interface LogRateAnalysisAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Optional flag to indicate whether to show contextual insights */
+  showContextualInsights?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
 }
@@ -46,6 +48,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  showContextualInsights = false,
   showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
@@ -69,7 +72,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
           <LogRateAnalysisReduxProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisPage />
+                <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </LogRateAnalysisReduxProvider>

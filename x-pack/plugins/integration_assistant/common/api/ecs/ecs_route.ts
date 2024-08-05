@@ -9,7 +9,8 @@ import { z } from 'zod';
 
 import {
   Connector,
-  DatastreamName,
+  DataStreamName,
+  LangSmithOptions,
   Mapping,
   PackageName,
   RawSamples,
@@ -19,10 +20,11 @@ import { EcsMappingAPIResponse } from '../model/response_schemas';
 export type EcsMappingRequestBody = z.infer<typeof EcsMappingRequestBody>;
 export const EcsMappingRequestBody = z.object({
   packageName: PackageName,
-  datastreamName: DatastreamName,
+  dataStreamName: DataStreamName,
   rawSamples: RawSamples,
   mapping: Mapping.optional(),
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type EcsMappingRequestBodyInput = z.input<typeof EcsMappingRequestBody>;
 

@@ -33,7 +33,7 @@ export async function getRelevantFieldNames({
   messages: Message[];
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
-}): Promise<{ fields: string[] }> {
+}): Promise<{ fields: string[]; stats: { analyzed: number; total: number } }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
 
   const hasAnyHitsResponse = await esClient.search({
@@ -89,8 +89,13 @@ export async function getRelevantFieldNames({
 
   const shortIdTable = new ShortIdTable();
 
+  const MAX_CHUNKS = 5;
+  const FIELD_NAMES_PER_CHUNK = 250;
+
+  const fieldNamesToAnalyze = fieldNames.slice(0, MAX_CHUNKS * FIELD_NAMES_PER_CHUNK);
+
   const relevantFields = await Promise.all(
-    chunk(fieldNames, 250).map(async (fieldsInChunk) => {
+    chunk(fieldNamesToAnalyze, FIELD_NAMES_PER_CHUNK).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
         await chat('get_relevant_dataset_names', {
           signal,
@@ -165,5 +170,8 @@ export async function getRelevantFieldNames({
     })
   );
 
-  return { fields: relevantFields.flat() };
+  return {
+    fields: relevantFields.flat(),
+    stats: { analyzed: fieldNamesToAnalyze.length, total: fieldNames.length },
+  };
 }

@@ -164,8 +164,7 @@ const InvestigationFieldsFormComponent = ({
           >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.setInvestigationFieldsWarningCallout"
-              defaultMessage="You’re about to overwrite custom highlighted fields for {rulesCount, plural, one {# selected rule} other {# selected rules}}, press Save to
-              apply changes."
+              defaultMessage="You’re about to overwrite custom highlighted fields for the {rulesCount, plural, one {# rule} other {# rules}} you selected. To apply and save the changes, click Save."
               values={{ rulesCount }}
             />
           </EuiCallOut>

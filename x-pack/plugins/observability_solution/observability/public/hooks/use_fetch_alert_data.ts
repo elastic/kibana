@@ -63,7 +63,7 @@ const getAlertsGroupedById = (
   return data.hits.hits.reduce(
     (acc, { _id, _index, _source }) => ({
       ...acc,
-      [_id]: {
+      [_id!]: {
         _id,
         _index,
         ..._source,

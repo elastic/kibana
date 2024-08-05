@@ -1,7 +1,9 @@
 - input: kafka
   template_path: kafka.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: hosts
       type: text

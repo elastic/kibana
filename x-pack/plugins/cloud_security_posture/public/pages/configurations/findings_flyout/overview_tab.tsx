@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
@@ -21,6 +20,7 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { getDatasetDisplayName } from '../../../common/utils/get_dataset_display_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -31,26 +31,31 @@ import {
 import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
+import {
+  BenchmarkIcons,
+  CodeBlock,
+  CspFlyoutMarkdown,
+  EMPTY_VALUE,
+  RuleNameLink,
+} from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexLink?: string) => [
+const getDetailsList = (
+  data: CspFinding,
+  ruleFlyoutLink?: string,
+  discoverDataViewLink?: string
+) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: (
-      <EuiToolTip
-        position="top"
-        content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
-          defaultMessage: 'Manage Rule',
-        })}
-      >
-        <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
-      </EuiToolTip>
+    description: data.rule?.name ? (
+      <RuleNameLink ruleFlyoutLink={ruleFlyoutLink} ruleName={data.rule.name} />
+    ) : (
+      EMPTY_VALUE
     ),
   },
   {
@@ -63,43 +68,57 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {
       defaultMessage: 'Rule Tags',
     }),
-    description: (
+    description: data.rule?.tags?.length ? (
       <>
         {data.rule.tags.map((tag) => (
           <EuiBadge key={tag}>{tag}</EuiBadge>
         ))}
       </>
+    ) : (
+      EMPTY_VALUE
     ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
       defaultMessage: 'Evaluated at',
     }),
-    description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
+    description: data['@timestamp']
+      ? moment(data['@timestamp']).format(CSP_MOMENT_FORMAT)
+      : EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
       defaultMessage: 'Framework Sources',
     }),
-    description: (
-      <CisKubernetesIcons
-        benchmarkId={data.rule.benchmark.id}
-        benchmarkName={data.rule.benchmark.name}
-      />
-    ),
+    description:
+      data.rule?.benchmark?.id && data.rule?.benchmark?.name ? (
+        <BenchmarkIcons
+          benchmarkId={data.rule?.benchmark?.id}
+          benchmarkName={data.rule?.benchmark?.name}
+        />
+      ) : (
+        EMPTY_VALUE
+      ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
-      defaultMessage: 'CIS Section',
+      defaultMessage: 'Framework Section',
     }),
-    description: data.rule.section,
+    description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.sourceTitle', {
+      defaultMessage: 'Source',
+    }),
+    description:
+      getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
       defaultMessage: 'Index',
     }),
-    description: discoverIndexLink ? (
-      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+    description: discoverDataViewLink ? (
+      <EuiLink href={discoverDataViewLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
     ) : (
       LATEST_FINDINGS_INDEX_DEFAULT_NS
     ),
@@ -109,33 +128,37 @@ const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexL
 export const getRemediationList = (rule: CspFinding['rule']) => [
   {
     title: '',
-    description: <CspFlyoutMarkdown>{rule.remediation}</CspFlyoutMarkdown>,
+    description: rule?.remediation ? (
+      <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
   },
-  ...(rule.impact
-    ? [
-        {
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
-            defaultMessage: 'Impact',
-          }),
-          description: <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown>,
-        },
-      ]
-    : []),
-  ...(rule.default_value
-    ? [
-        {
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
-            defaultMessage: 'Default Value',
-          }),
-          description: <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>,
-        },
-      ]
-    : []),
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
+      defaultMessage: 'Impact',
+    }),
+    description: rule?.impact ? <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown> : EMPTY_VALUE,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
+      defaultMessage: 'Default Value',
+    }),
+    description: rule?.default_value ? (
+      <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
+  },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
       defaultMessage: 'Rationale',
     }),
-    description: <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown>,
+    description: rule?.rationale ? (
+      <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
   },
 ];
 
@@ -152,7 +175,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">{JSON.stringify(result.evidence, null, 2)}</CodeBlock>
+          <CodeBlock language="json">{JSON.stringify(result?.evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
@@ -163,20 +186,36 @@ export const OverviewTab = ({
   ruleFlyoutLink,
 }: {
   data: CspFinding;
-  ruleFlyoutLink: string;
+  ruleFlyoutLink?: string;
 }) => {
   const { discover } = useKibana().services;
   const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
-  const discoverIndexLink = useMemo(
+  // link will navigate to our dataview in discover, filtered by the data source of the finding
+  const discoverDataViewLink = useMemo(
     () =>
       discover.locator?.getRedirectUrl({
-        indexPatternId: latestFindingsDataView.data?.id,
+        dataViewId: latestFindingsDataView.data?.id,
+        ...(data.data_stream?.dataset && {
+          filters: [
+            {
+              meta: {
+                type: 'phrase',
+                key: 'data_stream.dataset',
+              },
+              query: {
+                match_phrase: {
+                  'data_stream.dataset': data.data_stream.dataset,
+                },
+              },
+            },
+          ],
+        }),
       }),
-    [discover.locator, latestFindingsDataView.data?.id]
+    [data.data_stream?.dataset, discover.locator, latestFindingsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result.evidence);
+  const hasEvidence = !isEmpty(data.result?.evidence);
 
   const accordions: Accordion[] = useMemo(
     () =>
@@ -187,7 +226,7 @@ export const OverviewTab = ({
             defaultMessage: 'Details',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, ruleFlyoutLink, discoverIndexLink),
+          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink),
         },
         {
           initialIsOpen: true,
@@ -208,7 +247,7 @@ export const OverviewTab = ({
             listItems: getEvidenceList(data),
           },
       ].filter(truthy),
-    [data, discoverIndexLink, hasEvidence, ruleFlyoutLink]
+    [data, discoverDataViewLink, hasEvidence, ruleFlyoutLink]
   );
 
   return (

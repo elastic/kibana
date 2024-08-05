@@ -34,3 +34,18 @@ export const getConnectorTemplate = ({
     host: "${host || 'http://localhost:9200'}"
     api_key: "${apiKeyData?.encoded || ''}"
 `;
+
+export const getRunFromDockerSnippet = ({ version }: { version: string }) => dedent`
+docker run \\
+
+    -v "</absolute/path/to>/connectors-config:/config" \ # NOTE: change absolute path to match where config.yml is located on your machine
+    --tty \\
+
+    --rm \\
+
+    docker.elastic.co/enterprise-search/elastic-connectors:${version} \\
+
+    /app/bin/elastic-ingest \\
+
+    -c /config/config.yml # Path to your configuration file in the container
+`;

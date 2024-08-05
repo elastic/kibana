@@ -14,7 +14,7 @@ import {
 } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',

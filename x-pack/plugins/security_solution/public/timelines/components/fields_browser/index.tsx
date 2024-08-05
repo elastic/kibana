@@ -81,9 +81,9 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   }, [selectedDataViewId, missingPatterns, dataViews]);
 
   const openFieldEditor = useCallback<OpenFieldEditor>(
-    (fieldName) => {
+    async (fieldName) => {
       if (dataView && selectedDataViewId) {
-        const closeFieldEditor = dataViewFieldEditor.openEditor({
+        const closeFieldEditor = await dataViewFieldEditor.openEditor({
           ctx: { dataView },
           fieldName,
           onSave: async (savedFields: DataViewField[]) => {

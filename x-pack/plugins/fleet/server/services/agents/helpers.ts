@@ -58,7 +58,7 @@ export function searchHitToAgent(
       }))
     : undefined;
   const agent: Agent = {
-    id: hit._id,
+    id: hit._id!,
     type: hit._source?.type!,
     namespaces: hit._source?.namespaces,
     active: hit._source?.active!,

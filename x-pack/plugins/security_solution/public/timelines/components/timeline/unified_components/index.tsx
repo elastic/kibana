@@ -28,7 +28,6 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -37,7 +36,6 @@ import type {
   OnChangePage,
   RowRenderer,
   SortColumnTimeline,
-  ToggleDetailPanel,
   TimelineTabs,
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
@@ -47,10 +45,8 @@ import { DRAG_DROP_FIELD } from './data_table/translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
-import type { TimelineModel } from '../../../store/model';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from './default_headers';
-import type { TimelineDataGridCellContext } from '../types';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -109,9 +105,6 @@ interface Props {
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
   totalCount: number;
-  onEventClosed: (args: ToggleDetailPanel) => void;
-  expandedDetail: ExpandedDetailTimeline;
-  showExpandedDetails: boolean;
   onChangePage: OnChangePage;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
@@ -120,8 +113,6 @@ interface Props {
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
-  pinnedEventIds: TimelineModel['pinnedEventIds'];
-  eventIdToNoteIds: TimelineModel['eventIdToNoteIds'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -137,17 +128,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   refetch,
   dataLoadingState,
   totalCount,
-  onEventClosed,
-  showExpandedDetails,
-  expandedDetail,
   onChangePage,
   updatedAt,
   isTextBasedQuery,
   dataView,
   trailingControlColumns,
   leadingControlColumns,
-  pinnedEventIds,
-  eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -169,22 +155,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const {
     query: { filterManager: timelineFilterManager },
   } = timelineDataService;
-
-  const [eventIdsAddingNotes, setEventIdsAddingNotes] = useState<Set<string>>(new Set());
-
-  const onToggleShowNotes = useCallback(
-    (eventId?: string) => {
-      if (!eventId) return;
-      const newSet = new Set(eventIdsAddingNotes);
-      if (newSet.has(eventId)) {
-        newSet.delete(eventId);
-        setEventIdsAddingNotes(newSet);
-      } else {
-        setEventIdsAddingNotes(newSet.add(eventId));
-      }
-    },
-    [eventIdsAddingNotes]
-  );
 
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({
@@ -373,17 +343,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  const cellContext: TimelineDataGridCellContext = useMemo(() => {
-    return {
-      events,
-      pinnedEventIds,
-      eventIdsAddingNotes,
-      onToggleShowNotes,
-      eventIdToNoteIds,
-      refetch,
-    };
-  }, [events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds, refetch]);
-
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
@@ -450,9 +409,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
                       totalCount={totalCount}
-                      onEventClosed={onEventClosed}
-                      expandedDetail={expandedDetail}
-                      showExpandedDetails={showExpandedDetails}
                       onChangePage={onChangePage}
                       activeTab={activeTab}
                       updatedAt={updatedAt}
@@ -460,8 +416,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
                       leadingControlColumns={leadingControlColumns}
-                      cellContext={cellContext}
-                      eventIdToNoteIds={eventIdToNoteIds}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

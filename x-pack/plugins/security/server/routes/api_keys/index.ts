@@ -19,7 +19,7 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './update';
+} from '@kbn/security-plugin-types-server';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {
   defineEnabledApiKeysRoutes(params);

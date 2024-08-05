@@ -7,6 +7,7 @@
 
 import { formatNumber } from '@elastic/eui';
 import type { useKibanaContextForPlugin } from '../../../utils';
+import type { useDatasetDetailsTelemetry } from '../../../hooks';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
 import {
@@ -46,7 +47,11 @@ const timeRange: TimeRangeConfig = {
   to: 'now',
 };
 
-const degradedDocsHref = 'http://exploratory-view/degraded-docs';
+const degradedDocsLinkProps = {
+  linkProps: { href: 'http://exploratory-view/degraded-docs', onClick: () => {} },
+  navigate: () => {},
+  isLogsExplorerAvailable: true,
+};
 const hostsRedirectUrl = 'http://hosts/metric/';
 
 const hostsLocator = {
@@ -55,13 +60,18 @@ const hostsLocator = {
   typeof useKibanaContextForPlugin
 >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
 
+const telemetry = {
+  trackDetailsNavigated: () => {},
+} as unknown as ReturnType<typeof useDatasetDetailsTelemetry>;
+
 describe('getSummaryKpis', () => {
   it('should return the correct KPIs', () => {
     const result = getSummaryKpis({
       dataStreamDetails,
       timeRange,
-      degradedDocsHref,
+      degradedDocsLinkProps,
       hostsLocator,
+      telemetry,
     });
 
     expect(result).toEqual([
@@ -92,7 +102,7 @@ describe('getSummaryKpis', () => {
         value: '200',
         link: {
           label: flyoutShowAllText,
-          href: degradedDocsHref,
+          props: degradedDocsLinkProps.linkProps,
         },
         userHasPrivilege: true,
       },
@@ -119,8 +129,9 @@ describe('getSummaryKpis', () => {
     const result = getSummaryKpis({
       dataStreamDetails: detailsWithMaxPlusHosts,
       timeRange,
-      degradedDocsHref,
+      degradedDocsLinkProps,
       hostsLocator,
+      telemetry,
     });
 
     expect(result).toEqual([
@@ -151,7 +162,7 @@ describe('getSummaryKpis', () => {
         value: '200',
         link: {
           label: flyoutShowAllText,
-          href: degradedDocsHref,
+          props: degradedDocsLinkProps.linkProps,
         },
         userHasPrivilege: true,
       },

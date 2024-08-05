@@ -1,75 +1,12 @@
 openapi: 3.0.0
 
 info:
+  title: RiskScoresCalculation types
   version: '1'
-  title: Risk Scoring API
-  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
-
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
-
-paths:
-  /api/risk_scores/calculation:
-    post:
-      x-labels: [ess, serverless]
-      x-internal: true
-      summary: Trigger calculation of Risk Scores
-      description: Calculates and persists a segment of Risk Scores, returning details about the calculation.
-      requestBody:
-        description: Details about the Risk Scores being calculated
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RiskScoresCalculationRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RiskScoresCalculationResponse'
-        '400':
-          description: Invalid request
+paths: {}
 
 components:
   schemas:
-    RiskScoresCalculationRequest:
-      type: object
-      required:
-        - data_view_id
-        - identifier_type
-        - range
-      properties:
-        after_keys:
-          description: Used to calculate a specific "page" of risk scores. If unspecified, the first "page" of scores is returned. See also the `after_keys` key in a risk scores response.
-          $ref: '../common/common.schema.yaml#/components/schemas/AfterKeys'
-        data_view_id:
-          $ref: '../common/common.schema.yaml#/components/schemas/DataViewId'
-          description: The identifier of the Kibana data view to be used when generating risk scores. If a data view is not found, the provided ID will be used as the query's index pattern instead.
-        debug:
-          description: If set to `true`, the internal ES requests/responses will be logged in Kibana.
-          type: boolean
-        filter:
-          $ref: '../common/common.schema.yaml#/components/schemas/Filter'
-          description: An elasticsearch DSL filter object. Used to filter the data being scored, which implicitly filters the risk scores calculated.
-        page_size:
-          $ref: '../common/common.schema.yaml#/components/schemas/PageSize'
-        identifier_type:
-          description: Used to restrict the type of risk scores calculated.
-          allOf:
-            - $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
-        range:
-          $ref: '../common/common.schema.yaml#/components/schemas/DateRange'
-          description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
-        weights:
-          $ref: '../common/common.schema.yaml#/components/schemas/RiskScoreWeights'
-
     RiskScoresCalculationResponse:
       type: object
       required:

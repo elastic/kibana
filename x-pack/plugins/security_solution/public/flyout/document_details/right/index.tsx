@@ -7,13 +7,13 @@
 
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useTabs } from './hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
-import { useRightPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
+import type { DocumentDetailsProps } from '../shared/types';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
@@ -24,24 +24,14 @@ import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
-export interface RightPanelProps extends FlyoutPanelProps {
-  key: typeof DocumentDetailsRightPanelKey;
-  path?: PanelPath;
-  params?: {
-    id: string;
-    indexName: string;
-    scopeId: string;
-  };
-}
-
 /**
  * Panel to be displayed in the document details expandable flyout right section
  */
-export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
+export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
 
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
   // if the flyout is not, we render only table and json

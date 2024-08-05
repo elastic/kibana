@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const TITLE = i18n.translate('xpack.securitySolution.guideConfig.title', {
-  defaultMessage: 'Detect threats in my data with SIEM',
+  defaultMessage: 'Detect threats in my data with Security Solution',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.guideConfig.description', {
-  defaultMessage: `There are many ways to get your SIEM data into Elastic. In this guide, we'll help you get set up quickly using the Elastic Defend integration.`,
+  defaultMessage: `Welcome to Elastic Security for SIEM. In this guide, you'll learn how to analyze log and event data, set up threat detection, and respond to threats.`,
 });
 
 export const DOCS = i18n.translate('xpack.securitySolution.guideConfig.documentationLink', {
@@ -29,7 +29,7 @@ export const LINK_TEXT = i18n.translate(
 export const ADD_DATA_TITLE = i18n.translate(
   'xpack.securitySolution.guideConfig.addDataStep.title',
   {
-    defaultMessage: 'Add data with Elastic Defend',
+    defaultMessage: 'Send log and event data to Elastic',
   }
 );
 
@@ -37,7 +37,7 @@ export const ADD_DATA_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.guideConfig.addDataStep.description',
   {
     defaultMessage:
-      'Install Elastic Agent and its Elastic Defend integration on one of your computers to get SIEM data flowing.',
+      'Install an agent on one of your computers and configure it with the Elastic Defend integration. With this integration, the agent will be able to collect and send system data to Elastic Security in real time.',
   }
 );
 

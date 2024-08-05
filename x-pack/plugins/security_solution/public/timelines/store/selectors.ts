@@ -178,3 +178,8 @@ export const selectDataInTimeline = createSelector(
     return !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery));
   }
 );
+
+export const selectExcludedRowRendererIds = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.excludedRowRendererIds
+);

@@ -9,6 +9,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
+import { getHostPlatform } from '../../lib/endpoint/utils/get_host_platform';
 import { getAlertDetailsFieldValue } from '../../lib/endpoint/utils/get_event_details_field_values';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type {
@@ -132,7 +133,7 @@ export const useAlertResponseActionsSupport = (
 
     if (agentType === 'crowdstrike') {
       return getAlertDetailsFieldValue(
-        { category: 'crowdstrike', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
+        { category: 'device', field: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike },
         eventData
       );
     }
@@ -172,28 +173,12 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {
-    // TODO:PT need to check if crowdstrike event has `host.name`
-    if (agentType === 'crowdstrike') {
-      return getAlertDetailsFieldValue(
-        { category: 'crowdstrike', field: 'crowdstrike.event.HostName' },
-        eventData
-      );
-    }
-
     return getAlertDetailsFieldValue({ category: 'host', field: 'host.name' }, eventData);
-  }, [agentType, eventData]);
+  }, [eventData]);
 
   const platform = useMemo(() => {
-    // TODO:PT need to check if crowdstrike event has `host.os.family`
-    if (agentType === 'crowdstrike') {
-      return getAlertDetailsFieldValue(
-        { category: 'crowdstrike', field: 'crowdstrike.event.Platform' },
-        eventData
-      );
-    }
-
-    return getAlertDetailsFieldValue({ category: 'host', field: 'host.os.family' }, eventData);
-  }, [agentType, eventData]);
+    return getHostPlatform(eventData ?? []);
+  }, [eventData]);
 
   const unsupportedReason = useMemo(() => {
     if (!doesHostSupportResponseActions) {

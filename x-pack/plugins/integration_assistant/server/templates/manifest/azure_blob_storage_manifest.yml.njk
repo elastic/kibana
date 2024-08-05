@@ -1,7 +1,9 @@
 - input: azure-blob-storage
   template_path: azure-blob-storage.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: storage_url
       type: text

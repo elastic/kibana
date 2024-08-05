@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 
 import { getTacticLabel, getTacticMetadata } from '../helpers';
-import type { AttackDiscovery } from '../types';
 
 export const getMarkdownFields = (markdown: string): string => {
   const regex = new RegExp('{{\\s*(\\S+)\\s+(\\S+)\\s*}}', 'gm');

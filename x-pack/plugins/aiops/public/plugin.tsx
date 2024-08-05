@@ -41,7 +41,9 @@ export class AiopsPlugin
         { registerChangePointChartsAttachment },
         [coreStart, pluginStart],
       ]) => {
-        if (license.hasAtLeast('platinum')) {
+        const { canUseAiops } = coreStart.application.capabilities.ml;
+
+        if (license.hasAtLeast('platinum') && canUseAiops) {
           if (embeddable) {
             registerEmbeddables(embeddable, core);
           }

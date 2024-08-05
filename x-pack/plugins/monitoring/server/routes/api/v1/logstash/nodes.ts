@@ -26,6 +26,9 @@ export function logstashNodesRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
 

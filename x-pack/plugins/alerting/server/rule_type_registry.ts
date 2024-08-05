@@ -508,6 +508,27 @@ function augmentActionGroupsWithReserved<
     );
   }
 
+  const activeActionGroupSeverities = new Set<number>();
+  actionGroups.forEach((actionGroup) => {
+    if (!!actionGroup.severity) {
+      if (activeActionGroupSeverities.has(actionGroup.severity.level)) {
+        throw new Error(
+          i18n.translate(
+            'xpack.alerting.ruleTypeRegistry.register.duplicateActionGroupSeverityError',
+            {
+              defaultMessage:
+                'Rule type [id="{id}"] cannot be registered. Action group definitions cannot contain duplicate severity levels.',
+              values: {
+                id,
+              },
+            }
+          )
+        );
+      }
+      activeActionGroupSeverities.add(actionGroup.severity.level);
+    }
+  });
+
   return {
     ...ruleType,
     ...(config?.rules?.overwriteProducer ? { producer: config.rules.overwriteProducer } : {}),

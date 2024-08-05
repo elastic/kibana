@@ -74,6 +74,7 @@ export interface GetCasesColumn {
 export interface UseCasesColumnsReturnValue {
   columns: CasesColumns[];
   isLoadingColumns: boolean;
+  rowHeader: string;
 }
 
 export const useCasesColumns = ({
@@ -371,7 +372,7 @@ export const useCasesColumns = ({
     columns.push(actions);
   }
 
-  return { columns, isLoadingColumns };
+  return { columns, isLoadingColumns, rowHeader: casesColumnsConfig.title.field };
 };
 
 interface Props {

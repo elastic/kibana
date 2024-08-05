@@ -117,6 +117,7 @@ describe('transformHealthServiceProvider', () => {
     expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(1);
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(1, {
       basic: true,
+      transform_id: '_all',
     });
 
     const notStarted = result[0];

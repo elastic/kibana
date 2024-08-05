@@ -23,7 +23,6 @@ export const canUnlinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddab
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
       embeddable.getRoot() &&
       embeddable.getRoot().isContainer &&
-      isReferenceOrValueEmbeddable(embeddable) &&
       embeddable.inputIsRefType(embeddable.getInput())
   );
 };

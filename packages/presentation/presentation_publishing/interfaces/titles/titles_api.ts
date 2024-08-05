@@ -17,6 +17,14 @@ export interface SerializedTitles {
   hidePanelTitles?: boolean;
 }
 
+export const stateHasTitles = (state: unknown): state is SerializedTitles => {
+  return (
+    (state as SerializedTitles)?.title !== undefined ||
+    (state as SerializedTitles)?.description !== undefined ||
+    (state as SerializedTitles)?.hidePanelTitles !== undefined
+  );
+};
+
 export interface TitlesApi extends PublishesWritablePanelTitle, PublishesWritablePanelDescription {}
 
 export const initializeTitles = (

@@ -12,10 +12,10 @@ import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesTimeslice {
-  timeslice$?: PublishingSubject<[number, number] | undefined>;
+  timeslice$: PublishingSubject<[number, number] | undefined>;
 }
 
-export interface PublishesTimeRange extends PublishesTimeslice {
+export interface PublishesTimeRange extends Partial<PublishesTimeslice> {
   timeRange$: PublishingSubject<TimeRange | undefined>;
   timeRestore$?: PublishingSubject<boolean | undefined>;
 }
@@ -40,6 +40,12 @@ export type PublishesWritableUnifiedSearch = PublishesUnifiedSearch &
     setQuery: (query: Query | undefined) => void;
   };
 
+export const apiPublishesTimeslice = (
+  unknownApi: null | unknown
+): unknownApi is PublishesTimeslice => {
+  return Boolean(unknownApi && (unknownApi as PublishesTimeslice)?.timeslice$ !== undefined);
+};
+
 export const apiPublishesTimeRange = (
   unknownApi: null | unknown
 ): unknownApi is PublishesTimeRange => {
@@ -56,7 +62,7 @@ export const apiPublishesUnifiedSearch = (
   return Boolean(
     unknownApi &&
       apiPublishesTimeRange(unknownApi) &&
-      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined &&
+      apiPublishesFilters(unknownApi) &&
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };
@@ -66,7 +72,7 @@ export const apiPublishesPartialUnifiedSearch = (
 ): unknownApi is Partial<PublishesUnifiedSearch> => {
   return Boolean(
     apiPublishesTimeRange(unknownApi) ||
-      (unknownApi as PublishesUnifiedSearch)?.filters$ !== undefined ||
+      apiPublishesFilters(unknownApi) ||
       (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
   );
 };

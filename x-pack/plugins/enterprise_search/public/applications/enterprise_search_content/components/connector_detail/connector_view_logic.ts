@@ -7,12 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import {
-  Connector,
-  FeatureName,
-  IngestPipelineParams,
-  IngestionMethod,
-} from '@kbn/search-connectors';
+import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -23,6 +18,10 @@ import {
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
 import {
+  GenerateConnectorApiKeyApiLogicActions,
+  GenerateConnectorApiKeyApiLogic,
+} from '../../api/connector/generate_connector_api_key_api_logic';
+import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
@@ -30,15 +29,18 @@ import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_ind
 import { ElasticsearchViewIndex } from '../../types';
 
 import {
+  hasAdvancedFilteringFeature,
+  hasBasicFilteringFeature,
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,
 } from '../../utils/connector_helpers';
 import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import {
-  ConnectorNameAndDescriptionLogic,
   ConnectorNameAndDescriptionActions,
+  ConnectorNameAndDescriptionLogic,
 } from './connector_name_and_description_logic';
+import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
@@ -49,6 +51,8 @@ export interface ConnectorViewActions {
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
+  generateApiKeySuccess: GenerateConnectorApiKeyApiLogicActions['apiSuccess'];
+  generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
   nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
   startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
@@ -78,8 +82,6 @@ export interface ConnectorViewValues {
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
-  isSyncing: boolean;
-  isWaitingForSync: boolean;
   lastUpdated: string | null;
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
@@ -114,6 +116,10 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ],
       ConnectorNameAndDescriptionLogic,
       ['apiSuccess as nameAndDescriptionApiSuccess', 'apiError as nameAndDescriptionApiError'],
+      DeploymentLogic,
+      ['generateConfigurationSuccess'],
+      GenerateConnectorApiKeyApiLogic,
+      ['apiSuccess as generateApiKeySuccess'],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -131,6 +137,21 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   listeners: ({ actions, values }) => ({
+    fetchConnectorApiSuccess: ({ connector }) => {
+      if (!values.index && connector?.index_name) {
+        actions.fetchIndex({ indexName: connector.index_name });
+      }
+    },
+    generateApiKeySuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    generateConfigurationSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
     nameAndDescriptionApiError: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });
@@ -144,11 +165,6 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     updateConnectorConfigurationSuccess: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });
-      }
-    },
-    fetchConnectorApiSuccess: ({ connector }) => {
-      if (!values.index && connector?.index_name) {
-        actions.fetchIndex({ indexName: connector.index_name });
       }
     },
   }),
@@ -176,19 +192,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
-            connector.features[FeatureName.FILTERING_ADVANCED_CONFIG]
-          : false,
+      (connector?: Connector) => hasAdvancedFilteringFeature(connector),
     ],
     hasBasicFilteringFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
-            connector.features[FeatureName.FILTERING_RULES]
-          : false,
+      (connector?: Connector) => hasBasicFilteringFeature(connector),
     ],
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],

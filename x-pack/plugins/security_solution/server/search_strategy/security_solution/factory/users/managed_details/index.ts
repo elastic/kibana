@@ -15,6 +15,7 @@ import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
 
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
 import type {
+  ManagedUserHit,
   ManagedUserHits,
   ManagedUserDetailsStrategyResponse,
   ManagedUserFields,
@@ -43,7 +44,7 @@ export const managedUserDetails: SecuritySolutionFactory<UsersQueries.managedDet
     );
 
     const managedUsers = buckets.reduce<ManagedUserHits>((acc, bucket) => {
-      acc[bucket.key] = bucket.latest_hit.hits.hits[0];
+      acc[bucket.key] = bucket.latest_hit.hits.hits[0] as ManagedUserHit;
       return acc;
     }, {});
 

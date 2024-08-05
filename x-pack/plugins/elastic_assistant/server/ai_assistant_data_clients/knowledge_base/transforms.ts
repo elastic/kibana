@@ -19,7 +19,8 @@ export const transformESSearchToKnowledgeBaseEntry = (
       const kbEntrySchema = hit._source!;
       const kbEntry: KnowledgeBaseEntryResponse = {
         timestamp: kbEntrySchema['@timestamp'],
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
         createdAt: kbEntrySchema.created_at,
         createdBy: kbEntrySchema.created_by,
         updatedAt: kbEntrySchema.updated_at,

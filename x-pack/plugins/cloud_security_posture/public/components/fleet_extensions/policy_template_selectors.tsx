@@ -79,6 +79,7 @@ interface PolicyTemplateVarsFormProps {
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   setupTechnology: SetupTechnology;
+  isEditPage?: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({

@@ -63,19 +63,6 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
-    name: 'meta',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metaDoc', {
-      defaultMessage: 'Returns information about the ES|QL environment',
-    }),
-    examples: ['meta functions'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'functions', type: 'function' }],
-    },
-  },
-  {
     name: 'show',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
@@ -86,6 +73,36 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
+    },
+  },
+  {
+    name: 'metrics',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
+      defaultMessage:
+        'A metrics-specific source command, use this command to load data from TSDB indices. ' +
+        'Similar to STATS command on can calculate aggregate statistics, such as average, count, and sum, over the incoming search results set. ' +
+        'When used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. ' +
+        'When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. ' +
+        'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
+        'When you perform more than one aggregation, separate each aggregation with a comma.',
+    }),
+    examples: [
+      'metrics index',
+      'metrics index, index2',
+      'metrics index avg = avg(a)',
+      'metrics index sum(b) by b',
+      'metrics index, index2 sum(b) by b % 2',
+      'metrics <sources> [ <aggregates> [ by <grouping> ]]',
+      'metrics src1, src2 agg1, agg2 by field1, field2',
+    ],
+    options: [],
+    modes: [],
+    signature: {
+      multipleParams: true,
+      params: [
+        { name: 'index', type: 'source', wildcards: true },
+        { name: 'expression', type: 'function', optional: true },
+      ],
     },
   },
   {
@@ -256,7 +273,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'number', constantOnly: true }],
+      params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
     options: [],
     modes: [],
@@ -342,8 +359,8 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [
         { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
+        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
+        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
       ],
     },
   },
@@ -373,6 +390,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
+        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
@@ -390,6 +408,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
+        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],

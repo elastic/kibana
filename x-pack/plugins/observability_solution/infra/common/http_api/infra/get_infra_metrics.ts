@@ -16,6 +16,8 @@ export const InfraMetricTypeRT = rt.keyof({
   memoryFree: null,
   rx: null,
   tx: null,
+  rxV2: null,
+  txV2: null,
 });
 
 export const RangeRT = rt.type({
@@ -48,7 +50,6 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
     type: rt.literal('host'),
     limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(20)]),
     metrics: rt.array(rt.type({ type: InfraMetricTypeRT })),
-    sourceId: rt.string,
     range: RangeRT,
   }),
 ]);

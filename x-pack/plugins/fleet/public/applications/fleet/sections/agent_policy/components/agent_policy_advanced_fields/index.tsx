@@ -63,6 +63,7 @@ import { CustomFields } from './custom_fields';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
+  allowedNamespacePrefixes?: string[];
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
   disabled?: boolean;
@@ -308,7 +309,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
+      <CustomFields
+        updateAgentPolicy={updateAgentPolicy}
+        agentPolicy={agentPolicy}
+        isDisabled={disabled || agentPolicy.is_managed === true}
+      />
       <EuiDescribedFormGroup
         fullWidth
         title={

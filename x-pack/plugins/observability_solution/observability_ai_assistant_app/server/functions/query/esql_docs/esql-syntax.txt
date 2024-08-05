@@ -92,7 +92,7 @@ FROM logs
 
 ```esql
 FROM logs
-| STATS COUNT(*) BY timestamp = DATE_TRUNC(1h, @timestamp)
+| STATS COUNT(*) BY timestamp = BUCKET(@timestamp, 1h)
 | WHERE timestamp >= NOW() - 24h
 ```
 
@@ -100,7 +100,7 @@ FROM logs
 
 ```esql
 FROM logs
-| STATS AVG(response_time) BY minute = DATE_TRUNC(1m, @timestamp)
+| STATS AVG(response_time) BY minute = BUCKET(@timestamp, 1m)
 | WHERE @timestamp >= NOW() - 1h
 ```
 
@@ -108,7 +108,7 @@ FROM logs
 
 ```esql
 FROM logs
-| STATS COUNT(*) BY week = DATE_TRUNC(1w, @timestamp)
+| STATS COUNT(*) BY week = BUCKET(@timestamp, 1w)
 | WHERE @timestamp >= NOW() - 1y
 ```
 
@@ -116,6 +116,6 @@ FROM logs
 
 ```esql
 FROM logs
-| STATS MAX(response_time) BY second = DATE_TRUNC(1s, @timestamp)
+| STATS MAX(response_time) BY second = BUCKET(@timestamp, 1s)
 | WHERE @timestamp >= NOW() - 1m
 ```

@@ -11,18 +11,25 @@ import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  HasSaveNotification,
+  HasSerializedChildState,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDataLoading,
   PublishesFilters,
+  PublishesTimeslice,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
+import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
@@ -50,14 +57,22 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
-  Partial<HasParentApi<PublishesUnifiedSearch>>;
+  PublishesTimeslice &
+  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
+    autoApplySelections$: PublishingSubject<boolean>;
+    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    getLastSavedControlState: (controlUuid: string) => object;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    allowExpensiveQueries$: PublishingSubject<boolean>;
+    untilInitialized: () => Promise<void>;
+  };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
   labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
-  showApplySelections?: boolean;
+  autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
   initialChildControlState: ControlPanelsState<ControlPanelState>;
@@ -71,21 +86,17 @@ export interface ControlGroupRuntimeState {
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
-  'chainingSystem' | 'labelPosition' | 'showApplySelections' | 'ignoreParentSettings'
+  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
-export type ControlGroupSerializedState = Omit<
-  ControlGroupRuntimeState,
-  | 'labelPosition'
-  | 'ignoreParentSettings'
-  | 'defaultControlGrow'
-  | 'defaultControlWidth'
-  | 'anyChildHasUnsavedChanges'
-  | 'initialChildControlState'
-> & {
+export interface ControlGroupSerializedState {
+  chainingSystem: ControlGroupChainingSystem;
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
-  // In runtime state, we refer to this property as `labelPosition`; however, to avoid migrations, we will
-  // continue to refer to this property as the legacy `controlStyle` in the serialized state
+  // In runtime state, we refer to this property as `labelPosition`;
+  // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
   controlStyle: ControlStyle;
-};
+  // In runtime state, we refer to the inverse of this property as `autoApplySelections`
+  // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
+  showApplySelections: boolean | undefined;
+}

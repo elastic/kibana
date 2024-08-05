@@ -29,6 +29,11 @@ export const Default: Story<void> = () => {
   return <ExpandablePanel {...defaultProps}>{children}</ExpandablePanel>;
 };
 
+export const DefaultWithoutIcon: Story<void> = () => {
+  const props = { header: { title: 'title' } };
+  return <ExpandablePanel {...props}>{children}</ExpandablePanel>;
+};
+
 export const DefaultWithHeaderContent: Story<void> = () => {
   const props = {
     ...defaultProps,

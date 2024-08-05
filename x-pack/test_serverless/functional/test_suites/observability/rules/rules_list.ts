@@ -30,6 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const log = getService('log');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -82,9 +83,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     };
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await svlCommonPage.loginWithRole('admin');
+      await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
       await testSubjects.click('manageRulesPageButton');
@@ -102,8 +103,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should create an ES Query Rule and display it when consumer is observability', async () => {
@@ -711,6 +711,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should filter rules by the rule status', async () => {
+      const setRuleStatus = async (testSubj: string, checked: boolean) => {
+        const readAriaChecked = async (): Promise<boolean> => {
+          const statusItem = await testSubjects.find(testSubj);
+          return statusItem
+            ? JSON.parse((await statusItem.getAttribute('aria-checked')) || 'null')
+            : null;
+        };
+
+        await retry.try(async () => {
+          if ((await readAriaChecked()) !== checked) {
+            await testSubjects.click(testSubj);
+            await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+          }
+
+          expect(await readAriaChecked()).toEqual(checked);
+        });
+      };
+
       // Enabled alert
       const rule1 = await createRule({
         supertest,
@@ -750,39 +768,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await refreshRulesList();
       await assertRulesLength(4);
 
-      // Select only enabled
+      log.debug('ruleStatusFilterButton: Select only enabled');
       await testSubjects.click('ruleStatusFilterButton');
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await setRuleStatus('ruleStatusFilterOption-enabled', true);
       await assertRulesLength(2);
 
-      // Select enabled or disabled (e.g. all)
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select enabled or disabled (e.g. all)');
+      await setRuleStatus('ruleStatusFilterOption-disabled', true);
       await assertRulesLength(4);
 
-      // Select only disabled
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select only disabled');
+      await setRuleStatus('ruleStatusFilterOption-enabled', false);
       await assertRulesLength(2);
 
-      // Select only snoozed
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await testSubjects.click('ruleStatusFilterOption-snoozed');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select only snoozed');
+      await setRuleStatus('ruleStatusFilterOption-disabled', false);
+      await setRuleStatus('ruleStatusFilterOption-snoozed', true);
       await assertRulesLength(2);
 
-      // Select disabled or snoozed
-      await testSubjects.click('ruleStatusFilterOption-disabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select disabled or snoozed');
+      await setRuleStatus('ruleStatusFilterOption-disabled', true);
       await assertRulesLength(3);
 
-      // Select enabled or disabled or snoozed
-      await testSubjects.click('ruleStatusFilterOption-enabled');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      log.debug('ruleStatusFilterButton: Select enabled or disabled or snoozed');
+      await setRuleStatus('ruleStatusFilterOption-enabled', true);
       await assertRulesLength(4);
 
-      // Clear it again because it is still selected
+      log.debug('ruleStatusFilterButton: Clear it again because it is still selected');
       await testSubjects.click('rules-list-clear-filter');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);

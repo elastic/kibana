@@ -55,12 +55,13 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
       <EuiFlexItem
         grow={1}
         className="eui-textTruncate noThemeOverrides"
+        css={{ maxWidth: '95%' }}
         data-test-subj={getTestId('titleComponentContainer')}
       >
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
       {!isHelpOpen && (
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={false}>
           <StyledEuiButtonEmpty
             style={{ marginLeft: 'auto' }}
             onClick={handleHelpButtonOnClick}

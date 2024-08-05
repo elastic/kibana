@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   INSIGHTS_HEADER_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
@@ -102,12 +102,12 @@ jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
   useTourContext: jest.fn().mockReturnValue({ activeStep: 1, isTourShown: jest.fn(() => true) }),
 }));
 
-const renderInsightsSection = (contextValue: RightPanelContext) =>
+const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <InsightsSection />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -134,7 +134,7 @@ describe('<InsightsSection />', () => {
     const contextValue = {
       eventId: 'some_Id',
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
 
@@ -150,7 +150,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
     expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).not.toBeVisible();
@@ -163,7 +163,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
     expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
@@ -177,7 +177,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
     expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
@@ -196,7 +196,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: true,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderInsightsSection(contextValue);
 
@@ -219,7 +219,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: false,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId, queryByTestId } = renderInsightsSection(contextValue);
 

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  FindExceptionListItemsRequestQuery,
+  FindExceptionListItemsResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
 import type { ListsPluginRouter } from '../types';
-import {
-  FindExceptionListItemRequestQueryDecoded,
-  findExceptionListItemRequestQuery,
-  findExceptionListItemResponse,
-} from '../../common/api';
 
-import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -31,10 +30,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation<
-              typeof findExceptionListItemRequestQuery,
-              FindExceptionListItemRequestQueryDecoded
-            >(findExceptionListItemRequestQuery),
+            query: buildRouteValidationWithZod(FindExceptionListItemsRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -64,32 +60,29 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
               body: `list_id and filter need to have the same comma separated number of values. Expected list_id length: ${listId.length} to equal filter length: ${filter.length}`,
               statusCode: 400,
             });
-          } else {
-            const exceptionListItems = await exceptionLists.findExceptionListsItem({
-              filter,
-              listId,
-              namespaceType,
-              page,
-              perPage,
-              pit: undefined,
-              search,
-              searchAfter: undefined,
-              sortField,
-              sortOrder,
-            });
-            if (exceptionListItems == null) {
-              return siemResponse.error({
-                body: `exception list id: "${listId}" does not exist`,
-                statusCode: 404,
-              });
-            }
-            const [validated, errors] = validate(exceptionListItems, findExceptionListItemResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
           }
+
+          const exceptionListItems = await exceptionLists.findExceptionListsItem({
+            filter,
+            listId,
+            namespaceType,
+            page,
+            perPage,
+            pit: undefined,
+            search,
+            searchAfter: undefined,
+            sortField,
+            sortOrder,
+          });
+
+          if (exceptionListItems == null) {
+            return siemResponse.error({
+              body: `exception list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
+          }
+
+          return response.ok({ body: FindExceptionListItemsResponse.parse(exceptionListItems) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -15,11 +15,19 @@ import * as i18n from './translations';
 
 interface Props {
   allowed: number;
+  titleSize?: 'xs' | 's' | 'xxxs' | 'xxs' | 'm' | 'l' | undefined;
+  gap?: string;
   total: number;
   inline?: boolean;
 }
 
-const AllowedStatComponent: React.FC<Props> = ({ allowed, total, inline }) => {
+const AllowedStatComponent: React.FC<Props> = ({
+  allowed,
+  total,
+  inline,
+  titleSize = TITLE_SIZE,
+  gap = euiThemeVars.euiSizeXS,
+}) => {
   const tooltipContent = useMemo(() => i18n.ALLOWED_TOOLTIP({ allowed, total }), [allowed, total]);
 
   return (
@@ -30,7 +38,7 @@ const AllowedStatComponent: React.FC<Props> = ({ allowed, total, inline }) => {
             ? css`
                 display: flex;
                 align-items: center;
-                gap: ${euiThemeVars.euiSizeXS};
+                gap: ${gap};
               `
             : null
         }
@@ -38,7 +46,7 @@ const AllowedStatComponent: React.FC<Props> = ({ allowed, total, inline }) => {
         description={i18n.ALLOWED}
         reverse
         title={allowed}
-        titleSize={TITLE_SIZE}
+        titleSize={titleSize}
       />
     </EuiToolTip>
   );

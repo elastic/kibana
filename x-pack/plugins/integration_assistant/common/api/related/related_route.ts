@@ -9,7 +9,8 @@ import { z } from 'zod';
 
 import {
   Connector,
-  DatastreamName,
+  DataStreamName,
+  LangSmithOptions,
   PackageName,
   Pipeline,
   RawSamples,
@@ -19,10 +20,11 @@ import { RelatedAPIResponse } from '../model/response_schemas';
 export type RelatedRequestBody = z.infer<typeof RelatedRequestBody>;
 export const RelatedRequestBody = z.object({
   packageName: PackageName,
-  datastreamName: DatastreamName,
+  dataStreamName: DataStreamName,
   rawSamples: RawSamples,
   currentPipeline: Pipeline,
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type RelatedRequestBodyInput = z.input<typeof RelatedRequestBody>;
 

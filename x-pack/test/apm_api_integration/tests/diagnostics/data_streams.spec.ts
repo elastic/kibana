@@ -75,17 +75,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
         expect(status).to.be(200);
         expect(body.dataStreams).to.eql([
-          { name: 'metrics-apm.internal-default', template: 'metrics-apm.internal' },
+          { name: 'metrics-apm.internal-default', template: 'metrics-apm.internal@template' },
           {
             name: 'metrics-apm.service_summary.1m-default',
-            template: 'metrics-apm.service_summary.1m',
+            template: 'metrics-apm.service_summary.1m@template',
           },
           {
             name: 'metrics-apm.service_transaction.1m-default',
-            template: 'metrics-apm.service_transaction.1m',
+            template: 'metrics-apm.service_transaction.1m@template',
           },
-          { name: 'metrics-apm.transaction.1m-default', template: 'metrics-apm.transaction.1m' },
-          { name: 'traces-apm-default', template: 'traces-apm' },
+          {
+            name: 'metrics-apm.transaction.1m-default',
+            template: 'metrics-apm.transaction.1m@template',
+          },
+          { name: 'traces-apm-default', template: 'traces-apm@template' },
         ]);
       });
 

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { TypeOptions } from './type';
-export type { SchemaStructureEntry } from './type';
+export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions } from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';

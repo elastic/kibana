@@ -94,7 +94,7 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke',
+            path: '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -181,7 +181,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke-with-response-stream',
+            path: '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke-with-response-stream',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }

@@ -18,6 +18,7 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-usage-data-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-internal",
   ],
   "exclude": [
     "target/**/*",

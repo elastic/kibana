@@ -7,7 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES, type Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 interface FeatureRegistrationOpts {
   features: FeaturesPluginSetup;

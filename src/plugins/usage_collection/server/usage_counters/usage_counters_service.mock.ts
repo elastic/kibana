@@ -13,7 +13,7 @@ import type { UsageCounter } from './usage_counter';
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<UsageCountersServiceSetup> = {
     createUsageCounter: jest.fn(),
-    getUsageCounterByType: jest.fn(),
+    getUsageCounterByDomainId: jest.fn(),
   };
 
   setupContract.createUsageCounter.mockReturnValue({
