@@ -9,6 +9,9 @@ import semver from 'semver';
 import expect from '@kbn/expect';
 import { builtInDefinitions } from '@kbn/entityManager-plugin/server/lib/entities/built_in';
 import { ERROR_API_KEY_NOT_FOUND } from '@kbn/entityManager-plugin/public';
+import { builtInEntityDefinition as mockBuiltInEntityDefinition } from '@kbn/entityManager-plugin/server/lib/entities/helpers/fixtures';
+import { EntityDefinition } from '@kbn/entities-schema';
+import { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createAdmin, createRuntimeUser } from './helpers/user';
 import { Auth, getInstalledDefinitions, upgradeBuiltinDefinitions } from './helpers/request';
@@ -39,6 +42,20 @@ export default function ({ getService }: FtrProviderContext) {
     expect(definitionsResponse.definitions).to.eql([]);
   };
 
+  const isInstalledAndRunning = (
+    definition: EntityDefinition,
+    installedDefinitions: EntityDefinitionWithState[]
+  ) => {
+    return installedDefinitions.find((installedDefinition) => {
+      return (
+        installedDefinition.id === definition.id &&
+        installedDefinition.version === definition.version &&
+        installedDefinition.state.installed &&
+        installedDefinition.state.running
+      );
+    });
+  };
+
   describe('Entity discovery builtin definitions', () => {
     let authorizedUser: { username: string; password: string };
     let unauthorizedUser: { username: string; password: string };
@@ -62,16 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(definitionsResponse.definitions.length).to.eql(builtInDefinitions.length);
           expect(
-            builtInDefinitions.every((builtin) => {
-              return definitionsResponse.definitions.find((installedDefinition) => {
-                return (
-                  installedDefinition.id === builtin.id &&
-                  installedDefinition.version === builtin.version &&
-                  installedDefinition.state.installed &&
-                  installedDefinition.state.running
-                );
-              });
-            })
+            builtInDefinitions.every((builtin) =>
+              isInstalledAndRunning(builtin, definitionsResponse.definitions)
+            )
           ).to.eql(true, 'all builtin definitions are not installed/running');
 
           let stateResponse = await entityDiscoveryState(authorizedUser, 200);
@@ -132,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
         let definitionsResponse = await getInstalledDefinitions(supertest);
         expect(definitionsResponse.definitions.length).to.eql(builtInDefinitions.length);
 
+        // increment the version of builtin definitions
         const updatedBuiltinDefinitions = definitionsResponse.definitions.map((definition) => {
           return {
             ...definition,
@@ -145,23 +156,37 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(upgradeResponse.success).to.eql(true);
 
+        // check builtin definitions are running the latest version
         definitionsResponse = await getInstalledDefinitions(supertest);
         expect(definitionsResponse.definitions.length).to.eql(builtInDefinitions.length);
         expect(
-          updatedBuiltinDefinitions.every((builtin) => {
-            return definitionsResponse.definitions.find((installedDefinition) => {
-              return (
-                installedDefinition.id === builtin.id &&
-                installedDefinition.version === builtin.version &&
-                installedDefinition.state.installed &&
-                installedDefinition.state.running
-              );
-            });
-          })
+          updatedBuiltinDefinitions.every((builtin) =>
+            isInstalledAndRunning(builtin, definitionsResponse.definitions)
+          )
         ).to.eql(true, 'all builtin definitions are not installed/running');
 
         await disableEntityDiscovery(authorizedUser, 200);
       });
+    });
+
+    it('should install new builtin definitions', async () => {
+      await expectNoInstalledDefinitions();
+
+      const enableResponse = await enableEntityDiscovery(authorizedUser, 200);
+      expect(enableResponse.success).to.eql(true, "authorized user can't enable EEM");
+
+      // inject definition to simulate release of new builtin definition
+      const latestBuiltInDefinitions = [...builtInDefinitions, mockBuiltInEntityDefinition];
+      const upgradeResponse = await upgradeBuiltinDefinitions(supertest, latestBuiltInDefinitions);
+      expect(upgradeResponse.success).to.eql(true, 'upgrade was not successful');
+
+      const definitionsResponse = await getInstalledDefinitions(supertest);
+      expect(definitionsResponse.definitions.length).to.eql(latestBuiltInDefinitions.length);
+      expect(
+        isInstalledAndRunning(mockBuiltInEntityDefinition, definitionsResponse.definitions)
+      ).to.eql(true);
+
+      await disableEntityDiscovery(authorizedUser, 200);
     });
   });
 }
