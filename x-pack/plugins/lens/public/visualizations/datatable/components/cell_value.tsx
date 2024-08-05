@@ -32,7 +32,7 @@ export const createGridCell = (
   ) => CellColorFn,
   fitRowToContent?: boolean
 ) => {
-  return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
+  return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
     const rowValue = getParsedValue(table?.rows[rowIndex]?.[columnId]);
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
@@ -55,7 +55,20 @@ export const createGridCell = (
           setCellProps({ style });
         }
       }
-    }, [rowValue, columnId, setCellProps, colorMode, palette, colorMapping]);
+
+      // Clean up styles when something changes, this avoids cell's styling to stick forever
+      // Checks isExpanded to prevent clearing style after expanding cell
+      return () => {
+        if (colorMode !== 'none' && !isExpanded) {
+          setCellProps({
+            style: {
+              backgroundColor: undefined,
+              color: undefined,
+            },
+          });
+        }
+      };
+    }, [rowValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
 
     return (
       <div
