@@ -199,3 +199,7 @@ export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS: Readonly<
   ],
   crowdstrike: ['device.id'],
 });
+
+export const SUPPORTED_AGENT_ID_ALERT_FIELDS: Readonly<string[]> = Object.values(
+  RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS
+).flat();

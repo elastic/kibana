@@ -49,7 +49,7 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
 import { AGENT_ID } from './highlighted_fields_config';
-import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
+import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -1798,15 +1798,13 @@ describe('Exception helpers', () => {
           id: 'host.name',
         },
         // Fields used in support of Response Actions
-        ...Object.values(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS)
-          .flat()
-          .map((fieldPath) => {
-            return {
-              id: fieldPath,
-              overrideField: 'agent.status',
-              label: 'Agent status',
-            };
-          }),
+        ...SUPPORTED_AGENT_ID_ALERT_FIELDS.map((fieldPath) => {
+          return {
+            id: fieldPath,
+            overrideField: 'agent.status',
+            label: 'Agent status',
+          };
+        }),
         {
           id: 'user.name',
         },
