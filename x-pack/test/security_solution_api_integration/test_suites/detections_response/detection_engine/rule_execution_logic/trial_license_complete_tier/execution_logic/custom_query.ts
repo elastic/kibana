@@ -2755,7 +2755,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with a Lucene query rule', () => {
+    describe('@skipInServerless with a Lucene query rule', () => {
       it('should run successfully and generate an alert that matches the lucene query', async () => {
         const luceneQueryRule = getLuceneRuleForTesting();
         const { previewId } = await previewRule({ supertest, rule: luceneQueryRule });
