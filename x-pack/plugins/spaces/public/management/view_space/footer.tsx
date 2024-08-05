@@ -70,7 +70,12 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
                 <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill onClick={onUpdateSpaceWrapper}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onUpdateSpaceWrapper}
+                  data-test-subj="save-space-button"
+                >
                   Update space
                 </EuiButton>
               </EuiFlexItem>

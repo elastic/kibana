@@ -51,11 +51,11 @@ export const getTabs = ({
 
   const tabsDefinition: ViewSpaceTab[] = [
     {
-      id: TAB_ID_CONTENT,
-      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.content.heading', {
-        defaultMessage: 'Content',
+      id: TAB_ID_GENERAL,
+      name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.general.heading', {
+        defaultMessage: 'General settings',
       }),
-      content: <ViewSpaceContent space={space} />,
+      content: <ViewSpaceSettings space={space} features={features} history={history} />,
     },
   ];
 
@@ -82,11 +82,11 @@ export const getTabs = ({
   }
 
   tabsDefinition.push({
-    id: TAB_ID_GENERAL,
-    name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.general.heading', {
-      defaultMessage: 'General settings',
+    id: TAB_ID_CONTENT,
+    name: i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.content.heading', {
+      defaultMessage: 'Content',
     }),
-    content: <ViewSpaceSettings space={space} features={features} history={history} />,
+    content: <ViewSpaceContent space={space} />,
   });
 
   return tabsDefinition;
