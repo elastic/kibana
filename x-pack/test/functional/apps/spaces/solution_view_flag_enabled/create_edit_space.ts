@@ -33,8 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('spaces-view-page > navigationPanel');
       });
 
-      // FIXME
-      it.skip('changes the space solution and updates the side navigation', async () => {
+      it('changes the space solution and updates the side navigation', async () => {
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces/edit/default', {
           shouldUseHashForSubUrl: false,
         });
@@ -59,8 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        // FIXME
-        // await testSubjects.missingOrFail('userImpactWarning');
+        await testSubjects.missingOrFail('userImpactWarning');
         await PageObjects.spaceSelector.changeSolutionView('classic');
         await testSubjects.existOrFail('userImpactWarning'); // Warn that the change will impact other users
 
