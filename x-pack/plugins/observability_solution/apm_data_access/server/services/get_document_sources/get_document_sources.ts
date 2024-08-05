@@ -6,17 +6,26 @@
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
-import { APMEventClient } from './create_es_client/create_apm_event_client';
-import { getConfigForDocumentType } from './create_es_client/document_type';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
-import { isDurationSummaryNotSupportedFilter } from './transactions';
+import { isDurationSummaryNotSupportedFilter } from '../../lib/helpers/transactions';
+import { ApmDocumentType } from '../../../common/document_type';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getConfigForDocumentType } from '../../lib/helpers/create_es_client/document_type';
 
 const QUERY_INDEX = {
   DOCUMENT_TYPE: 0,
   DURATION_SUMMARY_NOT_SUPPORTED: 1,
 } as const;
+
+export interface DocumentSourcesRequest {
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+  kuery: string;
+  enableServiceTransactionMetrics: boolean;
+  enableContinuousRollups: boolean;
+}
 
 const getRequest = ({
   documentType,
