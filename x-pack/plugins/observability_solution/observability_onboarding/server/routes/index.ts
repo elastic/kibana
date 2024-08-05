@@ -7,6 +7,7 @@
 import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { elasticAgentRouteRepository } from './elastic_agent/route';
 import { flowRouteRepository } from './flow/route';
+import { kubernetesOnboardingRouteRepository } from './kubernetes/route';
 import { logsOnboardingRouteRepository } from './logs/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
@@ -14,6 +15,7 @@ function getTypedObservabilityOnboardingServerRouteRepository() {
     ...flowRouteRepository,
     ...logsOnboardingRouteRepository,
     ...elasticAgentRouteRepository,
+    ...kubernetesOnboardingRouteRepository,
   };
 
   return repository;

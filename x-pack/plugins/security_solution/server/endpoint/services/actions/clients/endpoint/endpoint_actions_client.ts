@@ -30,12 +30,11 @@ import type {
   ActionDetails,
   HostMetadata,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
@@ -45,6 +44,8 @@ import type {
   UploadedFileInfo,
   ResponseActionScanParameters,
   ResponseActionScanOutputContent,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -106,6 +107,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
+
+    if (actionError && !this.options.isAutomated) {
+      throw new ResponseActionsClientError(actionError, 400);
+    }
 
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
@@ -242,26 +247,26 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     return this.handleResponseAction<
-      KillOrSuspendProcessRequestBody,
-      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+      KillProcessRequestBody,
+      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
     >('kill-process', actionRequest, options);
   }
 
   async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     return this.handleResponseAction<
-      KillOrSuspendProcessRequestBody,
-      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+      SuspendProcessRequestBody,
+      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
     >('suspend-process', actionRequest, options);
   }
 

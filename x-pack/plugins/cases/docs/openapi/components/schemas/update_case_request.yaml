@@ -19,9 +19,7 @@ properties:
         assignees:
           $ref: 'assignees.yaml'
         category:
-          description: A word or phrase that categorizes the case.
-          type: string
-          maxLength: 50
+          $ref: 'case_category.yaml'
         connector:
           oneOf:
             - $ref: 'connector_properties_none.yaml'
@@ -36,7 +34,6 @@ properties:
           description: >
             Custom field values for a case.
             Any optional custom fields that are not specified in the request are set to null.
-          x-technical-preview: true
           minItems: 0
           maxItems: 10
           items:
@@ -48,8 +45,7 @@ properties:
             properties:
               $ref: 'case_customfields.yaml'
         description:
-          description: An updated description for the case.
-          type: string
+          $ref: 'case_description.yaml'
         id:
           description: The identifier for the case.
           type: string
@@ -57,20 +53,13 @@ properties:
         settings:
           $ref: 'settings.yaml'
         severity:
-          $ref: 'severity_property.yaml'
+          $ref: 'case_severity.yaml'
         status:
-          $ref: 'status.yaml'
+          $ref: 'case_status.yaml'
         tags:
-          description: The words and phrases that help categorize cases.
-          type: array
-          maxItems: 200
-          items:
-            type: string
-            maxLength: 256
+          $ref: 'case_tags.yaml'
         title:
-          description: A title for the case.
-          type: string
-          maxLength: 160
+          $ref: 'case_title.yaml'
         version:
           description: The current version of the case. To determine this value, use the get case or find cases APIs.
           type: string

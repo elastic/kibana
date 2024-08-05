@@ -13,7 +13,7 @@ import type {
 } from '@kbn/data-plugin/server';
 
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { PluginSetupContract } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   TaskManagerSetupContract as TaskManagerPluginSetup,
@@ -36,7 +36,7 @@ export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
   cases: CasesServerSetup;
   data: DataPluginSetup;
-  features: PluginSetupContract;
+  features: FeaturesPluginSetup;
   security: SecurityPluginStart;
   taskManager?: TaskManagerPluginSetup;
   telemetry?: TelemetryPluginSetup;

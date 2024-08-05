@@ -9,7 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { CanClearSelections, ControlWidth } from '@kbn/controls-plugin/public/types';
-import { HasSerializableState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
@@ -43,8 +43,11 @@ export type DefaultControlApi = PublishesDataLoading &
   CanClearSelections &
   HasType &
   HasUniqueId &
-  HasSerializableState &
   HasParentApi<ControlGroupApi> & {
+    // Can not use HasSerializableState interface
+    // HasSerializableState types serializeState as function returning 'MaybePromise'
+    // Controls serializeState is sync
+    serializeState: () => SerializedPanelState<DefaultControlState>;
     /** TODO: Make these non-public as part of https://github.com/elastic/kibana/issues/174961 */
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
@@ -72,6 +75,7 @@ export interface ControlFactory<
   ControlApi extends DefaultControlApi = DefaultControlApi
 > {
   type: string;
+  order?: number;
   getIconType: () => string;
   getDisplayName: () => string;
   buildControl: (
@@ -82,7 +86,7 @@ export interface ControlFactory<
     ) => ControlApi,
     uuid: string,
     parentApi: ControlGroupApi
-  ) => { api: ControlApi; Component: React.FC<{}> };
+  ) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
 
 export type ControlStateManager<State extends object = object> = {
@@ -93,5 +97,6 @@ export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
   PropsType extends {} = { className: string }
 > {
+  uuid: string;
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }

@@ -325,7 +325,7 @@ describe.skip('FormBased Data Panel', () => {
   let defaultProps: Parameters<typeof InnerFormBasedDataPanel>[0] & {
     showNoDataPopover: () => void;
   };
-  let core: ReturnType<typeof coreMock['createStart']>;
+  let core: ReturnType<(typeof coreMock)['createStart']>;
   let dataViews: DataViewPublicStart;
 
   beforeEach(() => {

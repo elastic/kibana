@@ -13,6 +13,7 @@ import {
   LoggerFactory,
   LogMeta,
   Logger,
+  LogMessageSource,
   LogLevelId,
 } from '@kbn/logging';
 
@@ -43,28 +44,73 @@ export abstract class AbstractLogger implements Logger {
     meta?: Meta
   ): LogRecord;
 
-  public trace<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Trace, message, meta));
+  public trace<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void {
+    if (!this.level.supports(LogLevel.Trace)) {
+      return;
+    }
+    if (typeof message === 'function') {
+      message = message();
+    }
+    this.performLog(this.createLogRecord<Meta>(LogLevel.Trace, message, meta));
   }
 
-  public debug<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Debug, message, meta));
+  public debug<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void {
+    if (!this.level.supports(LogLevel.Debug)) {
+      return;
+    }
+    if (typeof message === 'function') {
+      message = message();
+    }
+    this.performLog(this.createLogRecord<Meta>(LogLevel.Debug, message, meta));
   }
 
-  public info<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Info, message, meta));
+  public info<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void {
+    if (!this.level.supports(LogLevel.Info)) {
+      return;
+    }
+    if (typeof message === 'function') {
+      message = message();
+    }
+    this.performLog(this.createLogRecord<Meta>(LogLevel.Info, message, meta));
   }
 
-  public warn<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Warn, errorOrMessage, meta));
+  public warn<Meta extends LogMeta = LogMeta>(
+    errorOrMessage: LogMessageSource | Error,
+    meta?: Meta
+  ): void {
+    if (!this.level.supports(LogLevel.Warn)) {
+      return;
+    }
+    if (typeof errorOrMessage === 'function') {
+      errorOrMessage = errorOrMessage();
+    }
+    this.performLog(this.createLogRecord<Meta>(LogLevel.Warn, errorOrMessage, meta));
   }
 
-  public error<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Error, errorOrMessage, meta));
+  public error<Meta extends LogMeta = LogMeta>(
+    errorOrMessage: LogMessageSource | Error,
+    meta?: Meta
+  ): void {
+    if (!this.level.supports(LogLevel.Error)) {
+      return;
+    }
+    if (typeof errorOrMessage === 'function') {
+      errorOrMessage = errorOrMessage();
+    }
+    this.performLog(this.createLogRecord<Meta>(LogLevel.Error, errorOrMessage, meta));
   }
 
-  public fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
+  public fatal<Meta extends LogMeta = LogMeta>(
+    errorOrMessage: LogMessageSource | Error,
+    meta?: Meta
+  ): void {
+    if (!this.level.supports(LogLevel.Fatal)) {
+      return;
+    }
+    if (typeof errorOrMessage === 'function') {
+      errorOrMessage = errorOrMessage();
+    }
+    this.performLog(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
   }
 
   public isLevelEnabled(levelId: LogLevelId): boolean {
@@ -75,12 +121,16 @@ export abstract class AbstractLogger implements Logger {
     if (!this.level.supports(record.level)) {
       return;
     }
-    for (const appender of this.appenders) {
-      appender.append(record);
-    }
+    this.performLog(record);
   }
 
   public get(...childContextPaths: string[]): Logger {
     return this.factory.get(...[this.context, ...childContextPaths]);
+  }
+
+  private performLog(record: LogRecord) {
+    for (const appender of this.appenders) {
+      appender.append(record);
+    }
   }
 }

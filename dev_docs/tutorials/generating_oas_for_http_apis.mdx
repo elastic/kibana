@@ -44,6 +44,10 @@ Other useful query parameters for filtering are:
  * `pluginId` - get the OAS for a specific plugin, for example: `@kbn/data-views-plugin`
  * `access` - filter for specific access levels: `public` or `internal` are supported
 
+<DocCallOut>
+  For assistance with the writing docs or any other questions about the docs impact, check out https://docs.elastic.dev/content-architecture/oas or chat with writers on **#docs** or **#next-api-reference**
+</DocCallOut>
+
 ### Some good practices to consider
 
 #### 1. Runtime schema definitions
@@ -172,7 +176,7 @@ OAS for public routes are written to the Kibana repo as a snapshot that will ult
 #### What about runtime validation libary X?
 Teams have adopted different runtime validation libraries for their HTTP APIs. Kibana core does not intend to support all runtime validation libraries.
 
-Reach out to #kibana-core with questions, concerns or issues you may be facing with `@kbn/config-schema` and we will help you find a solution.
+Reach out to **#kibana-core** with questions, concerns or issues you may be facing with `@kbn/config-schema` and we will help you find a solution.
 
 #### What about internal HTTP APIs?
 It's possible to generate OpenAPI specification for `access: 'internal'` routes but it is not required. The benefit will largely be for your team's internal reference and for other teams to discover your APIs. If you follow the practices outlined in this tutorial it should be simple to generate OAS for internal routes as well.

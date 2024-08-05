@@ -118,11 +118,14 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   const isDedupeKeyRequired = eventAction !== 'trigger';
   const isTriggerPagerDutyEvent = eventAction === 'trigger';
 
-  const isDedupKeyInvalid: boolean = errors.dedupKey !== undefined && errors.dedupKey.length > 0;
+  const isDedupKeyInvalid: boolean =
+    errors.dedupKey !== undefined && Number(errors.dedupKey.length) > 0;
   const isSummaryInvalid: boolean =
-    errors.summary !== undefined && errors.summary.length > 0 && summary !== undefined;
+    errors.summary !== undefined && Number(errors.summary.length) > 0 && summary !== undefined;
   const isTimestampInvalid: boolean =
-    errors.timestamp !== undefined && errors.timestamp.length > 0 && timestamp !== undefined;
+    errors.timestamp !== undefined &&
+    Number(errors.timestamp.length) > 0 &&
+    timestamp !== undefined;
 
   return (
     <>

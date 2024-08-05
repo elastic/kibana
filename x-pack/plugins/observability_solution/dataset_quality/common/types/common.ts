@@ -22,6 +22,5 @@ export interface BasicDataStream {
   name: DataStreamStatType['name'];
   rawName: string;
   namespace: string;
-  title: string;
   integration?: Integration;
 }

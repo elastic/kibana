@@ -18,11 +18,16 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import {
+  registerDeleteInactiveNodesTaskDefinition,
+  scheduleDeleteInactiveNodesTaskDefinition,
+} from './kibana_discovery_service/delete_inactive_nodes_task';
+import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
-import { setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
 import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './task_type_dictionary';
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
@@ -37,6 +42,7 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
+import { TaskPartitioner } from './lib/task_partitioner';
 
 export interface TaskManagerSetupContract {
   /**
@@ -92,6 +98,7 @@ export class TaskManagerPlugin
   private adHocTaskCounter: AdHocTaskCounter;
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private kibanaDiscoveryService?: KibanaDiscoveryService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -110,7 +117,7 @@ export class TaskManagerPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<TaskManagerStartContract, unknown>,
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
@@ -197,6 +204,8 @@ export class TaskManagerPlugin
       );
     }
 
+    registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
@@ -229,7 +238,20 @@ export class TaskManagerPlugin
     executionContext,
     docLinks,
   }: CoreStart): TaskManagerStartContract {
-    const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
+    const savedObjectsRepository = savedObjects.createInternalRepository([
+      TASK_SO_NAME,
+      BACKGROUND_TASK_NODE_SO_NAME,
+    ]);
+
+    this.kibanaDiscoveryService = new KibanaDiscoveryService({
+      savedObjectsRepository,
+      logger: this.logger,
+      currentNode: this.taskManagerId!,
+    });
+
+    if (this.shouldRunBackgroundTasks) {
+      this.kibanaDiscoveryService.start().catch(() => {});
+    }
 
     const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
@@ -260,6 +282,8 @@ export class TaskManagerPlugin
         taskTypes: new Set(this.definitions.getAllTypes()),
         excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
+
+      const taskPartitioner = new TaskPartitioner(this.taskManagerId!, this.kibanaDiscoveryService);
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -271,6 +295,7 @@ export class TaskManagerPlugin
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         ...managedConfiguration,
+        taskPartitioner,
       });
 
       this.ephemeralTaskLifecycle = new EphemeralTaskLifecycle({
@@ -312,6 +337,8 @@ export class TaskManagerPlugin
       taskManagerId: taskStore.taskManagerId,
     });
 
+    scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
@@ -333,6 +360,12 @@ export class TaskManagerPlugin
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };
+  }
+
+  public stop() {
+    if (this.kibanaDiscoveryService?.isStarted()) {
+      this.kibanaDiscoveryService.deleteCurrentNode().catch(() => {});
+    }
   }
 }
 

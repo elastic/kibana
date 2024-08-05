@@ -113,9 +113,9 @@
               ", savedObject: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindResult",
+                "section": "def-server.SavedObjectsFindResult",
                 "text": "SavedObjectsFindResult"
               },
               "<unknown>) => Types[\"Item\"]; additionalSearchFields?: string[] | undefined; } | undefined"
@@ -559,17 +559,17 @@
           "(params: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsCreateOptions",
+            "section": "def-server.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           },
           ") => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsCreateOptions",
+            "section": "def-server.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           }
         ],
@@ -587,9 +587,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsCreateOptions",
+                "section": "def-server.SavedObjectsCreateOptions",
                 "text": "SavedObjectsCreateOptions"
               }
             ],
@@ -685,9 +685,9 @@
           ", savedObject: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindResult",
+            "section": "def-server.SavedObjectsFindResult",
             "text": "SavedObjectsFindResult"
           },
           "<unknown>) => ReturnItem; }"
@@ -974,9 +974,9 @@
           ">) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptions",
+            "section": "def-server.SavedObjectsFindOptions",
             "text": "SavedObjectsFindOptions"
           }
         ],
@@ -1029,17 +1029,17 @@
           "({ included, excluded, }?: { included?: string[] | undefined; excluded?: string[] | undefined; }) => { hasReference: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptionsReference",
+            "section": "def-server.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           "[] | undefined; hasNoReference: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptionsReference",
+            "section": "def-server.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
           "[] | undefined; }"
@@ -1112,17 +1112,17 @@
           ">(params: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsUpdateOptions",
+            "section": "def-server.SavedObjectsUpdateOptions",
             "text": "SavedObjectsUpdateOptions"
           },
           "<Types[\"Attributes\"]>) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsUpdateOptions",
+            "section": "def-server.SavedObjectsUpdateOptions",
             "text": "SavedObjectsUpdateOptions"
           },
           "<Types[\"Attributes\"]>"
@@ -1141,9 +1141,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsUpdateOptions",
+                "section": "def-server.SavedObjectsUpdateOptions",
                 "text": "SavedObjectsUpdateOptions"
               },
               "<Types[\"Attributes\"]>"
@@ -1955,9 +1955,9 @@
               ", savedObject: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindResult",
+                "section": "def-server.SavedObjectsFindResult",
                 "text": "SavedObjectsFindResult"
               },
               "<unknown>) => ReturnItem"
@@ -1997,9 +1997,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindResult",
+                    "section": "def-server.SavedObjectsFindResult",
                     "text": "SavedObjectsFindResult"
                   },
                   "<unknown>"
@@ -2352,17 +2352,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
+                "section": "def-server.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
+                "section": "def-server.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[] | undefined"
@@ -2399,17 +2399,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
+                "section": "def-server.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
+                "section": "def-server.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[] | undefined"
@@ -2514,9 +2514,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsPitParams",
+                "section": "def-server.SavedObjectsPitParams",
                 "text": "SavedObjectsPitParams"
               },
               " | undefined"
@@ -2600,9 +2600,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.MutatingOperationRefreshSetting",
+                "section": "def-server.MutatingOperationRefreshSetting",
                 "text": "MutatingOperationRefreshSetting"
               },
               " | undefined"
@@ -3155,9 +3155,9 @@
           "(params: Types[\"CreateOptions\"]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsCreateOptions",
+            "section": "def-server.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           }
         ],
@@ -3211,9 +3211,9 @@
           "(params: Types[\"SearchIn\"]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptions",
+            "section": "def-server.SavedObjectsFindOptions",
             "text": "SavedObjectsFindOptions"
           }
         ],
@@ -3281,9 +3281,9 @@
           "(params: Types[\"UpdateOptions\"]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsUpdateOptions",
+            "section": "def-server.SavedObjectsUpdateOptions",
             "text": "SavedObjectsUpdateOptions"
           },
           "<Types[\"Attributes\"]>"

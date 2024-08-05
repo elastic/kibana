@@ -898,10 +898,12 @@ describe('Detections Rules API', () => {
       expect(result).toEqual({
         '1': {
           muteAll: false,
+          name: '',
           activeSnoozes: [],
         },
         '2': {
           muteAll: false,
+          name: '',
           activeSnoozes: [],
           isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
         },

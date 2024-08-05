@@ -17,7 +17,6 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { delay } from '../test_utils';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');
 
@@ -33,7 +32,6 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
   afterEach(async () => {
     await root?.shutdown();
     await esServer?.stop();
-    await delay(10);
   });
 
   it('is not run for new installations', async () => {
@@ -80,7 +78,6 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
 
       // stop Kibana and remove logs
       await root.shutdown();
-      await delay(10);
       await fs.unlink(logFilePath).catch(() => {});
 
       root = createRoot();

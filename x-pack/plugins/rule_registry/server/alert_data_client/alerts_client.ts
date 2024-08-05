@@ -45,11 +45,6 @@ import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { TypeOf } from 'io-ts';
-import {
-  MAX_ALERTS_GROUPING_QUERY_SIZE,
-  MAX_ALERTS_PAGES,
-  MAX_PAGINATED_ALERTS,
-} from './constants';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -63,6 +58,11 @@ import { IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
 import { alertsAggregationsSchema } from '../../common/types';
+import {
+  MAX_ALERTS_GROUPING_QUERY_SIZE,
+  MAX_ALERTS_PAGES,
+  MAX_PAGINATED_ALERTS,
+} from './constants';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -1089,7 +1089,7 @@ export class AlertsClient {
     return this.find({
       featureIds,
       aggs: {
-        groupByField: {
+        groupByFields: {
           terms: {
             field: 'groupByField',
             size: MAX_ALERTS_GROUPING_QUERY_SIZE,

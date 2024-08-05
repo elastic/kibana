@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual, cloneDeep } from 'lodash';
+import { omit, partition, isEqual, cloneDeep, without } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
@@ -67,6 +67,7 @@ import type {
   DeletePackagePoliciesResponse,
   PolicySecretReference,
   AssetsMap,
+  AgentPolicy,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -132,6 +133,7 @@ import {
 import { getPackageAssetsMap } from './epm/packages/get';
 import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -241,6 +243,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
       await requireUniqueName(soClient, enrichedPackagePolicy);
+    }
+    if (enrichedPackagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: enrichedPackagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -847,6 +855,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await requireUniqueName(soClient, enrichedPackagePolicy, id);
     }
 
+    if (packagePolicy.namespace) {
+      await validatePolicyNamespaceForSpace({
+        namespace: packagePolicy.namespace,
+        spaceId: soClient.getCurrentNamespace(),
+      });
+    }
+
     // eslint-disable-next-line prefer-const
     let { version, ...restOfPackagePolicy } = packagePolicy;
     let inputs = getInputsWithStreamIds(restOfPackagePolicy, oldPackagePolicy.id);
@@ -1234,15 +1249,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
+    const agentlessAgentPolicies = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
-        await validateIsNotHostedPolicy(
+        const agentPolicy = await validateIsNotHostedPolicy(
           soClient,
           agentPolicyId,
           options?.force,
           'Cannot remove integrations of hosted agent policy'
         );
+        // collect agentless agent policies to delete
+        if (agentPolicy.supports_agentless) {
+          agentlessAgentPolicies.push(agentPolicyId);
+        }
       } catch (e) {
         hostedAgentPolicies.push(agentPolicyId);
       }
@@ -1317,14 +1337,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
+    if (agentlessAgentPolicies.length > 0) {
+      for (const agentPolicyId of agentlessAgentPolicies) {
+        await agentPolicyService.delete(soClient, esClient, agentPolicyId, { force: true });
+      }
+    }
+
     if (!options?.skipUnassignFromAgentPolicies) {
-      const uniquePolicyIdsR = [
+      let uniquePolicyIdsR = [
         ...new Set(
           result
             .filter((r) => r.success && r.policy_ids && r.policy_ids.length > 0)
             .flatMap((r) => r.policy_ids!)
         ),
       ];
+      uniquePolicyIdsR = without(uniquePolicyIdsR, ...agentlessAgentPolicies);
 
       const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
         if (cur.success && cur.policy_ids && cur.package?.name === 'endpoint') {
@@ -1527,7 +1554,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ) {
     const updatePackagePolicy = updatePackageInputs(
       {
-        ...omit(packagePolicy, 'id'),
+        ...omit(packagePolicy, 'id', 'spaceId'),
         inputs: packagePolicy.inputs,
         package: {
           ...packagePolicy.package!,
@@ -1612,7 +1639,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     const updatedPackagePolicy = updatePackageInputs(
       {
-        ...omit(packagePolicy, 'id'),
+        ...omit(packagePolicy, 'id', 'spaceId'),
         inputs: packagePolicy.inputs,
         package: {
           ...packagePolicy.package!,
@@ -1678,7 +1705,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         .info(
           `Package policy upgrade dry run ${hasErrors ? 'resulted in errors' : 'ran successfully'}`
         );
-      appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+      appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
     }
   }
 
@@ -1867,6 +1894,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 const omitted = {
                   ...omit(result, [
                     'id',
+                    'spaceId',
                     'version',
                     'revision',
                     'updated_at',
@@ -2716,9 +2744,10 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             appContextService
               .getLogger()
               .debug(
-                `Rejecting package policy update due to dataset change, old val '${
-                  oldStream?.vars[DATASET_VAR_NAME]?.value
-                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
+                () =>
+                  `Rejecting package policy update due to dataset change, old val '${
+                    oldStream.vars![DATASET_VAR_NAME].value
+                  }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
@@ -2738,7 +2767,7 @@ async function validateIsNotHostedPolicy(
   id: string,
   force = false,
   errorMessage?: string
-) {
+): Promise<AgentPolicy> {
   const agentPolicy = await agentPolicyService.get(soClient, id, false);
 
   if (!agentPolicy) {
@@ -2753,6 +2782,8 @@ async function validateIsNotHostedPolicy(
       errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
     );
   }
+
+  return agentPolicy;
 }
 
 export function sendUpdatePackagePolicyTelemetryEvent(
@@ -2781,7 +2812,7 @@ export function sendUpdatePackagePolicyTelemetryEvent(
           upgradeTelemetry
         );
         appContextService.getLogger().info(`Package policy upgraded successfully`);
-        appContextService.getLogger().debug(JSON.stringify(upgradeTelemetry));
+        appContextService.getLogger().debug(() => JSON.stringify(upgradeTelemetry));
       }
     }
   });

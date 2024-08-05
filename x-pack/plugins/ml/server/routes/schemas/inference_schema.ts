@@ -96,3 +96,9 @@ export const createIngestPipelineSchema = schema.object({
 export const modelDownloadsQuery = schema.object({
   version: schema.maybe(schema.oneOf([schema.literal('1'), schema.literal('2')])),
 });
+
+export const curatedModelsParamsSchema = schema.object({
+  modelName: schema.string(),
+});
+
+export const curatedModelsQuerySchema = schema.object({ version: schema.maybe(schema.number()) });

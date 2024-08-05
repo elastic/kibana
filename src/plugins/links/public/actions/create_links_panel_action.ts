@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
-import { serializeLinksAttributes } from '../lib/serialize_attributes';
-import { LinksSerializedState } from '../types';
 
 const ADD_LINKS_PANEL_ACTION_ID = 'create_links_panel';
 
@@ -23,26 +20,21 @@ export const registerCreateLinksPanelAction = () => {
     getIconType: () => APP_ICON,
     order: 10,
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      const { compatibilityCheck } = await import('./compatibility_check');
+      return compatibilityCheck(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) {
-        throw new IncompatibleActionError();
-      }
+      const { compatibilityCheck } = await import('./compatibility_check');
+      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       const { openEditorFlyout } = await import('../editor/open_editor_flyout');
       const runtimeState = await openEditorFlyout({
         parentDashboard: embeddable,
       });
       if (!runtimeState) return;
 
-      const initialState: LinksSerializedState = runtimeState.savedObjectId
-        ? { savedObjectId: runtimeState.savedObjectId }
-        : // We should not extract the references when passing initialState to addNewPanel
-          serializeLinksAttributes(runtimeState, false);
-
       await embeddable.addNewPanel({
         panelType: CONTENT_ID,
-        initialState,
+        initialState: runtimeState,
       });
     },
     grouping: [COMMON_EMBEDDABLE_GROUPING.annotation],

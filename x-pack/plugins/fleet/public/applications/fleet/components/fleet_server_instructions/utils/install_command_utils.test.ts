@@ -35,9 +35,9 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-x86_64.tar.gz
-        tar xzvf elastic-agent--darwin-x86_64.tar.gz
-        cd elastic-agent--darwin-x86_64
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
+        tar xzvf elastic-agent--darwin-aarch64.tar.gz
+        cd elastic-agent--darwin-aarch64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
@@ -156,9 +156,9 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-x86_64.tar.gz
-        tar xzvf elastic-agent--darwin-x86_64.tar.gz
-        cd elastic-agent--darwin-x86_64
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
+        tar xzvf elastic-agent--darwin-aarch64.tar.gz
+        cd elastic-agent--darwin-aarch64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
@@ -301,9 +301,9 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-x86_64.tar.gz
-        tar xzvf elastic-agent--darwin-x86_64.tar.gz
-        cd elastic-agent--darwin-x86_64
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
+        tar xzvf elastic-agent--darwin-aarch64.tar.gz
+        cd elastic-agent--darwin-aarch64
         sudo ./elastic-agent install --url=http://fleetserver:8220 \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\

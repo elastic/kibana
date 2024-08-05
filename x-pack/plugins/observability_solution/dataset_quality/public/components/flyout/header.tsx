@@ -27,17 +27,19 @@ import { IntegrationIcon } from '../common';
 import { BasicDataStream } from '../../../common/types';
 
 export function Header({
-  titleAndLinkDetails,
+  linkDetails,
   loading,
+  title,
 }: {
-  titleAndLinkDetails: BasicDataStream;
+  linkDetails: BasicDataStream;
   loading: boolean;
+  title: string;
 }) {
-  const { integration, title } = titleAndLinkDetails;
+  const { integration } = linkDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
   const redirectLinkProps = useRedirectLink({
-    dataStreamStat: titleAndLinkDetails,
+    dataStreamStat: linkDetails,
     telemetry: {
       page: 'details',
       navigationSource: NavigationSource.Header,

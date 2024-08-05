@@ -138,9 +138,10 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       this.#logger.debug(
-        `${LLM_TYPE}#completionWithRetry ${this.#traceId} assistantMessage:\n${JSON.stringify(
-          requestBody.params.subActionParams
-        )} `
+        () =>
+          `${LLM_TYPE}#completionWithRetry ${this.#traceId} assistantMessage:\n${JSON.stringify(
+            requestBody.params.subActionParams
+          )} `
       );
 
       const actionResult = await this.#actionsClient.execute(requestBody);

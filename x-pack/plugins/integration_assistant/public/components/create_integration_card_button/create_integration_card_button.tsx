@@ -93,7 +93,12 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                <EuiLink color="primary" href={href} onClick={navigate}>
+                <EuiLink
+                  color="primary"
+                  href={href}
+                  onClick={navigate}
+                  data-test-subj="createIntegrationLink"
+                >
                   <EuiFlexGroup
                     justifyContent="center"
                     alignItems="center"

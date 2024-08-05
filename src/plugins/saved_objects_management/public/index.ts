@@ -13,14 +13,7 @@ export type {
   SavedObjectsManagementPluginSetup,
   SavedObjectsManagementPluginStart,
 } from './plugin';
-export type {
-  SavedObjectsManagementActionServiceSetup,
-  SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementColumnServiceSetup,
-  SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-} from './services';
+export type { SavedObjectsManagementColumn, SavedObjectsManagementRecord } from './services';
 export { SavedObjectsManagementAction } from './services';
 export type { ProcessedImportResponse, FailedImport } from './lib';
 export { processImportResponse, getTagFindReferences, parseQuery } from './lib';

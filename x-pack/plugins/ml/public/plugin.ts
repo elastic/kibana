@@ -269,7 +269,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               );
             }
 
-            if (fullLicense) {
+            if (fullLicense && mlCapabilities.canGetMlInfo) {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
               if (this.enabledFeatures.ad) {

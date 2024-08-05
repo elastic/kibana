@@ -101,7 +101,7 @@ export async function scoreSuggestions({
       properties: {
         scores: {
           description: `The document IDs and their scores, as CSV. Example:
-          
+
             my_id,7
             my_other_id,3
             my_third_id,4
@@ -155,7 +155,7 @@ export async function scoreSuggestions({
     relevantDocumentIds.includes(suggestion.id)
   );
 
-  logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
+  logger.debug(() => `Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
   return {
     relevantDocuments,

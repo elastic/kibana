@@ -107,6 +107,10 @@
     "timestamp"
   ],
   "application_usage_totals": [],
+  "background-task-node": [
+    "id",
+    "last_seen"
+  ],
   "canvas-element": [
     "@created",
     "@timestamp",
@@ -301,7 +305,8 @@
     "metrics",
     "name",
     "staticFields",
-    "type"
+    "type",
+    "version"
   ],
   "entity-discovery-api-key": [
     "apiKey"
@@ -479,6 +484,7 @@
     "status",
     "uuid"
   ],
+  "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
     "policy_id",
     "token_plain"
@@ -999,6 +1005,7 @@
     "attempts",
     "enabled",
     "ownerId",
+    "partition",
     "retryAt",
     "runAt",
     "schedule",

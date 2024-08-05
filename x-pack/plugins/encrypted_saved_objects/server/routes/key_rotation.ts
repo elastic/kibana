@@ -23,6 +23,7 @@ export function defineKeyRotationRoutes({
   router,
   logger,
   config,
+  buildFlavor,
 }: RouteDefinitionParams) {
   let rotationInProgress = false;
   router.post(
@@ -39,7 +40,11 @@ export function defineKeyRotationRoutes({
         }),
       },
       options: {
-        tags: ['access:rotateEncryptionKey'],
+        tags: ['access:rotateEncryptionKey', 'oas-tag:saved objects'],
+        access: buildFlavor === 'serverless' ? 'internal' : undefined,
+        summary: `Rotate a key for encrypted saved objects`,
+        description: `If a saved object cannot be decrypted using the primary encryption key, Kibana attempts to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
+        NOTE: Bulk key rotation can consume a considerable amount of resources and hence only user with a superuser role can trigger it.`,
       },
     },
     async (context, request, response) => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useNodeDetailsRedirect } from '../../../../link_to/use_node_details_redirect';
@@ -34,28 +35,38 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const providerName = cloudProvider ?? 'Unknown';
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      className="eui-textTruncate"
-      gutterSize="s"
-      responsive={false}
+    <EuiToolTip
+      delay="long"
+      anchorClassName="eui-displayBlock"
+      content={i18n.translate('xpack.infra.hostsViewPage.table.nameTooltip', {
+        defaultMessage: '{providerName}: {name}',
+        values: {
+          providerName,
+          name,
+        },
+      })}
     >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip delay="long" content={providerName}>
-          <CloudProviderIcon cloudProvider={cloudProvider} size="m" title={name} />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>
-        <EuiToolTip delay="long" content={name}>
-          <EuiLink
-            data-test-subj="hostsViewTableEntryTitleLink"
-            className="eui-displayBlock eui-textTruncate"
-            {...link}
-          >
-            {name}
-          </EuiLink>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <EuiLink data-test-subj="hostsViewTableEntryTitleLink" {...link}>
+        <EuiFlexGroup
+          className="eui-textTruncate"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          onClick={onClick}
+        >
+          <EuiFlexItem grow={false}>
+            <CloudProviderIcon
+              cloudProvider={cloudProvider}
+              size="m"
+              title={providerName}
+              role="presentation"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem className="eui-textTruncate">
+            <span className="eui-textTruncate">{name}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiToolTip>
   );
 };

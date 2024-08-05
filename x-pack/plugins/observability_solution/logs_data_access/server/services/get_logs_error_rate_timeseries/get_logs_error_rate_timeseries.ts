@@ -22,14 +22,14 @@ export interface LogsErrorRateTimeseries {
   kuery?: string;
 }
 
-export const getLogErrorsAggegation = () => ({
+const getLogErrorsAggregation = () => ({
   terms: {
     field: LOG_LEVEL,
     include: ['error', 'ERROR'],
   },
 });
 
-type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggegation>;
+type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggregation>;
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
@@ -59,6 +59,8 @@ export function createGetLogErrorRateTimeseries() {
     serviceEnvironmentQuery = [],
   }: LogsErrorRateTimeseries): Promise<LogsErrorRateTimeseriesReturnType> => {
     const intervalString = getBucketSizeFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
+
+    // Note: Please keep the formula in `metricsFormulasMap` up to date with the query!
 
     const esResponse = await esClient.search({
       index: 'logs-*-*',
@@ -103,7 +105,7 @@ export function createGetLogErrorRateTimeseries() {
                 },
               },
               aggs: {
-                logErrors: getLogErrorsAggegation(),
+                logErrors: getLogErrorsAggregation(),
               },
             },
           },

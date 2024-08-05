@@ -11,9 +11,9 @@ import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
 import { ActionsClientLlm } from '@kbn/langchain/server';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
 import { AgentExecutor } from './types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
-import { APMTracer } from '../tracers/apm_tracer';
 
 export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
   'Elastic AI Assistant Agent Executor (OpenAI Functions)';

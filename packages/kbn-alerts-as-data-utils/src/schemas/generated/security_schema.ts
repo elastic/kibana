@@ -122,6 +122,7 @@ const SecurityAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
+  'event.original': schemaString,
   'host.asset.criticality': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,

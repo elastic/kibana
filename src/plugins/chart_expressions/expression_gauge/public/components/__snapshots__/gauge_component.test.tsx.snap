@@ -454,7 +454,7 @@ exports[`GaugeComponent renders the chart 1`] = `
           "barBackground": "#EDF0F5",
           "border": "#EDF0F5",
           "emptyBackground": "transparent",
-          "iconAlign": "left",
+          "iconAlign": "right",
           "minHeight": 64,
           "minValueFontSize": 12,
           "nonFiniteText": "N/A",

@@ -208,15 +208,16 @@ export const MetricVis = ({
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
     if (typeof value !== 'number') {
-      const nonNumericMetric: MetricWText = {
-        value: formatPrimaryMetric(value),
+      const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: renderSecondaryMetric(data.columns, row, config),
         color: config.metric.color ?? defaultColor,
       };
-      return nonNumericMetric;
+      return Array.isArray(value)
+        ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }
+        : { ...nonNumericMetricBase, value: formatPrimaryMetric(value) };
     }
 
     const baseMetric: MetricWNumber = {
@@ -335,6 +336,10 @@ export const MetricVis = ({
                   barBackground: euiThemeVars.euiColorLightShade,
                   emptyBackground: euiThemeVars.euiColorEmptyShade,
                   blendingBackground: euiThemeVars.euiColorEmptyShade,
+                  titlesTextAlign: config.metric.titlesTextAlign,
+                  valuesTextAlign: config.metric.valuesTextAlign,
+                  iconAlign: config.metric.iconAlign,
+                  valueFontSize: config.metric.valueFontSize,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

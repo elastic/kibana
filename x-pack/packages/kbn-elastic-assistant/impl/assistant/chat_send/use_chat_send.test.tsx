@@ -21,7 +21,6 @@ jest.mock('../use_conversation');
 jest.mock('../../..');
 
 const setEditingSystemPromptId = jest.fn();
-const setPromptTextPreview = jest.fn();
 const setSelectedPromptContexts = jest.fn();
 const setUserPrompt = jest.fn();
 const sendMessage = jest.fn();
@@ -43,7 +42,6 @@ export const testProps: UseChatSendProps = {
   } as unknown as HttpSetup,
   editingSystemPromptId: defaultSystemPrompt.id,
   setEditingSystemPromptId,
-  setPromptTextPreview,
   setSelectedPromptContexts,
   setUserPrompt,
   setCurrentConversation,
@@ -65,7 +63,6 @@ describe('use chat send', () => {
       assistantTelemetry: {
         reportAssistantMessageSent,
       },
-      knowledgeBase: { isEnabledKnowledgeBase: false, isEnabledRAGAlerts: false },
     });
   });
   it('handleOnChatCleared clears the conversation', async () => {
@@ -75,7 +72,6 @@ describe('use chat send', () => {
     });
     result.current.handleOnChatCleared();
     expect(clearConversation).toHaveBeenCalled();
-    expect(setPromptTextPreview).toHaveBeenCalledWith('');
     expect(setUserPrompt).toHaveBeenCalledWith('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
     await waitFor(() => {
@@ -89,7 +85,6 @@ describe('use chat send', () => {
       wrapper: TestProviders,
     });
     result.current.handlePromptChange('new prompt');
-    expect(setPromptTextPreview).toHaveBeenCalledWith('new prompt');
     expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
   });
   it('handleSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
@@ -154,8 +149,6 @@ describe('use chat send', () => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
         conversationId: testProps.currentConversation?.title,
         role: 'user',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',
@@ -163,8 +156,6 @@ describe('use chat send', () => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
         conversationId: testProps.currentConversation?.title,
         role: 'assistant',
-        isEnabledKnowledgeBase: false,
-        isEnabledRAGAlerts: false,
         actionTypeId: '.gen-ai',
         model: undefined,
         provider: 'OpenAI',

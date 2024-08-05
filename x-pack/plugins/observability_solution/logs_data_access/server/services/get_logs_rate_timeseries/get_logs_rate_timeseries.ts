@@ -51,6 +51,8 @@ export function createGetLogsRateTimeseries() {
   }: LogsRateTimeseries): Promise<LogsRateTimeseriesReturnType> => {
     const intervalString = getBucketSizeFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
 
+    // Note: Please keep the formula in `metricsFormulasMap` up to date with the query!
+
     const esResponse = await esClient.search({
       index: 'logs-*-*',
       size: 0,

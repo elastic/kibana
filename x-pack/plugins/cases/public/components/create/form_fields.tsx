@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import type { CasePostRequest } from '../../../common';
+import type { CasePostRequest, CaseUI } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
@@ -28,6 +28,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { TemplateSelector } from './templates';
 import { getInitialCaseValue } from './utils';
 import { CaseFormFields } from '../case_form_fields';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -42,7 +43,22 @@ const transformTemplateCaseFieldsToCaseFormFields = (
   caseTemplateFields: CasesConfigurationUITemplate['caseFields']
 ): CasePostRequest => {
   const caseFields = removeEmptyFields(caseTemplateFields ?? {});
-  return getInitialCaseValue({ owner, ...caseFields });
+  const transFormedCustomFields = caseFields?.customFields?.map((customField) => {
+    const customFieldFactory = customFieldsBuilderMap[customField.type];
+    const { convertNullToEmpty } = customFieldFactory();
+    const value = convertNullToEmpty ? convertNullToEmpty(customField.value) : customField.value;
+
+    return {
+      ...customField,
+      value,
+    };
+  });
+
+  return getInitialCaseValue({
+    owner,
+    ...caseFields,
+    customFields: transFormedCustomFields as CaseUI['customFields'],
+  });
 };
 
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';

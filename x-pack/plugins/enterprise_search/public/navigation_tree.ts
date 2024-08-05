@@ -211,7 +211,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [{ link: 'searchInferenceEndpoints' }],
+                  children: [{ link: 'enterpriseSearchRelevance:inferenceEndpoints' }],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
@@ -251,6 +251,14 @@ export const getNavigationTreeDefinition = ({
                   id: 'entsearch',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.entsearch', {
                     defaultMessage: 'Enterprise Search',
+                  }),
+                },
+                {
+                  children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
+                  id: 'otherTools',
+                  renderAs: 'accordion',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.otherTools', {
+                    defaultMessage: 'Other tools',
                   }),
                 },
               ],

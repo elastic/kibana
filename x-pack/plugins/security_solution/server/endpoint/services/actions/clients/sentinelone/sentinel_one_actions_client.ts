@@ -12,11 +12,16 @@ import {
 import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneExecuteScriptResponse,
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
-  SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
-  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetRemoteScriptResultsApiResponse,
+  SentinelOneGetRemoteScriptsParams,
+  SentinelOneGetRemoteScriptsResponse,
+  SentinelOneGetRemoteScriptStatusApiResponse,
+  SentinelOneRemoteScriptExecutionStatus,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import type {
   QueryDslQueryContainer,
@@ -24,11 +29,14 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
-import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
+import type { Mutable } from 'utility-types';
 import type {
-  NormalizedExternalConnectorClient,
-  NormalizedExternalConnectorClientExecuteOptions,
-} from '../lib/normalized_external_connector_client';
+  SentinelOneKillProcessScriptArgs,
+  SentinelOneProcessListScriptArgs,
+  SentinelOneScriptArgs,
+} from './types';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
+import type { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
@@ -40,16 +48,22 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionAgentResponseEsDocNotFound, ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  GetProcessesActionOutputContent,
+  KillProcessActionOutputContent,
+  KillProcessRequestBody,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionParametersWithProcessData,
+  ResponseActionParametersWithProcessName,
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
@@ -57,24 +71,41 @@ import type {
   SentinelOneGetFileResponseMeta,
   SentinelOneIsolationRequestMeta,
   SentinelOneIsolationResponseMeta,
+  SentinelOneKillProcessRequestMeta,
+  SentinelOneKillProcessResponseMeta,
+  SentinelOneProcessesRequestMeta,
+  SentinelOneProcessesResponseMeta,
   UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
+  GetProcessesRequestBody,
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
+  ResponseActionsClientPendingAction,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
-  ResponseActionsClientPendingAction,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
-import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
+
+const NOOP_THROW = () => {
+  throw new ResponseActionsClientError('not implemented!');
+};
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
 };
+
+interface FetchScriptInfoResponse<
+  TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+> {
+  scriptId: string;
+  scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number];
+  /** A helper method that will build the arguments for the given script */
+  buildScriptArgs: (options: TScriptOptions) => string;
+}
 
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
@@ -181,7 +212,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for SentinelOne with:\n${stringify(executeOptions)}`
+      () =>
+        `calling connector actions 'execute()' for SentinelOne with:\n${stringify(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
@@ -198,7 +230,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
+    this.log.debug(() => `Response:\n${stringify(actionSendResponse)}`);
 
     return actionSendResponse as ActionTypeExecutorResult<T>;
   }
@@ -207,28 +239,21 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentUUID: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
-      SentinelOneGetAgentsParams,
-      SUB_ACTION
-    > = {
-      params: {
-        subAction: SUB_ACTION.GET_AGENTS,
-        subActionParams: {
-          uuid: agentUUID,
-        },
-      },
-    };
+    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentUUID);
+
+    if (cachedEntry) {
+      this.log.debug(
+        `Found cached agent details for UUID [${agentUUID}]:\n${stringify(cachedEntry)}`
+      );
+      return cachedEntry;
+    }
 
     let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
     try {
-      const response = (await this.connectorActionsClient.execute(
-        executeOptions
-      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
-
-      this.log.debug(
-        `Response for SentinelOne agent id [${agentUUID}] returned:\n${stringify(response)}`
-      );
+      const response = await this.sendAction<SentinelOneGetAgentsResponse>(SUB_ACTION.GET_AGENTS, {
+        uuid: agentUUID,
+      });
 
       s1ApiResponse = response.data;
     } catch (err) {
@@ -242,6 +267,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
       throw new ResponseActionsClientError(`SentinelOne agent id [${agentUUID}] not found`, 404);
     }
+
+    this.cache.set(agentUUID, s1ApiResponse.data[0]);
 
     return s1ApiResponse.data[0];
   }
@@ -258,6 +285,23 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           400
         ),
       };
+    }
+
+    // validate that we have a `process_name`. We need this here because the schema for this command
+    // specifically because `KillProcessRequestBody` allows 3 types of parameters.
+    if (payload.command === 'kill-process') {
+      if (
+        !payload.parameters ||
+        !('process_name' in payload.parameters) ||
+        !payload.parameters.process_name
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            '[body.parameters.process_name]: missing parameter or value is empty'
+          ),
+        };
+      }
     }
 
     return super.validateRequest(payload);
@@ -438,12 +482,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           SentinelOneGetActivitiesResponse<{ commandBatchUuid: string }>
         >(SUB_ACTION.GET_ACTIVITIES, activitySearchCriteria);
 
-        this.log.debug(
-          `Search of activity log with:\n${stringify(
-            activitySearchCriteria
-          )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
-        );
-
         if (activityLogSearchResponse.data?.data.length) {
           const activityLogItem = activityLogSearchResponse.data?.data[0];
 
@@ -469,15 +507,27 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async getFileInfo(actionId: string, agentId: string): Promise<UploadedFileInfo> {
+    await this.ensureValidActionId(actionId);
+    const {
+      EndpointActions: {
+        data: { command },
+      },
+    } = await this.fetchActionRequestEsDoc(actionId);
+
+    const {
+      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
+      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
+    } = this.options.endpointService.experimentalFeatures;
+
     if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+      (command === 'get-file' && !isGetFileEnabled) ||
+      (command === 'running-processes' && !isRunningProcessesEnabled)
     ) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
         400
       );
     }
-    await this.ensureValidActionId(actionId);
 
     const fileInfo: UploadedFileInfo = {
       actionId,
@@ -492,19 +542,69 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     try {
-      const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+      switch (command) {
+        case 'get-file':
+          {
+            const agentResponse = await this.fetchEsResponseDocForAgentId<
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileResponseMeta
+            >(actionId, agentId);
 
-      // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
-      // calling the download API, which would return the following error:
-      // {  "errors":[ {
-      //      "code":4100010,
-      //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
-      //      "title":"Resource not found"
-      // } ] }
-      fileInfo.status = 'READY';
-      fileInfo.created = agentResponse.meta?.createdAt ?? '';
-      fileInfo.name = agentResponse.meta?.filename ?? '';
-      fileInfo.mimeType = 'application/octet-stream';
+            // Unfortunately, there is no way to determine if a file is still available in SentinelOne without actually
+            // calling the download API, which would return the following error:
+            // {  "errors":[ {
+            //      "code":4100010,
+            //      "detail":"The requested files do not exist. Fetched files are deleted after 3 days, or earlier if more than 30 files are fetched.",
+            //      "title":"Resource not found"
+            // } ] }
+            fileInfo.status = 'READY';
+            fileInfo.created = agentResponse.meta?.createdAt ?? '';
+            fileInfo.name = agentResponse.meta?.filename ?? '';
+            fileInfo.mimeType = 'application/octet-stream';
+          }
+          break;
+
+        case 'running-processes':
+          {
+            const agentResponse = await this.fetchEsResponseDocForAgentId<
+              GetProcessesActionOutputContent,
+              SentinelOneProcessesResponseMeta
+            >(actionId, agentId);
+            const s1TaskId = agentResponse.meta?.taskId ?? '';
+
+            fileInfo.created = agentResponse['@timestamp'];
+
+            const { data: s1ScriptResultsApiResponse } =
+              await this.sendAction<SentinelOneGetRemoteScriptResultsApiResponse>(
+                SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
+                {
+                  taskIds: [s1TaskId],
+                }
+              );
+
+            const fileDownloadLink = (s1ScriptResultsApiResponse?.data.download_links ?? []).find(
+              (linkInfo) => {
+                return linkInfo.taskId === s1TaskId;
+              }
+            );
+
+            if (!fileDownloadLink) {
+              this.log.debug(
+                `No download link found in SentinelOne for Task Id [${s1TaskId}]. Setting file status to DELETED`
+              );
+
+              fileInfo.status = 'DELETED';
+            } else {
+              fileInfo.status = 'READY';
+              fileInfo.name = fileDownloadLink.fileName ?? `${actionId}-${agentId}.zip`;
+              fileInfo.mimeType = 'application/octet-stream';
+            }
+          }
+          break;
+
+        default:
+          throw new ResponseActionsClientError(`${command} does not support file downloads`, 400);
+      }
     } catch (e) {
       // Ignore "no response doc" error for the agent and just return the file info with the status of 'AWAITING_UPLOAD'
       if (!(e instanceof ResponseActionAgentResponseEsDocNotFound)) {
@@ -516,8 +616,21 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
+    await this.ensureValidActionId(actionId);
+    const {
+      EndpointActions: {
+        data: { command },
+      },
+    } = await this.fetchActionRequestEsDoc(actionId);
+
+    const {
+      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
+      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
+    } = this.options.endpointService.experimentalFeatures;
+
     if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
+      (command === 'get-file' && !isGetFileEnabled) ||
+      (command === 'running-processes' && !isRunningProcessesEnabled)
     ) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
@@ -525,36 +638,246 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    await this.ensureValidActionId(actionId);
+    let downloadStream: Readable | undefined;
+    let fileName: string = 'download.zip';
 
-    const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
+    try {
+      switch (command) {
+        case 'get-file':
+          {
+            const getFileAgentResponse = await this.fetchEsResponseDocForAgentId<
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileResponseMeta
+            >(actionId, agentId);
 
-    if (!agentResponse.meta?.activityLogEntryId) {
-      throw new ResponseActionsClientError(
-        `Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]`
+            if (!getFileAgentResponse.meta?.activityLogEntryId) {
+              throw new ResponseActionsClientError(
+                `Unable to retrieve file from SentinelOne. Response ES document is missing [meta.activityLogEntryId]`
+              );
+            }
+
+            const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
+              agentUUID: agentId,
+              activityId: getFileAgentResponse.meta?.activityLogEntryId,
+            };
+            const { data } = await this.sendAction<Readable>(
+              SUB_ACTION.DOWNLOAD_AGENT_FILE,
+              downloadAgentFileMethodOptions
+            );
+
+            if (data) {
+              downloadStream = data;
+              fileName = getFileAgentResponse.meta.filename;
+            }
+          }
+          break;
+
+        case 'running-processes':
+          {
+            const processesAgentResponse = await this.fetchEsResponseDocForAgentId<
+              {},
+              SentinelOneProcessesResponseMeta
+            >(actionId, agentId);
+
+            if (!processesAgentResponse.meta?.taskId) {
+              throw new ResponseActionsClientError(
+                `Unable to retrieve file from SentinelOne for Response Action [${actionId}]. Response ES document is missing [meta.taskId]`
+              );
+            }
+
+            const { data } = await this.sendAction<Readable>(
+              SUB_ACTION.DOWNLOAD_REMOTE_SCRIPT_RESULTS,
+              {
+                taskId: processesAgentResponse.meta?.taskId,
+              }
+            );
+
+            if (data) {
+              downloadStream = data;
+              fileName = `${actionId}_${agentId}.zip`;
+            }
+          }
+          break;
+
+        default:
+          throw new ResponseActionsClientError(`${command} does not support file downloads`, 400);
+      }
+
+      if (!downloadStream) {
+        throw new ResponseActionsClientError(
+          `Unable to establish a file download Readable stream with SentinelOne for response action [${command}] [${actionId}]`
+        );
+      }
+    } catch (e) {
+      this.log.debug(
+        () =>
+          `Attempt to get file download stream from SentinelOne for response action failed with:\n${stringify(
+            e
+          )}`
       );
-    }
 
-    const downloadAgentFileMethodOptions: SentinelOneDownloadAgentFileParams = {
-      agentUUID: agentId,
-      activityId: agentResponse.meta?.activityLogEntryId,
-    };
-    const { data } = await this.sendAction<Readable>(
-      SUB_ACTION.DOWNLOAD_AGENT_FILE,
-      downloadAgentFileMethodOptions
-    );
-
-    if (!data) {
-      throw new ResponseActionsClientError(
-        `Unable to establish a readable stream for file with SentinelOne`
-      );
+      throw e;
     }
 
     return {
-      stream: data,
-      fileName: agentResponse.meta.filename,
+      stream: downloadStream,
       mimeType: undefined,
+      fileName,
     };
+  }
+
+  async killProcess(
+    actionRequest: KillProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
+  > {
+    if (
+      !this.options.endpointService.experimentalFeatures
+        .responseActionsSentinelOneKillProcessEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `kill-process not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      ResponseActionParametersWithProcessName,
+      KillProcessActionOutputContent,
+      Partial<SentinelOneKillProcessRequestMeta>
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'kill-process',
+      meta: { parentTaskId: '' },
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        const s1AgentDetails = await this.getAgentDetails(reqIndexOptions.endpoint_ids[0]);
+        const terminateScriptInfo = await this.fetchScriptInfo<SentinelOneKillProcessScriptArgs>(
+          'kill-process',
+          s1AgentDetails.osType
+        );
+
+        try {
+          const s1Response = await this.sendAction<SentinelOneExecuteScriptResponse>(
+            SUB_ACTION.EXECUTE_SCRIPT,
+            {
+              filter: {
+                uuids: actionRequest.endpoint_ids[0],
+              },
+              script: {
+                scriptId: terminateScriptInfo.scriptId,
+                taskDescription: this.buildExternalComment(reqIndexOptions),
+                requiresApproval: false,
+                outputDestination: 'SentinelCloud',
+                inputParams: terminateScriptInfo.buildScriptArgs({
+                  // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
+                  processName: reqIndexOptions.parameters.process_name,
+                }),
+              },
+            }
+          );
+
+          reqIndexOptions.meta = {
+            parentTaskId: s1Response.data?.data?.parentTaskId ?? '',
+          };
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation<
+      ResponseActionParametersWithProcessData,
+      KillProcessActionOutputContent
+    >(reqIndexOptions);
+
+    return actionDetails;
+  }
+
+  public async runningProcesses(
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
+    if (
+      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `processes not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      GetProcessesActionOutputContent,
+      Partial<SentinelOneProcessesRequestMeta>
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'running-processes',
+      meta: { parentTaskId: '' },
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      if (!error) {
+        const s1AgentDetails = await this.getAgentDetails(reqIndexOptions.endpoint_ids[0]);
+        const processesScriptInfo = await this.fetchScriptInfo<SentinelOneProcessListScriptArgs>(
+          'running-processes',
+          s1AgentDetails.osType
+        );
+
+        try {
+          const s1Response = await this.sendAction<SentinelOneExecuteScriptResponse>(
+            SUB_ACTION.EXECUTE_SCRIPT,
+            {
+              filter: {
+                uuids: actionRequest.endpoint_ids[0],
+              },
+              script: {
+                scriptId: processesScriptInfo.scriptId,
+                taskDescription: this.buildExternalComment(reqIndexOptions),
+                requiresApproval: false,
+                outputDestination: 'SentinelCloud',
+                inputParams: processesScriptInfo.buildScriptArgs({}),
+              },
+            }
+          );
+
+          reqIndexOptions.meta = {
+            parentTaskId: s1Response.data?.data?.parentTaskId ?? '',
+          };
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation<
+      undefined,
+      GetProcessesActionOutputContent
+    >(reqIndexOptions);
+
+    return actionDetails;
   }
 
   async processPendingActions({
@@ -564,6 +887,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     if (abortSignal.aborted) {
       return;
     }
+    const addResponsesToQueueIfAny = (responseList: LogsEndpointActionResponse[]): void => {
+      if (responseList.length > 0) {
+        addToQueue(...responseList);
+      }
+    };
 
     for await (const pendingActions of this.fetchAllPendingActions()) {
       if (abortSignal.aborted) {
@@ -580,22 +908,35 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
           case 'unisolate':
-            {
-              const isolationResponseDocs = await this.checkPendingIsolateOrReleaseActions(
+            addResponsesToQueueIfAny(
+              await this.checkPendingIsolateOrReleaseActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
                 >,
                 actionType as 'isolate' | 'unisolate'
-              );
-              if (isolationResponseDocs.length) {
-                addToQueue(...isolationResponseDocs);
-              }
-            }
+              )
+            );
             break;
 
+          case 'running-processes':
+            addResponsesToQueueIfAny(
+              await this.checkPendingRunningProcessesAction(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    undefined,
+                    GetProcessesActionOutputContent,
+                    SentinelOneProcessesRequestMeta
+                  >
+                >
+              )
+            );
+            break;
+
+          // FIXME:PT refactor kill-process entry here when that PR is merged
+
           case 'get-file':
-            {
-              const responseDocsForGetFile = await this.checkPendingGetFileActions(
+            addResponsesToQueueIfAny(
+              await this.checkPendingGetFileActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     ResponseActionGetFileParameters,
@@ -603,9 +944,23 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     SentinelOneGetFileRequestMeta
                   >
                 >
+              )
+            );
+            break;
+
+          case 'kill-process':
+            {
+              const responseDocsForKillProcess = await this.checkPendingKillProcessActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    ResponseActionParametersWithProcessName,
+                    KillProcessActionOutputContent,
+                    SentinelOneKillProcessRequestMeta
+                  >
+                >
               );
-              if (responseDocsForGetFile.length) {
-                addToQueue(...responseDocsForGetFile);
+              if (responseDocsForKillProcess.length) {
+                addToQueue(...responseDocsForKillProcess);
               }
             }
             break;
@@ -614,30 +969,126 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
   }
 
-  private async fetchGetFileResponseEsDocForAgentId(
-    actionId: string,
-    agentId: string
-  ): Promise<
-    LogsEndpointActionResponse<ResponseActionGetFileOutputContent, SentinelOneGetFileResponseMeta>
-  > {
+  /**
+   * retrieve script info. for scripts that are used to handle Elastic response actions
+   * @param scriptType
+   * @param osType
+   * @private
+   */
+  private async fetchScriptInfo<
+    TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
+  >(
+    scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process' | 'running-processes'>,
+    osType: string | 'linux' | 'macos' | 'windows'
+  ): Promise<FetchScriptInfoResponse<TScriptOptions>> {
+    const searchQueryParams: Mutable<Partial<SentinelOneGetRemoteScriptsParams>> = {
+      query: '',
+      osTypes: osType,
+    };
+    let buildScriptArgs: FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'] =
+      NOOP_THROW as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
+    let isDesiredScript: (
+      scriptInfo: SentinelOneGetRemoteScriptsResponse['data'][number]
+    ) => boolean = () => false;
+
+    // Set the query value for filtering the list of scripts in S1
+    switch (scriptType) {
+      case 'kill-process':
+        searchQueryParams.query = 'terminate';
+        searchQueryParams.scriptType = 'action';
+        isDesiredScript = (scriptInfo) => {
+          return (
+            scriptInfo.creator === 'SentinelOne' &&
+            scriptInfo.creatorId === '-1' &&
+            // Using single `-` (instead of double `--`) in match below to ensure both windows and macos/linux are matched
+            /-terminate/i.test(scriptInfo.inputInstructions ?? '') &&
+            /-processes/i.test(scriptInfo.inputInstructions ?? '')
+          );
+        };
+        break;
+
+      case 'running-processes':
+        if (osType === 'windows') {
+          throw new ResponseActionsClientError(
+            `Retrieval of running processes for Windows host is not supported by SentinelOne`,
+            405
+          );
+        }
+
+        searchQueryParams.query = 'process list';
+        searchQueryParams.scriptType = 'dataCollection';
+        isDesiredScript = (scriptInfo) => {
+          return scriptInfo.creator === 'SentinelOne' && scriptInfo.creatorId === '-1';
+        };
+
+        break;
+
+      default:
+        throw new ResponseActionsClientError(
+          `Unable to fetch SentinelOne script for OS [${osType}]. Unknown script type [${scriptType}]`
+        );
+    }
+
+    const { data: scriptSearchResults } =
+      await this.sendAction<SentinelOneGetRemoteScriptsResponse>(
+        SUB_ACTION.GET_REMOTE_SCRIPTS,
+        searchQueryParams
+      );
+
+    const s1Script: SentinelOneGetRemoteScriptsResponse['data'][number] | undefined = (
+      scriptSearchResults?.data ?? []
+    ).find(isDesiredScript);
+
+    if (!s1Script) {
+      throw new ResponseActionsClientError(
+        `Unable to find a script from SentinelOne to handle [${scriptType}] response action for host running [${osType}])`
+      );
+    }
+
+    // Define the `buildScriptArgs` callback for the Script type
+    switch (scriptType) {
+      case 'kill-process':
+        buildScriptArgs = ((args: SentinelOneKillProcessScriptArgs) => {
+          if (!args.processName) {
+            throw new ResponseActionsClientError(
+              `'processName' missing while building script args for [${s1Script.scriptName} (id: ${s1Script.id})] script`
+            );
+          }
+
+          if (osType === 'windows') {
+            return `-Terminate -Processes "${args.processName}" -Force`;
+          }
+
+          // Linux + Macos
+          return `--terminate --processes "${args.processName}" --force`;
+        }) as FetchScriptInfoResponse<TScriptOptions>['buildScriptArgs'];
+
+        break;
+
+      case 'running-processes':
+        buildScriptArgs = () => '';
+        break;
+    }
+
+    return {
+      scriptId: s1Script.id,
+      scriptInfo: s1Script,
+      buildScriptArgs,
+    } as FetchScriptInfoResponse<TScriptOptions>;
+  }
+
+  private async fetchEsResponseDocForAgentId<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string, agentId: string): Promise<LogsEndpointActionResponse<TOutputContent, TMeta>> {
     const agentResponse = (
-      await this.fetchActionResponseEsDocs<
-        ResponseActionGetFileOutputContent,
-        SentinelOneGetFileResponseMeta
-      >(actionId, [agentId])
+      await this.fetchActionResponseEsDocs<TOutputContent, TMeta>(actionId, [agentId])
     )[agentId];
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
         `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
         404
-      );
-    }
-
-    if (agentResponse.EndpointActions.data.command !== 'get-file') {
-      throw new ResponseActionsClientError(
-        `Invalid action ID [${actionId}] - Not a get-file action: [${agentResponse.EndpointActions.data.command}]`,
-        400
       );
     }
 
@@ -771,10 +1222,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       };
 
       this.log.debug(
-        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
-          searchRequestOptions,
-          15
-        )}`
+        () =>
+          `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
+            searchRequestOptions,
+            15
+          )}`
       );
 
       const searchResults = await this.options.esClient
@@ -782,7 +1234,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         .catch(catchAndWrapError);
 
       this.log.debug(
-        `Search results for SentinelOne ${command} activity documents:\n${stringify(searchResults)}`
+        () =>
+          `Search results for SentinelOne ${command} activity documents:\n${stringify(
+            searchResults
+          )}`
       );
 
       for (const searchResultHit of searchResults.hits.hits) {
@@ -831,9 +1286,114 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     this.log.debug(
-      `${completedResponses.length} ${command} action responses generated:\n${stringify(
-        completedResponses
-      )}`
+      () =>
+        `${completedResponses.length} ${command} action responses generated:\n${stringify(
+          completedResponses
+        )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  private async checkPendingRunningProcessesAction(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        undefined,
+        GetProcessesActionOutputContent,
+        SentinelOneProcessesRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    for (const pendingAction of actionRequests) {
+      const actionRequest = pendingAction.action;
+      const s1ParentTaskId = actionRequest.meta?.parentTaskId;
+
+      if (!s1ParentTaskId) {
+        completedResponses.push(
+          this.buildActionResponseEsDoc<
+            GetProcessesActionOutputContent,
+            SentinelOneProcessesResponseMeta
+          >({
+            actionId: actionRequest.EndpointActions.action_id,
+            agentId: Array.isArray(actionRequest.agent.id)
+              ? actionRequest.agent.id[0]
+              : actionRequest.agent.id,
+            data: {
+              command: 'running-processes',
+              comment: '',
+            },
+            error: {
+              message: `Action request missing SentinelOne 'parentTaskId' value - unable check on its status`,
+            },
+          })
+        );
+
+        warnings.push(
+          `Response Action [${actionRequest.EndpointActions.action_id}] is missing [meta.parentTaskId]! (should not have happened)`
+        );
+      } else {
+        const s1TaskStatusApiResponse =
+          await this.sendAction<SentinelOneGetRemoteScriptStatusApiResponse>(
+            SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
+            { parentTaskId: s1ParentTaskId }
+          );
+
+        if (s1TaskStatusApiResponse.data?.data.length) {
+          const processListScriptExecStatus = s1TaskStatusApiResponse.data.data[0];
+          const taskState = this.calculateTaskState(processListScriptExecStatus);
+
+          if (!taskState.isPending) {
+            this.log.debug(`Action is completed - generating response doc for it`);
+
+            const error: LogsEndpointActionResponse['error'] = taskState.isError
+              ? {
+                  message: `Action failed to execute in SentinelOne. message: ${taskState.message}`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                GetProcessesActionOutputContent,
+                SentinelOneProcessesResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'running-processes',
+                  comment: taskState.message,
+                  output: {
+                    type: 'json',
+                    content: {
+                      code: '',
+                      entries: [],
+                    },
+                  },
+                },
+                error,
+                meta: {
+                  taskId: processListScriptExecStatus.id,
+                },
+              })
+            );
+          }
+        }
+      }
+    }
+
+    this.log.debug(
+      () =>
+        `${completedResponses.length} running-processes action responses generated:\n${stringify(
+          completedResponses
+        )}`
     );
 
     if (warnings.length > 0) {
@@ -928,10 +1488,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (Object.keys(actionsByAgentAndBatchId).length) {
       this.log.debug(
-        `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
-          searchRequestOptions,
-          15
-        )}`
+        () =>
+          `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
+            searchRequestOptions,
+            15
+          )}`
       );
 
       const searchResults = await this.options.esClient
@@ -939,7 +1500,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         .catch(catchAndWrapError);
 
       this.log.debug(
-        `Search results for SentinelOne get-file activity documents:\n${stringify(searchResults)}`
+        () =>
+          `Search results for SentinelOne get-file activity documents:\n${stringify(searchResults)}`
       );
 
       for (const s1Hit of searchResults.hits.hits) {
@@ -1008,9 +1570,181 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     this.log.debug(
-      `${completedResponses.length} get-file action responses generated:\n${stringify(
-        completedResponses
-      )}`
+      () =>
+        `${completedResponses.length} get-file action responses generated:\n${stringify(
+          completedResponses
+        )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  /**
+   * Calculates the state of a SentinelOne Task using the response from their task status API. It
+   * returns a normalized object with basic info derived from the task status value
+   * @param taskStatusRecord
+   * @private
+   */
+  private calculateTaskState(taskStatusRecord: SentinelOneRemoteScriptExecutionStatus): {
+    isPending: boolean;
+    isError: boolean;
+    message: string;
+  } {
+    const taskStatusValue = taskStatusRecord.status;
+    let message =
+      taskStatusRecord.detailedStatus ?? taskStatusRecord.statusDescription ?? taskStatusValue;
+    let isPending: boolean;
+    let isError: boolean;
+
+    switch (taskStatusValue) {
+      // PENDING STATUSES ------------------------------------------
+      case 'created':
+      case 'pending':
+      case 'pending_user_action':
+      case 'scheduled':
+      case 'in_progress':
+      case 'partially_completed':
+        isPending = true;
+        isError = true;
+        break;
+
+      // COMPLETE STATUSES ------------------------------------------
+      case 'canceled':
+        isPending = false;
+        isError = true;
+        message = `SentinelOne Parent Task Id [${taskStatusRecord.parentTaskId}] was canceled${
+          taskStatusRecord.detailedStatus ? ` - ${taskStatusRecord.detailedStatus}` : ''
+        }`;
+        break;
+
+      case 'completed':
+        isPending = false;
+        isError = false;
+        break;
+
+      case 'expired':
+        isPending = false;
+        isError = true;
+        break;
+
+      case 'failed':
+        isPending = false;
+        isError = true;
+        break;
+
+      default:
+        isPending = false;
+        isError = true;
+        message = `Unable to determine task state - unknown SentinelOne task status value [${taskStatusRecord}] for task parent id [${taskStatusRecord.parentTaskId}]`;
+    }
+
+    return {
+      isPending,
+      isError,
+      message,
+    };
+  }
+
+  private async checkPendingKillProcessActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        ResponseActionParametersWithProcessName,
+        KillProcessActionOutputContent,
+        SentinelOneKillProcessRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    for (const pendingAction of actionRequests) {
+      const actionRequest = pendingAction.action;
+      const s1ParentTaskId = actionRequest.meta?.parentTaskId;
+
+      if (!s1ParentTaskId) {
+        completedResponses.push(
+          this.buildActionResponseEsDoc<
+            KillProcessActionOutputContent,
+            SentinelOneKillProcessResponseMeta
+          >({
+            actionId: actionRequest.EndpointActions.action_id,
+            agentId: Array.isArray(actionRequest.agent.id)
+              ? actionRequest.agent.id[0]
+              : actionRequest.agent.id,
+            data: {
+              command: 'kill-process',
+              comment: '',
+            },
+            error: {
+              message: `Action request missing SentinelOne 'parentTaskId' value - unable check on its status`,
+            },
+          })
+        );
+
+        warnings.push(
+          `Response Action [${actionRequest.EndpointActions.action_id}] is missing [meta.parentTaskId]! (should not have happened)`
+        );
+      } else {
+        const s1TaskStatusApiResponse =
+          await this.sendAction<SentinelOneGetRemoteScriptStatusApiResponse>(
+            SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
+            { parentTaskId: s1ParentTaskId }
+          );
+
+        if (s1TaskStatusApiResponse.data?.data.length) {
+          const killProcessStatus = s1TaskStatusApiResponse.data.data[0];
+          const taskState = this.calculateTaskState(killProcessStatus);
+
+          if (!taskState.isPending) {
+            this.log.debug(`Action is completed - generating response doc for it`);
+
+            const error: LogsEndpointActionResponse['error'] = taskState.isError
+              ? {
+                  message: `Action failed to execute in SentinelOne. message: ${taskState.message}`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                KillProcessActionOutputContent,
+                SentinelOneKillProcessResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'kill-process',
+                  comment: taskState.message,
+                  output: {
+                    type: 'json',
+                    content: {
+                      code: killProcessStatus.statusCode ?? killProcessStatus.status,
+                      command: actionRequest.EndpointActions.data.command,
+                      process_name: actionRequest.EndpointActions.data.parameters?.process_name,
+                    },
+                  },
+                },
+                error,
+                meta: {
+                  taskId: killProcessStatus.id,
+                },
+              })
+            );
+          }
+        }
+      }
+    }
+
+    this.log.debug(
+      () =>
+        `${completedResponses.length} kill-process action responses generated:\n${stringify(
+          completedResponses
+        )}`
     );
 
     if (warnings.length > 0) {

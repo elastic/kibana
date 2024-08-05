@@ -5,6 +5,7 @@
     "xpack.aiops": [
       "packages/ml/aiops_components",
       "packages/ml/aiops_log_pattern_analysis",
+      "packages/ml/aiops_log_rate_analysis",
       "plugins/aiops"
     ],
     "xpack.alerting": "plugins/alerting",
@@ -54,6 +55,7 @@
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
     "xpack.integrationAssistant": "plugins/integration_assistant",
     "xpack.investigate": "plugins/observability_solution/investigate",
+    "xpack.investigateApp": "plugins/observability_solution/investigate_app",
     "xpack.kubernetesSecurity": "plugins/kubernetes_security",
     "xpack.lens": "plugins/lens",
     "xpack.licenseApiGuard": "plugins/license_api_guard",

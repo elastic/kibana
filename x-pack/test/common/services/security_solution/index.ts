@@ -6,3 +6,5 @@
  */
 
 export * from './roles_users_utils';
+export * from './endpoint_data_stream_helpers';
+export * from './endpoint_registry_helpers';

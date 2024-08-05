@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-link-redirect-app",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinks",
+        "id": "def-public.RedirectAppLinks",
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinks",
@@ -39,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinks.$1",
+            "id": "def-public.RedirectAppLinks.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...props\n}",
@@ -60,7 +44,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinks",
+        "id": "def-public.RedirectAppLinks",
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinks",
@@ -78,7 +62,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinks.$1",
+            "id": "def-public.RedirectAppLinks.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  navigateToUrl,\n  currentAppId,\n  ...containerProps\n}",
@@ -99,7 +83,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinks",
+        "id": "def-public.RedirectAppLinks",
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinks",
@@ -117,7 +101,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinks.$1",
+            "id": "def-public.RedirectAppLinks.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ children, ...props }",
@@ -138,7 +122,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinksKibanaProvider",
+        "id": "def-public.RedirectAppLinksKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinksKibanaProvider",
@@ -156,7 +140,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinksKibanaProvider.$1",
+            "id": "def-public.RedirectAppLinksKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{ children, coreStart }",
@@ -177,7 +161,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinksProvider",
+        "id": "def-public.RedirectAppLinksProvider",
         "type": "Function",
         "tags": [],
         "label": "RedirectAppLinksProvider",
@@ -195,7 +179,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinksProvider.$1",
+            "id": "def-public.RedirectAppLinksProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -218,7 +202,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinksKibanaDependencies",
+        "id": "def-public.RedirectAppLinksKibanaDependencies",
         "type": "Interface",
         "tags": [],
         "label": "RedirectAppLinksKibanaDependencies",
@@ -231,7 +215,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinksKibanaDependencies.coreStart",
+            "id": "def-public.RedirectAppLinksKibanaDependencies.coreStart",
             "type": "Object",
             "tags": [],
             "label": "coreStart",
@@ -252,7 +236,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinksServices",
+        "id": "def-public.RedirectAppLinksServices",
         "type": "Interface",
         "tags": [],
         "label": "RedirectAppLinksServices",
@@ -265,7 +249,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinksServices.navigateToUrl",
+            "id": "def-public.RedirectAppLinksServices.navigateToUrl",
             "type": "Function",
             "tags": [],
             "label": "navigateToUrl",
@@ -280,7 +264,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-                "id": "def-common.RedirectAppLinksServices.navigateToUrl.$1",
+                "id": "def-public.RedirectAppLinksServices.navigateToUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "url",
@@ -293,7 +277,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-            "id": "def-common.RedirectAppLinksServices.currentAppId",
+            "id": "def-public.RedirectAppLinksServices.currentAppId",
             "type": "string",
             "tags": [],
             "label": "currentAppId",
@@ -313,7 +297,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-link-redirect-app",
-        "id": "def-common.RedirectAppLinksProps",
+        "id": "def-public.RedirectAppLinksProps",
         "type": "Type",
         "tags": [],
         "label": "RedirectAppLinksProps",
@@ -333,6 +317,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

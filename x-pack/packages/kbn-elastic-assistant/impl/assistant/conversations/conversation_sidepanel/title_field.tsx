@@ -32,7 +32,7 @@ const TitleFieldComponent = ({ conversationIds, euiFieldProps }: TitleFieldProps
         ),
         value: true,
       },
-      validate: (text: string) => {
+      validate: () => {
         if (conversationIds?.includes(value)) {
           return i18n.translate(
             'xpack.elasticAssistant.conversationSidepanel.titleField.uniqueTitle',
