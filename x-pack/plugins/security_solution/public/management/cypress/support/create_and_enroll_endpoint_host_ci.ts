@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
-import { fetchFleetAvailableVersions } from '../../../../common/endpoint/utils/fetch_fleet_version';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { HostVm } from '../../../../scripts/endpoint/common/types';
 import type { BaseVmCreateOptions } from '../../../../scripts/endpoint/common/vm_services';
@@ -75,7 +75,7 @@ export const createAndEnrollEndpointHostCI = async ({
   if (!forceVersion) {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     if (isServerless) {
-      agentVersion = await fetchFleetAvailableVersions(kbnClient);
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
     }
   }
 

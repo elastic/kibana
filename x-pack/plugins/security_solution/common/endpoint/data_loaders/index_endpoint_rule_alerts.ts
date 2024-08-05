@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '../utils/kibana_status';
-import { fetchFleetAvailableVersions } from '../utils/fetch_fleet_version';
+import { fetchFleetLatestAvailableAgentVersion } from '../utils/fetch_fleet_version';
 import { createToolingLogger, wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
@@ -51,7 +51,6 @@ export interface DeletedIndexedEndpointRuleAlerts {
  * @param endpointIsolated
  * @param count
  * @param log
- * @param isServerless
  */
 export const indexEndpointRuleAlerts = async ({
   esClient,
@@ -70,7 +69,7 @@ export const indexEndpointRuleAlerts = async ({
   if (kbnClient) {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     if (isServerless) {
-      version = await fetchFleetAvailableVersions(kbnClient);
+      version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
     }
   }
 

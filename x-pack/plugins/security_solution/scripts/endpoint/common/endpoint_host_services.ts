@@ -9,7 +9,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
-import { fetchFleetAvailableVersions } from '../../../common/endpoint/utils/fetch_fleet_version';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../common/endpoint/utils/fetch_fleet_version';
 import { prefixedOutputLogger } from './utils';
 import type { HostVm } from './types';
 import type { BaseVmCreateOptions } from './vm_services';
@@ -63,7 +63,7 @@ export const createAndEnrollEndpointHost = async ({
   if (!forceVersion) {
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     if (isServerless) {
-      agentVersion = await fetchFleetAvailableVersions(kbnClient);
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
     }
   }
   const isRunningInCI = Boolean(process.env.CI);

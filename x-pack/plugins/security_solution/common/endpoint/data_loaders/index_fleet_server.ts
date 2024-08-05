@@ -23,7 +23,7 @@ import {
   packagePolicyRouteService,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { fetchFleetAvailableVersions } from '../utils/fetch_fleet_version';
+import { fetchFleetLatestAvailableAgentVersion } from '../utils/fetch_fleet_version';
 import { indexFleetServerAgent } from './index_fleet_agent';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
@@ -51,7 +51,7 @@ export const enableFleetServerIfNecessary = usageTracker.track(
     let agentVersion = version;
 
     if (isServerless) {
-      agentVersion = await fetchFleetAvailableVersions(kbnClient);
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
     }
 
     const agentPolicy = await getOrCreateFleetServerAgentPolicy(kbnClient, log);

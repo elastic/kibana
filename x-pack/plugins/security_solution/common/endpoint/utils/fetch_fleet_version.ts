@@ -13,7 +13,9 @@ import type { KbnClient } from '@kbn/test';
 import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 
-export const fetchFleetAvailableVersions = async (kbnClient: KbnClient): Promise<string> => {
+export const fetchFleetLatestAvailableAgentVersion = async (
+  kbnClient: KbnClient
+): Promise<string> => {
   return kbnClient
     .request<{ items: string[] }>({
       method: 'GET',

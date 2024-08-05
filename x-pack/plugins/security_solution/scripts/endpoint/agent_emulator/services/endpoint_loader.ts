@@ -12,7 +12,7 @@ import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
-import { fetchFleetAvailableVersions } from '../../../../common/endpoint/utils/fetch_fleet_version';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { indexAlerts } from '../../../../common/endpoint/data_loaders/index_alerts';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { fetchEndpointMetadataList } from '../../common/endpoint_metadata_services';
@@ -89,7 +89,7 @@ export const loadEndpoints = async ({
   let version = kibanaPackageJson.version;
 
   if (isServerless) {
-    version = await fetchFleetAvailableVersions(kbnClient);
+    version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
   }
 
   if (!WAS_FLEET_SETUP_DONE) {

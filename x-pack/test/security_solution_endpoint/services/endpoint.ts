@@ -37,7 +37,7 @@ import { merge } from 'lodash';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
-import { fetchFleetAvailableVersions } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
+import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
 import { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { FtrService } from '../../functional/ftr_provider_context';
@@ -48,7 +48,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boolean) => {
   let version = kibanaPackageJson.version;
   if (isServerless) {
-    version = await fetchFleetAvailableVersions(kbnClient);
+    version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
   }
   // TS doesn't like the `version` let being used in the class definition
   const capturedVersion = version;
