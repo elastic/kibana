@@ -31,8 +31,8 @@ const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
   { type: 'memory' },
   { type: 'memoryFree' },
   { type: 'normalizedLoad1m' },
-  { type: 'rx' },
-  { type: 'tx' },
+  { type: 'rxV2' },
+  { type: 'txV2' },
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';

@@ -56,6 +56,14 @@ interface Props {
     | 'rightDown';
 }
 
+type V2MetricType = 'txV2' | 'rxV2' | 'cpuTotal';
+
+const V2ToLegacyMapping: Record<V2MetricType, string> = {
+  txV2: 'tx',
+  rxV2: 'rx',
+  cpuTotal: 'cpu',
+};
+
 const AGGREGATION_LABELS = {
   ['avg']: i18n.translate('xpack.infra.waffle.customMetrics.aggregationLables.avg', {
     defaultMessage: 'Average',
@@ -164,9 +172,29 @@ export const MetricExpression = ({
     [customMetric, debouncedOnChangeCustom]
   );
 
-  const availablefieldsOptions = metrics.map((m) => {
-    return { label: m.text, value: m.value };
-  }, []);
+  const metricsToRemove: string[] = metrics.reduce(
+    (metricToRemove, currentMetric) => {
+      if (Object.keys(V2ToLegacyMapping).includes(currentMetric.value)) {
+        metricToRemove.push(V2ToLegacyMapping[currentMetric.value as V2MetricType]);
+      }
+      return metricToRemove;
+    },
+    ['']
+  );
+
+  const availablefieldsOptions = useMemo(
+    () =>
+      metrics
+        .filter(
+          (availableMetric) =>
+            metric?.value === availableMetric.value ||
+            !metricsToRemove.includes(availableMetric.value)
+        )
+        .map((m) => {
+          return { label: m.text, value: m.value };
+        }, []),
+    [metric?.value, metrics, metricsToRemove]
+  );
 
   return (
     <EuiPopover

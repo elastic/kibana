@@ -31,8 +31,8 @@ export const snapshot = {
   memoryFree,
   memoryTotal,
   normalizedLoad1m,
-  rx,
-  tx,
   rxV2,
   txV2,
+  rx,
+  tx,
 };

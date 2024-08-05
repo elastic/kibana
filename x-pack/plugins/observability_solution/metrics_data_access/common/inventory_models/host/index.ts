@@ -54,5 +54,7 @@ export const host: InventoryModel<typeof metrics> = {
     ...awsRequiredMetrics,
     ...nginxRequireMetrics,
   ],
-  tooltipMetrics: ['cpu', 'memory', 'txV2', 'rxV2'],
+  tooltipMetrics: ['cpu', 'memory', 'txV2', 'rxV2', 'tx', 'rx'],
+  // Add 'cpuTotal'after https://github.com/elastic/kibana/pull/189261 is merged:
+  // tooltipMetrics: ['cpu', 'memory', 'txV2', 'rxV2', cpuTotal, 'tx', 'rx'],
 };
