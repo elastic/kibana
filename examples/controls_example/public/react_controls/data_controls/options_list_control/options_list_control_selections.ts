@@ -29,7 +29,7 @@ export function initializeOptionsListSelections(
       onSelectionChange();
     }
   }
-
+  
   const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
   function setExistsSelected(next: boolean | undefined) {
     if (existsSelected$.value !== next) {
@@ -56,13 +56,7 @@ export function initializeOptionsListSelections(
     >,
     hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
     selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
-    selectedOptionsComparatorFunction,
-    setSelectedOptions: (next: OptionsListSelection[] | undefined) => {
-      if (selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
-        selectedOptions$.next(next);
-        onSelectionChange();
-      }
-    },
+    setSelectedOptions,
     existsSelected$: existsSelected$ as PublishingSubject<boolean | undefined>,
     setExistsSelected,
     exclude$: exclude$ as PublishingSubject<boolean | undefined>,

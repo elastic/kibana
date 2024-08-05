@@ -38,7 +38,7 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = () => {
-  const { api, stateManager, setExclude } = useOptionsListContext();
+  const { api, stateManager } = useOptionsListContext();
 
   const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
     stateManager.exclude,
@@ -78,7 +78,7 @@ export const OptionsListPopoverFooter = () => {
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) => setExclude(optionId === 'optionsList__excludeResults')}
+              onChange={(optionId) => api.setExclude(optionId === 'optionsList__excludeResults')}
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />

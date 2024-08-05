@@ -291,11 +291,11 @@ export const getOptionsListControlFactory = (
 
       const componentApi = {
         ...api,
-        selections$: selections.selectedOptions$,
         loadMoreSubject,
         totalCardinality$,
         availableOptions$,
         invalidSelections$,
+        setExclude: selections.setExclude,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
           if (!key || !field) {
@@ -353,7 +353,7 @@ export const getOptionsListControlFactory = (
           } else {
             // select option
             if (existsSelected) selections.setExistsSelected(false);
-            selections.setSelectedOptions(selectedOptions ? [...selectedOptions, keyAsType] : []);
+            selections.setSelectedOptions(selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]);
           }
         },
       };
@@ -390,8 +390,7 @@ export const getOptionsListControlFactory = (
           return (
             <OptionsListControlContext.Provider
               value={{
-                stateManager,
-                setExclude: selections.setExclude,
+                stateManager: {...stateManager, selectedOptions: selections.selectedOptions$ },
                 api: componentApi,
                 displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
               }}

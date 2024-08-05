@@ -34,6 +34,7 @@ export const getOptionsListMocks = () => {
       },
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
+      setExclude: (next: boolean | undefined) => exclude$.next(next),
     },
     stateManager: {
       searchString: new BehaviorSubject<string>(''),
@@ -45,9 +46,11 @@ export const getOptionsListMocks = () => {
       selectedOptions: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
       searchTechnique: new BehaviorSubject<OptionsListSearchTechnique | undefined>(undefined),
     },
-    setExclude: (next: boolean | undefined) => exclude$.next(next),
+    displaySettings: {} as OptionsListDisplaySettings,
+    // setSelectedOptions and setExistsSelected are not exposed via API because
+    // they are not used by components
+    // they are needed in tests however so expose them as top level keys
     setSelectedOptions: (next: OptionsListSelection[] | undefined) => selectedOptions$.next(next),
     setExistsSelected: (next: boolean | undefined) => existsSelected$.next(next),
-    displaySettings: {} as OptionsListDisplaySettings,
   };
 };

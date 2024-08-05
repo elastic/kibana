@@ -29,7 +29,6 @@ export const OptionsListControlContext = React.createContext<
   | {
       api: OptionsListComponentApi;
       stateManager: ContextStateManager;
-      setExclude: (next: boolean | undefined) => void;
       displaySettings: OptionsListDisplaySettings;
     }
   | undefined

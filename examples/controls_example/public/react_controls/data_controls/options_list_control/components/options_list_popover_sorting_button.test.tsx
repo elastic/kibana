@@ -22,12 +22,10 @@ describe('Options list sorting button', () => {
     api,
     displaySettings,
     stateManager,
-    setExclude,
   }: {
     api: any;
     displaySettings: any;
     stateManager: any;
-    setExclude: (next: boolean | undefined) => void;
   }) => {
     const component = render(
       <OptionsListControlContext.Provider
@@ -35,7 +33,6 @@ describe('Options list sorting button', () => {
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
           stateManager: stateManager as unknown as ContextStateManager,
-          setExclude,
         }}
       >
         <OptionsListPopoverSortingButton showOnlySelected={false} />

@@ -25,12 +25,10 @@ describe('Options list popover', () => {
     api,
     displaySettings,
     stateManager,
-    setExclude,
   }: {
     api: any;
     displaySettings: any;
     stateManager: any;
-    setExclude: (next: boolean | undefined) => void;
   }) => {
     return render(
       <OptionsListControlContext.Provider
@@ -38,7 +36,6 @@ describe('Options list popover', () => {
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
           stateManager: stateManager as unknown as ContextStateManager,
-          setExclude,
         }}
       >
         <OptionsListPopover />
@@ -205,7 +202,7 @@ describe('Options list popover', () => {
     test('if exclude = true, select appropriate button in button group', async () => {
       const mocks = getOptionsListMocks();
       const popover = mountComponent(mocks);
-      mocks.setExclude(true);
+      mocks.api.setExclude(true);
       await waitOneTick();
 
       const includeButton = popover.getByTestId('optionsList__includeResults');

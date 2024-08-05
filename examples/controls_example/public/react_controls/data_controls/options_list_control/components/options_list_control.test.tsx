@@ -20,12 +20,10 @@ describe('Options list control', () => {
     api,
     displaySettings,
     stateManager,
-    setExclude,
   }: {
     api: any;
     displaySettings: any;
     stateManager: any;
-    setExclude: (next: boolean | undefined) => void;
   }) => {
     return render(
       <OptionsListControlContext.Provider
@@ -33,7 +31,6 @@ describe('Options list control', () => {
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
           stateManager: stateManager as unknown as ContextStateManager,
-          setExclude,
         }}
       >
         <OptionsListControl controlPanelClassName="controlPanel" />
@@ -44,7 +41,7 @@ describe('Options list control', () => {
   test('if exclude = false and existsSelected = true, then the option should read "Exists"', async () => {
     const mocks = getOptionsListMocks();
     mocks.api.uuid = 'testExists';
-    mocks.setExclude(false);
+    mocks.api.setExclude(false);
     mocks.setExistsSelected(true);
     const control = mountComponent(mocks);
     const existsOption = control.getByTestId('optionsList-control-testExists');
@@ -54,7 +51,7 @@ describe('Options list control', () => {
   test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', async () => {
     const mocks = getOptionsListMocks();
     mocks.api.uuid = 'testDoesNotExist';
-    mocks.setExclude(true);
+    mocks.api.setExclude(true);
     mocks.setExistsSelected(true);
     const control = mountComponent(mocks);
     const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
