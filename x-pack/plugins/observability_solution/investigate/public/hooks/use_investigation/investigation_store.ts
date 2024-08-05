@@ -46,8 +46,6 @@ interface InvestigationStore {
   unlockItem: (id: string) => Promise<void>;
   setItemTitle: (id: string, title: string) => Promise<void>;
   setRevision: (revisionId: string) => Promise<void>;
-  gotoPreviousRevision: () => Promise<void>;
-  gotoNextRevision: () => Promise<void>;
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
   }>;
@@ -329,40 +327,6 @@ export function createInvestigationStore({
         return {
           ...prevInvestigation,
           revision,
-        };
-      });
-    },
-    gotoPreviousRevision: () => {
-      return updateInvestigationInPlace((prevInvestigation) => {
-        const indexOfCurrentRevision = prevInvestigation.revisions.findIndex(
-          (revision) => revision.id === prevInvestigation.revision
-        );
-
-        const targetRevision = prevInvestigation.revisions[indexOfCurrentRevision - 1];
-        if (!targetRevision) {
-          throw new Error('Could not find previous revision');
-        }
-
-        return {
-          ...prevInvestigation,
-          revision: targetRevision.id,
-        };
-      });
-    },
-    gotoNextRevision: () => {
-      return updateInvestigationInPlace((prevInvestigation) => {
-        const indexOfCurrentRevision = prevInvestigation.revisions.findIndex(
-          (revision) => revision.id === prevInvestigation.revision
-        );
-
-        const targetRevision = prevInvestigation.revisions[indexOfCurrentRevision + 1];
-        if (!targetRevision) {
-          throw new Error('Could not find previous revision');
-        }
-
-        return {
-          ...prevInvestigation,
-          revision: targetRevision.id,
         };
       });
     },

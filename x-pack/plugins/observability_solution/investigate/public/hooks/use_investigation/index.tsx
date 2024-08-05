@@ -70,8 +70,6 @@ export interface UseInvestigationApi {
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   blocks: WorkflowBlock[];
   setRevision: (revisionId: string) => void;
-  gotoPreviousRevision: () => Promise<void>;
-  gotoNextRevision: () => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   investigations: Investigation[];
   deleteInvestigation: (id: string) => Promise<void>;
@@ -281,8 +279,6 @@ function useInvestigationWithoutContext({
 
   const {
     copyItem,
-    gotoNextRevision,
-    gotoPreviousRevision,
     lockItem,
     setGlobalParameters,
     setItemPositions,
@@ -406,8 +402,6 @@ function useInvestigationWithoutContext({
     blocks,
     copyItem,
     deleteItem,
-    gotoNextRevision,
-    gotoPreviousRevision,
     investigation,
     isAtEarliestRevision,
     isAtLatestRevision,
