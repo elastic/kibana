@@ -50,7 +50,7 @@ export const transformFilters: SearchFilterConfig[] = [
   },
   {
     type: 'field_value_selection',
-    field: 'health',
+    field: 'stats.health.status',
     name: i18n.translate('xpack.transform.healthFilter', { defaultMessage: 'Health' }),
     multiSelect: false,
     options: Object.values(TRANSFORM_HEALTH_STATUS).map((val) => ({
@@ -113,7 +113,7 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
       } else {
         ts = transforms.filter((transform) => {
           if (!transform.stats) return false;
-          if (c.type === 'field' && c.field === 'health') {
+          if (c.type === 'field' && c.field === 'stats.health.status') {
             return transform.stats.health?.status === c.value;
           }
           if (c.type === 'field' && c.field === 'mode') {
