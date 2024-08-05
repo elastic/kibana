@@ -1070,7 +1070,9 @@
         "signature": [
           "Omit<",
           "EuiFlyoutProps",
-          "<\"div\">, \"onClose\"> & { onClose?: ((flyout: ",
+          "<\"div\"> | ",
+          "EuiFlyoutResizableProps",
+          ", \"onClose\"> & { onClose?: ((flyout: ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",
@@ -1078,7 +1080,7 @@
             "section": "def-public.OverlayRef",
             "text": "OverlayRef"
           },
-          ") => void) | undefined; }"
+          ") => void) | undefined; isResizable?: boolean | undefined; }"
         ],
         "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
         "deprecated": false,

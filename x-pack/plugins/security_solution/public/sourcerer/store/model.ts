@@ -96,7 +96,7 @@ export interface SelectedDataView {
   /**
    * @deprecated use EcsFlat or fields / indexFields from data view
    */
-  browserFields: SourcererDataView['browserFields'];
+  browserFields: BrowserFields;
   dataViewId: string | null; // null if legacy pre-8.0 timeline
   /**
    * @deprecated use sourcererDataView
