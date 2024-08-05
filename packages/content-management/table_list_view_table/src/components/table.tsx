@@ -25,6 +25,7 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import {
   cssFavoriteHoverWithinEuiTableRow,
   useFavorites,
+  FavoritesEmptyState,
 } from '@kbn/content-management-favorites-public';
 
 import { useServices } from '../services';
@@ -230,11 +231,13 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [onTableSearchChange, renderCreateButton, renderToolsLeft, searchFilters, searchQuery.query]);
 
+  const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
+
   const noItemsMessage = tableFilter.favorites ? (
-    <FormattedMessage
-      id="contentManagement.tableList.listing.noMatchedFavoriteItemsMessage"
-      defaultMessage="No starred {entityNamePlural} matched your search. Star {entityNamePlural} by clicking the star icon next to a {entityName} to see them here."
-      values={{ entityNamePlural, entityName }}
+    <FavoritesEmptyState
+      emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
+      entityName={entityName}
+      entityNamePlural={entityNamePlural}
     />
   ) : (
     <FormattedMessage
