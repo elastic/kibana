@@ -210,9 +210,9 @@ export function getServiceColumns({
 
         return (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
-            series={timeseriesData?.currentPeriod?.[serviceName]?.logRate ?? []}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logRate}
             valueLabel={asDecimalOrInteger(metrics.logRate)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
@@ -259,9 +259,9 @@ export function getServiceColumns({
 
         return (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
-            series={timeseriesData?.currentPeriod?.[serviceName]?.logErrorRate ?? []}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logErrorRate}
             valueLabel={asPercent(metrics.logErrorRate, 1)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
