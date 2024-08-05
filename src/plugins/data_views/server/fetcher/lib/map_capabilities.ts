@@ -24,7 +24,7 @@ export interface RollupIndexCapability {
 /**
  * Get rollup job capabilities
  * @public
- * @param indices rollup job index capabilities
+ * @param indices rollup job index capabilites
  */
 export function getCapabilitiesForRollupIndices(
   indices: RollupGetRollupIndexCapsResponse
