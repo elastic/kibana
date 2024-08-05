@@ -170,7 +170,7 @@ describe('autocomplete', () => {
       ),
     ]);
     testSuggestions('from a | where stringField >= ', [
-      ...getFieldNamesByType('string').map((name) => `${name} `),
+      ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
     ]);
     // Skip these tests until the insensitive case equality gets restored back
@@ -1386,10 +1386,6 @@ describe('autocomplete', () => {
       13
     );
 
-    // FROM source METADATA field TODO
-
-    // KEEP field TODO
-
     // LIMIT number
     testSuggestions('FROM a | LIMIT ', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
@@ -1506,11 +1502,5 @@ describe('autocomplete', () => {
       undefined,
       27
     );
-
-    // WHERE argument comparison argument
-    testSuggestions('from a | where stringField >= ', [
-      ...getFieldNamesByType('string').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
-    ]);
   });
 });
