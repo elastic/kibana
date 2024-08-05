@@ -42,7 +42,7 @@ export const DeleteMonitor = ({
   }, [configId, isDeleting]);
 
   useEffect(() => {
-    const { core, toasts } = kibanaService;
+    const { coreStart, toasts } = kibanaService;
     if (!isDeleting) {
       return;
     }
@@ -53,7 +53,7 @@ export const DeleteMonitor = ({
             <p data-test-subj="uptimeDeleteMonitorFailure">
               {labels.MONITOR_DELETE_FAILURE_LABEL}
             </p>,
-            core
+            coreStart
           ),
         },
         { toastLifeTimeMs: 3000 }
@@ -72,7 +72,7 @@ export const DeleteMonitor = ({
                 }
               )}
             </p>,
-            core
+            coreStart
           ),
         },
         { toastLifeTimeMs: 3000 }

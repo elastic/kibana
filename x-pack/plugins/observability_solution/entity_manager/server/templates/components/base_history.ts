@@ -15,6 +15,7 @@ export const entitiesHistoryBaseComponentTemplateConfig: ClusterPutComponentTemp
       "Component template for the ECS fields used in the Elastic Entity Model's entity discovery framework's history data set",
     documentation: 'https://www.elastic.co/guide/en/ecs/current/ecs-base.html',
     ecs_version: '8.0.0',
+    managed: true,
   },
   template: {
     mappings: {

@@ -408,7 +408,7 @@ const GcpAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
             />
           </EuiText>
         </>
@@ -552,7 +552,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       input,
       isAgentlessEnabled,
       handleSetupTechnologyChange,
-      isEditPage,
     });
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) ||

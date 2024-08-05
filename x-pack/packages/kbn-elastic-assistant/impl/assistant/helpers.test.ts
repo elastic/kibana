@@ -163,21 +163,8 @@ describe('helpers', () => {
   });
 
   describe('getOptionalRequestParams', () => {
-    it('should return an empty object when alerts is false', () => {
-      const params = {
-        isEnabledRAGAlerts: false, // <-- false
-        alertsIndexPattern: 'indexPattern',
-        size: 10,
-      };
-
-      const result = getOptionalRequestParams(params);
-
-      expect(result).toEqual({});
-    });
-
     it('should return the optional request params when alerts is true', () => {
       const params = {
-        isEnabledRAGAlerts: true,
         alertsIndexPattern: 'indexPattern',
         size: 10,
       };

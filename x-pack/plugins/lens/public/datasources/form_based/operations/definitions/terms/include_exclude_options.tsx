@@ -32,16 +32,7 @@ const getTermsIncludeExcludeOptions = (
   };
 };
 
-export const IncludeExcludeRow = ({
-  include,
-  exclude,
-  tableRows,
-  columnId,
-  isNumberField,
-  includeIsRegex,
-  excludeIsRegex,
-  updateParams,
-}: {
+export interface IncludeExcludeRowProps {
   include?: string[] | number[];
   exclude?: string[] | number[];
   tableRows?: DatatableRow[];
@@ -55,7 +46,18 @@ export const IncludeExcludeRow = ({
     regexParam: string,
     regexValue: boolean
   ) => void;
-}) => {
+}
+
+export const IncludeExcludeRow = ({
+  include,
+  exclude,
+  tableRows,
+  columnId,
+  isNumberField,
+  includeIsRegex,
+  excludeIsRegex,
+  updateParams,
+}: IncludeExcludeRowProps) => {
   const [includeExcludeSelectedOptions, setIncludeExcludeSelectedOptions] = useState(
     getTermsIncludeExcludeOptions(include, exclude)
   );

@@ -7,15 +7,18 @@
  */
 
 import { AxiosError } from 'axios';
-
 export class KbnClientRequesterError extends Error {
   axiosError?: AxiosError;
   constructor(message: string, error: unknown) {
     super(message);
     this.name = 'KbnClientRequesterError';
-
-    if (error instanceof AxiosError) {
-      this.axiosError = error;
-    }
+    if (error instanceof AxiosError) this.axiosError = clean(error);
   }
+}
+function clean(error: Error): AxiosError {
+  const _ = AxiosError.from(error);
+  delete _.config;
+  delete _.request;
+  delete _.response;
+  return _;
 }

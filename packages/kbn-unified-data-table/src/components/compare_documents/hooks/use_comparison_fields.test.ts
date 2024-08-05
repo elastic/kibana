@@ -50,7 +50,7 @@ const renderFields = ({
     useComparisonFields({
       dataView,
       selectedFieldNames: ['message', 'extension', 'bytes'],
-      selectedDocs: ['0', '1', '2'],
+      selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
       showMatchingValues: true,
       getDocById,

@@ -58,7 +58,12 @@ export const RisksTable = ({
               defaultMessage: 'CIS Section',
             }),
         render: (name: GroupedFindingsEvaluation['name']) => (
-          <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate" color="text">
+          <EuiLink
+            data-test-subj="grouped-findings-evaluation-link"
+            onClick={() => onCellClick(name)}
+            className="eui-textTruncate"
+            color="text"
+          >
             {name}
           </EuiLink>
         ),
@@ -106,7 +111,11 @@ export const RisksTable = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div>
-          <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
+          <EuiButtonEmpty
+            data-test-subj="view-all-failed-findings"
+            onClick={onViewAllClick}
+            iconType="search"
+          >
             {viewAllButtonTitle}
           </EuiButtonEmpty>
         </div>

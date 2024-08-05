@@ -37,6 +37,16 @@ import {
 } from '../user_messages_ids';
 import { NonNullable } from '../react_embeddable/helper';
 
+export interface UserMessageGetterProps {
+  visualizationType: string | null | undefined;
+  visualization: Visualization | undefined;
+  visualizationState: VisualizationState | undefined;
+  activeDatasource: Datasource | null | undefined;
+  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
+  dataViews: DataViewsState;
+  core: CoreStart;
+}
+
 /**
  * Provides a place to register general user messages that don't belong in the datasource or visualization objects
  */
@@ -48,15 +58,7 @@ export const getApplicationUserMessages = ({
   activeDatasourceState,
   dataViews,
   core,
-}: {
-  visualizationType: string | null | undefined;
-  visualization: Visualization | undefined;
-  visualizationState: VisualizationState | undefined;
-  activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
-  dataViews: DataViewsState;
-  core: CoreStart;
-}): UserMessage[] => {
+}: UserMessageGetterProps): UserMessage[] => {
   const messages: UserMessage[] = [];
 
   if (!visualizationType) {

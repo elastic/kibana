@@ -28,10 +28,16 @@ export const SNOOZE_FAILED_MESSAGE = i18n.translate(
   }
 );
 
-export const OPEN_SNOOZE_PANEL_ARIA_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
-  { defaultMessage: 'Open snooze panel' }
-);
+export const OPEN_SNOOZE_PANEL_ARIA_LABEL = (name: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
+    {
+      defaultMessage: 'Open "{name}" snooze panel',
+      values: {
+        name,
+      },
+    }
+  );
 
 const getSecondsTranslation = (value: number) =>
   i18n.translate('xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.seconds', {

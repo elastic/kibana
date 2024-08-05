@@ -17,6 +17,7 @@ import type {
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 import { defaultFleetErrorHandler } from '../../errors';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -39,6 +40,7 @@ export const postNewAgentActionHandlerBuilder = function (
         created_at: new Date().toISOString(),
         ...newAgentAction,
         agents: [agent.id],
+        namespaces: [getCurrentNamespace(soClient)],
       });
 
       const body: PostNewAgentActionResponse = {

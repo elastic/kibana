@@ -1752,10 +1752,10 @@
           },
           {
             "parentPluginId": "@kbn/test",
-            "id": "def-common.SamlSessionManager.getSessionCookieForRole",
+            "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope",
             "type": "Function",
             "tags": [],
-            "label": "getSessionCookieForRole",
+            "label": "getInteractiveUserSessionCookieWithRoleScope",
             "description": [],
             "signature": [
               "(role: string) => Promise<string>"
@@ -1766,7 +1766,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test",
-                "id": "def-common.SamlSessionManager.getSessionCookieForRole.$1",
+                "id": "def-common.SamlSessionManager.getInteractiveUserSessionCookieWithRoleScope.$1",
                 "type": "string",
                 "tags": [],
                 "label": "role",

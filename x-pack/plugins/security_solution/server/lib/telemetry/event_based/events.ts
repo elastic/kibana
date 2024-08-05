@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EventTypeOpts } from '@kbn/core/server';
-import type { AssetCriticalityBulkUploadResponse } from '../../../../common/api/entity_analytics';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -88,7 +88,7 @@ interface AssetCriticalitySystemProcessedAssignmentFileEvent {
     endTime: string;
     tookMs: number;
   };
-  result?: AssetCriticalityBulkUploadResponse['stats'];
+  result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   status: 'success' | 'partial_success' | 'fail';
 }
 
@@ -124,7 +124,7 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
   };
 
 interface CreateAssetCriticalityProcessedFileEvent {
-  result?: AssetCriticalityBulkUploadResponse['stats'];
+  result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
   endTime: Date;
 }
@@ -154,7 +154,7 @@ export const createAssetCriticalityProcessedFileEvent = ({
   ];
 };
 
-const getUploadStatus = (stats?: AssetCriticalityBulkUploadResponse['stats']) => {
+const getUploadStatus = (stats?: BulkUpsertAssetCriticalityRecordsResponse['stats']) => {
   if (!stats) {
     return 'fail';
   }

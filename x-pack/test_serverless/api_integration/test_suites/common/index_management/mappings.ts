@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       log.debug('Creating index');
       try {
         indexName = await svlIndicesHelpers.createIndex(undefined, mappings);
@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
         log.debug('[Cleanup error] Error deleting index');
         throw err;
       }
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should get the index mappings', async () => {

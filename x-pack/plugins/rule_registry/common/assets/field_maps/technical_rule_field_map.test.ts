@@ -24,11 +24,19 @@ it('matches snapshot', () => {
       },
       "event.action": Object {
         "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
       "event.kind": Object {
         "array": false,
+        "ignore_above": 1024,
+        "required": false,
+        "type": "keyword",
+      },
+      "event.original": Object {
+        "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },

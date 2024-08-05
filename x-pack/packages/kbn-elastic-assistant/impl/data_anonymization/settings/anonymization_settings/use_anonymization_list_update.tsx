@@ -31,7 +31,6 @@ export const useAnonymizationListUpdate = ({
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
       const updatedFieldsKeys = updates.map((u) => u.field);
-
       const updatedFields = updates.map((u) => ({
         ...(anonymizationFields.data.find((f) => f.field === u.field) ?? { id: '', field: '' }),
         ...(u.update === 'allow' || u.update === 'defaultAllow'

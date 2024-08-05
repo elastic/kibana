@@ -57,6 +57,7 @@
       "embeddable",
       "fieldFormats",
       "charts",
+      "esqlDataGrid",
       "esql",
     ],
     "extraPublicDirs": [

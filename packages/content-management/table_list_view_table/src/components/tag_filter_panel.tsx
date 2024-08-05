@@ -43,7 +43,7 @@ const saveBtnWrapperCSS = css`
   width: 100%;
 `;
 
-interface Props {
+interface Context {
   clearTagSelection: () => void;
   closePopover: () => void;
   isPopoverOpen: boolean;
@@ -54,18 +54,28 @@ interface Props {
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
 }
 
-export const TagFilterPanel: FC<Props> = ({
-  isPopoverOpen,
-  isInUse,
-  options,
-  totalActiveFilters,
-  onFilterButtonClick,
-  onSelectChange,
-  closePopover,
-  clearTagSelection,
-}) => {
+const TagFilterContext = React.createContext<Context | null>(null);
+
+export const TagFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+  return <TagFilterContext.Provider value={props}>{children}</TagFilterContext.Provider>;
+};
+
+export const TagFilterPanel: FC<{}> = ({}) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
+  const componentContext = React.useContext(TagFilterContext);
+  if (!componentContext)
+    throw new Error('TagFilterPanel must be used within a TagFilterContextProvider');
+  const {
+    isPopoverOpen,
+    isInUse,
+    options,
+    totalActiveFilters,
+    onFilterButtonClick,
+    onSelectChange,
+    closePopover,
+    clearTagSelection,
+  } = componentContext;
   const isSearchVisible = options.length > 10;
 
   const searchBoxCSS = css`

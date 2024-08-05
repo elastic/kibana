@@ -11,7 +11,6 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { createAbsolutePathSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
@@ -25,15 +24,26 @@ const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
-expect.addSnapshotSerializer(createAbsolutePathSerializer());
-
 const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (s) => typeof s === 'string' && s.includes(nodeVersion),
-    (s) => s.split(nodeVersion).join('<node version>')
-  )
-);
+
+// The node variant may be overriden by an environment variable,
+// to provide test coverage against pointer-compression
+expect.addSnapshotSerializer({
+  test: (value) =>
+    typeof value === 'string' &&
+    (value.includes(nodeVersion) ||
+      Boolean(value.match(/(glibc-217|pointer-compression)/)) ||
+      value.startsWith(REPO_ROOT)),
+  print: (value) =>
+    typeof value === 'string'
+      ? value
+          .replaceAll(nodeVersion, '<node version>')
+          .replace('<node version>/glibc-217', '<node version>/<node variant>')
+          .replace('<node version>/pointer-compression', '<node version>/<node variant>')
+          .replace(REPO_ROOT, '<absolute path>')
+          .replace(/\\/g, '/')
+      : '',
+});
 
 async function setup() {
   const config = await Config.create({
@@ -82,8 +92,15 @@ it('runs expected fs operations', async () => {
     Object {
       "copy": Array [
         Array [
-          <absolute path>/.node_binaries/<node version>/default/node.exe,
-          <absolute path>/.node_binaries/<node version>/default/win32-x64/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-x64/download/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-x64/extract/node.exe,
+          Object {
+            "clone": true,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/default/win32-arm64/download/node.exe,
+          <absolute path>/.node_binaries/<node version>/default/win32-arm64/extract/node.exe,
           Object {
             "clone": true,
           },
@@ -91,57 +108,57 @@ it('runs expected fs operations', async () => {
       ],
       "untar": Array [
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/node-v<node version>-darwin-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-x64,
+          <absolute path>/.node_binaries/<node version>/default/darwin-x64/download/node-v<node version>-darwin-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/default/darwin-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/default/node-v<node version>-darwin-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/default/darwin-arm64,
+          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/download/node-v<node version>-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/default/darwin-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/pointer-compression/node-v<node version>-linux-x64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/pointer-compression/linux-x64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/download/node-v<node version>-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-x64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/glibc-217/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/glibc-217/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },
         ],
         Array [
-          <absolute path>/.node_binaries/<node version>/pointer-compression/node-v<node version>-linux-arm64.tar.gz,
-          <absolute path>/.node_binaries/<node version>/pointer-compression/linux-arm64,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/download/node-v<node version>-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/<node variant>/linux-arm64/extract,
           Object {
             "strip": 1,
           },

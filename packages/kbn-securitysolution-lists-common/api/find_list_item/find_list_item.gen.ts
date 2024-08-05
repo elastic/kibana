@@ -30,7 +30,7 @@ export const FindListItemsFilter = z.string();
 export type FindListItemsRequestQuery = z.infer<typeof FindListItemsRequestQuery>;
 export const FindListItemsRequestQuery = z.object({
   /**
-   * List's ide
+   * List's id
    */
   list_id: ListId,
   /**

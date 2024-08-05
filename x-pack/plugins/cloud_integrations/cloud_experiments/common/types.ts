@@ -19,6 +19,7 @@ export type CloudExperimentsFeatureFlagNames = keyof typeof FEATURE_FLAG_NAMES;
  * The contract of the start lifecycle method
  *
  * @public
+ * @deprecated in favor of the upcoming Core Feature Flags Service.
  */
 export interface CloudExperimentsPluginStart {
   /**
@@ -27,6 +28,7 @@ export interface CloudExperimentsPluginStart {
    * @param defaultValue The fallback value in case no variation is found.
    *
    * @public
+   * @deprecated in favor of the upcoming Core Feature Flags Service.
    */
   getVariation: <Data>(
     featureFlagName: CloudExperimentsFeatureFlagNames,
@@ -37,6 +39,7 @@ export interface CloudExperimentsPluginStart {
    * @param metric {@link CloudExperimentsMetric}
    *
    * @public
+   * @deprecated in favor of the upcoming Core Feature Flags Service.
    */
   reportMetric: <Data>(metric: CloudExperimentsMetric<Data>) => void;
 }

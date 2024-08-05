@@ -63,3 +63,5 @@ export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
 
 export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
 export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
+
+export const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];

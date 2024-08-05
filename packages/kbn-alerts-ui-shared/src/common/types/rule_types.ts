@@ -24,6 +24,8 @@ import { RuleType } from '@kbn/triggers-actions-ui-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TypeRegistry } from '../type_registry';
 
+export type { SanitizedRuleAction as RuleAction } from '@kbn/alerting-types';
+
 export type RuleTypeWithDescription = RuleType<string, string> & { description?: string };
 
 export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;

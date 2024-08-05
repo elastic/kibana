@@ -13,14 +13,14 @@ export const exampleDocumentProfileProvider: DocumentProfileProvider = {
   profileId: 'example-document-profile',
   profile: {},
   resolve: (params) => {
-    if (getFieldValue(params.record, 'data_stream.type') !== 'logs') {
+    if (getFieldValue(params.record, 'data_stream.type') !== 'example') {
       return { isMatch: false };
     }
 
     return {
       isMatch: true,
       context: {
-        type: DocumentType.Log,
+        type: DocumentType.Default,
       },
     };
   },
