@@ -27,8 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/translations/en.json')
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader);
-
       expect(response.body.locale).to.eql('en');
+
       expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
       expect(response.header).to.have.property(
         'cache-control',

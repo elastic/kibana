@@ -48,12 +48,15 @@ export default function ({ getService }: FtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
 
-      const response = await es.search({
-        index: ANALYTICS_SAVED_OBJECT_INDEX,
-        q: 'type:kql-telemetry',
-      });
-      const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-      expect(kqlTelemetryDoc.optInCount).to.be(1);
+      return es
+        .search({
+          index: ANALYTICS_SAVED_OBJECT_INDEX,
+          q: 'type:kql-telemetry',
+        })
+        .then((response) => {
+          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
+          expect(kqlTelemetryDoc.optInCount).to.be(1);
+        });
     });
 
     it('should increment the opt *out* counter in the .kibana_analytics/kql-telemetry document', async () => {
@@ -67,12 +70,15 @@ export default function ({ getService }: FtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
 
-      const response = await es.search({
-        index: ANALYTICS_SAVED_OBJECT_INDEX,
-        q: 'type:kql-telemetry',
-      });
-      const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
-      expect(kqlTelemetryDoc.optOutCount).to.be(1);
+      return es
+        .search({
+          index: ANALYTICS_SAVED_OBJECT_INDEX,
+          q: 'type:kql-telemetry',
+        })
+        .then((response) => {
+          const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
+          expect(kqlTelemetryDoc.optOutCount).to.be(1);
+        });
     });
 
     it('should report success when opt *in* is incremented successfully', async () => {

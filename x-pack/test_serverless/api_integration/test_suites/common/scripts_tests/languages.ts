@@ -15,8 +15,8 @@ import { RoleCredentials } from '../../../../shared/services';
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('Script Languages API', function getLanguages() {
     before(async () => {
