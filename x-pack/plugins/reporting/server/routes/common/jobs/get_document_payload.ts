@@ -53,7 +53,10 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(reporting: ReportingCore) {
+export function getDocumentPayloadFactory(
+  reporting: ReportingCore,
+  { isInternal }: { isInternal: boolean }
+) {
   const { logger: _logger } = reporting.getPluginSetupDeps();
   const logger = _logger.get('download-report');
   const exportTypesRegistry = reporting.getExportTypesRegistry();
@@ -84,29 +87,29 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     };
   }
 
-  // @TODO: These should be semantic HTTP codes as 500/503's indicate
-  // error then these are really operating properly.
   async function getFailure({ id }: ReportApiJSON): Promise<Payload> {
-    const jobsQuery = jobsQueryFactory(reporting);
+    const jobsQuery = jobsQueryFactory(reporting, { isInternal });
     const error = await jobsQuery.getError(id);
 
-    logger.debug(`Report job ${id} has failed. Sending statusCode: 500`);
+    // For download requested over public API, status code for failed job must be 500 to integrate with Watcher
+    const statusCode = isInternal ? 200 : 500;
+    logger.debug(`Report job ${id} has failed. Sending statusCode: ${statusCode}`);
 
     return {
-      statusCode: 500,
-      content: {
-        message: `Reporting generation failed: ${error}`,
-      },
+      statusCode,
+      content: { message: `Reporting generation failed: ${error}` },
       contentType: 'application/json',
       headers: {},
     };
   }
 
   function getIncomplete({ id, status }: ReportApiJSON): Payload {
-    logger.debug(`Report job ${id} is processing. Sending statusCode: 503`);
+    // For download requested over public API, status code for processing/pending job must be 503 to integrate with Watcher
+    const statusCode = isInternal ? 200 : 503;
+    logger.debug(`Report job ${id} is processing. Sending statusCode: ${statusCode}`);
 
     return {
-      statusCode: 503,
+      statusCode,
       content: status,
       contentType: 'text/plain',
       headers: { 'retry-after': '30' },
@@ -124,7 +127,6 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
       }
     }
 
-    // send a 503 indicating that the report isn't completed yet
     return getIncomplete(report);
   };
 }

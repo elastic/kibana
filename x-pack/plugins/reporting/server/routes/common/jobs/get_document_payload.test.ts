@@ -13,6 +13,7 @@ import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
+import { ReportingCore } from '../../..';
 import { ContentStream, getContentStream } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
 import { getDocumentPayloadFactory } from './get_document_payload';
@@ -22,13 +23,14 @@ jest.mock('../../../lib/content_stream');
 jest.mock('./jobs_query');
 
 describe('getDocumentPayload', () => {
+  let core: ReportingCore;
   let getDocumentPayload: ReturnType<typeof getDocumentPayloadFactory>;
 
   beforeEach(async () => {
     const schema = createMockConfigSchema();
-    const core = await createMockReportingCore(schema);
+    core = await createMockReportingCore(schema);
 
-    getDocumentPayload = getDocumentPayloadFactory(core);
+    getDocumentPayload = getDocumentPayloadFactory(core, { isInternal: false });
 
     (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(
       new Readable({
@@ -102,51 +104,109 @@ describe('getDocumentPayload', () => {
     });
   });
 
-  describe('when the report is failed', () => {
-    it('should return payload for the failed report', async () => {
-      await expect(
-        getDocumentPayload({
-          id: 'id1',
-          index: '.reporting-12345',
-          status: JOB_STATUS.FAILED,
-          jobtype: PDF_JOB_TYPE_V2,
-          output: {},
-          payload: {},
-        } as ReportApiJSON)
-      ).resolves.toEqual(
-        expect.objectContaining({
-          contentType: 'application/json',
-          content: {
-            message: expect.stringContaining('Some error'),
-          },
-          headers: {},
-          statusCode: 500,
-        })
-      );
+  describe('public API behavior', () => {
+    beforeEach(() => {
+      getDocumentPayload = getDocumentPayloadFactory(core, { isInternal: false });
+    });
+
+    describe('when the report is failed', () => {
+      it('should return payload for the failed report', async () => {
+        await expect(
+          getDocumentPayload({
+            id: 'id1',
+            index: '.reporting-12345',
+            status: JOB_STATUS.FAILED,
+            jobtype: PDF_JOB_TYPE_V2,
+            output: {},
+            payload: {},
+          } as ReportApiJSON)
+        ).resolves.toEqual(
+          expect.objectContaining({
+            contentType: 'application/json',
+            content: {
+              message: expect.stringContaining('Some error'),
+            },
+            headers: {},
+            statusCode: 500,
+          })
+        );
+      });
+    });
+
+    describe('when the report is incomplete', () => {
+      it('should return payload for the pending report', async () => {
+        await expect(
+          getDocumentPayload({
+            id: 'id1',
+            index: '.reporting-12345',
+            status: JOB_STATUS.PENDING,
+            jobtype: PDF_JOB_TYPE_V2,
+            output: {},
+            payload: {},
+          } as ReportApiJSON)
+        ).resolves.toEqual(
+          expect.objectContaining({
+            contentType: 'text/plain',
+            content: 'pending',
+            headers: {
+              'retry-after': '30',
+            },
+            statusCode: 503,
+          })
+        );
+      });
     });
   });
 
-  describe('when the report is incomplete', () => {
-    it('should return payload for the pending report', async () => {
-      await expect(
-        getDocumentPayload({
-          id: 'id1',
-          index: '.reporting-12345',
-          status: JOB_STATUS.PENDING,
-          jobtype: PDF_JOB_TYPE_V2,
-          output: {},
-          payload: {},
-        } as ReportApiJSON)
-      ).resolves.toEqual(
-        expect.objectContaining({
-          contentType: 'text/plain',
-          content: 'pending',
-          headers: {
-            'retry-after': '30',
-          },
-          statusCode: 503,
-        })
-      );
+  describe('internal API behavior', () => {
+    beforeEach(() => {
+      getDocumentPayload = getDocumentPayloadFactory(core, { isInternal: true });
+    });
+
+    describe('when the report is failed', () => {
+      it('should return payload for the failed report', async () => {
+        await expect(
+          getDocumentPayload({
+            id: 'id1',
+            index: '.reporting-12345',
+            status: JOB_STATUS.FAILED,
+            jobtype: PDF_JOB_TYPE_V2,
+            output: {},
+            payload: {},
+          } as ReportApiJSON)
+        ).resolves.toEqual(
+          expect.objectContaining({
+            contentType: 'application/json',
+            content: {
+              message: expect.stringContaining('Some error'),
+            },
+            headers: {},
+            statusCode: 200,
+          })
+        );
+      });
+    });
+
+    describe('when the report is incomplete', () => {
+      it('should return payload for the pending report', async () => {
+        await expect(
+          getDocumentPayload({
+            id: 'id1',
+            index: '.reporting-12345',
+            status: JOB_STATUS.PENDING,
+            jobtype: PDF_JOB_TYPE_V2,
+            output: {},
+            payload: {},
+          } as ReportApiJSON)
+        ).resolves.toEqual(
+          expect.objectContaining({
+            contentType: 'text/plain',
+            content: 'pending',
+            headers: { 'retry-after': '30' },
+            statusCode: 200,
+          })
+        );
+      });
     });
   });
 });
