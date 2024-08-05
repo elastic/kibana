@@ -24,7 +24,7 @@ import {
 } from './types';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
-import { updateBuiltInEntityDefinitions } from './lib/entities/update_entity_definition';
+import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
 import { builtInDefinitions } from './lib/entities/built_in';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
@@ -93,7 +93,7 @@ export class EntityManagerServerPlugin
         // the api key validation requires a check against the cluster license
         // which is lazily loaded. we ensure it gets loaded before the update
         await firstValueFrom(plugins.licensing.license$);
-        return updateBuiltInEntityDefinitions({
+        return upgradeBuiltInEntityDefinitions({
           definitions: builtInDefinitions,
           server: this.server!,
         });

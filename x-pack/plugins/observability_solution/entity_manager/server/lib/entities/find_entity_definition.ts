@@ -10,6 +10,10 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
+  getEntityHistoryIndexTemplateV1,
+  getEntityLatestIndexTemplateV1,
+} from '../../../common/helpers';
+import {
   generateHistoryTransformId,
   generateHistoryIngestPipelineId,
   generateLatestTransformId,
@@ -60,9 +64,15 @@ async function getEntityDefinitionState(
 ) {
   const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
   const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
-  const [ingestPipelines, transforms] = await Promise.all([
+  const [ingestPipelines, indexTemplatesInstalled, transforms] = await Promise.all([
     esClient.ingest.getPipeline({
       id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
+    }),
+    esClient.indices.existsIndexTemplate({
+      name: `${
+        (getEntityLatestIndexTemplateV1(definition.id),
+        getEntityHistoryIndexTemplateV1(definition.id))
+      }`,
     }),
     esClient.transform.getTransformStats({
       transform_id: [generateHistoryTransformId(definition), generateLatestTransformId(definition)],
@@ -80,7 +90,7 @@ async function getEntityDefinitionState(
     );
 
   return {
-    installed: ingestPipelinesInstalled && transformsInstalled,
+    installed: ingestPipelinesInstalled && transformsInstalled && indexTemplatesInstalled,
     running: transformsRunning,
   };
 }
