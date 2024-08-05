@@ -90,7 +90,8 @@ export function defineRoutes({
       },
     },
     errorHandler(async (context, request, response) => {
-      const [{ analytics }, { actions }] = await getStartServices();
+      const [{ analytics }, { actions, cloud }] = await getStartServices();
+
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
@@ -149,7 +150,13 @@ export function defineRoutes({
           isCitationsEnabled: data.citations,
         });
 
-        return handleStreamResponse({ logger, stream, response, request });
+        return handleStreamResponse({
+          logger,
+          stream,
+          response,
+          request,
+          isCloud: cloud?.isCloudEnabled ?? false,
+        });
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 

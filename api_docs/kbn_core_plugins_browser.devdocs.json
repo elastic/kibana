@@ -227,17 +227,17 @@
               "{ mode: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.EnvironmentMode",
+                "section": "def-server.EnvironmentMode",
                 "text": "EnvironmentMode"
               },
               ">; packageInfo: Readonly<",
               {
                 "pluginId": "@kbn/config",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnConfigPluginApi",
-                "section": "def-common.PackageInfo",
+                "section": "def-server.PackageInfo",
                 "text": "PackageInfo"
               },
               ">; }"
