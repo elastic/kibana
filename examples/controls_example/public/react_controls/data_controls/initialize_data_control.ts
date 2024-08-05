@@ -76,6 +76,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const dataViewIdSubscription = dataViewId
     .pipe(
       tap(() => {
+        filtersReady$.next(false);
         if (defaultControl.api.blockingError.value) {
           defaultControl.api.setBlockingError(undefined);
         }
@@ -97,8 +98,13 @@ export const initializeDataControl = <EditorState extends object = {}>(
       dataViews.next(dataView ? [dataView] : undefined);
     });
 
-  const fieldNameSubscription = combineLatest([dataViews, fieldName]).subscribe(
-    ([nextDataViews, nextFieldName]) => {
+  const fieldNameSubscription = combineLatest([dataViews, fieldName])
+    .pipe(
+      tap(() => {
+        filtersReady$.next(false);
+      })
+    )
+    .subscribe(([nextDataViews, nextFieldName]) => {
       const dataView = nextDataViews
         ? nextDataViews.find(({ id }) => dataViewId.value === id)
         : undefined;
@@ -126,8 +132,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
       if (spec) {
         fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
       }
-    }
-  );
+    });
 
   const onEdit = async () => {
     // get the initial state from the state manager
