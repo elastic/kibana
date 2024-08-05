@@ -116,8 +116,9 @@ describe('useColumns', () => {
   ];
 
   beforeEach(() => {
-    setItemStorageMock.mockClear();
+    jest.clearAllMocks();
     storage = { current: new Storage(mockStorage) };
+    queryClient.clear();
   });
 
   test('onColumnResize', async () => {
