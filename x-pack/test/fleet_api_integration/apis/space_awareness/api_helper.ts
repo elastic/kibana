@@ -48,6 +48,7 @@ export class SpaceTestApiClient {
 
     return res;
   }
+
   // Agent policies
   async createAgentPolicy(
     spaceId?: string,
@@ -319,6 +320,15 @@ export class SpaceTestApiClient {
       .set('kbn-xsrf', 'xxxx')
       .send({ action: { type: 'UNENROLL' } })
       .expect(200);
+
+    return res;
+  }
+  // Enable space awareness
+  async postEnableSpaceAwareness(spaceId?: string): Promise<any> {
+    const { body: res } = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/internal/fleet/enable_space_awareness`)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1');
 
     return res;
   }

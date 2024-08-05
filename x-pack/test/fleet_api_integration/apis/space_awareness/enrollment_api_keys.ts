@@ -49,6 +49,8 @@ export default function (providerContext: FtrProviderContext) {
     let spaceTest1EnrollmentKey1: EnrollmentAPIKey;
     // Create agent policies it should create a enrollment key for every keys
     before(async () => {
+      await apiClient.postEnableSpaceAwareness();
+
       const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
