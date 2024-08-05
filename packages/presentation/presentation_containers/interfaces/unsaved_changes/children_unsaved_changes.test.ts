@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { childrenUnsavedChanges$, DEBOUNCE_TIME } from './children_unsaved_changes';
 import { waitFor } from '@testing-library/react';
 
@@ -59,7 +59,7 @@ describe('childrenUnsavedChanges$', () => {
         interval: DEBOUNCE_TIME + 1,
       }
     );
-    
+
     child1Api.unsavedChanges.next({
       key1: 'modified value',
     });
@@ -116,7 +116,7 @@ describe('childrenUnsavedChanges$', () => {
         interval: DEBOUNCE_TIME + 1,
       }
     );
-    
+
     subscription.unsubscribe();
   });
 });
