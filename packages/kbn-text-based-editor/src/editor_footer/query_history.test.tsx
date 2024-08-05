@@ -9,8 +9,8 @@ import React from 'react';
 import { QueryHistoryAction, getTableColumns, QueryHistory, QueryColumn } from './query_history';
 import { render, screen } from '@testing-library/react';
 
-jest.mock('./history_local_storage', () => {
-  const module = jest.requireActual('./history_local_storage');
+jest.mock('../history_local_storage', () => {
+  const module = jest.requireActual('../history_local_storage');
   return {
     ...module,
     getHistoryItems: () => [
