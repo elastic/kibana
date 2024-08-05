@@ -753,16 +753,16 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'date',
+          type: 'datetime',
           optional: true,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
       minParams: 1,
     },
     {
@@ -1218,12 +1218,12 @@ const dateDiffDefinition: FunctionDefinition = {
         },
         {
           name: 'startTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'endTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1238,12 +1238,12 @@ const dateDiffDefinition: FunctionDefinition = {
         },
         {
           name: 'startTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'endTimestamp',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1308,7 +1308,7 @@ const dateExtractDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1323,7 +1323,7 @@ const dateExtractDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1357,7 +1357,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1372,7 +1372,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -1410,7 +1410,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1425,7 +1425,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1440,7 +1440,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1455,7 +1455,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1482,11 +1482,11 @@ const dateTruncDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -1497,11 +1497,11 @@ const dateTruncDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -2707,7 +2707,7 @@ const logDefinition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && Number(arg.value) < 0) {
+      if (isLiteralItem(arg) && arg.value < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2790,7 +2790,7 @@ const log10Definition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && Number(arg.value) < 0) {
+      if (isLiteralItem(arg) && arg.value < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2908,16 +2908,16 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
           name: 'field2',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3242,7 +3242,7 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -3398,11 +3398,11 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3545,11 +3545,11 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3702,11 +3702,11 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -3839,11 +3839,11 @@ const mvMaxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4019,11 +4019,11 @@ const mvMinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4116,6 +4116,43 @@ const mvMinDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const mvPseriesWeightedSumDefinition: FunctionDefinition = {
+  type: 'eval',
+  name: 'mv_pseries_weighted_sum',
+  description: i18n.translate(
+    'kbn-esql-validation-autocomplete.esql.definitions.mv_pseries_weighted_sum',
+    {
+      defaultMessage:
+        'Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.',
+    }
+  ),
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'p',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
+  supportedOptions: ['by'],
+  validate: undefined,
+  examples: [
+    'ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]\n| EVAL sum = MV_PSERIES_WEIGHTED_SUM(a, 1.5)\n| KEEP sum',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const mvSliceDefinition: FunctionDefinition = {
   type: 'eval',
   name: 'mv_slice',
@@ -4189,7 +4226,7 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
@@ -4203,7 +4240,7 @@ const mvSliceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4424,7 +4461,7 @@ const mvSortDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
         {
@@ -4434,7 +4471,7 @@ const mvSortDefinition: FunctionDefinition = {
           literalOptions: ['asc', 'desc'],
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -4511,7 +4548,6 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -4527,7 +4563,6 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'text',
@@ -4543,7 +4578,6 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
-          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'version',
@@ -4862,7 +4896,7 @@ const nowDefinition: FunctionDefinition = {
   signatures: [
     {
       params: [],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7041,11 +7075,11 @@ const toDatetimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7055,7 +7089,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7065,7 +7099,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7075,7 +7109,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7085,7 +7119,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7095,7 +7129,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
     {
       params: [
@@ -7105,7 +7139,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'date',
+      returnType: 'datetime',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7227,7 +7261,7 @@ const toDoubleDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7442,7 +7476,7 @@ const toIntegerDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7607,7 +7641,7 @@ const toLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7817,7 +7851,7 @@ const toStringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -7957,7 +7991,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'date',
+          type: 'datetime',
           optional: false,
         },
       ],
@@ -8226,6 +8260,7 @@ export const evalFunctionDefinitions = [
   mvMaxDefinition,
   mvMedianDefinition,
   mvMinDefinition,
+  mvPseriesWeightedSumDefinition,
   mvSliceDefinition,
   mvSortDefinition,
   mvSumDefinition,
