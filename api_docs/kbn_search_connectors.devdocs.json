@@ -25093,7 +25093,7 @@
                         "label": "depends_on",
                         "description": [],
                         "signature": [
-                          "{ field: string; value: string; }[]"
+                          "never[]"
                         ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
@@ -51905,6 +51905,206 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
+                  {
+                    "parentPluginId": "@kbn/search-connectors",
+                    "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "authentication",
+                    "description": [],
+                    "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.default_value",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "default_value",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.depends_on",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "depends_on",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.display",
+                        "type": "string",
+                        "tags": [],
+                        "label": "display",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.DisplayType",
+                            "text": "DisplayType"
+                          },
+                          ".DROPDOWN"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.label",
+                        "type": "string",
+                        "tags": [],
+                        "label": "label",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.options",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "options",
+                        "description": [],
+                        "signature": [
+                          "{ label: string; value: string; }[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.order",
+                        "type": "number",
+                        "tags": [],
+                        "label": "order",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.required",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "required",
+                        "description": [],
+                        "signature": [
+                          "true"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.sensitive",
+                        "type": "boolean",
+                        "tags": [],
+                        "label": "sensitive",
+                        "description": [],
+                        "signature": [
+                          "false"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.tooltip",
+                        "type": "Uncategorized",
+                        "tags": [],
+                        "label": "tooltip",
+                        "description": [],
+                        "signature": [
+                          "null"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          {
+                            "pluginId": "@kbn/search-connectors",
+                            "scope": "common",
+                            "docId": "kibKbnSearchConnectorsPluginApi",
+                            "section": "def-common.FieldType",
+                            "text": "FieldType"
+                          },
+                          ".STRING"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.ui_restrictions",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "ui_restrictions",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.validations",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "validations",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/search-connectors",
+                        "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.authentication.value",
+                        "type": "string",
+                        "tags": [],
+                        "label": "value",
+                        "description": [],
+                        "path": "packages/kbn-search-connectors/types/native_connectors.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
                   {
                     "parentPluginId": "@kbn/search-connectors",
                     "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.sharepoint_server.configuration.username",
