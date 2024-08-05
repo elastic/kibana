@@ -94,6 +94,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       );
       const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
       const settings$ = new BehaviorSubject<ControlGroupSettings | undefined>(undefined);
+      const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
 
       /** TODO: Handle loading; loading should be true if any child is loading */
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
@@ -125,6 +126,8 @@ export const getControlGroupEmbeddableFactory = (services: {
       const api = setApi({
         ...controlsManager.api,
         settings$,
+        disabledActionIds: disabledActionIds$,
+        setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
         openAddDataControlFlyout: (settings) => {
           const { controlInputTransform } = settings ?? {
             controlInputTransform: (state) => state,

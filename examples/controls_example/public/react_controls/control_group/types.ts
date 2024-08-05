@@ -20,6 +20,7 @@ import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDataLoading,
+  PublishesDisabledActionIds,
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
@@ -65,6 +66,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
+  PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;

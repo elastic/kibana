@@ -53,12 +53,12 @@ export const EditExample = () => {
       },
     };
 
-    // if (controlGroupAPI) {
-    //   const disabledActions: string[] = Object.keys(
-    //     pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
-    //   );
-    //   controlGroupAPI.updateInput({ disabledActions });
-    // }
+    if (controlGroupAPI) {
+      const disabledActions: string[] = Object.keys(
+        pickBy(newToggleIconIdToSelectedMapIcon, (value) => value)
+      );
+      controlGroupAPI.setDisabledActionIds(disabledActions);
+    }
 
     setToggleIconIdToSelectedMapIcon(newToggleIconIdToSelectedMapIcon);
   }

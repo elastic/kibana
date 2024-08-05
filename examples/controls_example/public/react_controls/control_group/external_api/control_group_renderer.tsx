@@ -36,8 +36,6 @@ export interface ControlGroupRendererProps {
   filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query;
-  loading?: boolean;
-  labelPosition?: ControlStyle;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlGroupRendererProps>(
