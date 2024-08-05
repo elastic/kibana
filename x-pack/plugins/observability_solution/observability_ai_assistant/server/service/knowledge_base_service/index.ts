@@ -39,7 +39,7 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isModelMissingOrUnavailableErrors(error: Error) {
+function isModelMissingOrUnavailableError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
     (error.body.error.type === 'resource_not_found_exception' ||
@@ -106,7 +106,7 @@ export class KnowledgeBaseService {
 
         return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
       } catch (error) {
-        if (isModelMissingOrUnavailableErrors(error)) {
+        if (isModelMissingOrUnavailableError(error)) {
           return false;
         } else {
           throw error;
@@ -166,7 +166,7 @@ export class KnowledgeBaseService {
     } catch (error) {
       this.dependencies.logger.debug('Error starting model deployment');
       this.dependencies.logger.debug(error);
-      if (!isModelMissingOrUnavailableErrors(error)) {
+      if (!isModelMissingOrUnavailableError(error)) {
         throw error;
       }
     }
@@ -407,7 +407,7 @@ export class KnowledgeBaseService {
         namespace,
         modelId,
       }).catch((error) => {
-        if (isModelMissingOrUnavailableErrors(error)) {
+        if (isModelMissingOrUnavailableError(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -548,7 +548,7 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isModelMissingOrUnavailableErrors(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -615,7 +615,7 @@ export class KnowledgeBaseService {
 
       return Promise.resolve();
     } catch (error) {
-      if (isModelMissingOrUnavailableErrors(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
