@@ -8998,7 +8998,39 @@
           "\nAggsStart represents the actual external contract as AggsCommonStart\nis only used internally. The difference is that AggsStart includes the\ntypings for the registry with initialized agg types.\n"
         ],
         "signature": [
-          "{ calculateAutoTimeExpression: (range: ",
+          "{ types: { get: (name: string) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any> | undefined; getAll: () => { buckets: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any>[]; metrics: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>[]; }; }; calculateAutoTimeExpression: (range: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9038,39 +9070,7 @@
             "section": "def-common.AggConfigs",
             "text": "AggConfigs"
           },
-          "; types: { get: (name: string) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BucketAggType",
-            "text": "BucketAggType"
-          },
-          "<any> | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.MetricAggType",
-            "text": "MetricAggType"
-          },
-          "<any> | undefined; getAll: () => { buckets: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BucketAggType",
-            "text": "BucketAggType"
-          },
-          "<any>[]; metrics: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.MetricAggType",
-            "text": "MetricAggType"
-          },
-          "<any>[]; }; }; }"
+          "; }"
         ],
         "path": "src/plugins/data/common/search/aggs/types.ts",
         "deprecated": false,
