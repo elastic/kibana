@@ -1035,15 +1035,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(
-      dataViewTitle: string,
-      transitionFromTextBasedLanguages?: boolean
-    ) {
-      await PageObjects.unifiedSearch.switchDataView(
-        'lns-dataView-switch-link',
-        dataViewTitle,
-        transitionFromTextBasedLanguages
-      );
+    async switchDataPanelIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 

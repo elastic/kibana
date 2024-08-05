@@ -16,7 +16,14 @@ import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es-query';
+import {
+  type Query,
+  type Filter,
+  type TimeRange,
+  type AggregateQuery,
+  isOfQueryType,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type {
   TimeHistoryContract,
@@ -32,7 +39,7 @@ import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
-import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
+import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type {
@@ -108,13 +115,12 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   disableQueryLanguageSwitcher?: boolean;
   // defines padding and border; use 'inPage' to avoid any padding or border;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
-  displayStyle?: 'inPage' | 'detached';
+  displayStyle?: 'inPage' | 'detached' | 'withBorders';
   // super update button background fill control
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
-  onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
@@ -480,9 +486,10 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   }
 
   public render() {
-    const { theme } = this.props;
+    const { theme, query } = this.props;
+    const isESQLQuery = isOfAggregateQueryType(query);
     const isScreenshotMode = this.props.isScreenshotMode === true;
-    const styles = searchBarStyles(theme);
+    const styles = searchBarStyles(theme, isESQLQuery);
     const cssStyles = [
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],
@@ -640,7 +647,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
-          onTextBasedSavedAndExit={this.props.onTextBasedSavedAndExit}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
           suggestionsSize={this.props.suggestionsSize}
@@ -650,6 +656,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
           renderQueryInputAppend={this.props.renderQueryInputAppend}
+          disableExternalPadding={this.props.displayStyle === 'withBorders'}
         />
       </div>
     );
