@@ -16,6 +16,7 @@ import {
   Tree,
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import TestAgent from 'supertest/lib/agent';
 import {
   GeneratedTrees,
   Options,
@@ -30,8 +31,8 @@ import {
 } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
+  const utils = getService('securitySolutionUtils');
 
   const relatedEventsToGen = [
     { category: RelatedEventCategory.Driver, count: 2 },
@@ -56,7 +57,11 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
   describe('@ess @serverless Resolver tree', function () {
+    let adminSupertest: TestAgent;
+
     before(async () => {
+      adminSupertest = await utils.createSuperTest();
+
       resolverTrees = await resolver.createTrees(treeOptions);
       // we need tree2 for comparison tests
       [tree, tree2] = resolverTrees.trees;
@@ -67,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('ancestry events', () => {
       it('should return the correct ancestor nodes for the tree', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -93,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should handle an invalid id', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -114,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return a subset of the ancestors', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -141,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return ancestors without the ancestry array', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -170,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         const from = new Date(
           timestampSafeVersion(tree.origin.lifecycle[0]) ?? new Date()
         ).toISOString();
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -198,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should support returning multiple ancestor trees when multiple nodes are requested', async () => {
         // There should be 2 levels of descendants under the origin, grab the bottom one, and the first node's id
         const bottomMostDescendant = Array.from(tree.childrenLevels[1].values())[0].id;
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -235,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         const level0Nodes = Array.from(tree.childrenLevels[0].values());
         const leftNode = level0Nodes[0].id;
         const rightNode = level0Nodes[2].id;
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -267,7 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not return any nodes when the search index does not have any data', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -290,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('descendant events', () => {
       it('returns all descendants for the origin without using the ancestry field', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -320,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns all descendants for the origin using the ancestry field', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -351,7 +356,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should handle an invalid id', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -375,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
         // this gets a node should have 3 children which were created in succession so that the timestamps
         // are ordered correctly to be retrieved in a single call
         const childID = Array.from(tree.childrenLevels[0].values())[0].id;
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -409,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
         const level0Nodes = Array.from(tree.childrenLevels[0].values());
         const leftNodeID = level0Nodes[0].id;
         const rightNodeID = level0Nodes[2].id;
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -443,7 +448,7 @@ export default function ({ getService }: FtrProviderContext) {
         const originGrandparent =
           parentEntityIDSafeVersion(tree.ancestry.get(originParent)!.lifecycle[0]) ?? '';
         expect(originGrandparent).to.not.be('');
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -481,7 +486,7 @@ export default function ({ getService }: FtrProviderContext) {
         const originGrandparent =
           parentEntityIDSafeVersion(tree.ancestry.get(originParent)!.lifecycle[0]) ?? '';
         expect(originGrandparent).to.not.be('');
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -518,7 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
         const end = new Date(
           timestampSafeVersion(level0Node.lifecycle[0]) ?? new Date()
         ).toISOString();
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -548,7 +553,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('ancestry and descendants', () => {
       it('returns all descendants and ancestors without the ancestry field and they should have the name field', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -587,7 +592,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns all descendants and ancestors without the ancestry field', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -626,7 +631,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns all descendants and ancestors with the ancestry field', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -665,7 +670,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('returns an empty response when limits are zero', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -698,7 +703,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('different agent.ids', () => {
       it('should return correct nodes for tree1 and tree2 based on agent.id', async () => {
-        const { body: body1 }: { body: ResolverNode[] } = await supertest
+        const { body: body1 }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -728,7 +733,7 @@ export default function ({ getService }: FtrProviderContext) {
           relatedEventsCategories: relatedEventsToGen,
         });
 
-        const { body: body2 }: { body: ResolverNode[] } = await supertest
+        const { body: body2 }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -764,7 +769,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should handle process.entity_id collisions correctly', async () => {
         const duplicateEntityId = tree.origin.id;
 
-        const { body: body1 }: { body: ResolverNode[] } = await supertest
+        const { body: body1 }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -782,7 +787,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const { body: body2 }: { body: ResolverNode[] } = await supertest
+        const { body: body2 }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
