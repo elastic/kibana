@@ -7,13 +7,10 @@
 
 import { uniq } from 'lodash';
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
-import type { AiopsLogRateAnalysisSchema } from '../api/schema';
-
 import { fetchCategories } from './fetch_categories';
+import type { FetchTopOptions } from './fetch_top_types';
 
 export const fetchTopCategories = async ({
   esClient,
@@ -21,16 +18,7 @@ export const fetchTopCategories = async ({
   emitError,
   logger,
   arguments: args,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  emitError: (m: string) => void;
-  abortSignal?: AbortSignal;
-  arguments: AiopsLogRateAnalysisSchema & {
-    fieldNames: string[];
-    sampleProbability?: number;
-  };
-}) => {
+}: FetchTopOptions) => {
   // The default value of 1 means no sampling will be used
   const { fieldNames, sampleProbability = 1, ...params } = args;
 
