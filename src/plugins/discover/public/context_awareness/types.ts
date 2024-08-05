@@ -24,9 +24,24 @@ export interface RowIndicatorExtensionParams {
   dataView: DataView;
 }
 
+export interface DefaultAppStateColumn {
+  name: string;
+  width?: number;
+}
+
+export interface DefaultAppStateExtensionParams {
+  dataView: DataView;
+}
+
+export interface DefaultAppStateExtension {
+  columns?: DefaultAppStateColumn[];
+  rowHeight?: number;
+}
+
 export interface Profile {
   getCellRenderers: () => CustomCellRenderer;
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+  getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
   getRowIndicatorProvider: (
     params: RowIndicatorExtensionParams
   ) => UnifiedDataTableProps['getRowIndicator'] | undefined;
