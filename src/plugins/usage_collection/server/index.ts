@@ -10,6 +10,7 @@ import { PluginInitializerContext } from '@kbn/core/server';
 
 export type {
   Collector,
+  ICollectorSet,
   AllowedSchemaTypes,
   MakeSchemaFrom,
   CollectorOptions,
