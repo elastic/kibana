@@ -7218,7 +7218,14 @@
             "label": "rules",
             "description": [],
             "signature": [
-              "{} | RoleMappingRule"
+              "{} | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/role_mapping.ts",
             "deprecated": false,
@@ -7230,6 +7237,162 @@
             "type": "Object",
             "tags": [],
             "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingAllRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingAllRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingAllRule.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingAnyRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingAnyRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingAnyRule.any",
+            "type": "Array",
+            "tags": [],
+            "label": "any",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingRule",
+                "text": "RoleMappingRule"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingExceptRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingExceptRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingExceptRule.except",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "except",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingAnyRule",
+                "text": "RoleMappingAnyRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingAllRule",
+                "text": "RoleMappingAllRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingFieldRule",
+                "text": "RoleMappingFieldRule"
+              },
+              " | ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleMappingExceptRule",
+                "text": "RoleMappingExceptRule"
+              }
+            ],
+            "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingFieldRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleMappingFieldRule",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleMappingFieldRule.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
             "description": [],
             "signature": [
               "{ [x: string]: any; }"
@@ -8200,6 +8363,51 @@
           "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
         ],
         "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleMappingRule",
+        "type": "Type",
+        "tags": [],
+        "label": "RoleMappingRule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingAnyRule",
+            "text": "RoleMappingAnyRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingAllRule",
+            "text": "RoleMappingAllRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingFieldRule",
+            "text": "RoleMappingFieldRule"
+          },
+          " | ",
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.RoleMappingExceptRule",
+            "text": "RoleMappingExceptRule"
+          }
+        ],
+        "path": "x-pack/plugins/security/common/model/role_mapping.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
