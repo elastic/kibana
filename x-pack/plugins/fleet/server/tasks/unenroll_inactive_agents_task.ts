@@ -21,7 +21,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService } from '../services';
@@ -32,6 +32,8 @@ const TITLE = 'Fleet Deleted Files Periodic Tasks';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';
+const POLICIES_BATCHSIZE = 1000;
+const UNENROLLMENT_BATCHSIZE = 1000;
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
@@ -72,7 +74,7 @@ export class UnenrollInactiveAgentsTask {
 
   public start = async ({ taskManager }: UnenrollInactiveAgentsTaskStartContract) => {
     if (!taskManager) {
-      this.logger.error('Missing required service during start');
+      this.logger.error('[UnenrollInactiveAgentsTask] Missing required service during start');
       return;
     }
 
@@ -103,7 +105,7 @@ export class UnenrollInactiveAgentsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[runTask()] ended${msg ? ': ' + msg : ''}`);
+    this.logger.info(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   private async fetchAgentsWithUnenrollmentTimeout(
@@ -111,25 +113,26 @@ export class UnenrollInactiveAgentsTask {
     soClient: SavedObjectsClientContract
   ) {
     this.logger.debug(
-      `Running UnenrollInactiveAgentsTask. Fetching agent policies with unenroll_timeout > 0`
+      `[UnenrollInactiveAgentsTask] Fetching agent policies with unenroll_timeout > 0`
     );
-    // find all agent policies having unenroll_timeout > 0
-    const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
+    // find all agent policies that are not managed and having unenroll_timeout > 0
+    const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
     const agentPolicies = await agentPolicyService.list(soClient, {
       kuery: policiesKuery,
-      perPage: SO_SEARCH_LIMIT,
-      withPackagePolicies: true,
+      perPage: POLICIES_BATCHSIZE,
+      withAgentCount: true,
     });
     const policyIds = agentPolicies?.items.map((policy) => policy.id);
     this.logger.debug(
-      `UnenrollInactiveAgentsTask. Found "${policyIds.length}" agent policies with unenroll_timeout > 0`
+      `[UnenrollInactiveAgentsTask] Found "${policyIds.length}" agent policies with unenroll_timeout > 0`
     );
-    if (!policyIds.length) {
-      this.endRun('No policies with with unenroll_timeout set');
+    if (!agentPolicies?.items.length || !policyIds.length) {
+      this.endRun('Found no policies to process');
       return;
     }
 
-    // find agents enrolled on above policies that are also inactive
+    // find inactive agents enrolled on above policies
+    // limit batch size to 1000 to avoid scaling issues
     const kuery = `(${AGENTS_PREFIX}.policy_id:${policyIds
       .map((id) => `"${id}"`)
       .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
@@ -137,27 +140,27 @@ export class UnenrollInactiveAgentsTask {
       kuery,
       showInactive: true,
       page: 1,
-      perPage: SO_SEARCH_LIMIT,
+      perPage: UNENROLLMENT_BATCHSIZE,
     });
     if (!res.agents.length) {
       this.endRun('No inactive agents to unenroll');
       return;
     }
     this.logger.debug(
-      `UnenrollInactiveAgentsTask. Found "${res.total}" inactive agents to unenroll`
+      `[UnenrollInactiveAgentsTask] Found "${res.total}" inactive agents to unenroll`
     );
     return res;
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     if (!this.wasStarted) {
-      this.logger.debug('[runTask()] Aborted. Task not started yet');
+      this.logger.debug('[UnenrollInactiveAgentsTask] runTask Aborted. Task not started yet');
       return;
     }
     // Check that this task is current
     if (taskInstance.id !== this.taskId) {
       this.logger.debug(
-        `Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+        `[UnenrollInactiveAgentsTask] Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();
     }
@@ -171,23 +174,25 @@ export class UnenrollInactiveAgentsTask {
     try {
       const res = await this.fetchAgentsWithUnenrollmentTimeout(esClient, soClient);
 
-      this.logger.debug(`Attempting unenrollment of ${res?.total} inactive agents.`);
+      this.logger.debug(
+        `[UnenrollInactiveAgentsTask] attempting unenrollment of ${res?.total} inactive agents.`
+      );
       const actionId = await unenrollBatch(soClient, esClient, res.agents, {
         revoke: true,
         force: true,
       });
       this.logger.debug(
-        `Executed unenrollment of ${res?.total} inactive agents.with actionId: ${actionId}`
+        `[UnenrollInactiveAgentsTask] Executed unenrollment of ${res?.total} inactive agents.with actionId: ${actionId}`
       );
 
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
-        this.logger.warn(`Request aborted due to timeout: ${err}`);
+        this.logger.warn(`[UnenrollInactiveAgentsTask] request aborted due to timeout: ${err}`);
         this.endRun();
         return;
       }
-      this.logger.error(err);
+      this.logger.error(`[UnenrollInactiveAgentsTask] error: ${err}`);
       this.endRun('error');
     }
   };

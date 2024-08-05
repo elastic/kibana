@@ -1143,10 +1143,6 @@ class AgentPolicyService {
         default_fleet_server: policy.is_default_fleet_server === true,
       };
 
-      if (policy.unenroll_timeout) {
-        // TODO: if this is set, we need to schedule a task
-      }
-
       acc.push(fleetServerPolicy);
       return acc;
     }, [] as FleetServerPolicy[]);
