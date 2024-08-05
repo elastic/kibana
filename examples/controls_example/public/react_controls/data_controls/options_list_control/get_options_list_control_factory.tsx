@@ -153,6 +153,8 @@ export const getOptionsListControlFactory = (
           selections.setSelectedOptions(undefined);
           selections.setExistsSelected(false);
           selections.setExclude(false);
+          requestSize$.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
+          sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
 
       /** Fetch the suggestions and perform validation */
