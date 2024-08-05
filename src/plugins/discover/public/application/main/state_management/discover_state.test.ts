@@ -753,25 +753,25 @@ describe('Test discover state actions', () => {
     expect(persistedDataViewId).toBe(nextSavedSearch?.searchSource.getField('index')!.id);
   });
 
-  test('transitionFromDataviewToESQL', async () => {
+  test('transitionFromDataViewToESQL', async () => {
     const savedSearchWithQuery = copySavedSearch(savedSearchMock);
     const query = { query: "foo: 'bar'", language: 'kuery' };
     savedSearchWithQuery.searchSource.setField('query', query);
     const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-    await state.actions.transitionFromDataviewToESQL(dataViewMock);
+    await state.actions.transitionFromDataViewToESQL(dataViewMock);
     expect(state.appState.getState().query).toStrictEqual({
       esql: 'FROM the-data-view-title | LIMIT 10',
     });
   });
 
-  test('transitionFromESQLToDataview', async () => {
+  test('transitionFromESQLToDataView', async () => {
     const savedSearchWithQuery = copySavedSearch(savedSearchMock);
     const query = {
       esql: 'FROM the-data-view-title | LIMIT 10',
     };
     savedSearchWithQuery.searchSource.setField('query', query);
     const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-    await state.actions.transitionFromESQLToDataview('the-data-view-id');
+    await state.actions.transitionFromESQLToDataView('the-data-view-id');
     expect(state.appState.getState().query).toStrictEqual({ query: '', language: 'kuery' });
   });
 

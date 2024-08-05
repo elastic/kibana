@@ -34,7 +34,7 @@ export const getTopNavLinks = ({
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
-  shouldShowESQLToDataviewTransitionModal,
+  shouldShowESQLToDataViewTransitionModal,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -43,7 +43,7 @@ export const getTopNavLinks = ({
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
-  shouldShowESQLToDataviewTransitionModal: boolean;
+  shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
   const alerts = {
     id: 'alerts',
@@ -71,21 +71,14 @@ export const getTopNavLinks = ({
   const esqLDataViewTransitionToggle = {
     id: 'esql',
     label: isEsqlMode
-      ? i18n.translate('discover.localMenu.localMenu.switchToClassicTitle', {
+      ? i18n.translate('discover.localMenu.switchToClassicTitle', {
           defaultMessage: 'Switch to classic',
         })
-      : i18n.translate('discover.localMenu.localMenu.tryESQLTitle', {
+      : i18n.translate('discover.localMenu.tryESQLTitle', {
           defaultMessage: 'Try ES|QL',
         }),
     emphasize: true,
     iconType: 'editorRedo',
-    description: isEsqlMode
-      ? i18n.translate('discover.localMenu.localMenu.switchToClassicTitle', {
-          defaultMessage: 'Switch to classic',
-        })
-      : i18n.translate('discover.localMenu.tryESQLDescription', {
-          defaultMessage: 'Try ES|QL',
-        }),
     fill: false,
     color: 'text',
     run: () => {
@@ -98,15 +91,15 @@ export const getTopNavLinks = ({
            * - the user has opened and applied changes to the saved search
            */
           if (
-            shouldShowESQLToDataviewTransitionModal &&
+            shouldShowESQLToDataViewTransitionModal &&
             !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
           ) {
             state.internalState.transitions.setIsESQLToDataViewTransitionModalVisible(true);
           } else {
-            state.actions.transitionFromESQLToDataview(dataView.id ?? '');
+            state.actions.transitionFromESQLToDataView(dataView.id ?? '');
           }
         } else {
-          state.actions.transitionFromDataviewToESQL(dataView);
+          state.actions.transitionFromDataViewToESQL(dataView);
           services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
         }
       }

@@ -171,11 +171,11 @@ export const DiscoverTopNav = ({
               false
             ),
           onSaveCb: () => {
-            stateContainer.actions.transitionFromESQLToDataview(dataView.id ?? '');
+            stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
           },
         });
       } else {
-        stateContainer.actions.transitionFromESQLToDataview(dataView.id ?? '');
+        stateContainer.actions.transitionFromESQLToDataView(dataView.id ?? '');
       }
     },
     [dataView.id, services, stateContainer]

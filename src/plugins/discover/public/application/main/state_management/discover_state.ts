@@ -179,12 +179,12 @@ export interface DiscoverStateContainer {
      * Triggered when transitioning from ESQL to Dataview
      * Clean ups the ES|QL query and moves to the dataview mode
      */
-    transitionFromESQLToDataview: (dataViewId: string) => void;
+    transitionFromESQLToDataView: (dataViewId: string) => void;
     /**
      * Triggered when transitioning from ESQL to Dataview
      * Clean ups the ES|QL query and moves to the dataview mode
      */
-    transitionFromDataviewToESQL: (dataView: DataView) => void;
+    transitionFromDataViewToESQL: (dataView: DataView) => void;
     /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
@@ -365,7 +365,7 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const transitionFromESQLToDataview = (dataViewId: string) => {
+  const transitionFromESQLToDataView = (dataViewId: string) => {
     appStateContainer.update({
       query: {
         language: 'kuery',
@@ -379,7 +379,7 @@ export function getDiscoverStateContainer({
     });
   };
 
-  const transitionFromDataviewToESQL = (dataView: DataView) => {
+  const transitionFromDataViewToESQL = (dataView: DataView) => {
     const queryString = getInitialESQLQuery(dataView);
     appStateContainer.update({
       query: { esql: queryString },
@@ -585,8 +585,8 @@ export function getDiscoverStateContainer({
       onDataViewCreated,
       onDataViewEdited,
       onOpenSavedSearch,
-      transitionFromESQLToDataview,
-      transitionFromDataviewToESQL,
+      transitionFromESQLToDataView,
+      transitionFromDataViewToESQL,
       onUpdateQuery,
       setDataView,
       undoSavedSearchChanges,

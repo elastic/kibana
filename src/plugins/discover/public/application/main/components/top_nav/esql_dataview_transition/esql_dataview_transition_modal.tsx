@@ -46,7 +46,7 @@ export default function ESQLToDataViewTransitionModal({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('discover.esqlToDataviewTransitionModalTitle', {
+          {i18n.translate('discover.esqlToDataViewTransitionModal.title', {
             defaultMessage: 'Unsaved changes',
           })}
         </EuiModalHeaderTitle>
@@ -62,14 +62,14 @@ export default function ESQLToDataViewTransitionModal({
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="GrayText">
-              {i18n.translate('discover.esqlToDataviewTransitionModalHelpText', {
-                defaultMessage: 'Help us improve ES|QL.',
+              {i18n.translate('discover.esqlToDataViewTransitionModal.helpText', {
+                defaultMessage: 'Help us improve ES|QL',
               })}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink external href={FEEDBACK_LINK} target="_blank">
-              {i18n.translate('discover.esqlToDataviewTransitionModalFeedbackLink', {
+              {i18n.translate('discover.esqlToDataViewTransitionModal.feedbackLink', {
                 defaultMessage: 'Submit feedback',
               })}
             </EuiLink>
@@ -82,8 +82,8 @@ export default function ESQLToDataViewTransitionModal({
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id="dismiss-text-based-languages-transition-modal"
-              label={i18n.translate('discover.esqlToDataviewTransitionModalDismissButton', {
-                defaultMessage: "Store response and don't show again",
+              label={i18n.translate('discover.esqlToDataViewTransitionModal.dismissButtonLabel', {
+                defaultMessage: "Don't ask me again",
               })}
               checked={dismissModalChecked}
               onChange={onTransitionModalDismiss}
@@ -98,7 +98,7 @@ export default function ESQLToDataViewTransitionModal({
                   iconType="trash"
                   data-test-subj="discover-esql-to-dataview-no-save-btn"
                 >
-                  {i18n.translate('discover.esqlToDataviewTransitionModalCloseButton', {
+                  {i18n.translate('discover.esqlToDataViewTransitionModal.closeButtonLabel', {
                     defaultMessage: 'Discard and switch',
                   })}
                 </EuiButtonEmpty>
@@ -111,7 +111,7 @@ export default function ESQLToDataViewTransitionModal({
                   iconType="save"
                   data-test-subj="discover-esql-to-dataview-save-btn"
                 >
-                  {i18n.translate('discover.esqlToDataviewTransitionModalSaveButton', {
+                  {i18n.translate('discover.esqlToDataViewTransitionModal.saveButtonLabel', {
                     defaultMessage: 'Save and switch',
                   })}
                 </EuiButton>

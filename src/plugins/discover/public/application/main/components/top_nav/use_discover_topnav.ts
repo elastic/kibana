@@ -45,7 +45,7 @@ export const useDiscoverTopNav = ({
   );
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();
-  const shouldShowESQLToDataviewTransitionModal = !savedSearchId || savedSearchHasChanged;
+  const shouldShowESQLToDataViewTransitionModal = !savedSearchId || savedSearchHasChanged;
   const dataView = useInternalStateSelector((state) => state.dataView);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const isEsqlMode = useIsEsqlMode();
@@ -64,7 +64,7 @@ export const useDiscoverTopNav = ({
         isEsqlMode,
         adHocDataViews,
         topNavCustomization,
-        shouldShowESQLToDataviewTransitionModal,
+        shouldShowESQLToDataViewTransitionModal,
       }),
     [
       adHocDataViews,
@@ -74,7 +74,7 @@ export const useDiscoverTopNav = ({
       services,
       stateContainer,
       topNavCustomization,
-      shouldShowESQLToDataviewTransitionModal,
+      shouldShowESQLToDataViewTransitionModal,
     ]
   );
 
