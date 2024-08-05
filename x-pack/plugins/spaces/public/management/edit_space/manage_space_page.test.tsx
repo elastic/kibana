@@ -83,6 +83,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -112,7 +113,7 @@ describe('ManageSpacePage', () => {
     });
   });
 
-  it('shows solution view select when enabled', async () => {
+  it('shows solution view select when visible', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
@@ -130,7 +131,7 @@ describe('ManageSpacePage', () => {
           spaces: { manage: true },
         }}
         allowFeatureVisibility
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
         eventTracker={eventTracker}
       />
     );
@@ -143,63 +144,35 @@ describe('ManageSpacePage', () => {
     expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(1);
   });
 
-  it('hides solution view select when not enabled or undefined', async () => {
+  it('hides solution view select when not visible', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    {
-      const wrapper = mountWithIntl(
-        <ManageSpacePage
-          spacesManager={spacesManager as unknown as SpacesManager}
-          getFeatures={featuresStart.getFeatures}
-          notifications={notificationServiceMock.createStartContract()}
-          history={history}
-          capabilities={{
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          }}
-          allowFeatureVisibility
-          eventTracker={eventTracker}
-        />
-      );
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowFeatureVisibility
+        allowSolutionVisibility={false}
+        eventTracker={eventTracker}
+      />
+    );
 
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('input[name="name"]')).toHaveLength(1);
-      });
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
 
-      expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
-    }
-
-    {
-      const wrapper = mountWithIntl(
-        <ManageSpacePage
-          spacesManager={spacesManager as unknown as SpacesManager}
-          getFeatures={featuresStart.getFeatures}
-          notifications={notificationServiceMock.createStartContract()}
-          history={history}
-          capabilities={{
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          }}
-          allowFeatureVisibility
-          solutionNavExperiment={Promise.resolve(false)}
-          eventTracker={eventTracker}
-        />
-      );
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('input[name="name"]')).toHaveLength(1);
-      });
-
-      expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
-    }
+    expect(findTestSubject(wrapper, 'navigationPanel')).toHaveLength(0);
   });
 
   it('shows feature visibility controls when allowed', async () => {
@@ -221,6 +194,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -251,6 +225,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility={false}
+        allowSolutionVisibility
       />
     );
 
@@ -297,7 +272,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
-        solutionNavExperiment={Promise.resolve(true)}
+        allowSolutionVisibility
       />
     );
 
@@ -375,6 +350,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -425,6 +401,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -463,6 +440,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
@@ -525,6 +503,7 @@ describe('ManageSpacePage', () => {
         }}
         eventTracker={eventTracker}
         allowFeatureVisibility
+        allowSolutionVisibility
       />
     );
 
