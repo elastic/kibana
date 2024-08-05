@@ -28,9 +28,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        await testSubjects.existOrFail('spaces-edit-page');
-        await testSubjects.existOrFail('spaces-edit-page > generalPanel');
-        await testSubjects.existOrFail('spaces-edit-page > navigationPanel');
+        await testSubjects.existOrFail('spaces-view-page');
+        await testSubjects.existOrFail('spaces-view-page > generalPanel');
+        await testSubjects.existOrFail('spaces-view-page > navigationPanel');
       });
 
       it('changes the space solution and updates the side navigation', async () => {

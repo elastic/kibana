@@ -6,6 +6,5 @@
  */
 
 export const TAB_ID_CONTENT = 'content';
-export const TAB_ID_FEATURES = 'features';
 export const TAB_ID_ROLES = 'roles';
 export const TAB_ID_GENERAL = 'general';

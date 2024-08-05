@@ -19,25 +19,16 @@ import React from 'react';
 interface Props {
   isDirty: boolean;
   isLoading: boolean;
-  setIsLoading: (value: boolean) => void;
   onCancel: () => void;
-  onUpdateSpace: () => Promise<void>;
+  onUpdateSpace: () => void;
 }
 
 export const ViewSpaceTabFooter: React.FC<Props> = ({
   isDirty,
   isLoading,
-  setIsLoading,
   onCancel,
   onUpdateSpace,
 }) => {
-  const onUpdateSpaceWrapper = async () => {
-    setIsLoading(true);
-    await onUpdateSpace();
-    window.location.reload();
-    setIsLoading(false); // in case reload fails
-  };
-
   return (
     <>
       <EuiCallOut
@@ -70,7 +61,12 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
                 <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill onClick={onUpdateSpaceWrapper}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onUpdateSpace}
+                  data-test-subj="save-space-button"
+                >
                   Update space
                 </EuiButton>
               </EuiFlexItem>

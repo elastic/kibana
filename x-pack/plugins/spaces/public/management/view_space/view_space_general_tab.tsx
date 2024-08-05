@@ -16,6 +16,7 @@ import { ViewSpaceTabFooter } from './footer';
 import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
 import type { Space } from '../../../common';
+import { ConfirmAlterActiveSpaceModal } from '../edit_space/confirm_alter_active_space_modal';
 import { CustomizeSpace } from '../edit_space/customize_space';
 import { SolutionView } from '../edit_space/solution_view';
 import { SpaceValidator } from '../lib';
@@ -30,6 +31,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
+  const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
 
   const { http, overlays, navigateToUrl, spacesManager } = useViewSpaceServices();
 
@@ -51,7 +53,10 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     setIsDirty(true);
   };
 
-  const onUpdateSpace = async () => {
+  // TODO cancel previous request, if there is one pending
+  // TODO flush analytics
+  // TODO error handling
+  const performSave = async ({ requiresReload = false }) => {
     const { id, name, disabledFeatures } = spaceSettings;
     if (!id) {
       throw new Error(`Can not update space without id field!`);
@@ -60,7 +65,8 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       throw new Error(`Can not update space without name field!`);
     }
 
-    // TODO cancel previous request, if there is one pending
+    setIsLoading(true);
+
     await spacesManager.updateSpace({
       id,
       name,
@@ -68,8 +74,20 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       ...spaceSettings,
     });
 
-    // TODO error handling
     setIsDirty(false);
+
+    if (requiresReload) {
+      window.location.reload();
+    }
+
+    setIsLoading(false);
+  };
+
+  const onUpdateSpace = () => {
+    setShowAlteringActiveSpaceDialog(true);
+
+    // FIXME if user did not modify visible features, no reload is required
+    // performSave({ requiresReload: false });
   };
 
   const onCancel = () => {
@@ -79,6 +97,15 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
 
   return (
     <>
+      {showAlteringActiveSpaceDialog && (
+        <ConfirmAlterActiveSpaceModal
+          onConfirm={async () => performSave({ requiresReload: true })}
+          onCancel={() => {
+            setShowAlteringActiveSpaceDialog(false);
+          }}
+        />
+      )}
+
       <CustomizeSpace
         space={spaceSettings}
         onChange={onChangeSpaceSettings}
@@ -100,7 +127,6 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       <ViewSpaceTabFooter
         isDirty={isDirty}
         isLoading={isLoading}
-        setIsLoading={setIsLoading}
         onCancel={onCancel}
         onUpdateSpace={onUpdateSpace}
       />
