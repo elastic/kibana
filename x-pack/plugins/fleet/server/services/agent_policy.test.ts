@@ -25,7 +25,7 @@ import type {
 } from '../types';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
-import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
+import { AGENT_POLICY_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -198,6 +198,48 @@ describe('Agent policy', () => {
         action: 'create',
         id: 'test-agent-policy',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should write to the correct saved object-type if user opt-in for space awerness', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = savedObjectsClientMock.create();
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-agent-policy',
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {},
+        references: [],
+      });
+
+      mockOutputsHelpers.validateOutputForPolicy.mockResolvedValueOnce(undefined);
+
+      await agentPolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'test',
+          namespace: 'default',
+        },
+        { id: 'test-agent-policy' }
+      );
+      expect(soClient.create).toBeCalledWith(
+        AGENT_POLICY_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'create',
+        id: 'test-agent-policy',
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
 
@@ -1554,6 +1596,24 @@ describe('Agent policy', () => {
         expect(soClientMock.find).toHaveBeenCalledWith(
           expect.objectContaining({
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            perPage: 1000,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            fields: [],
+            filter: undefined,
+          })
+        );
+      });
+
+      it('should use new saved object if user opt-in for space awareness', async () => {
+        jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+        for await (const ids of await agentPolicyService.fetchAllAgentPolicies(soClientMock)) {
+          expect(ids);
+        }
+
+        expect(soClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
             sortField: 'created_at',
             sortOrder: 'asc',
