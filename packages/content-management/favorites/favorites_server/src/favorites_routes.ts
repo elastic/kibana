@@ -68,21 +68,11 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         logger,
       });
 
-      try {
-        const favoriteIds: GetFavoritesResponse = await favorites.addFavorite({
-          id: request.params.id,
-        });
+      const favoriteIds: GetFavoritesResponse = await favorites.addFavorite({
+        id: request.params.id,
+      });
 
-        return response.ok({ body: favoriteIds });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: 'Something went wrong. Check the server logs for more information.',
-          },
-        });
-      }
+      return response.ok({ body: favoriteIds });
     }
   );
 
@@ -113,20 +103,10 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         logger,
       });
 
-      try {
-        const favoriteIds: GetFavoritesResponse = await favorites.removeFavorite({
-          id: request.params.id,
-        });
-        return response.ok({ body: favoriteIds });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: 'Something went wrong. Check the server logs for more information.',
-          },
-        });
-      }
+      const favoriteIds: GetFavoritesResponse = await favorites.removeFavorite({
+        id: request.params.id,
+      });
+      return response.ok({ body: favoriteIds });
     }
   );
 
@@ -156,21 +136,11 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         logger,
       });
 
-      try {
-        const getFavoritesResponse: GetFavoritesResponse = await favorites.getFavorites();
+      const getFavoritesResponse: GetFavoritesResponse = await favorites.getFavorites();
 
-        return response.ok({
-          body: getFavoritesResponse,
-        });
-      } catch (e) {
-        logger.error(e);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: 'Something went wrong. Check the server logs for more information.',
-          },
-        });
-      }
+      return response.ok({
+        body: getFavoritesResponse,
+      });
     }
   );
 }
