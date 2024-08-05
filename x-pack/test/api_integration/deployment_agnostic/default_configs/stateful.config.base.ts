@@ -20,7 +20,7 @@ import {
   FtrConfigProviderContext,
 } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { services } from './services';
+import { services } from '../services';
 
 interface CreateTestConfigOptions {
   esServerArgs?: string[];
@@ -32,7 +32,7 @@ interface CreateTestConfigOptions {
 
 export function createStatefulTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const xPackAPITestsConfig = await readConfigFile(require.resolve('../config.ts'));
+    const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
     const idpPath = require.resolve(

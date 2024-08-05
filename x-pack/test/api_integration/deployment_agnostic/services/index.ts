@@ -7,6 +7,8 @@
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { deploymentAgnosticServices } from './deployment_agnostic_services';
+import { DataViewApiProvider } from './data_view_api';
+import { SloApiProvider } from './slo_api';
 
 export type {
   InternalRequestHeader,
@@ -18,5 +20,7 @@ export const services = {
   ...deploymentAgnosticServices,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
   samlAuth: commonFunctionalServices.samlAuthProvider,
+  dataViewApi: DataViewApiProvider,
+  sloApi: SloApiProvider,
   // create a new deployment-agonstic service and load here
 };

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '../../serverless.config.base';
+import { createServerlessTestConfig } from './default_configs/serverless.config.base';
 
 export default createServerlessTestConfig({
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('.')],
+  testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
-    reportName: 'Serverless Observability - Painless lab - API Integration Tests',
+    reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml

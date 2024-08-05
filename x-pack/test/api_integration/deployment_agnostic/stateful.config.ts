@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '../../default_configs/stateful.config.base';
+import { createStatefulTestConfig } from './default_configs/stateful.config.base';
 
 export default createStatefulTestConfig({
-  testFiles: [require.resolve('.')],
+  testFiles: [require.resolve('./stateful.index.ts')],
   junit: {
-    reportName: 'Stateful - Painless lab - API Integration Tests',
+    reportName: 'Stateful - Deployment-agnostic API Integration Tests',
   },
   // extra arguments
   esServerArgs: [],

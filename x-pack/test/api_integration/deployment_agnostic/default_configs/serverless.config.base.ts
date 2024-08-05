@@ -7,7 +7,7 @@
 import { FtrConfigProviderContext, Config } from '@kbn/test';
 
 import { ServerlessProjectType } from '@kbn/es';
-import { services } from './services';
+import { services } from '../services';
 
 interface CreateTestConfigOptions {
   serverlessProject: ServerlessProjectType;
