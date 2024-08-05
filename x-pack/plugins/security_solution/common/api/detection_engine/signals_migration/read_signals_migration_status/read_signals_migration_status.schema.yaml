@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Get alerts migration status API endpoint
+  title: Read alerts migration status API endpoint
   version: '2023-10-31'
 paths:
   /api/detection_engine/signals/migration_status:
     post:
       x-labels: [ess]
-      operationId: GetAlertsMigrationStatus
+      operationId: ReadAlertsMigrationStatus
       x-codegen-enabled: true
       summary: Retrieve the status of detection alert migrations
       description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
