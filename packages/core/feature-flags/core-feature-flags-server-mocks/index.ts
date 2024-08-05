@@ -60,10 +60,28 @@ const createFeatureFlagsServiceMock = (): jest.Mocked<PublicMethodsOf<FeatureFla
   };
 };
 
+/**
+ * Mocks for the Feature Flags service (browser-side)
+ */
 export const coreFeatureFlagsMock = {
+  /**
+   * Mocks the entire feature flags service
+   */
   create: createFeatureFlagsServiceMock,
+  /**
+   * Mocks the core-internal setup contract
+   */
   createInternalSetup: createFeatureFlagsInternalSetup,
+  /**
+   * Mocks the setup contract
+   */
   createSetup: createFeatureFlagsSetup,
+  /**
+   * Mocks the start contract
+   */
   createStart: createFeatureFlagsStart,
+  /**
+   * Mocks the request handler context contract
+   */
   createRequestHandlerContext,
 };

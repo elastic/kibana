@@ -31,12 +31,20 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
   getOverrides: () => Record<string, unknown>;
 }
 
+/**
+ * The server-side Feature Flags Service
+ * @private
+ */
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
   private overrides: Record<string, unknown> = {};
   private context: MultiContextEvaluationContext = { kind: 'multi' };
 
+  /**
+   * The core service's constructor
+   * @param core {@link CoreContext}
+   */
   constructor(private readonly core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();

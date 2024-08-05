@@ -10,6 +10,7 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { schema } from '@kbn/config-schema';
 
 /**
+ * The definition of the validation config schema
  * @private
  */
 const configSchema = schema.object({
@@ -17,6 +18,7 @@ const configSchema = schema.object({
 });
 
 /**
+ * Type definition of the Feature Flags configuration
  * @private
  */
 export interface FeatureFlagsConfig {
@@ -24,9 +26,16 @@ export interface FeatureFlagsConfig {
 }
 
 /**
+ * Config descriptor for the feature flags service
  * @private
  */
 export const featureFlagsConfig: ServiceConfigDescriptor<FeatureFlagsConfig> = {
+  /**
+   * All config is prefixed by `feature_flags`
+   */
   path: 'feature_flags',
+  /**
+   * The definition of the validation config schema
+   */
   schema: configSchema,
 };

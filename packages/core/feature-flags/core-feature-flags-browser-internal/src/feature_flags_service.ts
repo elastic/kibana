@@ -31,6 +31,10 @@ export interface FeatureFlagsSetupDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
+/**
+ * The browser-side Feature Flags Service
+ * @private
+ */
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
@@ -38,6 +42,10 @@ export class FeatureFlagsService {
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private overrides: Record<string, unknown> = {};
 
+  /**
+   * The core service's constructor
+   * @param core {@link CoreContext}
+   */
   constructor(core: CoreContext) {
     this.logger = core.logger.get('feature-flags-service');
     this.featureFlagsClient = OpenFeature.getClient();
@@ -46,9 +54,10 @@ export class FeatureFlagsService {
 
   /**
    * Setup lifecycle method
+   * @param deps {@link FeatureFlagsSetup} including the {@link InternalInjectedMetadataSetup} used to retrieve the feature flags.
    */
-  public setup({ injectedMetadata }: FeatureFlagsSetupDeps): FeatureFlagsSetup {
-    const featureFlagsInjectedMetadata = injectedMetadata.getFeatureFlags();
+  public setup(deps: FeatureFlagsSetupDeps): FeatureFlagsSetup {
+    const featureFlagsInjectedMetadata = deps.injectedMetadata.getFeatureFlags();
     if (featureFlagsInjectedMetadata) {
       this.overrides = featureFlagsInjectedMetadata.overrides;
     }

@@ -30,12 +30,33 @@ import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-
  * @public
  */
 export interface CoreRequestHandlerContext {
+  /**
+   * {@link SavedObjectsRequestHandlerContext}
+   */
   savedObjects: SavedObjectsRequestHandlerContext;
+  /**
+   * {@link ElasticsearchRequestHandlerContext}
+   */
   elasticsearch: ElasticsearchRequestHandlerContext;
+  /**
+   * {@link FeatureFlagsRequestHandlerContext}
+   */
   featureFlags: FeatureFlagsRequestHandlerContext;
+  /**
+   * {@link UiSettingsRequestHandlerContext}
+   */
   uiSettings: UiSettingsRequestHandlerContext;
+  /**
+   * {@link DeprecationsRequestHandlerContext}
+   */
   deprecations: DeprecationsRequestHandlerContext;
+  /**
+   * {@link SecurityRequestHandlerContext}
+   */
   security: SecurityRequestHandlerContext;
+  /**
+   * {@link UserProfileRequestHandlerContext}
+   */
   userProfile: UserProfileRequestHandlerContext;
 }
 
@@ -45,6 +66,9 @@ export interface CoreRequestHandlerContext {
  * @public
  */
 export interface RequestHandlerContext extends RequestHandlerContextBase {
+  /**
+   * Promise that resolves the {@link CoreRequestHandlerContext}
+   */
   core: Promise<CoreRequestHandlerContext>;
 }
 
