@@ -8,11 +8,9 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -20,34 +18,12 @@ interface Props {
   isDirty: boolean;
   isLoading: boolean;
   onCancel: () => void;
-  onUpdateSpace: () => void;
+  onSubmit: () => void;
 }
 
-export const ViewSpaceTabFooter: React.FC<Props> = ({
-  isDirty,
-  isLoading,
-  onCancel,
-  onUpdateSpace,
-}) => {
-  // FIXME show if disable features have changed, or if solution view has changed
-  const showUserImpactWarning = () => {
-    return (
-      <EuiCallOut
-        color="warning"
-        iconType="help"
-        title="Warning"
-        data-test-subj="userImpactWarning"
-      >
-        {' '}
-        The changes made will impact all users in the space.{' '}
-      </EuiCallOut>
-    );
-  };
-
+export const ViewSpaceTabFooter: React.FC<Props> = ({ isDirty, isLoading, onCancel, onSubmit }) => {
   return (
     <>
-      {showUserImpactWarning()}
-      <EuiSpacer />
       {isLoading && (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
@@ -73,7 +49,7 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
                 <EuiButton
                   color="primary"
                   fill
-                  onClick={onUpdateSpace}
+                  onClick={onSubmit}
                   data-test-subj="save-space-button"
                 >
                   Update space

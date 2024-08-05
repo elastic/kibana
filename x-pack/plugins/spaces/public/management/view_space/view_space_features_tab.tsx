@@ -7,12 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React from 'react';
 
-import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
@@ -20,34 +18,18 @@ import { FeatureTable } from '../edit_space/enabled_features/feature_table';
 import { SectionPanel } from '../edit_space/section_panel';
 
 interface Props {
-  space: Space;
+  space: Partial<Space>;
   features: KibanaFeature[];
-  history: ScopedHistory;
+  onChange: (updatedSpace: Partial<Space>) => void;
 }
 
-export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, ...props }) => {
-  const [spaceFeatures, setSpaceFeatures] = useState<Partial<Space>>(space); // space details as seen in the Feature Visibility UI, possibly with unsaved changes
-  const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
-
-  const { capabilities, getUrlForApp, http, overlays, navigateToUrl } = useViewSpaceServices();
+export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, onChange }) => {
+  const { capabilities, getUrlForApp } = useViewSpaceServices();
   const canManageRoles = capabilities.management?.security?.roles === true;
-
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: isDirty,
-    http,
-    openConfirm: overlays.openConfirm,
-    navigateToUrl,
-    history: props.history,
-  });
 
   if (!features) {
     return null;
   }
-
-  const onChangeSpaceFeatures = (updatedSpace: Partial<Space>) => {
-    setIsDirty(true);
-    setSpaceFeatures({ ...updatedSpace, id: space.id });
-  };
 
   return (
     <SectionPanel data-test-subj="enabled-features-panel">
@@ -87,11 +69,7 @@ export const ViewSpaceEnabledFeatures: FC<Props> = ({ features, space, ...props 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <FeatureTable
-            features={features}
-            space={spaceFeatures}
-            onChange={onChangeSpaceFeatures}
-          />
+          <FeatureTable features={features} space={space} onChange={onChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>

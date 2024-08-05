@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
@@ -31,7 +31,9 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
-  const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
+  const [shouldShowUserImpactWarning, setShouldShowUserImpactWarning] = useState(false);
+  const [shouldShowAlteringActiveSpaceDialog, setShouldShowAlteringActiveSpaceDialog] =
+    useState(false);
 
   const { http, overlays, navigateToUrl, spacesManager } = useViewSpaceServices();
 
@@ -51,6 +53,28 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const onChangeSpaceSettings = (updatedSpace: Partial<Space>) => {
     setSpaceSettings(updatedSpace);
     setIsDirty(true);
+  };
+
+  const onChangeFeatures = (updatedSpace: Partial<Space>) => {
+    setSpaceSettings(updatedSpace);
+    setIsDirty(true);
+    setShouldShowUserImpactWarning(true);
+  };
+
+  const onSubmit = () => {
+    if (shouldShowUserImpactWarning) {
+      setShouldShowAlteringActiveSpaceDialog(true);
+    } else {
+      performSave({ requiresReload: false });
+    }
+  };
+
+  const onCancel = () => {
+    setSpaceSettings(space);
+    setShouldShowAlteringActiveSpaceDialog(false);
+    setShouldShowUserImpactWarning(false);
+    setIsDirty(false);
+    setIsLoading(false);
   };
 
   // TODO cancel previous request, if there is one pending
@@ -83,28 +107,43 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     setIsLoading(false);
   };
 
-  const onUpdateSpace = () => {
-    setShowAlteringActiveSpaceDialog(true);
-
-    // FIXME if user did not modify visible features, no reload is required
-    // performSave({ requiresReload: false });
+  const doShowAlteringActiveSpaceDialog = () => {
+    return (
+      shouldShowAlteringActiveSpaceDialog && (
+        <ConfirmAlterActiveSpaceModal
+          onConfirm={() => performSave({ requiresReload: true })}
+          onCancel={() => {
+            setShouldShowAlteringActiveSpaceDialog(false);
+          }}
+        />
+      )
+    );
   };
 
-  const onCancel = () => {
-    setSpaceSettings(space);
-    setIsDirty(false);
+  // Show if user has changed disabled features
+  // Show if user has changed solution view
+  const doShowUserImpactWarning = () => {
+    return (
+      shouldShowUserImpactWarning && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            color="warning"
+            iconType="help"
+            title="Warning"
+            data-test-subj="userImpactWarning"
+          >
+            {' '}
+            The changes made will impact all users in the space.{' '}
+          </EuiCallOut>
+        </>
+      )
+    );
   };
 
   return (
     <>
-      {showAlteringActiveSpaceDialog && (
-        <ConfirmAlterActiveSpaceModal
-          onConfirm={async () => performSave({ requiresReload: true })}
-          onCancel={() => {
-            setShowAlteringActiveSpaceDialog(false);
-          }}
-        />
-      )}
+      {doShowAlteringActiveSpaceDialog()}
 
       <CustomizeSpace
         space={spaceSettings}
@@ -114,21 +153,27 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       />
 
       <EuiSpacer />
-      <SolutionView space={spaceSettings} onChange={onChangeSpaceSettings} />
+      <SolutionView space={spaceSettings} onChange={onChangeFeatures} />
 
-      {shouldShowFeaturesVisibility ? (
+      {shouldShowFeaturesVisibility && (
         <>
           <EuiSpacer />
-          <ViewSpaceEnabledFeatures features={features} history={history} space={space} />
+          <ViewSpaceEnabledFeatures
+            features={features}
+            space={spaceSettings}
+            onChange={onChangeFeatures}
+          />
         </>
-      ) : null}
+      )}
+
+      {doShowUserImpactWarning()}
 
       <EuiSpacer />
       <ViewSpaceTabFooter
         isDirty={isDirty}
         isLoading={isLoading}
         onCancel={onCancel}
-        onUpdateSpace={onUpdateSpace}
+        onSubmit={onSubmit}
       />
     </>
   );
