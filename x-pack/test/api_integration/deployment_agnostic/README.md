@@ -124,7 +124,7 @@ Load all test files in `index.ts` under the same folder.
 Create `stateful.index.ts` tests entry file and load tests:
 
 ```ts
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from './ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('apis', () => {
@@ -154,7 +154,7 @@ Example for Observability project:
 
 oblt.index.ts
 ```ts
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from './ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability - Deployment-agnostic api integration tests', () => {

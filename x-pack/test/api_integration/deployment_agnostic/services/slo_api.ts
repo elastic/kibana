@@ -134,7 +134,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
           .set(samlAuth.getInternalRequestHeader())
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
-          throw new Error(`No SLO with id '${sloId}' found`);
+          throw new Error(`No SLO with id '${id}' found`);
         }
         return response.body;
       });
