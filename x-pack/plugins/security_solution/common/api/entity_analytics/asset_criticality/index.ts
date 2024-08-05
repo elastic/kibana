@@ -14,6 +14,3 @@ export * from './list_asset_criticality.gen';
 export * from './create_asset_criticality.gen';
 export * from './get_asset_criticality.gen';
 export * from './delete_asset_criticality.gen';
-export * from './internal_create_asset_criticality.gen';
-export * from './internal_get_asset_criticality.gen';
-export * from './internal_delete_asset_criticality.gen';
