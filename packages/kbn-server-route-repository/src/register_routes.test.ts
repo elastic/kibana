@@ -91,25 +91,25 @@ describe('registerRoutes', () => {
     registerRoutes({
       core: coreSetup,
       repository: {
-        internal: {
+        'GET /internal/app/feature': {
           endpoint: 'GET /internal/app/feature',
           handler: internalHandler,
           params: paramsRt,
           options: internalOptions,
         },
-        public: {
+        'GET /api/app/feature version': {
           endpoint: 'GET /api/app/feature version',
           handler: publicHandler,
           params: paramsRt,
           options: publicOptions,
         },
-        error: {
+        'GET /internal/app/feature/error': {
           endpoint: 'GET /internal/app/feature/error',
           handler: errorHandler,
           params: paramsRt,
           options: internalOptions,
         },
-        errorWithKibanaResponse: {
+        'GET /internal/app/feature/errorWithKibanaResponse': {
           endpoint: 'GET /internal/app/feature/errorWithKibanaResponse',
           handler: errorHandlerWithKibanaResponse,
           params: paramsRt,

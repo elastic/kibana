@@ -18,8 +18,8 @@ export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
   TClientOptions extends Record<string, any> = DefaultClientOptions
 >(core: CoreStart | CoreSetup) {
-  return ((endpoint, options) => {
-    const { params } = options as unknown as {
+  return ((endpoint, optionsWithParams) => {
+    const { params, ...options } = (optionsWithParams ?? { params: {} }) as unknown as {
       params?: Partial<Record<string, any>>;
     };
 
