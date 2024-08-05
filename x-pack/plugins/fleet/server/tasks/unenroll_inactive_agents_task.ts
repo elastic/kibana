@@ -105,7 +105,7 @@ export class UnenrollInactiveAgentsTask {
     this.logger.info(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public async fetchAgentsWithUnenrollmentTimeout(
+  public async unenrollInactiveAgents(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract
   ) {
@@ -125,7 +125,7 @@ export class UnenrollInactiveAgentsTask {
     );
     if (!agentPolicies?.items.length) {
       this.endRun('Found no policies to process');
-      return [];
+      return;
     }
 
     // find inactive agents enrolled on above policies
@@ -141,12 +141,20 @@ export class UnenrollInactiveAgentsTask {
     });
     if (!res.agents.length) {
       this.endRun('No inactive agents to unenroll');
-      return [];
+      return;
     }
     this.logger.debug(
       `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll`
     );
-    return res.agents;
+
+    this.logger.debug(
+      `[UnenrollInactiveAgentsTask] Unenrolling ${res.agents.length} inactive agents`
+    );
+    const actionId = await unenrollBatch(soClient, esClient, res.agents, {
+      revoke: true,
+      force: true,
+    });
+    return actionId;
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
@@ -169,17 +177,10 @@ export class UnenrollInactiveAgentsTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      const agents = await this.fetchAgentsWithUnenrollmentTimeout(esClient, soClient);
+      const actionId = await this.unenrollInactiveAgents(esClient, soClient);
 
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Unenrolling ${agents.length} inactive agents.`
-      );
-      const actionId = await unenrollBatch(soClient, esClient, agents, {
-        revoke: true,
-        force: true,
-      });
-      this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Executed unenrollment of ${agents.length} inactive agents.with actionId: ${actionId}`
+        `[UnenrollInactiveAgentsTask] Executed unenrollment of inactive agents.with actionId: ${actionId}`
       );
 
       this.endRun('success');
