@@ -34,13 +34,13 @@ const getAllLogs = async (esClient: ElasticsearchClient, eventsInterval: string)
               },
             },
           },
-          // {
-          //   term: {
-          //     ['host.name']: {
-          //       value: 'instance'
-          //     }
-          //   }
-          // }
+          {
+            term: {
+              ['container.id']: {
+                value: 'container-0',
+              },
+            },
+          },
         ],
       },
     },
@@ -81,13 +81,13 @@ const getErrorLogs = async (esClient: ElasticsearchClient, eventsInterval: strin
               },
             },
           },
-          // {
-          //   term: {
-          //     ['host.name']: {
-          //       value: 'admin-console.prod.014'
-          //     }
-          //   }
-          // },
+          {
+            term: {
+              ['container.id']: {
+                value: 'container-0',
+              },
+            },
+          },
         ],
       },
     },
@@ -121,13 +121,13 @@ const getAllServiceLatency = async (esClient: ElasticsearchClient, eventsInterva
               },
             },
           },
-          // {
-          //   term: {
-          //     ['host.name']: {
-          //       value: 'admin-console.prod.014'
-          //     }
-          //   }
-          // },
+          {
+            term: {
+              ['container.id']: {
+                value: 'container-0',
+              },
+            },
+          },
         ],
       },
     },
@@ -168,13 +168,13 @@ const getServiceLatency = async (esClient: ElasticsearchClient, eventsInterval: 
               },
             },
           },
-          // {
-          //   term: {
-          //     ['host.name']: {
-          //       value: 'admin-console.prod.014'
-          //     }
-          //   }
-          // },
+          {
+            term: {
+              ['container.id']: {
+                value: 'container-0',
+              },
+            },
+          },
         ],
       },
     },

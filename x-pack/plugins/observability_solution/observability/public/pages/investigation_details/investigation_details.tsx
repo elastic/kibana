@@ -47,6 +47,8 @@ import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { PageTitle, pageTitleContent } from './page_title';
 import { getRecentEvents } from './get_recent_events';
+import { Groups } from '../../components/alert_sources/groups';
+import { getSources } from '../../components/alert_sources/get_sources';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -93,7 +95,7 @@ export function InvestigationDetails() {
   const [, setDataViewError] = useState<Error>();
 
   const [intervalValue, setIntervalValue] = useState('');
-  const [eventsInterval, setEventsInterval] = useState('1h');
+  const [eventsInterval, setEventsInterval] = useState('15m');
   const [recentEvents, setRecentEvents] = useState([]);
 
   const onIntervalChange = (e: any) => {
@@ -101,7 +103,7 @@ export function InvestigationDetails() {
   };
 
   const onIntervalApply = () => {
-    setEventsInterval(intervalValue !== '' ? intervalValue : '1h');
+    setEventsInterval(intervalValue !== '' ? intervalValue : '15m');
   };
 
   const fetchRecentEvents = useCallback(async () => {
@@ -128,6 +130,10 @@ export function InvestigationDetails() {
 
   const annotations: EventAnnotationConfig[] = [];
   annotations.push(alertStartAnnotation);
+
+  const groups = alertDetail
+    ? (getSources(alertDetail.formatted) as Array<{ field: string; value: string }>)
+    : [];
 
   useBreadcrumbs([
     {
@@ -216,11 +222,28 @@ export function InvestigationDetails() {
       data-test-subj="alertInvestigationDetails"
     >
       <HeaderMenu />
+      {alertDetail && (
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued">
+              {i18n.translate('xpack.observability.investigationDetails.alertSourceTextLabel', {
+                defaultMessage: 'Alert source',
+              })}
+            </EuiText>
+            <EuiText>
+              <Groups
+                groups={groups}
+                timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiFieldText
             data-test-subj="o11yInvestigationDetailsFieldText"
-            placeholder={`Events interval (1h)`}
+            placeholder={`Events interval (15m)`}
             value={intervalValue}
             onChange={onIntervalChange}
           />
