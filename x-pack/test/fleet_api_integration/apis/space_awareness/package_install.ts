@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices } from './helpers';
+import { cleanFleetIndices, createFleetAgent } from './helpers';
 import { setupTestSpaces, TEST_SPACE_1 } from './space_helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -227,6 +227,62 @@ export default function (providerContext: FtrProviderContext) {
             );
           expect(dashboard).not.eql(undefined);
         });
+      });
+    });
+
+    describe('uninstall', () => {
+      beforeEach(async () => {
+        await apiClient.installPackage({
+          pkgName: 'nginx',
+          pkgVersion: '1.20.0',
+          force: true, // To avoid package verification
+        });
+        const agentPolicyRes = await apiClient.createAgentPolicy();
+
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [agentPolicyRes.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        await createFleetAgent(esClient, agentPolicyRes.item.id);
+      });
+
+      it('should not allow to delete a package with active agents in the same space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.uninstallPackage({
+            pkgName: 'nginx',
+            pkgVersion: '1.20.0',
+            force: true, // To avoid package verification
+          });
+        } catch (_err) {
+          err = _err;
+        }
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/400 "Bad Request"/);
+      });
+      it('should not allow to delete a package with active agents in a different space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.uninstallPackage(
+            {
+              pkgName: 'nginx',
+              pkgVersion: '1.20.0',
+              force: true, // To avoid package verification
+            },
+            TEST_SPACE_1
+          );
+        } catch (_err) {
+          err = _err;
+        }
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/400 "Bad Request"/);
       });
     });
   });

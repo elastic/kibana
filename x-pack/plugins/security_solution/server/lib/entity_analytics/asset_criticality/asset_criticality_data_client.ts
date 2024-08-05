@@ -11,7 +11,7 @@ import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
-  AssetCriticalityBulkUploadResponse,
+  BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -211,9 +211,9 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
-  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityBulkUploadResponse> => {
-    const errors: AssetCriticalityBulkUploadResponse['errors'] = [];
-    const stats: AssetCriticalityBulkUploadResponse['stats'] = {
+  }: BulkUpsertFromStreamOptions): Promise<BulkUpsertAssetCriticalityRecordsResponse> => {
+    const errors: BulkUpsertAssetCriticalityRecordsResponse['errors'] = [];
+    const stats: BulkUpsertAssetCriticalityRecordsResponse['stats'] = {
       successful: 0,
       failed: 0,
       total: 0,
@@ -272,12 +272,37 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
-    await this.options.esClient.delete({
-      id: createId(idParts),
-      index: this.getIndex(),
-      refresh: refresh ?? false,
-    });
+  public async delete(
+    idParts: AssetCriticalityIdParts,
+    refresh = 'wait_for' as const
+  ): Promise<AssetCriticalityRecord | undefined> {
+    let record: AssetCriticalityRecord | undefined;
+    try {
+      record = await this.get(idParts);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
+
+    if (!record) {
+      return undefined;
+    }
+
+    try {
+      await this.options.esClient.delete({
+        id: createId(idParts),
+        index: this.getIndex(),
+        refresh: refresh ?? false,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to delete asset criticality record: ${err.message}`);
+      throw err;
+    }
+
+    return record;
   }
 
   public formatSearchResponse(response: SearchResponse<AssetCriticalityRecord>): {

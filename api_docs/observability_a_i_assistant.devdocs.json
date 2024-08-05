@@ -2053,9 +2053,9 @@
               "<TEndpoint extends \"POST /internal/observability_ai_assistant/chat\" | \"POST /internal/observability_ai_assistant/chat/recall\" | \"POST /internal/observability_ai_assistant/chat/complete\" | \"POST /api/observability_ai_assistant/chat/complete 2023-10-31\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"GET /internal/observability_ai_assistant/functions\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarize\" | \"POST /internal/observability_ai_assistant/kb/setup\" | \"GET /internal/observability_ai_assistant/kb/status\" | \"GET /internal/observability_ai_assistant/kb/entries\" | \"POST /internal/observability_ai_assistant/kb/entries/import\" | \"POST /internal/observability_ai_assistant/kb/entries/save\" | \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\">(endpoint: TEndpoint, ...args: MaybeOptionalArgs<",
               {
                 "pluginId": "@kbn/server-route-repository",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnServerRouteRepositoryPluginApi",
-                "section": "def-common.ClientRequestParamsOf",
+                "section": "def-server.ClientRequestParamsOf",
                 "text": "ClientRequestParamsOf"
               },
               "<{ \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\": { endpoint: \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\"; params?: ",
@@ -2713,9 +2713,9 @@
               "; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; }>) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnServerRouteRepositoryPluginApi",
-                "section": "def-common.ReturnOf",
+                "section": "def-server.ReturnOf",
                 "text": "ReturnOf"
               },
               "<{ \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\": { endpoint: \"DELETE /internal/observability_ai_assistant/kb/entries/{entryId}\"; params?: ",
@@ -3403,25 +3403,25 @@
                   "<",
                   {
                     "pluginId": "@kbn/server-route-repository",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnServerRouteRepositoryPluginApi",
-                    "section": "def-common.ClientRequestParamsOf",
+                    "section": "def-server.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions> extends never ? [] | [",
                   {
                     "pluginId": "@kbn/server-route-repository",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnServerRouteRepositoryPluginApi",
-                    "section": "def-common.ClientRequestParamsOf",
+                    "section": "def-server.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions] : [",
                   {
                     "pluginId": "@kbn/server-route-repository",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnServerRouteRepositoryPluginApi",
-                    "section": "def-common.ClientRequestParamsOf",
+                    "section": "def-server.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions]"
@@ -4650,9 +4650,9 @@
           " ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IKibanaResponse",
+            "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
@@ -4660,9 +4660,9 @@
           " | { message: string | Error; attributes?: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ResponseErrorAttributes",
+            "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
@@ -5540,9 +5540,9 @@
           "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.RouteParamsRT",
+            "section": "def-server.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
@@ -5550,9 +5550,9 @@
           " ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnServerRouteRepositoryPluginApi",
-            "section": "def-common.RouteParamsRT",
+            "section": "def-server.RouteParamsRT",
             "text": "RouteParamsRT"
           },
           " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"

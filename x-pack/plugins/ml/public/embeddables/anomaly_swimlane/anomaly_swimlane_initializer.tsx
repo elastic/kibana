@@ -157,52 +157,58 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             }}
             errors={jobIdsErrors}
           />
+          {jobIds.length > 0 ? (
+            <>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.panelTitleLabel"
+                    defaultMessage="Panel title"
+                  />
+                }
+                isInvalid={!isPanelTitleValid}
+                fullWidth
+              >
+                <EuiFieldText
+                  id="panelTitle"
+                  name="panelTitle"
+                  value={panelTitle}
+                  onChange={(e) => {
+                    titleManuallyChanged.current = true;
+                    setPanelTitle(e.target.value);
+                  }}
+                  isInvalid={!isPanelTitleValid}
+                  fullWidth
+                />
+              </EuiFormRow>
 
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.swimlaneEmbeddable.panelTitleLabel"
-                defaultMessage="Panel title"
-              />
-            }
-            isInvalid={!isPanelTitleValid}
-            fullWidth
-          >
-            <EuiFieldText
-              id="panelTitle"
-              name="panelTitle"
-              value={panelTitle}
-              onChange={(e) => {
-                titleManuallyChanged.current = true;
-                setPanelTitle(e.target.value);
-              }}
-              isInvalid={!isPanelTitleValid}
-              fullWidth
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
-                defaultMessage="Swim lane type"
-              />
-            }
-            fullWidth
-          >
-            <EuiButtonGroup
-              id="selectSwimlaneType"
-              name="selectSwimlaneType"
-              color="primary"
-              isFullWidth
-              legend={i18n.translate('xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel', {
-                defaultMessage: 'Swim lane type',
-              })}
-              options={swimlaneTypeOptions}
-              idSelected={swimlaneType}
-              onChange={(id) => setSwimlaneType(id as SwimlaneType)}
-            />
-          </EuiFormRow>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel"
+                    defaultMessage="Swim lane type"
+                  />
+                }
+                fullWidth
+              >
+                <EuiButtonGroup
+                  id="selectSwimlaneType"
+                  name="selectSwimlaneType"
+                  color="primary"
+                  isFullWidth
+                  legend={i18n.translate(
+                    'xpack.ml.swimlaneEmbeddable.setupModal.swimlaneTypeLabel',
+                    {
+                      defaultMessage: 'Swim lane type',
+                    }
+                  )}
+                  options={swimlaneTypeOptions}
+                  idSelected={swimlaneType}
+                  onChange={(id) => setSwimlaneType(id as SwimlaneType)}
+                />
+              </EuiFormRow>
+            </>
+          ) : null}
 
           {swimlaneType === SWIMLANE_TYPE.VIEW_BY && (
             <>

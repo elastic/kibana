@@ -6,7 +6,7 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
@@ -60,7 +60,6 @@ export const mockSourcererState: SourcererState = {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
-    indexFields: mockIndexFields as FieldSpec[],
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
@@ -356,7 +355,6 @@ export const mockGlobalState: State = {
         },
         eventIdToNoteIds: { '1': ['1'] },
         excludedRowRendererIds: [],
-        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
@@ -410,7 +408,6 @@ export const mockGlobalState: State = {
         defaultColumns: defaultHeaders,
         dataViewId: 'security-solution-default',
         deletedEventIds: [],
-        expandedDetail: {},
         filters: [],
         indexNames: ['.alerts-security.alerts-default'],
         isSelectAllChecked: false,

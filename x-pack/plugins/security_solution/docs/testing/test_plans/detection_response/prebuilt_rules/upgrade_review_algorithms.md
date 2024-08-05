@@ -24,6 +24,8 @@ Status: `in progress`.
     - [**Scenario: `ABB` - Rule field is any type**](#scenario-abb---rule-field-is-any-type)
   - [Rule field has an update and a custom value that are NOT the same - `ABC`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same---abc)
     - [**Scenario: `ABC` - Rule field is a number or single line string**](#scenario-abc---rule-field-is-a-number-or-single-line-string)
+    - [**Scenario: `ABC` - Rule field is a mergable multi line string**](#scenario-abc---rule-field-is-a-mergable-multi-line-string)
+    - [**Scenario: `ABC` - Rule field is a non-mergable multi line string**](#scenario-abc---rule-field-is-a-non-mergable-multi-line-string)
     - [**Scenario: `ABC` - Rule field is an array of scalar values**](#scenario-abc---rule-field-is-an-array-of-scalar-values)
   - [Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same-and-the-rule-base-version-doesnt-exist----aa)
     - [**Scenario: `-AA` - Rule field is any type**](#scenario--aa---rule-field-is-any-type)
@@ -61,7 +63,7 @@ Status: `in progress`.
 
 #### **Scenario: `AAA` - Rule field is any type**
 
-**Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
+**Automation**: 4 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
 Given <field_name> field is not customized by the user (current version == base version)
@@ -71,10 +73,11 @@ And <field_name> field should not be returned from the `upgrade/_review` API end
 And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
-| single line string | name       | "A"                     | "A"                     | "A"                     | "A"                     |
-| number             | risk_score | 1                       | 1                       | 1                       | 1                       |
-| array of scalars   | tags       | ["one", "two", "three"] | ["one", "three", "two"] | ["three", "one", "two"] | ["one", "three", "two"] |
+| algorithm          | field_name  | base_version                              | current_version                           | target_version                            | merged_version                            |
+| single line string | name        | "A"                                       | "A"                                       | "A"                                       | "A"                                       |
+| multi line string  | description | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
+| number             | risk_score  | 1                                         | 1                                         | 1                                         | 1                                         |
+| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
 ```
 
 ### Rule field doesn't have an update but has a custom value - `ABA`
@@ -91,10 +94,11 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
-| single line string | name       | "A"                     | "B"                     | "A"                     | "B"                     |
-| number             | risk_score | 1                       | 2                       | 1                       | 2                       |
-| array of scalars   | tags       | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "three"] | ["one", "two", "four"]  |
+| algorithm          | field_name  | base_version                              | current_version                                 | target_version                            | merged_version                                  |
+| single line string | name        | "A"                                       | "B"                                             | "A"                                       | "B"                                             |
+| multi line string  | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
+| number             | risk_score  | 1                                         | 2                                               | 1                                         | 2                                               |
+| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "three"]                   | ["one", "two", "four"]                          |
 ```
 
 ### Rule field has an update and doesn't have a custom value - `AAB`
@@ -111,10 +115,11 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
-| single line string | name       | "A"                     | "A"                     | "B"                     | "B"                     |
-| number             | risk_score | 1                       | 1                       | 2                       | 2                       |
-| array of scalars   | tags       | ["one", "two", "three"] | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "four"]  |
+| algorithm          | field_name  | base_version                              | current_version                           | target_version                                  | merged_version                                  |
+| single line string | name        | "A"                                       | "A"                                       | "B"                                             | "B"                                             |
+| multi line string  | description | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
+| number             | risk_score  | 1                                         | 1                                         | 2                                               | 2                                               |
+| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "four"]                          |
 ```
 
 ### Rule field has an update and a custom value that are the same - `ABB`
@@ -132,10 +137,11 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
-| single line string | name       | "A"                     | "B"                     | "B"                     | "B"                     |
-| number             | risk_score | 1                       | 2                       | 2                       | 2                       |
-| array of scalars   | tags       | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "four"]  | ["one", "two", "four"]  |
+| algorithm          | field_name  | base_version                              | current_version                                 | target_version                                  | merged_version                                  |
+| single line string | name        | "A"                                       | "B"                                             | "B"                                             | "B"                                             |
+| multi line string  | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
+| number             | risk_score  | 1                                         | 2                                               | 2                                               | 2                                               |
+| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "four"]                          | ["one", "two", "four"]                          |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
@@ -156,6 +162,42 @@ Examples:
 | algorithm          | field_name | base_version | current_version | target_version  | merged_version |
 | single line string | name       | "A"          | "B"             | "C"             | "B"            |
 | number             | risk_score | 1            | 2               | 3               | 2              |
+```
+
+#### **Scenario: `ABC` - Rule field is a mergable multi line string**
+
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithms
+
+```Gherkin
+Given <field_name> field is customized by the user (current version != base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
+And the 3-way diff of <field_name> fields are determined to be mergable
+Then for <field_name> field the diff algorithm should output a merged version as the merged one with a solvable conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm         | field_name  | base_version                              | current_version                                 | target_version                                        | merged_version                                              |
+| multi line string | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My description.\nThis is a second line, now longer." | "My GREAT description.\nThis is a second line, now longer." |
+```
+
+#### **Scenario: `ABC` - Rule field is a non-mergable multi line string**
+
+**Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithms
+
+```Gherkin
+Given <field_name> field is customized by the user (current version != base version)
+And <field_name> field is updated by Elastic in this upgrade (target version != base version)
+And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
+And the 3-way diff of <field_name> fields are determined to be unmergable
+Then for <field_name> field the diff algorithm should output the current version as the merged one with a non-solvable conflict
+And <field_name> field should be returned from the `upgrade/_review` API endpoint
+And <field_name> field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm         | field_name  | base_version                              | current_version                                 | target_version                                 | merged_version                                 |
+| multi line string | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a third line."  | "My EXCELLENT description.\nThis is a fourth." | "My GREAT description.\nThis is a third line." |
 ```
 
 #### **Scenario: `ABC` - Rule field is an array of scalar values**
@@ -198,10 +240,11 @@ And <field_name> field should not be returned from the `upgrade/_review` API end
 And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version | current_version         | target_version          | merged_version          |
-| single line string | name       | N/A          | "A"                     | "A"                     | "A"                     |
-| number             | risk_score | N/A          | 1                       | 1                       | 1                       |
-| array of scalars   | tags       | N/A          | ["one", "three", "two"] | ["three", "one", "two"] | ["one", "three", "two"] |
+| algorithm          | field_name  | base_version | current_version                           | target_version                            | merged_version                            |
+| single line string | name        | N/A          | "A"                                       | "A"                                       | "A"                                       |
+| multi line string  | description | N/A          | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
+| number             | risk_score  | N/A          | 1                                         | 1                                         | 1                                         |
+| array of scalars   | tags        | N/A          | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`
@@ -219,9 +262,10 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  | merged_version |
-| single line string | name       | N/A          | "B"             | "C"             | "C"            |
-| number             | risk_score | N/A          | 2               | 3               | 3              |
+| algorithm          | field_name  | base_version | current_version                           | target_version                                  | merged_version                                  |
+| single line string | name        | N/A          | "B"                                       | "C"                                             | "C"                                             |
+| multi line string  | description | N/A          | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
+| number             | risk_score  | N/A          | 2                                         | 3                                               | 3                                               |
 ```
 
 #### **Scenario: `-BC` - Rule field is an array of scalar values**

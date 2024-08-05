@@ -159,6 +159,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -431,6 +432,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -688,6 +690,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -932,6 +935,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1194,6 +1198,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1476,6 +1481,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1751,6 +1757,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1907,6 +1914,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2068,6 +2076,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2283,6 +2292,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2484,6 +2494,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2687,6 +2698,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2927,6 +2939,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -3145,6 +3158,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [

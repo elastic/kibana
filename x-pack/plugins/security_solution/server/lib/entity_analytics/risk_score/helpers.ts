@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { AfterKeys, EntityAfterKey } from '../../../../common/api/entity_analytics/common';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 

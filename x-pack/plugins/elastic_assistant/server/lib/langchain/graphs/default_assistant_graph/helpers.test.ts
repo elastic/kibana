@@ -100,6 +100,8 @@ describe('streamGraph', () => {
         logger: mockLogger,
         onLlmResponse: mockOnLlmResponse,
         request: mockRequest,
+        bedrockChatEnabled: false,
+        llmType: 'openai',
       });
 
       expect(response).toBe(mockResponseWithHeaders);
@@ -179,6 +181,8 @@ describe('streamGraph', () => {
         logger: mockLogger,
         onLlmResponse: mockOnLlmResponse,
         request: mockRequest,
+        bedrockChatEnabled: false,
+        llmType: 'gemini',
       });
 
       expect(response).toBe(mockResponseWithHeaders);
