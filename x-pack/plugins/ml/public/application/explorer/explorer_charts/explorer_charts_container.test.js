@@ -21,12 +21,6 @@ import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_contex
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
-jest.mock('../../services/job_service', () => ({
-  mlJobService: {
-    getJob: jest.fn(),
-  },
-}));
-
 jest.mock('../../contexts/kibana', () => ({
   useMlKibana: () => {
     return {
