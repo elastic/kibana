@@ -13,9 +13,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { DeepReadonly } from 'utility-types';
 import type {
-  PostDeletePackagePoliciesResponse,
   PackagePolicy,
   NewPackagePolicy,
   UpdatePackagePolicy,
@@ -38,13 +36,8 @@ import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
-import { isCspPackagePolicyInstalled } from './fleet_integration/fleet_integration';
+import { scheduleScoreStatsTask, setupScoreTask } from './tasks/score_task';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
-import {
-  removeFindingsStatsTask,
-  scheduleFindingsStatsTask,
-  setupFindingsStatsTask,
-} from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
 import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
@@ -171,26 +164,6 @@ export class CspPlugin
             return packagePolicy;
           }
         );
-
-        plugins.fleet.registerExternalCallback(
-          'packagePolicyPostDelete',
-          async (deletedPackagePolicies: DeepReadonly<PostDeletePackagePoliciesResponse>) => {
-            for (const deletedPackagePolicy of deletedPackagePolicies) {
-              if (isCspPackage(deletedPackagePolicy.package?.name)) {
-                const soClient = core.savedObjects.createInternalRepository();
-                const packagePolicyService = plugins.fleet.packagePolicyService;
-                const isPackageExists = await isCspPackagePolicyInstalled(
-                  packagePolicyService,
-                  soClient,
-                  this.logger
-                );
-                if (!isPackageExists) {
-                  await this.uninstallResources(plugins.taskManager, this.logger);
-                }
-              }
-            }
-          }
-        );
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -207,12 +180,8 @@ export class CspPlugin
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
-    await scheduleFindingsStatsTask(taskManager, this.logger);
+    await scheduleScoreStatsTask(taskManager, this.logger);
     this.#isInitialized = true;
-  }
-
-  async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
-    await removeFindingsStatsTask(taskManager, logger);
   }
 
   setupCspTasks(
@@ -220,7 +189,7 @@ export class CspPlugin
     coreStartServices: CspServerPluginStartServices,
     logger: Logger
   ) {
-    setupFindingsStatsTask(taskManager, coreStartServices, logger);
+    setupScoreTask(taskManager, coreStartServices, logger);
   }
 }
 

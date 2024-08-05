@@ -27,6 +27,7 @@ import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_det
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
 import { setupCdrDataViews } from '../saved_objects/data_views';
+import { scheduleScoreStatsTask } from '../tasks/score_task';
 
 /**
  * 1. Registers routes
@@ -55,11 +56,13 @@ export function setupRoutes({
     if (request.url.pathname.includes(CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH)) {
       try {
         const [coreStart, startDeps] = await core.getStartServices();
+
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         const soClient = coreStart.savedObjects.createInternalRepository();
         const spaces = startDeps.spaces?.spacesService;
         const dataViews = startDeps.dataViews;
         await setupCdrDataViews(esClient, soClient, spaces, dataViews, request, logger);
+        await scheduleScoreStatsTask(startDeps.taskManager, logger);
       } catch (err) {
         logger.error(`Failed to create CDR data views: ${err}`);
       }

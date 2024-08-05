@@ -78,6 +78,6 @@ export interface VulnSeverityAggs {
   };
 }
 
-export interface FindingsStatsTaskResult {
+export interface ScoreTaskResult {
   state: LatestTaskStateSchema;
 }
