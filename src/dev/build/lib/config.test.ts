@@ -127,6 +127,7 @@ describe('#getTargetPlatforms()', () => {
         "linux-arm64",
         "linux-x64",
         "linux-x64",
+        "win32-arm64",
         "win32-x64",
       ]
     `);
@@ -156,6 +157,7 @@ describe('#getNodePlatforms()', () => {
       'linux-arm64',
       'linux-x64',
       'linux-x64',
+      'win32-arm64',
       'win32-x64',
     ]);
   });

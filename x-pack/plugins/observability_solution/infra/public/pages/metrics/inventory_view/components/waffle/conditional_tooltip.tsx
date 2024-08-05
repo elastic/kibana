@@ -20,7 +20,7 @@ import { useSourceContext } from '../../../../../containers/metrics_source';
 import { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
-import { SNAPSHOT_METRIC_TRANSLATIONS } from '../../../../../../common/inventory_models/intl_strings';
+import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
 
@@ -86,7 +86,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       ) : (
         metrics.map((metric) => {
           const metricName = SnapshotMetricTypeRT.is(metric.name) ? metric.name : 'custom';
-          const name = SNAPSHOT_METRIC_TRANSLATIONS[metricName] || metricName;
+          const name = getSnapshotMetricTranslations(nodeType)[metricName] || metricName;
           // if custom metric, find field and label from waffleOptionsContext result
           // because useSnapshot does not return it
           const customMetric =
