@@ -206,7 +206,7 @@ export function Dashboards() {
           icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
           title={
             <h4>
-              {i18n.translate('xpack.infra.customDashboards.loadingCustomDashboards', {
+              {i18n.translate('app_not_found_in_i18nrc.customDashboards.loadingCustomDashboards', {
                 defaultMessage: 'Loading dashboard',
               })}
             </h4>
@@ -278,6 +278,7 @@ export function Dashboards() {
                 getCreationOptions={getCreationOptions}
                 ref={setDashboard}
                 locator={locator}
+                kbnUrlStateStorage={kbnUrlStateStorage}
               />
             )}
           </EuiFlexItem>

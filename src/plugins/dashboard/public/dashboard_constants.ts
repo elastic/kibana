@@ -39,7 +39,7 @@ export function createDashboardListingFilterUrl(filter: string | undefined) {
 }
 
 export function createDashboardExpandedPanelUrl(id?: string, expandedPanelId?: string) {
-  return `${getFullEditPath(id)}&${DASHBOARD_STATE_STORAGE_KEY}=(panelId:${expandedPanelId})`;
+  return `${getFullEditPath(id)}&_a=(expandedPanelId:(${expandedPanelId}))`;
 }
 
 // ------------------------------------------------------------------

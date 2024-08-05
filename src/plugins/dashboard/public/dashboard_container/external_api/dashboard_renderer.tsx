@@ -23,12 +23,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectNotFound, replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardContainerInput } from '../../../common';
+import { DashboardContainerInput, SharedDashboardState } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
   DashboardContainerFactory,
@@ -42,7 +42,10 @@ import {
   buildApiFromDashboardContainer,
   DashboardAPI,
 } from './dashboard_api';
-import { createDashboardExpandedPanelUrl } from '../../dashboard_constants';
+import {
+  DASHBOARD_STATE_STORAGE_KEY,
+  createDashboardExpandedPanelUrl,
+} from '../../dashboard_constants';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
@@ -224,32 +227,38 @@ const ParentClassController = ({
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }) => {
   const maximizedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
-
   useLayoutEffect(() => {
     const parentDiv = viewportRef.parentElement;
     if (!parentDiv) return;
 
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
-      // add logic to have the maximized panel be part of the url here
-      // need to find the current url in the browser
       const currentUrlRisonBeginningIndex = window.location.href.indexOf('/view/');
-      const currentUrlRisonEndingIndex = window.location.href.indexOf('?');
+      // const currentUrlRisonEndingIndex = window.location.href.indexOf('?');
       const dashboardId = window.location.href.substring(
-        currentUrlRisonBeginningIndex + 6,
-        currentUrlRisonEndingIndex
+        currentUrlRisonBeginningIndex + 6
+        // currentUrlRisonEndingIndex
       );
-      console.log('currentUrl', window.location.href);
-      console.log('dashboardId', dashboardId);
+
+      console.log(kbnUrlStateStorage.kbnUrlControls.getPendingUrl());
+      // get any _a state that already exists in the url
+      const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
+        DASHBOARD_STATE_STORAGE_KEY
+      );
+      console.log('rawAppStateInUrl', rawAppStateInUrl);
       // the following is the dashboard id?
       // http://localhost:5601/bzr/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(filters:!())
       // need to add the panelId to the url
+      console.log('maxmizedPanelId', maximizedPanelId);
       const panelInUrl = createDashboardExpandedPanelUrl(dashboardId, maximizedPanelId);
+      console.log('panelInUrl', panelInUrl);
 
-      // need to replaceUrlHashQuery
+      const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
+        delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
+        return hashQuery;
+      });
 
-      // update it in kbnUrlControls?
-
+      kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
       // need the _g filters and etc
       // console.log('dashboard.id', kbnUrlStateStorage);
       // const fullEditPath = getFullPath(dashboard.locator?.getRedirectUrl());
