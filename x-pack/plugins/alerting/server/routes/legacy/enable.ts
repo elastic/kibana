@@ -30,6 +30,11 @@ export const enableAlertRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Enable an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
