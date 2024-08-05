@@ -191,11 +191,24 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
   };
 
-  const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {
+  const navigateToRulePage = async (
+    benchmarkCisId: string,
+    benchmarkCisVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };

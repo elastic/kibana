@@ -16,6 +16,7 @@ import {
 } from '@kbn/elastic-assistant';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
+import { useKibana } from '../../common/lib/kibana';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -25,6 +26,15 @@ export const ManagementSettings = React.memo(() => {
     http,
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
+
+  const {
+    application: {
+      navigateToApp,
+      capabilities: {
+        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+      },
+    },
+  } = useKibana().services;
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
@@ -45,6 +55,10 @@ export const ManagementSettings = React.memo(() => {
       getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
     [conversations, getDefaultConversation]
   );
+
+  if (!securityAIAssistantEnabled) {
+    navigateToApp('home');
+  }
 
   if (conversations) {
     return <AssistantSettingsManagement selectedConversation={currentConversation} />;
