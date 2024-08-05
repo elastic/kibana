@@ -12,7 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { getAuthRoleProvider } from './get_auth_provider';
-import { InternalRequestHeader } from './internal_headers';
+import { InternalRequestHeader } from './default_request_headers';
 
 export interface RoleCredentials {
   apiKey: { id: string; name: string };

@@ -7,4 +7,4 @@
  */
 export { SamlAuthProvider } from './saml_auth_provider';
 export type { RoleCredentials } from './saml_auth_provider';
-export type { InternalRequestHeader } from './internal_headers';
+export type { InternalRequestHeader } from './default_request_headers';

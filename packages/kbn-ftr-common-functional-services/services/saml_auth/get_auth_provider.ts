@@ -40,8 +40,8 @@ export const getAuthRoleProvider = async (props: AuthProviderProps) => {
   } else {
     const provider = new StatefulAuthProvider();
 
-    // TODO: move admin role & roles mapping creation to @kbn-es
-    // 'viewer' and 'editor' roles are already pre-exist for stateful ES, but we have to add 'admin'
+    // TODO: Move it to @kbn-es package, so that roles and its mapping are created before FTR services loading starts.
+    // 'viewer' and 'editor' roles are available by default, but we have to create 'admin' role
     const adminRoleMapping = JSON.parse(
       fs.readFileSync(require.resolve(STATEFUL_ADMIN_ROLE_MAPPING_PATH), 'utf8')
     );

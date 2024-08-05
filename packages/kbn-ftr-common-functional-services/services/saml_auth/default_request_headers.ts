@@ -10,18 +10,24 @@ export const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-const INTERNAL_REQUEST_HEADERS = {
+// possible change in 9.0 to match serverless
+const STATEFUL_INTERNAL_REQUEST_HEADERS = {
+  ...COMMON_REQUEST_HEADERS,
+};
+
+const SERVERLESS_INTERNAL_REQUEST_HEADERS = {
   ...COMMON_REQUEST_HEADERS,
   'x-elastic-internal-origin': 'kibana',
 };
 
-export type InternalRequestHeader = typeof INTERNAL_REQUEST_HEADERS;
+export type InternalRequestHeader =
+  | typeof STATEFUL_INTERNAL_REQUEST_HEADERS
+  | typeof SERVERLESS_INTERNAL_REQUEST_HEADERS;
 
 export const getServerlessInternalRequestHeaders = (): InternalRequestHeader => {
-  return INTERNAL_REQUEST_HEADERS;
+  return SERVERLESS_INTERNAL_REQUEST_HEADERS;
 };
 
 export const getStatefulInternalRequestHeaders = (): InternalRequestHeader => {
-  // TBD
-  return INTERNAL_REQUEST_HEADERS;
+  return STATEFUL_INTERNAL_REQUEST_HEADERS;
 };

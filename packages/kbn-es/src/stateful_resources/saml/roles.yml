@@ -1,5 +1,6 @@
 # -----
-# Source: Cloud deployment default roles
+# This file is for infromation purpose only. 'viewer' and 'editor' roles are defined in stateful Elasticsearch by default
+# Note: inconsistency between these roles definition and the same roles of serverless project may break FTR deployment-agnostic tests
 # -----
 viewer:
   cluster: []
