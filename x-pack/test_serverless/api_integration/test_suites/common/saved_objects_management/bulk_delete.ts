@@ -59,41 +59,38 @@ export default function ({ getService }: FtrProviderContext) {
       });
     }
 
-    it('should return 200 for an existing object', async () =>
-      await supertestWithoutAuth
+    it('should return 200 for an existing object', async () => {
+      const { body } = await supertestWithoutAuth
         .post(endpoint)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send([validObject])
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).to.have.length(1);
-          expectSuccess(0, body);
-        }));
+        .expect(200);
+      expect(body).to.have.length(1);
+      expectSuccess(0, body);
+    });
 
-    it('should return error for invalid object type', async () =>
-      await supertestWithoutAuth
+    it('should return error for invalid object type', async () => {
+      const { body } = await supertestWithoutAuth
         .post(endpoint)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send([invalidObject])
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).to.have.length(1);
-          expectBadRequest(0, body);
-        }));
+        .expect(200);
+      expect(body).to.have.length(1);
+      expectBadRequest(0, body);
+    });
 
-    it('should return mix of successes and errors', async () =>
-      await supertestWithoutAuth
+    it('should return mix of successes and errors', async () => {
+      const { body } = await supertestWithoutAuth
         .post(endpoint)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .send([validObject, invalidObject])
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).to.have.length(2);
-          expectSuccess(0, body);
-          expectBadRequest(1, body);
-        }));
+        .expect(200);
+      expect(body).to.have.length(2);
+      expectSuccess(0, body);
+      expectBadRequest(1, body);
+    });
   });
 }

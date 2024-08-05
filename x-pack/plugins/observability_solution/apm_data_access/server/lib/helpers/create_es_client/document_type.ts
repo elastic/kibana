@@ -6,10 +6,10 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { METRICSET_INTERVAL, METRICSET_NAME } from '@kbn/apm-types/es_fields';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { METRICSET_INTERVAL, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
-import { termQuery } from '../../../../common/utils/term_query';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../spans/get_is_using_service_destination_metrics';
 import { getBackwardCompatibleDocumentTypeFilter } from '../transactions';
 

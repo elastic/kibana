@@ -257,18 +257,19 @@ export function getDiscoverStateContainer({
   });
 
   /**
+   * Internal State Container, state that's not persisted and not part of the URL
+   */
+  const internalStateContainer = getInternalStateContainer();
+
+  /**
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
     stateStorage,
-    savedSearch: savedSearchContainer.getState(),
+    internalStateContainer,
+    savedSearchContainer,
     services,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
@@ -281,6 +282,7 @@ export function getDiscoverStateContainer({
       }
     }
   };
+
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
@@ -290,8 +292,8 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getInternalState: internalStateContainer.getState,
+    appStateContainer,
+    internalStateContainer,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
   });
@@ -403,9 +405,8 @@ export function getDiscoverStateContainer({
     });
 
     // initialize app state container, syncing with _g and _a part of the URL
-    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
-      savedSearchContainer.getState()
-    );
+    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
+
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateUnsubscribe = appStateContainer.subscribe(
       buildStateSubscribe({
@@ -417,6 +418,7 @@ export function getDiscoverStateContainer({
         setDataView,
       })
     );
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
@@ -467,6 +469,7 @@ export function getDiscoverStateContainer({
     await onChangeDataView(newDataView);
     return newDataView;
   };
+
   /**
    * Triggered when a user submits a query in the search bar
    */
@@ -492,6 +495,7 @@ export function getDiscoverStateContainer({
       appState: appStateContainer,
     });
   };
+
   /**
    * Undo all changes to the current saved search
    */
@@ -518,6 +522,7 @@ export function getDiscoverStateContainer({
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
+
   const fetchData = (initial: boolean = false) => {
     addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   // TODO: The `scripts` folder was renamed to `scripts_tests` because the folder
   // name `scripts` triggers the `eslint@kbn/imports/no_boundary_crossing` rule
   describe('scripts', function () {

@@ -25,6 +25,13 @@ const ROOT = resolve(__dirname, '../..');
           title: 'Security Solution Endpoint Management API (Elastic Cloud Serverless)',
           description: 'Interact with and manage endpoints running the Elastic Defend integration.',
         },
+        tags: [
+          {
+            name: 'Security Solution Endpoint Management API',
+            description:
+              'Interact with and manage endpoints running the Elastic Defend integration.',
+          },
+        ],
       },
     },
   });
@@ -42,6 +49,13 @@ const ROOT = resolve(__dirname, '../..');
           title: 'Security Solution Endpoint Management API (Elastic Cloud and self-hosted)',
           description: 'Interact with and manage endpoints running the Elastic Defend integration.',
         },
+        tags: [
+          {
+            name: 'Security Solution Endpoint Management API',
+            description:
+              'Interact with and manage endpoints running the Elastic Defend integration.',
+          },
+        ],
       },
     },
   });
