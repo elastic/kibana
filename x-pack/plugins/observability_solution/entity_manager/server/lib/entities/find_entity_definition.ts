@@ -18,9 +18,11 @@ import {
   generateHistoryIngestPipelineId,
   generateLatestTransformId,
   generateLatestIngestPipelineId,
+  generateHistoryBackfillTransformId,
 } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionWithState } from './types';
+import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function findEntityDefinitions({
   soClient,
@@ -64,6 +66,11 @@ async function getEntityDefinitionState(
 ) {
   const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
   const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
+  const transformIds = [
+    generateHistoryTransformId(definition),
+    generateLatestTransformId(definition),
+    ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
+  ];
   const [ingestPipelines, indexTemplatesInstalled, transforms] = await Promise.all([
     esClient.ingest.getPipeline({
       id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
@@ -75,14 +82,14 @@ async function getEntityDefinitionState(
       }`,
     }),
     esClient.transform.getTransformStats({
-      transform_id: [generateHistoryTransformId(definition), generateLatestTransformId(definition)],
+      transform_id: transformIds,
     }),
   ]);
 
   const ingestPipelinesInstalled = !!(
     ingestPipelines[historyIngestPipelineId] && ingestPipelines[latestIngestPipelineId]
   );
-  const transformsInstalled = transforms.count === 2;
+  const transformsInstalled = transforms.count === transformIds.length;
   const transformsRunning =
     transformsInstalled &&
     transforms.transforms.every(
