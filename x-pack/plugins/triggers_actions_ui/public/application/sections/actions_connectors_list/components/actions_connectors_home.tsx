@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useEffect } from 'react';
+import React, { lazy, useCallback, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiButtonEmpty, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -19,6 +25,7 @@ import { suspendedComponentWithProps } from '../../../lib/suspended_component_wi
 import { HealthContextProvider } from '../../../context/health_context';
 import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
+import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
@@ -33,7 +40,10 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
+  const { chrome, setBreadcrumbs, docLinks, actionTypeRegistry } = useKibana().services;
+
+  const [isCreateConnectorFlyoutVisible, setIsCreateConnectorFlyoutVisible] =
+    useState<boolean>(false);
 
   const tabs: Array<{
     id: Section;
@@ -96,6 +106,20 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           defaultMessage: 'Connect third-party software with your alerting data.',
         })}
         rightSideItems={[
+          <EuiFlexItem>
+            <EuiButton
+              data-test-subj="createConnectorButton"
+              fill
+              iconType="plusInCircle"
+              iconSide="left"
+              onClick={() => setIsCreateConnectorFlyoutVisible(true)}
+              isLoading={false}
+            >
+              {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
+                defaultMessage: 'Create connector',
+              })}
+            </EuiButton>
+          </EuiFlexItem>,
           <EuiButtonEmpty
             data-test-subj="documentationButton"
             key="documentation-button"
@@ -117,6 +141,17 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           'data-test-subj': `${tab.id}Tab`,
         }))}
       />
+
+      {isCreateConnectorFlyoutVisible && (
+        <CreateConnectorFlyout
+          onClose={() => {
+            setIsCreateConnectorFlyoutVisible(false);
+          }}
+          // onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+          onConnectorCreated={() => {}}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      )}
 
       <EuiSpacer size="l" />
 
