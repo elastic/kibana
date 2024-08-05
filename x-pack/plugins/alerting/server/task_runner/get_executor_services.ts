@@ -18,15 +18,18 @@ import {
   createWrappedScopedClusterClientFactory,
   WrappedScopedClusterClient,
 } from '../lib/wrap_scoped_cluster_client';
-import {
-  WrappedSearchSourceClient,
-  wrapSearchSourceClient,
-} from '../lib/wrap_search_source_client';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { PublicRuleMonitoringService, PublicRuleResultService } from '../types';
 import { withAlertingSpan } from './lib';
 import { TaskRunnerContext } from './types';
+
+interface RuleData {
+  name: string;
+  alertTypeId: string;
+  id: string;
+  spaceId: string;
+}
 
 interface GetExecutorServicesOpts {
   context: TaskRunnerContext;
@@ -35,21 +38,31 @@ interface GetExecutorServicesOpts {
   logger: Logger;
   ruleMonitoringService: RuleMonitoringService;
   ruleResultService: RuleResultService;
-  ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
+  ruleData: RuleData;
   ruleTaskTimeout?: string;
 }
 
+interface WrappedClientOptions {
+  rule: RuleData;
+  logger: Logger;
+  abortController: AbortController;
+  requestTimeout?: number;
+}
+
 export interface ExecutorServices {
-  dataViews: DataViewsContract;
   ruleMonitoringService: PublicRuleMonitoringService;
   ruleResultService: PublicRuleResultService;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   wrappedScopedClusterClient: WrappedScopedClusterClient;
-  wrappedSearchSourceClient: WrappedSearchSourceClient;
+  getDataViews: () => Promise<DataViewsContract>;
+  getWrappedClientOptions: () => {
+    fakeRequest: KibanaRequest;
+    wrappedClientOptions: WrappedClientOptions;
+  };
 }
 
-export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
+export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
   const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
 
   const wrappedClientOptions = {
@@ -66,34 +79,27 @@ export const getExecutorServices = async (opts: GetExecutorServicesOpts) => {
     scopedClusterClient,
   });
 
-  const searchSourceClient = await withAlertingSpan('alerting:get-search-source-client', () =>
-    context.data.search.searchSource.asScoped(fakeRequest)
-  );
-  const wrappedSearchSourceClient = wrapSearchSourceClient({
-    ...wrappedClientOptions,
-    searchSourceClient,
-  });
-
   const savedObjectsClient = context.savedObjects.getScopedClient(fakeRequest, {
     includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, 'action'],
   });
 
-  const dataViews = await await withAlertingSpan('alerting:get-data-views-factory', () =>
-    context.dataViews.dataViewsServiceFactory(
-      savedObjectsClient,
-      scopedClusterClient.asInternalUser
-    )
-  );
-
   const uiSettingsClient = context.uiSettings.asScopedToClient(savedObjectsClient);
 
   return {
-    dataViews,
     ruleMonitoringService: opts.ruleMonitoringService.getLastRunMetricsSetters(),
     ruleResultService: opts.ruleResultService.getLastRunSetters(),
     savedObjectsClient,
     uiSettingsClient,
     wrappedScopedClusterClient,
-    wrappedSearchSourceClient,
+    getDataViews: async () => {
+      const dataViews = await withAlertingSpan('alerting:get-data-views-factory', () =>
+        context.dataViews.dataViewsServiceFactory(
+          savedObjectsClient,
+          scopedClusterClient.asInternalUser
+        )
+      );
+      return dataViews;
+    },
+    getWrappedClientOptions: () => ({ wrappedClientOptions, fakeRequest }),
   };
 };
