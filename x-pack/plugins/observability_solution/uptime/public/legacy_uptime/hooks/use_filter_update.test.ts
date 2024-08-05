@@ -10,9 +10,8 @@ import * as params from './use_url_params';
 
 describe('useFilterUpdate', () => {
   describe('useFilterUpdate hook', () => {
-    let useUrlParamsSpy;
     let getUrlParamsSpy;
-    let updateUrlSpy;
+    let updateUrlSpy: jest.Mock;
 
     beforeEach(() => {
       getUrlParamsSpy = jest.fn().mockReturnValue({
@@ -20,9 +19,7 @@ describe('useFilterUpdate', () => {
         excludedFilters: '[["testField",["tag2"]]]',
       });
       updateUrlSpy = jest.fn();
-      useUrlParamsSpy = jest
-        .spyOn(params, 'useUrlParams')
-        .mockReturnValue([getUrlParamsSpy, updateUrlSpy]);
+      jest.spyOn(params, 'useUrlParams').mockReturnValue([getUrlParamsSpy, updateUrlSpy]);
     });
 
     it('does not update url when filters have not been updated', () => {
@@ -31,7 +28,7 @@ describe('useFilterUpdate', () => {
     });
 
     it('does update url when filters have been updated', () => {
-      renderHook(() => useFilterUpdate('testField', ['tag1', 'tag2']));
+      renderHook(() => useFilterUpdate('testField', ['tag1', 'tag2'], []));
       expect(updateUrlSpy).toBeCalledWith({
         filters: '[["testField",["tag1","tag2"]]]',
         excludedFilters: '',
