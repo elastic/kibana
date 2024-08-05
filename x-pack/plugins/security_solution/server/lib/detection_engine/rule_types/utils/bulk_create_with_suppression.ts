@@ -118,10 +118,10 @@ export const bulkCreateWithSuppression = async <
   // query rule type suppression does not happen in memory, so we can't just count createdAlerts and suppressedAlerts
   // for this rule type we need to look into alerts suppression properties, extract those values and sum up
   const suppressedItemsCount = isQueryRule(ruleType)
-    ? getNumberOfSuppressedAlerts([
-        ...createdAlerts,
-        ...suppressedAlerts.map(({ _source, _id }) => ({ _id, ..._source })),
-      ])
+    ? getNumberOfSuppressedAlerts(
+        createdAlerts,
+        suppressedAlerts.map(({ _source, _id }) => ({ _id, ..._source }))
+      )
     : suppressedAlerts.length;
 
   if (!isEmpty(errors)) {

@@ -292,7 +292,7 @@ export const groupAndBulkCreate = async ({
           current: toReturn,
           next: {
             ...bulkCreateResult,
-            suppressedItemsCount: getNumberOfSuppressedAlerts(bulkCreateResult.createdItems),
+            suppressedItemsCount: getNumberOfSuppressedAlerts(bulkCreateResult.createdItems, []),
           },
         });
         runOpts.ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);

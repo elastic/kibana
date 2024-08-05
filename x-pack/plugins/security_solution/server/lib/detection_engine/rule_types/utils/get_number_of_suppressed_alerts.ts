@@ -12,7 +12,14 @@ import type { BaseFieldsLatest } from '../../../../../common/api/detection_engin
 export const getNumberOfSuppressedAlerts = <
   T extends SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }
 >(
-  alerts: T[]
+  createdAlerts: T[],
+  suppressedAlerts: T[]
 ): number => {
-  return alerts.reduce((acc, alert) => acc + (alert?.[ALERT_SUPPRESSION_DOCS_COUNT] || 0), 0);
+  return (
+    createdAlerts.reduce((acc, alert) => acc + (alert?.[ALERT_SUPPRESSION_DOCS_COUNT] || 0), 0) +
+    suppressedAlerts.reduce(
+      (acc, alert) => acc + (alert?.[ALERT_SUPPRESSION_DOCS_COUNT] || 0) + 1,
+      0
+    )
+  );
 };

@@ -11,14 +11,35 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 describe('getNumberOfSuppressedAlerts', () => {
-  it('should count total number of suppressed alerts', () => {
-    const alerts = [
+  it('should count total number of suppressed alerts in created alerts', () => {
+    const createdAlerts = [
       { _id: '1', [ALERT_SUPPRESSION_DOCS_COUNT]: 2 },
       { _id: '2', [ALERT_SUPPRESSION_DOCS_COUNT]: 0 },
       { _id: '3', [ALERT_SUPPRESSION_DOCS_COUNT]: 4 },
       { _id: '4' },
     ] as Array<SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }>;
 
-    expect(getNumberOfSuppressedAlerts(alerts)).toBe(6);
+    expect(getNumberOfSuppressedAlerts(createdAlerts, [])).toBe(6);
+  });
+
+  // each alert in suppressed alerts counts as +1, since it is also suppressed
+  it('should count total number of suppressed alerts in suppressed alerts', () => {
+    const suppressedAlerts = [
+      { _id: '1', [ALERT_SUPPRESSION_DOCS_COUNT]: 2 },
+      { _id: '2', [ALERT_SUPPRESSION_DOCS_COUNT]: 0 },
+      { _id: '3', [ALERT_SUPPRESSION_DOCS_COUNT]: 4 },
+    ] as Array<SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }>;
+
+    expect(getNumberOfSuppressedAlerts([], suppressedAlerts)).toBe(9);
+  });
+
+  it('should count total number of suppressed alerts', () => {
+    const createdAlerts = [{ _id: '1', [ALERT_SUPPRESSION_DOCS_COUNT]: 2 }] as Array<
+      SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }
+    >;
+    const suppressedAlerts = [{ _id: '3', [ALERT_SUPPRESSION_DOCS_COUNT]: 4 }] as Array<
+      SuppressionFieldsLatest & BaseFieldsLatest & { _id: string }
+    >;
+    expect(getNumberOfSuppressedAlerts(createdAlerts, suppressedAlerts)).toBe(7);
   });
 });
