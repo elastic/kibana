@@ -13,10 +13,11 @@ import type {
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
+  ESQLLiteral,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
-import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
+import { ESQL_NUMBER_TYPES, compareTypesWithLiterals, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   lookupColumn,
@@ -94,7 +95,7 @@ import {
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
-import { FunctionParameter } from '../definitions/types';
+import { FunctionParameter, FunctionReturnType, SupportedFieldType } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -438,7 +439,13 @@ function areCurrentArgsValid(
 function extractFinalTypeFromArg(
   arg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
-): string | undefined {
+):
+  | ESQLLiteral['literalType']
+  | SupportedFieldType
+  | FunctionReturnType
+  | 'timeInterval'
+  | string // @TODO remove this
+  | undefined {
   if (Array.isArray(arg)) {
     return extractFinalTypeFromArg(arg[0], references);
   }
@@ -1283,7 +1290,9 @@ async function getFunctionArgsSuggestions(
       // if existing arguments are preset already, use them to filter out incompatible signatures
       .filter((signature) => {
         if (existingTypes.length) {
-          return existingTypes.every((type, index) => signature.params[index].type === type);
+          return existingTypes.every((type, index) =>
+            compareTypesWithLiterals(signature.params[index].type, type)
+          );
         }
         return true;
       });

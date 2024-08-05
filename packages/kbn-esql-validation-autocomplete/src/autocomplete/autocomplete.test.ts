@@ -841,7 +841,7 @@ describe('autocomplete', () => {
                     ].map(addCommaIfRequired),
                 ' '
               );
-              testSuggestions.skip(
+              testSuggestions(
                 `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
                   i ? ',' : ''
                 } )`,
