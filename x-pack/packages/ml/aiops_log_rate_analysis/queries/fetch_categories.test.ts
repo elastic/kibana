@@ -8,7 +8,27 @@
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { paramsMock } from './__mocks__/params_match_all';
-import { getBaselineOrDeviationFilter, getCategoryRequest } from './fetch_categories';
+import {
+  getBaselineOrDeviationFilter,
+  getCategoryRequest,
+  isMsearchResponseItemWithAggs,
+} from './fetch_categories';
+
+describe('isMsearchResponseItemWithAggs', () => {
+  it('returns true if the argument is an MsearchMultiSearchItem with aggregations', () => {
+    const arg = {
+      aggregations: {},
+    };
+
+    expect(isMsearchResponseItemWithAggs(arg)).toBe(true);
+  });
+
+  it('returns false if the argument is not an MsearchMultiSearchItem with aggregations', () => {
+    const arg = {};
+
+    expect(isMsearchResponseItemWithAggs(arg)).toBe(false);
+  });
+});
 
 describe('getBaselineOrDeviationFilter', () => {
   it('returns a filter that matches both baseline and deviation time range', () => {
