@@ -32,7 +32,7 @@ describe('Fleet index patterns', () => {
     it('should call updateObjectsSpaces with the correct params', async () => {
       const result = await makeManagedIndexPatternsGlobal(mockSoClient);
 
-      for (const pattern of ['logs-*', 'metrics-*']) {
+      for (const pattern of ['logs-*', 'metrics-*', 'traces-*']) {
         expect(mockSoClient.updateObjectsSpaces).toHaveBeenCalledWith(
           [{ id: pattern, type: 'index-pattern' }],
           ['*'],
@@ -40,7 +40,7 @@ describe('Fleet index patterns', () => {
         );
       }
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
     });
 
     it('handles errors from updateObjectsSpaces', async () => {
