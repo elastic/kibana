@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import { EditFilterList } from './edit_filter_list';
+
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
@@ -27,43 +33,52 @@ const mockTestFilter = {
     jobs: ['dns_exfiltration'],
   },
 };
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    filters: {
-      filters: () => {
-        return Promise.resolve(mockTestFilter);
+const mockKibanaContext = {
+  services: {
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            disableTimeRangeSelector: jest.fn(),
+            disableAutoRefreshSelector: jest.fn(),
+          },
+        },
       },
     },
-  },
-}));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (node) => {
-    return node;
-  },
-}));
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-
-import { EditFilterList } from './edit_filter_list';
-
-const props = {
-  canCreateFilter: true,
-  canDeleteFilter: true,
-  kibana: {
-    services: {
-      notifications: {
-        toasts: {
-          addWarning: () => {},
+    docLinks: { links: { ml: { anomalyDetectionJobTips: 'https://anomalyDetectionJobTips' } } },
+    notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
+    mlServices: {
+      mlApiServices: {
+        filters: {
+          filters: () => {
+            return Promise.resolve(mockTestFilter);
+          },
         },
       },
     },
   },
 };
 
+const mockReact = React;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  withKibana: (type) => {
+    const EnhancedType = (props) => {
+      return mockReact.createElement(type, {
+        ...props,
+        kibana: mockKibanaContext,
+      });
+    };
+    return EnhancedType;
+  },
+}));
+
+const props = {
+  canCreateFilter: true,
+  canDeleteFilter: true,
+};
+
 function prepareEditTest() {
-  const wrapper = shallowWithIntl(<EditFilterList {...props} />);
+  const wrapper = mountWithIntl(<EditFilterList {...props} />);
 
   // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
   // has resolved.
@@ -78,7 +93,7 @@ function prepareEditTest() {
 
 describe('EditFilterList', () => {
   test('renders the edit page for a new filter list and updates ID', () => {
-    const wrapper = shallowWithIntl(<EditFilterList {...props} />);
+    const wrapper = mountWithIntl(<EditFilterList {...props} />);
     expect(wrapper).toMatchSnapshot();
 
     const instance = wrapper.instance();
