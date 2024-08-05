@@ -173,7 +173,7 @@ async function getPkgInfoAssetsMap({
   return packageInfosandAssetsMap;
 }
 
-async function getSavedObjectType() {
+export async function getPackagePolicySavedObjectType() {
   return (await isSpaceAwarenessEnabled())
     ? PACKAGE_POLICY_SAVED_OBJECT_TYPE
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
@@ -227,7 +227,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     }
 
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -432,7 +432,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
   }> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     for (const packagePolicy of packagePolicies) {
       if (!packagePolicy.id) {
         packagePolicy.id = SavedObjectsUtils.generateId();
@@ -640,7 +640,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<PackagePolicy | null> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(savedObjectType, id);
     if (!packagePolicySO) {
       return null;
@@ -687,7 +687,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ): Promise<PackagePolicy[]> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
       type: savedObjectType,
       filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)}`,
@@ -719,7 +719,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ids: string[],
     options: { ignoreMissing?: boolean } = {}
   ): Promise<PackagePolicy[] | null> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
         id,
@@ -766,7 +766,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
       type: savedObjectType,
       sortField,
@@ -803,7 +803,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: ListWithKuery
   ): Promise<ListResult<string>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = await soClient.find<{}>({
       type: savedObjectType,
       sortField,
@@ -837,7 +837,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
@@ -1045,7 +1045,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       error: Error | SavedObjectError;
     }>;
   }> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     for (const packagePolicy of packagePolicyUpdates) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
@@ -1246,7 +1246,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
     for (const id of ids) {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'delete',
@@ -2016,7 +2016,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     { perPage = 1000, kuery }: PackagePolicyClientFetchAllItemIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     // TODO:PT Question for fleet team: do I need to `auditLoggingService.writeCustomSoAuditLog()` here? Its only IDs
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
 
     return createSoFindIterable<{}>({
       soClient,
@@ -2043,7 +2043,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       sortField = 'created_at',
     }: PackagePolicyClientFetchAllItemsOptions = {}
   ): Promise<AsyncIterable<PackagePolicy[]>> {
-    const savedObjectType = await getSavedObjectType();
+    const savedObjectType = await getPackagePolicySavedObjectType();
 
     return createSoFindIterable<PackagePolicySOAttributes>({
       soClient,
@@ -2886,7 +2886,7 @@ async function requireUniqueName(
   packagePolicy: UpdatePackagePolicy | NewPackagePolicy,
   id?: string
 ) {
-  const savedObjectType = await getSavedObjectType();
+  const savedObjectType = await getPackagePolicySavedObjectType();
   const existingPoliciesWithName = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${savedObjectType}.name:"${packagePolicy.name}"`,

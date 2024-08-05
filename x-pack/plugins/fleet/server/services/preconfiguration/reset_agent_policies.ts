@@ -17,7 +17,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
-import { agentPolicyService } from '../agent_policy';
+import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
@@ -61,7 +61,8 @@ async function _deleteGhostPackagePolicies(
     return;
   }
 
-  const objects = policyIds.map((id) => ({ id, type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE }));
+  const savedObjectType = await getAgentPolicySavedObjectType();
+  const objects = policyIds.map((id) => ({ id, type: savedObjectType }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (so.error && so.error.statusCode === 404) {
       acc.set(so.id, false);

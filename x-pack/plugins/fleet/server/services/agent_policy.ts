@@ -134,7 +134,7 @@ function normalizeKuery(savedObjectType: string, kuery: string) {
   }
 }
 
-async function getAgentPolicySavedObjectType() {
+export async function getAgentPolicySavedObjectType() {
   return (await isSpaceAwarenessEnabled())
     ? AGENT_POLICY_SAVED_OBJECT_TYPE
     : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;

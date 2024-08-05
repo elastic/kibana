@@ -23,13 +23,12 @@ import type { AgentPolicySOAttributes } from '../types';
 import type { LicenseService } from '../../common/services/license';
 
 import type { AgentPolicy } from '../../common';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from '../../common/services/agent_policy_config';
 
-import { agentPolicyService } from './agent_policy';
+import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 
 export class PolicyWatcher {
   private logger: Logger;
@@ -92,6 +91,7 @@ export class PolicyWatcher {
       if (policiesToUpdate.length === 0) {
         break;
       }
+      const savedObjectType = await getAgentPolicySavedObjectType();
 
       const { saved_objects: bulkUpdateSavedObjects } = await this.makeInternalSOClient(
         this.soStart
@@ -99,7 +99,7 @@ export class PolicyWatcher {
         policiesToUpdate.map((policy) => {
           const { id, revision, ...policyContent } = policy;
           return {
-            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            type: savedObjectType,
             id,
             attributes: {
               ...policyContent,
