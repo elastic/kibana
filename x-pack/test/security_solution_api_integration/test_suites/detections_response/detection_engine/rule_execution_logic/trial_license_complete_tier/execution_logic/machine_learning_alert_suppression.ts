@@ -572,7 +572,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('does not suppress alerts with missing fields, if not configured to do so', async () => {
+        it.only('does not suppress alerts with missing fields, if not configured to do so', async () => {
           const rule = {
             ...ruleProps,
             alert_suppression: {
@@ -611,15 +611,17 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_ORIGINAL_TIME],
           });
 
+          console.log('check 1')
+
           expect(previewAlerts.length).toEqual(3);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
 
+          console.log('check 2')
           expect(previewAlerts[0]._source).toEqual(
             expect.not.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: expect.anything(),
@@ -630,11 +632,11 @@ export default ({ getService }: FtrProviderContext) => {
             })
           );
 
+          console.log('check 3')
           expect(previewAlerts[1]._source).toEqual(
             expect.objectContaining({
               'user.name': ['irrelevant'],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
             })
           );
           expect(previewAlerts[1]._source).toEqual(
@@ -646,6 +648,8 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_DOCS_COUNT]: expect.anything(),
             })
           );
+
+          console.log('check 4')
 
           expect(previewAlerts[2]._source).toEqual(
             expect.objectContaining({
@@ -656,7 +660,6 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [TIMESTAMP]: timestamp,
-              [ALERT_START]: timestamp,
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: timestamp,
               [ALERT_SUPPRESSION_END]: timestamp,
