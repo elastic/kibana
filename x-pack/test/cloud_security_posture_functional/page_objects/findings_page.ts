@@ -235,27 +235,53 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const navigateToLatestFindingsPage = async () => {
+  const navigateToLatestFindingsPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
-  const navigateToLatestVulnerabilitiesPage = async () => {
+  const navigateToLatestVulnerabilitiesPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/vulnerabilities',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
-  const navigateToMisconfigurations = async () => {
+  const navigateToMisconfigurations = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       'cloud_security_posture/findings/configurations',
-      { shouldUseHashForSubUrl: false }
+      options
     );
   };
 
