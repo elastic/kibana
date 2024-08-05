@@ -31,6 +31,7 @@ jest.mock('../../contexts/kibana', () => ({
   useMlKibana: () => {
     return {
       services: {
+        chrome: { recentlyAccessed: { add: jest.fn() } },
         share: {
           url: {
             locators: {
