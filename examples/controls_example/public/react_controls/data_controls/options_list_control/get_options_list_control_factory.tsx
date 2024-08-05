@@ -150,9 +150,9 @@ export const getOptionsListControlFactory = (
         )
         .subscribe(() => {
           searchString$.next('');
-          selections.clearSelections();
-          requestSize$.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
-          sort$.next(OPTIONS_LIST_DEFAULT_SORT);
+          selections.setSelectedOptions(undefined);
+          selections.setExistsSelected(false);
+          selections.setExclude(false);
         });
 
       /** Fetch the suggestions and perform validation */
@@ -256,7 +256,11 @@ export const getOptionsListControlFactory = (
               references, // does not have any references other than those provided by the data control serializer
             };
           },
-          clearSelections: selections.clearSelections,
+          clearSelections: () => {
+            if (selections.selectedOptions$.getValue()?.length) selections.setSelectedOptions([]);
+            if (selections.existsSelected$.getValue()) selections.setExistsSelected(false);
+            if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
+          },
         },
         {
           ...dataControl.comparators,

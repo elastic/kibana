@@ -47,12 +47,6 @@ export function initializeOptionsListSelections(
   }
 
   return {
-    clearSelections: () => {
-      selectedOptions$.next(undefined);
-      existsSelected$.next(false);
-      exclude$.next(false);
-      onSelectionChange();
-    },
     comparators: {
       exclude: [exclude$, setExclude],
       existsSelected: [existsSelected$, setExistsSelected],
