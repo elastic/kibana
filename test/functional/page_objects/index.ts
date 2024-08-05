@@ -73,3 +73,5 @@ export const pageObjects = {
   unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
 };
+
+export { SolutionNavigationProvider } from './solution_navigation';

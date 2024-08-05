@@ -9,7 +9,7 @@ import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpac
 
 import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
-import { getSvlCommonNavigationProvider } from './svl_common_navigation';
+import { SvlCommonNavigationProvider } from './svl_common_navigation';
 import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
 import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboarding_stream_log_file';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
@@ -22,16 +22,12 @@ import { SvlManagementPageProvider } from './svl_management_page';
 import { SvlIngestPipelines } from './svl_ingest_pipelines';
 import { SvlSearchHomePageProvider } from './svl_search_homepage';
 
-const { solutionNavigation, ...rest } = xpackFunctionalPageObjects;
-// Enhance the solution navigation with serverless specifics (e.g. globalSearch)
-const svlCommonNavigation = getSvlCommonNavigationProvider(solutionNavigation);
-
 export const pageObjects = {
-  ...rest,
+  ...xpackFunctionalPageObjects,
   ...cloudSecurityPosturePageObjects,
 
   svlCommonPage: SvlCommonPageProvider,
-  svlCommonNavigation,
+  svlCommonNavigation: SvlCommonNavigationProvider,
   svlObltOnboardingPage: SvlObltOnboardingPageProvider,
   SvlObltOnboardingStreamLogFilePage: SvlObltOnboardingStreamLogFilePageProvider,
   svlObltOverviewPage: SvlObltOverviewPageProvider,

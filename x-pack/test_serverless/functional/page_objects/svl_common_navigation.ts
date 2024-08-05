@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-src/functional/page_objects';
+import { SolutionNavigationProvider } from '@kbn/test-suites-src/functional/page_objects';
 
 import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack/functional/page_objects/navigational_search';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-type SolutionNavigationProvider = typeof kibanaFunctionalPageObjects.solutionNavigation;
+export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
+  const solutionNavigation = SolutionNavigationProvider(ctx);
 
-export function getSvlCommonNavigationProvider(
-  solutionNavigationProvider: SolutionNavigationProvider
-) {
-  return (ctx: FtrProviderContext) => {
-    const solutionNavigation = solutionNavigationProvider(ctx);
-
-    return {
-      ...solutionNavigation,
-      search: new SvlNavigationSearchPageObject(ctx),
-    };
+  return {
+    ...solutionNavigation,
+    search: new SvlNavigationSearchPageObject(ctx),
   };
 }
 
