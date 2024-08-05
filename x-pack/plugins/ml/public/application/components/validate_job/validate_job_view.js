@@ -74,7 +74,7 @@ MessageList.propTypes = {
 const LoadingSpinner = () => (
   <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
+      <EuiLoadingSpinner size="xl" data-test-subj="mlValidateJobLoadingSpinner" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -118,11 +118,13 @@ export class ValidateJobUI extends Component {
   };
 
   validate = () => {
+    console.log('VALIDATE?????');
     const docLinks = this.props.kibana.services.docLinks;
     const job = this.props.getJobConfig();
     const getDuration = this.props.getDuration;
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
+    console.log('VALIDATE', duration, fields, job);
 
     // Run job validation only if a job config has been passed on and the duration makes sense to run it.
     // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.
@@ -130,7 +132,7 @@ export class ValidateJobUI extends Component {
       if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
         let shouldShowLoadingIndicator = true;
 
-        this.props.ml
+        this.props.kibana.services.mlServices.mlApiServices
           .validateJob({ duration, fields, job })
           .then((validationMessages) => {
             const messages = parseMessages(validationMessages, docLinks);
@@ -243,7 +245,8 @@ export class ValidateJobUI extends Component {
         {embedded === false ? (
           <div>
             <EuiButton
-              onClick={this.validate}
+              data-test-subj="mlValidateJobButton"
+              onClick={(e) => this.validate(e)}
               size="s"
               fill={fill}
               iconType={isCurrentJobConfig ? this.state.ui.iconType : defaultIconType}
@@ -259,6 +262,7 @@ export class ValidateJobUI extends Component {
 
             {!isDisabled && this.state.ui.isModalVisible && (
               <Modal
+                data-test-subj="mlValidateJobModal"
                 close={this.closeModal}
                 title={
                   <FormattedMessage
@@ -320,7 +324,6 @@ ValidateJobUI.propTypes = {
   getJobConfig: PropTypes.func.isRequired,
   isCurrentJobConfig: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  ml: PropTypes.object.isRequired,
   embedded: PropTypes.bool,
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,
