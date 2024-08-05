@@ -8,7 +8,7 @@
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
-export interface SearchResult {
+interface SearchResult {
   label: string;
 }
 
