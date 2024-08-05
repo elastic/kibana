@@ -28,7 +28,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { get, isEqual, isNil, omitBy } from 'lodash';
+import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
 import React, { useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
@@ -256,19 +256,23 @@ export const getVisualizeEmbeddableFactory: (deps: {
         }),
         serializedVis: [
           serializedVis$,
-          async (value) => {
+          (value) => {
             serializedVis$.next(value);
           },
           (a, b) => {
             const visA = a
               ? {
-                  ...a,
+                  ...omitBy(a, isEmpty),
                   data: omitBy(a.data, isNil),
                   params: omitBy(a.params, isNil),
                 }
               : {};
             const visB = b
-              ? { ...b, data: omitBy(b.data, isNil), params: omitBy(b.params, isNil) }
+              ? {
+                  ...omitBy(b, isEmpty),
+                  data: omitBy(b.data, isNil),
+                  params: omitBy(b.params, isNil),
+                }
               : {};
             return isEqual(visA, visB);
           },
