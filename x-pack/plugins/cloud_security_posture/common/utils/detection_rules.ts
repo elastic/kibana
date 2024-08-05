@@ -29,7 +29,7 @@ export const convertRuleTagsToMatchAnyKQL = (tags: string[]): string => {
 export const getFindingsDetectionRuleSearchTags = (
   cspBenchmarkRule: CspBenchmarkRuleMetadata
 ): string[] => {
-  if (!cspBenchmarkRule.benchmark || !cspBenchmarkRule.benchmark.id) {
+  if (!cspBenchmarkRule?.benchmark || !cspBenchmarkRule?.benchmark?.id) {
     // Return an empty array if benchmark ID is undefined
     return [];
   }
