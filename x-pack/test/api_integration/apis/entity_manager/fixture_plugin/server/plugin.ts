@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  Plugin,
+  CoreSetup,
+  RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+  IKibanaResponse,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { upgradeBuiltInEntityDefinitions } from '@kbn/entityManager-plugin/server/lib/entities/upgrade_entity_definition';
+import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+
+interface FixtureStartDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  security: SecurityPluginStart;
+}
+
+export class FixturePlugin implements Plugin<void, void, {}, FixtureStartDeps> {
+  private logger: Logger;
+
+  constructor(context: PluginInitializerContext<{}>) {
+    this.logger = context.logger.get();
+  }
+
+  public setup(core: CoreSetup<FixtureStartDeps>) {
+    core.http.createRouter().post(
+      {
+        path: '/api/entities/upgrade_builtin_definitions',
+        validate: false,
+      },
+      async (
+        context: RequestHandlerContext,
+        req: KibanaRequest<any, any, any, any>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse<any>> => {
+        const [coreStart, { encryptedSavedObjects, security }] = await core.getStartServices();
+
+        await upgradeBuiltInEntityDefinitions({
+          definitions: req.body.definitions,
+          server: {
+            encryptedSavedObjects,
+            security,
+            core: coreStart,
+            logger: this.logger,
+            config: {},
+            isServerless: false,
+          },
+        });
+
+        return res.ok({ body: { success: true } });
+      }
+    );
+  }
+
+  public start() {}
+  public stop() {}
+}
