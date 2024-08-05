@@ -23,33 +23,26 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     it(`returns the translations with the correct headers`, async () => {
-      await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .get('/translations/en.json')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
-          expect(response.body.locale).to.eql('en');
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.body.locale).to.eql('en');
 
-          expect(response.header).to.have.property(
-            'content-type',
-            'application/json; charset=utf-8'
-          );
-          expect(response.header).to.have.property(
-            'cache-control',
-            'public, max-age=31536000, immutable'
-          );
-          expect(response.header).not.to.have.property('etag');
-        });
+      expect(response.header).to.have.property('content-type', 'application/json; charset=utf-8');
+      expect(response.header).to.have.property(
+        'cache-control',
+        'public, max-age=31536000, immutable'
+      );
+      expect(response.header).not.to.have.property('etag');
     });
 
     it(`returns a 404 when not using the correct locale`, async () => {
-      await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .get('/translations/foo.json')
         .set(svlCommonApi.getInternalRequestHeader())
-        .set(roleAuthc.apiKeyHeader)
-        .then((response) => {
-          expect(response.status).to.eql(404);
-        });
+        .set(roleAuthc.apiKeyHeader);
+      expect(response.status).to.eql(404);
     });
   });
 }
