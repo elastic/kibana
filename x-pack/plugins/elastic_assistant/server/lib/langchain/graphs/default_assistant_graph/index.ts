@@ -93,7 +93,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+  const chain = RetrievalQAChain.fromLLM(getLlmInstance(), esStore.asRetriever(10));
 
   // Check if KB is available
   const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
