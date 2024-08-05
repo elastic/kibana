@@ -8,7 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
-import { cloneDeep, isEqual, merge } from 'lodash';
+import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs';
@@ -263,6 +263,12 @@ export class ConfigService {
     keyLoop: for (const key in flattenedOverrides) {
       // this if is enforced by an eslint rule :shrug:
       if (key in flattenedOverrides) {
+        // If set to `null`, delete the config from the overrides.
+        if (flattenedOverrides[key] === null) {
+          unset(globalOverrides, key);
+          continue;
+        }
+
         for (const [configPath, dynamicConfigKeys] of this.dynamicPaths.entries()) {
           if (
             key.startsWith(`${configPath}.`) &&
@@ -289,6 +295,7 @@ export class ConfigService {
     validateWithNamespace.forEach((ns) => this.validateAtPath(ns, globalOverridesAsConfig.get(ns)));
 
     this.overrides$.next(globalOverrides);
+    return globalOverrides;
   }
 
   private async logDeprecation() {
