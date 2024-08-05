@@ -76,11 +76,11 @@ export function disableUICapabilitiesFactory(
     // This method answers: 'Should we affect a capability based on privileges?'
 
     // 'fileUpload' feature ID is handled independently
-    // The spaces and file_upload plugins have their own capabilites switchers.
+    // The spaces and file_upload plugins have their own capabilities switchers.
 
     // The spaces capabilities switcher handles disabling capabilities within a specific
     // space, but the root 'spaces' feature ID needs to be affected here, where we can check
-    // if the current user is privileged to for general spaces capabilites(e.g.manage).
+    // if the current user is privileged to for general spaces capabilities (e.g., manage).
 
     // Always affect global settings, and the "spaces" feature (see above)
     if (featureId === 'globalSettings' || featureId === 'spaces') {
