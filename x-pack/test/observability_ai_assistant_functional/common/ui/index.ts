@@ -48,6 +48,18 @@ const pages = {
     button: 'obsAiAssistantInsightButton',
     text: 'obsAiAssistantInsightResponse',
   },
+  links: {
+    solutionMenuLink: 'observability-nav-observabilityAIAssistant-ai_assistant',
+    globalHeaderButton: 'observabilityAiAssistantAppNavControlButton',
+  },
+  settings: {
+    settingsPage: 'aiAssistantSettingsPage',
+    managementLink: 'aiAssistantManagementSelection',
+    logsIndexPatternInput:
+      'management-settings-editField-observability:aiAssistantLogsIndexPattern',
+    saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
+    aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
+  },
 };
 
 export async function ObservabilityAIAssistantUIProvider({

@@ -16,6 +16,7 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
+import { Subscription } from 'rxjs';
 
 function getSettingsFields({
   settingsKeys,
@@ -80,16 +81,29 @@ export function useEditableSettings(settingsKeys: string[]) {
 
   async function saveAll() {
     if (settings && !isEmpty(unsavedChanges)) {
+      let subscription: Subscription | null = null;
+      let updateErrorOccurred = false;
       try {
         setIsSaving(true);
-        const arr = Object.entries(unsavedChanges).map(([key, value]) =>
-          settings.client.set(key, value.unsavedValue)
-        );
+        subscription = settings.client.getUpdateErrors$().subscribe((error) => {
+          updateErrorOccurred = true;
+        });
+        const arr = Object.entries(unsavedChanges).map(([key, value]) => {
+          return settings.client.set(key, value.unsavedValue);
+        });
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
+        if (updateErrorOccurred) {
+          throw new Error('One or more settings updates failed');
+        }
+      } catch (e) {
+        throw e;
       } finally {
         setIsSaving(false);
+        if (subscription) {
+          subscription.unsubscribe();
+        }
       }
     }
   }
