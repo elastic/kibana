@@ -32,7 +32,7 @@ const TITLE = 'Fleet Deleted Files Periodic Tasks';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';
-const POLICIES_BATCHSIZE = 1000;
+const POLICIES_BATCHSIZE = 100;
 const UNENROLLMENT_BATCHSIZE = 1000;
 
 interface UnenrollInactiveAgentsTaskSetupContract {
@@ -79,7 +79,7 @@ export class UnenrollInactiveAgentsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[UnenrollInactiveAgentsTask] Started with interval of [${INTERVAL}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -93,10 +93,7 @@ export class UnenrollInactiveAgentsTask {
         params: { version: VERSION },
       });
     } catch (e) {
-      this.logger.error(
-        `Error scheduling task UnenrollInactiveAgentsTask, received error: ${e.message}`,
-        e
-      );
+      this.logger.error(`Error scheduling task UnenrollInactiveAgentsTask, error: ${e.message}`, e);
     }
   };
 
@@ -108,7 +105,7 @@ export class UnenrollInactiveAgentsTask {
     this.logger.info(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  private async fetchAgentsWithUnenrollmentTimeout(
+  public async fetchAgentsWithUnenrollmentTimeout(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract
   ) {
@@ -116,25 +113,25 @@ export class UnenrollInactiveAgentsTask {
       `[UnenrollInactiveAgentsTask] Fetching agent policies with unenroll_timeout > 0`
     );
     // find all agent policies that are not managed and having unenroll_timeout > 0
+    // limit batch size to 100 to avoid scale issues
     const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
     const agentPolicies = await agentPolicyService.list(soClient, {
       kuery: policiesKuery,
       perPage: POLICIES_BATCHSIZE,
-      withAgentCount: true,
     });
-    const policyIds = agentPolicies?.items.map((policy) => policy.id);
+
     this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Found "${policyIds.length}" agent policies with unenroll_timeout > 0`
+      `[UnenrollInactiveAgentsTask] Found "${agentPolicies.items.length}" agent policies with unenroll_timeout > 0`
     );
-    if (!agentPolicies?.items.length || !policyIds.length) {
+    if (!agentPolicies?.items.length) {
       this.endRun('Found no policies to process');
-      return;
+      return [];
     }
 
     // find inactive agents enrolled on above policies
-    // limit batch size to 1000 to avoid scaling issues
-    const kuery = `(${AGENTS_PREFIX}.policy_id:${policyIds
-      .map((id) => `"${id}"`)
+    // limit batch size to 1000 to avoid scale issues
+    const kuery = `(${AGENTS_PREFIX}.policy_id:${agentPolicies.items
+      .map((policy) => `"${policy.id}"`)
       .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
@@ -144,12 +141,12 @@ export class UnenrollInactiveAgentsTask {
     });
     if (!res.agents.length) {
       this.endRun('No inactive agents to unenroll');
-      return;
+      return [];
     }
     this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Found "${res.total}" inactive agents to unenroll`
+      `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll`
     );
-    return res;
+    return res.agents;
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
@@ -172,17 +169,17 @@ export class UnenrollInactiveAgentsTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      const res = await this.fetchAgentsWithUnenrollmentTimeout(esClient, soClient);
+      const agents = await this.fetchAgentsWithUnenrollmentTimeout(esClient, soClient);
 
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] attempting unenrollment of ${res?.total} inactive agents.`
+        `[UnenrollInactiveAgentsTask] Unenrolling ${agents.length} inactive agents.`
       );
-      const actionId = await unenrollBatch(soClient, esClient, res.agents, {
+      const actionId = await unenrollBatch(soClient, esClient, agents, {
         revoke: true,
         force: true,
       });
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Executed unenrollment of ${res?.total} inactive agents.with actionId: ${actionId}`
+        `[UnenrollInactiveAgentsTask] Executed unenrollment of ${agents.length} inactive agents.with actionId: ${actionId}`
       );
 
       this.endRun('success');
