@@ -25,6 +25,12 @@ const ROOT = resolve(__dirname, '../..');
           title: 'Security Solution Entity Analytics API (Elastic Cloud Serverless)',
           description: '',
         },
+        tags: [
+          {
+            name: 'Security Solution Entity Analytics API',
+            description: '',
+          },
+        ],
       },
     },
   });
@@ -42,6 +48,12 @@ const ROOT = resolve(__dirname, '../..');
           title: 'Security Solution Entity Analytics API (Elastic Cloud and self-hosted)',
           description: '',
         },
+        tags: [
+          {
+            name: 'Security Solution Entity Analytics API',
+            description: '',
+          },
+        ],
       },
     },
   });
