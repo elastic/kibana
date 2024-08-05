@@ -13,14 +13,6 @@ jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));
 
-jest.mock('../../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    links: {
-      ml: { calendars: jest.fn() },
-    },
-  }),
-}));
-
 jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));

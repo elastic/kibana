@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
 import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
@@ -17,6 +18,7 @@ import { ChartGrid } from './chart_grid';
 import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     chartLoader,
@@ -75,7 +77,7 @@ export const MultiMetricDetectorsSummary: FC = () => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,

@@ -22,7 +22,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { clearCache, setDependencyCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
@@ -160,10 +159,6 @@ export const renderApp = (
   mlFeatures: MlFeatures,
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  setDependencyCache({
-    timefilter: deps.data.query.timefilter,
-  });
-
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
@@ -179,7 +174,6 @@ export const renderApp = (
   );
 
   return () => {
-    clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
     deps.data.search.session.clear();
   };

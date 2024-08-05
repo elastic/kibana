@@ -8,6 +8,8 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
 import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
+
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import type { LineChartData } from '../../../../../common/chart_loader';
@@ -26,6 +28,7 @@ interface Props {
 const DTR_IDX = 0;
 
 export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     jobCreatorUpdate,
@@ -92,7 +95,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
     if (aggFieldPair !== null) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         const resp: LineChartData = await chartLoader.loadLineCharts(
           jobCreator.start,
           jobCreator.end,

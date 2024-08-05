@@ -10,16 +10,6 @@ import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
 
-jest.mock('../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    links: {
-      ml: {
-        anomalyDetectionJobTips: 'jest-metadata-mock-url',
-      },
-    },
-  }),
-}));
-
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;

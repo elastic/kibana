@@ -9,8 +9,9 @@ import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
+
+import { useUiSettings } from '../../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { PopulationJobCreator } from '../../../../../common/job_creator';
 import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
@@ -22,6 +23,7 @@ import { useToastNotificationService } from '../../../../../../../services/toast
 type DetectorFieldValues = Record<number, string[]>;
 
 export const PopulationDetectorsSummary: FC = () => {
+  const uiSettings = useUiSettings();
   const {
     jobCreator: jc,
     chartLoader,
@@ -78,7 +80,7 @@ export const PopulationDetectorsSummary: FC = () => {
     if (allDataReady()) {
       setLoadingData(true);
       try {
-        const cs = getChartSettings(jobCreator, chartInterval);
+        const cs = getChartSettings(uiSettings, jobCreator, chartInterval);
         setChartSettings(cs);
         const resp: LineChartData = await chartLoader.loadPopulationCharts(
           jobCreator.start,
