@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
-  title: Audit Log Schema
+  title: Action Log Schema
   version: '2023-10-31'
 paths:
   /api/endpoint/action_log/{agent_id}:
     get:
-      summary: Get action audit log schema
-      operationId: EndpointGetActionAuditLog
-      description: Get action audit log (old API to be deprecated)
+      summary: Get action requests log schema
+      operationId: EndpointGetActionLog
+      description: Get action requests log
       deprecated: true
       x-codegen-enabled: false
       x-labels:
@@ -23,7 +23,7 @@ paths:
           in: query
           required: true
           schema:
-            $ref: '#/components/schemas/AuditLogRequestQuery'
+            $ref: '#/components/schemas/ActionLogRequestQuery'
       responses:
         '200':
           description: OK
@@ -34,7 +34,7 @@ paths:
 
 components:
   schemas:
-    AuditLogRequestQuery:
+    ActionLogRequestQuery:
       type: object
       properties:
         page:

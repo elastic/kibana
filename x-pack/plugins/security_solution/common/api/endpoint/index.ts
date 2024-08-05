@@ -8,7 +8,7 @@
 export * from './actions/common/base';
 export * from './actions/common/response_actions';
 
-export * from './actions/audit_log';
+export * from './actions/action_log';
 export * from './actions/status';
 export * from './actions/details';
 export * from './actions/file_download';

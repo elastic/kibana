@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './audit_log';
-export * from './deprecated_audit_log.gen';
+export * from './action_log';
+export * from './deprecated_action_log.gen';
