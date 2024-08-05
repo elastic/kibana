@@ -1679,19 +1679,26 @@ async function getOptionArgsSuggestions(
           })
         );
       } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
-        // Otherwise try to complete the expression suggesting some columns
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            types[0] === 'column' ? ['any'] : types,
-            command.name,
-            option.name,
-            getFieldsByType,
-            {
-              functions: option.name === 'by',
-              fields: true,
-            }
-          ))
+          ...(await getFieldsByType(types[0] === 'column' ? ['any'] : types, [], {
+            advanceCursorAndOpenSuggestions: true,
+          }))
         );
+
+        if (option.name === 'by') {
+          suggestions.push(
+            ...(await getFieldsOrFunctionsSuggestions(
+              types[0] === 'column' ? ['any'] : types,
+              command.name,
+              option.name,
+              getFieldsByType,
+              {
+                functions: true,
+                fields: false,
+              }
+            ))
+          );
+        }
 
         if (command.name === 'stats' && isNewExpression) {
           suggestions.push(buildNewVarDefinition(findNewVariable(anyVariables)));

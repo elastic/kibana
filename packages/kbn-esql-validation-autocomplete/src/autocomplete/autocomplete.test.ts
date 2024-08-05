@@ -1208,7 +1208,7 @@ describe('autocomplete', () => {
       [
         'var0 = ',
         ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
-        ...getFieldNamesByType('any'),
+        ...getFieldNamesByType('any').map((field) => `${field} `),
       ],
       undefined,
       30
