@@ -11,13 +11,14 @@
  */
 import type { KbnClient } from '@kbn/test';
 import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { GetAvailableVersionsResponse } from '@kbn/fleet-plugin/common/types';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 
 export const fetchFleetLatestAvailableAgentVersion = async (
   kbnClient: KbnClient
 ): Promise<string> => {
   return kbnClient
-    .request<{ items: string[] }>({
+    .request<GetAvailableVersionsResponse>({
       method: 'GET',
       path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
       headers: {
