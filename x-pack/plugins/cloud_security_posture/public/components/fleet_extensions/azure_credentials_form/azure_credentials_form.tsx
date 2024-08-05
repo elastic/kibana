@@ -316,21 +316,24 @@ export const AzureInputVarFields = ({
             </>
           )}
           {field.type === 'text' && (
-            <EuiFormRow
-              key={field.id}
-              label={field.label}
-              fullWidth
-              hasChildLabel={true}
-              id={field.id}
-            >
-              <EuiFieldText
-                id={field.id}
+            <>
+              <EuiFormRow
+                key={field.id}
+                label={field.label}
                 fullWidth
-                value={field.value || ''}
-                onChange={(event) => onChange(field.id, event.target.value)}
-                data-test-subj={field.testSubj}
-              />
-            </EuiFormRow>
+                hasChildLabel={true}
+                id={field.id}
+              >
+                <EuiFieldText
+                  id={field.id}
+                  fullWidth
+                  value={field.value || ''}
+                  onChange={(event) => onChange(field.id, event.target.value)}
+                  data-test-subj={field.testSubj}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+            </>
           )}
         </div>
       ))}
