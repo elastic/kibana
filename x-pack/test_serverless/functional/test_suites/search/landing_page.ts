@@ -10,11 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'svlSearchLandingPage',
-    'svlCommonPage',
-    'svlCommonNavigation',
-  ]);
+  const pageObjects = getPageObjects(['svlSearchLandingPage', 'svlCommonPage', 'embeddedConsole']);
   const svlSearchNavigation = getService('svlSearchNavigation');
 
   describe('landing page', function () {
