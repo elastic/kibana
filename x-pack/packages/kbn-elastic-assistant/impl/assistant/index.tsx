@@ -12,7 +12,6 @@ import React, {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import {
@@ -24,7 +23,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiText,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { createPortal } from 'react-dom';
@@ -34,11 +32,11 @@ import deepEqual from 'fast-deep-equal';
 
 import { find, isEmpty, uniqBy } from 'lodash';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useChatRefactor } from './use_chat_refactor';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
-import { UpgradeLicenseCallToAction } from './upgrade_license_cta';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { getDefaultConnector } from './helpers';
 
@@ -50,18 +48,13 @@ import { useConversation } from './use_conversation';
 import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { ConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
-import { SystemPrompt } from './prompt_editor/system_prompt';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
-import * as i18n from './translations';
 import { CONVERSATIONS_QUERY_KEYS } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 import { getGenAiConfig } from '../connectorland/helpers';
-import { AssistantAnimatedIcon } from './assistant_animated_icon';
-import { SetupKnowledgeBaseButton } from '../knowledge_base/setup_knowledge_base_button';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -333,24 +326,6 @@ const AssistantComponent: React.FC<Props> = ({
   }, []);
   // End drill in `Add To Timeline` action
 
-  // Start Scrolling
-  const commentsContainerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const parent = commentsContainerRef.current?.parentElement;
-
-    if (!parent) {
-      return;
-    }
-    // when scrollHeight changes, parent is scrolled to bottom
-    parent.scrollTop = parent.scrollHeight;
-
-    (
-      commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
-    ).lastElementChild?.scrollIntoView();
-  });
-  //  End Scrolling
-
   // Add min-height to all codeblocks so timeline icon doesn't overflow
   const codeBlockContainers = [...document.getElementsByClassName('euiCodeBlock')];
   // @ts-ignore-expect-error
@@ -360,12 +335,6 @@ const AssistantComponent: React.FC<Props> = ({
   const onToggleShowAnonymizedValues = useCallback(() => {
     setShowAnonymizedValues((prevValue) => !prevValue);
   }, [setShowAnonymizedValues]);
-
-  const isNewConversation = useMemo(
-    () => currentConversation?.messages.length === 0,
-    [currentConversation?.messages.length]
-  );
-
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
     if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
@@ -564,133 +533,6 @@ const AssistantComponent: React.FC<Props> = ({
     setCurrentConversationId,
   ]);
 
-  const disclaimer = useMemo(
-    () =>
-      isNewConversation && (
-        <EuiText
-          data-test-subj="assistant-disclaimer"
-          textAlign="center"
-          color={euiThemeVars.euiColorMediumShade}
-          size="xs"
-          css={css`
-            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
-          `}
-        >
-          {i18n.DISCLAIMER}
-        </EuiText>
-      ),
-    [isNewConversation]
-  );
-
-  const welcomeSetup = useMemo(() => {
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasShadow={false}
-            css={css`
-              max-width: 400px;
-              text-align: center;
-            `}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
-              <EuiFlexItem grow={false}>
-                <AssistantAnimatedIcon />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h3>{i18n.WELCOME_SCREEN_TITLE}</h3>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued">
-                  <p>{i18n.WELCOME_SCREEN_DESCRIPTION}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} data-test-subj="connector-prompt">
-                <ConnectorSetup
-                  conversation={currentConversation}
-                  onConversationUpdate={handleOnConversationSelected}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }, [handleOnConversationSelected, currentConversation]);
-
-  const emptyConvo = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="center" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasShadow={false}
-            css={css`
-              max-width: 400px;
-              text-align: center;
-            `}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
-              <EuiFlexItem grow={false}>
-                <AssistantAnimatedIcon />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
-                  <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SystemPrompt
-                  conversation={currentConversation}
-                  currentSystemPromptId={currentSystemPromptId}
-                  onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  allSystemPrompts={allSystemPrompts}
-                  refetchConversations={refetchCurrentUserConversations}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SetupKnowledgeBaseButton />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [
-      allSystemPrompts,
-      currentConversation,
-      currentSystemPromptId,
-      handleOnSystemPromptSelectionChange,
-      isSettingsModalVisible,
-      refetchCurrentUserConversations,
-    ]
-  );
-
-  const flyoutBodyContent = useMemo(() => {
-    if (isWelcomeSetup) {
-      return welcomeSetup;
-    }
-
-    if (currentConversation?.messages.length === 0) {
-      return emptyConvo;
-    }
-
-    return (
-      <EuiPanel
-        hasShadow={false}
-        panelRef={(element) => {
-          commentsContainerRef.current = (element?.parentElement as HTMLDivElement) || null;
-        }}
-      >
-        {comments}
-      </EuiPanel>
-    );
-  }, [comments, currentConversation?.messages.length, emptyConvo, isWelcomeSetup, welcomeSetup]);
-
   return (
     <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
       {chatHistoryVisible && (
@@ -785,14 +627,20 @@ const AssistantComponent: React.FC<Props> = ({
                   )
                 }
               >
-                {!isAssistantEnabled ? (
-                  <UpgradeLicenseCallToAction http={http} />
-                ) : (
-                  <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
+                <AssistantBody
+                  allSystemPrompts={allSystemPrompts}
+                  comments={comments}
+                  currentConversation={currentConversation}
+                  currentSystemPromptId={currentSystemPromptId}
+                  handleOnConversationSelected={handleOnConversationSelected}
+                  handleOnSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+                  http={http}
+                  isAssistantEnabled={isAssistantEnabled}
+                  isSettingsModalVisible={isSettingsModalVisible}
+                  isWelcomeSetup={isWelcomeSetup}
+                  refetchCurrentUserConversations={refetchCurrentUserConversations}
+                  setIsSettingsModalVisible={setIsSettingsModalVisible}
+                />
               </EuiFlyoutBody>
               <EuiFlyoutFooter
                 css={css`

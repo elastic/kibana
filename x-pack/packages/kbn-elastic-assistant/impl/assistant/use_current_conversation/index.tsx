@@ -33,7 +33,23 @@ export const useCurrentConversation = ({
   getConversation,
   refetchCurrentUserConversations,
   setConversationTitle,
-}: Props) => {
+}: Props): {
+  currentConversation: Conversation | undefined;
+  currentConversationId: string | undefined;
+  currentSystemPromptId: string | undefined;
+  handleCreateConversation: () => Promise<void>;
+  handleOnConversationDeleted: (cTitle: string) => Promise<void>;
+  handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  handleOnSystemPromptSelectionChange: (systemPromptId?: string) => void;
+  refetchCurrentConversation: (options?: {
+    cId?: string;
+    cTitle?: string;
+    isStreamRefetch?: boolean;
+  }) => Promise<Conversation | undefined>;
+  setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
+  setCurrentConversationId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
+} => {
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
   const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
 
