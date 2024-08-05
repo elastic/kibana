@@ -31,10 +31,10 @@ const createStorageMock = (storeMock: IStorage): Storage => {
   const storage = new Storage(storeMock);
   return {
     store: storeMock,
-    get: jest.fn((...args) => storage.get(...args)),
-    clear: jest.fn((...args) => storage.clear(...args)),
-    set: jest.fn((...args) => storage.set(...args)),
-    remove: jest.fn((...args) => storage.remove(...args)),
+    get: (...args) => storage.get(...args),
+    clear: (...args) => storage.clear(...args),
+    set: (...args) => storage.set(...args),
+    remove: (...args) => storage.remove(...args),
   } as Storage;
 };
 
