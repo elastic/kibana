@@ -28,7 +28,7 @@ export const getAlertSuppressionUsage = (
     case 'threshold':
       return {
         hasAlertSuppressionPerRuleExecution: false,
-        hasAlertSuppressionPerTimePeriod: ruleAttributes.params.alertSuppression != null,
+        hasAlertSuppressionPerTimePeriod: true,
         hasAlertSuppressionMissingFieldsStrategyDoNotSuppress: false,
         alertSuppressionFieldsCount: ruleAttributes.params?.threshold?.field?.length || 0,
       };
