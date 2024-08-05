@@ -151,7 +151,7 @@ describe('autocomplete', () => {
     });
     testSuggestions('from a | where ', [...getFieldNamesByType('any'), ...allEvalFns]);
     testSuggestions('from a | eval var0 = 1 | where ', [
-      ...getFieldNamesByType('any'),
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       'var0',
       ...allEvalFns,
     ]);
@@ -167,7 +167,7 @@ describe('autocomplete', () => {
       ),
     ]);
     testSuggestions('from a | where stringField >= ', [
-      ...getFieldNamesByType('string'),
+      ...getFieldNamesByType('string').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
     ]);
     // Skip these tests until the insensitive case equality gets restored back
@@ -1218,7 +1218,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM index1 | WHERE f',
       [
-        ...getFieldNamesByType('any'),
+        ...getFieldNamesByType('any').map((field) => `${field} `),
         ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
       ],
       undefined,

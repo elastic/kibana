@@ -823,6 +823,7 @@ async function getExpressionSuggestionsByType(
             // ... | <COMMAND> <suggest>
             // In this case start suggesting something not strictly based on type
             suggestions.push(
+              ...(await getFieldsByType('any', [], { advanceCursorAndOpenSuggestions: true })),
               ...(await getFieldsOrFunctionsSuggestions(
                 ['any'],
                 command.name,
@@ -830,7 +831,7 @@ async function getExpressionSuggestionsByType(
                 getFieldsByType,
                 {
                   functions: true,
-                  fields: true,
+                  fields: false,
                   variables: anyVariables,
                 }
               ))
@@ -1066,37 +1067,6 @@ function pushItUpInTheList(suggestions: SuggestionRawDefinition[], shouldPromote
     sortText: `1${sortText}`,
   }));
 }
-
-// function getVariableSuggestions(types: string[], variables: Map<string, ESQLVariable[]>) {
-//   const filteredVariablesByType: string[] = [];
-//   for (const variable of variables.values()) {
-//     if (types.includes('any') || types.includes(variable[0].type)) {
-//       filteredVariablesByType.push(variable[0].name);
-//     }
-//   }
-//   // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
-//   // avg( numberField ) => avg_numberField_
-//   // const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
-//   // if (
-//   //   filteredVariablesByType.length &&
-//   //   filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
-//   // ) {
-//   // for (const variable of filteredVariablesByType) {
-//   // remove backticks if present
-//   // const sanitizedVariable = variable.startsWith(SINGLE_BACKTICK)
-//   //   ? variable.slice(1, variable.length - 1)
-//   //   : variable;
-//   // const underscoredName = sanitizedVariable.replace(ALPHANUMERIC_REGEXP, '_');
-//   // const index = filteredFieldsByType.findIndex(
-//   //   ({ label }) => underscoredName === label || `_${underscoredName}_` === label
-//   // );
-//   // if (index >= 0) {
-//   //   filteredFieldsByType.splice(index);
-//   // }
-//   // }
-//   // }
-//   return buildVariablesDefinitions(filteredVariablesByType);
-// }
 
 /**
  * TODO — split this into distinct functions, one for fields, one for functions, one for literals
