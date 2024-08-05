@@ -16,10 +16,11 @@ import { ConfiguredLimits, Account, Role } from './types';
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
-  configuredLimits: ConfiguredLimits;
   account: Account;
+  configuredLimits: ConfiguredLimits;
   myRole: Role;
 }
+
 interface AppActions {
   setOnboardingComplete(): boolean;
 }

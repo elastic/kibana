@@ -23,6 +23,8 @@ import { EmptyState, EmptyMetaEnginesState } from './components';
 import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
+import { AppSearchGatePage } from '../app_search_gate/app_search_gated_form_page';
+
 import {
   ENGINES_OVERVIEW_TITLE,
   CREATE_AN_ENGINE_BUTTON_LABEL,
@@ -34,6 +36,7 @@ import { EnginesLogic } from './engines_logic';
 
 export const EnginesOverview: React.FC = () => {
   const {
+    account: { kibanaIsEnabled },
     myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic);
 
@@ -58,7 +61,7 @@ export const EnginesOverview: React.FC = () => {
     loadMetaEngines();
   }, [metaEnginesMeta.page.current]);
 
-  return (
+  return kibanaIsEnabled ? (
     <AppSearchPageTemplate
       pageViewTelemetry="engines_overview"
       pageChrome={[ENGINES_TITLE]}
@@ -131,5 +134,7 @@ export const EnginesOverview: React.FC = () => {
       </DataPanel>
       <AuditLogsModal />
     </AppSearchPageTemplate>
-  );
+  ) : (
+    <AppSearchGatePage isLoading={dataLoading} />
+  )
 };

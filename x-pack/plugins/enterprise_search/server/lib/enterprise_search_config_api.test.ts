@@ -80,6 +80,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       app_search: {
         account: {
           id: 'some-id-string',
+          kibana_uis_enabled: false,
           onboarding_complete: true,
         },
         role: {
@@ -174,6 +175,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       appSearch: {
         accountId: undefined,
+        kibanaIsEnabled: false,
         onboardingComplete: false,
         role: {
           id: undefined,
