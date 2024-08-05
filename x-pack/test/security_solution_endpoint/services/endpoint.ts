@@ -39,7 +39,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
 import { fetchFleetAvailableVersions } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
 import { KbnClient } from '@kbn/test';
-import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the

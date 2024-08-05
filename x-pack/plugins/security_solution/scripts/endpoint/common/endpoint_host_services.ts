@@ -8,6 +8,7 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
 import { fetchFleetAvailableVersions } from '../../../common/endpoint/utils/fetch_fleet_version';
 import { prefixedOutputLogger } from './utils';
 import type { HostVm } from './types';
@@ -32,8 +33,6 @@ export interface CreateAndEnrollEndpointHostOptions
   useClosestVersionMatch?: boolean;
   /** If the local cache of agent downloads should be used. Defaults to `true` */
   useCache?: boolean;
-  /** If the environment is Serverless */
-  isServerless?: boolean;
 }
 
 export interface CreateAndEnrollEndpointHostResponse {
@@ -57,13 +56,15 @@ export const createAndEnrollEndpointHost = async ({
   forceVersion = false,
   useClosestVersionMatch = false,
   useCache = true,
-  isServerless = false,
 }: CreateAndEnrollEndpointHostOptions): Promise<CreateAndEnrollEndpointHostResponse> => {
   const log = prefixedOutputLogger('createAndEnrollEndpointHost()', _log);
   let agentVersion = version;
 
-  if (isServerless && !forceVersion) {
-    agentVersion = await fetchFleetAvailableVersions(kbnClient);
+  if (!forceVersion) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    if (isServerless) {
+      agentVersion = await fetchFleetAvailableVersions(kbnClient);
+    }
   }
   const isRunningInCI = Boolean(process.env.CI);
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;

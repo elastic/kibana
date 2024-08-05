@@ -253,7 +253,6 @@ export const dataLoaders = (
           esClient,
           kbnClient,
           log,
-          isServerless,
         })
       ).alerts;
     },
@@ -328,7 +327,6 @@ export const dataLoadersForRealEndpoints = (
   config: Cypress.PluginConfigOptions
 ): void => {
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
-  const isServerless = Boolean(config.env.IS_SERVERLESS);
 
   on('task', {
     createSentinelOneHost: async () => {
@@ -424,7 +422,6 @@ ${s1Info.status}
             const newHost = process.env.CI
               ? await createAndEnrollEndpointHostCI({
                   useClosestVersionMatch: true,
-                  isServerless,
                   ...options,
                   log,
                   kbnClient,
@@ -432,7 +429,6 @@ ${s1Info.status}
                 })
               : await createAndEnrollEndpointHost({
                   useClosestVersionMatch: true,
-                  isServerless,
                   ...options,
                   log,
                   kbnClient,

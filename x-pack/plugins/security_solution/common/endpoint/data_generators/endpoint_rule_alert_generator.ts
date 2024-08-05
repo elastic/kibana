@@ -36,7 +36,7 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<EndpointRuleAlert> = {}): EndpointRuleAlert {
     const endpointMetadataGenerator = new EndpointMetadataGenerator();
     const endpointMetadata = endpointMetadataGenerator.generate({
-      agent: { version: overrides?.agent?.version },
+      agent: { version: overrides?.agent?.version ?? kibanaPackageJson.version },
       host: { hostname: overrides?.host?.hostname },
       Endpoint: { state: { isolation: overrides?.Endpoint?.state?.isolation } },
     });
