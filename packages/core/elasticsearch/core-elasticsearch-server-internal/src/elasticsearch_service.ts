@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs';
+import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -107,6 +106,13 @@ export class ElasticsearchService
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
 
+    // Log every error we may encounter in the connection to Elasticsearch
+    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+      if (!isCompatible && message) {
+        this.log.error(message);
+      }
+    });
+
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
     this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser);
@@ -137,13 +143,6 @@ export class ElasticsearchService
     }
 
     const config = await firstValueFrom(this.config$);
-
-    // Log every error we may encounter in the connection to Elasticsearch
-    this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
 
     let capabilities: ElasticsearchCapabilities;
     let elasticsearchWaitTime: number;

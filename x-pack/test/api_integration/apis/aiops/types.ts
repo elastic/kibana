@@ -24,6 +24,7 @@ export interface TestData<T extends ApiVersion> {
     noIndexActionsLength: number;
     significantItems: SignificantItem[];
     groups: SignificantItemGroup[];
+    histogramActionsLength: number;
     histogramLength: number;
     fieldCandidates: FetchFieldCandidatesResponse;
   };
