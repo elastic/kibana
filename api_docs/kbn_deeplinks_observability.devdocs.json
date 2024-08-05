@@ -759,7 +759,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"metrics\" | \"synthetics\" | \"ux\" | \"apm\" | \"logs\" | \"profiling\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\""
+          "\"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"profiling\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,

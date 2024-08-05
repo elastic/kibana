@@ -13,11 +13,8 @@ import { type EuiBasicTableColumn, EuiText, EuiInMemoryTable, useEuiFontSize } f
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  BrowserField,
-  BrowserFields,
-  TimelineEventsDetailsItem,
-} from '@kbn/timelines-plugin/common';
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { TableFieldNameCell } from '../components/table_field_name_cell';
 import { TableFieldValueCell } from '../components/table_field_value_cell';
 import { TABLE_TAB_CONTENT_TEST_ID, TABLE_TAB_SEARCH_INPUT_TEST_ID } from './test_ids';
@@ -58,10 +55,10 @@ const search = {
  * Retrieve the correct field from the BrowserField
  */
 export const getFieldFromBrowserField = memoizeOne(
-  (field: string, browserFields: BrowserFields): BrowserField | undefined => {
+  (field: string, browserFields: BrowserFields): FieldSpec | undefined => {
     const category = getCategory(field);
 
-    return browserFields[category]?.fields?.[field] as BrowserField;
+    return browserFields[category]?.fields?.[field] as FieldSpec;
   },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );

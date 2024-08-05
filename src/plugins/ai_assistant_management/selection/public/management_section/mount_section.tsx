@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { BuildFlavor } from '@kbn/config';
 import type { StartDependencies, AIAssistantManagementSelectionPluginPublicStart } from '../plugin';
 import { aIAssistantManagementSelectionRouter } from '../routes/config';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
@@ -22,9 +23,16 @@ import { AppContextProvider } from '../app_context';
 interface MountParams {
   core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>;
   mountParams: ManagementAppMountParams;
+  kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
-export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
+export const mountManagementSection = async ({
+  core,
+  mountParams,
+  kibanaBranch,
+  buildFlavor,
+}: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   const { theme$ } = core.theme;
@@ -45,6 +53,8 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
               capabilities: coreStart.application.capabilities,
               navigateToApp: coreStart.application.navigateToApp,
               setBreadcrumbs,
+              kibanaBranch,
+              buildFlavor,
             }}
           >
             <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>
