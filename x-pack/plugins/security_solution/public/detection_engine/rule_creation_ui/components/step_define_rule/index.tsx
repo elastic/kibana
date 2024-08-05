@@ -77,7 +77,6 @@ import {
   isThresholdRule as getIsThresholdRule,
   isQueryRule,
   isEsqlRule,
-  isEqlSequenceQuery,
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
@@ -474,11 +473,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * purpose and so are treated as if the field is always selected.  */
   const areSuppressionFieldsSelected = isThresholdRule || groupByFields.length > 0;
 
-  const areSuppressionFieldsDisabledBySequence =
-    isEqlRule(ruleType) &&
-    isEqlSequenceQuery(queryBar?.query?.query as string) &&
-    groupByFields.length === 0;
-
   /** If we don't have ML field information, users can't meaningfully interact with suppression fields */
   const areSuppressionFieldsDisabledByMlFields =
     isMlRule(ruleType) && (mlRuleConfigLoading || !mlSuppressionFields.length);
@@ -491,26 +485,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    * - ML Field information is not available
    */
   const areSuppressionFieldsDisabled =
-    !isAlertSuppressionLicenseValid ||
-    areSuppressionFieldsDisabledBySequence ||
-    areSuppressionFieldsDisabledByMlFields;
+    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledByMlFields;
 
   const isSuppressionGroupByDisabled =
     (areSuppressionFieldsDisabled || isEsqlSuppressionLoading) && !areSuppressionFieldsSelected;
 
   const suppressionGroupByDisabledText = useMemo(() => {
-    if (areSuppressionFieldsDisabledBySequence) {
-      return i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP;
-    } else if (areSuppressionFieldsDisabledByMlFields) {
+    if (areSuppressionFieldsDisabledByMlFields) {
       return i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL;
     } else {
       return alertSuppressionUpsellingMessage;
     }
-  }, [
-    alertSuppressionUpsellingMessage,
-    areSuppressionFieldsDisabledByMlFields,
-    areSuppressionFieldsDisabledBySequence,
-  ]);
+  }, [alertSuppressionUpsellingMessage, areSuppressionFieldsDisabledByMlFields]);
 
   const suppressionGroupByFields = useMemo(() => {
     if (isEsqlRule(ruleType)) {

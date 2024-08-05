@@ -171,9 +171,9 @@ export const eqlExecutor = async ({
       } else if (sequences) {
         console.error('isAlertSuppressionActive??? ', isAlertSuppressionActive);
         if (isAlertSuppressionActive) {
-          result.warningMessages.push(
-            'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
-          );
+          // result.warningMessages.push(
+          //   'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
+          // );
 
           const candidateSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
           // partition sequence alert from building block alerts
