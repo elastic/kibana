@@ -83,20 +83,6 @@ describe('UnenrollInactiveAgentsTask', () => {
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
     });
-
-    // mockAgentPolicyService.list.mockResolvedValue({
-    //   items: [
-    //     createAgentPolicyMock({ unenroll_timeout: 3000 }),
-    //     createAgentPolicyMock({ id: 'agent-policy-2', unenroll_timeout: 1000 }),
-    //   ],
-    //   total: 1,
-    //   page: 1,
-    //   perPage: 1,
-    // });
-
-    // mockedGetAgentsByKuery.mockResolvedValue({
-    //   agents,
-    // } as any);
   });
 
   afterEach(() => {
