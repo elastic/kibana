@@ -56,21 +56,14 @@ export default function ESQLToDataViewTransitionModal({
         <EuiText size="m">
           {i18n.translate('discover.esqlToDataviewTransitionModalBody', {
             defaultMessage:
-              "Switching data views removes the current ES|QL query. Save this search to ensure you don't lose work.",
+              'Switching data views removes the current ES|QL query. Save this search to avoid losing work.',
           })}
         </EuiText>
         <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="GrayText">
-              {i18n.translate('discover.esqlToDataViewTransitionModal.helpText', {
-                defaultMessage: 'Help us improve ES|QL',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiLink external href={FEEDBACK_LINK} target="_blank">
               {i18n.translate('discover.esqlToDataViewTransitionModal.feedbackLink', {
-                defaultMessage: 'Submit feedback',
+                defaultMessage: 'Submit ES|QL feedback',
               })}
             </EuiLink>
           </EuiFlexItem>
