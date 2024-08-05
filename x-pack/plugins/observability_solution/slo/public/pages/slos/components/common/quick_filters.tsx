@@ -55,6 +55,7 @@ export function QuickFilters({
   return (
     <Container>
       <ControlGroupRenderer
+        viewMode={ViewMode.VIEW}
         getCreationOptions={async (initialInput, builder) => {
           await builder.addOptionsListControl(initialInput, {
             dataViewId: dataView.id!,
@@ -81,10 +82,7 @@ export function QuickFilters({
             placeholder: ALL_LABEL,
           });
           return {
-            initialInput: {
-              ...initialInput,
-              viewMode: ViewMode.VIEW,
-            },
+            initialInput,
           };
         }}
         ref={setControlGroupAPI}

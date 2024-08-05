@@ -9,13 +9,14 @@
 import { omit } from 'lodash';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE, getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlStyle } from '@kbn/controls-plugin/public';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useSearchApi } from '@kbn/presentation-publishing';
+import { type ViewMode as ViewModeType, useSearchApi } from '@kbn/presentation-publishing';
 
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '../types';
 import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
@@ -58,6 +59,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
     const [controlGroupSettings, setControlGroupSettings] = useState<
       ControlGroupSettings | undefined
     >(undefined);
+    const viewMode$ = useMemo(() => new BehaviorSubject<ViewModeType>(ViewMode.VIEW), []);
 
     // onMount
     useEffect(() => {
@@ -73,6 +75,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
             ignoreParentSettingsJSON: JSON.stringify(initialInput?.ignoreParentSettings ?? {}),
           } as ControlGroupSerializedState);
           setControlGroupSettings(settings);
+          if (initialInput?.viewMode) viewMode$.next(initialInput.viewMode);
           setApiLoading(false);
         }
       })();
@@ -95,6 +98,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
           ...searchApi,
+          viewMode: viewMode$,
           getSerializedStateForChild: () => ({ rawState: serializedState! }),
         })}
         onApiAvailable={(childApi) => {

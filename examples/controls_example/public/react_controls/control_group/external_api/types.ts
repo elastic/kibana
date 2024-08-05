@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ControlInputTransform } from '@kbn/controls-plugin/common';
-import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import {
+import type { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type {
   ControlGroupApi,
   ControlGroupSerializedState,
+  ControlInputTransform,
   ControlPanelState,
   SerializedControlPanelState,
 } from '../types';
@@ -33,6 +34,7 @@ export type ControlGroupRendererState = Omit<
   panels: {
     [panelId: string]: ControlPanelState<SerializedControlPanelState>;
   };
+  viewMode?: ViewMode;
   ignoreParentSettings?: ParentIgnoreSettings;
 };
 

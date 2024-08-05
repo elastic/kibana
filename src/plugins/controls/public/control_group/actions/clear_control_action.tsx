@@ -33,8 +33,8 @@ export type ClearControlActionApi = HasType &
   CanClearSelections &
   HasParentApi<PresentationContainer & HasType>;
 
-const isApiCompatible = (api: unknown | null): api is ClearControlActionApi =>
-  Boolean(
+const isApiCompatible = (api: unknown | null): api is ClearControlActionApi => {
+  return Boolean(
     apiHasType(api) &&
       apiHasUniqueId(api) &&
       isClearableControl(api) &&
@@ -43,7 +43,7 @@ const isApiCompatible = (api: unknown | null): api is ClearControlActionApi =>
       apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
       apiIsPresentationContainer(api.parentApi)
   );
-
+};
 export class ClearControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
