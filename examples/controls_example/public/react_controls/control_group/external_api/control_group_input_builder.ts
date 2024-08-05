@@ -12,7 +12,6 @@ import {
   DEFAULT_CONTROL_WIDTH,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,6 +22,7 @@ import { DefaultDataControlState } from '../../data_controls/types';
 import { untilPluginStartServicesReady, dataService } from '../../services/kibana_services';
 import { ControlPanelsState, ControlPanelState, SerializedControlPanelState } from '../types';
 import { ControlGroupRendererState } from './types';
+import { TIMESLIDER_CONTROL_TYPE } from '../../timeslider_control/types';
 
 export interface AddDataControlProps {
   controlId?: string;
@@ -136,7 +136,7 @@ export function getRangeSliderPanelState(
 
 export function getTimeSliderPanelState(input: Partial<ControlGroupRendererState>) {
   return {
-    type: TIME_SLIDER_CONTROL,
+    type: TIMESLIDER_CONTROL_TYPE,
     order: getNextPanelOrder(input.panels),
     grow: true,
     width: 'large',

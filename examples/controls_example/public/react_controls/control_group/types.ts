@@ -92,8 +92,11 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   };
 }
 
-export interface ControlGroupSerializedState {
-  chainingSystem: ControlGroupChainingSystem;
+export interface ControlGroupSerializedState
+  extends Pick<
+    ControlGroupRuntimeState,
+    'chainingSystem' | 'defaultControlGrow' | 'defaultControlWidth'
+  > {
   panelsJSON: string; // stringified version of ControlSerializedState
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;

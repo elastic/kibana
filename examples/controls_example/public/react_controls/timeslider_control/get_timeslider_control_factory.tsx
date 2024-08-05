@@ -53,6 +53,7 @@ export const getTimesliderControlFactory = (
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(controlGroupApi, services);
+      const debouncedTimeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
@@ -68,7 +69,7 @@ export const getTimesliderControlFactory = (
       ) {
         if (startPercentage === undefined || endPercentage === undefined) {
           if (timeslice$.value !== undefined) {
-            timeslice$.next(undefined);
+            debouncedTimeslice$.next(undefined);
           }
           return;
         }
@@ -76,7 +77,7 @@ export const getTimesliderControlFactory = (
         const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
         const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
-        timeslice$.next([
+        debouncedTimeslice$.next([
           roundDownToNextStepSizeFactor(from, stepSize),
           roundUpToNextStepSizeFactor(to, stepSize),
         ]);
@@ -85,7 +86,7 @@ export const getTimesliderControlFactory = (
 
       function setTimeslice(timeslice?: Timeslice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        timeslice$.next(timeslice);
+        debouncedTimeslice$.next(timeslice);
       }
 
       function setIsAnchored(isAnchored: boolean | undefined) {
@@ -192,6 +193,10 @@ export const getTimesliderControlFactory = (
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
           ? controlGroupApi.parentApi.dataLoading
           : new BehaviorSubject<boolean | undefined>(false);
+      dashboardDataLoading$.subscribe((test) => {
+        console.log('dashboardDataLoading$', test);
+      });
+
       const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
         // debounce to give time for panels to start loading if they are going to load from time changes
         debounceTime(300),
@@ -204,6 +209,12 @@ export const getTimesliderControlFactory = (
           return;
         })
       );
+
+      const debouncedTimeSliceSubscription = debouncedTimeslice$
+        .pipe(debounceTime(100))
+        .subscribe((timeslice) => {
+          timeslice$.next(timeslice);
+        });
 
       const api = buildApi(
         {
@@ -266,6 +277,7 @@ export const getTimesliderControlFactory = (
 
           useEffect(() => {
             return () => {
+              debouncedTimeSliceSubscription.unsubscribe();
               cleanupTimeRangeSubscription();
               timeRangeMetaSubscription.unsubscribe();
             };

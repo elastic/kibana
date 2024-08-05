@@ -6,23 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { BehaviorSubject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE, getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { omit } from 'lodash';
-import { map } from 'rxjs';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useSearchApi } from '@kbn/presentation-publishing';
+
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from '../types';
-import { controlGroupInputBuilder, ControlGroupInputBuilder } from './control_group_input_builder';
+import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
 import {
   AwaitingControlGroupApi,
   ControlGroupCreationOptions,
-  ControlGroupRendererState,
   ControlGroupRendererApi,
+  ControlGroupRendererState,
 } from './types';
 
 export interface ControlGroupRendererProps {
@@ -33,10 +34,29 @@ export interface ControlGroupRendererProps {
   ) => Promise<Partial<ControlGroupCreationOptions>>;
   timeRange?: TimeRange;
   query?: Query;
+  loading?: boolean;
 }
 
 export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlGroupRendererProps>(
-  ({ getCreationOptions, filters, timeRange, query }, ref) => {
+  ({ getCreationOptions, filters, timeRange, query, loading = false }, ref) => {
+    const searchApi = useSearchApi({
+      filters,
+      query,
+      timeRange,
+    });
+
+    const loadingApi = useMemo(() => {
+      return {
+        dataLoading: new BehaviorSubject<boolean>(loading),
+      };
+      // loadingonly used as initial values. Changes do not effect memoized value
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+      loadingApi.dataLoading.next(loading);
+    }, [loading, loadingApi.dataLoading]);
+
     const [serializedState, setSerializedState] = useState<
       ControlGroupSerializedState | undefined
     >();
@@ -92,9 +112,12 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       >
         maybeId={id}
         type={CONTROL_GROUP_TYPE}
-        getParentApi={() => ({ getSerializedStateForChild: () => ({ rawState: serializedState }) })}
+        getParentApi={() => ({
+          ...searchApi,
+          ...loadingApi,
+          getSerializedStateForChild: () => ({ rawState: serializedState }),
+        })}
         onApiAvailable={(childApi) => {
-          console.log(childApi);
           setControlGroup({
             ...childApi,
             onFiltersPublished$: childApi.filters$.pipe(

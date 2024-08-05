@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import React, { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+
 import {
+  ControlGroupRenderer,
+  type AwaitingControlGroupAPI,
   type ControlGroupInput,
   type ControlGroupInputBuilder,
-  type AwaitingControlGroupAPI,
-  ControlGroupRenderer,
-} from '@kbn/controls-plugin/public';
-import { first } from 'rxjs';
+} from '@kbn/controls-example-plugin/public';
+
 import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
 
@@ -59,29 +58,16 @@ export class Timeslider extends Component<Props, {}> {
     }
 
     this._subscriptions.add(
-      controlGroup
-        .getOutput$() // on timeslice updated?
-        .pipe(
-          distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
-            _.isEqual(timesliceA, timesliceB)
-          )
-        )
-        .subscribe(({ timeslice }) => {
-          // use waitForTimesliceToLoad$ observable to wait until next frame loaded
-          // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
-          this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
-            controlGroup.anyControlOutputConsumerLoading$.next(false);
-          });
-
-          this.props.setTimeslice(
-            timeslice === undefined
-              ? undefined
-              : {
-                  from: timeslice[0],
-                  to: timeslice[1],
-                }
-          );
-        })
+      controlGroup.timeslice$.subscribe((timeslice) => {
+        this.props.setTimeslice(
+          timeslice === undefined
+            ? undefined
+            : {
+                from: timeslice[0],
+                to: timeslice[1],
+              }
+        );
+      })
     );
   };
 

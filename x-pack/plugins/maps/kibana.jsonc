@@ -6,10 +6,7 @@
     "id": "maps",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "maps"
-    ],
+    "configPath": ["xpack", "maps"],
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
@@ -28,7 +25,8 @@
       "mapsEms",
       "share",
       "presentationUtil",
-      "contentManagement"
+      "contentManagement",
+      "controlsExample"
     ],
     "optionalPlugins": [
       "cloud",
@@ -50,10 +48,8 @@
       "unifiedSearch",
       "fieldFormats",
       "esql",
-      "savedObjects",
+      "savedObjects"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

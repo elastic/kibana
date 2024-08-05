@@ -4,13 +4,7 @@
     "outDir": "target/types",
     "allowJs": true
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "config.ts",
-    "../../../typings/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/maps-ems-plugin",
@@ -90,9 +84,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/controls-example-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -21,10 +21,6 @@ import {
 
 export type ControlGroupRendererApi = Omit<ControlGroupApi, keyof PublishesFilters> & {
   onFiltersPublished$: Observable<Filter[]>; // filters$ -> onFiltersPublished$ to keep API consistent
-  updateInput: (input: Partial<ControlGroupRendererState>) => void; // add updateInput as generic updater to keep API consistent
-  getInput$: () => ControlGroupRendererState;
-  getOutput$: () => object; // filters$? timeslice$?
-  openAddDataControlFlyout: () => void;
 };
 
 export type AwaitingControlGroupApi = ControlGroupRendererApi | null;
