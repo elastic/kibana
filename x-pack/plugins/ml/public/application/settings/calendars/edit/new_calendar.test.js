@@ -167,7 +167,7 @@ describe('NewCalendar', () => {
   });
 
   test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {
-    const { getByTestId, debug, queryByTestId, getByText } = render(
+    const { getByTestId, queryByTestId, getByText } = render(
       <IntlProvider locale="en">
         <NewCalendar {...props} />
       </IntlProvider>
@@ -183,8 +183,6 @@ describe('NewCalendar', () => {
     });
 
     await userEvent.type(mlCalendarIdInput, 'this-is-a-new-calendar');
-
-    debug(mlCalendarIdFormRow);
 
     await waitFor(() => {
       expect(mlCalendarIdInput).toHaveValue('this-is-a-new-calendar');
