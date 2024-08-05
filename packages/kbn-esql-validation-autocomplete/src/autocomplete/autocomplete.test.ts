@@ -149,7 +149,10 @@ describe('autocomplete', () => {
     const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
       scalar: true,
     });
-    testSuggestions('from a | where ', [...getFieldNamesByType('any'), ...allEvalFns]);
+    testSuggestions('from a | where ', [
+      ...getFieldNamesByType('any').map((field) => `${field} `),
+      ...allEvalFns,
+    ]);
     testSuggestions('from a | eval var0 = 1 | where ', [
       ...getFieldNamesByType('any').map((name) => `${name} `),
       'var0',
@@ -1499,9 +1502,15 @@ describe('autocomplete', () => {
           builtin: true,
         },
         ['string']
-      ).map(attachTriggerCommand),
+      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s))),
       undefined,
       27
     );
+
+    // WHERE argument comparison argument
+    testSuggestions('from a | where stringField >= ', [
+      ...getFieldNamesByType('string').map((name) => `${name} `),
+      ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
+    ]);
   });
 });
