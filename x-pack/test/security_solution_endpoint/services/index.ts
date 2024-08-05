@@ -45,3 +45,5 @@ export const svlServices = {
   svlCommonApi: SvlCommonApiServiceProvider,
   svlUserManager: SvlUserManagerProvider,
 };
+
+export type Services = typeof services | typeof svlServices;

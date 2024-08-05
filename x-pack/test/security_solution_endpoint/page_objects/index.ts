@@ -40,3 +40,5 @@ export const svlPageObjects = {
 
   svlCommonPage: SvlCommonPageProvider,
 };
+
+export type PageObjects = typeof pageObjects | typeof svlPageObjects;
