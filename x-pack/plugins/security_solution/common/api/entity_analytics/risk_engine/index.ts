@@ -14,3 +14,4 @@ export * from './engine_status_route.gen';
 export * from './calculation_route.gen';
 export * from './preview_route.gen';
 export * from './entity_calculation_route.gen';
+export * from './get_risk_engine_privileges.gen';
