@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('apis', () => {
     loadTestFile(require.resolve('./apis/console'));
     loadTestFile(require.resolve('./apis/core'));
