@@ -27,21 +27,10 @@ export const localStorageMock = (): IStorage => {
   };
 };
 
-const createStorageMock = (storeMock: IStorage): Storage => {
-  const storage = new Storage(storeMock);
-  return {
-    store: storeMock,
-    get: (...args) => storage.get(...args),
-    clear: (...args) => storage.clear(...args),
-    set: (...args) => storage.set(...args),
-    remove: (...args) => storage.remove(...args),
-  } as Storage;
-};
-
 export const createSecuritySolutionStorageMock = () => {
   const localStorage = localStorageMock();
   return {
     localStorage,
-    storage: createStorageMock(localStorage),
+    storage: new Storage(localStorage),
   };
 };
