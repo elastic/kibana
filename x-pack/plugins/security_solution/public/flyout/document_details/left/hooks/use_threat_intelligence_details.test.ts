@@ -7,13 +7,12 @@
 
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
 import { renderHook } from '@testing-library/react-hooks';
-
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
-import { SecurityPageName } from '../../../../../common/constants';
+import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import type { RouteSpyState } from '../../../../common/utils/route/types';
 import {
   type GetBasicDataFromDetailsData,
@@ -25,7 +24,7 @@ jest.mock('../../../../timelines/containers/details');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../shared/context');
-jest.mock('../../../../common/containers/cti/event_enrichment');
+jest.mock('../../shared/hooks/use_investigation_enrichment');
 jest.mock('../../../../timelines/components/side_panel/event_details/helpers');
 
 describe('useThreatIntelligenceDetails', () => {
