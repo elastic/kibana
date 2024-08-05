@@ -21,15 +21,17 @@ export function MachineLearningForecastProvider({ getService }: FtrProviderConte
     },
 
     async assertForecastButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled(
-        'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
-      );
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected "forecast" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(3000, async () => {
+        const isEnabled = await testSubjects.isEnabled(
+          'mlSingleMetricViewerSeriesControls > mlSingleMetricViewerButtonForecast'
+        );
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected "forecast" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+            isEnabled ? 'enabled' : 'disabled'
+          }')`
+        );
+      });
     },
 
     async assertForecastChartElementsExists() {
