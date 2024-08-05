@@ -29,15 +29,24 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({
   onCancel,
   onUpdateSpace,
 }) => {
-  return (
-    <>
+  // FIXME show if disable features have changed, or if solution view has changed
+  const showUserImpactWarning = () => {
+    return (
       <EuiCallOut
         color="warning"
         iconType="help"
-        title="The changes will impact all users in the space"
+        title="Warning"
+        data-test-subj="userImpactWarning"
       >
-        <strong>Changes will impact all users in the Space.</strong> The page will be reloaded.
+        {' '}
+        The changes made will impact all users in the space.{' '}
       </EuiCallOut>
+    );
+  };
+
+  return (
+    <>
+      {showUserImpactWarning()}
       <EuiSpacer />
       {isLoading && (
         <EuiFlexGroup justifyContent="spaceAround">
