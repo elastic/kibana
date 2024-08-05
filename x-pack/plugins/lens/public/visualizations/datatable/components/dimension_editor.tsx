@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
+import { getColorCategories } from '@kbn/chart-expressions-common';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
 import {
   applyPaletteParams,
   defaultPaletteParams,
-  PalettePanelContainer,
   findMinMaxByColumnId,
 } from '../../../shared_components';
 import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
@@ -23,19 +24,21 @@ import { getOriginalId } from '../../../../common/expressions/datatable/transpos
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
+import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
+import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 
 const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
 
-function updateColumnWith(
+function updateColumn(
   state: DatatableVisualizationState,
   columnId: string,
-  newColumnProps: Partial<ColumnType>
+  newColumn: Partial<ColumnType>
 ) {
   return state.columns.map((currentColumn) => {
     if (currentColumn.columnId === columnId) {
-      return { ...currentColumn, ...newColumnProps };
+      return { ...currentColumn, ...newColumn };
     } else {
       return currentColumn;
     }
@@ -45,15 +48,31 @@ function updateColumnWith(
 export function TableDimensionEditor(
   props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
     paletteService: PaletteRegistry;
+    isDarkMode: boolean;
   }
 ) {
-  const { state, setState, frame, accessor, isInlineEditing } = props;
-  const column = state.columns.find(({ columnId }) => accessor === columnId);
+  const { frame, accessor, isInlineEditing, isDarkMode } = props;
+  const column = props.state.columns.find(({ columnId }) => accessor === columnId);
+  const { inputValue: localState, handleInputChange: setLocalState } =
+    useDebouncedValue<DatatableVisualizationState>({
+      value: props.state,
+      onChange: props.setState,
+    });
+
+  const updateColumnState = useCallback(
+    (columnId: string, newColumn: Partial<ColumnType>) => {
+      setLocalState({
+        ...localState,
+        columns: updateColumn(localState, columnId, newColumn),
+      });
+    },
+    [setLocalState, localState]
+  );
 
   if (!column) return null;
   if (column.isTransposed) return null;
 
-  const currentData = frame.activeData?.[state.layerId];
+  const currentData = frame.activeData?.[localState.layerId];
 
   // either read config state or use same logic as chart itself
   const isNumeric = isNumericFieldForDatatable(currentData, accessor);
@@ -61,14 +80,14 @@ export function TableDimensionEditor(
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
 
-  const datasource = frame.datasourceLayers[state.layerId];
+  const datasource = frame.datasourceLayers[localState.layerId];
   const showDynamicColoringFeature = Boolean(
-    isNumeric && !datasource?.getOperationForColumnId(accessor)?.isBucketed
+    !datasource?.getOperationForColumnId(accessor)?.isBucketed
   );
 
-  const visibleColumnsCount = state.columns.filter((c) => !c.hidden).length;
+  const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
-  const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
+  const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
   const columnsToCheck = hasTransposedColumn
     ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
       []
@@ -76,12 +95,13 @@ export function TableDimensionEditor(
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData, getOriginalId);
   const currentMinMax = minMaxByColumnId[accessor];
 
-  const activePalette = column?.palette || {
+  const activePalette = column?.palette ?? {
     type: 'palette',
     name: defaultPaletteParams.name,
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  const categories = getColorCategories(currentData?.rows ?? [], accessor, [null]);
 
   return (
     <>
@@ -125,10 +145,7 @@ export function TableDimensionEditor(
           idSelected={`${idPrefix}${currentAlignment}`}
           onChange={(id) => {
             const newMode = id.replace(idPrefix, '') as ColumnType['alignment'];
-            setState({
-              ...state,
-              columns: updateColumnWith(state, accessor, { alignment: newMode }),
-            });
+            updateColumnState(accessor, { alignment: newMode });
           }}
         />
       </EuiFormRow>
@@ -188,44 +205,47 @@ export function TableDimensionEditor(
                   };
                 }
                 // clear up when switching to no coloring
-                if (column?.palette && newMode === 'none') {
+                if (newMode === 'none') {
                   params.palette = undefined;
+                  params.colorMapping = undefined;
                 }
-                setState({
-                  ...state,
-                  columns: updateColumnWith(state, accessor, params),
-                });
+                updateColumnState(accessor, params);
               }}
             />
           </EuiFormRow>
-          {hasDynamicColoring && (
-            <EuiFormRow
-              className="lnsDynamicColoringRow"
-              display="columnCompressed"
-              fullWidth
-              label={i18n.translate('xpack.lens.paletteTableGradient.label', {
-                defaultMessage: 'Color',
-              })}
-            >
-              <PalettePanelContainer
-                palette={displayStops.map(({ color }) => color)}
-                siblingRef={props.panelRef}
+
+          {hasDynamicColoring &&
+            (isNumeric ? (
+              <ColorMappingByValues
+                label={i18n.translate('xpack.lens.paletteTableGradient.label', {
+                  defaultMessage: 'Color',
+                })}
+                palette={activePalette}
                 isInlineEditing={isInlineEditing}
-              >
-                <CustomizablePalette
-                  palettes={props.paletteService}
-                  activePalette={activePalette}
-                  dataBounds={currentMinMax}
-                  setPalette={(newPalette) => {
-                    setState({
-                      ...state,
-                      columns: updateColumnWith(state, accessor, { palette: newPalette }),
-                    });
-                  }}
-                />
-              </PalettePanelContainer>
-            </EuiFormRow>
-          )}
+                setPalette={(newPalette) => {
+                  updateColumnState(accessor, { palette: newPalette });
+                }}
+                paletteService={props.paletteService}
+                panelRef={props.panelRef}
+                dataBounds={currentMinMax}
+              />
+            ) : (
+              <ColorMappingByTerms
+                isDarkMode={isDarkMode}
+                colorMapping={column.colorMapping}
+                palette={activePalette}
+                isInlineEditing={isInlineEditing}
+                setPalette={(palette) => {
+                  updateColumnState(accessor, { palette });
+                }}
+                setColorMapping={(colorMapping) => {
+                  updateColumnState(accessor, { colorMapping });
+                }}
+                paletteService={props.paletteService}
+                panelRef={props.panelRef}
+                categories={categories}
+              />
+            ))}
         </>
       )}
       {!column.isTransposed && (
@@ -247,8 +267,8 @@ export function TableDimensionEditor(
             disabled={!column.hidden && visibleColumnsCount <= 1}
             onChange={() => {
               const newState = {
-                ...state,
-                columns: state.columns.map((currentColumn) => {
+                ...localState,
+                columns: localState.columns.map((currentColumn) => {
                   if (currentColumn.columnId === accessor) {
                     return {
                       ...currentColumn,
@@ -259,7 +279,7 @@ export function TableDimensionEditor(
                   }
                 }),
               };
-              setState(newState);
+              setLocalState(newState);
             }}
           />
         </EuiFormRow>
@@ -283,8 +303,8 @@ export function TableDimensionEditor(
             disabled={column.hidden}
             onChange={() => {
               const newState = {
-                ...state,
-                columns: state.columns.map((currentColumn) => {
+                ...localState,
+                columns: localState.columns.map((currentColumn) => {
                   if (currentColumn.columnId === accessor) {
                     return {
                       ...currentColumn,
@@ -295,7 +315,7 @@ export function TableDimensionEditor(
                   }
                 }),
               };
-              setState(newState);
+              setLocalState(newState);
             }}
           />
         </EuiFormRow>
@@ -323,7 +343,7 @@ export function TableDimensionDataExtraEditor(
           onChange={(collapseFn) => {
             setState({
               ...state,
-              columns: updateColumnWith(state, accessor, { collapseFn }),
+              columns: updateColumn(state, accessor, { collapseFn }),
             });
           }}
         />

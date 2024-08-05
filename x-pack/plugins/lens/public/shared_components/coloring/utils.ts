@@ -37,11 +37,8 @@ export function getContrastColor(
   return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
 }
 
-export function getNumericValue(rowValue: number | number[] | undefined) {
-  if (rowValue == null || Array.isArray(rowValue)) {
-    return;
-  }
-  return rowValue;
+export function getNumericValue(rowValue?: unknown) {
+  return typeof rowValue === 'number' ? rowValue : undefined;
 }
 
 export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(

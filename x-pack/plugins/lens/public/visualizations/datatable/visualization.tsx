@@ -8,13 +8,13 @@
 import React from 'react';
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
+import { PaletteRegistry, CUSTOM_PALETTE, getColorStops } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import useObservable from 'react-use/lib/useObservable';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -33,7 +33,7 @@ import type {
   SortingState,
   PagingState,
   CollapseExpressionFunction,
-  DatatableColumnFunction,
+  DatatableColumnFn,
   DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
@@ -60,10 +60,10 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
 
 export const getDatatableVisualization = ({
   paletteService,
-  theme,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
@@ -197,13 +197,14 @@ export const getDatatableVisualization = ({
   },
 
   /*
-  Datatable works differently on text based datasource and form based
-  - Form based: It relies on the isBucketed flag to identify groups. It allows only numeric fields
+  Datatable works differently on text-based datasource and form-based
+  - Form-based: It relies on the isBucketed flag to identify groups. It allows only numeric fields
   on the Metrics dimension
-  - Text based: It relies on the isMetric flag to identify groups. It allows all type of fields
+  - Text-based: It relies on the isMetric flag to identify groups. It allows all type of fields
   on the Metric dimension in cases where there are no numeric columns
   **/
   getConfiguration({ state, frame, layerId }) {
+    const isDarkMode = kibanaTheme.getTheme().darkMode;
     const { sortedColumns, datasource } =
       getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
 
@@ -319,22 +320,14 @@ export const getDatatableVisualization = ({
               return !operation?.isBucketed;
             })
             .map((accessor) => {
-              const columnConfig = columnMap[accessor];
-              const stops = columnConfig?.palette?.params?.stops;
-              const isNumeric = Boolean(
-                accessor && isNumericFieldForDatatable(frame.activeData?.[state.layerId], accessor)
-              );
-              const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
+              const { colorMode, palette, colorMapping, hidden } = columnMap[accessor] ?? {};
+              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const hasColoring = Boolean(colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
-                triggerIconType: columnConfig?.hidden
-                  ? 'invisible'
-                  : hasColoring && isNumeric
-                  ? 'colorBy'
-                  : undefined,
-                palette:
-                  hasColoring && isNumeric && stops ? stops.map(({ color }) => color) : undefined,
+                triggerIconType: hidden ? 'invisible' : hasColoring ? 'colorBy' : undefined,
+                palette: hasColoring ? stops : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -386,7 +379,11 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    return <TableDimensionEditor {...props} paletteService={paletteService} />;
+    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+
+    return (
+      <TableDimensionEditor {...props} isDarkMode={isDarkMode} paletteService={paletteService} />
+    );
   },
 
   DimensionEditorAdditionalSectionComponent(props) {
@@ -482,12 +479,10 @@ export const getDatatableVisualization = ({
             reverse: false, // managed at UI level
           };
           const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
-
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
-
-          const canColor =
-            datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
-
+          const dataType = datasource!.getOperationForColumnId(column.columnId)?.dataType;
+          const canColor = dataType !== 'date';
+          const isNumeric = dataType === 'number';
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;
@@ -497,7 +492,7 @@ export const getDatatableVisualization = ({
             isTransposable = Boolean(column?.isMetric || operation?.inMetricDimension);
           }
 
-          const datatableColumnFn = buildExpressionFunction<DatatableColumnFunction>(
+          const datatableColumnFn = buildExpressionFunction<DatatableColumnFn>(
             'lens_datatable_column',
             {
               columnId: column.columnId,
@@ -507,8 +502,12 @@ export const getDatatableVisualization = ({
               isTransposed: column.isTransposed,
               transposable: isTransposable,
               alignment: column.alignment,
-              colorMode: canColor && column.colorMode ? column.colorMode : 'none',
-              palette: paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams),
+              colorMode: canColor ? column.colorMode ?? 'none' : 'none',
+              palette: paletteService
+                // The palette for numeric values is a pseudo custom palette that is only custom from params level
+                .get(isNumeric ? CUSTOM_PALETTE : column.palette?.name || CUSTOM_PALETTE)
+                .toExpression(paletteParams),
+              colorMapping: column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
               summaryLabel: hasNoSummaryRow
                 ? undefined

@@ -5,96 +5,79 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MutableRefObject, useState } from 'react';
+
 import {
-  PaletteRegistry,
-  CategoricalColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
+import {
   ColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  CategoricalColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  PaletteOutput,
   AVAILABLE_PALETTES,
-  getColorsFromMapping,
+  PaletteOutput,
+  PaletteRegistry,
+  CustomPaletteParams,
+  getColorStops,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
-import { useState, MutableRefObject, useCallback } from 'react';
-import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getColorCategories } from '@kbn/chart-expressions-common';
-import type { TagcloudState } from './types';
-import { PalettePanelContainer, PalettePicker } from '../../shared_components';
-import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { PalettePicker } from '../palette_picker';
+import { PalettePanelContainer } from './palette_panel_container';
 
-interface Props {
-  paletteService: PaletteRegistry;
-  state: TagcloudState;
-  setState: (state: TagcloudState) => void;
-  frame: FramePublicAPI;
-  panelRef: MutableRefObject<HTMLDivElement | null>;
+interface ColorMappingByTermsProps {
+  label?: string;
   isDarkMode: boolean;
+  colorMapping?: ColorMapping.Config;
+  palette?: PaletteOutput<CustomPaletteParams>;
   isInlineEditing?: boolean;
+  setPalette: (palette: PaletteOutput) => void;
+  setColorMapping: (colorMapping?: ColorMapping.Config) => void;
+  paletteService: PaletteRegistry;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
+  categories: Array<string | string[]>;
 }
 
-export function TagsDimensionEditor({
-  state,
-  frame,
-  setState,
-  panelRef,
+export function ColorMappingByTerms({
+  label,
   isDarkMode,
-  paletteService,
+  colorMapping,
+  palette,
   isInlineEditing,
-}: Props) {
-  const { inputValue: localState, handleInputChange: setLocalState } =
-    useDebouncedValue<TagcloudState>({
-      value: state,
-      onChange: setState,
-    });
-  const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
-
-  const colors = getColorsFromMapping(isDarkMode, state.colorMapping);
-  const table = frame.activeData?.[state.layerId];
-  const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
-
-  const setColorMapping = useCallback(
-    (colorMapping?: ColorMapping.Config) => {
-      setLocalState({
-        ...localState,
-        colorMapping,
-      });
-    },
-    [localState, setLocalState]
-  );
-
-  const setPalette = useCallback(
-    (palette: PaletteOutput) => {
-      setLocalState({
-        ...localState,
-        palette,
-        colorMapping: undefined,
-      });
-    },
-    [localState, setLocalState]
-  );
-
-  const canUseColorMapping = state.colorMapping;
+  setPalette,
+  setColorMapping,
+  paletteService,
+  panelRef,
+  categories,
+}: ColorMappingByTermsProps) {
+  const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(colorMapping));
 
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
-        defaultMessage: 'Color mapping',
-      })}
+      label={
+        label ||
+        i18n.translate('xpack.lens.colorMapping.editColorMappingSectionlabel', {
+          defaultMessage: 'Color mapping',
+        })
+      }
       style={{ alignItems: 'center' }}
       fullWidth
     >
       <PalettePanelContainer
-        palette={colors}
+        palette={getColorStops(paletteService, isDarkMode, palette, colorMapping)}
         siblingRef={panelRef}
         title={
           useNewColorMapping
             ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                defaultMessage: 'Edit colors by term mapping',
+                defaultMessage: 'Assign colors to terms',
               })
             : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
                 defaultMessage: 'Edit colors',
@@ -129,27 +112,26 @@ export function TagsDimensionEditor({
                   setUseNewColorMapping(checked);
                 }}
               />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
-              {canUseColorMapping || useNewColorMapping ? (
+              {useNewColorMapping ? (
                 <CategoricalColorMapping
                   isDarkMode={isDarkMode}
-                  model={state.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                  onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
+                  model={colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                  onModelUpdate={setColorMapping}
+                  specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   palettes={AVAILABLE_PALETTES}
                   data={{
                     type: 'categories',
-                    categories: splitCategories,
+                    categories,
                   }}
-                  specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                 />
               ) : (
                 <PalettePicker
                   palettes={paletteService}
-                  activePalette={state.palette}
-                  setPalette={(newPalette) => {
-                    setPalette(newPalette);
-                  }}
+                  activePalette={palette}
+                  setPalette={setPalette}
                 />
               )}
             </EuiFlexItem>

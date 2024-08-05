@@ -11,7 +11,7 @@ import { createGridCell } from './cell_value';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { DatatableArgs, ColumnConfigArg } from '../../../../common/expressions';
+import { DatatableArgs, DatatableColumnConfigArgs } from '../../../../common/expressions';
 import { DataContextType } from './types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
@@ -189,7 +189,7 @@ describe('datatable cell renderer', () => {
               },
             },
             type: 'lens_datatable_column',
-          } as ColumnConfigArg,
+          } as DatatableColumnConfigArgs,
         ],
         sortingColumnId: '',
         sortingDirection: 'none',

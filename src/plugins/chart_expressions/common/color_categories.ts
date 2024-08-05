@@ -15,13 +15,15 @@ import { isMultiFieldKey } from '@kbn/data-plugin/common';
  */
 export function getColorCategories(
   rows: DatatableRow[],
-  accessor?: string
+  accessor?: string,
+  exclude?: any[]
 ): Array<string | string[]> {
   return accessor
     ? rows.reduce<{ keys: Set<string>; categories: Array<string | string[]> }>(
         (acc, r) => {
           const value = r[accessor];
-          if (value === undefined) {
+
+          if (value === undefined || exclude?.includes(value)) {
             return acc;
           }
           // The categories needs to be stringified in their unformatted version.

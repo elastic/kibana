@@ -11,10 +11,11 @@ export type { ColorMappingInputData } from './categorical_color_mapping';
 export type { ColorMapping } from './config';
 export * from './palettes';
 export * from './color/color_handling';
-export { SPECIAL_TOKENS_STRING_CONVERTION } from './color/rule_matching';
+export { SPECIAL_TOKENS_STRING_CONVERSION } from './color/rule_matching';
 export {
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
   getPaletteColors,
   getColorsFromMapping,
+  getColorStops,
 } from './config/default_color_mapping';

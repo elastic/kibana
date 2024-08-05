@@ -8,15 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ColumnConfigArg } from './datatable_column';
+import { DatatableColumnConfigArgs } from './datatable_column';
 import { getOriginalId } from './transpose_helpers';
 import { isNumericFieldForDatatable } from './utils';
 
-type SummaryRowType = Extract<ColumnConfigArg['summaryRow'], string>;
+type SummaryRowType = Extract<DatatableColumnConfigArgs['summaryRow'], string>;
 
 export function getFinalSummaryConfiguration(
   columnId: string,
-  columnArgs: Pick<ColumnConfigArg, 'summaryRow' | 'summaryLabel'> | undefined,
+  columnArgs: Pick<DatatableColumnConfigArgs, 'summaryRow' | 'summaryLabel'> | undefined,
   table: Datatable | undefined
 ) {
   const isNumeric = isNumericFieldForDatatable(table, columnId);
@@ -87,7 +87,7 @@ export function getSummaryRowOptions(): Array<{
 
 /** @internal **/
 export function computeSummaryRowForColumn(
-  columnArgs: ColumnConfigArg,
+  columnArgs: DatatableColumnConfigArgs,
   table: Datatable,
   formatters: Record<string, FieldFormat>,
   defaultFormatter: FieldFormat
@@ -101,7 +101,7 @@ export function computeSummaryRowForColumn(
 }
 
 function computeFinalValue(
-  type: ColumnConfigArg['summaryRow'],
+  type: DatatableColumnConfigArgs['summaryRow'],
   columnId: string,
   rows: Datatable['rows']
 ) {

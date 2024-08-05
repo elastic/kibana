@@ -13,7 +13,7 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   PaletteRegistry,
   ColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERTION,
+  SPECIAL_TOKENS_STRING_CONVERSION,
   AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
@@ -188,7 +188,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         type: 'categories',
                         categories: splitCategories,
                       }}
-                      specialTokens={SPECIAL_TOKENS_STRING_CONVERTION}
+                      specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                     />
                   ) : (
                     <PalettePicker

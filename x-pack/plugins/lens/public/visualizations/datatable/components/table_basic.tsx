@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -27,9 +27,11 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
+import useObservable from 'react-use/lib/useObservable';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
@@ -57,6 +59,8 @@ import {
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
+import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -72,6 +76,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
+  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -385,17 +390,58 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     isInteractive,
   ]);
 
-  const renderCellValue = useMemo(
-    () =>
-      createGridCell(
-        formatters,
-        columnConfig,
-        DataContext,
-        props.theme,
-        props.args.fitRowToContent
-      ),
-    [formatters, columnConfig, props.theme, props.args.fitRowToContent]
-  );
+  const renderCellValue = useMemo(() => {
+    const cellColorFnMap = new Map<string, CellColorFn>();
+    const getCellColor = (
+      originalId: string,
+      palette?: PaletteOutput<CustomPaletteState>,
+      colorMapping?: string
+    ): CellColorFn => {
+      if (cellColorFnMap.has(originalId)) {
+        return cellColorFnMap.get(originalId)!;
+      }
+
+      const isNumeric = isNumericFieldForDatatable(firstLocalTable, originalId);
+      const data: ColorMappingInputData = isNumeric
+        ? {
+            type: 'ranges',
+            bins: 0,
+            ...minMaxByColumnId[originalId],
+          }
+        : {
+            type: 'categories',
+            categories: getColorCategories(firstLocalTable.rows, originalId, [null]),
+          };
+      const colorFn = getCellColorFn(
+        props.paletteService,
+        data,
+        isNumeric,
+        isDarkMode,
+        palette,
+        colorMapping
+      );
+      cellColorFnMap.set(originalId, colorFn);
+
+      return colorFn;
+    };
+
+    return createGridCell(
+      formatters,
+      columnConfig,
+      DataContext,
+      isDarkMode,
+      getCellColor,
+      props.args.fitRowToContent
+    );
+  }, [
+    formatters,
+    columnConfig,
+    isDarkMode,
+    props.args.fitRowToContent,
+    props.paletteService,
+    firstLocalTable,
+    minMaxByColumnId,
+  ]);
 
   const columnVisibility = useMemo(
     () => ({
@@ -471,7 +517,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
           minMaxByColumnId,
-          getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
           handleFilterClick,
         }}
       >

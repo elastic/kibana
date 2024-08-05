@@ -20,8 +20,8 @@ import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type {
-  ColumnConfig,
-  ColumnConfigArg,
+  DatatableColumnConfig,
+  DatatableColumnConfigArgs,
   LensGridDirection,
 } from '../../../../common/expressions';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
@@ -30,8 +30,8 @@ import { buildColumnsMetaLookup } from './helpers';
 
 export const createGridResizeHandler =
   (
-    columnConfig: ColumnConfig,
-    setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
+    columnConfig: DatatableColumnConfig,
+    setColumnConfig: React.Dispatch<React.SetStateAction<DatatableColumnConfig>>,
     onEditAction: (data: LensResizeAction['data']) => void
   ) =>
   (eventData: { columnId: string; width: number | undefined }) => {
@@ -59,8 +59,8 @@ export const createGridResizeHandler =
 
 export const createGridHideHandler =
   (
-    columnConfig: ColumnConfig,
-    setColumnConfig: React.Dispatch<React.SetStateAction<ColumnConfig>>,
+    columnConfig: DatatableColumnConfig,
+    setColumnConfig: React.Dispatch<React.SetStateAction<DatatableColumnConfig>>,
     onEditAction: (data: LensToggleAction['data']) => void
   ) =>
   (eventData: { columnId: string }) => {
@@ -177,7 +177,7 @@ function getColumnType({
   columnId,
   lookup,
 }: {
-  columnConfig: ColumnConfig;
+  columnConfig: DatatableColumnConfig;
   columnId: string;
   lookup: Record<
     string,
@@ -195,7 +195,7 @@ function getColumnType({
 export const buildSchemaDetectors = (
   columns: EuiDataGridColumn[],
   columnConfig: {
-    columns: ColumnConfigArg[];
+    columns: DatatableColumnConfigArgs[];
     sortingColumnId: string | undefined;
     sortingDirection: 'none' | 'asc' | 'desc';
   },
