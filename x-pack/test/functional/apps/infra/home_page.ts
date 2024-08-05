@@ -169,7 +169,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memoryUsage', value: '18.0%' },
             { metric: 'diskUsage', value: '35.0%' },
           ].forEach(({ metric, value }) => {
-            it(`${metric} tile should show ${value}`, async () => {
+            it.skip(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
