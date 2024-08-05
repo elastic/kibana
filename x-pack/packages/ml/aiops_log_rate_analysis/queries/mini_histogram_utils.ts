@@ -44,17 +44,17 @@ export const getMiniHistogramDataFromAggResponse = (
   aggReponse: Record<string, MiniHistogramAgg>,
   index: number
 ): SignificantItemHistogramItem[] =>
-  overallTimeSeries.map((o) => {
+  overallTimeSeries.map((overallTimeSeriesItem) => {
     const current = aggReponse[`${MINI_HISTOGRAM_AGG_PREFIX}${index}`].mini_histogram.buckets.find(
-      (d1) => d1.key_as_string === o.key_as_string
+      (bucket) => bucket.key_as_string === overallTimeSeriesItem.key_as_string
     ) ?? {
       doc_count: 0,
     };
 
     return {
-      key: o.key,
-      key_as_string: o.key_as_string ?? '',
+      key: overallTimeSeriesItem.key,
+      key_as_string: overallTimeSeriesItem.key_as_string ?? '',
       doc_count_significant_item: current.doc_count,
-      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+      doc_count_overall: Math.max(0, overallTimeSeriesItem.doc_count - current.doc_count),
     };
   }) ?? [];
