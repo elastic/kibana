@@ -12,7 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseSearchAlertsQueryParams } from '../../..';
+import type { UseSearchAlertsQueryParams } from './use_search_alerts_query';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
 import { useSearchAlertsQuery } from './use_search_alerts_query';
 
