@@ -92,7 +92,6 @@ import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/com
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
-import { ManageAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
@@ -103,12 +102,14 @@ import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plu
 import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
 import { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
 import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
+import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
 import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
@@ -591,24 +592,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getAlertsIndex() {
-      return supertest
-        .get('/api/detection_engine/index')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-     */
-    getAlertsMigrationStatus(props: GetAlertsMigrationStatusProps) {
-      return supertest
-        .post('/api/detection_engine/signals/migration_status')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
     getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
       return supertest
         .get('/api/asset_criticality')
@@ -658,30 +641,6 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
-    },
-    /**
-     * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
-     */
-    getPrebuiltRulesAndTimelinesStatus() {
-      return supertest
-        .get('/api/detection_engine/rules/prepackaged/_status')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-      * Retrieves whether or not the user is authenticated, and the user's Kibana
-space and index privileges, which determine if the user can create an
-index for the Elastic Security alerts generated by
-detection engine rules.
-
-      */
-    getPrivileges() {
-      return supertest
-        .get('/api/detection_engine/privileges')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
       return supertest
@@ -796,20 +755,6 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * And tags to detection alerts, and remove them from alerts.
-> info
-> You cannot add and remove the same alert tag in the same request.
-
-      */
-    manageAlertTags(props: ManageAlertTagsProps) {
-      return supertest
-        .post('/api/detection_engine/signals/tags')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
      * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
      */
     patchRule(props: PatchRuleProps) {
@@ -877,6 +822,48 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    readAlertsIndex() {
+      return supertest
+        .get('/api/detection_engine/index')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
+     */
+    readAlertsMigrationStatus(props: ReadAlertsMigrationStatusProps) {
+      return supertest
+        .post('/api/detection_engine/signals/migration_status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+     */
+    readPrebuiltRulesAndTimelinesStatus() {
+      return supertest
+        .get('/api/detection_engine/rules/prepackaged/_status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+      * Retrieves whether or not the user is authenticated, and the user's Kibana
+space and index privileges, which determine if the user can create an
+index for the Elastic Security alerts generated by
+detection engine rules.
+
+      */
+    readPrivileges() {
+      return supertest
+        .get('/api/detection_engine/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     readRiskEngineSettings() {
       return supertest
@@ -960,6 +947,20 @@ detection engine rules.
     setAlertsStatus(props: SetAlertsStatusProps) {
       return supertest
         .post('/api/detection_engine/signals/status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+      * And tags to detection alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+      */
+    setAlertTags(props: SetAlertTagsProps) {
+      return supertest
+        .post('/api/detection_engine/signals/tags')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1134,9 +1135,6 @@ export interface FindRulesProps {
 export interface GetAgentPolicySummaryProps {
   query: GetAgentPolicySummaryRequestQueryInput;
 }
-export interface GetAlertsMigrationStatusProps {
-  query: GetAlertsMigrationStatusRequestQueryInput;
-}
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
 }
@@ -1179,9 +1177,6 @@ export interface ImportTimelinesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
-export interface ManageAlertTagsProps {
-  body: ManageAlertTagsRequestBodyInput;
-}
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
@@ -1204,6 +1199,9 @@ export interface PersistPinnedEventRouteProps {
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
 }
+export interface ReadAlertsMigrationStatusProps {
+  query: ReadAlertsMigrationStatusRequestQueryInput;
+}
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
 }
@@ -1221,6 +1219,9 @@ export interface SetAlertAssigneesProps {
 }
 export interface SetAlertsStatusProps {
   body: SetAlertsStatusRequestBodyInput;
+}
+export interface SetAlertTagsProps {
+  body: SetAlertTagsRequestBodyInput;
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;

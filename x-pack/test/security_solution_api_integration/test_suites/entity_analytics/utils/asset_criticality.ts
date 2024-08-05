@@ -29,6 +29,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
 import { KbnClient } from '@kbn/test';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
@@ -202,7 +203,7 @@ export const assetCriticalityRouteHelpersFactory = (
 });
 
 export const assetCriticalityRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.Agent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
