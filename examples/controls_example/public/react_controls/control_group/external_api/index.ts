@@ -7,4 +7,9 @@
  */
 
 export { ControlGroupRenderer } from './control_group_renderer';
-export type { AwaitingControlGroupAPI } from './types';
+
+/** Renaming exports to keep types published from the control plugin consistent */
+export type {
+  AwaitingControlGroupApi as AwaitingControlGroupAPI,
+  ControlGroupRendererState as ControlGroupInput,
+} from './types';

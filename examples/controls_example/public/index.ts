@@ -7,6 +7,7 @@
  */
 
 import { ControlsExamplePlugin } from './plugin';
+export type { ControlGroupInput } from './react_controls/control_group/external_api';
 
 export function plugin() {
   return new ControlsExamplePlugin();

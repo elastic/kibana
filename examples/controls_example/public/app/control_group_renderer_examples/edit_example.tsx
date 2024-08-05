@@ -21,15 +21,17 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import {
   type ControlGroupInput,
-  ControlGroupRenderer,
-  AwaitingControlGroupAPI,
   ACTION_EDIT_CONTROL,
   ACTION_DELETE_CONTROL,
 } from '@kbn/controls-plugin/public';
-import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
+import {
+  AwaitingControlGroupAPI,
+  ControlGroupRenderer,
+} from '../../react_controls/control_group/external_api';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 

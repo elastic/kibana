@@ -60,7 +60,7 @@ export class Timeslider extends Component<Props, {}> {
 
     this._subscriptions.add(
       controlGroup
-        .getOutput$()
+        .getOutput$() // on timeslice updated?
         .pipe(
           distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
             _.isEqual(timesliceA, timesliceB)

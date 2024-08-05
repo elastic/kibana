@@ -6,31 +6,38 @@
  * Side Public License, v 1.
  */
 
+import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { PublishesFilters } from '@kbn/presentation-publishing';
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
+  ControlGroupSerializedState,
   ControlPanelState,
   SerializedControlPanelState,
 } from '../types';
 
 export type ControlGroupRendererApi = Omit<ControlGroupApi, keyof PublishesFilters> & {
-  onFiltersPublished$: Subject<Filter[]>; // filters$ -> onFiltersPublished$ to keep API consistent
+  onFiltersPublished$: Observable<Filter[]>; // filters$ -> onFiltersPublished$ to keep API consistent
+  updateInput: (input: Partial<ControlGroupRendererState>) => void; // add updateInput as generic updater to keep API consistent
+  getInput$: () => ControlGroupRendererState;
+  getOutput$: () => object; // filters$? timeslice$?
+  openAddDataControlFlyout: () => void;
 };
 
-export type AwaitingControlGroupAPI = ControlGroupApi | null;
+export type AwaitingControlGroupApi = ControlGroupRendererApi | null;
 
-export type ControlGroupInput = Omit<
-  ControlGroupRuntimeState,
-  'initialChildControlState' | 'editorConfig'
+export type ControlGroupRendererState = Omit<
+  ControlGroupSerializedState,
+  'panelsJSON' | 'ignoreParentSettingsJSON'
 > & {
   id: string;
   panels: {
     [panelId: string]: ControlPanelState<SerializedControlPanelState>;
   };
+  ignoreParentSettings?: ParentIgnoreSettings;
 };
 
 export interface ControlGroupSettings {
@@ -42,7 +49,7 @@ export interface ControlGroupSettings {
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
 export interface ControlGroupCreationOptions {
-  initialInput?: ControlGroupInput;
+  initialInput?: Partial<ControlGroupRendererState>;
   settings?: ControlGroupSettings;
   fieldFilterPredicate?: FieldFilterPredicate;
 }

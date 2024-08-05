@@ -22,7 +22,7 @@ import { RangeValue } from '../../data_controls/range_slider/types';
 import { DefaultDataControlState } from '../../data_controls/types';
 import { untilPluginStartServicesReady, dataService } from '../../services/kibana_services';
 import { ControlPanelsState, ControlPanelState, SerializedControlPanelState } from '../types';
-import { ControlGroupInput } from './types';
+import { ControlGroupRendererState } from './types';
 
 export interface AddDataControlProps {
   controlId?: string;
@@ -43,7 +43,7 @@ export type ControlGroupInputBuilder = typeof controlGroupInputBuilder;
 
 export const controlGroupInputBuilder = {
   addDataControlFromField: async (
-    initialInput: Partial<ControlGroupInput>,
+    initialInput: Partial<ControlGroupRendererState>,
     controlProps: AddDataControlProps
   ) => {
     const panelState = await getDataControlPanelState(initialInput, controlProps);
@@ -53,7 +53,7 @@ export const controlGroupInputBuilder = {
     };
   },
   addOptionsListControl: (
-    initialInput: Partial<ControlGroupInput>,
+    initialInput: Partial<ControlGroupRendererState>,
     controlProps: AddOptionsListControlProps
   ) => {
     const panelState = getOptionsListPanelState(initialInput, controlProps);
@@ -63,7 +63,7 @@ export const controlGroupInputBuilder = {
     };
   },
   addRangeSliderControl: (
-    initialInput: Partial<ControlGroupInput>,
+    initialInput: Partial<ControlGroupRendererState>,
     controlProps: AddRangeSliderControlProps
   ) => {
     const panelState = getRangeSliderPanelState(initialInput, controlProps);
@@ -72,7 +72,7 @@ export const controlGroupInputBuilder = {
       [panelState.explicitInput.id]: panelState,
     };
   },
-  addTimeSliderControl: (initialInput: Partial<ControlGroupInput>) => {
+  addTimeSliderControl: (initialInput: Partial<ControlGroupRendererState>) => {
     const panelState = getTimeSliderPanelState(initialInput);
     initialInput.panels = {
       ...initialInput.panels,
@@ -82,7 +82,7 @@ export const controlGroupInputBuilder = {
 };
 
 export async function getDataControlPanelState(
-  input: Partial<ControlGroupInput>,
+  input: Partial<ControlGroupRendererState>,
   controlProps: AddDataControlProps
 ) {
   const { controlId, dataViewId, fieldName, title } = controlProps;
@@ -99,7 +99,7 @@ export async function getDataControlPanelState(
 }
 
 export function getOptionsListPanelState(
-  input: Partial<ControlGroupInput>,
+  input: Partial<ControlGroupRendererState>,
   controlProps: AddOptionsListControlProps
 ) {
   const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
@@ -117,7 +117,7 @@ export function getOptionsListPanelState(
 }
 
 export function getRangeSliderPanelState(
-  input: Partial<ControlGroupInput>,
+  input: Partial<ControlGroupRendererState>,
   controlProps: AddRangeSliderControlProps
 ) {
   const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
@@ -134,7 +134,7 @@ export function getRangeSliderPanelState(
   } as SerializedControlPanelState<DefaultDataControlState>;
 }
 
-export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
+export function getTimeSliderPanelState(input: Partial<ControlGroupRendererState>) {
   return {
     type: TIME_SLIDER_CONTROL,
     order: getNextPanelOrder(input.panels),
@@ -149,7 +149,10 @@ export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
   } as SerializedControlPanelState;
 }
 
-function getPanelState(input: Partial<ControlGroupInput>, controlProps: AddDataControlProps) {
+function getPanelState(
+  input: Partial<ControlGroupRendererState>,
+  controlProps: AddDataControlProps
+) {
   return {
     order: getNextPanelOrder(input.panels),
     grow: controlProps.grow ?? input.defaultControlGrow ?? DEFAULT_CONTROL_GROW,
