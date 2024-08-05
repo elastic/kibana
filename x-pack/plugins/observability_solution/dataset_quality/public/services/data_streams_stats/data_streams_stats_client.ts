@@ -22,7 +22,6 @@ import {
   GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
-  GetIntegrationsParams,
   GetNonAggregatableDataStreamsParams,
   GetNonAggregatableDataStreamsResponse,
 } from '../../../common/data_streams_stats';
@@ -111,13 +110,9 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return nonAggregatableDatasets;
   }
 
-  public async getIntegrations(
-    params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
-  ): Promise<Integration[]> {
+  public async getIntegrations(): Promise<Integration[]> {
     const response = await this.http
-      .get<IntegrationResponse>('/internal/dataset_quality/integrations', {
-        query: params,
-      })
+      .get<IntegrationResponse>('/internal/dataset_quality/integrations')
       .catch((error) => {
         throw new GetDataStreamsStatsError(
           `Failed to fetch integrations: ${error}`,

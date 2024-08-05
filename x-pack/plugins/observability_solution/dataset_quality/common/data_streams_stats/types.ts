@@ -15,9 +15,6 @@ export type GetDataStreamsStatsResponse =
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type DataStreamStatServiceResponse = GetDataStreamsStatsResponse;
 
-export type GetIntegrationsParams =
-  APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations`>['params'];
-
 export type GetDataStreamsDegradedDocsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
 export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
