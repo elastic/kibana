@@ -121,7 +121,7 @@ export const useSourcererDataView = (
       browserFields: browserFields(),
       dataViewId: sourcererDataView.id,
       indexPattern: {
-        fields: sourcererDataView.indexFields,
+        fields: Object.values(sourcererDataView.fields || {}),
         title: selectedPatterns.join(','),
         getName: () => selectedPatterns.join(','),
       },
