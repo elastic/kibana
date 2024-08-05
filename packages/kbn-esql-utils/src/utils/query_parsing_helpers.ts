@@ -22,7 +22,7 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
 // For ES|QL we consider stats and keep transformational command
 // The metrics command too but only if it aggregates
 export function hasTransformationalCommand(esql?: string) {
-  const transformationalCommands = ['stats', 'inlinestats', 'keep'];
+  const transformationalCommands = ['stats', 'keep'];
   const { ast } = getAstAndSyntaxErrors(esql);
   const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
     ast.find(({ name }) => name === command)
