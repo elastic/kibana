@@ -17,7 +17,7 @@ export const openAIFunctionAgentPrompt = ChatPromptTemplate.fromMessages([
 export const bedrockToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
   [
     'system',
-    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax.',
+    'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax. Always return value from ESQLKnowledgeBaseTool as is. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.',
   ],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
@@ -28,7 +28,7 @@ export const geminiToolCallingAgentPrompt = ChatPromptTemplate.fromMessages([
   [
     'system',
     'You are a helpful assistant. ALWAYS use the provided tools. Use tools as often as possible, as they have access to the latest data and syntax.\n\n' +
-      `The final response will be the only output the user sees and should be a complete answer to the user's question, as if you were responding to the user's initial question, which is "{input}". The final response should never be empty.`,
+      "The final response will be the only output the user sees and should be a complete answer to the user's question, as if you were responding to the user's initial question. The final response should never be empty.",
   ],
   ['placeholder', '{chat_history}'],
   ['human', '{input}'],
