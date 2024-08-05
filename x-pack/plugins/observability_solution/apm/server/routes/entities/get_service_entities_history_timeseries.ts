@@ -36,9 +36,9 @@ export async function getServiceEntitiesHistoryTimeseries({
   environment,
 }: Params) {
   const { intervalString } = getBucketSize({
-    numBuckets: 20,
     start: new Date(start).getTime(),
     end: new Date(end).getTime(),
+    minBucketSize: 60,
   });
 
   const response = await entitiesESClient.searchHistory('get_entities_history_timeseries', {
