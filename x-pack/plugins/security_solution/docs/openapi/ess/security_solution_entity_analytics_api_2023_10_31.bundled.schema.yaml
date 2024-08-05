@@ -38,6 +38,20 @@ paths:
             type: string
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    description: >-
+                      If the record was deleted. If false the record did not
+                      exist.
+                    type: boolean
+                  record:
+                    $ref: '#/components/schemas/AssetCriticalityRecord'
+                required:
+                  - deleted
           description: Successful response
         '400':
           description: Invalid request
