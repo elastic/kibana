@@ -79,6 +79,7 @@
     "@kbn/utility-types",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/ui-theme",
+    "@kbn/apm-utils",
   ],
   "exclude": [
     "target/**/*",

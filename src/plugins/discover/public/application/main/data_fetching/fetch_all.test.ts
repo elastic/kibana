@@ -73,6 +73,10 @@ describe('test fetchAll', () => {
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+        },
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -261,6 +265,10 @@ describe('test fetchAll', () => {
         expandedDoc: undefined,
         customFilters: [],
         overriddenVisContextAfterInvalidation: undefined,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+        },
       }),
     };
     fetchAll(subjects, false, deps);
@@ -379,6 +387,10 @@ describe('test fetchAll', () => {
           expandedDoc: undefined,
           customFilters: [],
           overriddenVisContextAfterInvalidation: undefined,
+          resetDefaultProfileState: {
+            columns: false,
+            rowHeight: false,
+          },
         }),
       };
       fetchAll(subjects, false, deps);

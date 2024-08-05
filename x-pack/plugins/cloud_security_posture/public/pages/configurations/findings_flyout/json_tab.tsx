@@ -10,14 +10,12 @@ import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 
-const offsetTopHeight = 120;
-const offsetBottomHeight = 72;
-
 export const JsonTab = ({ data }: { data: CspFinding }) => (
-  <div style={{ position: 'absolute', inset: 0, top: offsetTopHeight, bottom: offsetBottomHeight }}>
+  <div style={{ position: 'absolute', inset: 0 }}>
     <CodeEditor
       isCopyable
       allowFullScreen
+      enableFindAction
       languageId={XJsonLang.ID}
       value={JSON.stringify(data, null, 2)}
       options={{
