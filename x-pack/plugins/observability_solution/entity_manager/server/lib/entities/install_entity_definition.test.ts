@@ -185,15 +185,12 @@ describe('install_entity_definition', () => {
         page: 1,
         per_page: 10,
       };
-      soClient.find
-        .mockResolvedValueOnce(definitionSOResult)
-        .mockResolvedValueOnce(definitionSOResult)
-        .mockResolvedValueOnce({
-          saved_objects: [],
-          total: 0,
-          page: 1,
-          per_page: 10,
-        });
+      soClient.find.mockResolvedValueOnce(definitionSOResult).mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+      });
 
       await installBuiltInEntityDefinitions({
         esClient,
@@ -229,15 +226,12 @@ describe('install_entity_definition', () => {
         per_page: 10,
       };
 
-      soClient.find
-        .mockResolvedValueOnce(definitionSOResult)
-        .mockResolvedValueOnce(definitionSOResult)
-        .mockResolvedValueOnce({
-          saved_objects: [],
-          total: 0,
-          page: 1,
-          per_page: 10,
-        });
+      soClient.find.mockResolvedValueOnce(definitionSOResult).mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10,
+      });
 
       await installBuiltInEntityDefinitions({
         esClient,
