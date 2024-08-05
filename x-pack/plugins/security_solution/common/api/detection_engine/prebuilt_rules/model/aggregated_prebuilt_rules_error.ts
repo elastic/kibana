@@ -8,8 +8,8 @@
 import { z } from 'zod';
 import { RuleName, RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';
 
-export type AggregatedPrebuiltRuleError = z.infer<typeof AggregatedPrebuiltRuleErrorSchema>;
-export const AggregatedPrebuiltRuleErrorSchema = z.object({
+export type AggregatedPrebuiltRuleError = z.infer<typeof AggregatedPrebuiltRuleError>;
+export const AggregatedPrebuiltRuleError = z.object({
   message: z.string(),
   status_code: z.number().optional(),
   rules: z.array(

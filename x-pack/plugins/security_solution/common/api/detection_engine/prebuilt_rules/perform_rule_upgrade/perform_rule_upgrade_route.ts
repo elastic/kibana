@@ -58,7 +58,7 @@ import {
   HistoryWindowStart,
 } from '../../model/rule_schema/specific_attributes/new_terms_attributes.gen';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
-import { AggregatedPrebuiltRuleErrorSchema } from '../model';
+import { AggregatedPrebuiltRuleError } from '../model';
 
 export type PickVersionValues = z.infer<typeof PickVersionValues>;
 export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
@@ -67,7 +67,7 @@ export const PickVersionValuesEnum = PickVersionValues.enum;
 
 const createUpgradeFieldSchema = <T extends z.ZodType>(fieldSchema: T) =>
   z
-    .union([
+    .discriminatedUnion('pick_version', [
       z.object({
         pick_version: PickVersionValues,
       }),
@@ -170,11 +170,11 @@ export const PerformRuleUpgradeResponseBody = z.object({
     updated: z.array(RuleResponse),
     skipped: z.array(SkippedRuleUpgrade),
   }),
-  errors: z.array(AggregatedPrebuiltRuleErrorSchema),
+  errors: z.array(AggregatedPrebuiltRuleError),
 });
 
 export type PerformRuleUpgradeRequestBody = z.infer<typeof PerformRuleUpgradeRequestBody>;
-export const PerformRuleUpgradeRequestBody = z.union([
+export const PerformRuleUpgradeRequestBody = z.discriminatedUnion('mode', [
   UpgradeAllRulesRequest,
   UpgradeSpecificRulesRequest,
 ]);
