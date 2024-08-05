@@ -45,7 +45,6 @@ interface InvestigationStore {
   lockItem: (id: string) => Promise<void>;
   unlockItem: (id: string) => Promise<void>;
   setItemTitle: (id: string, title: string) => Promise<void>;
-  setRevision: (revisionId: string) => Promise<void>;
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
   }>;
@@ -319,14 +318,6 @@ export function createInvestigationStore({
               ...position,
             };
           }),
-        };
-      });
-    },
-    setRevision: (revision) => {
-      return updateInvestigationInPlace((prevInvestigation) => {
-        return {
-          ...prevInvestigation,
-          revision,
         };
       });
     },
