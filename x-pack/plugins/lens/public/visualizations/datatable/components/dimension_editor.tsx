@@ -81,9 +81,9 @@ export function TableDimensionEditor(
   const hasDynamicColoring = currentColorMode !== 'none';
 
   const datasource = frame.datasourceLayers[localState.layerId];
-  const showDynamicColoringFeature = Boolean(
-    !datasource?.getOperationForColumnId(accessor)?.isBucketed
-  );
+
+  const showDynamicColoringFeature =
+    datasource?.getOperationForColumnId(accessor)?.dataType !== 'date';
 
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 

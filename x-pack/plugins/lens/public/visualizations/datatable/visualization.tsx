@@ -246,14 +246,29 @@ export const getDatatableVisualization = ({
               }
               return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
             })
-            .map((accessor) => ({
-              columnId: accessor,
-              triggerIconType: columnMap[accessor].hidden
-                ? 'invisible'
-                : columnMap[accessor].collapseFn
-                ? 'aggregate'
-                : undefined,
-            })),
+            .map((accessor) => {
+              const {
+                colorMode = 'none',
+                palette,
+                colorMapping,
+                hidden,
+                collapseFn,
+              } = columnMap[accessor] ?? {};
+              const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
+              const hasColoring = Boolean(colorMode !== 'none' && stops);
+
+              return {
+                columnId: accessor,
+                triggerIconType: hidden
+                  ? 'invisible'
+                  : hasColoring
+                  ? 'colorBy'
+                  : collapseFn
+                  ? 'aggregate'
+                  : undefined,
+                palette: hasColoring ? stops : undefined,
+              };
+            }),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_rows',
