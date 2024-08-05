@@ -8,7 +8,7 @@
 // NOTE: This is pretty much a copy/paste from test/common/services/bsearch.ts but with the ability
 // to provide custom auth
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { GenericFtrService } from '@kbn/test';
 import request from 'superagent';
 import type { IEsSearchResponse } from '@kbn/search-types';
