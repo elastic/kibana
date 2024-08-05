@@ -21,7 +21,6 @@ export type { InvestigatePublicSetup, InvestigatePublicStart, OnWidgetAdd, Widge
 
 export {
   type Investigation,
-  type InvestigationRevision,
   type InvestigateWidget,
   type InvestigateWidgetCreate,
   InvestigateWidgetColumnSpan,

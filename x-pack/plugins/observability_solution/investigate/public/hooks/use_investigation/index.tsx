@@ -6,7 +6,7 @@
  */
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { last, pull } from 'lodash';
+import { pull } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 } from 'uuid';
@@ -19,43 +19,27 @@ import {
 } from '../use_investigate_widget';
 import { useLocalStorage } from '../use_local_storage';
 import { createNewInvestigation } from './create_new_investigation';
-import {
-  createInvestigationStore,
-  StatefulInvestigation,
-  StatefulInvestigationRevision,
-} from './investigation_store';
+import { StatefulInvestigation, createInvestigationStore } from './investigation_store';
 
 export type RenderableInvestigateWidget = InvestigateWidget & {
   loading: boolean;
   element: React.ReactNode;
 };
 
-export type RenderableInvestigationRevision = Omit<StatefulInvestigationRevision, 'items'> & {
+export type RenderableInvestigation = Omit<StatefulInvestigation, 'items'> & {
   items: RenderableInvestigateWidget[];
 };
 
-export type RenderableInvestigateTimeline = Omit<StatefulInvestigation, 'revisions'> & {
-  revisions: RenderableInvestigationRevision[];
-};
-
 export interface UseInvestigationApi {
-  startNewInvestigation: (id: string) => void;
-  loadInvestigation: (id: string) => void;
-  investigation?: Omit<StatefulInvestigation, 'revisions'>;
-  revision?: RenderableInvestigationRevision;
-  isAtLatestRevision: boolean;
-  isAtEarliestRevision: boolean;
-  setItemPositions: (
-    positions: Array<{ id: string; columns: number; rows: number }>
-  ) => Promise<void>;
-  setItemTitle: (id: string, title: string) => Promise<void>;
+  investigations: Investigation[];
+  investigation?: RenderableInvestigation;
+  addItem: (options: InvestigateWidgetCreate) => Promise<void>;
+  copyItem: (id: string) => Promise<void>;
+  deleteItem: (id: string) => Promise<void>;
   updateItem: (
     id: string,
     cb: (item: InvestigateWidget) => Promise<InvestigateWidget>
   ) => Promise<void>;
-  copyItem: (id: string) => Promise<void>;
-  deleteItem: (id: string) => Promise<void>;
-  addItem: (options: InvestigateWidgetCreate) => Promise<void>;
   lockItem: (id: string) => Promise<void>;
   unlockItem: (id: string) => Promise<void>;
   setItemParameters: (
@@ -63,12 +47,8 @@ export interface UseInvestigationApi {
     parameters: GlobalWidgetParameters & Record<string, any>
   ) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
-  setRevision: (revisionId: string) => void;
-  gotoPreviousRevision: () => Promise<void>;
-  gotoNextRevision: () => Promise<void>;
   setTitle: (title: string) => Promise<void>;
-  investigations: Investigation[];
-  deleteInvestigation: (id: string) => Promise<void>;
+  setItemTitle: (id: string, title: string) => Promise<void>;
 }
 
 function useInvestigationWithoutContext({
@@ -84,7 +64,7 @@ function useInvestigationWithoutContext({
   from: string;
   to: string;
 }): UseInvestigationApi {
-  const [investigationStore, setInvestigationStore] = useState(() =>
+  const [investigationStore, _] = useState(() =>
     createInvestigationStore({
       user,
       widgetDefinitions,
@@ -103,16 +83,7 @@ function useInvestigationWithoutContext({
   );
 
   const investigation$ = investigationStore.asObservable();
-
   const investigation = useObservable(investigation$)?.investigation;
-
-  const currentRevision = useMemo(() => {
-    return investigation?.revisions.find((revision) => revision.id === investigation.revision);
-  }, [investigation?.revision, investigation?.revisions]);
-
-  const isAtEarliestRevision = investigation?.revisions[0].id === currentRevision?.id;
-
-  const isAtLatestRevision = last(investigation?.revisions)?.id === currentRevision?.id;
 
   const deleteItem = useCallback(
     async (id: string) => {
@@ -120,7 +91,6 @@ function useInvestigationWithoutContext({
     },
     [investigationStore]
   );
-
   const deleteItemRef = useRef(deleteItem);
   deleteItemRef.current = deleteItem;
 
@@ -132,7 +102,7 @@ function useInvestigationWithoutContext({
     const unusedComponentIds = Object.keys(widgetComponentsById);
 
     const nextItemsWithContext =
-      currentRevision?.items.map((item) => {
+      investigation?.items.map((item) => {
         let Component = widgetComponentsById.current[item.id];
         if (!Component) {
           const id = item.id;
@@ -178,7 +148,7 @@ function useInvestigationWithoutContext({
     });
 
     return nextItemsWithContext;
-  }, [currentRevision?.items, widgetDefinitions, investigationStore]);
+  }, [investigation, widgetDefinitions, investigationStore]);
 
   const addItem = useCallback(
     async (widget: InvestigateWidgetCreate) => {
@@ -200,42 +170,6 @@ function useInvestigationWithoutContext({
   const addItemRef = useRef(addItem);
   addItemRef.current = addItem;
 
-  const renderableRevision = useMemo(() => {
-    return currentRevision
-      ? {
-          ...currentRevision,
-          items: itemsWithContext.map((item) => {
-            const { Component, ...rest } = item;
-            return {
-              ...rest,
-              element: <Component widget={item} />,
-            };
-          }),
-        }
-      : undefined;
-  }, [currentRevision, itemsWithContext]);
-
-  const startNewInvestigation = useCallback(
-    async (id: string) => {
-      const prevInvestigation = await investigationStore.getInvestigation();
-
-      const lastRevision = last(prevInvestigation.revisions)!;
-
-      const createdInvestigationStore = createInvestigationStore({
-        investigation: createNewInvestigation({
-          globalWidgetParameters: lastRevision.parameters,
-          user,
-          id,
-        }) as StatefulInvestigation,
-        user,
-        widgetDefinitions,
-      });
-
-      setInvestigationStore(createdInvestigationStore);
-    },
-    [user, widgetDefinitions, investigationStore]
-  );
-
   const setItemParameters = useCallback(
     async (id: string, nextGlobalWidgetParameters: GlobalWidgetParameters) => {
       return investigationStore.setItemParameters(id, nextGlobalWidgetParameters);
@@ -245,13 +179,9 @@ function useInvestigationWithoutContext({
 
   const {
     copyItem,
-    gotoNextRevision,
-    gotoPreviousRevision,
     lockItem,
     setGlobalParameters,
-    setItemPositions,
     setItemTitle,
-    setRevision,
     setTitle,
     unlockItem,
     updateItem,
@@ -262,29 +192,22 @@ function useInvestigationWithoutContext({
   >('experimentalInvestigations', []);
 
   const investigationsRef = useRef(investigations);
-
   investigationsRef.current = investigations;
 
-  const loadInvestigation = useCallback(
-    async (id: string) => {
-      const investigationsFromStorage = investigationsRef.current;
-      const nextInvestigation = investigationsFromStorage.find(
-        (investigationAtIndex) => investigationAtIndex.id === id
-      );
-
-      if (!nextInvestigation) {
-        throw new Error('Could not find investigation for id ' + id);
-      }
-      setInvestigationStore(() =>
-        createInvestigationStore({
-          investigation: nextInvestigation as StatefulInvestigation,
-          user,
-          widgetDefinitions,
-        })
-      );
-    },
-    [widgetDefinitions, user]
-  );
+  const renderableInvestigation = useMemo(() => {
+    return investigation
+      ? {
+          ...investigation,
+          items: itemsWithContext.map((item) => {
+            const { Component, ...rest } = item;
+            return {
+              ...rest,
+              element: <Component widget={item} />,
+            };
+          }),
+        }
+      : undefined;
+  }, [investigation, itemsWithContext]);
 
   useEffect(() => {
     function attemptToStoreInvestigations(next: Investigation[]) {
@@ -301,22 +224,16 @@ function useInvestigationWithoutContext({
     }
 
     const subscription = investigation$.subscribe(({ investigation: investigationFromStore }) => {
-      const isEmpty = investigationFromStore.revisions.length === 1;
-
+      const isEmpty = investigationFromStore.items.length === 0;
       if (isEmpty) {
         return;
       }
 
       const toSerialize = {
         ...investigationFromStore,
-        revisions: investigationFromStore.revisions.map((revision) => {
-          return {
-            ...revision,
-            items: revision.items.map((item) => {
-              const { loading, ...rest } = item;
-              return rest;
-            }),
-          };
+        items: investigationFromStore.items.map((item) => {
+          const { loading, ...rest } = item;
+          return rest;
         }),
       };
 
@@ -346,48 +263,19 @@ function useInvestigationWithoutContext({
     };
   }, [investigation$, setInvestigations, notifications]);
 
-  const deleteInvestigation = useCallback(
-    async (id: string) => {
-      const nextInvestigations = investigationsRef.current.filter(
-        (investigationAtIndex) => investigationAtIndex.id !== id
-      );
-      setInvestigations(nextInvestigations);
-      if (investigation?.id === id) {
-        const nextInvestigation = nextInvestigations[0];
-
-        if (nextInvestigation) {
-          loadInvestigation(nextInvestigation.id);
-        } else {
-          startNewInvestigation(v4());
-        }
-      }
-    },
-    [loadInvestigation, startNewInvestigation, setInvestigations, investigation?.id]
-  );
-
   return {
     addItem,
     copyItem,
     deleteItem,
-    gotoNextRevision,
-    gotoPreviousRevision,
-    investigation,
-    isAtEarliestRevision,
-    isAtLatestRevision,
-    loadInvestigation,
     lockItem,
-    revision: renderableRevision,
     setGlobalParameters,
     setItemParameters,
-    setItemPositions,
     setItemTitle,
-    setRevision,
     setTitle,
-    startNewInvestigation,
     unlockItem,
     updateItem,
+    investigation: renderableInvestigation,
     investigations,
-    deleteInvestigation,
   };
 }
 

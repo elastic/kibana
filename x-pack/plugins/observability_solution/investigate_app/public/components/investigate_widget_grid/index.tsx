@@ -7,14 +7,14 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { ChromeOption, InvestigateWidgetColumnSpan } from '@kbn/investigate-plugin/public';
-import { keyBy, mapValues, orderBy } from 'lodash';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { ItemCallback, Layout, Responsive, WidthProvider } from 'react-grid-layout';
+import { mapValues } from 'lodash';
+import React, { useMemo, useRef } from 'react';
+import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { EuiBreakpoint, EUI_BREAKPOINTS, useBreakpoints } from '../../hooks/use_breakpoints';
+import { EUI_BREAKPOINTS, EuiBreakpoint, useBreakpoints } from '../../hooks/use_breakpoints';
 import { useTheme } from '../../hooks/use_theme';
-import { GridItem, GRID_ITEM_HEADER_HEIGHT } from '../grid_item';
+import { GRID_ITEM_HEADER_HEIGHT, GridItem } from '../grid_item';
 import './styles.scss';
 
 const gridContainerClassName = css`
@@ -56,7 +56,6 @@ export interface InvestigateWidgetGridItem {
 
 interface InvestigateWidgetGridProps {
   items: InvestigateWidgetGridItem[];
-  onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemLockToggle: (item: InvestigateWidgetGridItem) => Promise<void>;
@@ -127,7 +126,6 @@ const CONTAINER_PADDING: [number, number] = [0, 0];
 
 function GridSectionRenderer({
   items,
-  onItemsChange,
   onItemDelete,
   onItemCopy,
   onItemLockToggle,
@@ -141,7 +139,6 @@ function GridSectionRenderer({
   const theme = useTheme();
 
   const callbacks = {
-    onItemsChange,
     onItemCopy,
     onItemDelete,
     onItemLockToggle,
@@ -200,51 +197,8 @@ function GridSectionRenderer({
   // `layouts` changes, except when on mount. So...
   // we do some gymnastics to skip the first call
   // after a layout change
-
   const prevLayouts = useRef(layouts);
-
-  const expectLayoutChangeCall = prevLayouts.current !== layouts;
-
   prevLayouts.current = layouts;
-
-  const onLayoutChange = useMemo(() => {
-    let skipCall = expectLayoutChangeCall;
-    return (nextLayouts: Layout[]) => {
-      if (skipCall) {
-        skipCall = false;
-        return;
-      }
-      const itemsById = keyBy(items, (item) => item.id);
-
-      const sortedLayouts = orderBy(nextLayouts, ['y', 'x']);
-
-      const itemsInOrder = sortedLayouts.map((layout) => {
-        return itemsById[layout.i];
-      });
-
-      itemCallbacksRef.current.onItemsChange(itemsInOrder);
-    };
-  }, [items, expectLayoutChangeCall]);
-
-  const onResize: ItemCallback = useCallback(
-    (layout) => {
-      const itemsById = keyBy(items, (item) => item.id);
-
-      const itemsAfterResize = layout.map((layoutItem) => {
-        const gridItem = itemsById[layoutItem.i];
-
-        return {
-          ...gridItem,
-          columns: Math.max(1, layoutItem.w),
-          rows: Math.max(1, layoutItem.h),
-        };
-      });
-
-      itemCallbacksRef.current.onItemsChange(itemsAfterResize);
-    },
-
-    [items]
-  );
 
   return (
     <WithFixedWidth
@@ -255,8 +209,6 @@ function GridSectionRenderer({
       rowHeight={ROW_HEIGHT}
       cols={BREAKPOINT_COLUMNS}
       allowOverlap={false}
-      onLayoutChange={onLayoutChange}
-      onResizeStop={onResize}
       compactType="vertical"
       isBounded
       containerPadding={CONTAINER_PADDING}
@@ -270,7 +222,6 @@ function GridSectionRenderer({
 
 export function InvestigateWidgetGrid({
   items,
-  onItemsChange,
   onItemDelete,
   onItemCopy,
   onItemLockToggle,
@@ -319,19 +270,6 @@ export function InvestigateWidgetGrid({
                 }}
                 onItemLockToggle={(toggledItem) => {
                   return onItemLockToggle(toggledItem);
-                }}
-                onItemsChange={(itemsInSection) => {
-                  const nextItems = sections.flatMap((sectionAtIndex) => {
-                    if ('item' in sectionAtIndex) {
-                      return sectionAtIndex.item;
-                    }
-                    if (sectionAtIndex !== section) {
-                      return sectionAtIndex.items;
-                    }
-                    return itemsInSection;
-                  });
-
-                  return onItemsChange(nextItems);
                 }}
                 onItemOverrideRemove={(item, override) => {
                   return onItemOverrideRemove(item, override);

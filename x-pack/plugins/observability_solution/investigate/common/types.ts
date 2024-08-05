@@ -24,19 +24,13 @@ export enum InvestigateWidgetColumnSpan {
   Four = 4,
 }
 
-export interface InvestigationRevision {
-  id: string;
-  items: InvestigateWidget[];
-  parameters: GlobalWidgetParameters;
-}
-
 export interface Investigation {
   id: string;
-  '@timestamp': number;
+  createdAt: number;
   user: AuthenticatedUser;
-  revisions: InvestigationRevision[];
+  items: InvestigateWidget[];
+  parameters: GlobalWidgetParameters;
   title: string;
-  revision: string;
 }
 
 export interface InvestigateWidget<

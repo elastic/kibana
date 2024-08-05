@@ -32,17 +32,15 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   const {
+    investigation,
     addItem,
-    setItemPositions,
     setItemTitle,
     copyItem,
     deleteItem,
-    investigation,
     lockItem,
+    unlockItem,
     setItemParameters,
     setGlobalParameters,
-    unlockItem,
-    revision,
   } = investigate.useInvestigation({
     user,
     from: range.start.toISOString(),
@@ -52,25 +50,24 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
     return addItem(widgetCreate);
   };
-
   const createWidgetRef = useRef(createWidget);
   createWidgetRef.current = createWidget;
 
   useEffect(() => {
     if (
-      revision?.parameters.timeRange.from &&
-      revision?.parameters.timeRange.to &&
-      range.start.toISOString() !== revision.parameters.timeRange.from &&
-      range.end.toISOString() !== revision.parameters.timeRange.to
+      investigation?.parameters.timeRange.from &&
+      investigation?.parameters.timeRange.to &&
+      range.start.toISOString() !== investigation.parameters.timeRange.from &&
+      range.end.toISOString() !== investigation.parameters.timeRange.to
     ) {
       setRange({
-        from: revision.parameters.timeRange.from,
-        to: revision.parameters.timeRange.to,
+        from: investigation.parameters.timeRange.from,
+        to: investigation.parameters.timeRange.to,
       });
     }
   }, [
-    revision?.parameters.timeRange.from,
-    revision?.parameters.timeRange.to,
+    investigation?.parameters.timeRange.from,
+    investigation?.parameters.timeRange.to,
     range.start,
     range.end,
     setRange,
@@ -80,7 +77,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
 
     return (
-      revision?.items.map((item) => {
+      investigation?.items.map((item) => {
         const definitionForType = widgetDefinitionsByType[item.type];
 
         return {
@@ -96,16 +93,16 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           overrides: item.locked
             ? getOverridesFromGlobalParameters(
                 pick(item.parameters, 'filters', 'timeRange'),
-                revision.parameters,
+                investigation.parameters,
                 uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
               )
             : [],
         };
       }) ?? []
     );
-  }, [revision, widgetDefinitions, uiSettings]);
+  }, [investigation, widgetDefinitions, uiSettings]);
 
-  if (!investigation || !revision || !gridItems) {
+  if (!investigation || !gridItems) {
     return <EuiLoadingSpinner />;
   }
 
@@ -124,7 +121,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                     to: datemath.parse(dateRange.to)!.toISOString(),
                   };
                   await setGlobalParameters({
-                    ...revision.parameters,
+                    ...investigation.parameters,
                     timeRange: nextDateRange,
                   });
 
@@ -142,15 +139,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
             <EuiFlexItem grow={false}>
               <InvestigateWidgetGrid
                 items={gridItems}
-                onItemsChange={async (nextGridItems) => {
-                  return setItemPositions(
-                    nextGridItems.map((gridItem) => ({
-                      columns: gridItem.columns,
-                      rows: gridItem.rows,
-                      id: gridItem.id,
-                    }))
-                  );
-                }}
                 onItemTitleChange={async (item, title) => {
                   return setItemTitle(item.id, title);
                 }}
@@ -166,10 +154,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 fadeLockedItems={searchBarFocused}
                 onItemOverrideRemove={async (updatedItem, override) => {
                   // TODO: remove filters
-                  const itemToUpdate = revision.items.find((item) => item.id === updatedItem.id);
+                  const itemToUpdate = investigation.items.find(
+                    (item) => item.id === updatedItem.id
+                  );
                   if (itemToUpdate) {
                     return setItemParameters(updatedItem.id, {
-                      ...revision.parameters,
+                      ...investigation.parameters,
                       ...omit(itemToUpdate.parameters, override.id),
                     });
                   }
@@ -182,8 +172,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           </EuiFlexGroup>
 
           <AddObservationUI
-            filters={revision.parameters.filters}
-            timeRange={revision.parameters.timeRange}
+            filters={investigation.parameters.filters}
+            timeRange={investigation.parameters.timeRange}
             onWidgetAdd={(widget) => {
               return createWidgetRef.current(widget);
             }}
@@ -194,8 +184,8 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       <EuiFlexItem grow={2}>
         <AddNoteUI
           user={user}
-          filters={revision.parameters.filters}
-          timeRange={revision.parameters.timeRange}
+          filters={investigation.parameters.filters}
+          timeRange={investigation.parameters.timeRange}
           onWidgetAdd={(widget) => {
             return createWidgetRef.current(widget);
           }}
