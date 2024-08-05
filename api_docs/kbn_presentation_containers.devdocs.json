@@ -370,6 +370,58 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.childrenUnsavedChanges$",
+        "type": "Function",
+        "tags": [],
+        "label": "childrenUnsavedChanges$",
+        "description": [
+          "\n Create an observable stream of unsaved changes from all react embeddable children"
+        ],
+        "signature": [
+          "(children$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<{ [key: string]: unknown; }>) => ",
+          "Observable",
+          "<{ [key: string]: object; } | undefined>"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.childrenUnsavedChanges$.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "children$",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.PublishingSubject",
+                "text": "PublishingSubject"
+              },
+              "<{ [key: string]: unknown; }>"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/children_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-public.combineCompatibleChildrenApis",
         "type": "Function",
         "tags": [],
@@ -496,6 +548,100 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-public.initializeUnsavedChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeUnsavedChanges",
+        "description": [],
+        "signature": [
+          "<RuntimeState extends {} = {}>(initialLastSavedState: RuntimeState, parentApi: unknown, comparators: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.StateComparators",
+            "text": "StateComparators"
+          },
+          "<RuntimeState>) => { api: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<RuntimeState> & ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.HasSnapshottableState",
+            "text": "HasSnapshottableState"
+          },
+          "<RuntimeState>; cleanup: () => void; }"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.initializeUnsavedChanges.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialLastSavedState",
+            "description": [],
+            "signature": [
+              "RuntimeState"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.initializeUnsavedChanges.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.initializeUnsavedChanges.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.StateComparators",
+                "text": "StateComparators"
+              },
+              "<RuntimeState>"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
