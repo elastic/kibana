@@ -7,7 +7,7 @@ It can be used in every application that would like to add an in-app documentati
 - A details page
 
 ```
-<LanguageDocumentationPopover language={language} sections={documentationSections} setIsHelpMenuOpen={setIsHelpMenuOpen} isHelpMenuOpen={isHelpMenuOpen} />
+<LanguageDocumentationPopover language={language} sections={documentationSections} onHelpMenuVisibilityChange={onHelpMenuVisibilityChange} isHelpMenuOpen={isHelpMenuOpen} />
 ```
 
 The properties are typed as:

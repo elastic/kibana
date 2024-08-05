@@ -858,7 +858,7 @@ export function FormulaEditor({
                         ),
                       }}
                       isHelpMenuOpen={isHelpOpen}
-                      setIsHelpMenuOpen={setIsHelpOpen}
+                      onHelpMenuVisibilityChange={setIsHelpOpen}
                     />
                   )}
                 </EuiFlexItem>

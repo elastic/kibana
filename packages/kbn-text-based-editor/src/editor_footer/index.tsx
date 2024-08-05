@@ -267,7 +267,7 @@ export const EditorFooter = memo(function EditorFooter({
                       ),
                     }}
                     isHelpMenuOpen={isHelpMenuOpen}
-                    setIsHelpMenuOpen={setIsHelpMenuOpen}
+                    onHelpMenuVisibilityChange={setIsHelpMenuOpen}
                   />
                 </EuiFlexItem>
               )}
@@ -304,7 +304,7 @@ export const EditorFooter = memo(function EditorFooter({
                           ),
                         }}
                         isHelpMenuOpen={isHelpMenuOpen}
-                        setIsHelpMenuOpen={setIsHelpMenuOpen}
+                        onHelpMenuVisibilityChange={setIsHelpMenuOpen}
                       />
                     </EuiFlexItem>
                   )}

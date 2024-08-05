@@ -22,7 +22,7 @@ import {
 interface DocumentationPopoverProps {
   language: string;
   isHelpMenuOpen: boolean;
-  setIsHelpMenuOpen: (status: boolean) => void;
+  onHelpMenuVisibilityChange: (status: boolean) => void;
   sections?: LanguageDocumentationSections;
   buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
   searchInDescription?: boolean;
@@ -36,27 +36,27 @@ function DocumentationPopover({
   searchInDescription,
   linkToDocumentation,
   isHelpMenuOpen,
-  setIsHelpMenuOpen,
+  onHelpMenuVisibilityChange,
 }: DocumentationPopoverProps) {
   const toggleDocumentationPopover = useCallback(() => {
-    setIsHelpMenuOpen?.(!isHelpMenuOpen);
-  }, [isHelpMenuOpen, setIsHelpMenuOpen]);
+    onHelpMenuVisibilityChange?.(!isHelpMenuOpen);
+  }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
 
   useEffect(() => {
-    setIsHelpMenuOpen(isHelpMenuOpen ?? false);
-  }, [isHelpMenuOpen, setIsHelpMenuOpen]);
+    onHelpMenuVisibilityChange(isHelpMenuOpen ?? false);
+  }, [isHelpMenuOpen, onHelpMenuVisibilityChange]);
 
   return (
     <EuiOutsideClickDetector
       onOutsideClick={() => {
-        setIsHelpMenuOpen?.(false);
+        onHelpMenuVisibilityChange?.(false);
       }}
     >
       <EuiPopover
         panelClassName="documentation__docs--overlay"
         panelPaddingSize="none"
         isOpen={isHelpMenuOpen}
-        closePopover={() => setIsHelpMenuOpen(false)}
+        closePopover={() => onHelpMenuVisibilityChange(false)}
         button={
           <EuiToolTip
             position="top"
