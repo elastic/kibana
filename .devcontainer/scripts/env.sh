@@ -30,7 +30,7 @@ setup_shell() {
   if [ -n "$SHELL" ] && [ -x "$SHELL" ]; then
     sudo chsh -s "$SHELL" vscode
 
-    if [ "$0" != "$CURRENT_SHELL" ]; then
+    if [ "$0" != "$SHELL" ]; then
       exec "$SHELL"
     fi
   else
