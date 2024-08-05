@@ -104,7 +104,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
               onSave: async (createdDataView) => {
                 if (createdDataView.id) {
                   if (!createdDataView.isPersisted()) {
-                    onAddAdHocDataView(createdDataView);
+                    onAddAdHocDataView(await dataViews.toDataView(createdDataView));
                   }
 
                   await loadPersistedDataViews();
@@ -115,7 +115,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             });
           }
         : undefined,
-    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAddAdHocDataView]
+    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAddAdHocDataView, dataViews]
   );
 
   useEffect(() => {

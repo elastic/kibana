@@ -9,10 +9,10 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE, DataViewLazy } from '@kbn/data-views-plugin/public';
 import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorContext, DataViewEditorPropsInternal } from '../types';
 import { DataViewEditorService } from '../data_view_editor_service';
 
 const DataViewFlyoutContentContainer = ({
@@ -23,7 +23,7 @@ const DataViewFlyoutContentContainer = ({
   editData,
   allowAdHocDataView,
   showManagementLink,
-}: DataViewEditorProps) => {
+}: DataViewEditorPropsInternal) => {
   const {
     services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
@@ -48,7 +48,7 @@ const DataViewFlyoutContentContainer = ({
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
-      let saveResponse;
+      let saveResponse: DataViewLazy;
       if (editData) {
         const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
@@ -58,15 +58,16 @@ const DataViewFlyoutContentContainer = ({
         if (editData.isPersisted()) {
           await dataViews.updateSavedObject(editData);
         }
-        saveResponse = editData;
+        saveResponse = await dataViews.toDataViewLazy(editData);
       } else {
         saveResponse = persist
-          ? await dataViews.createAndSave(dataViewSpec)
-          : await dataViews.create(dataViewSpec);
+          ? await dataViews.createAndSaveDataViewLazy(dataViewSpec)
+          : await dataViews.createDataViewLazy(dataViewSpec);
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
-        await dataViews.refreshFields(saveResponse);
+        // clears legacy data view cache, clients will need to fetch the data view again
+        dataViews.clearInstanceCache(saveResponse.id);
 
         if (persist) {
           const title = i18n.translate('indexPatternEditor.saved', {

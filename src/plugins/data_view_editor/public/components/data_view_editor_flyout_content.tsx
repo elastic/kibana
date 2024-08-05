@@ -18,17 +18,9 @@ import {
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE, DataView } from '@kbn/data-views-plugin/public';
 
-import {
-  DataView,
-  DataViewSpec,
-  Form,
-  useForm,
-  useFormData,
-  useKibana,
-  UseField,
-} from '../shared_imports';
+import { DataViewSpec, Form, useForm, useFormData, useKibana, UseField } from '../shared_imports';
 
 import { FlyoutPanels } from './flyout_panels';
 

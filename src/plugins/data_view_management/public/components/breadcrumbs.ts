@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { AbstractDataView } from '@kbn/data-views-plugin/common';
 
 export function getListBreadcrumbs(withLink?: boolean) {
   return [
@@ -32,7 +32,7 @@ export function getCreateBreadcrumbs(withLink?: boolean) {
   ];
 }
 
-export function getEditBreadcrumbs(indexPattern: DataView, withLink?: boolean) {
+export function getEditBreadcrumbs(indexPattern: AbstractDataView, withLink?: boolean) {
   return [
     ...getListBreadcrumbs(true),
     {
@@ -42,7 +42,7 @@ export function getEditBreadcrumbs(indexPattern: DataView, withLink?: boolean) {
   ];
 }
 
-export function getEditFieldBreadcrumbs(indexPattern: DataView, fieldName: string) {
+export function getEditFieldBreadcrumbs(indexPattern: AbstractDataView, fieldName: string) {
   return [
     ...getEditBreadcrumbs(indexPattern, true),
     {
@@ -51,7 +51,7 @@ export function getEditFieldBreadcrumbs(indexPattern: DataView, fieldName: strin
   ];
 }
 
-export function getCreateFieldBreadcrumbs(indexPattern: DataView) {
+export function getCreateFieldBreadcrumbs(indexPattern: AbstractDataView) {
   return [
     ...getEditBreadcrumbs(indexPattern, true),
     {

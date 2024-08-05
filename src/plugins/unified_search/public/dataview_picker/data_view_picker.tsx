@@ -8,7 +8,12 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type {
+  DataView,
+  DataViewLazy,
+  DataViewListItem,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLanguages } from '@kbn/esql-utils';
 import { ChangeDataView } from './change_dataview';
@@ -41,7 +46,7 @@ export interface DataViewPickerProps {
    * Callback that is called when the user edits the current data view via flyout.
    * The first parameter is the updated data view stub without fetched fields
    */
-  onEditDataView?: (updatedDataViewStub: DataView) => void;
+  onEditDataView?: (updatedDataViewStub: DataViewLazy) => void;
   /**
    * The id of the selected dataview.
    */

@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField, DataViewLazy } from '@kbn/data-views-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import {
   UnifiedFieldListSidebarContainer,
@@ -125,7 +125,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on create dataview
    */
-  onDataViewCreated: (dataView: DataView) => void;
+  onDataViewCreated: (dataView: DataViewLazy) => void;
   /**
    * For customization and testing purposes
    */
