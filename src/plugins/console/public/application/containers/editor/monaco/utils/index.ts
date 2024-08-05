@@ -10,11 +10,11 @@ export { AutocompleteType, SELECTED_REQUESTS_CLASSNAME } from './constants';
 export {
   getRequestStartLineNumber,
   getRequestEndLineNumber,
-  stringifyRequest,
   replaceRequestVariables,
   getCurlRequest,
   trackSentRequests,
   getAutoIndentedRequests,
+  getRequestFromEditor,
 } from './requests_utils';
 export {
   getDocumentationLinkFromAutocomplete,

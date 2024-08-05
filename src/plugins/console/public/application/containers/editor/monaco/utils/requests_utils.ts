@@ -7,8 +7,10 @@
  */
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
+import { parse } from 'hjson';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { constructUrl } from '../../../../../lib/es';
-import { MetricsTracker } from '../../../../../types';
+import type { MetricsTracker } from '../../../../../types';
 import type { DevToolsVariable } from '../../../../components';
 import type { EditorRequest, AdjustedParsedRequest } from '../types';
 import {
@@ -16,21 +18,9 @@ import {
   dataVariableTemplateRegex,
   startsWithMethodRegex,
 } from './constants';
-import { removeTrailingWhitespaces } from './tokens_utils';
+import { parseMethodUrlLine } from './tokens_utils';
 
-/*
- * This function stringifies and normalizes the parsed request:
- * - the method is converted to upper case
- * - any trailing comments are removed from the url
- * - the request body is stringified from an object using JSON.stringify
- */
-export const stringifyRequest = (parsedRequest: ParsedRequest): EditorRequest => {
-  const url = parsedRequest.url ? removeTrailingWhitespaces(parsedRequest.url) : '';
-  const method = parsedRequest.method?.toUpperCase() ?? '';
-  const data = parsedRequest.data?.map((parsedData) => JSON.stringify(parsedData, null, 2));
-  return { url, method, data: data ?? [] };
-};
-
+const { collapseLiteralStrings } = XJson;
 /*
  * This function replaces any variables with its values stored in localStorage.
  * For example 'GET ${exampleVariable1} -> 'GET _search'.
@@ -55,10 +45,29 @@ export const getCurlRequest = (
 ): string => {
   const curlUrl = constructUrl(elasticsearchBaseUrl, url);
   let curlRequest = `curl -X${method} "${curlUrl}" -H "kbn-xsrf: reporting"`;
-  if (data.length > 0) {
-    curlRequest += ` -H "Content-Type: application/json" -d'\n`;
-    curlRequest += data.join('\n');
-    curlRequest += "'";
+  if (data && data.length) {
+    const joinedData = data.join('\n');
+    let dataAsString: string;
+
+    try {
+      curlRequest += ` -H "Content-Type: application/json" -d'\n`;
+
+      if (containsComments(joinedData)) {
+        // if there are comments in the data, we need to strip them out
+        const dataWithoutComments = parse(joinedData);
+        dataAsString = collapseLiteralStrings(JSON.stringify(dataWithoutComments, null, 2));
+      } else {
+        dataAsString = collapseLiteralStrings(joinedData);
+      }
+      // We escape single quoted strings that are wrapped in single quoted strings
+      curlRequest += dataAsString.replace(/'/g, "'\\''");
+      if (data.length > 1) {
+        curlRequest += '\n';
+      } // end with a new line
+      curlRequest += "'";
+    } catch (e) {
+      throw new Error(`Error parsing data: ${e.message}`);
+    }
   }
   return curlRequest;
 };
@@ -199,19 +208,17 @@ export const getAutoIndentedRequests = (
     ) {
       // Start of a request
       const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
-
-      if (requestLines.some((line) => containsComments(line))) {
-        // If request has comments, add it as it is - without formatting
-        // TODO: Format requests with comments
+      const firstLine = cleanUpWhitespaces(requestLines[0]);
+      formattedTextLines.push(firstLine);
+      const dataLines = requestLines.slice(1);
+      if (dataLines.some((line) => containsComments(line))) {
+        // If data has comments, add it as it is - without formatting
+        // TODO: Format requests with comments https://github.com/elastic/kibana/issues/182138
         formattedTextLines.push(...requestLines);
       } else {
-        // If no comments, add stringified parsed request
-        const stringifiedRequest = stringifyRequest(request);
-        const firstLine = stringifiedRequest.method + ' ' + stringifiedRequest.url;
-        formattedTextLines.push(firstLine);
-
-        if (stringifiedRequest.data && stringifiedRequest.data.length > 0) {
-          formattedTextLines.push(...stringifiedRequest.data);
+        // If no comments, indent data
+        if (requestLines.length > 1) {
+          formattedTextLines.push(indentData(dataLines));
         }
       }
 
@@ -220,10 +227,74 @@ export const getAutoIndentedRequests = (
     } else {
       // Current line is a comment or whitespaces
       // Trim white spaces and add it to the formatted text
-      formattedTextLines.push(selectedTextLines[currentLineIndex].trim());
+      formattedTextLines.push(cleanUpWhitespaces(selectedTextLines[currentLineIndex]));
       currentLineIndex++;
     }
   }
 
   return formattedTextLines.join('\n');
+};
+
+export const getRequestFromEditor = (
+  model: monaco.editor.ITextModel,
+  startLineNumber: number,
+  endLineNumber: number
+): EditorRequest | null => {
+  const methodUrlLine = model.getLineContent(startLineNumber);
+  if (!methodUrlLine) {
+    return null;
+  }
+  const { method, url } = parseMethodUrlLine(methodUrlLine);
+  if (!method || !url) {
+    return null;
+  }
+  const upperCaseMethod = method.toUpperCase();
+
+  if (endLineNumber <= startLineNumber) {
+    return { method: upperCaseMethod, url, data: [] };
+  }
+  const dataString = model
+    .getValueInRange({
+      startLineNumber: startLineNumber + 1,
+      startColumn: 1,
+      endLineNumber,
+      endColumn: model.getLineMaxColumn(endLineNumber),
+    })
+    .trim();
+  const data = splitDataIntoJsonObjects(dataString);
+
+  return { method: upperCaseMethod, url, data };
+};
+
+const splitDataIntoJsonObjects = (dataString: string): string[] => {
+  const jsonSplitRegex = /}\s+{/;
+  if (dataString.match(jsonSplitRegex)) {
+    return dataString.split(jsonSplitRegex).map((part, index, parts) => {
+      let restoredBracketsString = part;
+      // add an opening bracket to all parts except the 1st
+      if (index > 0) {
+        restoredBracketsString = `{${restoredBracketsString}`;
+      }
+      // add a closing bracket to all parts except the last
+      if (index < parts.length - 1) {
+        restoredBracketsString = `${restoredBracketsString}}`;
+      }
+      return restoredBracketsString;
+    });
+  }
+  return [dataString];
+};
+
+const cleanUpWhitespaces = (line: string): string => {
+  return line.trim().replaceAll(/\s+/g, ' ');
+};
+
+const indentData = (dataLines: string[]): string => {
+  const joinedData = dataLines.join('\n');
+  try {
+    const parsedData = parse(joinedData);
+    return JSON.stringify(parsedData, null, 2);
+  } catch {
+    return joinedData;
+  }
 };

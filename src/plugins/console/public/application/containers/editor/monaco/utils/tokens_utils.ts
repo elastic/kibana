@@ -16,6 +16,11 @@ import {
   whitespacesRegex,
 } from './constants';
 
+export const parseMethodUrlLine = (line: string) => {
+  line = line.trim();
+  const parts = line.split(whitespacesRegex);
+  return { method: parts[0], url: parts[1] };
+};
 /*
  * This function parses a line with the method and url.
  * The url is parsed into path and params, each parsed into tokens.

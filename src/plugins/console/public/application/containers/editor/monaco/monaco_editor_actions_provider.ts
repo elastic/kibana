@@ -33,8 +33,8 @@ import {
   replaceRequestVariables,
   SELECTED_REQUESTS_CLASSNAME,
   shouldTriggerSuggestions,
-  stringifyRequest,
   trackSentRequests,
+  getRequestFromEditor,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -199,13 +199,20 @@ export class MonacoEditorActionsProvider {
   }
 
   private async getRequests() {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
     const parsedRequests = await this.getSelectedParsedRequests();
-    const stringifiedRequests = parsedRequests.map((parsedRequest) =>
-      stringifyRequest(parsedRequest)
-    );
+    const stringifiedRequests = parsedRequests.map((parsedRequest) => {
+      const { startLineNumber, endLineNumber } = parsedRequest;
+      return getRequestFromEditor(model, startLineNumber, endLineNumber);
+    });
     // get variables values
     const variables = getStorage().get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
-    return stringifiedRequests.map((request) => replaceRequestVariables(request, variables));
+    return stringifiedRequests
+      .filter(Boolean)
+      .map((request) => replaceRequestVariables(request!, variables));
   }
 
   public async getCurl(elasticsearchBaseUrl: string): Promise<string> {
@@ -391,7 +398,7 @@ export class MonacoEditorActionsProvider {
 
     // if the current request doesn't have a method, the request is not valid
     // and shouldn't have an autocomplete type
-    if (!currentRequest.method) {
+    if (!currentRequest) {
       return null;
     }
 
