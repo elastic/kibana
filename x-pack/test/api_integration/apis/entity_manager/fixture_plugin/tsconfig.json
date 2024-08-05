@@ -9,9 +9,12 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/config-schema",
     "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/security-plugin",
+    "@kbn/core-plugins-server",
+    "@kbn/zod-helpers",
+    "@kbn/entityManager-plugin",
+    "@kbn/security-plugin-types-server",
+    "@kbn/entities-schema",
   ],
   "exclude": [
     "target/**/*",
