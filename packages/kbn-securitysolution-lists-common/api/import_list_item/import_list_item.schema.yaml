@@ -13,8 +13,6 @@ paths:
         Imports a list of items from a `.txt` or `.csv` file. The maximum file size is 9 million bytes.
 
         You can import items to a new or existing list.
-      tags:
-        - List items Import/Export API
       requestBody:
         required: true
         content:
