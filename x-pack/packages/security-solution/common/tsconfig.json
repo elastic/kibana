@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -7,7 +7,8 @@
       "node",
       "react",
       "@testing-library/jest-dom",
-      "@testing-library/react"
+      "@testing-library/react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
