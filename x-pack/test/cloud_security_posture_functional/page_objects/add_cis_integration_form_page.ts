@@ -116,38 +116,77 @@ export function AddCisIntegrationFormPageProvider({
     return fieldValue;
   };
 
-  const navigateToAddIntegrationCspmPage = async () => {
+  const navigateToAddIntegrationCspmPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/cspm',
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const navigateToAddIntegrationCspmWithVersionPage = async (packageVersion: string) => {
+  const navigateToAddIntegrationCspmWithVersionPage = async (
+    packageVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet',
       `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const navigateToAddIntegrationCnvmPage = async () => {
+  const navigateToAddIntegrationCnvmPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/vuln_mgmt',
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const navigateToAddIntegrationKspmPage = async () => {
+  const navigateToAddIntegrationKspmPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/kspm',
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
