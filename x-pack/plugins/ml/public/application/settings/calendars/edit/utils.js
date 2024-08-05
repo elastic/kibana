@@ -71,13 +71,13 @@ function getCalendars(mlApiServices) {
   });
 }
 
-export function getCalendarSettingsData() {
+export function getCalendarSettingsData(mlApiServices) {
   return new Promise(async (resolve, reject) => {
     try {
       const [jobIds, groupIds, calendars] = await Promise.all([
-        getJobIds(),
-        getGroupIds(),
-        getCalendars(),
+        getJobIds(mlApiServices),
+        getGroupIds(mlApiServices),
+        getCalendars(mlApiServices),
       ]);
 
       resolve({

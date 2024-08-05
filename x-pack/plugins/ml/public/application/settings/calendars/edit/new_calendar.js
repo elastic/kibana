@@ -71,7 +71,9 @@ class NewCalendarUI extends Component {
 
   async formSetup() {
     try {
-      const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
+      const { jobIds, groupIds, calendars } = await getCalendarSettingsData(
+        this.props.kibana.services.mlServices.mlApiServices
+      );
 
       const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
       const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
