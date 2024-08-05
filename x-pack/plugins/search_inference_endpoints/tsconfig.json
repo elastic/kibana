@@ -4,9 +4,9 @@
     "outDir": "target/types",
   },
   "include": [
-    "__mocks__/**/*", 
-    "common/**/*", 
-    "public/**/*", 
+    "__mocks__/**/*",
+    "common/**/*",
+    "public/**/*",
     "server/**/*"
   ],
   "kbn_references": [
@@ -29,7 +29,7 @@
     "@kbn/doc-links",
     "@kbn/console-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/ml-error-utils"
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": [
     "target/**/*",

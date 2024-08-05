@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -18,11 +20,13 @@ import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
 
 export const upgradePrebuiltRule = async ({
+  actionsClient,
   rulesClient,
   ruleAsset,
   mlAuthz,
   prebuiltRuleAssetClient,
 }: {
+  actionsClient: ActionsClient;
   rulesClient: RulesClient;
   ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
@@ -46,6 +50,7 @@ export const upgradePrebuiltRule = async ({
     await rulesClient.delete({ id: existingRule.id });
 
     const createdRule = await createRule({
+      actionsClient,
       rulesClient,
       mlAuthz,
       rule: {
@@ -72,7 +77,7 @@ export const upgradePrebuiltRule = async ({
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: convertRuleResponseToAlertingRule(patchedRule),
+    data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
   });
 
   return convertAlertingRuleToRuleResponse(patchedInternalRule);

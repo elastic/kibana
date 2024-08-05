@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory } from '../types';
+import { DataControlFactory, DataControlServices } from '../types';
 import {
   SearchControlApi,
   SearchControlState,
@@ -46,13 +44,9 @@ const allSearchOptions = [
 
 const DEFAULT_SEARCH_TECHNIQUE = 'match';
 
-export const getSearchControlFactory = ({
-  core,
-  dataViewsService,
-}: {
-  core: CoreStart;
-  dataViewsService: DataViewsPublicPluginStart;
-}): DataControlFactory<SearchControlState, SearchControlApi> => {
+export const getSearchControlFactory = (
+  services: DataControlServices
+): DataControlFactory<SearchControlState, SearchControlApi> => {
   return {
     type: SEARCH_CONTROL_TYPE,
     getIconType: () => 'search',
@@ -65,8 +59,11 @@ export const getSearchControlFactory = ({
         (field.spec.esTypes ?? []).includes('text')
       );
     },
-    CustomOptionsComponent: ({ currentState, updateState }) => {
-      const searchTechnique = currentState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE;
+    CustomOptionsComponent: ({ initialState, updateState }) => {
+      const [searchTechnique, setSearchTechnique] = useState(
+        initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
+      );
+
       return (
         <EuiFormRow label={'Searching'} data-test-subj="searchControl__searchOptionsRadioGroup">
           <EuiRadioGroup
@@ -74,13 +71,14 @@ export const getSearchControlFactory = ({
             idSelected={searchTechnique}
             onChange={(id) => {
               const newSearchTechnique = id as SearchControlTechniques;
+              setSearchTechnique(newSearchTechnique);
               updateState({ searchTechnique: newSearchTechnique });
             }}
           />
         </EuiFormRow>
       );
     },
-    buildControl: (initialState, buildApi, uuid, parentApi) => {
+    buildControl: async (initialState, buildApi, uuid, parentApi) => {
       const searchString = new BehaviorSubject<string | undefined>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
@@ -93,10 +91,7 @@ export const getSearchControlFactory = ({
         initialState,
         editorStateManager,
         parentApi,
-        {
-          core,
-          dataViews: dataViewsService,
-        }
+        services
       );
 
       const api = buildApi(
@@ -127,6 +122,7 @@ export const getSearchControlFactory = ({
             searchTechnique,
             (newTechnique: SearchControlTechniques | undefined) =>
               searchTechnique.next(newTechnique),
+            (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
           ],
           searchString: [
             searchString,
@@ -178,10 +174,14 @@ export const getSearchControlFactory = ({
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(distinctUntilChanged(deepEqual))
+        .pipe(skip(1))
         .subscribe(() => {
           searchString.next(undefined);
         });
+
+      if (initialState.searchString?.length) {
+        await dataControl.untilFiltersInitialized();
+      }
 
       return {
         api,

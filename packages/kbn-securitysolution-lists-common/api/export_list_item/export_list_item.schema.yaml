@@ -10,8 +10,6 @@ paths:
       x-codegen-enabled: true
       summary: Exports list items
       description: Exports list item values from the specified list
-      tags:
-        - List items Import/Export API
       parameters:
         - name: list_id
           in: query
