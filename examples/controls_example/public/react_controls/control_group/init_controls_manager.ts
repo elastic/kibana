@@ -7,34 +7,43 @@
  */
 
 import { v4 as generateId } from 'uuid';
+import fastIsEqual from 'fast-deep-equal';
 import {
   HasSerializedChildState,
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { Reference } from '@kbn/content-management-utils';
-import { BehaviorSubject, merge } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Reference } from '@kbn/content-management-utils';
+import { BehaviorSubject, first, merge } from 'rxjs';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlPanelsState, ControlPanelState } from './types';
 import { DefaultControlApi, DefaultControlState } from '../types';
+import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
 
-type ControlOrder = Array<{ id: string; type: string }>;
+export type ControlsInOrder = Array<{ id: string; type: string }>;
+
+export function getControlsInOrder(initialControlPanelsState: ControlPanelsState) {
+  return Object.keys(initialControlPanelsState)
+    .map((key) => ({
+      id: key,
+      order: initialControlPanelsState[key].order,
+      type: initialControlPanelsState[key].type,
+    }))
+    .sort((a, b) => (a.order > b.order ? 1 : -1))
+    .map(({ id, type }) => ({ id, type })); // filter out `order`
+}
 
 export function initControlsManager(initialControlPanelsState: ControlPanelsState) {
+  const lastSavedControlsPanelState$ = new BehaviorSubject(initialControlPanelsState);
+  const initialControlIds = Object.keys(initialControlPanelsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-  const controlsPanelState: { [panelId: string]: DefaultControlState } = {
+  let controlsPanelState: { [panelId: string]: DefaultControlState } = {
     ...initialControlPanelsState,
   };
-  const controlsInOrder$ = new BehaviorSubject<ControlOrder>(
-    Object.keys(initialControlPanelsState)
-      .map((key) => ({
-        id: key,
-        order: initialControlPanelsState[key].order,
-        type: initialControlPanelsState[key].type,
-      }))
-      .sort((a, b) => (a.order > b.order ? 1 : -1))
-      .map(({ id, type }) => ({ id, type })) // filter out `order`
+  const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
+    getControlsInOrder(initialControlPanelsState)
   );
 
   function untilControlLoaded(
@@ -132,6 +141,20 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         references,
       };
     },
+    snapshotControlsRuntimeState: () => {
+      const controlsRuntimeState: ControlPanelsState = {};
+      controlsInOrder$.getValue().forEach(({ id, type }, index) => {
+        const controlApi = getControlApi(id);
+        if (controlApi && apiHasSnapshottableState(controlApi)) {
+          controlsRuntimeState[id] = {
+            order: index,
+            type,
+            ...controlApi.snapshotRuntimeState(),
+          };
+        }
+      });
+      return controlsRuntimeState;
+    },
     api: {
       getSerializedStateForChild: (childId: string) => {
         const controlPanelState = controlsPanelState[childId];
@@ -156,6 +179,46 @@ export function initControlsManager(initialControlPanelsState: ControlPanelsStat
         );
         return controlApi ? controlApi.uuid : '';
       },
-    } as PresentationContainer & HasSerializedChildState<ControlPanelState>,
+      untilInitialized: () => {
+        return new Promise((resolve) => {
+          children$
+            .pipe(
+              first((children) => {
+                const atLeastOneControlNotInitialized = initialControlIds.some(
+                  (controlId) => !children[controlId]
+                );
+                return !atLeastOneControlNotInitialized;
+              })
+            )
+            .subscribe(() => {
+              resolve();
+            });
+        });
+      },
+    } as PresentationContainer &
+      HasSerializedChildState<ControlPanelState> & { untilInitialized: () => Promise<void> },
+    comparators: {
+      controlsInOrder: [
+        controlsInOrder$,
+        (next: ControlsInOrder) => controlsInOrder$.next(next),
+        fastIsEqual,
+      ],
+      // Control state differences tracked by controlApi comparators
+      // Control ordering differences tracked by controlsInOrder comparator
+      // initialChildControlState comparatator exists to reset controls manager to last saved state
+      initialChildControlState: [
+        lastSavedControlsPanelState$,
+        (lastSavedControlPanelsState: ControlPanelsState) => {
+          lastSavedControlsPanelState$.next(lastSavedControlPanelsState);
+          controlsPanelState = {
+            ...lastSavedControlPanelsState,
+          };
+          controlsInOrder$.next(getControlsInOrder(lastSavedControlPanelsState));
+        },
+        () => true,
+      ],
+    } as StateComparators<
+      Pick<ControlGroupComparatorState, 'controlsInOrder' | 'initialChildControlState'>
+    >,
   };
 }

@@ -42,6 +42,7 @@ describe('Response Action file info API', () => {
     const actionRequestEsSearchResponse = createActionRequestsEsSearchResultsMock();
 
     actionRequestEsSearchResponse.hits.hits[0]._source!.EndpointActions.action_id = '321-654';
+    actionRequestEsSearchResponse.hits.hits[0]._source!.EndpointActions.data.command = 'get-file';
 
     applyEsClientSearchMock({
       esClientMock,

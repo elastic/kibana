@@ -35,5 +35,7 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/datemath",
     "@kbn/ui-theme",
+    "@kbn/react-kibana-context-render",
+    "@kbn/field-formats-plugin",
   ]
 }

@@ -7,7 +7,7 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
-import { RoleCredentials } from '../../../../test_serverless/shared/services';
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SecuritySolutionUtils } from './types';
 

@@ -55,6 +55,7 @@ paths:
           description: Internal server error response
       summary: Delete an alerts index
       tags:
+        - Security Solution Detections API
         - Alert index API
     get:
       operationId: GetAlertsIndex
@@ -100,6 +101,7 @@ paths:
           description: Internal server error response
       summary: Gets the alert index name if it exists
       tags:
+        - Security Solution Detections API
         - Alert index API
     post:
       operationId: CreateAlertsIndex
@@ -141,6 +143,7 @@ paths:
           description: Internal server error response
       summary: Create an alerts index
       tags:
+        - Security Solution Detections API
         - Alert index API
   /api/detection_engine/privileges:
     get:
@@ -183,6 +186,7 @@ paths:
           description: Internal server error response
       summary: Returns user privileges for the Kibana space
       tags:
+        - Security Solution Detections API
         - Privileges API
   /api/detection_engine/rules:
     delete:
@@ -210,6 +214,7 @@ paths:
           description: Indicates a successful call.
       summary: Delete a detection rule
       tags:
+        - Security Solution Detections API
         - Rules API
     get:
       description: Retrieve a detection rule using the `rule_id` or `id` field.
@@ -236,6 +241,7 @@ paths:
           description: Indicates a successful call.
       summary: Retrieve a detection rule
       tags:
+        - Security Solution Detections API
         - Rules API
     patch:
       description: >-
@@ -257,6 +263,7 @@ paths:
           description: Indicates a successful call.
       summary: Patch a detection rule
       tags:
+        - Security Solution Detections API
         - Rules API
     post:
       description: Create a new detection rule.
@@ -276,6 +283,7 @@ paths:
           description: Indicates a successful call.
       summary: Create a detection rule
       tags:
+        - Security Solution Detections API
         - Rules API
     put:
       description: >
@@ -301,6 +309,7 @@ paths:
           description: Indicates a successful call.
       summary: Update a detection rule
       tags:
+        - Security Solution Detections API
         - Rules API
   /api/detection_engine/rules/_bulk_action:
     post:
@@ -339,6 +348,7 @@ paths:
           description: OK
       summary: Apply a bulk action to detection rules
       tags:
+        - Security Solution Detections API
         - Bulk API
   /api/detection_engine/rules/_bulk_create:
     post:
@@ -363,6 +373,7 @@ paths:
           description: Indicates a successful call.
       summary: Create multiple detection rules
       tags:
+        - Security Solution Detections API
         - Bulk API
   /api/detection_engine/rules/_bulk_delete:
     delete:
@@ -414,6 +425,7 @@ paths:
           description: Internal server error response
       summary: Delete multiple detection rules
       tags:
+        - Security Solution Detections API
         - Bulk API
     post:
       deprecated: true
@@ -463,6 +475,7 @@ paths:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       tags:
+        - Security Solution Detections API
         - Bulk API
   /api/detection_engine/rules/_bulk_update:
     patch:
@@ -489,6 +502,7 @@ paths:
           description: Indicates a successful call.
       summary: Patch multiple detection rules
       tags:
+        - Security Solution Detections API
         - Bulk API
     put:
       deprecated: true
@@ -520,6 +534,7 @@ paths:
           description: Indicates a successful call.
       summary: Update multiple detection rules
       tags:
+        - Security Solution Detections API
         - Bulk API
   /api/detection_engine/rules/_export:
     post:
@@ -583,6 +598,7 @@ paths:
           description: Indicates a successful call.
       summary: Export detection rules
       tags:
+        - Security Solution Detections API
         - Import/Export API
   /api/detection_engine/rules/_find:
     get:
@@ -657,6 +673,7 @@ paths:
           description: Successful response
       summary: List all detection rules
       tags:
+        - Security Solution Detections API
         - Rules API
   /api/detection_engine/rules/_import:
     post:
@@ -771,6 +788,7 @@ paths:
           description: Indicates a successful call.
       summary: Import detection rules
       tags:
+        - Security Solution Detections API
         - Import/Export API
   /api/detection_engine/rules/prepackaged:
     put:
@@ -808,6 +826,7 @@ paths:
           description: Indicates a successful call
       summary: Install prebuilt detection rules and Timelines
       tags:
+        - Security Solution Detections API
         - Prebuilt Rules API
   /api/detection_engine/rules/prepackaged/_status:
     get:
@@ -866,6 +885,7 @@ paths:
           description: Indicates a successful call
       summary: Retrieve the status of prebuilt detection rules and Timelines
       tags:
+        - Security Solution Detections API
         - Prebuilt Rules API
   /api/detection_engine/rules/preview:
     post:
@@ -945,6 +965,7 @@ paths:
           description: Internal server error response
       summary: Preview rule alerts generated on specified time range
       tags:
+        - Security Solution Detections API
         - Rule preview API
   /api/detection_engine/signals/assignees:
     post:
@@ -975,6 +996,8 @@ paths:
         '400':
           description: Invalid request.
       summary: Assign and unassign users from detection alerts
+      tags:
+        - Security Solution Detections API
   /api/detection_engine/signals/finalize_migration:
     post:
       description: >
@@ -1032,6 +1055,7 @@ paths:
           description: Internal server error response
       summary: Finalize detection alert migrations
       tags:
+        - Security Solution Detections API
         - Alerts migration API
   /api/detection_engine/signals/migration:
     delete:
@@ -1099,6 +1123,7 @@ paths:
           description: Internal server error response
       summary: Clean up detection alert migrations
       tags:
+        - Security Solution Detections API
         - Alerts migration API
     post:
       description: >
@@ -1165,6 +1190,7 @@ paths:
           description: Internal server error response
       summary: Initiate a detection alert migration
       tags:
+        - Security Solution Detections API
         - Alerts migration API
   /api/detection_engine/signals/migration_status:
     post:
@@ -1222,6 +1248,7 @@ paths:
           description: Internal server error response
       summary: Retrieve the status of detection alert migrations
       tags:
+        - Security Solution Detections API
         - Alerts migration API
   /api/detection_engine/signals/search:
     post:
@@ -1294,6 +1321,7 @@ paths:
           description: Internal server error response
       summary: Find and/or aggregate detection alerts
       tags:
+        - Security Solution Detections API
         - Alerts API
   /api/detection_engine/signals/status:
     post:
@@ -1341,6 +1369,7 @@ paths:
           description: Internal server error response
       summary: Set a detection alert status
       tags:
+        - Security Solution Detections API
         - Alerts API
   /api/detection_engine/signals/tags:
     post:
@@ -1397,6 +1426,7 @@ paths:
           description: Internal server error response
       summary: Add and remove detection alert tags
       tags:
+        - Security Solution Detections API
         - Alerts API
   /api/detection_engine/tags:
     get:
@@ -1411,6 +1441,7 @@ paths:
           description: Indicates a successful call
       summary: List all detection rule tags
       tags:
+        - Security Solution Detections API
         - Tags API
 components:
   schemas:
@@ -4104,7 +4135,6 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
       required:
-        - group
         - id
         - params
     NormalizedRuleError:
@@ -4902,7 +4932,6 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
       required:
         - action_type_id
-        - group
         - id
         - params
     RuleActionAlertsFilter:
@@ -6928,3 +6957,9 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: >-
+      You can create rules that automatically turn events and external alerts
+      sent to Elastic Security into detection alerts. These alerts are displayed
+      on the Detections page.
+    name: Security Solution Detections API
