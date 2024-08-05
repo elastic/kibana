@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { SearchControlState } from './types';
 
 export function initializeSearchControlSelections(
@@ -15,15 +15,19 @@ export function initializeSearchControlSelections(
   onSelectionChange: () => void
 ) {
   const searchString$ = new BehaviorSubject<string | undefined>(initialState.searchString);
+  function setSearchString(next: string | undefined) {
+    if (searchString$.value !== next) {
+      searchString$.next(next);
+      onSelectionChange();
+    }
+  }
 
   return {
+    comparators: {
+      searchString: [searchString$, setSearchString],
+    } as StateComparators<Pick<SearchControlState, 'searchString'>>,
     hasInitialSelections: initialState.searchString?.length,
     searchString$: searchString$ as PublishingSubject<string | undefined>,
-    setSearchString: (next: string | undefined) => {
-      if (searchString$.value !== next) {
-        searchString$.next(next);
-        onSelectionChange();
-      }
-    },
+    setSearchString,
   };
 }

@@ -95,7 +95,7 @@ export const getSearchControlFactory = (
         services
       );
 
-      const searchControlSelections = initializeSearchControlSelections(
+      const selections = initializeSearchControlSelections(
         initialState,
         dataControl.setters.onSelectionChange
       );
@@ -112,30 +112,24 @@ export const getSearchControlFactory = (
             return {
               rawState: {
                 ...dataControlState,
-                searchString: searchControlSelections.searchString$.getValue(),
+                searchString: selections.searchString$.getValue(),
                 searchTechnique: searchTechnique.getValue(),
               },
               references, // does not have any references other than those provided by the data control serializer
             };
           },
           clearSelections: () => {
-            searchControlSelections.setSearchString(undefined);
+            selections.setSearchString(undefined);
           },
         },
         {
           ...dataControl.comparators,
+          ...selections.comparators,
           searchTechnique: [
             searchTechnique,
             (newTechnique: SearchControlTechniques | undefined) =>
               searchTechnique.next(newTechnique),
             (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
-          ],
-          searchString: [
-            searchControlSelections.searchString$,
-            (newString: string | undefined) =>
-              searchControlSelections.setSearchString(
-                newString?.length === 0 ? undefined : newString
-              ),
           ],
         }
       );
@@ -143,10 +137,7 @@ export const getSearchControlFactory = (
       /**
        * If either the search string or the search technique changes, recalulate the output filter
        */
-      const onSearchStringChanged = combineLatest([
-        searchControlSelections.searchString$,
-        searchTechnique,
-      ])
+      const onSearchStringChanged = combineLatest([selections.searchString$, searchTechnique])
         .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
         .subscribe(([newSearchString, currentSearchTechnnique]) => {
           const currentDataView = dataControl.api.dataViews.getValue()?.[0];
@@ -185,7 +176,7 @@ export const getSearchControlFactory = (
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          searchControlSelections.setSearchString(undefined);
+          selections.setSearchString(undefined);
         });
 
       if (initialState.searchString?.length) {
@@ -199,9 +190,7 @@ export const getSearchControlFactory = (
          * ControlPanel that are necessary for styling
          */
         Component: ({ className: controlPanelClassName }) => {
-          const currentSearch = useStateFromPublishingSubject(
-            searchControlSelections.searchString$
-          );
+          const currentSearch = useStateFromPublishingSubject(selections.searchString$);
 
           useEffect(() => {
             return () => {
@@ -222,7 +211,7 @@ export const getSearchControlFactory = (
               isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}
               onChange={(event) => {
-                searchControlSelections.setSearchString(event.target.value);
+                selections.setSearchString(event.target.value);
               }}
               placeholder={i18n.translate('controls.searchControl.placeholder', {
                 defaultMessage: 'Search...',

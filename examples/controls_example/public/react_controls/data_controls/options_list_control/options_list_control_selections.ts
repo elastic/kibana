@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import deepEqual from 'react-fast-compare';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { OptionsListControlState } from './types';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 
@@ -19,13 +19,32 @@ export function initializeOptionsListSelections(
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(
     initialState.selectedOptions ?? []
   );
-  const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
-  const exclude$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
-
   const selectedOptionsComparatorFunction = (
     a: OptionsListSelection[] | undefined,
     b: OptionsListSelection[] | undefined
   ) => deepEqual(a ?? [], b ?? []);
+  function setSelectedOptions(next: OptionsListSelection[] | undefined) {
+    if (selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
+      selectedOptions$.next(next);
+      onSelectionChange();
+    }
+  }
+
+  const existsSelected$ = new BehaviorSubject<boolean | undefined>(initialState.existsSelected);
+  function setExistsSelected(next: boolean | undefined) {
+    if (existsSelected$.value !== next) {
+      existsSelected$.next(next);
+      onSelectionChange();
+    }
+  }
+
+  const exclude$ = new BehaviorSubject<boolean | undefined>(initialState.exclude);
+  function setExclude(next: boolean | undefined) {
+    if (exclude$.value !== next) {
+      exclude$.next(next);
+      onSelectionChange();
+    }
+  }
 
   return {
     clearSelections: () => {
@@ -34,6 +53,13 @@ export function initializeOptionsListSelections(
       exclude$.next(false);
       onSelectionChange();
     },
+    comparators: {
+      exclude: [exclude$, setExclude],
+      existsSelected: [existsSelected$, setExistsSelected],
+      selectedOptions: [selectedOptions$, setSelectedOptions, selectedOptionsComparatorFunction],
+    } as StateComparators<
+      Pick<OptionsListControlState, 'exclude' | 'existsSelected' | 'selectedOptions'>
+    >,
     hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
     selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
     selectedOptionsComparatorFunction,
@@ -44,18 +70,8 @@ export function initializeOptionsListSelections(
       }
     },
     existsSelected$: existsSelected$ as PublishingSubject<boolean | undefined>,
-    setExistsSelected: (next: boolean | undefined) => {
-      if (existsSelected$.value !== next) {
-        existsSelected$.next(next);
-        onSelectionChange();
-      }
-    },
+    setExistsSelected,
     exclude$: exclude$ as PublishingSubject<boolean | undefined>,
-    setExclude: (next: boolean | undefined) => {
-      if (exclude$.value !== next) {
-        exclude$.next(next);
-        onSelectionChange();
-      }
-    },
+    setExclude,
   };
 }

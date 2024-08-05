@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { RangeValue, RangesliderControlState } from './types';
 
 export function initializeRangeControlSelections(
@@ -15,15 +15,19 @@ export function initializeRangeControlSelections(
   onSelectionChange: () => void
 ) {
   const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
+  function setValue(next: RangeValue | undefined) {
+    if (value$.value !== next) {
+      value$.next(next);
+      onSelectionChange();
+    }
+  }
 
   return {
+    comparators: {
+      value: [value$, setValue],
+    } as StateComparators<Pick<RangesliderControlState, 'value'>>,
     hasInitialSelections: initialState.value !== undefined,
     value$: value$ as PublishingSubject<RangeValue | undefined>,
-    setValue: (next: RangeValue | undefined) => {
-      if (value$.value !== next) {
-        value$.next(next);
-        onSelectionChange();
-      }
-    },
+    setValue,
   };
 }
