@@ -6,6 +6,10 @@
  */
 
 import { http, HttpResponse } from 'msw';
+import {
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '../../../../common/constants';
 
 const generateDataViewField = (name: string, type: 'string' | 'date' = 'string') => ({
   name,
@@ -36,6 +40,36 @@ export const defaultDataViewFindHandler = http.get(
           generateDataViewField('rule.section'),
         ],
         indices: ['logs-cloud_security_posture.findings_latest-default'],
+      });
+    }
+
+    return HttpResponse.json({
+      fields: [],
+      indices: [],
+    });
+  }
+);
+
+export const defaultDataViewGetHandler = http.get(
+  'http://localhost/internal/data_views/',
+  ({ request }) => {
+    const url = new URL(request.url);
+    const id = url.searchParams.get('id');
+
+    // if (id?.includes('logs-cloud_security_posture.findings_latest-*')) {
+    if (id?.includes(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX)) {
+      return HttpResponse.json({
+        fields: [
+          generateDataViewField('@timestamp', 'date'),
+          generateDataViewField('resource.id'),
+          generateDataViewField('resource.name'),
+          generateDataViewField('resource.sub_type'),
+          generateDataViewField('result.evaluation'),
+          generateDataViewField('rule.benchmark.rule_number'),
+          generateDataViewField('rule.name'),
+          generateDataViewField('rule.section'),
+        ],
+        indices: [CDR_MISCONFIGURATIONS_INDEX_PATTERN],
       });
     }
 

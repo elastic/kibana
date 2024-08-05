@@ -131,6 +131,26 @@ export const getMockServerDependencies = () => {
 
             return [dataView];
           },
+          get: async (id: string) => {
+            const response = await fetch(`${MOCK_SERVER_BASE_URL}/internal/data_views/?id=${id}`);
+
+            const responseJson = await response.json();
+
+            const fields = responseJson.fields.reduce((acc: any, field: any) => {
+              acc[field.name] = field;
+              return acc;
+            }, {});
+
+            const dataView = createStubDataView({
+              spec: {
+                id,
+                title: responseJson.indices[0],
+                fields,
+              },
+            });
+
+            return dataView;
+          },
         },
       },
       licensing: {

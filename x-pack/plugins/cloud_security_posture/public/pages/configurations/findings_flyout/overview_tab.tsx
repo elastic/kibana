@@ -114,8 +114,8 @@ const getDetailsList = (
       getDatasetDisplayName(data.data_stream?.dataset) || data.data_stream?.dataset || EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.indexTitle', {
-      defaultMessage: 'Index',
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {
+      defaultMessage: 'Data View',
     }),
     description: discoverDataViewLink ? (
       <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
