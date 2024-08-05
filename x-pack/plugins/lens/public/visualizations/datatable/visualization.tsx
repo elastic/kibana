@@ -320,7 +320,12 @@ export const getDatatableVisualization = ({
               return !operation?.isBucketed;
             })
             .map((accessor) => {
-              const { colorMode, palette, colorMapping, hidden } = columnMap[accessor] ?? {};
+              const {
+                colorMode = 'none',
+                palette,
+                colorMapping,
+                hidden,
+              } = columnMap[accessor] ?? {};
               const stops = getColorStops(paletteService, isDarkMode, palette, colorMapping);
               const hasColoring = Boolean(colorMode !== 'none' && stops);
 
