@@ -14,30 +14,11 @@
  *   version: 1
  */
 
-import { z } from 'zod';
+import type { z } from 'zod';
 
-export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;
-export const EntityAnalyticsPrivileges = z.object({
-  has_all_required: z.boolean(),
-  has_read_permissions: z.boolean().optional(),
-  has_write_permissions: z.boolean().optional(),
-  privileges: z.object({
-    elasticsearch: z.object({
-      cluster: z
-        .object({
-          manage_index_templates: z.boolean().optional(),
-          manage_transform: z.boolean().optional(),
-        })
-        .optional(),
-      index: z
-        .object({})
-        .catchall(
-          z.object({
-            read: z.boolean().optional(),
-            write: z.boolean().optional(),
-          })
-        )
-        .optional(),
-    }),
-  }),
-});
+import { EntityAnalyticsPrivileges } from '../common/common.gen';
+
+export type AssetCriticalityGetPrivilegesResponse = z.infer<
+  typeof AssetCriticalityGetPrivilegesResponse
+>;
+export const AssetCriticalityGetPrivilegesResponse = EntityAnalyticsPrivileges;
