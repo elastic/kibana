@@ -11,6 +11,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import { Dispatch } from '@reduxjs/toolkit';
+import { partition } from 'lodash';
 import {
   updateDatasourceState,
   type DataViewsState,
@@ -36,6 +37,7 @@ import {
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
 import { NonNullable } from '../react_embeddable/helper';
+import { LensCallbacks } from '../react_embeddable/types';
 
 export interface UserMessageGetterProps {
   visualizationType: string | null | undefined;
@@ -204,6 +206,25 @@ function getMissingIndexPatternsErrors(
   ];
 }
 
+export const handleMessageOverwriteFromConsumer = (
+  messages: UserMessage[],
+  onBeforeBadgesRender?: LensCallbacks['onBeforeBadgesRender']
+) => {
+  if (onBeforeBadgesRender) {
+    // we need something else to better identify those errors
+    const [messagesToHandle, originalMessages] = partition(messages, (message) =>
+      message.displayLocations.some((location) => location.id === 'embeddableBadge')
+    );
+
+    if (messagesToHandle.length > 0) {
+      const customBadgeMessages = onBeforeBadgesRender(messagesToHandle);
+      return originalMessages.concat(customBadgeMessages);
+    }
+  }
+
+  return messages;
+};
+
 export const filterAndSortUserMessages = (
   userMessages: UserMessage[],
   locationId?: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[],
@@ -346,17 +367,14 @@ export const useApplicationUserMessages = ({
       setAdditionalUserMessages(newMessageMap);
     }
 
-    return {
-      rerender: addedMessageIds.length > 0,
-      cleanup: () => {
-        const withMessagesRemoved = {
-          ...additionalUserMessages,
-        };
+    return () => {
+      const withMessagesRemoved = {
+        ...additionalUserMessages,
+      };
 
-        addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
+      addedMessageIds.forEach((id) => delete withMessagesRemoved[id]);
 
-        setAdditionalUserMessages(withMessagesRemoved);
-      },
+      setAdditionalUserMessages(withMessagesRemoved);
     };
   };
   return { getUserMessages, addUserMessages };

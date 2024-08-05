@@ -61,6 +61,7 @@ import {
   IndexPatternRef,
   LensTableRowContextMenuEvent,
   Simplify,
+  UserMessage,
   Visualization,
   VisualizationMap,
 } from '../types';
@@ -166,6 +167,7 @@ export interface LensCallbacks {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
 interface ViewInDiscoverCallbacks {

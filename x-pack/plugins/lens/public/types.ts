@@ -317,10 +317,7 @@ export type UserMessagesGetter = (
   filters?: UserMessageFilters
 ) => UserMessage[];
 
-export type AddUserMessages = (messages: UserMessage[]) => {
-  rerender: boolean;
-  cleanup: () => void;
-};
+export type AddUserMessages = (messages: UserMessage[]) => () => void;
 
 /**
  * Interface for the datasource registry

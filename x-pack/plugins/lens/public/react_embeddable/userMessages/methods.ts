@@ -8,6 +8,7 @@
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
+  handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
 import { UserMessagesGetter, AddUserMessages, UserMessage, FramePublicAPI } from '../../types';
@@ -17,6 +18,7 @@ import {
   getInitialDataViewsObject,
 } from '../../utils';
 import {
+  LensCallbacks,
   LensEmbeddableStartServices,
   VisualizationContext,
   VisualizationContextHelper,
@@ -59,7 +61,8 @@ function getUpdatedState(
 
 export function buildUserMessagesHelper(
   getVisualizationContext: () => VisualizationContext,
-  { coreStart, visualizationMap, datasourceMap }: LensEmbeddableStartServices
+  { coreStart, visualizationMap, datasourceMap }: LensEmbeddableStartServices,
+  onBeforeBadgesRender: LensCallbacks['onBeforeBadgesRender']
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
@@ -149,10 +152,13 @@ export function buildUserMessagesHelper(
         }) ?? [])
       );
 
-      return filterAndSortUserMessages(
-        userMessages.concat(Object.values(runtimeUserMessages)),
-        locationId,
-        filters ?? {}
+      return handleMessageOverwriteFromConsumer(
+        filterAndSortUserMessages(
+          userMessages.concat(Object.values(runtimeUserMessages)),
+          locationId,
+          filters ?? {}
+        ),
+        onBeforeBadgesRender
       );
     },
     addUserMessages: (messages) => {
@@ -172,13 +178,10 @@ export function buildUserMessagesHelper(
         runtimeUserMessages = newMessageMap;
       }
 
-      return {
-        rerender: Boolean(addedMessageIds.length),
-        cleanup: () => {
-          messages.forEach(({ uniqueId }) => {
-            delete runtimeUserMessages[uniqueId];
-          });
-        },
+      return () => {
+        messages.forEach(({ uniqueId }) => {
+          delete runtimeUserMessages[uniqueId];
+        });
       };
     },
   };
