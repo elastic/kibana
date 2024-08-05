@@ -14,7 +14,7 @@ const RETRY_ATTEMPTS = 2;
 const RETRY_DELAY = 200;
 
 /*
- * Retry an operation if it runs into 409 Conflicts,
+ * Retry a request if it runs into 409 Conflicts,
  * up to a maximum number of attempts.
  */
 export const retryRequestIfConflicts = async (
