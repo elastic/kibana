@@ -49,7 +49,7 @@ jest.mock('../application/services/api', () => ({
   getInferenceEndpoints: jest.fn().mockResolvedValue({
     data: [
       {
-        inference_id: 'e5',
+        model_id: 'e5',
         task_type: 'text_embedding',
         service: 'elasticsearch',
         service_settings: {

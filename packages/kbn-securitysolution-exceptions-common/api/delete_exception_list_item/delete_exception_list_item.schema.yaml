@@ -9,8 +9,6 @@ paths:
       operationId: DeleteExceptionListItem
       x-codegen-enabled: true
       summary: Deletes an exception list item
-      tags:
-        - Exceptions API
       parameters:
         - name: id
           in: query
