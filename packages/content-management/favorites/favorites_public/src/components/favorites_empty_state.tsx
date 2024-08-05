@@ -8,7 +8,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, useEuiTheme, EuiImage } from '@elastic/eui';
+import { EuiEmptyPrompt, useEuiTheme, EuiImage, EuiMarkdownFormat } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import emptyFavoritesDark from './empty_favorites_dark.svg';
@@ -55,11 +55,13 @@ export const FavoritesEmptyState = ({
       hasBorder={false}
       title={<h2>{title}</h2>}
       body={
-        <FormattedMessage
-          id="contentManagement.favorites.noFavoritesMessageBody"
-          defaultMessage="You can easily star {entityNamePlural} to keep them handy. Simply click the star icon next to a {entityName}, and it will be added to your Starred list."
-          values={{ entityNamePlural, entityName }}
-        />
+        <EuiMarkdownFormat>
+          {i18n.translate('contentManagement.favorites.noFavoritesMessageBody', {
+            defaultMessage:
+              "Keep track of your most important {entityNamePlural} by adding them to your **Starred** list. Click the **{starIcon}** **star icon** next to a {entityName} name and it'll appear in this tab.",
+            values: { entityNamePlural, entityName, starIcon: `✩` },
+          })}
+        </EuiMarkdownFormat>
       }
     />
   );

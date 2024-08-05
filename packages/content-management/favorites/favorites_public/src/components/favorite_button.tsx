@@ -30,7 +30,7 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
 
   if (isFavorite) {
     const title = i18n.translate('contentManagement.favorites.unfavoriteButtonLabel', {
-      defaultMessage: 'Remove from starred',
+      defaultMessage: 'Remove from Starred',
     });
 
     return (
@@ -50,7 +50,7 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
     );
   } else {
     const title = i18n.translate('contentManagement.favorites.favoriteButtonLabel', {
-      defaultMessage: 'Add to starred',
+      defaultMessage: 'Add to Starred',
     });
     return (
       <EuiButtonIcon

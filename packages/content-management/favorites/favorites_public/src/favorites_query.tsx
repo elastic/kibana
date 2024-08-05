@@ -57,7 +57,7 @@ export const useAddFavorite = () => {
         notifyError?.(
           <>
             {i18n.translate('contentManagement.favorites.addFavoriteError', {
-              defaultMessage: 'Error adding to starred',
+              defaultMessage: 'Error adding to Starred',
             })}
           </>,
           error?.message
@@ -91,7 +91,7 @@ export const useRemoveFavorite = () => {
         notifyError?.(
           <>
             {i18n.translate('contentManagement.favorites.removeFavoriteError', {
-              defaultMessage: 'Error removing from starred',
+              defaultMessage: 'Error removing from Starred',
             })}
           </>,
           error?.message
