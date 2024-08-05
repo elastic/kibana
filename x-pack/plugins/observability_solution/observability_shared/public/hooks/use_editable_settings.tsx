@@ -86,9 +86,9 @@ export function useEditableSettings(settingsKeys: string[]) {
       });
       try {
         setIsSaving(true);
-        const arr = Object.entries(unsavedChanges).map(([key, value]) => {
-          return settings.client.set(key, value.unsavedValue);
-        });
+        const arr = Object.entries(unsavedChanges).map(([key, value]) =>
+          settings.client.set(key, value.unsavedValue)
+        );
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
