@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/packages/shared-ux/table'],
+  roots: ['<rootDir>/packages/shared-ux/table_persist'],
 };
