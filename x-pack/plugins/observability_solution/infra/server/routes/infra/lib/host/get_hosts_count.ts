@@ -8,7 +8,12 @@
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { BoolQuery } from '@kbn/es-query';
 import { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
-import { HOST_NAME_FIELD, EVENT_MODULE, METRICSET_MODULE } from '../../../../../common/constants';
+import {
+  HOST_NAME_FIELD,
+  EVENT_MODULE,
+  METRICSET_MODULE,
+  SYSTEM_INTEGRATION,
+} from '../../../../../common/constants';
 
 export async function getHostsCount({
   infraMetricsClient,
@@ -39,8 +44,8 @@ export async function getHostsCount({
             {
               bool: {
                 should: [
-                  ...termQuery(EVENT_MODULE, 'system'),
-                  ...termQuery(METRICSET_MODULE, 'system'),
+                  ...termQuery(EVENT_MODULE, SYSTEM_INTEGRATION),
+                  ...termQuery(METRICSET_MODULE, SYSTEM_INTEGRATION),
                 ],
                 minimum_should_match: 1,
               },
