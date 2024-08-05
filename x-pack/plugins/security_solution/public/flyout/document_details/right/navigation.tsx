@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutNavigation } from '@kbn/securitysolution-common';
+import { FlyoutNavigation } from '@kbn/security-solution-common';
 import { useKibana } from '../../../common/lib/kibana';
 import { HeaderActions } from './components/header_actions';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';

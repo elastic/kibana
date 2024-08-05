@@ -6236,6 +6236,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-common@link:x-pack/packages/security-solution/common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
   version "0.0.0"
   uid ""
@@ -6281,10 +6285,6 @@
   uid ""
 
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
-  version "0.0.0"
-  uid ""
-
-"@kbn/securitysolution-common@link:packages/kbn-securitysolution-common":
   version "0.0.0"
   uid ""
 

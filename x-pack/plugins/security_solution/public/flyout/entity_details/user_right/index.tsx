@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutLoading, FlyoutNavigation } from '@kbn/securitysolution-common/src/flyout';
+import { FlyoutLoading, FlyoutNavigation } from '@kbn/security-solution-common/src/flyout';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { FlyoutBody } from '@kbn/securitysolution-common';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';

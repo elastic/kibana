@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { getDiscoverCellRenderer } from '@kbn/securitysolution-common';
+import { getDiscoverCellRenderer } from '@kbn/security-solution-common';
 import { RootProfileProvider, SolutionType } from '../../../profiles';
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';

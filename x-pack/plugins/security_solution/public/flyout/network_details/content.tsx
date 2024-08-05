@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FlyoutBody } from '@kbn/securitysolution-common';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { NetworkDetails } from './components/network_details';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
 

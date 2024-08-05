@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutLoading } from '@kbn/securitysolution-common';
+import { FlyoutLoading } from '@kbn/security-solution-common';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';

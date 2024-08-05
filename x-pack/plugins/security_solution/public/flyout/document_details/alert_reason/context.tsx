@@ -7,7 +7,7 @@
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { FlyoutError, FlyoutLoading } from '@kbn/securitysolution-common';
+import { FlyoutError, FlyoutLoading } from '@kbn/security-solution-common';
 import { useEventDetails } from '../shared/hooks/use_event_details';
 import type { AlertReasonPanelProps } from '.';
 

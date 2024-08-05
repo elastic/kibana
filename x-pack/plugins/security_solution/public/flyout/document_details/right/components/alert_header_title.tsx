@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, useEuiTheme, EuiLink } 
 import { css } from '@emotion/css';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
-import { FlyoutTitle } from '@kbn/securitysolution-common';
+import { FlyoutTitle } from '@kbn/security-solution-common';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';

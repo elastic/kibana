@@ -9,7 +9,7 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { FlyoutError, FlyoutLoading } from '@kbn/securitysolution-common/src/flyout';
+import { FlyoutError, FlyoutLoading } from '@kbn/security-solution-common/src/flyout';
 import { useEventDetails } from './hooks/use_event_details';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';

@@ -14,7 +14,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/securitysolution-common';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../../common/types';

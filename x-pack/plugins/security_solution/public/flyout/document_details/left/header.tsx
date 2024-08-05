@@ -9,7 +9,7 @@ import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import { FlyoutHeader } from '@kbn/securitysolution-common';
+import { FlyoutHeader } from '@kbn/security-solution-common';
 import type { LeftPanelPaths } from '.';
 import type { LeftPanelTabType } from './tabs';
 import { getField } from '../shared/utils';

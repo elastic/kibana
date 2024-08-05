@@ -10,7 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/securitysolution-common';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import {

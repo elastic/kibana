@@ -9,7 +9,7 @@ import type { EuiFlyoutHeader } from '@elastic/eui';
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { FlyoutHeader, FlyoutHeaderTabs } from '@kbn/securitysolution-common';
+import { FlyoutHeader, FlyoutHeaderTabs } from '@kbn/security-solution-common';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';

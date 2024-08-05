@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FlyoutFooter } from '@kbn/securitysolution-common';
+import { FlyoutFooter } from '@kbn/security-solution-common';
 import { useRuleOverviewPanelContext } from '../context';
 import { RULE_OVERVIEW_FOOTER_TEST_ID, RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';

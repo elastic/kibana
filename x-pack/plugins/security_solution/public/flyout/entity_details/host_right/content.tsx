@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { FlyoutBody } from '@kbn/securitysolution-common';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';

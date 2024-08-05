@@ -754,7 +754,7 @@ x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunt
 x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-explore
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
-packages/kbn-securitysolution-common @elastic/security-threat-hunting-investigations
+packages/kbn-security-solution-common @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -876,9 +876,9 @@ packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless 
-test 
-x-pack/test 
+x-pack/test_serverless
+test
+x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 packages/kbn-text-based-editor @elastic/kibana-esql

@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/securitysolution-common';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
 

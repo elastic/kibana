@@ -9,8 +9,7 @@ import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { FlyoutHeader } from '@kbn/securitysolution-common';
-import { FlyoutTitle } from '@kbn/securitysolution-common';
+import { FlyoutHeader, FlyoutTitle } from '@kbn/security-solution-common';
 import type { HostItem } from '../../../../common/search_strategy';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';

@@ -20,7 +20,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/securitysolution-common';
+} from '@kbn/security-solution-common';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';

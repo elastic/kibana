@@ -8,7 +8,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutLoading, FlyoutError } from '@kbn/securitysolution-common';
+import { FlyoutLoading, FlyoutError } from '@kbn/security-solution-common';
 import { useRuleOverviewPanelContext } from '../context';
 import { ExpandableSection } from '../../right/components/expandable_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';

@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import { ExpandablePanel } from '@kbn/securitysolution-common';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionPreview } from '../hooks/use_session_preview';

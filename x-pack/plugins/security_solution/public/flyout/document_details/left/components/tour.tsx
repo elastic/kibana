@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { FlyoutTour } from '@kbn/securitysolution-common';
+import { FlyoutTour } from '@kbn/security-solution-common';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';

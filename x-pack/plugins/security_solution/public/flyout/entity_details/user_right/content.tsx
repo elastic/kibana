@@ -8,7 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
-import { FlyoutBody } from '@kbn/securitysolution-common';
+import { FlyoutBody } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 

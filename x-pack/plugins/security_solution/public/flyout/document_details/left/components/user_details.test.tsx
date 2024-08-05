@@ -24,7 +24,7 @@ import {
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/securitysolution-common';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';

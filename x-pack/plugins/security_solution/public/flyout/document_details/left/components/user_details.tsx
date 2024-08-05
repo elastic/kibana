@@ -24,7 +24,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/securitysolution-common';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';

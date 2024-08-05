@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/securitysolution-common';
+import { ExpandablePanel } from '@kbn/security-solution-common';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
