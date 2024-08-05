@@ -14,6 +14,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -101,10 +102,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     dataViewId,
     loading: loadingSourcerer,
     indexPattern,
-    runtimeMappings,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
+    sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings, telemetry, timelineDataService } = useKibana().services;
@@ -195,7 +196,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     indexNames: selectedPatterns,
     language: kqlQuery.language,
     limit: !unifiedComponentsInTimelineDisabled ? sampleSize : itemsPerPage,
-    runtimeMappings,
+    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     startDate: start,

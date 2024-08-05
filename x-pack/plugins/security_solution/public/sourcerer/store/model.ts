@@ -73,12 +73,6 @@ export interface SourcererDataView extends KibanaDataView {
   /** set when data view fields are fetched */
   loading: boolean;
   /**
-   * @deprecated use sourcererDataView.runtimeMappings
-   * Needed to pass to search strategy
-   * Remove once issue resolved: https://github.com/elastic/kibana/issues/111762
-   */
-  runtimeMappings: RunTimeMappings;
-  /**
    * @type DataView @kbn/data-views-plugin/common
    */
   dataView: DataViewSpec | undefined;
@@ -108,10 +102,6 @@ export interface SelectedDataView {
    * all active & inactive patterns from SourcererDataView['title']
    */
   patternList: string[];
-  /**
-   * @deprecated use sourcererDataView.runtimeMappings
-   */
-  runtimeMappings: SourcererDataView['runtimeMappings'];
   /**
    * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
    * all selected patterns from SourcererScope['selectedPatterns'] */
@@ -165,7 +155,6 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
   fields: undefined,
   loading: false,
   patternList: [],
-  runtimeMappings: {},
   title: '',
   dataView: undefined,
 };

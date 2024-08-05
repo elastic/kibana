@@ -10,6 +10,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { HeaderSection } from '../../../common/components/header_section';
 
 import * as i18n from './translations';
@@ -45,7 +46,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
     useUserData();
-  const { runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -121,7 +122,7 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
               hasIndexWrite={hasIndexWrite ?? false}
               loading={userInfoLoading || loading}
               renderChildComponent={renderGroupedAlertTable}
-              runtimeMappings={runtimeMappings}
+              runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
               signalIndexName={signalIndexName}
               tableId={TableId.alertsRiskInputs}
               to={to}

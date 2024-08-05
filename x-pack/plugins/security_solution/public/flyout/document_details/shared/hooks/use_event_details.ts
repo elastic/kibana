@@ -87,7 +87,7 @@ export const useEventDetails = ({
     useTimelineEventsDetails({
       indexName: eventIndex,
       eventId: eventId ?? '',
-      runtimeMappings: sourcererDataView.runtimeMappings as RunTimeMappings,
+      runtimeMappings: sourcererDataView?.sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       skip: !eventId,
     });
   const getFieldsData = useGetFieldsData(searchHit?.fields);
