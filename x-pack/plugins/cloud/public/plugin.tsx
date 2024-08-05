@@ -21,6 +21,7 @@ import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {
   id?: string;
+  organization_id?: string;
   cname?: string;
   base_url?: string;
   profile_url?: string;
@@ -40,6 +41,7 @@ export interface CloudConfigType {
     project_id: string;
     project_name?: string;
     project_type?: string;
+    orchestrator_target?: string;
   };
 }
 
@@ -89,6 +91,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: id,
+      organizationId: this.config.organization_id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
       baseUrl,
@@ -108,6 +111,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        orchestratorTarget: this.config.serverless?.orchestrator_target,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

@@ -107,6 +107,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDataStreamDetailsContent: () => string;
       reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
+      indexErrorCalloutExists: () => boolean;
     };
   };
 }
@@ -195,6 +196,9 @@ export const setup = async ({
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
+    },
+    indexErrorCalloutExists: () => {
+      return exists('indexErrorCallout');
     },
   };
 
@@ -326,7 +330,7 @@ export const setup = async ({
       find('inferenceIdButton').simulate('click');
     },
     openSelectInferencePopover: () => {
-      expect(exists('addInferenceEndpointButton')).toBe(true);
+      expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
       expect(exists('manageInferenceEndpointButton')).toBe(true);
     },
     expectDefaultInferenceModelToExists: () => {

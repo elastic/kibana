@@ -34,3 +34,6 @@ export const RiskEngineStatusResponse = z.object({
   is_max_amount_of_risk_engines_reached: z.boolean(),
   task: RiskEngineTaskStatus.optional(),
 });
+
+export type GetRiskEngineStatusResponse = z.infer<typeof GetRiskEngineStatusResponse>;
+export const GetRiskEngineStatusResponse = RiskEngineStatusResponse;

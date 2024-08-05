@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback, memo } from 'react';
 import styled from 'styled-components';
-import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -21,7 +20,7 @@ import {
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { timelineActions, timelineSelectors } from '../../../../store';
+import { timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
@@ -37,9 +36,7 @@ import { useTimelineFullScreen } from '../../../../../common/containers/use_full
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { calculateTotalPages } from '../../helpers';
-import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { DetailsPanel } from '../../../side_panel';
 import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import {
@@ -47,7 +44,6 @@ import {
   ScrollableFlexItem,
   StyledEuiFlyoutBody,
   StyledEuiFlyoutFooter,
-  VerticalRule,
 } from '../shared/layout';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
@@ -87,12 +83,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   pinnedEventIds,
-  onEventClosed,
   renderCellValue,
   rowRenderers,
-  showExpandedDetails,
   sort,
-  expandedDetail,
   eventIdToNoteIds,
 }) => {
   const { telemetry } = useKibana().services;
@@ -104,8 +97,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const filterQuery = useMemo(() => {
@@ -198,6 +191,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     eventIdToNoteIds,
     refetch,
     timelineId,
+    activeTab: TimelineTabs.pinned,
   });
 
   const onToggleShowNotes = useCallback(
@@ -267,10 +261,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [queryLoadingState]
   );
 
-  const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
-  }, [timelineId, onEventClosed]);
-
   const NotesFlyoutMemo = useMemo(() => {
     return (
       <NotesFlyout
@@ -285,7 +275,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     );
   }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
 
-  if (unifiedComponentsInTimelineEnabled) {
+  if (!unifiedComponentsInTimelineDisabled) {
     return (
       <>
         {NotesFlyoutMemo}
@@ -301,9 +291,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
           refetch={refetch}
           dataLoadingState={queryLoadingState}
           totalCount={events.length}
-          onEventClosed={onEventClosed}
-          expandedDetail={expandedDetail}
-          showExpandedDetails={showExpandedDetails}
           onChangePage={loadPage}
           activeTab={TimelineTabs.pinned}
           updatedAt={refreshedAt}
@@ -373,20 +360,6 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
-        {showExpandedDetails && (
-          <>
-            <VerticalRule />
-            <ScrollableFlexItem grow={1}>
-              <DetailsPanel
-                browserFields={browserFields}
-                handleOnPanelClosed={handleOnPanelClosed}
-                runtimeMappings={runtimeMappings}
-                tabType={TimelineTabs.pinned}
-                scopeId={timelineId}
-              />
-            </ScrollableFlexItem>
-          </>
-        )}
       </FullWidthFlexGroup>
     </>
   );
@@ -396,15 +369,8 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const {
-      columns,
-      expandedDetail,
-      itemsPerPage,
-      itemsPerPageOptions,
-      pinnedEventIds,
-      sort,
-      eventIdToNoteIds,
-    } = timeline;
+    const { columns, itemsPerPage, itemsPerPageOptions, pinnedEventIds, sort, eventIdToNoteIds } =
+      timeline;
 
     return {
       columns,
@@ -412,23 +378,14 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
-      showExpandedDetails:
-        !!expandedDetail[TimelineTabs.pinned] && !!expandedDetail[TimelineTabs.pinned]?.panelView,
       sort,
-      expandedDetail,
       eventIdToNoteIds,
     };
   };
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: TimelineTabCommonProps) => ({
-  onEventClosed: (args: ToggleDetailPanel) => {
-    dispatch(timelineActions.toggleDetailPanel(args));
-  },
-});
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
@@ -437,8 +394,6 @@ const PinnedTabContent = connector(
     PinnedTabContentComponent,
     (prevProps, nextProps) =>
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
-      prevProps.onEventClosed === nextProps.onEventClosed &&
-      prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&

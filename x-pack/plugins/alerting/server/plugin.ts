@@ -48,10 +48,7 @@ import {
   IEventLogService,
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
-import {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';

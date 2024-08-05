@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
+import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 
 import { AnomaliesSort, Pagination } from '../../../../common/log_analysis';
-import { createValidationFunction } from '../../../../common/runtime_types';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { getLogEntryAnomalies } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
@@ -30,7 +30,7 @@ export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) =
         version: '1',
         validate: {
           request: {
-            body: createValidationFunction(
+            body: createRouteValidationFunction(
               logAnalysisResultsV1.getLogEntryAnomaliesRequestPayloadRT
             ),
           },

@@ -8,7 +8,8 @@ paths:
       x-labels: [ess]
       x-codegen-enabled: true
       operationId: InstallPrebuiltRulesAndTimelines
-      summary: Installs all Elastic prebuilt rules and timelines
+      summary: Install prebuilt detection rules and Timelines
+      description: Install and update all Elastic prebuilt detection rules and Timelines.
       tags:
         - Prebuilt Rules API
       responses:

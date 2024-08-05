@@ -8,7 +8,8 @@ paths:
       x-labels: [ess]
       x-codegen-enabled: true
       operationId: GetPrebuiltRulesAndTimelinesStatus
-      summary: Get the status of Elastic prebuilt rules
+      summary: Retrieve the status of prebuilt detection rules and Timelines
+      description: Retrieve the status of all Elastic prebuilt detection rules and Timelines.
       tags:
         - Prebuilt Rules API
       responses:

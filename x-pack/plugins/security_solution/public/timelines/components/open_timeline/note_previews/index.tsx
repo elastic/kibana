@@ -74,6 +74,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   return (
     <EuiButtonIcon
+      data-test-subj="notes-toggle-event-details"
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       color="text"
@@ -177,10 +178,32 @@ const NoteActions = React.memo<{
   savedObjectId?: string | null;
   confirmingNoteId?: string | null;
   eventIdToNoteIds?: Record<string, string[]>;
-}>(({ eventId, timelineId, noteId, confirmingNoteId, eventIdToNoteIds, savedObjectId }) => {
-  return eventId && timelineId ? (
-    <>
-      <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+  showToggleEventDetailsAction?: boolean;
+}>(
+  ({
+    eventId,
+    timelineId,
+    noteId,
+    confirmingNoteId,
+    eventIdToNoteIds,
+    savedObjectId,
+    showToggleEventDetailsAction = true,
+  }) => {
+    return eventId && timelineId ? (
+      <>
+        {showToggleEventDetailsAction ? (
+          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+        ) : null}
+        <DeleteNoteButton
+          noteId={noteId}
+          eventId={eventId}
+          confirmingNoteId={confirmingNoteId}
+          savedObjectId={savedObjectId}
+          timelineId={timelineId}
+          eventIdToNoteIds={eventIdToNoteIds}
+        />
+      </>
+    ) : (
       <DeleteNoteButton
         noteId={noteId}
         eventId={eventId}
@@ -189,18 +212,9 @@ const NoteActions = React.memo<{
         timelineId={timelineId}
         eventIdToNoteIds={eventIdToNoteIds}
       />
-    </>
-  ) : (
-    <DeleteNoteButton
-      noteId={noteId}
-      eventId={eventId}
-      confirmingNoteId={confirmingNoteId}
-      savedObjectId={savedObjectId}
-      timelineId={timelineId}
-      eventIdToNoteIds={eventIdToNoteIds}
-    />
-  );
-});
+    );
+  }
+);
 
 NoteActions.displayName = 'NoteActions';
 /**
@@ -211,10 +225,11 @@ interface NotePreviewsProps {
   notes?: TimelineResultNote[] | null;
   timelineId?: string;
   showTimelineDescription?: boolean;
+  showToggleEventDetailsAction?: boolean;
 }
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
-  ({ notes, timelineId, showTimelineDescription }) => {
+  ({ notes, timelineId, showTimelineDescription, showToggleEventDetailsAction = true }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
     const timeline = useDeepEqualSelector((state) =>
@@ -288,6 +303,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 savedObjectId={note.savedObjectId}
                 confirmingNoteId={timeline?.confirmingNoteId}
                 eventIdToNoteIds={eventIdToNoteIds}
+                showToggleEventDetailsAction={showToggleEventDetailsAction}
               />
             ),
             timelineAvatar: (
@@ -299,7 +315,13 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             ),
           };
         }),
-      [eventIdToNoteIds, notes, timelineId, timeline?.confirmingNoteId]
+      [
+        eventIdToNoteIds,
+        notes,
+        timelineId,
+        timeline?.confirmingNoteId,
+        showToggleEventDetailsAction,
+      ]
     );
 
     const commentList = useMemo(

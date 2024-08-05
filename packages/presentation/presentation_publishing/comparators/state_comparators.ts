@@ -28,7 +28,7 @@ export const runComparators = <StateType extends object = object>(
   lastSavedState: StateType | undefined,
   latestState: Partial<StateType>
 ) => {
-  if (!lastSavedState) {
+  if (!lastSavedState || Object.keys(latestState).length === 0) {
     // if we have no last saved state, everything is considered a change
     return latestState;
   }

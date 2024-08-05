@@ -107,7 +107,8 @@ const defaultState = {
 } as any;
 
 const setErrorsInTrainedModelDeployment = jest.fn().mockReturnValue(undefined);
-const fetchData = jest.fn().mockReturnValue(undefined);
+const saveMappings = jest.fn().mockReturnValue(undefined);
+const forceSaveMappings = jest.fn().mockReturnValue(undefined);
 
 describe('When semantic_text is enabled', () => {
   const setup = (defaultProps: Partial<TrainedModelsDeploymentModalProps>) =>
@@ -124,7 +125,8 @@ describe('When semantic_text is enabled', () => {
     mappingsContextMocked.useMappingsState.mockReturnValue(defaultState);
     const { exists } = setup({
       errorsInTrainedModelDeployment: {},
-      fetchData,
+      saveMappings,
+      forceSaveMappings,
       setErrorsInTrainedModelDeployment: () => undefined,
     });
 
@@ -156,7 +158,8 @@ describe('When semantic_text is enabled', () => {
     } as any);
     const { exists, find } = setup({
       errorsInTrainedModelDeployment: {},
-      fetchData,
+      forceSaveMappings,
+      saveMappings,
       setErrorsInTrainedModelDeployment,
     });
 
@@ -170,11 +173,25 @@ describe('When semantic_text is enabled', () => {
       );
     });
 
-    it('should call fetch data if refresh button is pressed', async () => {
+    it('should call saveMappings if refresh button is pressed', async () => {
       await act(async () => {
-        find('confirmModalConfirmButton').simulate('click');
+        find('tryAgainModalButton').simulate('click');
       });
-      expect(fetchData.mock.calls).toHaveLength(1);
+      expect(saveMappings.mock.calls).toHaveLength(1);
+    });
+    it('should disable the force save mappings button if checkbox is not checked', async () => {
+      expect(find('forceSaveMappingsButton').props().disabled).toBe(true);
+    });
+    it('checking checkbox should enable force save mappings button', async () => {
+      find('allowForceSaveMappingsCheckbox')
+        .simulate('change', { target: { checked: true } })
+        .update();
+      expect(find('forceSaveMappingsButton').props().disabled).toBe(false);
+      await act(async () => {
+        find('forceSaveMappingsButton').simulate('click');
+      });
+
+      expect(forceSaveMappings.mock.calls).toHaveLength(1);
     });
   });
 
@@ -200,8 +217,9 @@ describe('When semantic_text is enabled', () => {
       },
     } as any);
     const { find } = setup({
-      fetchData,
       errorsInTrainedModelDeployment: { '.elser_model_2': 'Error' },
+      saveMappings,
+      forceSaveMappings,
       setErrorsInTrainedModelDeployment,
     });
 
@@ -216,15 +234,9 @@ describe('When semantic_text is enabled', () => {
 
     it("should call refresh method if 'Try again' button is pressed", async () => {
       await act(async () => {
-        find('confirmModalConfirmButton').simulate('click');
+        find('tryAgainModalButton').simulate('click');
       });
-      expect(fetchData.mock.calls).toHaveLength(1);
-    });
-
-    it('should call setIsVisibleForErrorModal method if cancel button is pressed', async () => {
-      await act(async () => {
-        find('confirmModalCancelButton').simulate('click');
-      });
+      expect(saveMappings.mock.calls).toHaveLength(1);
     });
   });
 });

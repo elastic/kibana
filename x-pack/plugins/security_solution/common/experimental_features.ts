@@ -84,6 +84,9 @@ export const allowedExperimentalValues = Object.freeze({
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: false,
 
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: false,
+
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
@@ -96,24 +99,14 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionScanEnabled: false,
 
   /**
-   * Enables top charts on Alerts Page
-   */
-  alertsPageChartsEnabled: true,
-
-  /**
-   * Enables the alert type column in KPI visualizations on Alerts Page
-   */
-  alertTypeEnabled: false,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
 
   /**
-   * Enables entity and alert previews
+   * Disables entity and alert previews
    */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -121,9 +114,14 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
+
+  /**
+   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
+   */
+  assistantBedrockChat: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -151,31 +149,16 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Enables AI assistant on rule creation form when query has error
-   */
-  AIAssistantOnRuleCreationFormEnabled: false,
-
-  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
 
   /**
-   * Enables alerts suppression for ES|QL rules
-   */
-  alertSuppressionForEsqlRuleEnabled: false,
-
-  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables alerts suppression for machine learning rules
-   */
-  alertSuppressionForMachineLearningRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -205,9 +188,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   timelineEsqlTabDisabled: false,
   /*
-   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  unifiedComponentsInTimelineEnabled: false,
+  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -242,11 +225,6 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
-
-  /**
    * Enables the manual rule run
    */
   manualRuleRunEnabled: false,
@@ -255,6 +233,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: false,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

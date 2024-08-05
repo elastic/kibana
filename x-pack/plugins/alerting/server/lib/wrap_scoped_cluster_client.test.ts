@@ -75,6 +75,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('uses asCurrentUser when specified', async () => {
@@ -100,6 +101,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('uses search options when specified', async () => {
@@ -126,9 +128,14 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {\"ignore\":[404],\"requestTimeout\":10000} and 5000ms requestTimeout`
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    test('re-throws error when an error is thrown', async () => {
+    test('re-throws error and logs query when an error is thrown', async () => {
       const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
 
       childClient.search.mockRejectedValueOnce(new Error('something went wrong!'));
@@ -141,8 +148,15 @@ describe('wrapScopedClusterClient', () => {
       }).client();
 
       await expect(
-        wrappedSearchClient.asInternalUser.search
+        wrappedSearchClient.asInternalUser.search(esQuery)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      );
     });
 
     test('handles empty search result object', async () => {
@@ -169,6 +183,11 @@ describe('wrapScopedClusterClient', () => {
       const stats = wrappedSearchClientFactory.getMetrics();
       expect(stats.numSearches).toEqual(1);
       expect(stats.esSearchDurationMs).toEqual(0);
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('keeps track of number of queries', async () => {
@@ -200,6 +219,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('throws error when search throws abort error', async () => {
@@ -216,10 +236,15 @@ describe('wrapScopedClusterClient', () => {
       }).client();
 
       await expect(
-        abortableSearchClient.asInternalUser.search
+        abortableSearchClient.asInternalUser.search(esQuery)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Search has been aborted due to cancelled execution"`
       );
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -248,6 +273,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000ms requestTimeout'
       );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('uses asCurrentUser when specified', async () => {
@@ -273,6 +299,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000ms requestTimeout'
       );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('uses search options when specified', async () => {
@@ -299,9 +326,14 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {"ignore":[404],"requestTimeout":10000} and 5000ms requestTimeout'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    test('re-throws error when an error is thrown', async () => {
+    test('re-throws error and logs when an error is thrown', async () => {
       const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
 
       childClient.eql.search.mockRejectedValueOnce(new Error('something went wrong!'));
@@ -314,8 +346,15 @@ describe('wrapScopedClusterClient', () => {
       }).client();
 
       await expect(
-        wrappedSearchClient.asInternalUser.eql.search
+        wrappedSearchClient.asInternalUser.eql.search(eqlQuery)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {}'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {}'
+      );
     });
 
     test('keeps track of number of queries', async () => {
@@ -347,6 +386,7 @@ describe('wrapScopedClusterClient', () => {
       expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing eql query for rule .test-rule-type:abcdefg in space my-space - {\"index\":\"foo\",\"query\":\"process where process.name == \\\"regsvr32.exe\\\"\"} - with options {}`
       );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('throws error when eql search throws abort error', async () => {
@@ -365,10 +405,15 @@ describe('wrapScopedClusterClient', () => {
       }).client();
 
       await expect(
-        abortableSearchClient.asInternalUser.eql.search
+        abortableSearchClient.asInternalUser.eql.search(eqlQuery)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"EQL search has been aborted due to cancelled execution"`
       );
+
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+        `executing eql query for rule .test-rule-type:abcdefg in space my-space - {\"index\":\"foo\",\"query\":\"process where process.name == \\\"regsvr32.exe\\\"\"} - with options {}`
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -395,9 +440,11 @@ describe('wrapScopedClusterClient', () => {
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
+        expect(logger.warn).not.toHaveBeenCalled();
       });
 
       test('uses asCurrentUser when specified', async () => {
@@ -423,6 +470,7 @@ describe('wrapScopedClusterClient', () => {
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
+        expect(logger.warn).not.toHaveBeenCalled();
       });
 
       test('uses search options when specified', async () => {
@@ -449,9 +497,14 @@ describe('wrapScopedClusterClient', () => {
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {"ignore":[404],"requestTimeout":10000} and 5000ms requestTimeout'
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
       });
 
-      test('re-throws error when an error is thrown', async () => {
+      test('re-throws error and logs when an error is thrown', async () => {
         const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
 
         childClient.transport.request.mockRejectedValueOnce(new Error('something went wrong!'));
@@ -466,6 +519,13 @@ describe('wrapScopedClusterClient', () => {
         await expect(
           wrappedSearchClient.asInternalUser.transport.request({ method: 'POST', path: '/_query' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query"} - with options {}'
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query"} - with options {}'
+        );
       });
 
       test('keeps track of number of queries', async () => {
@@ -497,6 +557,7 @@ describe('wrapScopedClusterClient', () => {
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"body\":{\"query\":\"from .kibana_task_manager\"}} - with options {}`
         );
+        expect(logger.warn).not.toHaveBeenCalled();
       });
 
       test('throws error when es|ql search throws abort error', async () => {
@@ -522,6 +583,11 @@ describe('wrapScopedClusterClient', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"ES|QL search has been aborted due to cancelled execution"`
         );
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\"} - with options {}`
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
       });
     });
 
@@ -542,12 +608,13 @@ describe('wrapScopedClusterClient', () => {
 
       expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(
         { method: '', path: '' },
-        {
-          requestTimeout: 5000,
-        }
+        { requestTimeout: 5000 }
       );
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('uses asCurrentUser when specified', async () => {
@@ -572,6 +639,9 @@ describe('wrapScopedClusterClient', () => {
       );
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('uses search options when specified', async () => {
@@ -603,6 +673,9 @@ describe('wrapScopedClusterClient', () => {
       );
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test('re-throws error when an error is thrown', async () => {
@@ -620,6 +693,9 @@ describe('wrapScopedClusterClient', () => {
       await expect(
         wrappedSearchClient.asInternalUser.transport.request({ method: '', path: '' })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     test(`doesn't throw error when non es|ql request throws an error`, async () => {
@@ -641,6 +717,9 @@ describe('wrapScopedClusterClient', () => {
           path: '/_cat/indices',
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Some other error"`);
+
+      expect(loggingSystemMock.collect(logger).debug).toEqual([]);
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

@@ -141,6 +141,7 @@ export const performBulkActionRoute = (
           // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
           if (body.action === BulkActionTypeEnum.edit && !isDryRun) {
             const { rules, errors, skipped } = await bulkEditRules({
+              actionsClient,
               rulesClient,
               filter: query,
               ids: body.ids,

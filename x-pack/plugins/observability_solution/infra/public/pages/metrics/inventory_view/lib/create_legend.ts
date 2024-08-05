@@ -8,7 +8,7 @@
 import type {
   InventoryColorPalette,
   InfraWaffleMapSteppedGradientLegend,
-} from '../../../../lib/lib';
+} from '../../../../common/inventory/types';
 import { getColorPalette } from './get_color_palette';
 
 export const createLegend = (

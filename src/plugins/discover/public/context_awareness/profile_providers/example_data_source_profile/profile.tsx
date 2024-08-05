@@ -58,11 +58,35 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       return {
         title: `Record #${recordId}`,
         docViewsRegistry: (registry) => {
-          registry.enableById('doc_view_logs_overview');
+          registry.add({
+            id: 'doc_view_example',
+            title: 'Example',
+            order: 0,
+            component: () => (
+              <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
+            ),
+          });
+
           return prevValue.docViewsRegistry(registry);
         },
       };
     },
+    getDefaultAppState: () => () => ({
+      columns: [
+        {
+          name: '@timestamp',
+          width: 212,
+        },
+        {
+          name: 'log.level',
+          width: 150,
+        },
+        {
+          name: 'message',
+        },
+      ],
+      rowHeight: 5,
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;

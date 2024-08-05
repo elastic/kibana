@@ -20,13 +20,13 @@ import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildAnnotationsFromError } from '../helpers';
 import { useScheduleNowRiskEngineMutation } from '../../../api/hooks/use_schedule_now_risk_engine_mutation';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 export const AssetCriticalityResultStep: React.FC<{
-  result?: AssetCriticalityBulkUploadResponse;
+  result?: BulkUpsertAssetCriticalityRecordsResponse;
   validLinesAsText: string;
   errorMessage?: string;
   onReturn: () => void;

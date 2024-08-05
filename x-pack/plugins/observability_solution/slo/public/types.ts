@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ToastsStart } from '@kbn/core/public';
 import {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -22,7 +21,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -31,10 +29,6 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  ActionTypeRegistryContract,
-  RuleTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   UsageCollectionSetup,
@@ -44,12 +38,10 @@ import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -67,13 +59,12 @@ export interface SloPublicPluginsSetup {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   serverless?: ServerlessPluginSetup;
-  presentationUtil?: PresentationUtilPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   usageCollection: UsageCollectionSetup;
 }
 
 export interface SloPublicPluginsStart {
-  actionTypeRegistry: ActionTypeRegistryContract;
   aiops: AiopsPluginStart;
   cases: CasesPublicStart;
   cloud?: CloudStart;
@@ -83,8 +74,6 @@ export interface SloPublicPluginsStart {
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  navigation: NavigationPublicPluginStart;
-  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   share: SharePluginStart;
   licensing: LicensingPluginStart;
@@ -94,16 +83,13 @@ export interface SloPublicPluginsStart {
   serverless?: ServerlessPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  ruleTypeRegistry: RuleTypeRegistryContract;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   lens: LensPublicStart;
   charts: ChartsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  uiSettings: IUiSettingsClient;
   usageCollection: UsageCollectionStart;
-  discover: DiscoverStart;
+  discover?: DiscoverStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
-  toastNotifications: ToastsStart;
 }
 
 export type SloPublicSetup = ReturnType<SloPlugin['setup']>;

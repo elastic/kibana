@@ -26,16 +26,20 @@ import {
   AgentNotFoundError,
   FleetUnauthorizedError,
 } from '../../errors';
-
 import { auditLoggingService } from '../audit_logging';
+import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
-
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
-const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
+const INACTIVE_AGENT_CONDITION = `status:inactive`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
+
+const includeUnenrolled = (kuery?: string) =>
+  kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
 
 export function _joinFilters(
   filters: Array<string | undefined | KueryNode>
@@ -157,6 +161,9 @@ export async function getAgentTags(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
+  if (!includeUnenrolled(kuery)) {
+    filters.push(ENROLLED_AGENT_CONDITION);
+  }
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
@@ -182,33 +189,6 @@ export async function getAgentTags(
     }
     throw err;
   }
-}
-
-export function getElasticsearchQuery(
-  kuery: string,
-  showInactive = false,
-  includeHosted = false,
-  hostedPolicies: string[] = [],
-  extraFilters: string[] = []
-): estypes.QueryDslQueryContainer | undefined {
-  const filters = [];
-
-  if (kuery && kuery !== '') {
-    filters.push(kuery);
-  }
-
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  if (!includeHosted && hostedPolicies.length > 0) {
-    filters.push('NOT (policy_id:{policyIds})'.replace('{policyIds}', hostedPolicies.join(',')));
-  }
-
-  filters.push(...extraFilters);
-
-  const kueryNode = _joinFilters(filters);
-  return kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
 }
 
 export async function getAgentsByKuery(
@@ -263,6 +243,9 @@ export async function getAgentsByKuery(
 
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
+  }
+  if (!includeUnenrolled(kuery)) {
+    filters.push(ENROLLED_AGENT_CONDITION);
   }
 
   const kueryNode = _joinFilters(filters);
@@ -421,6 +404,10 @@ export async function getAgentById(
 
   if ('notFound' in agentHit) {
     throw new AgentNotFoundError(`Agent ${agentId} not found`);
+  }
+
+  if (!isAgentInNamespace(agentHit, getCurrentNamespace(soClient))) {
+    throw new AgentNotFoundError(`${agentHit.id} not found in namespace`);
   }
 
   return agentHit;
