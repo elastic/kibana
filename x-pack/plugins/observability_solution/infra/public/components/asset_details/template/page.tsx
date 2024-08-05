@@ -9,6 +9,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -24,6 +25,10 @@ import { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
+
+const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
+  host: [SYSTEM_INTEGRATION],
+};
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
@@ -79,7 +84,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   return (
     <InfraPageTemplate
       onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
-      dataAvailabilityModules={asset.type === 'host' ? [SYSTEM_INTEGRATION] : undefined}
+      dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
       pageHeader={{
         pageTitle: asset.name,
         tabs: tabEntries,

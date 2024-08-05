@@ -24,6 +24,8 @@ import { BetaBadge } from '../../../components/beta_badge';
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
 
+const DATA_AVAILABILITY_MODULES = [SYSTEM_INTEGRATION];
+
 export const HostsPage = () => {
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
 
@@ -40,7 +42,7 @@ export const HostsPage = () => {
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
         <InfraPageTemplate
-          dataAvailabilityModules={[SYSTEM_INTEGRATION]}
+          dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
           onboardingFlow={OnboardingFlow.Hosts}
           pageHeader={{
             alignItems: 'center',
