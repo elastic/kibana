@@ -144,17 +144,15 @@ export class UnenrollInactiveAgentsTask {
       return;
     }
     this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll`
-    );
-
-    this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Unenrolling ${res.agents.length} inactive agents`
+      `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll. Attempting unenrollment`
     );
     const actionId = await unenrollBatch(soClient, esClient, res.agents, {
       revoke: true,
       force: true,
     });
-    return actionId;
+    this.logger.debug(
+      `[UnenrollInactiveAgentsTask] Executed unenrollment of inactive agents with actionId: ${actionId}`
+    );
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
@@ -177,11 +175,7 @@ export class UnenrollInactiveAgentsTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      const actionId = await this.unenrollInactiveAgents(esClient, soClient);
-
-      this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Executed unenrollment of inactive agents.with actionId: ${actionId}`
-      );
+      await this.unenrollInactiveAgents(esClient, soClient);
 
       this.endRun('success');
     } catch (err) {
