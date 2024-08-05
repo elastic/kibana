@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Logger, SavedObjectsClient } from '@kbn/core/server';
-import { once } from 'lodash';
+import {
+  CoreRequestHandlerContext,
+  CoreSetup,
+  Logger,
+  SECURITY_EXTENSION_ID,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { FavoritesService } from './favorites_service';
 import { favoritesSavedObjectType } from './favorites_saved_object';
@@ -27,16 +31,14 @@ export interface GetFavoritesResponse {
 export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; logger: Logger }) {
   const router = core.http.createRouter();
 
-  const getSavedObjectClient = once(async () => {
-    const [coreStart] = await core.getStartServices();
-
-    // We need an internal client to access the `favorite` type which not every user has access to
+  const getSavedObjectClient = (coreRequestHandlerContext: CoreRequestHandlerContext) => {
+    // We need to exclude security extension to access the `favorite` type which not every user has access to
     // and give access only to the current user's favorites through this API
-    const internalClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository([favoritesSavedObjectType.name])
-    );
-    return internalClient;
-  });
+    return coreRequestHandlerContext.savedObjects.getClient({
+      includedHiddenTypes: [favoritesSavedObjectType.name],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  };
 
   router.post(
     {
@@ -47,6 +49,8 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
           type: typeSchema,
         }),
       },
+      // we don't protect the route with any access tags as
+      // we only give access to the current user's favorites ids
     },
     async (requestHandlerContext, request, response) => {
       const coreRequestHandlerContext = await requestHandlerContext.core;
@@ -59,10 +63,8 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
 
       const type = request.params.type;
 
-      const currentNamespace = coreRequestHandlerContext.savedObjects.client.getCurrentNamespace();
-
-      const favorites = new FavoritesService(currentNamespace, type, userId, {
-        savedObjectClient: await getSavedObjectClient(),
+      const favorites = new FavoritesService(type, userId, {
+        savedObjectClient: getSavedObjectClient(coreRequestHandlerContext),
         logger,
       });
 
@@ -70,6 +72,7 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         const favoriteIds: GetFavoritesResponse = await favorites.addFavorite({
           id: request.params.id,
         });
+
         return response.ok({ body: favoriteIds });
       } catch (e) {
         logger.error(e);
@@ -92,6 +95,8 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
           type: typeSchema,
         }),
       },
+      // we don't protect the route with any access tags as
+      // we only give access to the current user's favorites ids
     },
     async (requestHandlerContext, request, response) => {
       const coreRequestHandlerContext = await requestHandlerContext.core;
@@ -103,10 +108,8 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
 
       const type = request.params.type;
 
-      const currentNamespace = coreRequestHandlerContext.savedObjects.client.getCurrentNamespace();
-
-      const favorites = new FavoritesService(currentNamespace, type, userId, {
-        savedObjectClient: await getSavedObjectClient(),
+      const favorites = new FavoritesService(type, userId, {
+        savedObjectClient: getSavedObjectClient(coreRequestHandlerContext),
         logger,
       });
 
@@ -135,6 +138,8 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
           type: typeSchema,
         }),
       },
+      // we don't protect the route with any access tags as
+      // we only give access to the current user's favorites ids
     },
     async (requestHandlerContext, request, response) => {
       const coreRequestHandlerContext = await requestHandlerContext.core;
@@ -144,12 +149,10 @@ export function registerFavoritesRoutes({ core, logger }: { core: CoreSetup; log
         return response.forbidden();
       }
 
-      const currentNamespace = coreRequestHandlerContext.savedObjects.client.getCurrentNamespace();
-
       const type = request.params.type;
 
-      const favorites = new FavoritesService(currentNamespace, type, userId, {
-        savedObjectClient: await getSavedObjectClient(),
+      const favorites = new FavoritesService(type, userId, {
+        savedObjectClient: getSavedObjectClient(coreRequestHandlerContext),
         logger,
       });
 

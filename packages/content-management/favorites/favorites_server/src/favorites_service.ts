@@ -12,7 +12,6 @@ import { favoritesSavedObjectType, FavoritesSavedObjectAttributes } from './favo
 
 export class FavoritesService {
   constructor(
-    private namespace: string | undefined,
     private type: string,
     private userId: string,
     private deps: {
@@ -38,35 +37,35 @@ export class FavoritesService {
         {
           userId: this.userId,
           type: this.type,
-          favoriteIds: [],
+          favoriteIds: [id],
         },
         {
           id: this.getFavoriteSavedObjectId(),
-          namespace: this.namespace,
         }
       );
+
+      return { favoriteIds: favoritesSavedObject.attributes.favoriteIds };
+    } else {
+      const newFavoriteIds = [
+        ...(favoritesSavedObject.attributes.favoriteIds ?? []).filter(
+          (favoriteId) => favoriteId !== id
+        ),
+        id,
+      ];
+
+      await this.deps.savedObjectClient.update(
+        favoritesSavedObjectType.name,
+        favoritesSavedObject.id,
+        {
+          favoriteIds: newFavoriteIds,
+        },
+        {
+          version: favoritesSavedObject.version,
+        }
+      );
+
+      return { favoriteIds: newFavoriteIds };
     }
-
-    const newFavoriteIds = [
-      ...(favoritesSavedObject.attributes.favoriteIds ?? []).filter(
-        (favoriteId) => favoriteId !== id
-      ),
-      id,
-    ];
-
-    await this.deps.savedObjectClient.update(
-      favoritesSavedObjectType.name,
-      favoritesSavedObject.id,
-      {
-        favoriteIds: newFavoriteIds,
-      },
-      {
-        version: favoritesSavedObject.version,
-        namespace: this.namespace,
-      }
-    );
-
-    return { favoriteIds: newFavoriteIds };
   }
 
   public async removeFavorite({ id }: { id: string }): Promise<{ favoriteIds: string[] }> {
@@ -88,7 +87,6 @@ export class FavoritesService {
       },
       {
         version: favoritesSavedObject.version,
-        namespace: this.namespace,
       }
     );
 
@@ -102,8 +100,7 @@ export class FavoritesService {
       const favoritesSavedObject =
         await this.deps.savedObjectClient.get<FavoritesSavedObjectAttributes>(
           favoritesSavedObjectType.name,
-          this.getFavoriteSavedObjectId(),
-          { namespace: this.namespace }
+          this.getFavoriteSavedObjectId()
         );
 
       return favoritesSavedObject;
