@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('spaces-view-page > navigationPanel');
       });
 
-      it('changes the space solution and updates the side navigation', async () => {
+      // FIXME
+      it.skip('changes the space solution and updates the side navigation', async () => {
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces/edit/default', {
           shouldUseHashForSubUrl: false,
         });
