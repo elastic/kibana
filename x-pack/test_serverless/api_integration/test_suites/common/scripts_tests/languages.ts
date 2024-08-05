@@ -29,7 +29,6 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertestWithoutAuth
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);
@@ -40,7 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertestWithoutAuth
         .get('/internal/scripts/languages')
         .set(ELASTIC_HTTP_VERSION_HEADER, SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION)
-        // TODO: API requests in Serverless require internal request headers
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(200);

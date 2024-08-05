@@ -144,7 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader);
-
         expect(response.status).to.eql(200);
         expect(response.body.saved_objects.length).not.to.be(null);
         expect(response.body.saved_objects.map((obj: any) => obj.id).length).to.be.greaterThan(0);
@@ -224,7 +223,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
-
         expect(response.body.saved_objects).to.have.length(1);
         expect(response.body.saved_objects[0].meta).to.eql({
           icon: 'discoverApp',
@@ -244,7 +242,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set(svlCommonApi.getInternalRequestHeader())
           .set(roleAuthc.apiKeyHeader)
           .expect(200);
-
         expect(response.body.saved_objects).to.have.length(1);
         expect(response.body.saved_objects[0].meta).to.eql({
           icon: 'dashboardApp',
