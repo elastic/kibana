@@ -6,92 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  useEuiTheme,
-  EuiLink,
-  EuiCode,
-  EuiButtonIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import type { MonacoMessage } from './helpers';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  LanguageDocumentationPopover,
+  type LanguageDocumentationSections,
+} from '@kbn/language-documentation-popover';
+import { type MonacoMessage, getDocumentationSections } from '../helpers';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { QueryHistoryAction, QueryHistory } from './query_history';
+import { SubmitFeedbackComponent } from './feedback_component';
+import { QueryWrapComponent } from './query_wrap_component';
+import type { TextBasedEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
-const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
-
-export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: boolean }) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <>
-      {isSpaceReduced && (
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href={FEEDBACK_LINK}
-            external={false}
-            target="_blank"
-            data-test-subj="TextBasedLangEditor-feedback-link"
-          >
-            <EuiToolTip
-              position="top"
-              content={i18n.translate(
-                'textBasedEditor.query.textBasedLanguagesEditor.submitFeedback',
-                {
-                  defaultMessage: 'Submit feedback',
-                }
-              )}
-            >
-              <EuiIcon
-                type="editorComment"
-                color="primary"
-                size="m"
-                css={css`
-                  margin-right: ${euiTheme.size.s};
-                `}
-              />
-            </EuiToolTip>
-          </EuiLink>
-        </EuiFlexItem>
-      )}
-      {!isSpaceReduced && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="editorComment" color="primary" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              href={FEEDBACK_LINK}
-              external={false}
-              target="_blank"
-              css={css`
-                font-size: 12px;
-                margin-right: ${euiTheme.size.m};
-              `}
-              data-test-subj="TextBasedLangEditor-feedback-link"
-            >
-              {isSpaceReduced
-                ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
-                    defaultMessage: 'Feedback',
-                  })
-                : i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.submitFeedback', {
-                    defaultMessage: 'Submit feedback',
-                  })}
-            </EuiLink>
-          </EuiFlexItem>
-        </>
-      )}
-    </>
-  );
-}
 
 interface EditorFooterProps {
   lines: number;
@@ -99,6 +32,7 @@ interface EditorFooterProps {
     bottomContainer: Interpolation<Theme>;
     historyContainer: Interpolation<Theme>;
   };
+  code: string;
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
@@ -107,18 +41,16 @@ interface EditorFooterProps {
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
+  isHelpMenuOpen: boolean;
+  setIsHelpMenuOpen: (status: boolean) => void;
   measuredContainerWidth: number;
   hideRunQueryText?: boolean;
-  disableSubmitAction?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
-  isLoading?: boolean;
-  allowQueryCancellation?: boolean;
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   refetchHistoryItems?: boolean;
   isInCompactMode?: boolean;
-  queryHasChanged?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -131,22 +63,27 @@ export const EditorFooter = memo(function EditorFooter({
   runQuery,
   updateQuery,
   hideRunQueryText,
-  disableSubmitAction,
   editorIsInline,
   isSpaceReduced,
-  isLoading,
-  allowQueryCancellation,
   hideTimeFilterInfo,
   isHistoryOpen,
   setIsHistoryOpen,
   hideQueryHistory,
   refetchHistoryItems,
   isInCompactMode,
-  queryHasChanged,
   measuredContainerWidth,
+  code,
+  isHelpMenuOpen,
+  setIsHelpMenuOpen,
 }: EditorFooterProps) {
+  const kibana = useKibana<TextBasedEditorDeps>();
+  const { docLinks } = kibana.services;
+
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
+  const [documentationSections, setDocumentationSections] =
+    useState<LanguageDocumentationSections>();
+
   const onUpdateAndSubmit = useCallback(
     (qs: string) => {
       // update the query first
@@ -160,6 +97,16 @@ export const EditorFooter = memo(function EditorFooter({
     },
     [runQuery, updateQuery]
   );
+
+  useEffect(() => {
+    async function getDocumentation() {
+      const sections = await getDocumentationSections('esql');
+      setDocumentationSections(sections);
+    }
+    if (!documentationSections) {
+      getDocumentation();
+    }
+  }, [documentationSections]);
 
   return (
     <EuiFlexGroup
@@ -180,6 +127,7 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <QueryWrapComponent code={code} updateQuery={updateQuery} />
               <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                 <EuiText
                   size="xs"
@@ -300,6 +248,29 @@ export const EditorFooter = memo(function EditorFooter({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
+              {documentationSections && !editorIsInline && (
+                <EuiFlexItem grow={false}>
+                  <LanguageDocumentationPopover
+                    language="ES|QL"
+                    sections={documentationSections}
+                    searchInDescription
+                    linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+                    buttonProps={{
+                      color: 'text',
+                      size: 'xs',
+                      'data-test-subj': 'TextBasedLangEditor-documentation',
+                      'aria-label': i18n.translate(
+                        'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                        {
+                          defaultMessage: 'Documentation',
+                        }
+                      ),
+                    }}
+                    isHelpMenuOpen={isHelpMenuOpen}
+                    onHelpMenuVisibilityChange={setIsHelpMenuOpen}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {Boolean(editorIsInline) && (
@@ -314,49 +285,29 @@ export const EditorFooter = memo(function EditorFooter({
                       isSpaceReduced={true}
                     />
                   )}
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                        {
-                          defaultMessage: 'Run query',
-                        }
-                      )}
-                    >
-                      <EuiButtonIcon
-                        display="base"
-                        color={queryHasChanged ? 'success' : 'primary'}
-                        onClick={runQuery}
-                        iconType={
-                          allowQueryCancellation && isLoading
-                            ? 'cross'
-                            : queryHasChanged
-                            ? 'play'
-                            : 'refresh'
-                        }
-                        size="s"
-                        isLoading={isLoading && !allowQueryCancellation}
-                        isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                        data-test-subj="TextBasedLangEditor-run-query-button"
-                        aria-label={
-                          allowQueryCancellation && isLoading
-                            ? i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.cancel',
-                                {
-                                  defaultMessage: 'Cancel',
-                                }
-                              )
-                            : i18n.translate(
-                                'textBasedEditor.query.textBasedLanguagesEditor.runQuery',
-                                {
-                                  defaultMessage: 'Run query',
-                                }
-                              )
-                        }
+                  {documentationSections && (
+                    <EuiFlexItem grow={false}>
+                      <LanguageDocumentationPopover
+                        language="ES|QL"
+                        sections={documentationSections}
+                        searchInDescription
+                        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+                        buttonProps={{
+                          color: 'text',
+                          size: 'xs',
+                          'data-test-subj': 'TextBasedLangEditor-documentation',
+                          'aria-label': i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                            {
+                              defaultMessage: 'Documentation',
+                            }
+                          ),
+                        }}
+                        isHelpMenuOpen={isHelpMenuOpen}
+                        onHelpMenuVisibilityChange={setIsHelpMenuOpen}
                       />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </>
