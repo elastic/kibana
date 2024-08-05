@@ -149,39 +149,41 @@ describe('useHighlightedFields', () => {
     });
   });
 
-  it('should return sentinelone agent id field if data is s1 alert', () => {
-    const agentIdField = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0];
-    const hookResult = renderHook(() =>
-      useHighlightedFields({
-        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
-          {
-            category: 'event',
-            field: 'event.module',
-            values: ['sentinel_one'],
-            originalValue: ['sentinel_one'],
-            isObjectArray: false,
-          },
-          {
-            category: parseEcsFieldPath(agentIdField).category,
-            field: agentIdField,
-            values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-            originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-            isObjectArray: false,
-          },
-        ]),
-        investigationFields: ['agent.status', agentIdField],
-      })
-    );
+  it.each(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one)(
+    'should return sentinelone agent id field: %s',
+    (agentIdField) => {
+      const hookResult = renderHook(() =>
+        useHighlightedFields({
+          dataFormattedForFieldBrowser: dataFormattedForFieldBrowser.concat([
+            {
+              category: 'event',
+              field: 'event.module',
+              values: ['sentinel_one'],
+              originalValue: ['sentinel_one'],
+              isObjectArray: false,
+            },
+            {
+              category: parseEcsFieldPath(agentIdField).category,
+              field: agentIdField,
+              values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+              originalValue: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+              isObjectArray: false,
+            },
+          ]),
+          investigationFields: ['agent.status', agentIdField],
+        })
+      );
 
-    expect(hookResult.result.current).toEqual({
-      'kibana.alert.rule.type': {
-        values: ['query'],
-      },
-      [agentIdField]: {
-        values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
-      },
-    });
-  });
+      expect(hookResult.result.current).toEqual({
+        'kibana.alert.rule.type': {
+          values: ['query'],
+        },
+        [agentIdField]: {
+          values: ['deb35a20-70f8-458e-a64a-c9e6f7575893'],
+        },
+      });
+    }
+  );
 
   it('should return crowdstrike agent id field if data is crowdstrike alert', () => {
     const hookResult = renderHook(() =>
