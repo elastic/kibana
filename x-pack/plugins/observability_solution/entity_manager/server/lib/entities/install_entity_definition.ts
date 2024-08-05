@@ -44,6 +44,7 @@ import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
 import { getEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
 import { getEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
+import { EntityDefinitionNotFound } from './errors/entity_not_found';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -101,7 +102,12 @@ export async function installEntityDefinition({
       }),
     ]);
 
-    await deleteEntityDefinition(soClient, definition, logger);
+    await deleteEntityDefinition(soClient, definition).catch((err) => {
+      if (err instanceof EntityDefinitionNotFound) {
+        return;
+      }
+      throw err;
+    });
 
     throw e;
   }

@@ -50,7 +50,7 @@ export async function uninstallEntityDefinition({
   if (deleteData) {
     await deleteIndices(esClient, definition, logger);
   }
-  await deleteEntityDefinition(soClient, definition, logger);
+  await deleteEntityDefinition(soClient, definition);
 }
 
 export async function uninstallBuiltInEntityDefinitions({
