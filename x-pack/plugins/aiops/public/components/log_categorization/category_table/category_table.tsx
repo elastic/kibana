@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
@@ -48,6 +48,7 @@ interface Props {
   enableRowActions?: boolean;
   displayExamples?: boolean;
   selectable?: boolean;
+  onRenderComplete?: () => void;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -60,6 +61,7 @@ export const CategoryTable: FC<Props> = ({
   enableRowActions = true,
   displayExamples = true,
   selectable = true,
+  onRenderComplete,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -238,39 +240,66 @@ export const CategoryTable: FC<Props> = ({
     },
   });
 
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
+
+  const renderCompleteListener = useCallback(
+    (event: Event) => {
+      if (event.target !== chartWrapperRef.current) {
+        return;
+      }
+      if (typeof onRenderComplete === 'function') {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete]
+  );
+
+  useEffect(() => {
+    if (!chartWrapperRef.current) {
+      throw new Error('Reference to the chart wrapper is not set');
+    }
+    const chartWrapper = chartWrapperRef.current;
+    chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+    return () => {
+      chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+    };
+  }, [renderCompleteListener]);
+
   return (
-    <EuiInMemoryTable<Category>
-      compressed
-      items={categories}
-      columns={columns}
-      selection={selectionValue}
-      itemId="key"
-      onTableChange={onTableChange}
-      pagination={pagination}
-      sorting={sorting}
-      data-test-subj="aiopsLogPatternsTable"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      css={tableStyle}
-      rowProps={(category) => {
-        return mouseOver
-          ? {
-              onClick: () => {
-                if (category.key === mouseOver.pinnedCategory?.key) {
-                  mouseOver.setPinnedCategory(null);
-                } else {
-                  mouseOver.setPinnedCategory(category);
-                }
-              },
-              onMouseEnter: () => {
-                mouseOver.setHighlightedCategory(category);
-              },
-              onMouseLeave: () => {
-                mouseOver.setHighlightedCategory(null);
-              },
-              style: getRowStyle(category),
-            }
-          : undefined;
-      }}
-    />
+    <div ref={chartWrapperRef}>
+      <EuiInMemoryTable<Category>
+        compressed
+        items={categories}
+        columns={columns}
+        selection={selectionValue}
+        itemId="key"
+        onTableChange={onTableChange}
+        pagination={pagination}
+        sorting={sorting}
+        data-test-subj="aiopsLogPatternsTable"
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        css={tableStyle}
+        rowProps={(category) => {
+          return mouseOver
+            ? {
+                onClick: () => {
+                  if (category.key === mouseOver.pinnedCategory?.key) {
+                    mouseOver.setPinnedCategory(null);
+                  } else {
+                    mouseOver.setPinnedCategory(category);
+                  }
+                },
+                onMouseEnter: () => {
+                  mouseOver.setHighlightedCategory(category);
+                },
+                onMouseLeave: () => {
+                  mouseOver.setHighlightedCategory(null);
+                },
+                style: getRowStyle(category),
+              }
+            : undefined;
+        }}
+      />
+    </div>
   );
 };

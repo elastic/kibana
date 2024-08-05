@@ -39,13 +39,24 @@ import { useMinimumTimeRange } from './use_minimum_time_range';
 import { FieldValidationCallout } from '../category_validation_callout';
 import { useActions } from '../category_table/use_actions';
 
-export interface LogCategorizationEmbeddableProps {
-  input: Readonly<EmbeddablePatternAnalysisInput & PatternAnalysisProps>;
-}
+export type LogCategorizationEmbeddableProps = Readonly<
+  EmbeddablePatternAnalysisInput & PatternAnalysisProps
+>;
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({ input }) => {
+export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> = ({
+  dataView,
+  savedSearch,
+  fieldName,
+  minimumTimeRangeOption,
+  randomSamplerMode,
+  randomSamplerProbability,
+  onChange,
+  onRenderComplete,
+  timeRange,
+  lastReloadRequestTime,
+}) => {
   const {
     notifications: { toasts },
     data: {
@@ -54,18 +65,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     uiSettings,
     embeddingOrigin,
   } = useAiopsAppContext();
-
-  const {
-    dataView,
-    savedSearch,
-    fieldName,
-    minimumTimeRangeOption,
-    randomSamplerMode,
-    randomSamplerProbability,
-    onChange,
-    onRenderComplete,
-    timeRange,
-  } = input;
 
   const { filters, query } = useFilterQueryUpdates();
 
@@ -304,11 +303,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       if (typeof onChange === 'function') {
         onChange(data?.categories ?? []);
       }
-      if (data !== null) {
-        onRenderComplete();
-      }
     },
-    [data, onChange, onRenderComplete]
+    [data, onChange]
   );
 
   useEffect(
@@ -343,13 +339,13 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   useEffect(
     function refreshTriggeredFromButton() {
-      if (input.lastReloadRequestTime !== undefined) {
+      if (lastReloadRequestTime !== undefined) {
         cancelRequest();
         forceRefresh();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [input.lastReloadRequestTime]
+    [lastReloadRequestTime]
   );
 
   const actions = [...getActions(false), ...getActions(true)];
@@ -369,6 +365,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           tableState={tableState}
           selectable={false}
           actions={actions}
+          onRenderComplete={onRenderComplete}
         />
       ) : null}
     </>

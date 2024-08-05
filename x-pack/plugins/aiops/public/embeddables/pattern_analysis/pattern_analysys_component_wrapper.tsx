@@ -56,21 +56,19 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
       }}
     >
       <LogCategorizationEmbeddable
-        input={{
-          dataView,
-          dataViewId: dataView.id!,
-          fieldName,
-          minimumTimeRangeOption,
-          randomSamplerProbability,
-          randomSamplerMode,
-          lastReloadRequestTime,
-          timeRange,
-          onError,
-          onLoading,
-          onRenderComplete,
-          onChange,
-          emptyState,
-        }}
+        dataView={dataView}
+        dataViewId={dataView.id!}
+        fieldName={fieldName}
+        minimumTimeRangeOption={minimumTimeRangeOption}
+        randomSamplerProbability={randomSamplerProbability}
+        randomSamplerMode={randomSamplerMode}
+        lastReloadRequestTime={lastReloadRequestTime}
+        timeRange={timeRange}
+        onError={onError}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onChange={onChange}
+        emptyState={emptyState}
       />
     </div>
   );
