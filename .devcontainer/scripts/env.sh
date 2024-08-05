@@ -1,7 +1,7 @@
 #!/bin/bash
 
-ENV_PATH=".devcontainer/.env"
-KBN_CONFIG_FILE="config/kibana.dev.yml"
+ENV_PATH="${KBN_DIR}/.devcontainer/.env"
+KBN_CONFIG_FILE="${KBN_DIR}/config/kibana.dev.yml"
 
 setup_fips() {
   if [ ! -f "$KBN_CONFIG_FILE" ]; then
@@ -9,20 +9,19 @@ setup_fips() {
   fi
 
   if [ -n "$FIPS" ] && [ "$FIPS" == "1" ]; then
-    echo "FIPS mode enabled"
     yq ".xpack.security.experimental.fipsMode.enabled = true" -i $KBN_CONFIG_FILE
 
     # Patch node_modules so we can start Kibana in dev mode
-    sed -i 's/hashType = hashType || '\''md5'\'';/hashType = hashType || '\''sha1'\'';/g' node_modules/file-loader/node_modules/loader-utils/lib/getHashDigest.js
-    sed -i 's/const hash = createHash("md4");/const hash = createHash("sha1");/g' node_modules/webpack/lib/ModuleFilenameHelpers.js
-    sed -i 's/contentHash: createHash("md4")/contentHash: createHash("sha1")/g' node_modules/webpack/lib/SourceMapDevToolPlugin.js
+    sed -i 's/hashType = hashType || '\''md5'\'';/hashType = hashType || '\''sha1'\'';/g' ${KBN_DIR}/node_modules/file-loader/node_modules/loader-utils/lib/getHashDigest.js
+    sed -i 's/const hash = createHash("md4");/const hash = createHash("sha1");/g' ${KBN_DIR}/node_modules/webpack/lib/ModuleFilenameHelpers.js
+    sed -i 's/contentHash: createHash("md4")/contentHash: createHash("sha1")/g' ${KBN_DIR}/node_modules/webpack/lib/SourceMapDevToolPlugin.js
 
     export OPENSSL_MODULES="$OPENSSL_PATH/lib/ossl-modules"
     export NODE_OPTIONS="--enable-fips --openssl-config=$KBN_DIR/.devcontainer/config/nodejs.cnf"
+    echo "FIPS mode enabled"
   else
-    echo "FIPS mode disabled"
-
     yq ".xpack.security.experimental.fipsMode.enabled = false" -i $KBN_CONFIG_FILE
+    echo "FIPS mode disabled"
   fi
 }
 
