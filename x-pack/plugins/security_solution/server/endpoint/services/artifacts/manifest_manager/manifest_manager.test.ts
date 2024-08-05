@@ -84,7 +84,7 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
 
   const getMockPolicyFetchAllItemIds = (items: string[]) =>
-    jest.fn().mockResolvedValue(
+    jest.fn(async () =>
       jest.fn(async function* () {
         yield items;
       })()
@@ -1267,7 +1267,7 @@ describe('ManifestManager', () => {
 
   describe('tryDispatch', () => {
     const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
-      jest.fn().mockResolvedValue(
+      jest.fn(async () =>
         jest.fn(async function* () {
           yield items;
         })()
