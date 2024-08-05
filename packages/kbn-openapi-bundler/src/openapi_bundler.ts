@@ -32,7 +32,7 @@ interface BundleOptions {
    */
   prototypeDocument?: PrototypeDocument | string;
   /**
-   * When specified the produced bundle will contain only
+   * When `includeLabels` are specified the produced bundle will contain only
    * operations objects with matching labels
    */
   includeLabels?: string[];
@@ -40,7 +40,7 @@ interface BundleOptions {
 
 export const bundle = async ({
   sourceGlob,
-  outputFilePath = 'bundled-{version}.schema.yaml',
+  outputFilePath = 'bundled_{version}.schema.yaml',
   options,
 }: BundlerConfig) => {
   const prototypeDocument = options?.prototypeDocument
@@ -82,6 +82,7 @@ export const bundle = async ({
     splitDocumentsByVersion: true,
     skipServers: Boolean(prototypeDocument?.servers),
     skipSecurity: Boolean(prototypeDocument?.security),
+    addTags: prototypeDocument?.tags,
   });
 
   await writeDocuments(resultDocumentsMap, outputFilePath);
