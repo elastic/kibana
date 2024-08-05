@@ -68,6 +68,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           ),
         }}
       />
+      <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
         <ol>
           {isOrganization ? (
