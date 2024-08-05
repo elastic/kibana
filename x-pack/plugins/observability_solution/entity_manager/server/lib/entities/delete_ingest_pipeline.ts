@@ -24,7 +24,7 @@ export async function deleteHistoryIngestPipeline(
       esClient.ingest.deletePipeline({ id: historyPipelineId }, { ignore: [404] })
     );
   } catch (e) {
-    logger.error(`Unable to delete history ingest pipeline [${definition.id}].`);
+    logger.error(`Unable to delete history ingest pipeline [${definition.id}]: ${e}`);
     throw e;
   }
 }
@@ -40,7 +40,7 @@ export async function deleteLatestIngestPipeline(
       esClient.ingest.deletePipeline({ id: latestPipelineId }, { ignore: [404] })
     );
   } catch (e) {
-    logger.error(`Unable to delete latest ingest pipeline [${definition.id}].`);
+    logger.error(`Unable to delete latest ingest pipeline [${definition.id}]: ${e}`);
     throw e;
   }
 }

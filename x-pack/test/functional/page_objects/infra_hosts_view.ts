@@ -129,8 +129,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
       await testSubjects.existOrFail('embeddablePanelAction-openInLens');
-      // forces the modal to close
-      await element.click();
     },
 
     // KPIs
