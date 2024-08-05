@@ -27,6 +27,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
+import { ALERT_GROUP_ID } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -598,22 +599,39 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     currentTimeOverride,
                   });
 
+                  console.error(
+                    'WHAT IS AUGMENTED ALERT',
+                    augmentedAlerts.map(
+                      (augAlert) => augAlert._source._source['kibana.alert.group.id']
+                    )
+                  );
+
+                  const matchingBuildingBlockAlerts = buildingBlockAlerts?.filter((someAlert) => {
+                    // console.error('SOME ALERT GROUP ID', someAlert?._source[ALERT_GROUP_ID]);
+                    // console.error('NEW ALERT GROUP ID', newAlerts[0]?._source[ALERT_GROUP_ID]);
+
+                    return (
+                      someAlert?._source[ALERT_GROUP_ID] ===
+                      newAlerts[0]?._source._source['kibana.alert.group.id']
+                    );
+                  });
+
                   const augmentedBuildingBlockAlerts =
                     newAlerts?.length > 0 && buildingBlockAlerts?.length > 0
                       ? augmentAlerts({
-                          alerts: buildingBlockAlerts,
+                          alerts: matchingBuildingBlockAlerts,
                           options,
                           kibanaVersion: ruleDataClient.kibanaVersion,
                           currentTimeOverride,
                         })
                       : [];
 
-                  console.error('DO WE HAVE NEW ALERTS?', newAlerts?.length);
-                  console.error('DO WE HAVE BUILDING BLOCK ALERTS?? ', buildingBlockAlerts?.length);
-                  console.error(
-                    'DO THE MAP ALERTS TO BULK CREATE CONTAIN THE INSTANCE IDS',
-                    JSON.stringify(mapAlertsToBulkCreate(augmentedAlerts))
-                  );
+                  // console.error('DO WE HAVE NEW ALERTS?', newAlerts?.length);
+                  // console.error('DO WE HAVE BUILDING BLOCK ALERTS?? ', buildingBlockAlerts?.length);
+                  // console.error(
+                  //   'DO THE MAP ALERTS TO BULK CREATE CONTAIN THE INSTANCE IDS',
+                  //   JSON.stringify(mapAlertsToBulkCreate(augmentedAlerts))
+                  // );
                   const bulkResponse = await ruleDataClientWriter.bulk({
                     body: [
                       ...duplicateAlertUpdates,
