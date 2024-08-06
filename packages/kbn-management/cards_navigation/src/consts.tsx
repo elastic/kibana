@@ -100,8 +100,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.SPACES]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.spacesDescription', {
-      defaultMessage:
-        'Organize your dashboards and other saved objects into meaningful categories.',
+      defaultMessage: 'Organize your saved objects into meaningful categories.',
     }),
     icon: 'spaces',
   },
