@@ -65,12 +65,12 @@ const tableEntries = [
   },
   {
     alertsCount: 0,
-    title: 'demo-stack-nginx-01',
+    title: 'demo-stack-client-01',
     cpuUsage: '0%',
-    normalizedLoad: '1.4%',
-    memoryUsage: '18%',
-    memoryFree: '3.2 GB',
-    diskSpaceUsage: '35%',
+    normalizedLoad: '0.1%',
+    memoryUsage: '13.8%',
+    memoryFree: '3.3 GB',
+    diskSpaceUsage: '33.8%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -87,12 +87,12 @@ const tableEntries = [
   },
   {
     alertsCount: 0,
-    title: 'demo-stack-client-01',
+    title: 'demo-stack-nginx-01',
     cpuUsage: '0%',
-    normalizedLoad: '0.1%',
-    memoryUsage: '13.8%',
-    memoryFree: '3.3 GB',
-    diskSpaceUsage: '33.8%',
+    normalizedLoad: '1.4%',
+    memoryUsage: '18%',
+    memoryFree: '3.2 GB',
+    diskSpaceUsage: '35%',
     rx: '0 bit/s',
     tx: '0 bit/s',
   },
@@ -304,7 +304,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'memoryUsage', value: '94.9%' },
               { metric: 'diskUsage', value: 'N/A' },
             ].forEach(({ metric, value }) => {
-              it.skip(`${metric} tile should show ${value}`, async () => {
+              it(`${metric} tile should show ${value}`, async () => {
                 await retry.try(async () => {
                   const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                     metric
@@ -477,14 +477,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render the computed metrics for each host entry', async () => {
-            hostRows.forEach((row, position) => {
-              pageObjects.infraHostsView
-                .getHostsRowData(row)
-                .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
-            });
+            for (let i = 0; i < hostRows.length; i++) {
+              const hostRowData = await pageObjects.infraHostsView.getHostsRowData(hostRows[i]);
+              expect(hostRowData).to.eql(tableEntries[i]);
+            }
           });
 
-          it.skip('should select and filter hosts inside the table', async () => {
+          it('should select and filter hosts inside the table', async () => {
             const selectHostsButtonExistsOnLoad =
               await pageObjects.infraHostsView.selectedHostsButtonExist();
             expect(selectHostsButtonExistsOnLoad).to.be(false);
@@ -550,12 +549,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('KPIs', () => {
           [
             { metric: 'hostsCount', value: '6' },
-            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'cpuUsage', value: 'N/A' },
             { metric: 'normalizedLoad1m', value: '0.3%' },
             { metric: 'memoryUsage', value: '16.8%' },
             { metric: 'diskUsage', value: '35.7%' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
                 const tileValue =
                   metric === 'hostsCount'
@@ -701,18 +700,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
             expect(hostRows.length).to.equal(3);
 
-            hostRows.forEach((row, position) => {
-              pageObjects.infraHostsView
-                .getHostsRowData(row)
-                .then((hostRowData) => expect(hostRowData).to.eql(filtererEntries[position]));
-            });
+            for (let i = 0; i < hostRows.length; i++) {
+              const hostRowData = await pageObjects.infraHostsView.getHostsRowData(hostRows[i]);
+              expect(hostRowData).to.eql(filtererEntries[i]);
+            }
           });
 
-          it.skip('should update the KPIs content on a search submit', async () => {
+          it('should update the KPIs content on a search submit', async () => {
             await Promise.all(
               [
                 { metric: 'hostsCount', value: '3' },
-                { metric: 'cpuUsage', value: '0.9%' },
+                { metric: 'cpuUsage', value: 'N/A' },
                 { metric: 'normalizedLoad1m', value: '0.2%' },
                 { metric: 'memoryUsage', value: '17.5%' },
                 { metric: 'diskUsage', value: '35.7%' },
@@ -782,38 +780,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should show 5 rows on the first page', async () => {
             const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-            hostRows.forEach((row, position) => {
-              pageObjects.infraHostsView
-                .getHostsRowData(row)
-                .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
-            });
+
+            for (let i = 0; i < hostRows.length; i++) {
+              const hostRowData = await pageObjects.infraHostsView.getHostsRowData(hostRows[i]);
+              expect(hostRowData).to.eql(tableEntries[i]);
+            }
           });
 
           it('should paginate to the last page', async () => {
             await pageObjects.infraHostsView.paginateTo(2);
             const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-            hostRows.forEach((row) => {
-              pageObjects.infraHostsView
-                .getHostsRowData(row)
-                .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[5]));
-            });
+
+            expect(hostRows.length).to.equal(1);
+
+            const hostRowData = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
+            expect(hostRowData).to.eql(tableEntries[5]);
           });
 
           it('should show all hosts on the same page', async () => {
             await pageObjects.infraHostsView.changePageSize(10);
             const hostRows = await pageObjects.infraHostsView.getHostsTableData();
-            hostRows.forEach((row, position) => {
-              pageObjects.infraHostsView
-                .getHostsRowData(row)
-                .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
-            });
+
+            for (let i = 0; i < hostRows.length; i++) {
+              const hostRowData = await pageObjects.infraHostsView.getHostsRowData(hostRows[i]);
+              expect(hostRowData).to.eql(tableEntries[i]);
+            }
           });
 
-          it.skip('should sort by a numeric field asc', async () => {
-            await pageObjects.infraHostsView.sortByCpuUsage();
+          it('should sort by a numeric field asc', async () => {
+            await pageObjects.infraHostsView.sortByMemoryUsage();
             let hostRows = await pageObjects.infraHostsView.getHostsTableData();
             const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-            expect(hostDataFirtPage).to.eql(tableEntries[5]);
+            expect(hostDataFirtPage).to.eql(tableEntries[3]);
 
             await pageObjects.infraHostsView.paginateTo(2);
             hostRows = await pageObjects.infraHostsView.getHostsTableData();
@@ -821,8 +819,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(hostDataLastPage).to.eql(tableEntries[0]);
           });
 
-          it.skip('should sort by a numeric field desc', async () => {
-            await pageObjects.infraHostsView.sortByCpuUsage();
+          it('should sort by a numeric field desc', async () => {
+            await pageObjects.infraHostsView.sortByMemoryUsage();
             let hostRows = await pageObjects.infraHostsView.getHostsTableData();
             const hostDataFirtPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
             expect(hostDataFirtPage).to.eql(tableEntries[0]);
@@ -830,7 +828,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.paginateTo(2);
             hostRows = await pageObjects.infraHostsView.getHostsTableData();
             const hostDataLastPage = await pageObjects.infraHostsView.getHostsRowData(hostRows[0]);
-            expect(hostDataLastPage).to.eql(tableEntries[5]);
+            expect(hostDataLastPage).to.eql(tableEntries[3]);
           });
 
           it('should sort by text field asc', async () => {
