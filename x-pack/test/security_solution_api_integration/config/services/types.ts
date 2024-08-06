@@ -23,6 +23,6 @@ export interface SecuritySolutionUtilsInterface {
 
 export interface SecuritySolutionESSUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
-  createSuperTest: (role?: string) => Promise<TestAgent<any>>;
   createBsearch: (role?: string) => Promise<BsearchService>;
+  createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
 }

@@ -29,8 +29,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     let supertest: TestAgent;
     let bsearch: BsearchService;
     before(async () => {
-      supertest = await utils.createSuperTest('admin');
-      bsearch = await utils.createBsearch('admin');
+      supertest = await utils.createSuperTest();
+      bsearch = await utils.createBsearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/uncommon_processes');
     });
     after(async () => {

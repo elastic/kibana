@@ -24,8 +24,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     let bsearch: BsearchService;
     describe('With filebeat', () => {
       before(async () => {
-        supertest = await utils.createSuperTest('admin');
-        bsearch = await utils.createBsearch('admin');
+        supertest = await utils.createSuperTest();
+        bsearch = await utils.createBsearch();
         await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
       });
       after(
