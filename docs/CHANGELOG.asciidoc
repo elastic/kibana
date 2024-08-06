@@ -170,13 +170,15 @@ SharedUX::
 !!TODO!! The above PR had a lengthy release note description:
 The new *Connection details* overlay features a cleaner UI for Elasticsearch endpoint URL and Cloud ID token retrieval. As well as the new *"API key"* tab, which is a simplified interface for creating an API key with all the default settings, except the expiration time is set to 90 days. If user wants a more granular API keys, there is a link which navigates to the right section in Stack Management.
 ////
-Other::
-
+Observability::
 * Update links for integration buttons in observability solutions ({kibana-pull}184477[#184477]).
 * Adds SLO status, SLI value, error budget remaining and consumed in burn rate alert context ({kibana-pull}184471[#184471]).
 * Feat(slo): prevent initial backfill ({kibana-pull}184312[#184312]).
 * Update `Add data` links to use improved deep linking ({kibana-pull}184164[#184164]).
 * Change navigation behavior for the o11y guide cards to pre-select the correct solution ({kibana-pull}184065[#184065]).
+Other::
+
+
 * The POC for creating entity-centric indices using entity definitions ({kibana-pull}183205[#183205]).
 * Using alert summary widget as the history chart ({kibana-pull}181824[#181824]).
 * Flyout Summary section ({kibana-pull}179479[#179479]).
@@ -320,6 +322,12 @@ The new *Connection details* overlay features a cleaner UI for Elasticsearch end
 !!TODO!! The above PR had a lengthy release note description:
 Reporting internal storage has been changed from using regular indices to a data stream configuration for a more efficient sharding strategy. This change is not expected to have any impact to users.
 ////
+Observability::
+* Update links for integration buttons in observability solutions ({kibana-pull}184477[#184477]).
+* Adds SLO status, SLI value, error budget remaining and consumed in burn rate alert context ({kibana-pull}184471[#184471]).
+* Feat(slo): prevent initial backfill ({kibana-pull}184312[#184312]).
+* Change navigation behavior for the o11y guide cards to pre-select the correct solution ({kibana-pull}184065[#184065]).
+* The POC for creating entity-centric indices using entity definitions ({kibana-pull}183205[#183205]).
 Other::
 * Improve metadata autocomplete suggestions with comma and pipe ({kibana-pull}188338[#188338]).
 * Automatically encapsulate index names with special chars with quotes ({kibana-pull}187899[#187899]).
@@ -330,15 +338,12 @@ Other::
 * Editor supports integrations ({kibana-pull}184716[#184716]).
 * Allows to comment out the current line with the keyboard ({kibana-pull}184637[#184637]).
 * Telemetry collection support for Logstash agent driven monitoring ({kibana-pull}184480[#184480]).
-* Update links for integration buttons in observability solutions ({kibana-pull}184477[#184477]).
-* Adds SLO status, SLI value, error budget remaining and consumed in burn rate alert context ({kibana-pull}184471[#184471]).
 * Implement clone monitor action ({kibana-pull}184393[#184393]).
 * Lightweight monitors allow 10 and 30 seconds schedules ({kibana-pull}184380[#184380]).
-* Feat(slo): prevent initial backfill ({kibana-pull}184312[#184312]).
+
 * Update `Add data` links to use improved deep linking ({kibana-pull}184164[#184164]).
 * Render a Discover-like table in the assistant instead of a Lens chart ({kibana-pull}184106[#184106]).
 * Adds UI controls to mark KB entries as public ({kibana-pull}184094[#184094]).
-* Change navigation behavior for the o11y guide cards to pre-select the correct solution ({kibana-pull}184065[#184065]).
 ////
 !!TODO!! The above PR had a lengthy release note description:
 Pass any field to ServiceNow using the ServiceNow ITSM and SecOps connectors with a JSON field called "additional fields".
@@ -348,7 +353,7 @@ Pass any field to ServiceNow using the ServiceNow ITSM and SecOps connectors wit
 * Query all search connectors by default but allow user to override ({kibana-pull}183712[#183712]).
 * Gemini connector integration ({kibana-pull}183668[#183668]).
 * Adds downstream dependency service name to logs and errors to improve alert insights ({kibana-pull}183215[#183215]).
-* The POC for creating entity-centric indices using entity definitions ({kibana-pull}183205[#183205]).
+
 * Config: add support for `${VAR:default}` syntax ({kibana-pull}182139[#182139]).
 ////
 !!TODO!! The above PR had a lengthy release note description:
@@ -363,6 +368,10 @@ The Kibana configuration file now supports assigning default value for environme
 === Bug Fixes
 Alerting::
 * Fixes kibana.alert.rule.execution.timstamp timezone and format ({kibana-pull}183905[#183905]).
+* Fixes undefined error source in alerting log tags ({kibana-pull}182352[#182352]).
+* Allow the rule types to throw user errors ({kibana-pull}184213[#184213]).
+* Set validation errors in subaction framework as user errors ({kibana-pull}184317[#184317]).
+* Fixes x-axis timezone on alertSummaryWidget full size ({kibana-pull}187468[#187468]).
 Canvas::
 * Fixes parent API should implement unified search interface with react embeddables ({kibana-pull}183772[#183772]).
 Dashboard::
@@ -379,6 +388,12 @@ Discover::
 * Error messages fix overlapping ({kibana-pull}181416[#181416]).
 Elastic Security::
 For the Elastic Security 8.15.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+ES|QL::
+* Suppress empty syntax error ({kibana-pull}184246[#184246]).
+* Accept null values for function arguments ({kibana-pull}184254[#184254]).
+* Recognize transformational commands with ast parsing ({kibana-pull}184291[#184291]).
+* Accept negated index patterns ({kibana-pull}184528[#184528]).
+* Fixes the overflow problem of the editor ({kibana-pull}186166[#186166]).
 Fleet::
 * Fixes navigating back to Agent policy integration list ({kibana-pull}189165[#189165]).
 * Fixes copy agent policy, missed bump revision ({kibana-pull}188935[#188935]).
@@ -428,6 +443,17 @@ Management::
 * Transform: Fixes transform stats API call in the transform health alerting rule ({kibana-pull}187586[#187586]).
 * Transforms: Improves data view checks ({kibana-pull}181892[#181892]).
 * Fixes Human-readable (precise) formatting ({kibana-pull}181391[#181391]).
+Observability::
+* Decrease bucket size top_dependencies sends to get_connection_stats query ({kibana-pull}182884[#182884]).
+* Fix(slo): history details data ({kibana-pull}183097[#183097]).
+* Feat(slo): Improve permission check on SLO pages ({kibana-pull}182609[#182609]).
+* Fixes flaky e2e test (contextual insights for APM errors) ({kibana-pull}184642[#184642]).
+* Fixes Alerts page history navigation ({kibana-pull}186068[#186068]).
+* Accept project monitors with `monitor.url` of type `string` that contains commas ({kibana-pull}186112[#186112]).
+* Fixes TLS cert view for > 3 monitors per cert ({kibana-pull}186204[#186204]).
+* Fixes synthetics/uptime fields alerts autocomplete for query bar ({kibana-pull}186588[#186588]).
+* Hide ai assistant menu item when in a disabled space ({kibana-pull}188017[#188017]).
+* Fixes AI Assistant Settings when plugin disabled ({kibana-pull}188160[#188160]).
 Platform::
 * Fixes small `i18n` + `l10n` inconsistencies ({kibana-pull}181735[#181735]).
 Presentation::
@@ -472,26 +498,9 @@ Fixes a bug where retest on failure was not able to be turned off when creating 
 * Bring back EuiThemeProvider to fix o11y and stack monitoring rules in stack management ({kibana-pull}188724[#188724]).
 * Fixes gemini connector card in icon style ({kibana-pull}188469[#188469]).
 * Allow users to save mappings with errors ({kibana-pull}188326[#188326]).
-* Fixes AI Assistant Settings when plugin disabled ({kibana-pull}188160[#188160]).
-* Hide ai assistant menu item when in a disabled space ({kibana-pull}188017[#188017]).
-* Fixes x-axis timezone on alertSummaryWidget full size ({kibana-pull}187468[#187468]).
-* Fixes synthetics/uptime fields alerts autocomplete for query bar ({kibana-pull}186588[#186588]).
-* Fixes TLS cert view for > 3 monitors per cert ({kibana-pull}186204[#186204]).
-* Fixes the overflow problem of the editor ({kibana-pull}186166[#186166]).
-* Accept project monitors with `monitor.url` of type `string` that contains commas ({kibana-pull}186112[#186112]).
-* Fixes Alerts page history navigation ({kibana-pull}186068[#186068]).
-* Fixes flaky e2e test (contextual insights for APM errors) ({kibana-pull}184642[#184642]).
-* Accept negated index patterns ({kibana-pull}184528[#184528]).
-* Set validation errors in subaction framework as user errors ({kibana-pull}184317[#184317]).
-* Recognize transformational commands with ast parsing ({kibana-pull}184291[#184291]).
-* Accept null values for function arguments ({kibana-pull}184254[#184254]).
-* Suppress empty syntax error ({kibana-pull}184246[#184246]).
-* Allow the rule types to throw user errors ({kibana-pull}184213[#184213]).
 * UI States for reduced user privileges ({kibana-pull}183947[#183947]).
-* Fix(slo): history details data ({kibana-pull}183097[#183097]).
-* Decrease bucket size top_dependencies sends to get_connection_stats query ({kibana-pull}182884[#182884]).
-* Feat(slo): Improve permission check on SLO pages ({kibana-pull}182609[#182609]).
-* Fixes undefined error source in alerting log tags ({kibana-pull}182352[#182352]).
+
+
 
 [[release-notes-8.14.3]]
 == {kib} 8.14.3
