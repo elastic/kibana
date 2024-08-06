@@ -226,6 +226,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               ...updatedItem,
             }
           : exception;
+        console.log('process changed', item);
         cleanupEntries(item);
         onChange({
           item,
