@@ -53,9 +53,9 @@
     "@kbn/ebt-tools",
     "@kbn/fields-metadata-plugin",
     "@kbn/server-route-repository-utils",
+    "@kbn/core-analytics-server",
     "@kbn/core-analytics-browser",
-    "@kbn/telemetry-plugin",
-    "@kbn/core-analytics-server"
+    "@kbn/telemetry-plugin"
   ],
   "exclude": [
     "target/**/*"
