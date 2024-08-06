@@ -9,9 +9,7 @@ paths:
       operationId: EndpointGetActionsDetails
       description: Get action details
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       parameters:
         - name: action_id
           in: path

@@ -9,9 +9,7 @@ paths:
       operationId: EndpointUnisolateAction
       description: Release an endpoint
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       requestBody:
         required: true
         content:
@@ -29,5 +27,4 @@ paths:
 components:
   schemas:
     UnisolateRouteRequestBody:
-      allOf:
-        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'
+      $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'

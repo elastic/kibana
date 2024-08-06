@@ -10,9 +10,7 @@ paths:
       description: Get action requests log
       deprecated: true
       x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       parameters:
         - name: agent_id
           in: path

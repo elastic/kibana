@@ -9,9 +9,7 @@ paths:
       operationId: EndpointGetProcessesAction
       description: Get list of running processes on an endpoint
       x-codegen-enabled: true
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       requestBody:
         required: true
         content:

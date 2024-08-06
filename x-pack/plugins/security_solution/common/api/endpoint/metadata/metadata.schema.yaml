@@ -8,9 +8,7 @@ paths:
       summary: Get Metadata List schema
       operationId: GetEndpointMetadataList
       x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       parameters:
         - name: query
           in: query
@@ -30,9 +28,7 @@ paths:
       summary: Get Metadata Transform schema
       operationId: GetEndpointMetadataTransform
       x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       responses:
         '200':
           description: OK
@@ -46,9 +42,7 @@ paths:
       summary: Get Metadata schema
       operationId: GetEndpointMetadata
       x-codegen-enabled: false
-      x-labels:
-        - ess
-        - serverless
+      x-labels: [ess, serverless]
       parameters:
         - name: query
           in: path

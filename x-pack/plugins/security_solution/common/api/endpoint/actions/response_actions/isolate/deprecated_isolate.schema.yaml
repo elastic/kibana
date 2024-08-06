@@ -9,8 +9,7 @@ paths:
       operationId: EndpointIsolateRedirect
       deprecated: true
       x-codegen-enabled: true
-      x-labels:
-        - ess
+      x-labels: [ess]
       requestBody:
         required: true
         content:
