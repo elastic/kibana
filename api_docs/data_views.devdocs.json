@@ -10944,7 +10944,7 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-server.DataViewsServerPluginSetupDependencies.usageCollection",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "usageCollection",
             "description": [
