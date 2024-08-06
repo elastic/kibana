@@ -182,7 +182,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe.only('#Asset Type: host', () => {
+      describe('#Asset Type: host', () => {
         before(async () => {
           await pageObjects.timePicker.setAbsoluteRange(
             START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
