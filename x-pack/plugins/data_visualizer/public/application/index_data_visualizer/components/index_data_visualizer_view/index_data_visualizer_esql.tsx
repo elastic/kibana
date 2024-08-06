@@ -54,7 +54,6 @@ export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 const DEFAULT_ESQL_QUERY = { esql: '' };
-const expandCodeEditor = () => true;
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
@@ -264,10 +263,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           query={localQuery}
           onTextLangQueryChange={onTextLangQueryChange}
           onTextLangQuerySubmit={onTextLangQuerySubmit}
-          expandCodeEditor={expandCodeEditor}
-          isCodeEditorExpanded={true}
           detectedTimestamp={currentDataView?.timeFieldName}
-          hideMinimizeButton={true}
           hideRunQueryText={false}
           isLoading={queryHistoryStatus ?? false}
         />
