@@ -7,10 +7,10 @@
  */
 
 import { camelCase } from 'lodash';
-import { supportedFieldTypes } from '../definitions/types';
+import { dataTypes } from '../definitions/types';
 
 export const fields = [
-  ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+  ...dataTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },

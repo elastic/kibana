@@ -11,7 +11,7 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
+import { FunctionDefinition, SupportedDataType, dataTypes } from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
@@ -76,7 +76,7 @@ function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: SupportedDataType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,
@@ -128,7 +128,7 @@ function getFieldMapping(
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
-    if (supportedFieldTypes.includes(typeString as SupportedFieldType)) {
+    if (dataTypes.includes(typeString as SupportedDataType)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -874,7 +874,7 @@ describe('validation logic', () => {
         []
       );
 
-      for (const field of supportedFieldTypes) {
+      for (const field of dataTypes) {
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
@@ -937,7 +937,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=["a", "b"]', []);
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
-      for (const field of supportedFieldTypes) {
+      for (const field of dataTypes) {
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);

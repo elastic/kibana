@@ -10,7 +10,7 @@ import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '
 
 // Currently, partial of the full list
 // https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
-export const supportedFieldTypes = [
+export const dataTypes = [
   'double',
   'unsigned_long',
   'long',
@@ -29,19 +29,16 @@ export const supportedFieldTypes = [
   'geo_point',
   'geo_shape',
   'version',
+  'null',
+  'time_duration',
 ] as const;
 
-export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
-  supportedFieldTypes.includes(type as SupportedFieldType);
+export const isSupportedDataType = (type: string): type is SupportedDataType =>
+  dataTypes.includes(type as SupportedDataType);
 
-export type SupportedFieldType = (typeof supportedFieldTypes)[number];
+export type SupportedDataType = (typeof dataTypes)[number];
 
-export type FunctionParameterType =
-  | SupportedFieldType
-  | 'null'
-  | 'any'
-  | 'time_literal'
-  | 'time_duration'
+type ArrayType =
   | 'double[]'
   | 'unsigned_long[]'
   | 'long[]'
@@ -56,30 +53,9 @@ export type FunctionParameterType =
   | 'datetime[]'
   | 'date_period[]';
 
-export type FunctionReturnType =
-  | 'double'
-  | 'unsigned_long'
-  | 'long'
-  | 'integer'
-  | 'int'
-  | 'counter_integer'
-  | 'counter_long'
-  | 'counter_double'
-  | 'date'
-  | 'date_period'
-  | 'time_duration'
-  | 'any'
-  | 'boolean'
-  | 'text'
-  | 'keyword'
-  | 'string'
-  | 'cartesian_point'
-  | 'cartesian_shape'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'ip'
-  | 'version'
-  | 'void';
+export type FunctionParameterType = SupportedDataType | ArrayType | 'any' | 'time_literal'; // TODO what is time_literal in Elasticsearch speak? date_duration?
+
+export type FunctionReturnType = SupportedDataType | 'any' | 'void';
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';

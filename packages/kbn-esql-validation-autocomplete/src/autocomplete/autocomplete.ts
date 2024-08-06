@@ -95,7 +95,7 @@ import {
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
-import { FunctionParameter, FunctionReturnType, SupportedFieldType } from '../definitions/types';
+import { FunctionParameter, FunctionReturnType, SupportedDataType } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -441,7 +441,7 @@ function extractFinalTypeFromArg(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ):
   | ESQLLiteral['literalType']
-  | SupportedFieldType
+  | SupportedDataType
   | FunctionReturnType
   | 'timeInterval'
   | string // @TODO remove this
