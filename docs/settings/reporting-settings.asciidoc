@@ -190,7 +190,7 @@ pay attention to errors regarding the headless browser being unable to connect t
 URL that Reporting is attempting to open is logged during report execution.
 ============
 
-`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}.port`>> value.
+`xpack.reporting.kibanaServer.port`:: The port for accessing {kib}.
 
 `xpack.reporting.kibanaServer.protocol`:: The protocol for accessing {kib}, typically `http` or `https`.
 
