@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless summary_exception_lists', () => {
+  describe('@ess @serverless @serverlessQA summary_exception_lists', () => {
     describe('summary exception lists', () => {
       beforeEach(async () => {
         await createListsIndex(supertest, log);
