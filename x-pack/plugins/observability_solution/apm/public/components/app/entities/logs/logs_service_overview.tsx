@@ -95,7 +95,7 @@ export function LogsServiceOverview() {
             <EuiSpacer size="l" />
           </>
         ) : null}
-        {data?.entity.hasLogMetrics === false ? (
+        {data?.entity?.hasLogMetrics === false ? (
           <>
             <EuiCallOut
               title={i18n.translate(
