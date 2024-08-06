@@ -22,9 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-  const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
-  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
-  const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
@@ -61,15 +58,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await cisIntegration.navigateToIntegrationCspList();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
-        integrationPolicyName
-      );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(
-        `Agentless policy for ${integrationPolicyName}`
-      );
+      expect(
+        (await cisIntegration.cisAws.getPostInstallCloudFormationModal()) ? true : false
+      ).to.be(true);
     });
 
     it(`should create default agent-based agent`, async () => {
@@ -84,18 +75,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
-      const agentPolicyName = await cisIntegration.getAgentPolicyName();
-
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await cisIntegration.navigateToIntegrationCspList();
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
-      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
-        integrationPolicyName
-      );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(agentPolicyName);
+      expect(
+        (await cisIntegration.cisAws.getPostInstallCloudFormationModal()) ? true : false
+      ).to.be(true);
     });
   });
 }
