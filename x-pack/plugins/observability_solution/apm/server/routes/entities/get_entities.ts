@@ -45,14 +45,16 @@ export async function getEntities({
   environment,
   kuery,
   size,
+  serviceName,
 }: {
   entitiesESClient: EntitiesESClient;
   start: number;
   end: number;
   environment: string;
-  kuery: string;
+  kuery?: string;
   size: number;
-}) {
+  serviceName?: string;
+}): Promise<ServiceEntities[]> {
   const entities = (
     await entitiesESClient.searchLatest(`get_entities`, {
       body: {
@@ -66,6 +68,7 @@ export async function getEntities({
               ...environmentQuery(environment, SERVICE_ENVIRONMENT),
               ...entitiesRangeQuery(start, end),
               ...termQuery(ENTITY_TYPE, EntityType.SERVICE),
+              ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
             ],
           },
         },
@@ -82,7 +85,7 @@ export async function getEntities({
       })
     : undefined;
 
-  return entities.map((entity): ServiceEntities => {
+  return entities.map((entity) => {
     const historyLogRate = serviceEntitiesHistoryMetricsMap?.[entity.entity.id]?.logRate;
     return {
       serviceName: entity.service.name,

@@ -24,12 +24,11 @@ import {
 import { getServiceTransactionDetailedStatsPeriods } from '../../services/get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getServiceEntities } from './get_service_entities';
 import { getServiceEntitySummary } from '../get_service_entity_summary';
+import { ServiceEntities } from '../types';
 
 export interface EntityServicesResponse {
   services: EntityServiceListItem[];
 }
-
-interface ServiceEntitySummaryResponse {}
 
 const serviceEntitiesSummaryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/entities/services/{serviceName}/summary',
@@ -38,7 +37,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
     query: t.intersection([environmentRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<any> {
+  async handler(resources): Promise<ServiceEntities> {
     const { context, params, request } = resources;
     const coreContext = await context.core;
 
