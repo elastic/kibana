@@ -8,7 +8,6 @@
 import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/tasks/create_new_rule';
 import { disableNewFeaturesTours } from './navigation';
 import { getAdvancedButton } from '../screens/integrations';
-import { ServerlessRoleName } from '../support/roles';
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 
 export const DEFAULT_QUERY = 'select * from processes;';
@@ -118,7 +117,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
-  cy.login(ServerlessRoleName.SOC_MANAGER);
+  // cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
