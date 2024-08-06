@@ -22,6 +22,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 
+const TIMEOUT_CHECK = 3000;
+
 export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
@@ -59,9 +61,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
       ) {
         if ('deepLinkId' in by) {
-          await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
+          await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else if ('navId' in by) {
-          await testSubjects.existOrFail(`~nav-item-id-${by.navId}`);
+          await testSubjects.existOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
         } else {
           expect(await getByVisibleText('~nav-item', by.text)).not.be(null);
         }
@@ -70,9 +74,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }
       ) {
         if ('deepLinkId' in by) {
-          await testSubjects.missingOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
+          await testSubjects.missingOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else if ('navId' in by) {
-          await testSubjects.missingOrFail(`~nav-item-id-${by.navId}`);
+          await testSubjects.missingOrFail(`~nav-item-id-${by.navId}`, { timeout: TIMEOUT_CHECK });
         } else {
           expect(await getByVisibleText('~nav-item', by.text)).be(null);
         }
@@ -83,10 +89,13 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await this.expectLinkExists(by);
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(
-            `~nav-item-deepLinkId-${by.deepLinkId} & ~nav-item-isActive`
+            `~nav-item-deepLinkId-${by.deepLinkId} & ~nav-item-isActive`,
+            { timeout: TIMEOUT_CHECK }
           );
         } else if ('navId' in by) {
-          await testSubjects.existOrFail(`~nav-item-id-${by.navId} & ~nav-item-isActive`);
+          await testSubjects.existOrFail(`~nav-item-id-${by.navId} & ~nav-item-isActive`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else {
           await retry.try(async () => {
             const link = await getByVisibleText('~nav-item', by.text);
@@ -150,7 +159,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (isOpen) return;
-        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`);
+        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`, TIMEOUT_CHECK);
         await collapseBtn.click();
         await this.expectSectionOpen(sectionId);
       },
@@ -158,12 +167,12 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await this.expectSectionExists(sectionId);
         const isOpen = await this.isSectionOpen(sectionId);
         if (!isOpen) return;
-        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`);
+        const collapseBtn = await testSubjects.find(`~accordionArrow-${sectionId}`, TIMEOUT_CHECK);
         await collapseBtn.click();
         await this.expectSectionClosed(sectionId);
       },
       async isCollapsed() {
-        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton');
+        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
         return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
       },
       async isExpanded() {
@@ -182,14 +191,14 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             shouldBeCollapsed ? 'Collapsing' : 'Expanding'
           );
 
-          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton');
+          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
       },
     },
     breadcrumbs: {
       async expectExists() {
-        await testSubjects.existOrFail('breadcrumbs');
+        await testSubjects.existOrFail('breadcrumbs', { timeout: TIMEOUT_CHECK });
       },
       async clickBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         if ('deepLinkId' in by) {
@@ -200,7 +209,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         if ('deepLinkId' in by) {
-          return testSubjects.find(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+          return testSubjects.find(`~breadcrumb-deepLinkId-${by.deepLinkId}`, TIMEOUT_CHECK);
         } else {
           return getByVisibleText('~breadcrumb', by.text);
         }
@@ -211,7 +220,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           JSON.stringify(by)
         );
         if ('deepLinkId' in by) {
-          await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+          await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else {
           await retry.try(async () => {
             expect(await getByVisibleText('~breadcrumb', by.text)).not.be(null);
@@ -220,7 +231,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectBreadcrumbMissing(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         if ('deepLinkId' in by) {
-          await testSubjects.missingOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+          await testSubjects.missingOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
+            timeout: TIMEOUT_CHECK,
+          });
         } else {
           await retry.try(async () => {
             expect(await getByVisibleText('~breadcrumb', by.text)).be(null);
@@ -233,7 +246,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           JSON.stringify(expectedBreadcrumbTexts)
         );
         await retry.try(async () => {
-          const breadcrumbsContainer = await testSubjects.find('breadcrumbs');
+          const breadcrumbsContainer = await testSubjects.find('breadcrumbs', TIMEOUT_CHECK);
           const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');
           breadcrumbs.shift(); // remove home
           expect(expectedBreadcrumbTexts.length).to.eql(breadcrumbs.length);
@@ -244,10 +257,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     },
     recent: {
       async expectExists() {
-        await testSubjects.existOrFail('nav-item-recentlyAccessed');
+        await testSubjects.existOrFail('nav-item-recentlyAccessed', { timeout: TIMEOUT_CHECK });
       },
       async expectHidden() {
-        await testSubjects.missingOrFail('nav-item-recentlyAccessed', { timeout: 1000 });
+        await testSubjects.missingOrFail('nav-item-recentlyAccessed', { timeout: TIMEOUT_CHECK });
       },
       async expectLinkExists(text: string) {
         await this.expectExists();
@@ -255,7 +268,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await retry.try(async () => {
           foundLink = await getByVisibleText(
             async () =>
-              (await testSubjects.find('nav-item-recentlyAccessed')).findAllByTagName('a'),
+              (
+                await testSubjects.find('nav-item-recentlyAccessed', TIMEOUT_CHECK)
+              ).findAllByTagName('a'),
             text
           );
           expect(!!foundLink).to.be(true);
