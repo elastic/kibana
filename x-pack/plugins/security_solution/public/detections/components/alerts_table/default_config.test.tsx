@@ -290,7 +290,33 @@ describe('alerts default_config', () => {
       expect(filters).toHaveLength(0);
     });
 
-    it('builds filter containing all rule ids passed into function', () => {
+    it('builds filter containing 1 rule id passed into function', () => {
+      const filters = buildAlertsFilterByRuleIds(['rule-id-1']);
+      const expected = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_id': 'rule-id-1',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expected);
+    });
+
+    it('builds filter containing 3 rule ids passed into function', () => {
       const filters = buildAlertsFilterByRuleIds(['rule-id-1', 'rule-id-2', 'rule-id-3']);
       const expected = {
         meta: {

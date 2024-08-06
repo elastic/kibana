@@ -29,7 +29,7 @@ import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../../../objects/rule';
 import { getExceptionList } from '../../../../../../objects/exception';
 import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
-import { ALERTS_COUNT } from '../../../../../../screens/alerts';
+import { ALERTS_COUNT, ALERT_EMBEDDABLE_EMPTY_PROMPT } from '../../../../../../screens/alerts';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryOperatorValue,
@@ -150,5 +150,6 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     goToAlertsTab();
 
     cy.get(ALERTS_COUNT).should('not.exist');
+    cy.get(ALERT_EMBEDDABLE_EMPTY_PROMPT).should('exist');
   });
 });
