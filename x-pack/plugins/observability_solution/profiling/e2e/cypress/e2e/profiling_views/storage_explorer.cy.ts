@@ -78,7 +78,7 @@ describe('Storage explorer page', () => {
           totalNumberOfHosts,
           totalProfilingSizeBytes,
           totalSymbolsSizeBytes,
-        } = response.body;
+        } = response?.body;
 
         const { kuery } = request.query;
 
