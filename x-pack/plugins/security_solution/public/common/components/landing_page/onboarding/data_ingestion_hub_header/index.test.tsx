@@ -7,10 +7,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DataIngestionHubHeader } from '.';
+import rocketDark from '../images/rocket_dark.png';
 import { useCurrentUser } from '../../../../lib/kibana';
 
 jest.mock('../../../../lib/kibana', () => ({
   useCurrentUser: jest.fn(),
+  useEuiTheme: jest.fn(() => ({ euiTheme: { colorTheme: 'DARK' } })),
 }));
 
 const mockUseCurrentUser = useCurrentUser as jest.Mock;
@@ -51,7 +53,7 @@ describe('WelcomeHeaderComponent', () => {
     mockUseCurrentUser.mockReturnValue({});
 
     const { queryByTestId } = render(<DataIngestionHubHeader />);
-    const greetings = queryByTestId(`welcome-header-greetings`);
+    const greetings = queryByTestId('data-ingestion-hub-header-greetings');
     expect(greetings).not.toBeInTheDocument();
   });
 
@@ -67,5 +69,9 @@ describe('WelcomeHeaderComponent', () => {
     expect(descriptionElement).toBeInTheDocument();
   });
 
-  it('should render the rocket dark image when the theme is DARK', () => {});
+  it('should render the rocket dark image when the theme is DARK', () => {
+    const { queryByTestId } = render(<DataIngestionHubHeader />);
+    const image = queryByTestId('data-ingestion-hub-header-image');
+    expect(image).toHaveStyle({ backgroundImage: `url(${rocketDark})` });
+  });
 });

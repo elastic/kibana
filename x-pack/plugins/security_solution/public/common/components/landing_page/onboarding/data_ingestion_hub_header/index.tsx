@@ -39,13 +39,17 @@ const DataIngestionHubHeaderComponent: React.FC = () => {
       justifyContent="center"
       alignItems="center"
     >
-      <EuiFlexItem grow={false} className={headerImageStyles} />
+      <EuiFlexItem
+        data-test-subj="data-ingestion-hub-header-image"
+        grow={false}
+        className={headerImageStyles}
+      />
       <EuiFlexItem grow={false} className={headerContentStyles}>
         {name && (
           <EuiTitle
             size="l"
             className={headerTitleStyles}
-            data-test-subj="welcome-header-greetings"
+            data-test-subj="data-ingestion-hub-header-greetings"
           >
             <span>{GET_STARTED_PAGE_TITLE(name)}</span>
           </EuiTitle>
