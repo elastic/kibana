@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import { PaletteOutput } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { FormatFactory } from '../../../../common/types';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
@@ -44,8 +43,7 @@ export const createGridCell = (
 
     useEffect(() => {
       if (colorMode !== 'none' && (palette || colorMapping)) {
-        const originalId = getOriginalId(columnId); // workout what bucket the value belongs to
-        const color = getCellColor(originalId, palette, colorMapping)(rowValue);
+        const color = getCellColor(columnId, palette, colorMapping)(rowValue);
 
         if (color) {
           const style = { [colorMode === 'cell' ? 'backgroundColor' : 'color']: color };

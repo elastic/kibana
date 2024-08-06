@@ -18,6 +18,10 @@ function getTransposeId(value: string, columnId: string) {
   return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
 }
 
+export function isTransposeId(id: string): boolean {
+  return id.split(TRANSPOSE_SEPARATOR).length > 1;
+}
+
 export function getOriginalId(id: string) {
   if (id.includes(TRANSPOSE_SEPARATOR)) {
     const idParts = id.split(TRANSPOSE_SEPARATOR);

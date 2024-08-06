@@ -35,7 +35,7 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import type { LensGridDirection } from '../../../../common/expressions';
+import { getOriginalId, isTransposeId, LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
 import type {
@@ -57,7 +57,6 @@ import {
   createTransposeColumnFilterHandler,
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
@@ -393,10 +392,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const renderCellValue = useMemo(() => {
     const cellColorFnMap = new Map<string, CellColorFn>();
     const getCellColor = (
-      originalId: string,
+      columnId: string,
       palette?: PaletteOutput<CustomPaletteState>,
       colorMapping?: string
     ): CellColorFn => {
+      const originalId = getOriginalId(columnId); // workout what bucket the value belongs to
+
       if (cellColorFnMap.has(originalId)) {
         return cellColorFnMap.get(originalId)!;
       }
@@ -410,7 +411,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           }
         : {
             type: 'categories',
-            categories: getColorCategories(firstLocalTable.rows, originalId, [null]),
+            categories: getColorCategories(
+              firstLocalTable.rows,
+              originalId,
+              isTransposeId(columnId),
+              [null]
+            ),
           };
       const colorFn = getCellColorFn(
         props.paletteService,

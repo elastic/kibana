@@ -251,6 +251,7 @@ export function AssignmentsConfig({
                 button={
                   <EuiButtonIcon
                     iconType="boxesVertical"
+                    color="text"
                     aria-label={i18n.translate(
                       'coloring.colorMapping.container.OpenAdditionalActionsButtonLabel',
                       {

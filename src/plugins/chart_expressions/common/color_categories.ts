@@ -16,28 +16,37 @@ import { isMultiFieldKey } from '@kbn/data-plugin/common';
 export function getColorCategories(
   rows: DatatableRow[],
   accessor?: string,
+  isTransposed?: boolean,
   exclude?: any[]
 ): Array<string | string[]> {
-  return accessor
-    ? rows.reduce<{ keys: Set<string>; categories: Array<string | string[]> }>(
-        (acc, r) => {
-          const value = r[accessor];
+  const ids = isTransposed
+    ? Object.keys(rows[0]).filter((key) => accessor && key.endsWith(accessor))
+    : accessor
+    ? [accessor]
+    : [];
 
-          if (value === undefined || exclude?.includes(value)) {
-            return acc;
-          }
+  return rows
+    .flatMap((r) =>
+      ids
+        .map((id) => r[id])
+        .filter((v) => !(v === undefined || exclude?.includes(v)))
+        .map((v) => {
           // The categories needs to be stringified in their unformatted version.
           // We can't distinguish between a number and a string from a text input and the match should
           // work with both numeric field values and string values.
-          const key = (isMultiFieldKey(value) ? [...value.keys] : [value]).map(String);
+          const key = (isMultiFieldKey(v) ? [...v.keys] : [v]).map(String);
           const stringifiedKeys = key.join(',');
-          if (!acc.keys.has(stringifiedKeys)) {
-            acc.keys.add(stringifiedKeys);
-            acc.categories.push(key.length === 1 ? key[0] : key);
-          }
-          return acc;
-        },
-        { keys: new Set(), categories: [] }
-      ).categories
-    : [];
+          return { key, stringifiedKeys };
+        })
+    )
+    .reduce<{ keys: Set<string>; categories: Array<string | string[]> }>(
+      (acc, { key, stringifiedKeys }) => {
+        if (!acc.keys.has(stringifiedKeys)) {
+          acc.keys.add(stringifiedKeys);
+          acc.categories.push(key.length === 1 ? key[0] : key);
+        }
+        return acc;
+      },
+      { keys: new Set(), categories: [] }
+    ).categories;
 }
