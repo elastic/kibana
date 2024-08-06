@@ -17,8 +17,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHeartbeats } from '../../tasks/index_endpoint_heartbeats';
 import { login, ROLE } from '../../tasks/login';
 
-// Failing: See https://github.com/elastic/kibana/issues/187083
-describe.skip(
+describe(
   'Metering',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
@@ -39,6 +38,7 @@ describe.skip(
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHeartbeats> | undefined;
 
     before(() => {
+      login(ROLE.system_indices_superuser);
       login(ROLE.system_indices_superuser);
       startTransparentApiProxy({ port: 3623 });
       indexEndpointHeartbeats({

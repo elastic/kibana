@@ -811,6 +811,9 @@ export class Authenticator {
       });
       existingSessionValue = null;
     } else if (usernameHasChanged) {
+      this.logger.warn(
+        `~~~old ${existingSessionValue!.username} | ~~~new ${authenticationResult.user!.username}`
+      );
       this.logger.warn('Username has changed, existing session will be invalidated.');
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
