@@ -22,52 +22,62 @@ const PENDING_TIMEOUT = 60 * 60 * 1000;
 
 export async function enableSpaceAwarenessMigration() {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-
-  const existingSettings = await getSettings(soClient);
-  if (existingSettings.use_space_awareness) {
-    throw new FleetError('Migration is already done.');
-  }
-
-  if (
-    existingSettings.use_space_awareness_migration_started_at &&
-    new Date(existingSettings.use_space_awareness_migration_started_at).getTime() >
-      Date.now() - PENDING_TIMEOUT
-  ) {
-    throw new FleetError('Migration is pending.');
-  }
-
-  await saveSettings(
-    soClient,
-    {
-      use_space_awareness_migration_started_at: new Date().toISOString(),
-    },
-    {
-      version: existingSettings.version,
+  const logger = appContextService.getLogger();
+  try {
+    const existingSettings = await getSettings(soClient);
+    if (existingSettings.use_space_awareness_migration_status === 'success') {
+      throw new FleetError('Migration is already done.');
     }
-  );
 
-  // Migration
-  // Agent Policy
-  await batchMigration(
-    soClient,
-    LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-    AGENT_POLICY_SAVED_OBJECT_TYPE
-  );
-  await batchMigration(
-    soClient,
-    LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-    PACKAGE_POLICY_SAVED_OBJECT_TYPE
-  );
+    if (
+      existingSettings.use_space_awareness_migration_started_at &&
+      new Date(existingSettings.use_space_awareness_migration_started_at).getTime() >
+        Date.now() - PENDING_TIMEOUT
+    ) {
+      throw new FleetError('Migration is pending.');
+    }
 
-  // Todo
-  // uninstall token
-  // message signing
+    logger.info('Starting Fleet space awareness migration');
 
-  // Update Settings SO
-  await saveSettings(soClient, {
-    use_space_awareness: true,
-    use_space_awareness_migration_started_at: null,
-  });
+    await saveSettings(
+      soClient,
+      {
+        use_space_awareness_migration_status: 'pending',
+        use_space_awareness_migration_started_at: new Date().toISOString(),
+      },
+      {
+        version: existingSettings.version,
+      }
+    );
+
+    // Migration
+    // Agent Policy
+    await batchMigration(
+      soClient,
+      LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+      AGENT_POLICY_SAVED_OBJECT_TYPE
+    );
+    await batchMigration(
+      soClient,
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      PACKAGE_POLICY_SAVED_OBJECT_TYPE
+    );
+
+    // Update Settings SO
+    await saveSettings(soClient, {
+      use_space_awareness_migration_status: 'success',
+      use_space_awareness_migration_started_at: null,
+    });
+
+    logger.info('Fleet space awareness migration is complete');
+  } catch (error) {
+    logger.error('Fleet space awareness migration failed', { error });
+    await saveSettings(soClient, {
+      use_space_awareness_migration_status: 'error',
+      use_space_awareness_migration_started_at: null,
+    });
+    throw error;
+  }
 }
 
 const BATCH_SIZE = 1000;

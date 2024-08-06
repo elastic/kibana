@@ -19,6 +19,10 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
 import type {
@@ -53,8 +57,6 @@ import {
   PackagePolicyValidationError,
 } from '../errors';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
 import {
@@ -71,6 +73,9 @@ import { getPackageInfo } from './epm/packages';
 import { sendTelemetryEvents } from './upgrade_sender';
 import { auditLoggingService } from './audit_logging';
 import { agentPolicyService } from './agent_policy';
+import { isSpaceAwarenessEnabled } from './spaces/helpers';
+
+jest.mock('./spaces/helpers');
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
@@ -221,6 +226,7 @@ const mockAgentPolicyGet = () => {
 describe('Package policy service', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -240,7 +246,7 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         attributes: {},
         references: [],
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       mockAgentPolicyGet();
@@ -268,7 +274,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'create',
         id: 'test-package-policy',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -281,7 +287,7 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         attributes: {},
         references: [],
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       mockAgentPolicyGet();
@@ -334,13 +340,13 @@ describe('Package policy service', () => {
             id: 'test-package-policy-1',
             attributes: {},
             references: [],
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-package-policy-2',
             attributes: {},
             references: [],
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -371,13 +377,13 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'create',
         id: 'test-package-policy-1',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'create',
         id: 'test-package-policy-2',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -389,7 +395,7 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         attributes: {},
         references: [],
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       await packagePolicyService.get(soClient, 'test-package-policy');
@@ -397,7 +403,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-package-policy',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -411,13 +417,13 @@ describe('Package policy service', () => {
             id: 'test-package-policy-1',
             attributes: {},
             references: [],
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-package-policy-2',
             attributes: {},
             references: [],
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       });
@@ -430,13 +436,13 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
         id: 'test-package-policy-1',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
         id: 'test-package-policy-2',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -453,14 +459,14 @@ describe('Package policy service', () => {
             id: 'test-package-policy-1',
             attributes: {},
             references: [],
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
           {
             id: 'test-package-policy-2',
             attributes: {},
             references: [],
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
         ],
@@ -475,13 +481,13 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
         id: 'test-package-policy-1',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
         id: 'test-package-policy-2',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -1686,14 +1692,14 @@ describe('Package policy service', () => {
 
       soClient.get.mockResolvedValue({
         id: 'test-package-policy',
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         references: [],
         attributes,
       });
 
       soClient.update.mockResolvedValue({
         id: 'test-package-policy',
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         references: [],
         attributes,
       });
@@ -1706,7 +1712,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
         id: 'test-package-policy',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -2474,13 +2480,13 @@ describe('Package policy service', () => {
       const mockPackagePolicies = [
         {
           id: 'test-package-policy-1',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           attributes: {},
           references: [],
         },
         {
           id: 'test-package-policy-2',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           attributes: {},
           references: [],
         },
@@ -2527,7 +2533,7 @@ describe('Package policy service', () => {
 
       const mockPackagePolicy = {
         id: 'test-package-policy',
-        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         attributes: {},
         references: [],
       };
@@ -2545,7 +2551,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
         id: 'test-package-policy',
-        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
   });
@@ -4991,7 +4997,7 @@ describe('Package policy service', () => {
 
       expect(soClientMock.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           perPage: 1000,
           sortField: 'created_at',
           sortOrder: 'asc',
@@ -5011,7 +5017,7 @@ describe('Package policy service', () => {
 
       expect(soClientMock.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           perPage: 13,
           sortField: 'created_at',
           sortOrder: 'asc',
@@ -5065,6 +5071,24 @@ describe('Package policy service', () => {
 
       expect(soClientMock.find).toHaveBeenCalledWith(
         expect.objectContaining({
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 1000,
+          sortField: 'created_at',
+          sortOrder: 'asc',
+          fields: [],
+          filter: undefined,
+        })
+      );
+    });
+
+    it('should use space aware saved object type if user opt-in for space awareness', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
+      for await (const ids of await packagePolicyService.fetchAllItemIds(soClientMock)) {
+        expect(ids);
+      }
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
           type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           perPage: 1000,
           sortField: 'created_at',
@@ -5087,7 +5111,7 @@ describe('Package policy service', () => {
 
       expect(soClientMock.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           perPage: 12,
           sortField: 'updated_by',
           sortOrder: 'desc',

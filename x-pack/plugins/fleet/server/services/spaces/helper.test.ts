@@ -46,7 +46,7 @@ describe('isSpaceAwarenessEnabled', () => {
   it('should return false if feature flag is enabled but user did not optin', async () => {
     mockFeatureFlag(true);
     mockGetSettings({
-      use_space_awareness: false,
+      use_space_awareness_migration_status: undefined,
     });
     const res = await isSpaceAwarenessEnabled();
 
@@ -64,7 +64,7 @@ describe('isSpaceAwarenessEnabled', () => {
   it('should return true if feature flag is enabled and user optin', async () => {
     mockFeatureFlag(true);
     mockGetSettings({
-      use_space_awareness: true,
+      use_space_awareness_migration_status: 'success',
     });
     const res = await isSpaceAwarenessEnabled();
 
@@ -74,7 +74,7 @@ describe('isSpaceAwarenessEnabled', () => {
   it('should use cache if called multiple time and feature flag is enabled and user optin', async () => {
     mockFeatureFlag(true);
     mockGetSettings({
-      use_space_awareness: true,
+      use_space_awareness_migration_status: 'success',
     });
     await isSpaceAwarenessEnabled();
     await isSpaceAwarenessEnabled();

@@ -28,7 +28,7 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
     }
   });
 
-  CACHE_SPACE_AWARENESS = settings?.use_space_awareness ?? false;
+  CACHE_SPACE_AWARENESS = settings?.use_space_awareness_migration_status === 'success' ?? false;
 
   return CACHE_SPACE_AWARENESS;
 }
