@@ -1146,7 +1146,11 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+
   const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)

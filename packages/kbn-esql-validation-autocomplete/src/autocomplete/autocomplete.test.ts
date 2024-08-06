@@ -181,6 +181,14 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('where', ['any'], { scalar: true }),
     ]);
+
+    testSuggestions('from a | where dateField >= ', [
+      TIME_PICKER_SUGGESTION,
+      ...TIME_SYSTEM_PARAMS,
+      ...getFieldNamesByType('date'),
+      ...getFunctionSignaturesByReturnType('where', ['date'], { scalar: true }),
+    ]);
+
     // Skip these tests until the insensitive case equality gets restored back
     testSuggestions.skip('from a | where stringField =~ ', [
       ...getFieldNamesByType('string'),
