@@ -4127,28 +4127,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.EMPTY_INDEX_FIELDS",
-        "type": "Array",
-        "tags": [],
-        "label": "EMPTY_INDEX_FIELDS",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-common.EntityType",
         "type": "Type",
         "tags": [],
