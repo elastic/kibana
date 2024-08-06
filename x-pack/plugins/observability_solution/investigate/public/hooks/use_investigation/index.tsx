@@ -78,7 +78,6 @@ function useInvestigationWithoutContext({
         user,
         id: v4(),
         globalWidgetParameters: {
-          filters: [],
           timeRange: {
             from,
             to,

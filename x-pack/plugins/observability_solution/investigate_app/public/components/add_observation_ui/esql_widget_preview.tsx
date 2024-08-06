@@ -79,7 +79,6 @@ function PreviewContainer({ children }: { children: React.ReactNode }) {
 export function EsqlWidgetPreview({
   esqlQuery,
   onWidgetAdd,
-  filters,
   timeRange,
 }: {
   esqlQuery: string;
@@ -91,10 +90,9 @@ export function EsqlWidgetPreview({
 
   const filter = useMemo(() => {
     return getEsFilterFromOverrides({
-      filters,
       timeRange,
     });
-  }, [filters, timeRange]);
+  }, [timeRange]);
 
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | undefined>(undefined);
 

@@ -152,7 +152,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           </EuiFlexGroup>
 
           <AddObservationUI
-            filters={revision.parameters.filters}
             timeRange={revision.parameters.timeRange}
             onWidgetAdd={(widget) => {
               return createWidgetRef.current(widget);
@@ -164,7 +163,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       <EuiFlexItem grow={2}>
         <AddNoteUI
           user={user}
-          filters={revision.parameters.filters}
           timeRange={revision.parameters.timeRange}
           onWidgetAdd={(widget) => {
             return createWidgetRef.current(widget);

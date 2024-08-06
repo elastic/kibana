@@ -6,7 +6,6 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core/public';
-import type { Filter } from '@kbn/es-query';
 import type { DeepPartial } from 'utility-types';
 
 export interface GlobalWidgetParameters {
@@ -14,7 +13,6 @@ export interface GlobalWidgetParameters {
     from: string;
     to: string;
   };
-  filters: Filter[];
 }
 
 export enum InvestigateWidgetColumnSpan {

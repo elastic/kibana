@@ -217,7 +217,6 @@ export function registerEsqlWidget({
     async ({ parameters, signal }) => {
       const {
         esql: esqlQuery,
-        filters,
         timeRange,
         suggestion: suggestionFromParameters,
       } = parameters as EsqlWidgetParameters & GlobalWidgetParameters;
@@ -226,7 +225,6 @@ export function registerEsqlWidget({
 
       const esFilters = [
         getEsFilterFromOverrides({
-          filters,
           timeRange,
         }),
       ];
@@ -265,7 +263,7 @@ export function registerEsqlWidget({
         dateHistogram: dateHistoResponse,
       };
     },
-    ({ widget, blocks }) => {
+    ({ widget }) => {
       const {
         main: { dataView, columns, values, suggestion },
         dateHistogram,
