@@ -20,6 +20,7 @@ import {
 
 import { PrivilegesWarningIconWrapper } from '../../common';
 import { notAvailableLabel } from '../../../../common/translations';
+import type { getSummaryKpis } from './get_summary_kpis';
 
 export function FlyoutSummaryKpiItem({
   title,
@@ -27,16 +28,7 @@ export function FlyoutSummaryKpiItem({
   link,
   isLoading,
   userHasPrivilege,
-}: {
-  title: string;
-  value: string;
-  link?: {
-    label: string;
-    href: string;
-  };
-  isLoading: boolean;
-  userHasPrivilege: boolean;
-}) {
+}: ReturnType<typeof getSummaryKpis>[number] & { isLoading: boolean }) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -71,8 +63,7 @@ export function FlyoutSummaryKpiItem({
                 alignItems: 'center',
                 width: 'fit-content',
               }}
-              href={link.href}
-              target="_blank"
+              {...link.props}
             >
               <EuiText
                 css={{

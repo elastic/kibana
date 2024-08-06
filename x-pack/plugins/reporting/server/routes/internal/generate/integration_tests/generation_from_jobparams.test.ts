@@ -77,7 +77,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
         },
-        security: {
+        securityService: {
           authc: {
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
@@ -89,6 +89,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
     usageCounter = {
+      domainId: 'abc123',
       incrementCounter: jest.fn(),
     };
     jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);

@@ -6,8 +6,8 @@
  */
 
 import { IntegrationAssistantPlugin } from './plugin';
+export type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
 
 export function plugin() {
   return new IntegrationAssistantPlugin();
 }
-export type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';

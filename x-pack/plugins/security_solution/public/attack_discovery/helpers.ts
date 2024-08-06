@@ -56,7 +56,7 @@ export const getTacticLabel = (tactic: string): string => {
   }
 };
 
-interface TacticMetadata {
+export interface TacticMetadata {
   detected: boolean;
   index: number;
   name: string;

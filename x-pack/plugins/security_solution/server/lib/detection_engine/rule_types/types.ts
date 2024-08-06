@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -37,7 +38,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
-import type { CompleteRule, EqlRuleParams, RuleParams, ThreatRuleParams } from '../rule_schema';
+import type { CompleteRule, RuleParams } from '../rule_schema';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../rule_monitoring';
@@ -72,6 +73,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -139,6 +141,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   isPreview?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
+  analytics?: AnalyticsServiceSetup;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -401,5 +404,3 @@ export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;
   fields?: estypes.Fields;
 }
-
-export type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams;

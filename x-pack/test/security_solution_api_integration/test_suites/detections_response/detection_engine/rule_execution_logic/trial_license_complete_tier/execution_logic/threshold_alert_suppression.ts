@@ -51,7 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless @serverlessQA Threshold type rules, alert suppression', () => {
+  // NOTE: Add to second quality gate after feature is GA
+  describe('@ess @serverless Threshold type rules, alert suppression', () => {
     const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -98,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      expect(alerts.hits.hits.length).toEqual(1);
+      expect(alerts.hits.hits).toHaveLength(1);
 
       // suppression start equal to alert timestamp
       const suppressionStart = alerts.hits.hits[0]._source?.[TIMESTAMP];
@@ -193,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Close the alert. Subsequent rule executions should ignore this closed alert
       // for suppression purposes.
-      const alertIds = alerts.hits.hits.map((alert) => alert._id);
+      const alertIds = alerts.hits.hits.map((alert) => alert._id!);
       await supertest
         .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
         .set('kbn-xsrf', 'true')

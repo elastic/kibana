@@ -21,7 +21,8 @@ import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -400,13 +401,16 @@ export class Plugin implements InfraClientPluginClass {
 
     plugins.uiActions.registerAction<EmbeddableApiContext>({
       id: ADD_LOG_STREAM_ACTION_ID,
+      grouping: [COMMON_EMBEDDABLE_GROUPING.legacy],
+      order: 30,
       getDisplayName: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
-          defaultMessage: 'Log stream',
+          defaultMessage: 'Log stream (deprecated)',
         }),
       getDisplayNameTooltip: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.description', {
-          defaultMessage: 'Add a table of live streaming logs.',
+          defaultMessage:
+            'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved search instead of using Log stream.',
         }),
       getIconType: () => 'logsApp',
       isCompatible: async ({ embeddable }) => {
@@ -427,7 +431,7 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-    plugins.uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_LOG_STREAM_ACTION_ID);
+    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LOG_STREAM_ACTION_ID);
 
     const startContract: InfraClientStartExports = {
       inventoryViews,

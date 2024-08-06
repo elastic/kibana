@@ -141,6 +141,26 @@ describe('<CorrelationsOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('should not render link when isPreviewMode is true', () => {
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'event-id' });
+    jest
+      .mocked(useShowRelatedAlertsBySameSourceEvent)
+      .mockReturnValue({ show: false, originalEventId });
+    jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
+    jest.mocked(useShowRelatedCases).mockReturnValue(false);
+    jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
+
+    const { getByTestId, queryByTestId } = render(
+      renderCorrelationsOverview({ ...panelContextValue, isPreviewMode: true })
+    );
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
+  });
+
   it('should show component with all rows in expandable panel', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)

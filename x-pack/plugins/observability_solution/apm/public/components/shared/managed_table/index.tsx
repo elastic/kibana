@@ -66,6 +66,7 @@ export const shouldfetchServer = ({
 function UnoptimizedManagedTable<T extends object>(props: {
   items: T[];
   columns: Array<ITableColumn<T>>;
+  rowHeader?: string | false;
   noItemsMessage?: React.ReactNode;
   isLoading?: boolean;
   error?: boolean;
@@ -96,6 +97,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const {
     items,
     columns,
+    rowHeader,
     noItemsMessage,
     isLoading = false,
     error = false,
@@ -285,6 +287,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
         }
         items={renderedItems}
         columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+        rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
         sorting={sorting}
         onChange={onTableChange}
         {...(paginationProps ? { pagination: paginationProps } : {})}

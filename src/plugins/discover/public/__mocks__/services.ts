@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
@@ -35,6 +35,7 @@ import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
@@ -142,6 +143,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   const theme = themeServiceMock.createSetupContract({ darkMode: false });
 
   corePluginMock.theme = theme;
+  corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
 
   return {
     core: corePluginMock,
@@ -163,6 +165,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       PatternAnalysisComponent: jest.fn(() => createElement('div')),
     },
     docLinks: docLinksServiceMock.createStartContract(),
+    embeddable: embeddablePluginMock.createStartContract(),
     capabilities: {
       visualize: {
         show: true,

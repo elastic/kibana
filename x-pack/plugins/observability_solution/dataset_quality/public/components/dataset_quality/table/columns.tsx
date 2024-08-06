@@ -31,6 +31,7 @@ import {
   BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import { NavigationSource } from '../../../services/telemetry';
 import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { PrivilegesWarningIconWrapper, IntegrationIcon } from '../../common';
 import { useRedirectLink } from '../../../hooks';
@@ -352,10 +353,13 @@ const RedirectLink = ({
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const redirectLinkProps = useRedirectLink({ dataStreamStat });
+  const redirectLinkProps = useRedirectLink({
+    dataStreamStat,
+    telemetry: { page: 'main', navigationSource: NavigationSource.Table },
+  });
 
   return (
-    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...redirectLinkProps}>
+    <EuiLink data-test-subj="datasetQualityLogsExplorerLinkLink" {...redirectLinkProps.linkProps}>
       {title}
     </EuiLink>
   );

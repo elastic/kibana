@@ -5,8 +5,9 @@ info:
 paths:
   /internal/elastic_assistant/attack_discovery/{connectorId}:
     get:
-      operationId: AttackDiscoveryGet
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttackDiscoveryGet
       description: Get relevant data for performing an attack discovery like pending requests
       summary: Get relevant data for performing an attack discovery
       tags:
@@ -28,11 +29,13 @@ paths:
                 properties:
                   data:
                     $ref: './common_attributes.schema.yaml#/components/schemas/AttackDiscoveryResponse'
-                  entryExists:
-                    type: boolean
-                    description: Indicates if an attack discovery exists for the given connectorId
+                  stats:
+                    type: array
+                    description: Attack discovery stats per connector
+                    items:
+                      $ref: './common_attributes.schema.yaml#/components/schemas/AttackDiscoveryStat'
                 required:
-                  - entryExists
+                  - stats
         '400':
           description: Generic Error
           content:

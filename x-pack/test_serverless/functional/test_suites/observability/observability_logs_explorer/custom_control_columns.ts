@@ -36,13 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await navigateToLogsExplorer();
     });
 
     after(async () => {
       await synthtrace.clean();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('should render custom control columns properly', async () => {

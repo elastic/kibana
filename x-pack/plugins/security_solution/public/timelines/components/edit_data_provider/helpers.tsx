@@ -8,9 +8,10 @@
 import { findIndex } from 'lodash/fp';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataProviderType } from '../../../../common/api/timeline';
+import type { FieldCategory } from '@kbn/timelines-plugin/common/search_strategy';
+import { type DataProviderType, DataProviderTypeEnum } from '../../../../common/api/timeline';
 
-import type { BrowserField, BrowserFields } from '../../../common/containers/source';
+import type { BrowserFields } from '../../../common/containers/source';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
 import {
@@ -46,7 +47,7 @@ export const operatorLabels: EuiComboBoxOptionOption[] = [
 export const EMPTY_ARRAY_RESULT = [];
 
 /** Returns the names of fields in a category */
-export const getFieldNames = (category: Partial<BrowserField>): string[] =>
+export const getFieldNames = (category: FieldCategory): string[] =>
   category.fields != null && Object.keys(category.fields).length > 0
     ? Object.keys(category.fields)
     : EMPTY_ARRAY_RESULT;
@@ -82,7 +83,7 @@ export const selectionsAreValid = ({
   const fieldIsValid = browserFields && getAllFieldsByName(browserFields)[fieldId] != null;
   const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels) !== -1;
   const isOneOfOperatorSelectionWithTemplate =
-    type === DataProviderType.template &&
+    type === DataProviderTypeEnum.template &&
     (operator === i18n.IS_ONE_OF || operator === i18n.IS_NOT_ONE_OF);
 
   return fieldIsValid && operatorIsValid && !isOneOfOperatorSelectionWithTemplate;

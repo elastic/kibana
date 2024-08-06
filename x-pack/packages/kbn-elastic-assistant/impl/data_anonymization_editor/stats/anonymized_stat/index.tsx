@@ -16,11 +16,19 @@ import * as i18n from './translations';
 
 interface Props {
   anonymized: number;
+  titleSize?: 'xs' | 's' | 'xxxs' | 'xxs' | 'm' | 'l' | undefined;
+  gap?: string;
   isDataAnonymizable: boolean;
   inline?: boolean;
 }
 
-const AnonymizedStatComponent: React.FC<Props> = ({ anonymized, isDataAnonymizable, inline }) => {
+const AnonymizedStatComponent: React.FC<Props> = ({
+  anonymized,
+  isDataAnonymizable,
+  inline,
+  titleSize = TITLE_SIZE,
+  gap = euiThemeVars.euiSizeXS,
+}) => {
   const color = useMemo(() => getColor(isDataAnonymizable), [isDataAnonymizable]);
 
   const tooltipContent = useMemo(
@@ -45,7 +53,7 @@ const AnonymizedStatComponent: React.FC<Props> = ({ anonymized, isDataAnonymizab
             ? css`
                 display: flex;
                 align-items: center;
-                gap: ${euiThemeVars.euiSizeXS};
+                gap: ${gap};
               `
             : null
         }
@@ -54,7 +62,7 @@ const AnonymizedStatComponent: React.FC<Props> = ({ anonymized, isDataAnonymizab
         reverse
         titleColor={color}
         title={anonymized}
-        titleSize={TITLE_SIZE}
+        titleSize={titleSize}
       />
     </EuiToolTip>
   );

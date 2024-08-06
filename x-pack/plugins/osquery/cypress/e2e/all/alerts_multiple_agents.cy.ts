@@ -14,7 +14,6 @@ import {
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
-import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
 describe(
   'Alert Event Details - dynamic params',
@@ -43,7 +42,6 @@ describe(
 
     it('should substitute parameters in investigation guide', () => {
       cy.getBySel('expand-event').first().click();
-      closeAlertsStepTourIfVisible();
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();
       // Flakes at times if the button is only clicked once
       cy.contains('Get processes').should('be.visible').dblclick({ force: true });
@@ -84,7 +82,7 @@ describe(
 
       it('should be able to run take action query against all enrolled agents', () => {
         cy.getBySel('expand-event').first().click();
-        cy.getBySel('take-action-dropdown-btn').click();
+        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
           cy.getBySel('comboBoxClearButton').click();

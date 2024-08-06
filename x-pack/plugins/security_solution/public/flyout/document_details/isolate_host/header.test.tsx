@@ -95,6 +95,8 @@ describe('Isolation Flyout PanelHeader', () => {
       } else {
         expect(queryByTestId('flyoutHostIsolationHeaderBadge')).toBeNull();
       }
+
+      expect(getByTestId('flyoutHostIsolationHeaderIntegration'));
     }
   );
 });

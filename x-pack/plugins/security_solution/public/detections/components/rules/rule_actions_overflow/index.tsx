@@ -68,7 +68,10 @@ const RuleActionsOverflowComponent = ({
   confirmDeletion,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -155,12 +158,20 @@ const RuleActionsOverflowComponent = ({
                     key={i18nActions.MANUAL_RULE_RUN}
                     icon="play"
                     disabled={!userHasPermissions || !rule.enabled}
+                    toolTipContent={
+                      !userHasPermissions || !rule.enabled
+                        ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
+                        : ''
+                    }
                     data-test-subj="rules-details-manual-rule-run"
                     onClick={async () => {
                       startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
                       closePopover();
                       const modalManualRuleRunConfirmationResult =
                         await showManualRuleRunConfirmation();
+                      telemetry.reportManualRuleRunOpenModal({
+                        type: 'single',
+                      });
                       if (modalManualRuleRunConfirmationResult === null) {
                         return;
                       }
@@ -216,6 +227,7 @@ const RuleActionsOverflowComponent = ({
       confirmDeletion,
       scheduleRuleRun,
       isManualRuleRunEnabled,
+      telemetry,
     ]
   );
 

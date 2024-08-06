@@ -10,7 +10,8 @@
       "PUT"
     ],
     "patterns": [
-      "_connector/{connector_id}"
+      "_connector/{connector_id}",
+      "_connector"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/create-connector-api.html",
     "availability": {

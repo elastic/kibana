@@ -9,7 +9,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { TimelineType } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
 
 import { TimelinesPage } from './timelines_page';
 
@@ -17,8 +17,8 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 
 import { TIMELINES_PATH } from '../../../common/constants';
 
-const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineType.default}|${TimelineType.template})`;
-const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
+const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineTypeEnum.default}|${TimelineTypeEnum.template}|notes)`;
+const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineTypeEnum.default}`;
 
 export const Timelines = React.memo(() => (
   <Routes>

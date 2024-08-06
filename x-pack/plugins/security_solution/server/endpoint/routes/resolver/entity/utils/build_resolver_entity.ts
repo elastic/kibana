@@ -23,6 +23,9 @@ export function resolverEntity(
       let foundSchema = true;
       // check that the constraint and id fields are defined and that the id field is not an empty string
       const id = getFieldAsString(hit._source, supportedSchema.schema.id);
+      const agentId =
+        supportedSchema.schema.agentId &&
+        getFieldAsString(hit._source, supportedSchema.schema.agentId);
       for (const constraint of supportedSchema.constraints) {
         const fieldValue = getFieldAsString(hit._source, constraint.field);
         // track that all the constraints are true, if one of them is false then this schema is not valid so mark it
@@ -40,6 +43,7 @@ export function resolverEntity(
           name: supportedSchema.name,
           schema: supportedSchema.schema,
           id,
+          ...(agentId ? { agentId } : {}),
         });
       }
     }

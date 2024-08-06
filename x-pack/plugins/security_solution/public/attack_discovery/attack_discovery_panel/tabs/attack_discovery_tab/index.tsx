@@ -85,7 +85,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
 
       {tacticMetadata.length > 0 && (
         <>
-          <EuiTitle data-test-subj="detailsTitle" size="xs">
+          <EuiTitle data-test-subj="attackChainTitle" size="xs">
             <h2>{i18n.ATTACK_CHAIN}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />

@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
+  BareNote,
   PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
@@ -26,14 +27,14 @@ import type {
   ResponseTimeline,
   SortTimeline,
   TimelineResult,
-  TimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
+  TimelineType,
+  TimelineStatus,
   ResolvedTimelineWithOutcomeSavedObject,
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
 } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -51,11 +52,11 @@ export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 export const getTimeline = async (
   request: FrameworkRequest,
   timelineId: string,
-  timelineType: TimelineTypeLiteralWithNull = TimelineType.default
+  timelineType: TimelineType | null = TimelineTypeEnum.default
 ): Promise<TimelineSavedObject> => {
   let timelineIdToUse = timelineId;
   try {
-    if (timelineType === TimelineType.template) {
+    if (timelineType === TimelineTypeEnum.template) {
       const options = {
         type: timelineSavedObjectType,
         perPage: 1,
@@ -129,33 +130,33 @@ export const getTimelineTemplateOrNull = async (
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
 const getTimelineTypeFilter = (
-  timelineType: TimelineTypeLiteralWithNull,
-  status: TimelineStatusLiteralWithNull
+  timelineType: TimelineType | null,
+  status: TimelineStatus | null
 ) => {
   const typeFilter =
     timelineType == null
       ? null
-      : timelineType === TimelineType.template
-      ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+      : timelineType === TimelineTypeEnum.template
+      ? `siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}` /** Show only whose timelineType exists and equals to "template" */
       : /** Show me every timeline whose timelineType is not "template".
          * which includes timelineType === 'default' and
          * those timelineType doesn't exists */
-        `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+        `not siem-ui-timeline.attributes.timelineType: ${TimelineTypeEnum.template}`;
 
   /** Show me every timeline whose status is not "draft".
    * which includes status === 'active' and
    * those status doesn't exists */
   const draftFilter =
-    status === TimelineStatus.draft
-      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
-      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
+    status === TimelineStatusEnum.draft
+      ? `siem-ui-timeline.attributes.status: ${TimelineStatusEnum.draft}`
+      : `not siem-ui-timeline.attributes.status: ${TimelineStatusEnum.draft}`;
 
   const immutableFilter =
     status == null
       ? null
-      : status === TimelineStatus.immutable
-      ? `siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`
-      : `not siem-ui-timeline.attributes.status: ${TimelineStatus.immutable}`;
+      : status === TimelineStatusEnum.immutable
+      ? `siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`
+      : `not siem-ui-timeline.attributes.status: ${TimelineStatusEnum.immutable}`;
 
   const filters = [typeFilter, draftFilter, immutableFilter];
   return combineFilters(filters);
@@ -203,7 +204,7 @@ export const getExistingPrepackagedTimelines = async (
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,
-    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.immutable),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.template, TimelineStatusEnum.immutable),
   };
 
   return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
@@ -215,8 +216,8 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline,
   search: string | null,
   sort: SortTimeline | null,
-  status: TimelineStatusLiteralWithNull,
-  timelineType: TimelineTypeLiteralWithNull
+  status: TimelineStatus | null,
+  timelineType: TimelineType | null
 ): Promise<AllTimelinesResponse> => {
   const searchTerm = search != null ? search : undefined;
   const searchFields = ['title', 'description'];
@@ -239,21 +240,21 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.default, TimelineStatus.active),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.default, TimelineStatusEnum.active),
   };
 
   const templateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.template, null),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.template, null),
   };
 
   const customTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.template, TimelineStatus.active),
+    filter: getTimelineTypeFilter(TimelineTypeEnum.template, TimelineStatusEnum.active),
   };
 
   const favoriteTimelineOptions = {
@@ -263,7 +264,7 @@ export const getAllTimeline = async (
     perPage: 1,
     page: 1,
     filter: combineFilters([
-      getTimelineTypeFilter(timelineType ?? null, TimelineStatus.active),
+      getTimelineTypeFilter(timelineType ?? null, TimelineStatusEnum.active),
       getTimelineFavoriteFilter({ onlyUserFavorite: true, request }),
     ]),
   };
@@ -289,10 +290,10 @@ export const getAllTimeline = async (
 
 export const getDraftTimeline = async (
   request: FrameworkRequest,
-  timelineType: TimelineTypeLiteralWithNull
+  timelineType: TimelineType | null
 ): Promise<ResponseTimelines> => {
   const filter = combineFilters([
-    getTimelineTypeFilter(timelineType ?? null, TimelineStatus.draft),
+    getTimelineTypeFilter(timelineType ?? null, TimelineStatusEnum.draft),
     getTimelinesCreatedAndUpdatedByCurrentUser({ request }),
   ]);
   const options: SavedObjectsFindOptions = {
@@ -596,7 +597,7 @@ export const copyTimeline = async (
     pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
   ]);
 
-  const isImmutable = timeline.status === TimelineStatus.immutable;
+  const isImmutable = timeline.status === TimelineStatusEnum.immutable;
   const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
 
   const timelineResponse = await createTimeline({
@@ -610,13 +611,14 @@ export const copyTimeline = async (
 
   const copiedNotes = Promise.all(
     notes.map((_note) => {
+      const newNote: BareNote = {
+        ..._note,
+        timelineId: newTimelineId,
+      };
       return note.persistNote({
         request,
         noteId: null,
-        note: {
-          ..._note,
-          timelineId: newTimelineId,
-        },
+        note: newNote,
         overrideOwner: false,
       });
     })
@@ -771,7 +773,7 @@ export const getSelectedTimelines = async (
       },
       null,
       null,
-      TimelineStatus.active,
+      TimelineStatusEnum.active,
       null
     );
     exportedIds = savedAllTimelines.map((t) => t.savedObjectId);

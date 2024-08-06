@@ -11,7 +11,7 @@ import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { IdFormat } from '../../../../common/http_api/latest';
 import { LogEntryExample } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import { callGetLogEntryExamplesAPI } from './service_calls/get_log_entry_examples';
 
 export const useLogEntryExamples = ({

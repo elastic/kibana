@@ -80,7 +80,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     <KibanaRenderContextProvider {...core}>
       <KibanaReactContextProvider>
         <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={dependencies}>
+          <AppContextProvider value={{ ...dependencies, overlays }}>
             <MappingsEditorProvider>
               <ComponentTemplatesProvider value={componentTemplateProviderValues}>
                 <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>

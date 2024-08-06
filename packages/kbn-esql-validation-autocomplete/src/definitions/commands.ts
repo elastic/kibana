@@ -63,19 +63,6 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
-    name: 'meta',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metaDoc', {
-      defaultMessage: 'Returns information about the ES|QL environment',
-    }),
-    examples: ['meta functions'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'functions', type: 'function' }],
-    },
-  },
-  {
     name: 'show',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
@@ -286,7 +273,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'number', constantOnly: true }],
+      params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
     options: [],
     modes: [],
@@ -372,8 +359,8 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [
         { name: 'expression', type: 'any' },
-        { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
-        { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
+        { name: 'direction', type: 'string', optional: true, values: ['ASC', 'DESC'] },
+        { name: 'nulls', type: 'string', optional: true, values: ['NULLS FIRST', 'NULLS LAST'] },
       ],
     },
   },
@@ -403,6 +390,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
+        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
@@ -420,6 +408,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
+        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
         { name: 'column', type: 'column', innerType: 'string' },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],

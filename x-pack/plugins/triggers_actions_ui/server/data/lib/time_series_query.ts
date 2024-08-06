@@ -111,7 +111,7 @@ export async function timeSeriesQuery(
   const includeConditionInQuery = !!conditionParams;
 
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
-  logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
+  logger.debug(() => `${logPrefix} call: ${JSON.stringify(esQuery)}`);
   let esResult: estypes.SearchResponse<unknown>;
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
@@ -127,7 +127,7 @@ export async function timeSeriesQuery(
   }
 
   // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
-  logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
+  logger.debug(() => `${logPrefix} result: ${JSON.stringify(esResult)}`);
   return getResultFromEs({
     isCountAgg,
     isGroupAgg,

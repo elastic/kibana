@@ -769,7 +769,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(result.saved_objects).toHaveLength(4);
       generatedResults.hits.hits.forEach((doc, i) => {
         expect(result.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
           type: doc._source!.type,
           originId: doc._source!.originId,
           ...mockTimestampFields,
@@ -825,7 +825,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       generatedResults.hits.hits.forEach((doc, i) => {
         expect(result.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
           type: doc._source!.type,
           originId: doc._source!.originId,
           ...mockTimestampFields,
@@ -882,7 +882,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       generatedResults.hits.hits.forEach((doc, i) => {
         expect(result.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+          id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
           type: doc._source!.type,
           originId: doc._source!.originId,
           ...mockTimestampFields,
@@ -927,7 +927,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         objects: generatedResults.hits.hits.map((obj) => {
           return {
             type: obj._source?.type,
-            id: obj._id.slice(obj._id.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
+            id: obj._id!.slice(obj._id!.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
             existingNamespaces:
               obj._source?.namespaces ?? obj._source?.namespace ? [obj._source?.namespace] : [],
           };

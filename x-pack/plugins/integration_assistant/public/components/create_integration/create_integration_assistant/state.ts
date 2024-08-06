@@ -10,7 +10,7 @@ import type { AIConnector, IntegrationSettings } from './types';
 
 export interface State {
   step: number;
-  connectorId?: AIConnector['id'];
+  connector?: AIConnector;
   integrationSettings?: IntegrationSettings;
   isGenerating: boolean;
   result?: {
@@ -21,7 +21,7 @@ export interface State {
 
 export const initialState: State = {
   step: 1,
-  connectorId: undefined,
+  connector: undefined,
   integrationSettings: undefined,
   isGenerating: false,
   result: undefined,
@@ -29,7 +29,7 @@ export const initialState: State = {
 
 type Action =
   | { type: 'SET_STEP'; payload: State['step'] }
-  | { type: 'SET_CONNECTOR_ID'; payload: State['connectorId'] }
+  | { type: 'SET_CONNECTOR'; payload: State['connector'] }
   | { type: 'SET_INTEGRATION_SETTINGS'; payload: State['integrationSettings'] }
   | { type: 'SET_IS_GENERATING'; payload: State['isGenerating'] }
   | { type: 'SET_GENERATED_RESULT'; payload: State['result'] };
@@ -43,8 +43,8 @@ export const reducer = (state: State, action: Action): State => {
         isGenerating: false,
         ...(action.payload < state.step && { result: undefined }), // reset the result when we go back
       };
-    case 'SET_CONNECTOR_ID':
-      return { ...state, connectorId: action.payload };
+    case 'SET_CONNECTOR':
+      return { ...state, connector: action.payload };
     case 'SET_INTEGRATION_SETTINGS':
       return { ...state, integrationSettings: action.payload };
     case 'SET_IS_GENERATING':
@@ -58,7 +58,7 @@ export const reducer = (state: State, action: Action): State => {
 
 export interface Actions {
   setStep: (payload: State['step']) => void;
-  setConnectorId: (payload: State['connectorId']) => void;
+  setConnector: (payload: State['connector']) => void;
   setIntegrationSettings: (payload: State['integrationSettings']) => void;
   setIsGenerating: (payload: State['isGenerating']) => void;
   setResult: (payload: State['result']) => void;

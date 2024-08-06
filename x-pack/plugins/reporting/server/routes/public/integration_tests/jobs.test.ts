@@ -95,7 +95,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
         },
-        security: {
+        securityService: {
           authc: {
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
@@ -107,6 +107,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
     reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
     usageCounter = {
+      domainId: 'abc123',
       incrementCounter: jest.fn(),
     };
     jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);
@@ -165,7 +166,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
             ...licensingMock.createStart(),
             license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          security: { authc: { getCurrentUser: () => undefined } },
+          securityService: { authc: { getCurrentUser: () => undefined } },
         },
         mockConfigSchema
       );

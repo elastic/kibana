@@ -632,7 +632,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+        `"Failed to create case: Error: Invalid duplicated customFields keys in request: duplicated_key"`
       );
     });
 

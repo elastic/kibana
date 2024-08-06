@@ -7,6 +7,11 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
+if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
+  echo "--- Nothing to do in DRY_RUN mode"
+  exit 0
+fi
+
 echo "--- Push docker image"
 mkdir -p target
 

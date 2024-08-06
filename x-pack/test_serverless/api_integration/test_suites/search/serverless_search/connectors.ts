@@ -6,20 +6,30 @@
  */
 
 import expect from 'expect';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
 
   describe('Connectors routes', function () {
     describe('GET connectors', function () {
+      before(async () => {
+        roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
+      });
+      after(async () => {
+        await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      });
       it('returns list of connectors', async () => {
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/connectors`)
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .expect(200);
 
         expect(body.connectors).toBeDefined();

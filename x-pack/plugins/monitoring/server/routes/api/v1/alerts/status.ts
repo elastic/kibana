@@ -28,6 +28,9 @@ export function alertStatusRoute(npRoute: RouteDependencies) {
           }),
         }),
       },
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       try {

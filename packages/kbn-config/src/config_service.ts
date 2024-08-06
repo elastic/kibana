@@ -47,6 +47,7 @@ export class ConfigService {
   private readonly deprecationLog: Logger;
   private readonly docLinks: DocLinks;
 
+  private stripUnknownKeys = false;
   private validated = false;
   private readonly config$: Observable<Config>;
   private lastConfig?: Config;
@@ -97,6 +98,14 @@ export class ConfigService {
   }
 
   /**
+   * Set the global setting for stripUnknownKeys. Useful for running in Serverless-compatible way.
+   * @param stripUnknownKeys Set to `true` if unknown keys (not explicitly forbidden) should be dropped without failing validation
+   */
+  public setGlobalStripUnknownKeys(stripUnknownKeys: boolean) {
+    this.stripUnknownKeys = stripUnknownKeys;
+  }
+
+  /**
    * Set config schema for a path and performs its validation
    */
   public setSchema(path: ConfigPath, schema: Type<unknown>) {
@@ -139,7 +148,7 @@ export class ConfigService {
   public async validate(params: ConfigValidateParameters = { logDeprecations: true }) {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
-      await this.getValidatedConfigAtPath$(namespaces[i]).pipe(first()).toPromise();
+      await firstValueFrom(this.getValidatedConfigAtPath$(namespaces[i]));
     }
 
     if (params.logDeprecations) {
@@ -313,7 +322,8 @@ export class ConfigService {
         serverless: this.env.packageInfo.buildFlavor === 'serverless',
         ...this.env.packageInfo,
       },
-      `config validation of [${namespace}]`
+      `config validation of [${namespace}]`,
+      this.stripUnknownKeys ? { stripUnknownKeys: this.stripUnknownKeys } : {}
     );
   }
 

@@ -7,6 +7,10 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
+  AddNoteFromExpandableFlyoutClickedParams,
+  OpenNoteInExpandableFlyoutClickedParams,
+} from './events/notes/types';
+import type {
   TelemetryClientStart,
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
@@ -35,6 +39,11 @@ import type {
   OnboardingHubStepLinkClickedParams,
   OnboardingHubStepOpenParams,
   OnboardingHubStepFinishedParams,
+  ReportManualRuleRunCancelJobParams,
+  ReportManualRuleRunExecuteParams,
+  ReportManualRuleRunOpenModalParams,
+  ReportEventLogShowSourceEventDateRangeParams,
+  ReportEventLogFilterByRunTypeParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
 
@@ -167,5 +176,39 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportOnboardingHubStepLinkClicked = (params: OnboardingHubStepLinkClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepLinkClicked, params);
+  };
+
+  public reportManualRuleRunOpenModal = (params: ReportManualRuleRunOpenModalParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunOpenModal, params);
+  };
+
+  public reportManualRuleRunExecute = (params: ReportManualRuleRunExecuteParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunExecute, params);
+  };
+
+  public reportManualRuleRunCancelJob = (params: ReportManualRuleRunCancelJobParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ManualRuleRunCancelJob, params);
+  };
+
+  public reportEventLogFilterByRunType = (params: ReportEventLogFilterByRunTypeParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EventLogFilterByRunType, params);
+  };
+
+  public reportEventLogShowSourceEventDateRange(
+    params: ReportEventLogShowSourceEventDateRangeParams
+  ): void {
+    this.analytics.reportEvent(TelemetryEventTypes.EventLogShowSourceEventDateRange, params);
+  }
+
+  public reportOpenNoteInExpandableFlyoutClicked = (
+    params: OpenNoteInExpandableFlyoutClickedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, params);
+  };
+
+  public reportAddNoteFromExpandableFlyoutClicked = (
+    params: AddNoteFromExpandableFlyoutClickedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AddNoteFromExpandableFlyoutClicked, params);
   };
 }

@@ -14,17 +14,16 @@ import { schema } from '@kbn/config-schema';
 
 import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import type { SetupPlugins, StartPlugins } from '../../../plugin';
 
 import type { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
   context: RequestHandlerContext,
-  security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
-  const savedObjectsClient = (await context.core).savedObjects.client;
-  const user = await security?.authc.getCurrentUser(request);
+  const coreContext = await context.core;
+  const savedObjectsClient = coreContext.savedObjects.client;
+  const user = coreContext.security.authc.getCurrentUser();
 
   return set<FrameworkRequest>(
     'user',

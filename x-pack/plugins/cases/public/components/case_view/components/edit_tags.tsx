@@ -18,17 +18,17 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from '../../tags/translations';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { Tags } from '../../tags/tags';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { schemaTags } from '../../create/schema';
+import { schema as createCaseSchema } from '../../create/schema';
 
-export const schema: FormSchema = {
-  tags: schemaTags,
+export const schema = {
+  tags: createCaseSchema.tags as FieldConfig<string[]>,
 };
 
 export interface EditTagsProps {

@@ -8,6 +8,9 @@ paths:
       summary: Get suggestions
       operationId: GetEndpointSuggestions
       x-codegen-enabled: true
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:

@@ -12,12 +12,12 @@ import type { ISearchOptions } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
+import { buildFilterCriteria } from '../../../../../common/utils/build_query_filters';
 
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
@@ -45,7 +45,7 @@ export const getDocumentCountStats = async (
   // Probability = 1 represents no sampling
   const result = { randomlySampled: false, took: 0, totalCount: 0, probability: 1 };
 
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
+  const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
 
   const query = {
     bool: {
@@ -229,12 +229,11 @@ export const processDocumentCountStats = (
     buckets[time] = dataForTime.doc_count;
     totalCount += dataForTime.doc_count;
   });
-
   return {
     interval: params.intervalMs,
     buckets,
-    timeRangeEarliest: params.earliest,
-    timeRangeLatest: params.latest,
+    timeRangeEarliest: typeof params.earliest === 'number' ? params.earliest : undefined,
+    timeRangeLatest: typeof params.latest === 'number' ? params.latest : undefined,
     totalCount,
   };
 };

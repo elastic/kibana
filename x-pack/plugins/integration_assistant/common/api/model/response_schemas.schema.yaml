@@ -57,9 +57,12 @@ components:
     CheckPipelineAPIResponse:
       type: object
       required:
-        - pipelineResults
+        - results
       properties:
-        pipelineResults:
-          $ref: "./common_attributes.schema.yaml#/components/schemas/PipelineResults"
-        errors:
-          $ref: "./common_attributes.schema.yaml#/components/schemas/Errors"
+        results:
+          type: object
+          required:
+            - docs
+          properties:
+            docs:
+              $ref: "./common_attributes.schema.yaml#/components/schemas/Docs"

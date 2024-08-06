@@ -58,8 +58,6 @@ describe('migration v2', () => {
     if (esServer) {
       await esServer.stop();
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   describe('when `discardUnknownObjects` does not match current kibana version', () => {

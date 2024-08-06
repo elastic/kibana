@@ -31,7 +31,74 @@
       "path": "x-pack/plugins/search_notebooks/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "searchNotebooks",
+          "id": "def-public.SearchNotebooksPluginStart.setNotebookList",
+          "type": "Function",
+          "tags": [],
+          "label": "setNotebookList",
+          "description": [],
+          "signature": [
+            "(value: ",
+            "NotebookListValue",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/search_notebooks/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "searchNotebooks",
+              "id": "def-public.SearchNotebooksPluginStart.setNotebookList.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "value",
+              "description": [],
+              "signature": [
+                "NotebookListValue"
+              ],
+              "path": "x-pack/plugins/search_notebooks/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "searchNotebooks",
+          "id": "def-public.SearchNotebooksPluginStart.setSelectedNotebook",
+          "type": "Function",
+          "tags": [],
+          "label": "setSelectedNotebook",
+          "description": [],
+          "signature": [
+            "(notebookId: string) => void"
+          ],
+          "path": "x-pack/plugins/search_notebooks/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "searchNotebooks",
+              "id": "def-public.SearchNotebooksPluginStart.setSelectedNotebook.$1",
+              "type": "string",
+              "tags": [],
+              "label": "notebookId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/search_notebooks/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

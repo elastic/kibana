@@ -45,20 +45,6 @@ export const assistantMessageSentEvent: TelemetryEvent = {
         optional: false,
       },
     },
-    isEnabledKnowledgeBase: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is knowledge base enabled',
-        optional: false,
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG on Alerts enabled',
-        optional: false,
-      },
-    },
     actionTypeId: {
       type: 'keyword',
       _meta: {
@@ -106,17 +92,10 @@ export const assistantQuickPrompt: TelemetryEvent = {
 export const assistantSettingToggledEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.AssistantSettingToggled,
   schema: {
-    isEnabledKnowledgeBase: {
+    alertsCountUpdated: {
       type: 'boolean',
       _meta: {
-        description: 'Is knowledge base enabled',
-        optional: true,
-      },
-    },
-    isEnabledRAGAlerts: {
-      type: 'boolean',
-      _meta: {
-        description: 'Is RAG on Alerts enabled',
+        description: 'Did alerts count update',
         optional: true,
       },
     },

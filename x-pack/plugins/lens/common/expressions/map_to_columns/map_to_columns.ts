@@ -22,11 +22,21 @@ export const mapToColumns: MapToColumnsExpressionFunction = {
           'A JSON encoded object in which keys are the datatable column ids and values are the Lens column definitions. Any datatable columns not mentioned within the ID map will be kept unmapped.',
       }),
     },
+    isTextBased: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.functions.mapToColumns.isESQL.help', {
+        defaultMessage: 'An optional flag to indicate if this is about the text based datasource.',
+      }),
+    },
   },
   inputTypes: ['datatable'],
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
     const { mapToOriginalColumns } = await import('./map_to_columns_fn');
-    return mapToOriginalColumns(...args);
+    const { mapToOriginalColumnsTextBased } = await import('./map_to_columns_fn_textbased');
+
+    return args?.[1]?.isTextBased
+      ? mapToOriginalColumnsTextBased(...args)
+      : mapToOriginalColumns(...args);
   },
 };

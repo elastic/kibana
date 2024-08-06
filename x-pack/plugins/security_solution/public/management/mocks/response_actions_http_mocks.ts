@@ -39,7 +39,7 @@ import type {
   ResponseActionGetFileParameters,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
 } from '../../../common/endpoint/types';
@@ -263,12 +263,12 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     method: 'post',
     handler: (): ActionDetailsApiResponse<
       ResponseActionScanOutputContent,
-      ResponseActionsScanParameters
+      ResponseActionScanParameters
     > => {
       const generator = new EndpointActionGenerator('seed');
       const response = generator.generateActionDetails<
         ResponseActionScanOutputContent,
-        ResponseActionsScanParameters
+        ResponseActionScanParameters
       >({
         command: 'scan',
       });

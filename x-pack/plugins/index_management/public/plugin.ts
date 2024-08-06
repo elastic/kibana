@@ -74,7 +74,7 @@ export class IndexMgmtUIPlugin
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
-      enableSemanticText: enableSemanticText ?? false,
+      enableSemanticText: enableSemanticText ?? true,
     };
   }
 

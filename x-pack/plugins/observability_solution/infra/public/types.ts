@@ -8,7 +8,7 @@
 import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -125,12 +125,7 @@ export type InfraClientPluginClass = PluginClass<
 export type InfraClientStartServicesAccessor = InfraClientCoreSetup['getStartServices'];
 export type InfraClientStartServices = UnwrapPromise<ReturnType<InfraClientStartServicesAccessor>>;
 
-export interface InfraHttpError extends IHttpFetchError {
-  readonly body?: {
-    statusCode: number;
-    message?: string;
-  };
-}
+export type InfraHttpError = IHttpFetchError<ResponseErrorBody>;
 
 export interface ExecutionTimeRange {
   gte: number;

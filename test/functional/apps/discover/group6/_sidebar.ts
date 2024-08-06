@@ -223,6 +223,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('rel4tedContent.art');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '4 available fields. 0 meta fields.'
+          );
+        });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be(
+          'relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag'
+        );
+      });
+
       it('should ignore empty search', async function () {
         await PageObjects.unifiedFieldList.findFieldByName('   '); // only spaces
 
@@ -425,6 +442,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
         );
+
+        // verify popular fields were persisted
+        await browser.refresh();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
+        );
       });
 
       it('should show selected and available fields in ES|QL mode', async function () {
@@ -465,10 +489,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('selected')).join(', ')
         ).to.be('countB, geo.dest');
 
+        await PageObjects.unifiedSearch.switchToDataViewMode();
+
         await PageObjects.unifiedSearch.switchDataView(
           'discover-dataView-switch-link',
-          'logstash-*',
-          true
+          'logstash-*'
         );
 
         await PageObjects.header.waitUntilLoadingHasFinished();

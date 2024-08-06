@@ -21,10 +21,10 @@ import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shar
 import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor } from '@testing-library/react';
-import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -128,7 +128,7 @@ describe('ObservabilityActions component', () => {
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
-        <QueryClientProvider client={queryClient} context={AlertsTableQueryContext}>
+        <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
           <AlertActions {...props} />
         </QueryClientProvider>
       </Router>
@@ -244,13 +244,13 @@ describe('ObservabilityActions component', () => {
     const wrapper = await setup(RULE_DETAILS_PAGE_ID);
 
     expect(
-      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props
-    ).toEqual(expect.objectContaining({ href: 'http://localhost:5620/app/o11y/log-explorer' }));
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props.onClick
+    ).toBeDefined();
 
     prependMock.mockClear();
 
     await waitFor(() => {
-      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseOver');
+      wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseover');
       expect(prependMock).toBeCalledTimes(1);
     });
   });

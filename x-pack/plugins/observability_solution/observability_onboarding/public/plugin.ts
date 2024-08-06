@@ -23,7 +23,6 @@ import {
 } from '@kbn/core/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
@@ -46,7 +45,6 @@ export interface ObservabilityOnboardingPluginSetupDeps {
   discover: DiscoverSetup;
   share: SharePluginSetup;
   fleet: FleetSetup;
-  security: SecurityPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -58,7 +56,6 @@ export interface ObservabilityOnboardingPluginStartDeps {
   discover: DiscoverStart;
   share: SharePluginStart;
   fleet: FleetStart;
-  security: SecurityPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   cloudExperiments?: CloudExperimentsPluginStart;
@@ -75,6 +72,7 @@ export class ObservabilityOnboardingPlugin
   constructor(private readonly ctx: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -109,6 +107,10 @@ export class ObservabilityOnboardingPlugin
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
+            context: {
+              isServerless: Boolean(pluginSetupDeps.cloud?.isServerlessEnabled),
+              stackVersion,
+            },
           });
         },
         visibleIn: [],

@@ -17,6 +17,10 @@ import {
   EuiFlexItem,
   EuiSelect,
 } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 
 import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
@@ -55,7 +59,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
   const ctrl = useRef(new AbortController());
   const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<Type>(defaultListType);
-  const filePickerRef = useRef<EuiFilePicker | null>(null);
+  const filePickerRef = useRef<EuiFilePickerClass | null>(null);
   const { http } = useKibana().services;
   const { start: importList, ...importState } = useImportList();
 
@@ -136,7 +140,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
           data-test-subj="value-list-file-picker"
           id="value-list-file-picker"
           initialPromptText={i18n.FILE_PICKER_PROMPT}
-          ref={filePickerRef}
+          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           onChange={handleFileChange}
           fullWidth={true}
           isLoading={importState.loading}

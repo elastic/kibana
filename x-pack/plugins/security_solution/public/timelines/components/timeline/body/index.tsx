@@ -51,6 +51,7 @@ export interface Props {
   tabType: TimelineTabs;
   totalPages: number;
   onRuleChange?: () => void;
+  onToggleShowNotes?: (eventId?: string) => void;
 }
 
 /**
@@ -73,6 +74,7 @@ export const StatefulBody = React.memo<Props>(
     totalPages,
     leadingControlColumns = [],
     trailingControlColumns = [],
+    onToggleShowNotes,
   }) => {
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -256,6 +258,7 @@ export const StatefulBody = React.memo<Props>(
               leadingControlColumns={leadingControlColumns}
               trailingControlColumns={trailingControlColumns}
               tabType={tabType}
+              onToggleShowNotes={onToggleShowNotes}
             />
           </EventsTable>
         </TimelineBody>

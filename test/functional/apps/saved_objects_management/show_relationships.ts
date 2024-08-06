@@ -37,16 +37,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       expect(invalidRelations).to.eql([
         {
-          error: 'Saved object [visualization/missing-vis-ref] not found',
-          id: 'missing-vis-ref',
-          relationship: 'Child',
-          type: 'visualization',
-        },
-        {
           error: 'Saved object [dashboard/missing-dashboard-ref] not found',
           id: 'missing-dashboard-ref',
           relationship: 'Child',
           type: 'dashboard',
+        },
+        {
+          error: 'Saved object [visualization/missing-vis-ref] not found',
+          id: 'missing-vis-ref',
+          relationship: 'Child',
+          type: 'visualization',
         },
       ]);
     });

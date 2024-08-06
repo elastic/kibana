@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { useStartServices, useBreadcrumbs } from '../../../../hooks';
 
@@ -13,10 +13,7 @@ export const CreateIntegration = React.memo(() => {
   const { integrationAssistant } = useStartServices();
   useBreadcrumbs('integration_create');
 
-  const CreateIntegrationAssistant = useMemo(
-    () => integrationAssistant?.CreateIntegration,
-    [integrationAssistant]
-  );
+  const CreateIntegrationAssistant = integrationAssistant?.components.CreateIntegration;
 
   return CreateIntegrationAssistant ? <CreateIntegrationAssistant /> : null;
 });

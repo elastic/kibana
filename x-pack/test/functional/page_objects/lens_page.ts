@@ -319,6 +319,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
     },
 
+    async waitForMissingField(field: string) {
+      await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
+    },
+
     async waitForMissingDataViewWarning() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`missing-refs-failure`);
@@ -1031,15 +1035,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(
-      dataViewTitle: string,
-      transitionFromTextBasedLanguages?: boolean
-    ) {
-      await PageObjects.unifiedSearch.switchDataView(
-        'lns-dataView-switch-link',
-        dataViewTitle,
-        transitionFromTextBasedLanguages
-      );
+    async switchDataPanelIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 

@@ -11,7 +11,6 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { FilesStart } from '@kbn/files-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { ImageEmbeddableStartDependencies } from '../plugin';
@@ -20,7 +19,6 @@ export let coreServices: CoreStart;
 export let filesService: FilesStart;
 export let uiActionsService: UiActionsStart;
 export let screenshotModeService: ScreenshotModePluginStart | undefined;
-export let securityService: SecurityPluginStart | undefined;
 
 export let trackUiMetric: (
   type: string,
@@ -48,7 +46,6 @@ export const setKibanaServices = (
 ) => {
   coreServices = kibanaCore;
   filesService = deps.files;
-  securityService = deps.security;
   uiActionsService = deps.uiActions;
   screenshotModeService = deps.screenshotMode;
 

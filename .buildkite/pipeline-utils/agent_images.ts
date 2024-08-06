@@ -20,7 +20,7 @@ const DEFAULT_AGENT_IMAGE_CONFIG: AgentImageConfig = {
 const FIPS_AGENT_IMAGE_CONFIG: AgentImageConfig = {
   provider: 'gcp',
   image: 'family/kibana-fips-ubuntu-2004',
-  imageProject: 'elastic-images-qa',
+  imageProject: 'elastic-images-prod',
 };
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
@@ -52,4 +52,19 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageCo
   return config;
 }
 
-export { getAgentImageConfig };
+const expandAgentQueue = (queueName: string = 'n2-4-spot') => {
+  const [kind, cores, addition] = queueName.split('-');
+  const additionalProps =
+    {
+      spot: { preemptible: true },
+      virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+    }[addition] || {};
+
+  return {
+    ...getAgentImageConfig(),
+    machineType: `${kind}-standard-${cores}`,
+    ...additionalProps,
+  };
+};
+
+export { getAgentImageConfig, expandAgentQueue };

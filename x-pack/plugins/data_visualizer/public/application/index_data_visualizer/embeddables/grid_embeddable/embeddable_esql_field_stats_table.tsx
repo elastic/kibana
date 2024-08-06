@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
 const EmbeddableESQLFieldStatsTableWrapper = React.memo(
   (props: ESQLDataVisualizerGridEmbeddableState) => {
-    const { onTableUpdate } = props;
+    const { onTableUpdate, onRenderComplete } = props;
     const [dataVisualizerListState, setDataVisualizerListState] =
       useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 
@@ -44,15 +44,30 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
       overallStatsProgress,
       setLastRefresh,
       getItemIdToExpandedRowMap,
+      resetData,
     } = useESQLDataVisualizerData(props, dataVisualizerListState);
 
     useEffect(() => {
       setLastRefresh(Date.now());
     }, [props?.lastReloadRequestTime, setLastRefresh]);
 
+    useEffect(() => {
+      const subscription = props.resetData$?.subscribe(() => {
+        resetData();
+      });
+      return () => subscription?.unsubscribe();
+    }, [props.resetData$, resetData]);
+
+    useEffect(() => {
+      if (progress === 100 && onRenderComplete) {
+        onRenderComplete();
+      }
+    }, [progress, onRenderComplete]);
+
     if (progress === 100 && configs.length === 0) {
       return <EmbeddableNoResultsEmptyPrompt />;
     }
+
     return (
       <DataVisualizerTable<FieldVisConfig>
         items={configs}
@@ -64,6 +79,7 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
         onChange={onTableUpdate}
         loading={progress < 100}
         overallStatsRunning={overallStatsProgress.isRunning}
+        error={overallStatsProgress.error}
       />
     );
   }

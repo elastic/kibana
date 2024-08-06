@@ -12,7 +12,7 @@ import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
 import { SavedObjectsModelVersionMap, SavedObject } from '@kbn/core-saved-objects-server';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, createType } from '../test_utils';
+import { createType } from '../test_utils';
 import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 import {
   SavedObjectsSerializer,
@@ -114,7 +114,6 @@ describe('getOutdatedDocumentsQuery', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   it('creates a query returning the expected documents', async () => {

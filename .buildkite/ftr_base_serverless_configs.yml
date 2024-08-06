@@ -1,0 +1,7 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+
+  # Serverless base config files
+  - x-pack/test_serverless/api_integration/config.base.ts
+  - x-pack/test_serverless/functional/config.base.ts
+  - x-pack/test_serverless/shared/config.base.ts

@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiPageSection,
 } from '@elastic/eui';
+import type { ArtifactEntryCardDecoratorProps } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
@@ -34,7 +35,7 @@ import { policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
-interface PolicyArtifactsLayoutProps {
+export interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
@@ -44,6 +45,8 @@ interface PolicyArtifactsLayoutProps {
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check if has write artifact privilege or not */
   canWriteArtifact?: boolean;
+  // Artifact specific decorations to display in the cards
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({
@@ -54,6 +57,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     getArtifactPath,
     getPolicyArtifactsPath,
     canWriteArtifact = false,
+    CardDecorator,
   }) => {
     const exceptionsListApiClient = useMemo(
       () => getExceptionsListApiClient(),
@@ -154,6 +158,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               searchableFields={[...searchableFields]}
               onClose={handleOnCloseFlyout}
               labels={labels}
+              CardDecorator={CardDecorator}
             />
           )}
           {allArtifacts && allArtifacts.total !== 0 ? (
@@ -205,6 +210,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             searchableFields={[...searchableFields]}
             onClose={handleOnCloseFlyout}
             labels={labels}
+            CardDecorator={CardDecorator}
           />
         )}
         {exceptionItemToDelete && (
@@ -228,6 +234,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             canWriteArtifact={canWriteArtifact}
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
+            CardDecorator={CardDecorator}
           />
         </EuiPageSection>
       </div>

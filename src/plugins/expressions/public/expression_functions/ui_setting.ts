@@ -7,10 +7,10 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import { getUiSettingFn as getCommonUiSettingFn } from '../../common';
+import { getUiSettingFnBrowser } from '../../common';
 
 export function getUiSettingFn({ getStartServices }: Pick<CoreSetup, 'getStartServices'>) {
-  return getCommonUiSettingFn({
+  return getUiSettingFnBrowser({
     async getStartDependencies() {
       const [{ uiSettings }] = await getStartServices();
 
