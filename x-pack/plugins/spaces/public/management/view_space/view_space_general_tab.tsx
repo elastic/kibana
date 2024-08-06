@@ -18,6 +18,7 @@ import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
 import type { Space } from '../../../common';
 import { ConfirmAlterActiveSpaceModal } from '../edit_space/confirm_alter_active_space_modal';
 import { CustomizeSpace } from '../edit_space/customize_space';
+import type { FormValues } from '../edit_space/manage_space_page';
 import { SolutionView } from '../edit_space/solution_view';
 import { SpaceValidator } from '../lib';
 
@@ -50,7 +51,14 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     history,
   });
 
-  const onChangeSpaceSettings = (updatedSpace: Partial<Space>) => {
+  const onChangeSpaceSettings = (formValues: FormValues & Partial<Space>) => {
+    const {
+      customIdentifier,
+      avatarType,
+      customAvatarInitials,
+      customAvatarColor,
+      ...updatedSpace
+    } = formValues;
     setSpaceSettings(updatedSpace);
     setIsDirty(true);
   };
