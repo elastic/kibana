@@ -31,7 +31,9 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     panelPaddingSize="m"
     repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
         describedByIds={Array []}
         display="row"
@@ -117,7 +119,9 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     panelPaddingSize="m"
     repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
         describedByIds={Array []}
         display="row"
@@ -203,7 +207,9 @@ exports[`AddItemPopover renders the popover 1`] = `
     panelPaddingSize="m"
     repositionToCrossAxis={true}
   >
-    <EuiForm>
+    <EuiForm
+      data-test-subj="mlFilterListAddItemPopoverContent"
+    >
       <EuiFormRow
         describedByIds={Array []}
         display="row"
