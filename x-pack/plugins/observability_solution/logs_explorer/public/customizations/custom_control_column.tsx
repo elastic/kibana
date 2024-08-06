@@ -22,7 +22,6 @@ import {
 } from '../components/common/translations';
 import * as constants from '../../common/constants';
 import { getStacktraceFields } from '../utils/get_stack_trace';
-import { ActionsColumnTooltip } from '../components/virtual_columns/column_tooltips/actions_column_tooltip';
 
 const DegradedDocs = ({
   Control,
@@ -93,7 +92,6 @@ export const getRowAdditionalControlColumns =
       {
         id: 'connectedStacktraceDocs',
         headerAriaLabel: actionsHeaderAriaLabelStacktraceAction,
-        headerCellRender: ActionsColumnTooltip,
         renderControl: (Control, rowProps) => {
           return <Stacktrace Control={Control} rowProps={rowProps} />;
         },

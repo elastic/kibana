@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo, ReactElement } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 
@@ -20,7 +20,7 @@ export const TooltipButton = ({
 }: {
   children: React.ReactChild;
   popoverTitle: string;
-  displayText?: string | ReactElement;
+  displayText?: string;
   headerRowHeight?: number;
   iconType?: string;
 }) => {
