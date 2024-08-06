@@ -1,4 +1,4 @@
-[[dashboard]]
+//[[dashboard]]
 = Dashboard and visualizations
 
 [partintro]
@@ -43,13 +43,13 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 |===
 
 [float]
-[[create-dashboards]]
+//[[create-dashboards]]
 == Create dashboards
 
 Dashboards provide you with the space where you add panels of your data.
 
 [float]
-[[dashboard-minimum-requirements]]
+//[[dashboard-minimum-requirements]]
 === Minimum requirements
 
 To create dashboards, you must meet the minimum requirements. 
@@ -63,7 +63,7 @@ to create or save dashboards, and the options to create and save dashboards are 
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
-[[open-the-dashboard]]
+//[[open-the-dashboard]]
 === Open the dashboard
 
 Begin with an empty dashboard, or open an existing dashboard.
@@ -84,7 +84,7 @@ When you open an existing dashboard, you are in view mode. To make changes to th
 
 
 [float]
-[[create-panels-with-lens]]
+//[[create-panels-with-lens]]
 === Create and add panels
 
 You create panels using the editors, which you can access from the dashboard toolbar or the *Visualize Library*, or add panels that are saved in the *Visualize Library*, or search results from <<save-your-search,*Discover*>>.
@@ -111,16 +111,16 @@ When a panel contains a saved query, both queries are applied.
 +
 When you add search results from *Discover* to dashboards, the results are not aggregated.
 
-[[tsvb]]
+//[[tsvb]]
 
 [float]
-[[save-panels]]
+//[[save-panels]]
 === Save and add panels
 
 Consider where you want to save and add the panel in {kib}.
 
 [float]
-[[save-to-visualize-library]]
+//[[save-to-visualize-library]]
 ==== Save to the Visualize Library
 
 To use the panel on other dashboards and *Canvas* workpads, save the panel to the *Visualize Library*. When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
@@ -148,7 +148,7 @@ If you created the panel from the *Visualize Library*:
 * To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
 
 [float]
-[[save-to-the-dashboard]]
+//[[save-to-the-dashboard]]
 ==== Save to the dashboard
 
 Return to the dashboard and add the panel without specifying the save options or adding the panel to the *Visualize Library*. 
@@ -184,7 +184,7 @@ To add unsaved dashboard panels to the *Visualize Library*:
 . Enter the panel title, then click *Save*.
 
 [float]
-[[add-text]]
+//[[add-text]]
 == Add context to panels
 
 To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
@@ -216,7 +216,7 @@ image::images/markdown_example_4.png[Panel with markdown image]
 For detailed information about writing on GitHub, click *Help*.
 
 [float]
-[[save-the-markdown-panel]]
+//[[save-the-markdown-panel]]
 === Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
@@ -244,7 +244,7 @@ To save the panel to the dashboard:
 .. Enter the *Title*, then click *Save*.
 
 [float]
-[[add-image]]
+//[[add-image]]
 == Add image panels
 
 To personalize your dashboards, add your own logos and graphics with the *Image* panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.
@@ -265,9 +265,9 @@ When importing a dashboard with an image panel, and the image file is unavailabl
 ============================================================================
 
 [float]
-[[arrange-panels]]
-[[moving-containers]]
-[[resizing-containers]]
+//[[arrange-panels]]
+//[[moving-containers]]
+//[[resizing-containers]]
 == Arrange panels
 
 Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.
@@ -281,7 +281,7 @@ In the toolbar, click *Edit*, then use the following options:
 * To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
 
 [float]
-[[edit-panels]]
+//[[edit-panels]]
 == Edit panels
 
 To make changes to the panel, use the panel menu options.
@@ -305,14 +305,14 @@ To make changes without changing the original version, open the panel menu, then
 If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
 
 [float]
-[[duplicate-panels]]
+//[[duplicate-panels]]
 == Duplicate panels
 
 To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. 
 
 [float]
-[[clone-panels]]
+//[[clone-panels]]
 === Clone panels
 
 Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
@@ -324,7 +324,7 @@ Cloned panels appear next to the original panel, and move the other panels to pr
 When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
 [float]
-[[copy-to-dashboard]]
+//[[copy-to-dashboard]]
 === Copy panels
 
 Copy panels from one dashboard to another dashboard.
@@ -334,7 +334,7 @@ Copy panels from one dashboard to another dashboard.
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
 [float]
-[[add-dashboard-settings]]
+//[[add-dashboard-settings]]
 == Add the dashboard settings
 
 Add the title, tags, design options, and more to the dashboard.
@@ -362,7 +362,7 @@ Add the title, tags, design options, and more to the dashboard.
 . Click *Apply*. 
 
 [float]
-[[reset-the-dashboard]]
+//[[reset-the-dashboard]]
 == Reset the dashboard
 
 To remove any dashboard changes you've made, reset the dashboard to the last saved changes.
@@ -372,7 +372,7 @@ To remove any dashboard changes you've made, reset the dashboard to the last sav
 . On the *Reset dashboard* window, click *Reset dashboard*.
 
 [float]
-[[save-dashboards]]
+//[[save-dashboards]]
 == Save dashboards
 
 When you've finished making changes to the dashboard, save it.
@@ -382,7 +382,7 @@ When you've finished making changes to the dashboard, save it.
 . To exit *Edit* mode, click *Switch to view mode*. 
 
 [float]
-[[search-or-filter-your-data]]
+//[[search-or-filter-your-data]]
 == Search and filter your data
 
 {kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
@@ -405,7 +405,7 @@ To view and edit panel-level filters:
 . To edit, click *Edit filters*.
 
 [float]
-[[download-csv]]
+//[[download-csv]]
 == View the panel data and requests
 
 View the data in visualizations and the requests that collect the data. 
@@ -433,13 +433,13 @@ When you download visualization panels with multiple layers, each layer produces
 .. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
 [float]
-[[share-the-dashboard]]
+//[[share-the-dashboard]]
 == Share dashboards
 
 To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
-[[import-dashboards]]
+//[[import-dashboards]]
 == Export dashboards
 
 To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.

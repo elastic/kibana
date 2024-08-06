@@ -1,0 +1,4 @@
+= Manage dashboards
+
+include::find-dashboards.asciidoc[leveloffset=+1]
+

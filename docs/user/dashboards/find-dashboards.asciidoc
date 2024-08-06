@@ -1,5 +1,5 @@
-//[[find-dashboards]]
-== Search and filter dashboards
+[[find-dashboards]]
+= Browse dashboards
 
 When looking for specific dashboards to open or share, several actions are available to you to help you find them quicker.
 
