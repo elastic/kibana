@@ -82,7 +82,7 @@ export function EsqlWidget({
     const timestampColumn = datatable.columns.find((column) => column.name === '@timestamp');
     const messageColumn = datatable.columns.find((column) => column.name === 'message');
 
-    if (datatable.columns.length > 100 && timestampColumn && messageColumn) {
+    if (datatable.columns.length > 20 && timestampColumn && messageColumn) {
       const hasDataForBothColumns = datatable.rows.every((row) => {
         const timestampValue = row['@timestamp'];
         const messageValue = row.message;
