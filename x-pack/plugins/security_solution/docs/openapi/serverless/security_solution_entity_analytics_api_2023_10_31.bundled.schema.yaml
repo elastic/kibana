@@ -300,8 +300,6 @@ components:
       properties:
         id_field:
           $ref: '#/components/schemas/IdField'
-          description: The field representing the ID.
-          example: host.name
         id_value:
           description: The ID value of the asset.
           type: string
@@ -318,9 +316,11 @@ components:
           required:
             - criticality_level
     IdField:
+      description: The field representing the ID.
       enum:
         - host.name
         - user.name
+      example: host.name
       type: string
   securitySchemes:
     BasicAuth:

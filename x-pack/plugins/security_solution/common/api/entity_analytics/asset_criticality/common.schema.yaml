@@ -28,6 +28,8 @@ components:
       enum:
         - 'host.name'
         - 'user.name'
+      example: 'host.name'
+      description: The field representing the ID.
     AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -36,8 +38,6 @@ components:
           description: The ID value of the asset.
         id_field:
           $ref: '#/components/schemas/IdField'
-          example: 'host.name'
-          description: The field representing the ID.
       required:
         - id_value
         - id_field

@@ -16,6 +16,9 @@
 
 import { z } from 'zod';
 
+/**
+ * The field representing the ID.
+ */
 export type IdField = z.infer<typeof IdField>;
 export const IdField = z.enum(['host.name', 'user.name']);
 export type IdFieldEnum = typeof IdField.enum;
@@ -27,9 +30,6 @@ export const AssetCriticalityRecordIdParts = z.object({
    * The ID value of the asset.
    */
   id_value: z.string(),
-  /**
-   * The field representing the ID.
-   */
   id_field: IdField,
 });
 
