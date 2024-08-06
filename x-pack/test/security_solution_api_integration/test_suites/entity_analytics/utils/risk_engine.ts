@@ -26,6 +26,7 @@ import {
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -579,7 +580,7 @@ interface Credentials {
 }
 
 export const riskEngineRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.Agent,
+  supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: Credentials) =>
