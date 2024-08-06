@@ -382,6 +382,8 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
   log.indent(-4);
 }
 
+const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = ['connection refused', 'i/o timeout'];
+
 /**
  *
  * Pull a Docker image if needed. Ensures latest image.
@@ -407,8 +409,12 @@ ${message}`;
     {
       retries: 2,
       onFailedAttempt: (error) => {
-        // Only retry if `connection refused` is found in the error message.
-        if (!error?.message?.includes('connection refused')) {
+        // Only retry if retryable error messages are found in the error message.
+        if (
+          RETRYABLE_DOCKER_PULL_ERROR_MESSAGES.every(
+            (msg) => !error?.message?.includes('connection refused')
+          )
+        ) {
           throw error;
         }
       },
