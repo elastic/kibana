@@ -630,6 +630,11 @@ Index Management by running this series of requests in Console:
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/inference/README.md[inference]
+|The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and
+external LLM APIs. Its goals are:
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
