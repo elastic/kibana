@@ -32,7 +32,7 @@ const useSummaryPanel = () => {
   };
 
   const isDatasetsQualityLoading = useSelector(service, (state) =>
-    state.matches('degradedDocs.fetching')
+    state.matches('stats.degradedDocs.fetching')
   );
 
   /*
@@ -57,7 +57,7 @@ const useSummaryPanel = () => {
   };
 
   const isDatasetsActivityLoading = useSelector(service, (state) =>
-    state.matches('datasets.fetching')
+    state.matches('stats.datasets.fetching')
   );
 
   /*
@@ -70,7 +70,8 @@ const useSummaryPanel = () => {
 
   const isEstimatedDataLoading = useSelector(
     service,
-    (state) => state.matches('datasets.fetching') || state.matches('degradedDocs.fetching')
+    (state) =>
+      state.matches('stats.datasets.fetching') || state.matches('stats.degradedDocs.fetching')
   );
 
   return {
