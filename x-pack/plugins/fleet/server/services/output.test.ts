@@ -222,6 +222,7 @@ function getMockedSoClient(
   });
 
   mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+  mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient);
 
   return soClient;
 }
