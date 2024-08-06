@@ -11,30 +11,72 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
+  const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
 
-  describe('edit space', () => {
+  describe('solution navigation', () => {
     let cleanUp: () => Promise<unknown>;
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      ({ cleanUp } = await spaces.api.createAndNavigateToSpace(
-        { solution: 'oblt' },
-        'observability'
-      ));
+
+      // Navigate to the spaces management page which will log us in Kibana
+      await common.navigateToUrl('management', 'kibana/spaces', {
+        shouldUseHashForSubUrl: false,
+      });
+
+      // Create a space with the observability solution and navigate to its home page
+      ({ cleanUp } = await spaces.api.createAndNavigateToSpace({ solution: 'oblt' }));
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+
+      // Clean up space created
       await cleanUp?.();
     });
 
-    describe('solution view', () => {
-      it('does show the solution view panel', async () => {
-        // TODO: add some test example
-        // await testSubjects.existOrFail('spaces-edit-page');
-        // await testSubjects.existOrFail('spaces-edit-page > generalPanel');
-        // await testSubjects.existOrFail('spaces-edit-page > navigationPanel');
+    describe('observability sidenav & breadcrumbs', () => {
+      it('renders the correct nav and navigate to links (smoke tests)', async () => {
+        const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
+
+        await solutionNavigation.expectExists();
+        await solutionNavigation.breadcrumbs.expectExists();
+
+        // check side nav links
+        await solutionNavigation.sidenav.expectSectionExists('observability_project_nav');
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observabilityOnboarding',
+        });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'observabilityOnboarding',
+        });
+
+        // check the aiops subsection
+        await solutionNavigation.sidenav.openSection('observability_project_nav.aiMl'); // open AI & ML subsection
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
+        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI & ML' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'ml:anomalyDetection',
+        });
+
+        // navigate to a different section
+        await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'management' });
+
+        // navigate back to the home page using header logo
+        await solutionNavigation.clickLogo();
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'observabilityOnboarding',
+        });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          deepLinkId: 'observabilityOnboarding',
+        });
+
+        await expectNoPageReload();
       });
     });
   });
