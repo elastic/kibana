@@ -199,7 +199,6 @@ class ConversationalChainFn {
         question: (input) => input.question,
       },
       RunnableLambda.from((inputs) => {
-        console.log("inputs.question",inputs.question)
         data.appendMessageAnnotation({
           type: 'search_query',
           question: inputs.question,
