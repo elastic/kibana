@@ -59,6 +59,7 @@ export const login: CyLoginTask = (
     return cy
       .task('getSessionCookie', user)
       .then((result) => {
+        cy.log({ result });
         username = result.username;
         password = result.password;
         // Set cookie asynchronously

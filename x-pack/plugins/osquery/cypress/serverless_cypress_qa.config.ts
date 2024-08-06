@@ -16,7 +16,7 @@ export default defineCypressConfig(
     },
     env: {
       // Uncomment to enable logging
-      // TOOLING_LOG_LEVEL: 'verbose',
+      TOOLING_LOG_LEVEL: 'verbose',
       grepTags: '@serverless --@skipInServerless --@brokenInServerless --@skipInServerlessMKI',
     },
   })
