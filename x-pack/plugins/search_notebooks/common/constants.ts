@@ -65,3 +65,5 @@ export const INTRODUCTION_NOTEBOOK: Notebook = {
     ],
   },
 };
+
+export const DEFAULT_NOTEBOOK_ID = 'introduction';
