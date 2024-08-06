@@ -84,7 +84,7 @@ This can occur when
 
 * {es} is experiencing an underlying issue during {kib}'s migration, most commonly related to {es} errors 
 +
-* {ref}/size-your-shards.html#_this_action_would_add_x_total_shards_but_this_cluster_currently_has_yz_maximum_shards_open[`this action would add [x] total shards, but this cluster currently has [y]/[z] maximum shards open`]
+* {ref}/size-your-shards.html#troubleshooting-max-shards-open[`this action would add [x] total shards, but this cluster currently has [y]/[z] maximum shards open`]
 * {ref}/fix-watermark-errors.html[`disk usage exceeded flood-stage watermark, index has read-only-allow-delete block`]
 
 The underlying {es} issue should be resolved first. Afterwards, you may need to manually resolve by either
