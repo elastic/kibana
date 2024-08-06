@@ -921,15 +921,7 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         'from a | eval var0=date_trunc()',
-        [
-          ...[...TIME_SYSTEM_PARAMS].map((t) => `${t}, `),
-          ...getLiteralsByType('time_literal').map((t) => `${t}, `),
-          ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }, undefined, [
-            'date_trunc',
-          ]).map((t) => ({ ...t, text: `${t.text},` })),
-          ...getFieldNamesByType('date').map((t) => `${t}, `),
-          TIME_PICKER_SUGGESTION,
-        ],
+        getLiteralsByType('time_literal').map((t) => `${t}, `),
         '('
       );
       testSuggestions(
