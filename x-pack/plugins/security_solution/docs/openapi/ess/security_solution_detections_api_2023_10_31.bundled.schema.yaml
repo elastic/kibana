@@ -2041,10 +2041,6 @@ components:
           $ref: '#/components/schemas/RuleFilterArray'
         index:
           $ref: '#/components/schemas/IndexPatternArray'
-        response_actions:
-          items:
-            $ref: '#/components/schemas/ResponseAction'
-          type: array
         tiebreaker_field:
           $ref: '#/components/schemas/TiebreakerField'
         timestamp_field:
