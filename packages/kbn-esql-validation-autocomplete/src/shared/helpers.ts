@@ -248,19 +248,27 @@ function compareLiteralType(argType: string, item: ESQLLiteral) {
 /**
  * This function returns the variable or field matching a column
  */
-export function lookupColumn(
+export function getColumnForASTNode(
   column: ESQLColumn,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
   const columnName = getQuotedColumnName(column);
   return (
-    fields.get(columnName) ||
-    variables.get(columnName)?.[0] ||
+    getColumnByName(columnName, { fields, variables }) ||
     // It's possible columnName has backticks "`fieldName`"
     // so we need to access the original name as well
-    fields.get(column.name) ||
-    variables.get(column.name)?.[0]
+    getColumnByName(column.name, { fields, variables })
   );
+}
+
+/**
+ * This function returns the variable or field matching a column
+ */
+export function getColumnByName(
+  columnName: string,
+  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+): ESQLRealField | ESQLVariable | undefined {
+  return fields.get(columnName) || variables.get(columnName)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
@@ -379,7 +387,7 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = lookupColumn(subArg, references);
+        const hit = getColumnForASTNode(subArg, references);
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -446,7 +454,7 @@ export function checkFunctionArgMatchesDefinition(
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
   if (arg.type === 'column') {
-    const hit = lookupColumn(arg, references);
+    const hit = getColumnForASTNode(arg, references);
     const validHit = hit;
     if (!validHit) {
       return false;

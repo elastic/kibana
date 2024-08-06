@@ -20,7 +20,7 @@ import { partition } from 'lodash';
 import { ESQL_NUMBER_TYPES, compareTypesWithLiterals, isNumericType } from '../shared/esql_types';
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
-  lookupColumn,
+  getColumnForASTNode,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -46,6 +46,7 @@ import {
   getColumnExists,
   findPreviousWord,
   noCaseCompare,
+  getColumnByName,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
@@ -104,7 +105,7 @@ type GetDataStreamsForIntegrationFn = (
 type GetFieldsByTypeFn = (
   type: string | string[],
   ignored?: string[],
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ) => Promise<SuggestionRawDefinition[]>;
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -380,7 +381,7 @@ function workoutBuiltinOptions(
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
   return {
-    skipAssign: Boolean(!isColumnItem(nodeArg) || lookupColumn(nodeArg, references)),
+    skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnForASTNode(nodeArg, references)),
   };
 }
 
@@ -454,7 +455,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = lookupColumn(arg, references);
+      const hit = getColumnForASTNode(arg, references);
       if (hit) {
         return hit.type;
       }
@@ -657,9 +658,36 @@ async function getExpressionSuggestionsByType(
     if (argDef.type === 'column' || argDef.type === 'any') {
       // ... | <COMMAND> <suggest>
       if ((!nodeArg || isNewExpression) && !endsWithNot) {
+        const words = innerText.split(/\s+/);
+        const lastWord = words[words.length - 1];
+        if (lastWord !== '') {
+          // ... | <COMMAND> <word><suggest>
+          // check if lastWord is an existing field
+          const column = getColumnByName(lastWord, references);
+          if (column) {
+            // now we know that the user has already entered a column,
+            // so suggest comma and pipe
+            return getFinalSuggestions().map((s) => ({
+              ...s,
+              filterText: lastWord,
+              text: lastWord + s.text,
+            }));
+          }
+        }
+
+        const typeToUse = argDef.innerType || 'any';
+        const shouldAdvanceCursor = command.name === 'sort';
+        const shouldOpenSuggestions = command.name === 'keep' || command.name === 'sort';
         suggestions.push(
+          ...(!argDef.constantOnly
+            ? await getFieldsByType(
+                typeToUse,
+                isNewExpression ? command.args.filter(isColumnItem).map(({ name }) => name) : [],
+                { openSuggestions: shouldOpenSuggestions, advanceCursor: shouldAdvanceCursor }
+              )
+            : []),
           ...(await getFieldsOrFunctionsSuggestions(
-            [argDef.innerType || 'any'],
+            [typeToUse],
             command.name,
             option?.name,
             getFieldsByType,
@@ -669,14 +697,9 @@ async function getExpressionSuggestionsByType(
               // I think it comes down to the definition of 'column' since 'any' should always
               // include functions.
               functions: canHaveAssignments || command.name === 'sort',
-              fields: !argDef.constantOnly,
+              fields: false,
               variables: anyVariables,
               literals: argDef.constantOnly,
-            },
-            {
-              ignoreFields: isNewExpression
-                ? command.args.filter(isColumnItem).map(({ name }) => name)
-                : [],
             }
           ))
         );
@@ -835,7 +858,7 @@ async function getExpressionSuggestionsByType(
             // ... | <COMMAND> <suggest>
             // In this case start suggesting something not strictly based on type
             suggestions.push(
-              ...(await getFieldsByType('any', [], { advanceCursorAndOpenSuggestions: true })),
+              ...(await getFieldsByType('any', [], { advanceCursor: true, openSuggestions: true })),
               ...(await getFieldsOrFunctionsSuggestions(
                 ['any'],
                 command.name,
@@ -1108,11 +1131,7 @@ async function getFieldsOrFunctionsSuggestions(
   } = {}
 ): Promise<SuggestionRawDefinition[]> {
   const filteredFieldsByType = pushItUpInTheList(
-    (await (fields
-      ? getFieldsByType(types, ignoreFields, {
-          advanceCursorAndOpenSuggestions: commandName === 'sort',
-        })
-      : [])) as SuggestionRawDefinition[],
+    (await (fields ? getFieldsByType(types, ignoreFields) : [])) as SuggestionRawDefinition[],
     functions
   );
 
@@ -1343,7 +1362,8 @@ async function getFunctionArgsSuggestions(
       ...pushItUpInTheList(
         await getFieldsByType(getTypesFromParamDefs(paramDefsWhichSupportFields), [], {
           addComma: shouldAddComma,
-          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          advanceCursor: hasMoreMandatoryArgs,
+          openSuggestions: hasMoreMandatoryArgs,
         }),
         true
       )
@@ -1685,7 +1705,8 @@ async function getOptionArgsSuggestions(
       } else if (isNewExpression || (isAssignment(nodeArg) && !isAssignmentComplete(nodeArg))) {
         suggestions.push(
           ...(await getFieldsByType(types[0] === 'column' ? ['any'] : types, [], {
-            advanceCursorAndOpenSuggestions: true,
+            advanceCursor: true,
+            openSuggestions: true,
           }))
         );
 

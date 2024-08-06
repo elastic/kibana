@@ -1391,6 +1391,22 @@ describe('autocomplete', () => {
       13
     );
 
+    // KEEP field
+    testSuggestions(
+      'FROM a | KEEP ',
+      getFieldNamesByType('any').map(attachTriggerCommand),
+      undefined,
+      14
+    );
+    testSuggestions(
+      'FROM a | KEEP doubleFiel',
+      getFieldNamesByType('any').map(attachTriggerCommand),
+      undefined,
+      24
+    );
+    testSuggestions('FROM a | KEEP doubleField', ['doubleField,', 'doubleField| '], undefined, 25);
+    testSuggestions('FROM a | KEEP doubleField ', ['| ', ','], undefined, 26);
+
     // LIMIT number
     testSuggestions('FROM a | LIMIT ', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
 
