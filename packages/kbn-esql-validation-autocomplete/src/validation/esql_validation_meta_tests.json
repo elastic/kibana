@@ -19279,29 +19279,37 @@
     {
       "query": "row mv_sort(5, \"a\")",
       "error": [],
-      "warning": []
+      "warning": [
+        "Invalid option [\"a\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "row var = mv_sort(\"a\", \"a\")",
       "error": [],
-      "warning": []
+      "warning": [
+        "Invalid option [\"a\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "row mv_sort(\"a\", \"a\")",
-      "error": [
+      "error": [],
+      "warning": [
         "Invalid option [\"a\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
-      ],
-      "warning": []
+      ]
     },
     {
       "query": "row var = mv_sort(to_version(\"1.0.0\"), \"a\")",
       "error": [],
-      "warning": []
+      "warning": [
+        "Invalid option [\"a\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "row mv_sort(to_version(\"1.0.0\"), \"a\")",
       "error": [],
-      "warning": []
+      "warning": [
+        "Invalid option [\"a\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "from a_index | eval var = mv_sort(longField, keywordField)",

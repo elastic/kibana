@@ -5580,14 +5580,36 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval mv_sort(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval mv_sort("2022", "asc")', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(concat("20", "22"), "asc")', []);
-        testErrorsAndWarnings('row var = mv_sort(5, "a")', []);
-        testErrorsAndWarnings('row mv_sort(5, "a")', []);
-        testErrorsAndWarnings('row var = mv_sort("a", "a")', []);
-        testErrorsAndWarnings('row mv_sort("a", "a")', [
-          'Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].',
-        ]);
-        testErrorsAndWarnings('row var = mv_sort(to_version("1.0.0"), "a")', []);
-        testErrorsAndWarnings('row mv_sort(to_version("1.0.0"), "a")', []);
+        testErrorsAndWarnings(
+          'row var = mv_sort(5, "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row mv_sort(5, "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row var = mv_sort("a", "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row mv_sort("a", "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row var = mv_sort(to_version("1.0.0"), "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
+        testErrorsAndWarnings(
+          'row mv_sort(to_version("1.0.0"), "a")',
+          [],
+          ['Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].']
+        );
         testErrorsAndWarnings('from a_index | eval var = mv_sort(longField, keywordField)', []);
         testErrorsAndWarnings('from a_index | eval mv_sort(longField, keywordField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(textField, keywordField)', []);
