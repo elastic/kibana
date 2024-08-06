@@ -130,7 +130,7 @@ const ToolbarStandardButton = ({
     <EuiButton
       size={rest.size}
       isDisabled={isDisabled}
-      css={cssProps}
+      css={type === 'primary' ? null : cssProps}
       iconType={icon}
       iconSide={iconType ? iconSide : 'right'}
       fullWidth={fullWidth}
