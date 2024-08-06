@@ -17,7 +17,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import { useSourcererDataView } from '../containers';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { TimelineId } from '../../../common/types/timeline';
-import { TimelineType } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
@@ -263,7 +263,7 @@ describe('Update available for timeline template', () => {
         ...mockGlobalState.timeline.timelineById,
         [TimelineId.active]: {
           ...mockGlobalState.timeline.timelineById.test,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         },
       },
     },
@@ -339,7 +339,7 @@ describe('Missing index patterns', () => {
         ...mockGlobalState.timeline.timelineById,
         [TimelineId.active]: {
           ...mockGlobalState.timeline.timelineById.test,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template as TimelineType,
         },
       },
     },
@@ -392,7 +392,7 @@ describe('Missing index patterns', () => {
       activePatterns: ['myFakebeat-*'],
     });
     const state3 = cloneDeep(state2);
-    state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
+    state3.timeline.timelineById[TimelineId.active].timelineType = TimelineTypeEnum.default;
     store = createMockStore(state3);
 
     render(
