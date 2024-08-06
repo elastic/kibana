@@ -37,11 +37,10 @@ export class ServerlessAuthProvider implements AuthProvider {
 
   constructor(config: Config) {
     const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
-    this.projectType = kbnServerArgs
-      .reduce((acc, arg) => {
-        const match = arg.match(/--serverless[=\s](\w+)/);
-        return acc + (match ? match[1] : '');
-      }, '') as ServerlessProjectType;
+    this.projectType = kbnServerArgs.reduce((acc, arg) => {
+      const match = arg.match(/--serverless[=\s](\w+)/);
+      return acc + (match ? match[1] : '');
+    }, '') as ServerlessProjectType;
 
     if (!isServerlessProjectType(this.projectType)) {
       throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
