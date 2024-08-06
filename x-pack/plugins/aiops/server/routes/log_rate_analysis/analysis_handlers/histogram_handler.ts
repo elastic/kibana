@@ -5,26 +5,22 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { queue } from 'async';
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type {
   SignificantItem,
-  SignificantItemHistogramItem,
+  SignificantItemHistogram,
   NumericChartData,
 } from '@kbn/ml-agg-utils';
-import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
-
+import { QUEUE_CHUNKING_SIZE } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 import {
   addSignificantItemsHistogram,
   updateLoadingState,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+import { fetchMiniHistogramsForSignificantItems } from '@kbn/aiops-log-rate-analysis/queries/fetch_mini_histograms_for_significant_items';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
-import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-
-import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 
 import {
   MAX_CONCURRENT_QUERIES,
@@ -46,7 +42,7 @@ export const histogramHandlerFactory =
     fieldValuePairsCount: number,
     significantCategories: SignificantItem[],
     significantTerms: SignificantItem[],
-    overallTimeSeries?: NumericChartData
+    overallTimeSeries?: NumericChartData['data']
   ) => {
     function pushHistogramDataLoadingState() {
       responseStream.push(
@@ -67,11 +63,18 @@ export const histogramHandlerFactory =
 
     // time series filtered by fields
     if (
-      significantTerms.length > 0 &&
+      (significantTerms.length > 0 || significantCategories.length > 0) &&
       overallTimeSeries !== undefined &&
       !requestBody.overrides?.regroupOnly
     ) {
-      const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
+      const fieldValueHistogramQueueChunks = [
+        ...chunk(significantTerms, QUEUE_CHUNKING_SIZE),
+        ...chunk(significantCategories, QUEUE_CHUNKING_SIZE),
+      ];
+      const loadingStepSize =
+        (1 / fieldValueHistogramQueueChunks.length) * PROGRESS_STEP_HISTOGRAMS;
+
+      const fieldValueHistogramQueue = queue(async function (payload: SignificantItem[]) {
         if (stateHandler.shouldStop()) {
           logDebugMessage('shouldStop abort fetching field/value histograms.');
           fieldValueHistogramQueue.kill();
@@ -80,170 +83,32 @@ export const histogramHandlerFactory =
         }
 
         if (overallTimeSeries !== undefined) {
-          const histogramQuery = getHistogramQuery(requestBody, [
-            {
-              term: { [cp.fieldName]: cp.fieldValue },
-            },
-          ]);
-
-          let cpTimeSeries: NumericChartData;
+          let histograms: SignificantItemHistogram[];
 
           try {
-            cpTimeSeries = (
-              (await fetchHistogramsForFields({
-                esClient,
-                abortSignal,
-                arguments: {
-                  indexPattern: requestBody.index,
-                  query: histogramQuery,
-                  fields: [
-                    {
-                      fieldName: requestBody.timeFieldName,
-                      type: KBN_FIELD_TYPES.DATE,
-                      interval: overallTimeSeries.interval,
-                      min: overallTimeSeries.stats[0],
-                      max: overallTimeSeries.stats[1],
-                    },
-                  ],
-                  samplerShardSize: -1,
-                  randomSamplerProbability: stateHandler.sampleProbability(),
-                  randomSamplerSeed: RANDOM_SAMPLER_SEED,
-                },
-              })) as [NumericChartData]
-            )[0];
+            histograms = await fetchMiniHistogramsForSignificantItems(
+              esClient,
+              requestBody,
+              payload,
+              overallTimeSeries,
+              logger,
+              stateHandler.sampleProbability(),
+              () => {},
+              abortSignal
+            );
           } catch (e) {
-            logger.error(
-              `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-                cp.fieldValue
-              }", got: \n${e.toString()}`
-            );
-            responseStream.pushError(
-              `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-            );
+            logger.error(`Failed to fetch the histogram data chunk, got: \n${e.toString()}`);
+            responseStream.pushError(`Failed to fetch the histogram data chunk.`);
             return;
           }
 
-          const histogram: SignificantItemHistogramItem[] =
-            overallTimeSeries.data.map((o) => {
-              const current = cpTimeSeries.data.find(
-                (d1) => d1.key_as_string === o.key_as_string
-              ) ?? {
-                doc_count: 0,
-              };
-
-              return {
-                key: o.key,
-                key_as_string: o.key_as_string ?? '',
-                doc_count_significant_item: current.doc_count,
-                doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-              };
-            }) ?? [];
-
-          const { fieldName, fieldValue } = cp;
-
-          stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
+          stateHandler.loaded(loadingStepSize, false);
           pushHistogramDataLoadingState();
-          responseStream.push(
-            addSignificantItemsHistogram([
-              {
-                fieldName,
-                fieldValue,
-                histogram,
-              },
-            ])
-          );
+          responseStream.push(addSignificantItemsHistogram(histograms));
         }
       }, MAX_CONCURRENT_QUERIES);
 
-      await fieldValueHistogramQueue.push(significantTerms);
+      await fieldValueHistogramQueue.push(fieldValueHistogramQueueChunks);
       await fieldValueHistogramQueue.drain();
-    }
-
-    // histograms for text field patterns
-    if (
-      overallTimeSeries !== undefined &&
-      significantCategories.length > 0 &&
-      !requestBody.overrides?.regroupOnly
-    ) {
-      const significantCategoriesHistogramQueries = significantCategories.map((d) => {
-        const histogramQuery = getHistogramQuery(requestBody);
-        const categoryQuery = getCategoryQuery(d.fieldName, [
-          { key: `${d.key}`, count: d.doc_count, examples: [], regex: '' },
-        ]);
-        if (Array.isArray(histogramQuery.bool?.filter)) {
-          histogramQuery.bool?.filter?.push(categoryQuery);
-        }
-        return histogramQuery;
-      });
-
-      for (const [i, histogramQuery] of significantCategoriesHistogramQueries.entries()) {
-        const cp = significantCategories[i];
-        let catTimeSeries: NumericChartData;
-
-        try {
-          catTimeSeries = (
-            (await fetchHistogramsForFields({
-              esClient,
-              abortSignal,
-              arguments: {
-                indexPattern: requestBody.index,
-                query: histogramQuery,
-                fields: [
-                  {
-                    fieldName: requestBody.timeFieldName,
-                    type: KBN_FIELD_TYPES.DATE,
-                    interval: overallTimeSeries.interval,
-                    min: overallTimeSeries.stats[0],
-                    max: overallTimeSeries.stats[1],
-                  },
-                ],
-                samplerShardSize: -1,
-                randomSamplerProbability: stateHandler.sampleProbability(),
-                randomSamplerSeed: RANDOM_SAMPLER_SEED,
-              },
-            })) as [NumericChartData]
-          )[0];
-        } catch (e) {
-          logger.error(
-            `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-              cp.fieldValue
-            }", got: \n${e.toString()}`
-          );
-          responseStream.pushError(
-            `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-          );
-          return;
-        }
-
-        const histogram: SignificantItemHistogramItem[] =
-          overallTimeSeries.data.map((o) => {
-            const current = catTimeSeries.data.find(
-              (d1) => d1.key_as_string === o.key_as_string
-            ) ?? {
-              doc_count: 0,
-            };
-
-            return {
-              key: o.key,
-              key_as_string: o.key_as_string ?? '',
-              doc_count_significant_item: current.doc_count,
-              doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-            };
-          }) ?? [];
-
-        const { fieldName, fieldValue } = cp;
-
-        stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
-        pushHistogramDataLoadingState();
-        responseStream.push(
-          addSignificantItemsHistogram([
-            {
-              fieldName,
-              fieldValue,
-              histogram,
-            },
-          ])
-        );
-      }
     }
   };
