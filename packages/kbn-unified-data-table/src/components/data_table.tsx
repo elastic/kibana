@@ -299,8 +299,9 @@ export interface UnifiedDataTableProps {
    */
   externalControlColumns?: EuiDataGridControlColumn[];
   /**
-   * @deprecated Use only `rowAdditionalLeadingControls` instead
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
+   * We recommend to rather position all controls in the beginning of rows and use `rowAdditionalLeadingControls` for that
+   * as number of columns can be dynamically changed and we don't want the controls to become hidden due to horizontal scroll.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
   /**
