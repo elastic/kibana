@@ -28,7 +28,8 @@ import {
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
 
-describe('useActions', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/188361
+describe.skip('useActions', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

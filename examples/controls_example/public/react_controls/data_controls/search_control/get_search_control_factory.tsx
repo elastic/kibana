@@ -122,6 +122,7 @@ export const getSearchControlFactory = (
             searchTechnique,
             (newTechnique: SearchControlTechniques | undefined) =>
               searchTechnique.next(newTechnique),
+            (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
           ],
           searchString: [
             searchString,
