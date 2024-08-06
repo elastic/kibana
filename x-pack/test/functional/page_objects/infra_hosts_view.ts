@@ -35,11 +35,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // Inventory UI
     async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
+      return testSubjects.click('inventory-hostsView-link');
     },
 
     async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
+      return testSubjects.click('inventory-hostsView-link-badge');
     },
 
     // Table
