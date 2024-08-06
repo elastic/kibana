@@ -18,28 +18,19 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { openInDiscoverText, openInLogsExplorerText } from '../../../common/translations';
-import { useDatasetQualityDetailsRedirectLink } from '../../hooks';
+import { useDatasetQualityDetailsRedirectLink, useDatasetQualityDetailsState } from '../../hooks';
 import { IntegrationIcon } from '../common';
-import { BasicDataStream, TimeRangeConfig } from '../../../common/types';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default function Header({
-  linkDetails,
-  loading,
-  title,
-  timeRange,
-}: {
-  linkDetails: BasicDataStream;
-  loading: boolean;
-  title: string;
-  timeRange: TimeRangeConfig;
-}) {
-  const { integration, rawName } = linkDetails;
+export default function Header({ loading }: { loading: boolean }) {
+  const { datasetDetails, timeRange } = useDatasetQualityDetailsState();
+
+  const { integration, rawName, name: title } = datasetDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
   const redirectLinkProps = useDatasetQualityDetailsRedirectLink({
-    dataStreamStat: linkDetails,
+    dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
   });
 

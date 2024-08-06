@@ -8,16 +8,16 @@
 import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { useDatasetQualityDegradedField } from '../../../hooks';
 import { getDegradedFieldsColumns } from './columns';
 import {
   overviewDegradedFieldsTableLoadingText,
   overviewDegradedFieldsTableNoData,
-} from '../../../../common/translations';
+} from '../../../../../common/translations';
+import { useDegradedFields } from '../../../../hooks/use_degraded_fields';
 
 export const DegradedFieldTable = () => {
   const { isLoading, pagination, renderedItems, onTableChange, sort, fieldFormats } =
-    useDatasetQualityDegradedField();
+    useDegradedFields();
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
   ]);
@@ -32,16 +32,16 @@ export const DegradedFieldTable = () => {
       sorting={sort}
       onChange={onTableChange}
       pagination={pagination}
-      data-test-subj="datasetQualityFlyoutDegradedFieldTable"
+      data-test-subj="datasetQualityDetailsDegradedFieldTable"
       rowProps={{
-        'data-test-subj': 'datasetQualityFlyoutDegradedTableRow',
+        'data-test-subj': 'datasetQualityDetailsDegradedTableRow',
       }}
       noItemsMessage={
         isLoading ? (
           overviewDegradedFieldsTableLoadingText
         ) : (
           <EuiEmptyPrompt
-            data-test-subj="datasetQualityFlyoutDegradedTableNoData"
+            data-test-subj="datasetQualityDetailsDegradedTableNoData"
             layout="vertical"
             title={<h2>{overviewDegradedFieldsTableNoData}</h2>}
             hasBorder={false}

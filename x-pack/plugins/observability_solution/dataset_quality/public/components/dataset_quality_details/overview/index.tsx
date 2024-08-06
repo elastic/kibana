@@ -12,6 +12,7 @@ import { AggregationNotSupported } from './aggregation_not_supported';
 import { OverviewHeader } from './header';
 import { Summary } from './summary';
 import { DegradedDocs } from './document_trends/degraded_docs';
+import { DegradedFields } from './degraded_fields';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -34,6 +35,8 @@ export default function Overview() {
       <Summary />
       <EuiSpacer size="m" />
       <DegradedDocs lastReloadTime={lastReloadTime} />
+      <EuiSpacer size="m" />
+      <DegradedFields />
     </>
   );
 }

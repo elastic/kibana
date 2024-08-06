@@ -15,3 +15,4 @@ export * from './use_dataset_quality_degraded_field';
 export * from './use_telemetry';
 export * from './use_dataset_quality_details_state';
 export * from './use_dataset_quality_details_redirect_link';
+export * from './use_degraded_fields';

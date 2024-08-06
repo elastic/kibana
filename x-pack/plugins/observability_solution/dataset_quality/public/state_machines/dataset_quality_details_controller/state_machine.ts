@@ -17,7 +17,11 @@ import { DatasetQualityStartDeps } from '../../types';
 import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
 import { IDataStreamDetailsClient } from '../../services/data_stream_details';
 import { indexNameToDataStreamParts } from '../../../common/utils';
-import { DataStreamDetails, NonAggregatableDatasets } from '../../../common/api_types';
+import {
+  DataStreamDetails,
+  DegradedFieldResponse,
+  NonAggregatableDatasets,
+} from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
 import {
   fetchDataStreamDetailsFailedNotifier,
@@ -122,6 +126,35 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 done: {},
               },
             },
+            dataStreamDegradedFields: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadDegradedFields',
+                    onDone: {
+                      target: 'done',
+                      actions: ['storeDegradedFields'],
+                    },
+                    onError: {
+                      target: 'done',
+                    },
+                  },
+                },
+                done: {
+                  on: {
+                    UPDATE_TIME_RANGE: {
+                      target: 'fetching',
+                      actions: ['resetDegradedFieldPageAndRowsPerPage'],
+                    },
+                    UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                      target: 'done',
+                      actions: ['storeDegradedFieldTableOptions'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -159,6 +192,36 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
+        storeDegradedFields: assign((context, event: DoneInvokeEvent<DegradedFieldResponse>) => {
+          return 'data' in event
+            ? {
+                degradedFields: {
+                  ...context.degradedFields,
+                  data: event.data.degradedFields,
+                },
+              }
+            : {};
+        }),
+        storeDegradedFieldTableOptions: assign((context, event) => {
+          return 'degraded_field_criteria' in event
+            ? {
+                degradedFields: {
+                  ...context.degradedFields,
+                  table: event.degraded_field_criteria,
+                },
+              }
+            : {};
+        }),
+        resetDegradedFieldPageAndRowsPerPage: assign((context, _event) => ({
+          degradedFields: {
+            ...context.degradedFields,
+            table: {
+              ...context.degradedFields.table,
+              page: 0,
+              rowsPerPage: 10,
+            },
+          },
+        })),
       },
     }
   );
@@ -227,6 +290,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         }
 
         return false;
+      },
+      loadDegradedFields: (context) => {
+        const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
+
+        return dataStreamDetailsClient.getDataStreamDegradedFields({
+          dataStream: context.dataStream,
+          start,
+          end,
+        });
       },
     },
   });

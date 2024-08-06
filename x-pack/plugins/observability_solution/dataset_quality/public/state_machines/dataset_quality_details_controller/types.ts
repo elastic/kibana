@@ -10,6 +10,7 @@ import { DegradedFieldSortField } from '../../hooks';
 import {
   DataStreamDetails,
   DegradedField,
+  DegradedFieldResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
@@ -23,6 +24,7 @@ export interface DataStream {
 
 export interface DegradedFieldsTableConfig {
   table: TableCriteria<DegradedFieldSortField>;
+  data?: DegradedField[];
 }
 
 export interface DegradedFieldsWithData {
@@ -69,6 +71,7 @@ export type DatasetQualityDetailsControllerTypeState =
         | 'initializing'
         | 'uninitialized'
         | 'initializing.nonAggregatableDataset.fetching'
+        | 'initializing.dataStreamDegradedFields.fetching'
         | 'initializing.dataStreamDetails.fetching';
       context: WithDefaultControllerState;
     }
@@ -87,6 +90,10 @@ export type DatasetQualityDetailsControllerTypeState =
   | {
       value: 'initializing.checkBreakdownFieldIsEcs.done';
       context: WithDefaultControllerState & WithBreakdownInEcsCheck;
+    }
+  | {
+      value: 'initializing.dataStreamDegradedFields.done';
+      context: WithDefaultControllerState & WithDegradedFieldsData;
     };
 
 export type DatasetQualityDetailsControllerContext =
@@ -101,7 +108,12 @@ export type DatasetQualityDetailsControllerEvent =
       type: 'BREAKDOWN_FIELD_CHANGE';
       breakdownField: string | undefined;
     }
+  | {
+      type: 'UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA';
+      degraded_field_criteria: TableCriteria<DegradedFieldSortField>;
+    }
   | DoneInvokeEvent<NonAggregatableDatasets>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
-  | DoneInvokeEvent<boolean>;
+  | DoneInvokeEvent<boolean>
+  | DoneInvokeEvent<DegradedFieldResponse>;

@@ -147,34 +147,6 @@ export const flyoutHostsText = i18n.translate('xpack.datasetQuality.flyoutHostsT
 export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShowAllText', {
   defaultMessage: 'Show all',
 });
-
-export const flyoutImprovementText = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
-  {
-    defaultMessage: 'Degraded fields',
-  }
-);
-
-export const flyoutImprovementTooltip = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
-  {
-    defaultMessage: 'A partial list of degraded fields found in your data set.',
-  }
-);
-
-export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
-  {
-    defaultMessage: 'Loading degraded fields',
-  }
-);
-
-export const flyoutDegradedFieldsTableNoData = i18n.translate(
-  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
-  {
-    defaultMessage: 'No degraded fields found',
-  }
-);
 /*
 Summary Panel
 */
@@ -272,6 +244,20 @@ export const fullDatasetNameDescription = i18n.translate(
   }
 );
 
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of degraded fields found in your data set.',
+  }
+);
+
 /*
 Dataset Quality Details
 */
@@ -340,5 +326,40 @@ export const overviewPanelDatasetQualityIndicatorDegradedDocs = i18n.translate(
   'xpack.datasetQuality.details.overviewPanel.datasetQuality.degradedDocs',
   {
     defaultMessage: 'Degraded docs',
+  }
+);
+
+export const overviewDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const overviewDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
+
+export const overviewDegradedFieldsSectionTitle = i18n.translate(
+  'xpack.datasetQuality.detail.degradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Quality issues',
+  }
+);
+
+export const overviewDegradedFieldsSectionTitleTooltip = i18n.translate(
+  'xpack.datasetQuality.details.degradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'A partial list of quality issues found in your data set.',
+  }
+);
+
+export const overviewQualityIssuesAccordionTechPreviewBadge = i18n.translate(
+  'xpack.datasetQuality.details.overviewQualityIssuesAccordionTechPreviewBadge',
+  {
+    defaultMessage: 'TECH PREVIEW',
   }
 );

@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
+  EuiButtonIcon,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,10 +25,17 @@ import {
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { css } from '@emotion/react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
-import { overviewDegradedDocsText } from '../../../../../../common/translations';
+import {
+  openInLogsExplorerText,
+  overviewDegradedDocsText,
+} from '../../../../../../common/translations';
 import { useDegradedDocs } from '../../../../../hooks/use_degraded_docs';
 import { DegradedDocsChart } from './degraded_docs_chart';
-import { useDatasetQualityDetailsState } from '../../../../../hooks';
+import {
+  useDatasetQualityDetailsRedirectLink,
+  useDatasetQualityDetailsState,
+} from '../../../../../hooks';
+import { _IGNORED } from '../../../../../../common/es_fields';
 
 const degradedDocsTooltip = (
   <FormattedMessage
@@ -44,7 +52,7 @@ const degradedDocsTooltip = (
 );
 
 export function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
-  const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
+  const { timeRange, updateTimeRange, datasetDetails } = useDatasetQualityDetailsState();
   const { dataView, breakdown, ...chartProps } = useDegradedDocs();
 
   const accordionId = useGeneratedHtmlId({
@@ -54,6 +62,12 @@ export function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
   const [breakdownDataViewField, setBreakdownDataViewField] = useState<DataViewField | undefined>(
     undefined
   );
+
+  const degradedDocLinkLogsExplorer = useDatasetQualityDetailsRedirectLink({
+    dataStreamStat: datasetDetails,
+    timeRangeConfig: timeRange,
+    query: { language: 'kuery', query: `${_IGNORED}: *` },
+  });
 
   useEffect(() => {
     if (breakdown.dataViewField && breakdown.fieldSupportsBreakdown) {
@@ -97,7 +111,7 @@ export function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
         initialIsOpen={true}
         data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
       >
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
             <UnifiedBreakdownFieldSelector
               dataView={dataView!}
@@ -105,6 +119,16 @@ export function DegradedDocs({ lastReloadTime }: { lastReloadTime: number }) {
               onBreakdownFieldChange={breakdown.onChange}
             />
           </EuiSkeletonRectangle>
+          <EuiToolTip content={openInLogsExplorerText}>
+            <EuiButtonIcon
+              display="base"
+              iconType="discoverApp"
+              aria-label="Discover"
+              size="s"
+              data-test-subj="datasetQualityDetailsLinkToDiscover"
+              {...degradedDocLinkLogsExplorer.linkProps}
+            />
+          </EuiToolTip>
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />

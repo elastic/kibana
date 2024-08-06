@@ -11,6 +11,7 @@ import { OnRefreshProps } from '@elastic/eui';
 import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
+import { BasicDataStream } from '../../common/types';
 
 export const useDatasetQualityDetailsState = () => {
   const { service } = useDatasetQualityDetailsContext();
@@ -32,9 +33,9 @@ export const useDatasetQualityDetailsState = () => {
 
   const { type, dataset, namespace } = indexNameToDataStreamParts(dataStream);
 
-  const datasetDetails = {
+  const datasetDetails: BasicDataStream = {
     type,
-    dataset,
+    name: dataset,
     namespace,
     rawName: dataStream,
   };

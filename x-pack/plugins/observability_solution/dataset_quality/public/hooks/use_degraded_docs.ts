@@ -118,12 +118,7 @@ export const useDegradedDocs = () => {
   }, [openInLensCallback]);
 
   const redirectLinkProps = useDatasetQualityDetailsRedirectLink({
-    dataStreamStat: {
-      name: datasetDetails.dataset,
-      rawName: datasetDetails.rawName,
-      type: datasetDetails.type,
-      namespace: datasetDetails.namespace,
-    },
+    dataStreamStat: datasetDetails,
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
     breakdownField: breakdownDataViewField?.name,

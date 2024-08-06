@@ -7,7 +7,6 @@
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DegradedField } from '../../common/data_streams_stats';
 import { SortDirection } from '../../common/types';
 import {
@@ -15,24 +14,26 @@ import {
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
 } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../utils';
+import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 
-type DegradedFieldSortField = keyof DegradedField;
+export type DegradedFieldSortField = keyof DegradedField;
 
-// TODO: DELETE this hook in favour of new hook post migration
-export function useDatasetQualityDegradedField() {
-  const { service } = useDatasetQualityContext();
+export function useDegradedFields() {
+  const { service } = useDatasetQualityDetailsState();
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const degradedFields = useSelector(service, (state) => state.context.flyout.degradedFields) ?? {};
+  const degradedFields = useSelector(service, (state) => state.context.degradedFields) ?? {};
   const { data, table } = degradedFields;
   const { page, rowsPerPage, sort } = table;
+
+  const totalItemCount = data?.length ?? 0;
 
   const pagination = {
     pageIndex: page,
     pageSize: rowsPerPage,
-    totalItemCount: data?.length ?? 0,
+    totalItemCount,
     hidePerPageOptions: true,
   };
 
@@ -62,7 +63,7 @@ export function useDatasetQualityDegradedField() {
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
   const isLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamDegradedFields.fetching')
+    state.matches('initializing.dataStreamDegradedFields.fetching')
   );
 
   return {
@@ -72,5 +73,6 @@ export function useDatasetQualityDegradedField() {
     renderedItems,
     sort: { sort },
     fieldFormats,
+    totalItemCount,
   };
 }
