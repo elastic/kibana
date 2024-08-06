@@ -38,6 +38,7 @@ import type {
   ESQLNumericLiteralType,
   FunctionSubtype,
   ESQLNumericLiteral,
+  ESQLOrderExpression,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -216,6 +217,26 @@ export function createFunction<Subtype extends FunctionSubtype>(
   }
   return node;
 }
+
+export const createOrderExpression = (
+  ctx: ParserRuleContext,
+  arg: ESQLAstItem,
+  order: ESQLOrderExpression['order'],
+  nulls: ESQLOrderExpression['nulls']
+) => {
+  const orderExpression: ESQLOrderExpression = createFunction(
+    'order-expression',
+    ctx,
+    undefined,
+    'postfix-unary-expression'
+  ) as ESQLOrderExpression;
+
+  orderExpression.args = [arg];
+  orderExpression.order = order;
+  orderExpression.nulls = nulls;
+
+  return orderExpression;
+};
 
 function walkFunctionStructure(
   args: ESQLAstItem[],

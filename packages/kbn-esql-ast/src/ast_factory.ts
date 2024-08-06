@@ -51,7 +51,7 @@ import {
   visitDissect,
   visitGrok,
   collectBooleanExpression,
-  visitOrderExpression,
+  visitOrderExpressions,
   getPolicyName,
   getMatchField,
   getEnrichClauses,
@@ -219,7 +219,7 @@ export class AstListener implements ESQLParserListener {
   exitSortCommand(ctx: SortCommandContext) {
     const command = createCommand('sort', ctx);
     this.ast.push(command);
-    command.args.push(...visitOrderExpression(ctx.orderExpression_list()));
+    command.args.push(...visitOrderExpressions(ctx.orderExpression_list()));
   }
 
   /**

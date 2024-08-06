@@ -115,9 +115,15 @@ export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
   args: [ESQLAstItem];
 }
 
-export interface ESQLPostfixUnaryExpression extends ESQLFunction<'postfix-unary-expression'> {
+export interface ESQLPostfixUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'postfix-unary-expression', Name> {
   subtype: 'postfix-unary-expression';
   args: [ESQLAstItem];
+}
+
+export interface ESQLOrderExpression extends ESQLPostfixUnaryExpression<'order-expression'> {
+  order: '' | 'ASC' | 'DESC';
+  nulls: '' | 'NULLS FIRST' | 'NULLS LAST';
 }
 
 export interface ESQLBinaryExpression

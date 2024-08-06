@@ -10,11 +10,38 @@ import { getAstAndSyntaxErrors as parse } from '../ast_parser';
 
 describe('SORT', () => {
   describe('correctly formatted', () => {
-    // Un-skip one https://github.com/elastic/kibana/issues/189491 fixed.
-    it.skip('example from documentation', () => {
+    it('sorting order without modifiers', () => {
+      const text = `FROM employees | SORT height`;
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'sort',
+          args: [
+            {
+              type: 'function',
+              subtype: 'postfix-unary-expression',
+              name: 'order-expression',
+              order: '',
+              nulls: '',
+              args: [
+                {
+                  type: 'column',
+                  name: 'height',
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('with order modifier "DESC"', () => {
       const text = `
         FROM employees
-        | KEEP first_name, last_name, height
         | SORT height DESC
         `;
       const { ast, errors } = parse(text);
@@ -22,22 +49,61 @@ describe('SORT', () => {
       expect(errors.length).toBe(0);
       expect(ast).toMatchObject([
         {},
-        {},
         {
           type: 'command',
           name: 'sort',
           args: [
             {
-              type: 'column',
-              name: 'height',
+              type: 'function',
+              subtype: 'postfix-unary-expression',
+              name: 'order-expression',
+              order: 'DESC',
+              nulls: '',
+              args: [
+                {
+                  type: 'column',
+                  name: 'height',
+                },
+              ],
             },
           ],
         },
       ]);
     });
 
-    // Un-skip once https://github.com/elastic/kibana/issues/189491 fixed.
-    it.skip('can parse various sorting columns with options', () => {
+    it('with nulls modifier "NULLS LAST"', () => {
+      const text = `
+        FROM employees
+        | SORT height NULLS LAST
+        `;
+      const { ast, errors } = parse(text);
+
+      expect(errors.length).toBe(0);
+      expect(ast).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'sort',
+          args: [
+            {
+              type: 'function',
+              subtype: 'postfix-unary-expression',
+              name: 'order-expression',
+              order: '',
+              nulls: 'NULLS LAST',
+              args: [
+                {
+                  type: 'column',
+                  name: 'height',
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('can parse various sorting columns with options', () => {
       const text =
         'FROM a | SORT a, b ASC, c DESC, d NULLS FIRST, e NULLS LAST, f ASC NULLS FIRST, g DESC NULLS LAST';
       const { ast, errors } = parse(text);
@@ -50,32 +116,71 @@ describe('SORT', () => {
           name: 'sort',
           args: [
             {
-              type: 'column',
-              name: 'a',
+              type: 'function',
+              subtype: 'postfix-unary-expression',
+              name: 'order-expression',
+              order: '',
+              nulls: '',
+              args: [
+                {
+                  type: 'column',
+                  name: 'a',
+                },
+              ],
             },
             {
-              type: 'column',
-              name: 'b',
+              order: 'ASC',
+              nulls: '',
+              args: [
+                {
+                  name: 'b',
+                },
+              ],
             },
             {
-              type: 'column',
-              name: 'c',
+              order: 'DESC',
+              nulls: '',
+              args: [
+                {
+                  name: 'c',
+                },
+              ],
             },
             {
-              type: 'column',
-              name: 'd',
+              order: '',
+              nulls: 'NULLS FIRST',
+              args: [
+                {
+                  name: 'd',
+                },
+              ],
             },
             {
-              type: 'column',
-              name: 'e',
+              order: '',
+              nulls: 'NULLS LAST',
+              args: [
+                {
+                  name: 'e',
+                },
+              ],
             },
             {
-              type: 'column',
-              name: 'f',
+              order: 'ASC',
+              nulls: 'NULLS FIRST',
+              args: [
+                {
+                  name: 'f',
+                },
+              ],
             },
             {
-              type: 'column',
-              name: 'g',
+              order: 'DESC',
+              nulls: 'NULLS LAST',
+              args: [
+                {
+                  name: 'g',
+                },
+              ],
             },
           ],
         },
