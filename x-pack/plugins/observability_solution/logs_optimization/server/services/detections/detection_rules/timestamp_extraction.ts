@@ -13,7 +13,49 @@ import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../../common/constants';
 import { createFieldExtractionDetection } from '../../../../common/detections/utils';
 import { FieldExtractionDetection } from '../../../../common/detections/types';
 
+interface DatePreset {
+  grokPattern: string;
+  temporaryTarget: string;
+  outputFormat: string;
+}
+
 const TEMPORARY_TIMESTAMP_FIELD = 'detected_timestamp';
+
+const DATE_PRESETS: DatePreset[] = [
+  { grokPattern: 'TIMESTAMP_ISO8601', temporaryTarget: 'timestamp_iso', outputFormat: 'ISO8601' },
+  {
+    grokPattern: 'SYSLOGTIMESTAMP',
+    temporaryTarget: 'timestamp_sys',
+    outputFormat: 'MMM dd HH:mm:ss',
+  },
+  {
+    grokPattern: 'DATESTAMP_RFC822',
+    temporaryTarget: 'timestamp_rfc822',
+    outputFormat: 'EEE, dd MMM yy HH:mm:ss Z',
+  },
+  {
+    grokPattern: 'DATESTAMP_RFC2822',
+    temporaryTarget: 'timestamp_rfc2822',
+    outputFormat: 'EEE, dd MMM yyyy HH:mm:ss Z',
+  },
+  {
+    grokPattern: 'DATESTAMP_EVENTLOG',
+    temporaryTarget: 'timestamp_eventlog',
+    outputFormat: 'yyyyMMddHHmmss',
+  },
+  {
+    grokPattern: 'HTTPDATE',
+    temporaryTarget: 'timestamp_httpdate',
+    outputFormat: 'dd/MMM/yyyy:HH:mm:ss Z',
+  },
+  {
+    grokPattern: 'DATESTAMP_OTHER',
+    temporaryTarget: 'timestamp_other',
+    outputFormat: 'EEE MMM dd HH:mm:ss Z yyyy',
+  },
+  { grokPattern: 'DATE_EU', temporaryTarget: 'timestamp_date_eu', outputFormat: 'dd/MM/yyyy' },
+  { grokPattern: 'DATE_US', temporaryTarget: 'timestamp_date_us', outputFormat: 'MM/dd/yyyy' },
+];
 
 export class TimestampExtractionDetectionRule {
   constructor(private esqlTransport: EsqlTransport) {}
@@ -32,15 +74,16 @@ export class TimestampExtractionDetectionRule {
         .matched_pattern as string;
 
       const canExtractTimestamp = Boolean(pattern);
+      const datePreset = DATE_PRESETS.find((date) => pattern.includes(date.grokPattern));
 
-      if (canExtractTimestamp) {
+      if (canExtractTimestamp && datePreset) {
         return createFieldExtractionDetection({
           sourceField: MESSAGE_FIELD,
           targetField: TIMESTAMP_FIELD,
           pattern,
           documentSamples: esqlDocs.hits,
           tasks: {
-            processors: this.buildPipelineProcessors(pattern),
+            processors: this.buildPipelineProcessors(pattern, datePreset.outputFormat),
           },
         });
       } else {
@@ -54,28 +97,20 @@ export class TimestampExtractionDetectionRule {
   private buildQuery(index: NewestIndex) {
     return `FROM ${index.name}
             | WHERE ${MESSAGE_FIELD} IS NOT NULL
-            | GROK ${MESSAGE_FIELD} "%{TIMESTAMP_ISO8601:timestamp_iso}"
-            | GROK ${MESSAGE_FIELD} "%{SYSLOGTIMESTAMP:timestamp_sys}"
-            | GROK ${MESSAGE_FIELD} "%{DATESTAMP_RFC822:timestamp_rfc822}"
-            | GROK ${MESSAGE_FIELD} "%{DATESTAMP_RFC2822:timestamp_rfc2822}"
-            | GROK ${MESSAGE_FIELD} "%{DATESTAMP_EVENTLOG:timestamp_eventlog}"
-            | GROK ${MESSAGE_FIELD} "%{HTTPDATE:timestamp_httpdate}"
-            | GROK ${MESSAGE_FIELD} "%{DATESTAMP_OTHER:timestamp_other}"
-            | GROK ${MESSAGE_FIELD} "%{DATE_EU:timestamp_date_eu}"
-            | GROK ${MESSAGE_FIELD} "%{DATE_US:timestamp_date_us}"
+            ${DATE_PRESETS.map(
+              ({ grokPattern, temporaryTarget }) =>
+                `| GROK ${MESSAGE_FIELD} "%{${grokPattern}:${temporaryTarget}}"`
+            ).join('\n')}
             | EVAL matched_pattern = CASE(
-                timestamp_iso IS NOT NULL, "%{TIMESTAMP_ISO8601:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_sys IS NOT NULL, "%{SYSLOGTIMESTAMP:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_rfc822 IS NOT NULL, "%{DATESTAMP_RFC822:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_rfc2822 IS NOT NULL, "%{DATESTAMP_RFC2822:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_eventlog IS NOT NULL, "%{DATESTAMP_EVENTLOG:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_httpdate IS NOT NULL, "%{HTTPDATE:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_other IS NOT NULL, "%{DATESTAMP_OTHER:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_date_eu IS NOT NULL, "%{DATE_EU:${TEMPORARY_TIMESTAMP_FIELD}}",
-                timestamp_date_us IS NOT NULL, "%{DATE_US:${TEMPORARY_TIMESTAMP_FIELD}}",
+                ${DATE_PRESETS.map(
+                  ({ grokPattern, temporaryTarget }) =>
+                    `${temporaryTarget} IS NOT NULL, "%{${grokPattern}:${TEMPORARY_TIMESTAMP_FIELD}}",`
+                ).join('\n')}
                 ""
             )
-            | EVAL matched_value = COALESCE(timestamp_iso, timestamp_sys, timestamp_rfc822, timestamp_rfc2822, timestamp_eventlog, timestamp_httpdate, timestamp_other, timestamp_date_eu, timestamp_date_us)
+            | EVAL matched_value = COALESCE(${DATE_PRESETS.map(
+              (date) => date.temporaryTarget
+            ).join()})
             | WHERE matched_pattern != ""
             | WHERE matched_value != DATE_FORMAT(@timestamp)
             | KEEP @timestamp,${MESSAGE_FIELD},matched_pattern
@@ -83,13 +118,16 @@ export class TimestampExtractionDetectionRule {
     `;
   }
 
-  private buildPipelineProcessors(pattern: string): IngestProcessorContainer[] {
+  private buildPipelineProcessors(
+    pattern: string,
+    outputFormat: DatePreset['outputFormat']
+  ): IngestProcessorContainer[] {
     return [
       createGrokProcessor({ field: MESSAGE_FIELD, patterns: [pattern] }),
       {
         date: {
           field: TEMPORARY_TIMESTAMP_FIELD,
-          formats: ['ISO8601', 'UNIX', 'UNIX_MS', 'TAI64N'],
+          formats: [outputFormat],
           ignore_failure: true,
         },
       },
