@@ -94,7 +94,9 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
+    if (this.definition.module) {
+      startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
+    }
 
     if (!this.instance) {
       return;
