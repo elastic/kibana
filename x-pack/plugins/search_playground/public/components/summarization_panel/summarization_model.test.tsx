@@ -60,9 +60,5 @@ describe('SummarizationModel', () => {
     );
 
     expect(getByTestId('summarizationModelSelect')).toBeInTheDocument();
-    expect(getByTestId('manageConnectorsLink')).toHaveAttribute(
-      'href',
-      'http://example.com/manage-connectors'
-    );
   });
 });

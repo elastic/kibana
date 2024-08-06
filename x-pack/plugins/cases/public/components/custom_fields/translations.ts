@@ -77,7 +77,7 @@ export const REQUIRED = i18n.translate('xpack.cases.customFields.required', {
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.customFields.requiredField', {
     values: { fieldName },
-    defaultMessage: 'A {fieldName} is required.',
+    defaultMessage: '{fieldName} is required.',
   });
 
 export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>

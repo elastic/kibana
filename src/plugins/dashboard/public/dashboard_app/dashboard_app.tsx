@@ -42,6 +42,7 @@ import { loadDashboardHistoryLocationState } from './locator/load_dashboard_hist
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
+import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
 
 export interface DashboardAppProps {
   history: History;
@@ -82,12 +83,20 @@ export function DashboardApp({
     embeddable: { getStateTransfer },
     notifications: { toasts },
     settings: { uiSettings },
-    data: { search },
+    data: { search, dataViews },
     customBranding,
     share: { url },
+    observabilityAIAssistant,
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
+
+  useObservabilityAIAssistantContext({
+    observabilityAIAssistant: observabilityAIAssistant.start,
+    dashboardAPI,
+    search,
+    dataViews,
+  });
 
   useExecutionContext(executionContext, {
     type: 'application',

@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
 import { times } from 'lodash/fp';
-import { RiskInputsTab } from './risk_inputs_tab';
+import { EXPAND_ALERT_TEST_ID, RiskInputsTab } from './risk_inputs_tab';
 import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
@@ -49,6 +49,12 @@ const riskScore = {
   },
 };
 
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+}));
+
 const riskScoreWithAssetCriticalityContribution = (contribution: number) => {
   const score = JSON.parse(JSON.stringify(riskScore));
   score.user.risk.category_2_score = contribution;
@@ -74,7 +80,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -87,7 +93,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -116,11 +122,55 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
     expect(queryByTestId('risk-input-contexts-title')).toBeInTheDocument();
+  });
+
+  it('it renders alert preview button when feature flag is enable', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [alertInputDataMock],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(EXPAND_ALERT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('it does not render alert preview button when feature flag is disable', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [alertInputDataMock],
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId(EXPAND_ALERT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('Displays 0.00 for the asset criticality contribution if the contribution value is less than -0.01', () => {
@@ -134,7 +184,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
     const contextsTable = getByTestId('risk-input-contexts-table');
@@ -153,7 +203,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
     const contextsTable = getByTestId('risk-input-contexts-table');
@@ -172,7 +222,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -201,7 +251,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 

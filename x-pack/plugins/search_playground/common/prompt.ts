@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const OpenAIPrompt = (systemInstructions: string) => {
+const OpenAIPrompt = (systemInstructions: string, question?: boolean) => {
   return `
   Instructions:
   ${systemInstructions}
@@ -13,27 +13,26 @@ const OpenAIPrompt = (systemInstructions: string) => {
   Context:
   {context}
 
-  Question: {question}
-  Answer:
+  ${question ? 'follow up question: {question}' : ''}
   `;
 };
 
-const MistralPrompt = (systemInstructions: string) => {
+const MistralPrompt = (systemInstructions: string, question?: boolean) => {
   return `
   <s>[INST]${systemInstructions}[/INST] </s>
 
   [INST]
   Context:
   {context}
-
-  Question: {question}
-  Answer:
   [/INST]
+
+  ${question ? '[INST]follow up question: {question}[/INST]' : ''}
+
   `;
 };
 
 // https://docs.anthropic.com/claude/docs/use-xml-tags
-const AnthropicPrompt = (systemInstructions: string) => {
+const AnthropicPrompt = (systemInstructions: string, question?: boolean) => {
   return `
   <instructions>${systemInstructions}</instructions>
 
@@ -41,14 +40,27 @@ const AnthropicPrompt = (systemInstructions: string) => {
   {context}
   </context>
 
-  <input>{question}</input>
+  ${question ? '<input>{question}</input>' : ''}
+  `;
+};
+
+const GeminiPrompt = (systemInstructions: string, question?: boolean) => {
+  return `
+  Instructions:
+  ${systemInstructions}
+
+  Context:
+  {context}
+
+  ${question ? 'follow up question: {question}' : ''}
+
   `;
 };
 
 interface PromptTemplateOptions {
   citations?: boolean;
   context?: boolean;
-  type?: 'openai' | 'mistral' | 'anthropic';
+  type?: 'openai' | 'mistral' | 'anthropic' | 'gemini';
 }
 
 export const Prompt = (instructions: string, options: PromptTemplateOptions): string => {
@@ -56,10 +68,10 @@ export const Prompt = (instructions: string, options: PromptTemplateOptions): st
   - ${instructions}
   ${
     options.context
-      ? '- Answer questions truthfully and factually using only the information presented.'
+      ? '- Answer questions truthfully and factually using only the context presented.'
       : ''
   }
-  - If you don't know the answer, just say that you don't know, don't make up an answer!
+  - If you don't know the answer, just say that you don't know, don't make up an answer.
   ${
     options.citations
       ? '- You must always cite the document where the answer was extracted using inline academic citation style [], using the position.'
@@ -73,5 +85,20 @@ export const Prompt = (instructions: string, options: PromptTemplateOptions): st
     openai: OpenAIPrompt,
     mistral: MistralPrompt,
     anthropic: AnthropicPrompt,
-  }[options.type || 'openai'](systemInstructions);
+    gemini: GeminiPrompt,
+  }[options.type || 'openai'](systemInstructions, false);
+};
+
+interface QuestionRewritePromptOptions {
+  type: 'openai' | 'mistral' | 'anthropic' | 'gemini';
+}
+
+export const QuestionRewritePrompt = (options: QuestionRewritePromptOptions): string => {
+  const systemInstructions = `Given the following conversation context and a follow up question, rephrase the follow up question to be a standalone question. Rewrite the question in the question language. Keep the answer to a single sentence. Do not use quotes.`;
+  return {
+    openai: OpenAIPrompt,
+    mistral: MistralPrompt,
+    anthropic: AnthropicPrompt,
+    gemini: GeminiPrompt,
+  }[options.type || 'openai'](systemInstructions, true);
 };

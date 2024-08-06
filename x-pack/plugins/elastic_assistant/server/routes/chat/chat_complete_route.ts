@@ -23,10 +23,8 @@ import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_te
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
-  DEFAULT_PLUGIN_NAME,
   appendAssistantMessageToConversation,
-  createOrUpdateConversationWithUserInput,
-  getPluginNameFromRequest,
+  createConversationWithUserInput,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -150,41 +148,21 @@ export const chatCompleteRoute = (
             return transformedMessage;
           });
 
-          let updatedConversation: ConversationResponse | undefined | null;
-          // Fetch any tools registered by the request's originating plugin
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const enableKnowledgeBaseByDefault =
-            ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-          // TODO: remove non-graph persistance when KB will be enabled by default
-          if (
-            (!enableKnowledgeBaseByDefault || (enableKnowledgeBaseByDefault && !conversationId)) &&
-            request.body.persist &&
-            conversationsDataClient
-          ) {
-            updatedConversation = await createOrUpdateConversationWithUserInput({
-              actionsClient,
+          let newConversation: ConversationResponse | undefined | null;
+          if (conversationsDataClient && !conversationId && request.body.persist) {
+            newConversation = await createConversationWithUserInput({
               actionTypeId,
               connectorId,
               conversationId,
               conversationsDataClient,
               promptId: request.body.promptId,
-              logger,
               replacements: latestReplacements,
               newMessages: messages,
               model: request.body.model,
             });
-            if (updatedConversation == null) {
-              return assistantResponse.error({
-                body: `conversation id: "${conversationId}" not updated`,
-                statusCode: 400,
-              });
-            }
+
             // messages are anonymized by conversationsDataClient
-            messages = updatedConversation?.messages?.map((c) => ({
+            messages = newConversation?.messages?.map((c) => ({
               role: c.role,
               content: c.content,
             }));
@@ -195,9 +173,9 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (updatedConversation?.id && conversationsDataClient) {
+            if (newConversation?.id && conversationsDataClient) {
               await appendAssistantMessageToConversation({
-                conversationId: updatedConversation?.id,
+                conversationId: newConversation?.id,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,
@@ -209,12 +187,11 @@ export const chatCompleteRoute = (
 
           return await langChainExecute({
             abortSignal,
-            isEnabledKnowledgeBase: true,
             isStream: request.body.isStream ?? false,
             actionsClient,
             actionTypeId,
             connectorId,
-            conversationId,
+            conversationId: conversationId ?? newConversation?.id,
             context: ctx,
             getElser,
             logger,
@@ -222,7 +199,16 @@ export const chatCompleteRoute = (
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,
-            request,
+            request: {
+              ...request,
+              // TODO: clean up after empty tools will be available to use
+              body: {
+                ...request.body,
+                replacements: {},
+                size: 10,
+                alertsIndexPattern: '.alerts-security.alerts-default',
+              },
+            },
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,
@@ -231,8 +217,6 @@ export const chatCompleteRoute = (
           const error = transformError(err as Error);
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
             model: request.body.model,
             errorMessage: error.message,
             // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented

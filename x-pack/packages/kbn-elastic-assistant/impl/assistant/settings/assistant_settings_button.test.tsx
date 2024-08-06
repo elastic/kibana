@@ -22,7 +22,6 @@ const testProps = {
   isSettingsModalVisible: false,
   selectedConversation: welcomeConvo,
   setIsSettingsModalVisible,
-  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
   conversationsLoaded: true,

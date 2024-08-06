@@ -10,13 +10,10 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AppPluginStartDependencies } from './types';
+import { AppProps } from './components/app';
 
-export const Playground = dynamic(async () => ({
+export const Playground = dynamic<React.FC<AppProps>>(async () => ({
   default: (await import('./components/app')).App,
-}));
-
-export const PlaygroundToolbar = dynamic(async () => ({
-  default: (await import('./components/toolbar')).Toolbar,
 }));
 
 export const PlaygroundProvider = dynamic(async () => ({

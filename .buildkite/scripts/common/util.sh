@@ -36,7 +36,7 @@ check_for_changed_files() {
   GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options')"
 
   if [ "$GIT_CHANGES" ]; then
-    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
@@ -171,4 +171,10 @@ npm_install_global() {
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+}
+
+print_if_dry_run() {
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
+    echo "DRY_RUN is enabled."
+  fi
 }

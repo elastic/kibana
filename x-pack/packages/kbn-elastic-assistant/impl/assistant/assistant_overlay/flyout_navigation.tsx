@@ -48,6 +48,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           onClick={onToggle}
           iconType={isExpanded ? 'arrowEnd' : 'arrowStart'}
           size="xs"
+          data-test-subj="aiAssistantFlyoutNavigationToggle"
           aria-label={
             isExpanded
               ? i18n.translate(

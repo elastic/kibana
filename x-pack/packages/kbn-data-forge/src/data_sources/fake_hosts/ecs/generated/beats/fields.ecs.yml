@@ -398,6 +398,21 @@
       type: float
       description: Percentage of CPU usage by user processes
       default_field: false
+    - name: filesystem.used.pct
+      level: custom
+      type: float
+      description: Percentage of filesytem used by system processes
+      default_field: false
+    - name: load.1
+      level: custom
+      type: float
+      description: Load 1m by system processes
+      default_field: false
+    - name: memory.actual.used.pct
+      level: custom
+      type: float
+      description: Percentage of actual memory by system processes
+      default_field: false
     - name: network.in.bytes
       level: custom
       type: long

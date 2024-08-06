@@ -5,25 +5,26 @@
  * 2.0.
  */
 import agent, { Span } from 'elastic-apm-node';
-import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import {
+  initializeAgentExecutorWithOptions,
+  createToolCallingAgent,
+  AgentExecutor as lcAgentExecutor,
+} from 'langchain/agents';
 
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  getDefaultArguments,
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
-import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { getDefaultArguments } from '@kbn/langchain/server';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
+import { getLlmClass } from '../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
-import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
@@ -35,8 +36,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
-  isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   esClient,
   esStore,
@@ -51,9 +52,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
   dataClients,
+  conversationId,
 }) => {
   const isOpenAI = llmType === 'openai';
-  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   const llm = new llmClass({
     actionsClient,
@@ -105,7 +107,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
-    isEnabledKnowledgeBase,
+    isEnabledKnowledgeBase: true,
     llm,
     logger,
     modelExists,
@@ -131,6 +133,21 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         ...executorArgs,
+      })
+    : llmType === 'bedrock' && bedrockChatEnabled
+    ? new lcAgentExecutor({
+        agent: await createToolCallingAgent({
+          llm,
+          tools,
+          prompt: ChatPromptTemplate.fromMessages([
+            ['system', 'You are a helpful assistant'],
+            ['placeholder', '{chat_history}'],
+            ['human', '{input}'],
+            ['placeholder', '{agent_scratchpad}'],
+          ]),
+          streamRunnable: isStream,
+        }),
+        tools,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'structured-chat-zero-shot-react-description',
@@ -272,6 +289,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       trace_data: traceData,
       replacements,
       status: 'ok',
+      conversationId,
     },
     headers: {
       'content-type': 'application/json',

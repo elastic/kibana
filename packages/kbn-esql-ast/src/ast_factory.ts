@@ -29,7 +29,7 @@ import {
   default as esql_parser,
   type MetaCommandContext,
   type MetricsCommandContext,
-  IndexIdentifierContext,
+  IndexPatternContext,
 } from './antlr/esql_parser';
 import { default as ESQLParserListener } from './antlr/esql_parser_listener';
 import {
@@ -154,7 +154,7 @@ export class AstListener implements ESQLParserListener {
       type: 'command',
       args: [],
       sources: ctx
-        .getTypedRuleContexts(IndexIdentifierContext)
+        .getTypedRuleContexts(IndexPatternContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);

@@ -18,7 +18,7 @@ import type {
   TimelineEventsDetailsItem,
   RiskSeverity,
 } from '../../../../../common/search_strategy';
-import { RiskSummary } from '../../../../entity_analytics/components/risk_summary';
+import { RiskSummaryPanel } from '../../../../entity_analytics/components/risk_summary_panel';
 import { EnrichmentSummary } from './enrichment_summary';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
@@ -137,7 +137,7 @@ const ThreatSummaryViewComponent: React.FC<{
         {hasEntityAnalyticsCapability && (
           <>
             <EuiFlexItem grow={false}>
-              <RiskSummary
+              <RiskSummaryPanel
                 riskEntity={RiskScoreEntity.host}
                 risk={hostRisk}
                 originalRisk={originalHostRisk}
@@ -145,7 +145,7 @@ const ThreatSummaryViewComponent: React.FC<{
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <RiskSummary
+              <RiskSummaryPanel
                 riskEntity={RiskScoreEntity.user}
                 risk={userRisk}
                 originalRisk={originalUserRisk}

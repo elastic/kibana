@@ -33,6 +33,8 @@ paths:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
                 connectorId:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
+                langSmithOptions:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
       responses:
         200:
           description: Indicates a successful call.

@@ -10,6 +10,7 @@ import { z } from 'zod';
 import {
   Connector,
   DataStreamName,
+  LangSmithOptions,
   PackageName,
   Pipeline,
   RawSamples,
@@ -23,6 +24,7 @@ export const RelatedRequestBody = z.object({
   rawSamples: RawSamples,
   currentPipeline: Pipeline,
   connectorId: Connector,
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type RelatedRequestBodyInput = z.input<typeof RelatedRequestBody>;
 
