@@ -673,10 +673,10 @@ export const RulePatchProps = z.union([
 
 export type RuleResponse = z.infer<typeof RuleResponse>;
 export const RuleResponse = z.discriminatedUnion('type', [
+  ThresholdRule,
   EqlRule,
   QueryRule,
   SavedQueryRule,
-  ThresholdRule,
   ThreatMatchRule,
   MachineLearningRule,
   NewTermsRule,
