@@ -277,7 +277,6 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
   ['counter_integer[]', 'counter_integer'],
   ['counter_long[]', 'counter_long'],
   ['counter_double[]', 'counter_double'],
-  ['string[]', 'string'],
   ['keyword[]', 'keyword'],
   ['text[]', 'text'],
   ['datetime[]', 'date'],
