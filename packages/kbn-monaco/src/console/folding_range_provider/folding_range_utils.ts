@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useRef } from 'react';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '../../..';
 
 const getOpeningLineRegex = (openingMarker: string) => {
   // Opening parentheses can only be preceded by a colon or nothing
@@ -45,28 +44,4 @@ export const getFoldingRanges = (lines: string[], openingMarker: string, closing
   }
 
   return ranges;
-};
-
-/**
- * Hook that returns a function for registering a folding provider in the editor.
- *
- * @param langId The language id on which the folding provider will be applied
- */
-export const useFoldingProvider = (langId: string) => {
-  const foldingProviderDisposable = useRef<monaco.IDisposable | null>(null);
-
-  const registerFoldingProvider = () => {
-    foldingProviderDisposable.current = monaco.languages.registerFoldingRangeProvider(langId, {
-      provideFoldingRanges: (model) => [
-        ...getFoldingRanges(model.getLinesContent(), '{', '}'),
-        ...getFoldingRanges(model.getLinesContent(), '[', ']'),
-      ],
-    });
-  };
-
-  const unregisterFoldingProvider = () => {
-    foldingProviderDisposable.current!.dispose();
-  };
-
-  return { registerFoldingProvider, unregisterFoldingProvider };
 };

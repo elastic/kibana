@@ -25,7 +25,6 @@ import {
   useSetupAutosave,
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
-  useFoldingProvider,
 } from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
@@ -50,8 +49,6 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
-  const { registerFoldingProvider, unregisterFoldingProvider } =
-    useFoldingProvider(CONSOLE_LANG_ID);
 
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
@@ -100,7 +97,6 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     } else {
       unregisterKeyboardCommands();
     }
-    registerFoldingProvider();
   }, [
     editorInstance,
     getDocumenationLink,
@@ -108,14 +104,12 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     registerKeyboardCommands,
     unregisterKeyboardCommands,
     settings.isKeyboardShortcutsEnabled,
-    registerFoldingProvider,
   ]);
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
     unregisterKeyboardCommands();
-    unregisterFoldingProvider();
-  }, [destroyResizeChecker, unregisterFoldingProvider, unregisterKeyboardCommands]);
+  }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider);

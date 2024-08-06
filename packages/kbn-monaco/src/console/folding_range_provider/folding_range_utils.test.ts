@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getFoldingRanges } from './use_register_folding_provider';
+import { getFoldingRanges } from './folding_range_utils';
 
 describe('getFoldingRanges', () => {
   // Sample test input visualization:

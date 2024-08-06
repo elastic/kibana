@@ -22,7 +22,7 @@ import {
   safeExpandLiteralStrings,
   languageForContentType,
 } from '../utilities';
-import { useFoldingProvider, useResizeCheckerUtils } from './hooks';
+import { useResizeCheckerUtils } from './hooks';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -33,21 +33,17 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
-  const { registerFoldingProvider, unregisterFoldingProvider } =
-    useFoldingProvider(CONSOLE_OUTPUT_LANG_ID);
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       setupResizeChecker(divRef.current!, editor);
-      registerFoldingProvider();
     },
-    [setupResizeChecker, registerFoldingProvider]
+    [setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
-    unregisterFoldingProvider();
-  }, [destroyResizeChecker, unregisterFoldingProvider]);
+  }, [destroyResizeChecker]);
 
   useEffect(() => {
     if (data) {
