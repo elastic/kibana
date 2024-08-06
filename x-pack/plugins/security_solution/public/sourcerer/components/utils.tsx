@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { TimelineType } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { Blockquote } from './helpers';
 import * as i18n from './translations';
 
@@ -41,7 +41,7 @@ export const CurrentPatternsMessage = ({
     [activePatterns, deadPatterns.length, selectedPatterns, timelineType]
   );
 
-  if (timelineType === TimelineType.template) {
+  if (timelineType === TimelineTypeEnum.template) {
     return (
       <span data-test-subj="sourcerer-current-patterns-message">
         <FormattedMessage
@@ -83,7 +83,7 @@ export const NoMatchDataMessage = ({
     () => selectedPatterns.filter((p) => !activePatterns.includes(p)).join(', '),
     [activePatterns, selectedPatterns]
   );
-  if (timelineType === TimelineType.template) {
+  if (timelineType === TimelineTypeEnum.template) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.indexPatterns.timelineTemplate.noMatchData"
@@ -118,7 +118,7 @@ export const BadCurrentPatternsMessage = ({
     [selectedPatterns]
   );
 
-  if (timelineType === TimelineType.template) {
+  if (timelineType === TimelineTypeEnum.template) {
     return (
       <FormattedMessage
         id="xpack.securitySolution.indexPatterns.timelineTemplate.currentPatternsBad"
@@ -147,7 +147,7 @@ export const DeprecatedMessage = ({
   onReset: () => void;
   timelineType: TimelineType;
 }) => {
-  if (timelineType === TimelineType.template) {
+  if (timelineType === TimelineTypeEnum.template) {
     return (
       <span data-test-subj="sourcerer-deprecated-message">
         <FormattedMessage
@@ -180,7 +180,7 @@ export const MissingPatternsMessage = ({
   timelineType: TimelineType;
   onReset: () => void;
 }) => {
-  if (timelineType === TimelineType.template) {
+  if (timelineType === TimelineTypeEnum.template) {
     return (
       <span data-test-subj="sourcerer-missing-patterns-message">
         <FormattedMessage
