@@ -1484,7 +1484,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.5",
     "@testing-library/react-hooks": "^8.0.1",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/adm-zip": "^0.5.0",
     "@types/archiver": "^5.3.1",
     "@types/async": "^3.2.3",
