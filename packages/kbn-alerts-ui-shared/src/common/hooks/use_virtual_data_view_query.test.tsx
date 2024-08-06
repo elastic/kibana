@@ -7,11 +7,15 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
-import { useVirtualDataViewQuery } from './use_virtual_data_view_query';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
+import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+
+const { QueryClient, QueryClientProvider } = ReactQuery;
+const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -21,10 +25,9 @@ const wrapper: FunctionComponent = ({ children }) => (
 
 const mockDataView = { fields: [] } as unknown as DataView;
 
-const mockDataViewsService = {
-  create: jest.fn().mockResolvedValue(mockDataView),
-  clearInstanceCache: jest.fn(),
-} as unknown as DataViewsContract;
+const mockDataViewsService = dataViewPluginMocks.createStartContract();
+mockDataViewsService.create.mockResolvedValue(mockDataView);
+mockDataViewsService.clearInstanceCache = jest.fn();
 
 describe('useVirtualDataViewQuery', () => {
   afterEach(() => {
@@ -43,6 +46,9 @@ describe('useVirtualDataViewQuery', () => {
 
     expect(mockDataViewsService.create).not.toHaveBeenCalled();
     rerender({ indexNames: [] });
+    expect(useQuerySpy).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false, queryKey: queryKeyPrefix.concat([]) })
+    );
 
     expect(mockDataViewsService.create).not.toHaveBeenCalled();
   });

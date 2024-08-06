@@ -14,8 +14,8 @@ import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
 describe('fetchAlertsIndexNames', () => {
   const http = httpServiceMock.createStartContract();
 
-  test('should call the alerts/index API with the correct parameters', async () => {
-    const featureIds = [AlertConsumers.STACK_ALERTS];
+  it('calls the alerts/index API with the correct parameters', async () => {
+    const featureIds = [AlertConsumers.STACK_ALERTS, AlertConsumers.APM];
     const indexNames = ['test-index'];
     http.get.mockResolvedValueOnce({
       index_name: indexNames,

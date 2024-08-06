@@ -7,12 +7,12 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import * as ReactQuery from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 const { QueryClient, QueryClientProvider } = ReactQuery;
 
@@ -24,9 +24,7 @@ const wrapper: FunctionComponent = ({ children }) => (
 
 const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
-const mockHttpClient = {
-  get: jest.fn(),
-} as unknown as HttpSetup;
+const mockHttpClient = httpServiceMock.createStartContract();
 
 const emptyData = { browserFields: {}, fields: [] };
 

@@ -9,10 +9,10 @@
 import React, { FunctionComponent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 jest.mock('../apis/fetch_alerts_index_names');
 
@@ -22,14 +22,12 @@ const wrapper: FunctionComponent = ({ children }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const mockHttpClient = {
-  get: jest.fn(),
-} as unknown as HttpSetup;
-const mockfetchAlertsIndexNames = jest.mocked(fetchAlertsIndexNames);
+const mockHttpClient = httpServiceMock.createStartContract();
+const mockFetchAlertsIndexNames = jest.mocked(fetchAlertsIndexNames);
 
 describe('useFetchAlertsIndexNamesQuery', () => {
   beforeEach(() => {
-    mockfetchAlertsIndexNames.mockResolvedValue(['test-index']);
+    mockFetchAlertsIndexNames.mockResolvedValue(['test-index']);
   });
 
   afterEach(() => {
@@ -42,7 +40,7 @@ describe('useFetchAlertsIndexNamesQuery', () => {
       wrapper,
     });
 
-    expect(mockfetchAlertsIndexNames).not.toHaveBeenCalled();
+    expect(mockFetchAlertsIndexNames).not.toHaveBeenCalled();
   });
 
   it('calls fetchAlertsIndexNames with the correct parameters', () => {
@@ -50,7 +48,7 @@ describe('useFetchAlertsIndexNamesQuery', () => {
       wrapper,
     });
 
-    expect(mockfetchAlertsIndexNames).toHaveBeenCalledWith({
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledWith({
       http: mockHttpClient,
       featureIds: ['apm'],
     });
@@ -66,10 +64,10 @@ describe('useFetchAlertsIndexNamesQuery', () => {
 
     await waitForValueToChange(() => result.current.data);
 
-    expect(mockfetchAlertsIndexNames).toHaveBeenCalledTimes(1);
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
 
     rerender();
 
-    expect(mockfetchAlertsIndexNames).toHaveBeenCalledTimes(1);
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
   });
 });

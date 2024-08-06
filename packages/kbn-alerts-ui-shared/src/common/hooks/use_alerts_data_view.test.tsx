@@ -10,40 +10,38 @@ import React, { FunctionComponent } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks/dom';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useAlertsDataView } from './use_alerts_data_view';
-import { HttpSetup } from '@kbn/core-http-browser';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 jest.mock('../apis/fetch_alerts_index_names');
+const mockFetchAlertsIndexNames = jest
+  .mocked(fetchAlertsIndexNames)
+  .mockResolvedValue([
+    '.alerts-observability.uptime.alerts-*',
+    '.alerts-observability.metrics.alerts-*',
+    '.alerts-observability.logs.alerts-*',
+    '.alerts-observability.apm.alerts-*',
+  ]);
+
 jest.mock('../apis/fetch_alerts_fields');
-
-const mockFetchAlertsIndexNames = jest.mocked(fetchAlertsIndexNames);
-const mockFetchAlertsFields = jest.mocked(fetchAlertsFields);
-
-mockFetchAlertsIndexNames.mockResolvedValue([
-  '.alerts-observability.uptime.alerts-*',
-  '.alerts-observability.metrics.alerts-*',
-  '.alerts-observability.logs.alerts-*',
-  '.alerts-observability.apm.alerts-*',
-]);
-mockFetchAlertsFields.mockResolvedValue({ browserFields: {}, fields: [] });
+const mockFetchAlertsFields = jest
+  .mocked(fetchAlertsFields)
+  .mockResolvedValue({ browserFields: {}, fields: [] });
 
 const mockDataView = { fields: [] } as unknown as DataView;
 
 const mockServices = {
-  http: {} as HttpSetup,
-  dataViewsService: {
-    create: jest.fn().mockResolvedValue(mockDataView),
-    clearInstanceCache: jest.fn(),
-  } as unknown as DataViewsContract,
-  toasts: {
-    addDanger: jest.fn(),
-  } as unknown as ToastsStart,
+  http: httpServiceMock.createStartContract(),
+  toasts: notificationServiceMock.createStartContract().toasts,
+  dataViewsService: dataViewPluginMocks.createStartContract(),
 };
+mockServices.dataViewsService.create.mockResolvedValue(mockDataView);
 
 const queryClient = new QueryClient(testQueryClientConfig);
 

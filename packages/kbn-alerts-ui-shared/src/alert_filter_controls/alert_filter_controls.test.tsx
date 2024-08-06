@@ -7,17 +7,20 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { AlertFilterControls, AlertFilterControlsProps } from './alert_filter_controls';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { HttpStart } from '@kbn/core-http-browser';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DEFAULT_CONTROLS } from './constants';
 import { useAlertsDataView } from '../common/hooks/use_alerts_data_view';
+import { FilterGroup } from './filter_group';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+
+jest.mock('./filter_group');
+jest.mocked(FilterGroup).mockReturnValue(<span data-test-subj="filter-group" />);
 
 jest.mock('../common/hooks/use_alerts_data_view');
-
 jest.mocked(useAlertsDataView).mockReturnValue({
   isLoading: false,
   dataView: {
@@ -34,21 +37,15 @@ jest.mocked(useAlertsDataView).mockReturnValue({
 });
 
 const mockServices = {
-  http: {} as unknown as HttpStart,
-  notifications: {
-    toasts: {
-      addDanger: jest.fn(),
-    },
-  } as unknown as NotificationsStart,
-  dataViews: {
-    create: jest.fn((dataViewSpec) => ({ ...dataViewSpec })),
-    clearInstanceCache: jest.fn(),
-  } as unknown as DataViewsPublicPluginStart,
+  http: httpServiceMock.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
   storage: class {
     get = jest.fn();
     set = jest.fn();
   } as unknown as AlertFilterControlsProps['services']['storage'],
 };
+mockServices.dataViews.clearInstanceCache = jest.fn().mockResolvedValue(undefined);
 
 const setFilters = jest.fn();
 
@@ -69,10 +66,10 @@ describe('AlertFilterControls', () => {
     ControlGroupRenderer,
   };
 
-  it('renders', () => {
-    const result = render(<AlertFilterControls {...props} />);
+  it('renders the filter group', async () => {
+    render(<AlertFilterControls {...props} />);
 
-    expect(result.container).toMatchSnapshot();
+    expect(await screen.findByTestId('filter-group')).toBeInTheDocument();
   });
 
   it('creates a data view if a spec with an id is provided', () => {
