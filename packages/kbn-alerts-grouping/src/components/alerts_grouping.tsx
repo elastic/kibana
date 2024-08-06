@@ -56,7 +56,9 @@ const NextLevel = ({
   return children(nextGroupingFilters)!;
 };
 
-const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
+const AlertsGroupingInternal = <T extends Record<string, unknown>>(
+  props: AlertsGroupingProps<T>
+) => {
   const {
     groupingId,
     services,
@@ -195,7 +197,7 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
       };
 
       return (
-        <AlertsGroupingLevel
+        <AlertsGroupingLevel<T>
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
@@ -276,10 +278,13 @@ const AlertsGroupingInternal = (props: AlertsGroupingProps) => {
  * );
  * ```
  */
-export const AlertsGrouping = memo((props: AlertsGroupingProps) => {
-  return (
-    <AlertsGroupingContextProvider>
-      <AlertsGroupingInternal {...props} />
-    </AlertsGroupingContextProvider>
-  );
-});
+const typedMemo: <T>(c: T) => T = memo;
+export const AlertsGrouping = typedMemo(
+  <T extends Record<string, unknown>>(props: AlertsGroupingProps<T>) => {
+    return (
+      <AlertsGroupingContextProvider>
+        <AlertsGroupingInternal {...props} />
+      </AlertsGroupingContextProvider>
+    );
+  }
+);

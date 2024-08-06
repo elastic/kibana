@@ -40,7 +40,8 @@ const DEFAULT_FILTERS: Filter[] = [];
 /**
  * Renders an alerts grouping level
  */
-export const AlertsGroupingLevel = memo(
+const typedMemo: <T>(c: T) => T = memo;
+export const AlertsGroupingLevel = typedMemo(
   <T extends Record<string, unknown> = {}>({
     featureIds,
     defaultFilters = DEFAULT_FILTERS,

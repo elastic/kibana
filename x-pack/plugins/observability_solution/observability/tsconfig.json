@@ -108,6 +108,8 @@
     "@kbn/event-annotation-components",
     "@kbn/slo-schema",
     "@kbn/license-management-plugin",
+    "@kbn/grouping",
+    "@kbn/alerts-grouping"
   ],
   "exclude": [
     "target/**/*"
