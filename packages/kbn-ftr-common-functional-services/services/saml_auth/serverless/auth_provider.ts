@@ -38,7 +38,6 @@ export class ServerlessAuthProvider implements AuthProvider {
   constructor(config: Config) {
     const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
     this.projectType = kbnServerArgs
-      .filter((arg) => arg.startsWith('--serverless'))
       .reduce((acc, arg) => {
         const match = arg.match(/--serverless[=\s](\w+)/);
         return acc + (match ? match[1] : '');
