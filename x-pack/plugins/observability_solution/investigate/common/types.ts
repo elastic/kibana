@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import type { DeepPartial, PickByValue } from 'utility-types';
 import type { AuthenticatedUser } from '@kbn/core/public';
+import type { Filter } from '@kbn/es-query';
+import type { DeepPartial } from 'utility-types';
 
 export interface GlobalWidgetParameters {
   timeRange: {

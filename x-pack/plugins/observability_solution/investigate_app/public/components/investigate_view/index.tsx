@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, omit, pick } from 'lodash';
+import { keyBy, noop, omit, pick } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
@@ -33,7 +33,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
 
   const {
     addItem,
-    setItemPositions,
     setItemTitle,
     copyItem,
     deleteItem,
@@ -155,13 +154,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
               <InvestigateWidgetGrid
                 items={gridItems}
                 onItemsChange={async (nextGridItems) => {
-                  return setItemPositions(
-                    nextGridItems.map((gridItem) => ({
-                      columns: gridItem.columns,
-                      rows: gridItem.rows,
-                      id: gridItem.id,
-                    }))
-                  );
+                  noop();
                 }}
                 onItemTitleChange={async (item, title) => {
                   return setItemTitle(item.id, title);

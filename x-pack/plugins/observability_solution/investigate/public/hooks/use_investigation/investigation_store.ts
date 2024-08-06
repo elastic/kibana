@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { v4 } from 'uuid';
 import { MaybePromise } from '@kbn/utility-types';
-import { keyBy } from 'lodash';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { v4 } from 'uuid';
 import { InvestigateWidget, mergePlainObjects } from '../../../common';
 import {
   GlobalWidgetParameters,
@@ -32,9 +31,6 @@ export type StatefulInvestigationRevision = Omit<InvestigationRevision, 'items'>
 };
 
 interface InvestigationStore {
-  setItemPositions: (
-    positions: Array<{ id: string; columns: number; rows: number }>
-  ) => Promise<void>;
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (id: string, item: InvestigateWidgetCreate) => Promise<void>;
@@ -302,22 +298,6 @@ export function createInvestigationStore({
         return {
           ...prevRevision,
           items: prevRevision.items.filter((itemAtIndex) => itemAtIndex.id !== itemToDelete.id),
-        };
-      });
-    },
-    setItemPositions: (positions) => {
-      return nextRevision((prevRevision) => {
-        const positionsById = keyBy(positions, (position) => position.id);
-        return {
-          ...prevRevision,
-          items: prevRevision.items.map((item) => {
-            const position = positionsById[item.id];
-
-            return {
-              ...item,
-              ...position,
-            };
-          }),
         };
       });
     },

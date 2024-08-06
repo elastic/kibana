@@ -45,9 +45,6 @@ export interface UseInvestigationApi {
   revision?: RenderableInvestigationRevision;
   isAtLatestRevision: boolean;
   isAtEarliestRevision: boolean;
-  setItemPositions: (
-    positions: Array<{ id: string; columns: number; rows: number }>
-  ) => Promise<void>;
   setItemTitle: (id: string, title: string) => Promise<void>;
   updateItem: (
     id: string,
@@ -245,7 +242,6 @@ function useInvestigationWithoutContext({
     copyItem,
     lockItem,
     setGlobalParameters,
-    setItemPositions,
     setItemTitle,
     setTitle,
     unlockItem,
@@ -372,7 +368,6 @@ function useInvestigationWithoutContext({
     revision: renderableRevision,
     setGlobalParameters,
     setItemParameters,
-    setItemPositions,
     setItemTitle,
     setTitle,
     startNewInvestigation,
