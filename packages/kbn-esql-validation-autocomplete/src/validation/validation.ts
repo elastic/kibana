@@ -731,35 +731,6 @@ const validateAggregates = (
   return messages;
 };
 
-/**
- * Validates grouping fields of the BY clause: `... BY <grouping>`.
- */
-const validateByGrouping = (
-  fields: ESQLAstItem[],
-  commandName: string,
-  referenceMaps: ReferenceMaps,
-  multipleParams: boolean
-): ESQLMessage[] => {
-  const messages: ESQLMessage[] = [];
-  for (const field of fields) {
-    if (!Array.isArray(field)) {
-      if (!multipleParams) {
-        if (isColumnItem(field)) {
-          messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
-        }
-      } else {
-        if (isColumnItem(field)) {
-          messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
-        }
-        if (isFunctionItem(field)) {
-          messages.push(...validateFunction(field, commandName, 'by', referenceMaps));
-        }
-      }
-    }
-  }
-  return messages;
-};
-
 function validateOption(
   option: ESQLCommandOption,
   optionDef: CommandOptionsDefinition | undefined,
@@ -940,108 +911,6 @@ export function validateSources(
   return messages;
 }
 
-/**
- * Validates the METRICS source command:
- *
- *     METRICS <sources> [ <aggregates> [ BY <grouping> ]]
- */
-const validateMetricsCommand = (
-  command: ESQLAstMetricsCommand,
-  references: ReferenceMaps
-): ESQLMessage[] => {
-  const messages: ESQLMessage[] = [];
-  const { sources, aggregates, grouping } = command;
-
-  // METRICS <sources> ...
-  messages.push(...validateSources(command, sources, references));
-
-  // ... <aggregates> ...
-  if (aggregates && aggregates.length) {
-    messages.push(...validateAggregates(command, aggregates, references));
-
-    // ... BY <grouping>
-    if (grouping && grouping.length) {
-      messages.push(...validateByGrouping(grouping, 'metrics', references, true));
-    }
-  }
-
-  return messages;
-};
-
-function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (command.incomplete) {
-    return messages;
-  }
-  // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
-
-  if (commandDef?.validate) {
-    messages.push(...commandDef.validate(command));
-  }
-
-  switch (commandDef.name) {
-    case 'metrics': {
-      const metrics = command as ESQLAstMetricsCommand;
-      messages.push(...validateMetricsCommand(metrics, references));
-      break;
-    }
-    default: {
-      // Now validate arguments
-      for (const commandArg of command.args) {
-        const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
-        for (const arg of wrappedArg) {
-          if (isFunctionItem(arg)) {
-            messages.push(...validateFunction(arg, command.name, undefined, references));
-          }
-
-          if (isSettingItem(arg)) {
-            messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
-          }
-
-          if (isOptionItem(arg)) {
-            messages.push(
-              ...validateOption(
-                arg,
-                commandDef.options.find(({ name }) => name === arg.name),
-                command,
-                references
-              )
-            );
-          }
-          if (isColumnItem(arg)) {
-            if (command.name === 'stats') {
-              messages.push(errors.unknownAggFunction(arg));
-            } else {
-              messages.push(...validateColumnForCommand(arg, command.name, references));
-            }
-          }
-          if (isTimeIntervalItem(arg)) {
-            messages.push(
-              getMessageFromId({
-                messageId: 'unsupportedTypeForCommand',
-                values: {
-                  command: command.name.toUpperCase(),
-                  type: 'date_period',
-                  value: arg.name,
-                },
-                locations: arg.location,
-              })
-            );
-          }
-          if (isSourceItem(arg)) {
-            messages.push(...validateSource(arg, command.name, references));
-          }
-        }
-      }
-    }
-  }
-
-  // no need to check for mandatory options passed
-  // as they are already validated at syntax level
-  return messages;
-}
-
 function validateFieldsShadowing(
   fields: Map<string, ESQLRealField>,
   variables: Map<string, ESQLVariable[]>
@@ -1109,7 +978,8 @@ export async function validateQuery(
   options: ValidationOptions = {},
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
-  const result = await validateAst(queryString, astProvider, callbacks);
+  const validation = new EsqlValidation(queryString, callbacks);
+  const result = await validation.validateAst(astProvider);
   // early return if we do not want to ignore errors
   if (!options.ignoreOnMissingCallbacks) {
     return result;
@@ -1146,70 +1016,204 @@ export async function validateQuery(
   return { errors: filteredErrors, warnings: result.warnings };
 }
 
-/**
- * This function will perform an high level validation of the
- * query AST. An initial syntax validation is already performed by the parser
- * while here it can detect things like function names, types correctness and potential warnings
- * @param ast A valid AST data structure
- */
-async function validateAst(
-  queryString: string,
-  astProvider: AstProviderFn,
-  callbacks?: ESQLCallbacks
-): Promise<ValidationResult> {
-  const messages: ESQLMessage[] = [];
+/** Represents one run of an ES|QL query validation. */
+class EsqlValidation {
+  constructor(public readonly src: string, public readonly callbacks?: ESQLCallbacks) {}
 
-  const parsingResult = await astProvider(queryString);
-  const { ast } = parsingResult;
+  /**
+   * This function will perform an high level validation of the
+   * query AST. An initial syntax validation is already performed by the parser
+   * while here it can detect things like function names, types correctness and potential warnings
+   * @param ast A valid AST data structure
+   */
+  public async validateAst(astProvider: AstProviderFn): Promise<ValidationResult> {
+    const messages: ESQLMessage[] = [];
+    const callbacks = this.callbacks;
 
-  const [sources, availableFields, availablePolicies] = await Promise.all([
-    // retrieve the list of available sources
-    retrieveSources(ast, callbacks),
-    // retrieve available fields (if a source command has been defined)
-    retrieveFields(queryString, ast, callbacks),
-    // retrieve available policies (if an enrich command has been defined)
-    retrievePolicies(ast, callbacks),
-  ]);
+    const queryString: string = this.src;
+    const parsingResult = await astProvider(queryString);
+    const { ast } = parsingResult;
 
-  if (availablePolicies.size) {
-    const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
-    fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
-  }
+    const [sources, availableFields, availablePolicies] = await Promise.all([
+      // retrieve the list of available sources
+      retrieveSources(ast, callbacks),
+      // retrieve available fields (if a source command has been defined)
+      retrieveFields(queryString, ast, callbacks),
+      // retrieve available policies (if an enrich command has been defined)
+      retrievePolicies(ast, callbacks),
+    ]);
 
-  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
-    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
-      queryString,
-      ast,
-      callbacks
-    );
-    fieldsFromGrokOrDissect.forEach((value, key) => {
-      // if the field is already present, do not overwrite it
-      // Note: this can also overlap with some variables
-      if (!availableFields.has(key)) {
-        availableFields.set(key, value);
-      }
-    });
-  }
+    if (availablePolicies.size) {
+      const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
+      fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
+    }
 
-  const variables = collectVariables(ast, availableFields, queryString);
-  // notify if the user is rewriting a column as variable with another type
-  messages.push(...validateFieldsShadowing(availableFields, variables));
-  messages.push(...validateUnsupportedTypeFields(availableFields));
+    if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+      const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
+        queryString,
+        ast,
+        callbacks
+      );
+      fieldsFromGrokOrDissect.forEach((value, key) => {
+        // if the field is already present, do not overwrite it
+        // Note: this can also overlap with some variables
+        if (!availableFields.has(key)) {
+          availableFields.set(key, value);
+        }
+      });
+    }
 
-  for (const command of ast) {
-    const references: ReferenceMaps = {
-      sources,
-      fields: availableFields,
-      policies: availablePolicies,
-      variables,
-      query: queryString,
+    const variables = collectVariables(ast, availableFields, queryString);
+    // notify if the user is rewriting a column as variable with another type
+    messages.push(...validateFieldsShadowing(availableFields, variables));
+    messages.push(...validateUnsupportedTypeFields(availableFields));
+
+    for (const command of ast) {
+      const references: ReferenceMaps = {
+        sources,
+        fields: availableFields,
+        policies: availablePolicies,
+        variables,
+        query: queryString,
+      };
+      const commandMessages = this.validateCommand(command, references);
+      messages.push(...commandMessages);
+    }
+
+    return {
+      errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+      warnings: messages.filter(({ type }) => type === 'warning'),
     };
-    const commandMessages = validateCommand(command, references);
-    messages.push(...commandMessages);
   }
 
-  return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
-    warnings: messages.filter(({ type }) => type === 'warning'),
-  };
+  public validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
+    const messages: ESQLMessage[] = [];
+    if (command.incomplete) {
+      return messages;
+    }
+    // do not check the command exists, the grammar is already picking that up
+    const commandDef = getCommandDefinition(command.name);
+
+    if (commandDef?.validate) {
+      messages.push(...commandDef.validate(command));
+    }
+
+    switch (commandDef.name) {
+      case 'metrics': {
+        const metrics = command as ESQLAstMetricsCommand;
+        messages.push(...this.validateMetricsCommand(metrics, references));
+        break;
+      }
+      default: {
+        // Now validate arguments
+        for (const commandArg of command.args) {
+          const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
+          for (const arg of wrappedArg) {
+            if (isFunctionItem(arg)) {
+              messages.push(...validateFunction(arg, command.name, undefined, references));
+            }
+
+            if (isSettingItem(arg)) {
+              messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
+            }
+
+            if (isOptionItem(arg)) {
+              messages.push(
+                ...validateOption(
+                  arg,
+                  commandDef.options.find(({ name }) => name === arg.name),
+                  command,
+                  references
+                )
+              );
+            }
+            if (isColumnItem(arg)) {
+              if (command.name === 'stats') {
+                messages.push(errors.unknownAggFunction(arg));
+              } else {
+                messages.push(...validateColumnForCommand(arg, command.name, references));
+              }
+            }
+            if (isTimeIntervalItem(arg)) {
+              messages.push(
+                getMessageFromId({
+                  messageId: 'unsupportedTypeForCommand',
+                  values: {
+                    command: command.name.toUpperCase(),
+                    type: 'date_period',
+                    value: arg.name,
+                  },
+                  locations: arg.location,
+                })
+              );
+            }
+            if (isSourceItem(arg)) {
+              messages.push(...validateSource(arg, command.name, references));
+            }
+          }
+        }
+      }
+    }
+
+    // no need to check for mandatory options passed
+    // as they are already validated at syntax level
+    return messages;
+  }
+
+  /**
+   * Validates the METRICS source command:
+   *
+   *     METRICS <sources> [ <aggregates> [ BY <grouping> ]]
+   */
+  public validateMetricsCommand(
+    command: ESQLAstMetricsCommand,
+    references: ReferenceMaps
+  ): ESQLMessage[] {
+    const messages: ESQLMessage[] = [];
+    const { sources, aggregates, grouping } = command;
+
+    // METRICS <sources> ...
+    messages.push(...validateSources(command, sources, references));
+
+    // ... <aggregates> ...
+    if (aggregates && aggregates.length) {
+      messages.push(...validateAggregates(command, aggregates, references));
+
+      // ... BY <grouping>
+      if (grouping && grouping.length) {
+        messages.push(...this.validateByGrouping(grouping, 'metrics', references, true));
+      }
+    }
+
+    return messages;
+  }
+
+  /**
+   * Validates grouping fields of the BY clause: `... BY <grouping>`.
+   */
+  public validateByGrouping(
+    fields: ESQLAstItem[],
+    commandName: string,
+    referenceMaps: ReferenceMaps,
+    multipleParams: boolean
+  ): ESQLMessage[] {
+    const messages: ESQLMessage[] = [];
+    for (const field of fields) {
+      if (!Array.isArray(field)) {
+        if (!multipleParams) {
+          if (isColumnItem(field)) {
+            messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
+          }
+        } else {
+          if (isColumnItem(field)) {
+            messages.push(...validateColumnForCommand(field, commandName, referenceMaps));
+          }
+          if (isFunctionItem(field)) {
+            messages.push(...validateFunction(field, commandName, 'by', referenceMaps));
+          }
+        }
+      }
+    }
+    return messages;
+  }
 }

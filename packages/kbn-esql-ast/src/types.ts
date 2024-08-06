@@ -51,7 +51,12 @@ export interface ESQLLocation {
 
 export interface ESQLAstBaseItem<Name = string> {
   name: Name;
+
+  /**
+   * @deprecated Use `location` to extract the text from the source.
+   */
   text: string;
+
   location: ESQLLocation;
   incomplete: boolean;
 }
