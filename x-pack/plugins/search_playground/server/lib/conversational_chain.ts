@@ -198,6 +198,14 @@ class ConversationalChainFn {
         context: RunnableSequence.from([(input) => input.question, retrievalChain]),
         question: (input) => input.question,
       },
+      RunnableLambda.from((inputs) => {
+        console.log("inputs.question",inputs.question)
+        data.appendMessageAnnotation({
+          type: 'search_query',
+          question: inputs.question,
+        });
+        return inputs;
+      }),
       RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
       RunnableLambda.from(registerContextTokenCounts(data)),
       prompt,
