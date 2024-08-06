@@ -102,7 +102,7 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
       <EuiButtonIcon
         data-test-subj={`${dataTestSubj}ToggleIcon`}
         aria-label={i18n.translate(
-          'xpack.securitySolution.flyout.shared.ExpandablePanelButtonIconAriaLabel',
+          'securitySolutionPackages.flyout.shared.ExpandablePanelButtonIconAriaLabel',
           {
             defaultMessage: 'Expandable panel toggle',
           }
@@ -210,7 +210,7 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
     <EuiSkeletonText
       data-test-subj={`${dataTestSubj}Loading`}
       contentAriaLabel={i18n.translate(
-        'xpack.securitySolution.flyout.shared.expandablePanelLoadingAriaLabel',
+        'securitySolutionPackages.flyout.shared.expandablePanelLoadingAriaLabel',
         { defaultMessage: 'expandable panel' }
       )}
     />
