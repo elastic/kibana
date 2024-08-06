@@ -206,8 +206,8 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes }) => {
-        if (isLogsSignal(signalTypes) && metrics.logRate === undefined) {
+      render: (_, { metrics, serviceName, signalTypes, hasLogMetrics }) => {
+        if (isLogsSignal(signalTypes) && !hasLogMetrics) {
           return <NotAvailableLogsMetrics />;
         }
 
@@ -258,8 +258,8 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName, signalTypes }) => {
-        if (isLogsSignal(signalTypes) && metrics.logErrorRate === undefined) {
+      render: (_, { metrics, serviceName, signalTypes, hasLogMetrics }) => {
+        if (isLogsSignal(signalTypes) && !hasLogMetrics) {
           return <NotAvailableLogsMetrics />;
         }
 
