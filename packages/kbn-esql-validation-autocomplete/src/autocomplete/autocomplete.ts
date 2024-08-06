@@ -247,6 +247,10 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    if (astContext.command.name === 'sort') {
+      return (await getFieldsByType('any')) as SuggestionRawDefinition[];
+    }
+
     // suggest next possible argument, or option
     // otherwise a variable
     return getExpressionSuggestionsByType(

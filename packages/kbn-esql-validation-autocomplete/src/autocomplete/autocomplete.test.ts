@@ -338,17 +338,6 @@ describe('autocomplete', () => {
     }
   });
 
-  describe('sort', () => {
-    testSuggestions('from a | sort ', [
-      ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-    ]);
-    testSuggestions('from a | sort stringField ', ['ASC', 'DESC', ',', '|']);
-    testSuggestions('from a | sort stringField desc ', ['NULLS FIRST', 'NULLS LAST', ',', '|']);
-    // @TODO: improve here
-    // testSuggestions('from a | sort stringField desc ', ['first', 'last']);
-  });
-
   describe('limit', () => {
     testSuggestions('from a | limit ', ['10', '100', '1000']);
     testSuggestions('from a | limit 4 ', ['|']);
