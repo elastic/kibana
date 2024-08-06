@@ -143,13 +143,13 @@ export class EphemeralTaskLifecycle {
     taskType && this.definitions.get(taskType)?.maxConcurrency
       ? Math.max(
           Math.min(
-            this.pool.availableCapacity(),
+            this.pool.availableWorkers,
             this.definitions.get(taskType)!.maxConcurrency! -
-              this.pool.getUsedCapacityByType(taskType)
+              this.pool.getOccupiedWorkersByType(taskType)
           ),
           0
         )
-      : this.pool.availableCapacity();
+      : this.pool.availableWorkers;
 
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);

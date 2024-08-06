@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { RunContext, TaskCost, TaskDefinition, TaskPriority } from './task';
+import { RunContext, TaskDefinition, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import {
   sanitizeTaskDefinitions,
@@ -53,7 +53,6 @@ describe('taskTypeDictionary', () => {
   const logger = mockLogger();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     definitions = new TaskTypeDictionary(logger);
   });
 
@@ -65,7 +64,6 @@ describe('taskTypeDictionary', () => {
       expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
-          "cost": 2,
           "createTaskRunner": [Function],
           "description": "one super cool task",
           "timeout": "5m",
@@ -73,7 +71,6 @@ describe('taskTypeDictionary', () => {
           "type": "test_task_type_0",
         },
         Object {
-          "cost": 2,
           "createTaskRunner": [Function],
           "description": "one super cool task",
           "timeout": "5m",
@@ -81,7 +78,6 @@ describe('taskTypeDictionary', () => {
           "type": "test_task_type_1",
         },
         Object {
-          "cost": 2,
           "createTaskRunner": [Function],
           "description": "one super cool task",
           "timeout": "5m",
@@ -180,6 +176,7 @@ describe('taskTypeDictionary', () => {
         const taskDefinitions: TaskDefinitionRegistry = {
           some_kind_of_task: {
             title: 'Test XYZ',
+            // @ts-expect-error upgrade typescript v5.1.6
             priority: 23,
             description: `Actually this won't work`,
             createTaskRunner() {
@@ -228,7 +225,6 @@ describe('taskTypeDictionary', () => {
         createTaskRunner: expect.any(Function),
         maxConcurrency: 2,
         priority: 1,
-        cost: 2,
         timeout: '5m',
         title: 'foo',
         type: 'foo',
@@ -240,6 +236,7 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
+          // @ts-expect-error upgrade typescript v5.1.6
           priority: 23,
           createTaskRunner: jest.fn(),
         },
@@ -247,49 +244,7 @@ describe('taskTypeDictionary', () => {
       expect(logger.error).toHaveBeenCalledWith(
         `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,Normal => 50`
       );
-      expect(() => {
-        definitions.get('foo');
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported task type \\"foo\\". Supported types are "`
-      );
-    });
-
-    it('uses task cost if specified', () => {
-      definitions.registerTaskDefinitions({
-        foo: {
-          title: 'foo',
-          maxConcurrency: 2,
-          cost: TaskCost.ExtraLarge,
-          createTaskRunner: jest.fn(),
-        },
-      });
-      expect(definitions.get('foo')).toEqual({
-        createTaskRunner: expect.any(Function),
-        maxConcurrency: 2,
-        cost: 10,
-        timeout: '5m',
-        title: 'foo',
-        type: 'foo',
-      });
-    });
-
-    it('does not register task with invalid cost schema', () => {
-      definitions.registerTaskDefinitions({
-        foo: {
-          title: 'foo',
-          maxConcurrency: 2,
-          cost: 23,
-          createTaskRunner: jest.fn(),
-        },
-      });
-      expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,ExtraLarge => 10`
-      );
-      expect(() => {
-        definitions.get('foo');
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported task type \\"foo\\". Supported types are "`
-      );
+      expect(definitions.get('foo')).toEqual(undefined);
     });
 
     it('throws error when registering duplicate task type', () => {

@@ -96,12 +96,14 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     groups: [
       [] as Group[],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchResults: (_, { results }) => results,
       },
     ],
     contentSources: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeGroups: (_, { contentSources }) => contentSources,
       },
     ],
@@ -129,6 +131,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     newGroupName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNewGroupName: (_, newGroupName) => newGroupName,
         setSearchResults: () => '',
         closeNewGroupModal: () => '',
@@ -137,6 +140,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     newGroup: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNewGroup: (_, newGroup) => newGroup,
         resetGroups: () => null,
         openNewGroupModal: () => null,
@@ -145,6 +149,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     newGroupNameErrors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNewGroupFormErrors: (_, newGroupNameErrors) => newGroupNameErrors,
         setNewGroup: () => [],
         setNewGroupName: () => [],
@@ -154,6 +159,7 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     filterSourcesDropdownOpen: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         toggleFilterSourcesDropdown: (state) => !state,
         closeFilterSourcesDropdown: () => false,
       },
@@ -163,13 +169,16 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       {
         resetGroupsFilters: () => [],
         setNewGroup: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         addFilteredSource: (state, sourceId) => [...state, sourceId].sort(),
+        // @ts-expect-error upgrade typescript v5.1.6
         removeFilteredSource: (state, sourceId) => state.filter((id) => id !== sourceId),
       },
     ],
     filterValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFilterValue: (_, filterValue) => filterValue,
         resetGroupsFilters: () => '',
       },
@@ -179,7 +188,9 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
       {
         resetGroupsFilters: () => DEFAULT_META,
         setNewGroup: () => DEFAULT_META,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSearchResults: (_, { meta }) => meta,
+        // @ts-expect-error upgrade typescript v5.1.6
         setActivePage: (state, activePage) => ({
           ...state,
           page: {
