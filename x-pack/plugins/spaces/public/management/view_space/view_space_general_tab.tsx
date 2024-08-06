@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { ViewSpaceTabFooter } from './footer';
@@ -36,7 +37,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const [shouldShowAlteringActiveSpaceDialog, setShouldShowAlteringActiveSpaceDialog] =
     useState(false);
 
-  const { http, overlays, navigateToUrl, spacesManager } = useViewSpaceServices();
+  const { http, overlays, notifications, navigateToUrl, spacesManager } = useViewSpaceServices();
 
   const { solution } = space;
   const shouldShowFeaturesVisibility = !solution || solution === 'classic';
@@ -59,12 +60,12 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       customAvatarColor,
       ...updatedSpace
     } = formValues;
-    setSpaceSettings(updatedSpace);
+    setSpaceSettings({ ...spaceSettings, ...updatedSpace });
     setIsDirty(true);
   };
 
   const onChangeFeatures = (updatedSpace: Partial<Space>) => {
-    setSpaceSettings(updatedSpace);
+    setSpaceSettings({ ...spaceSettings, ...updatedSpace });
     setIsDirty(true);
     setShouldShowUserImpactWarning(true);
   };
@@ -77,17 +78,18 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     }
   };
 
+  const backToSpacesList = () => {
+    history.push('/');
+  };
+
   const onCancel = () => {
-    setSpaceSettings(space);
     setShouldShowAlteringActiveSpaceDialog(false);
     setShouldShowUserImpactWarning(false);
-    setIsDirty(false);
-    setIsLoading(false);
+    backToSpacesList();
   };
 
   // TODO cancel previous request, if there is one pending
   // TODO flush analytics
-  // TODO error handling
   const performSave = async ({ requiresReload = false }) => {
     const { id, name, disabledFeatures } = spaceSettings;
     if (!id) {
@@ -99,20 +101,40 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
 
     setIsLoading(true);
 
-    await spacesManager.updateSpace({
-      id,
-      name,
-      disabledFeatures: disabledFeatures ?? [],
-      ...spaceSettings,
-    });
+    try {
+      await spacesManager.updateSpace({
+        id,
+        name,
+        disabledFeatures: disabledFeatures ?? [],
+        ...spaceSettings,
+      });
 
-    setIsDirty(false);
+      notifications.toasts.addSuccess(
+        i18n.translate(
+          'xpack.spaces.management.spaceDetails.spaceSuccessfullySavedNotificationMessage',
+          {
+            defaultMessage: `Space {name} was saved.`,
+            values: { name: `'${name}'` },
+          }
+        )
+      );
 
-    if (requiresReload) {
-      window.location.reload();
+      setIsDirty(false);
+      backToSpacesList();
+      if (requiresReload) {
+        window.location.reload();
+      }
+    } catch (error) {
+      const message = error?.body?.message ?? '';
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
+          defaultMessage: 'Error saving space: {message}',
+          values: { message },
+        })
+      );
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const doShowAlteringActiveSpaceDialog = () => {

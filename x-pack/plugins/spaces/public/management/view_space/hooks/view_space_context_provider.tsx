@@ -10,6 +10,7 @@ import React, { createContext, useContext } from 'react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 
@@ -24,6 +25,7 @@ export interface ViewSpaceServices {
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   http: HttpStart;
   overlays: OverlayStart;
+  notifications: NotificationsStart;
 }
 
 const ViewSpaceContext = createContext<ViewSpaceServices | null>(null);

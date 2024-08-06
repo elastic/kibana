@@ -148,6 +148,7 @@ export const spacesManagementApp = Object.freeze({
               selectedTabId={selectedTabId}
               getRolesAPIClient={getRolesAPIClient}
               http={http}
+              notifications={notifications}
               overlays={overlays}
             />
           );
