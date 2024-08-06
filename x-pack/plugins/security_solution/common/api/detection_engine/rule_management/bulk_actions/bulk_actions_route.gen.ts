@@ -27,6 +27,7 @@ import {
   IndexPatternArray,
   RuleTagArray,
   InvestigationFields,
+  AlertSuppression,
   TimelineTemplateId,
   TimelineTemplateTitle,
 } from '../../model/rule_schema/common_attributes.gen';
@@ -211,6 +212,9 @@ export const BulkActionEditType = z.enum([
   'add_investigation_fields',
   'delete_investigation_fields',
   'set_investigation_fields',
+  'add_alert_suppression',
+  'delete_alert_suppression',
+  'set_alert_suppression',
 ]);
 export type BulkActionEditTypeEnum = typeof BulkActionEditType.enum;
 export const BulkActionEditTypeEnum = BulkActionEditType.enum;
@@ -275,6 +279,14 @@ export const BulkActionEditPayloadInvestigationFields = z.object({
   value: InvestigationFields,
 });
 
+export type BulkActionEditPayloadAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadAlertSuppression
+>;
+export const BulkActionEditPayloadAlertSuppression = z.object({
+  type: z.enum(['add_alert_suppression', 'delete_alert_suppression', 'set_alert_suppression']),
+  value: AlertSuppression,
+});
+
 export type BulkActionEditPayloadTimeline = z.infer<typeof BulkActionEditPayloadTimeline>;
 export const BulkActionEditPayloadTimeline = z.object({
   type: z.literal('set_timeline'),
@@ -289,6 +301,7 @@ export const BulkActionEditPayload = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
+  BulkActionEditPayloadAlertSuppression,
   BulkActionEditPayloadTimeline,
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,

@@ -47,6 +47,11 @@ export enum TELEMETRY_EVENT {
   SET_INVESTIGATION_FIELDS = 'set_investigation_fields',
   DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
 
+  // Bulk edit alert suppression
+  ADD_ALERT_SUPPRESSION = 'add_alert_suppression',
+  SET_ALERT_SUPPRESSION = 'set_alert_suppression',
+  DELETE_ALERT_SUPPRESSION = 'delete_alert_suppression',
+
   // AI assistant on rule creation form
   OPEN_ASSISTANT_ON_RULE_QUERY_ERROR = 'open_assistant_on_rule_query_error',
 }

@@ -235,6 +235,11 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForEventFiltersEnabled: false,
 
   /**
+   * Enables the rule's bulk action to manage alert suppression
+   */
+  bulkEditAlertSuppressionEnabled: false,
+
+  /**
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,

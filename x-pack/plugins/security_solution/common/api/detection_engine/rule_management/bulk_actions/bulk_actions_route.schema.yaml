@@ -312,6 +312,9 @@ components:
         - add_investigation_fields
         - delete_investigation_fields
         - set_investigation_fields
+        - add_alert_suppression
+        - delete_alert_suppression
+        - set_alert_suppression
 
     # Per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:
@@ -426,6 +429,21 @@ components:
         - type
         - value
 
+    BulkActionEditPayloadAlertSuppression:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - add_alert_suppression
+            - delete_alert_suppression
+            - set_alert_suppression
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+      required:
+        - type
+        - value
+
     BulkActionEditPayloadTimeline:
       type: object
       properties:
@@ -452,6 +470,7 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
         - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'

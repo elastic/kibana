@@ -187,6 +187,27 @@ export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.alertSuppressionTitle',
+  {
+    defaultMessage: 'Alert suppression',
+  }
+);
+
+export const BULK_ACTION_ADD_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.addAlertSuppression',
+  {
+    defaultMessage: 'Add alert suppression',
+  }
+);
+
+export const BULK_ACTION_DELETE_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteAlertSuppression',
+  {
+    defaultMessage: 'Delete alert suppression',
+  }
+);
+
 export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
   {
@@ -534,6 +555,70 @@ export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_TITLE = i18n.tran
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsTitle',
   {
     defaultMessage: 'Delete custom highlighted fields',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_REQUIRED_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.alertSuppressionRequiredErrorMessage',
+  {
+    defaultMessage: 'A minimum of one suppression field is required.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_MAX_LENGTH_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.alertSuppressionMaxLengthErrorMessage',
+  {
+    defaultMessage: 'Number of suppress by fields must be at most 3.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_OVERWRITE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addAlertSuppressionOverwriteCheckboxLabel',
+  {
+    defaultMessage: 'Overwrite alert suppression for the selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addAlertSuppressionComboboxLabel',
+  {
+    defaultMessage: 'Add alert suppression for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addAlertSuppressionComboboxHelpText',
+  {
+    defaultMessage:
+      'Enter fields that you want to add.  You can choose from any of the fields included in the default Elastic Security indices.',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_ADD_ALERT_SUPPRESSION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addAlertSuppressionTitle',
+  {
+    defaultMessage: 'Add alert suppression',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteAlertSuppressionComboboxLabel',
+  {
+    defaultMessage: 'Delete alert suppression for selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteAlertSuppressionComboboxHelpText',
+  {
+    defaultMessage: 'Enter the fields that you want to remove from the selected rules',
+  }
+);
+
+export const BULK_EDIT_FLYOUT_FORM_DELETE_ALERT_SUPPRESSION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteAlertSuppressionTitle',
+  {
+    defaultMessage: 'Delete alert suppression',
   }
 );
 

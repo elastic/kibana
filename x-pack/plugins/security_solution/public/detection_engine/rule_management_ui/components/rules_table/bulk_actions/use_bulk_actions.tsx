@@ -90,6 +90,9 @@ export const useBulkActions = ({
   } = rulesTableContext;
 
   const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
+  const isBulkEditAlertSuppressionEnabled = useIsExperimentalFeatureEnabled(
+    'bulkEditAlertSuppressionEnabled'
+  );
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
@@ -404,6 +407,18 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
+            // TODO: add license check
+            ...(isBulkEditAlertSuppressionEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+                    name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+                    'data-test-subj': 'alertSuppressionBulkEditRule',
+                    disabled: isEditDisabled,
+                    panel: 4,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -574,6 +589,34 @@ export const useBulkActions = ({
             },
           ],
         },
+        {
+          id: 4,
+          title: i18n.BULK_ACTION_MENU_TITLE,
+          items: [
+            {
+              key: i18n.BULK_ACTION_ADD_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_ADD_ALERT_SUPPRESSION,
+              'data-test-subj': 'addAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.add_alert_suppression),
+              disabled: isEditDisabled,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
+              'data-test-subj': 'deleteAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_alert_suppression),
+              disabled: isEditDisabled,
+              toolTipContent: missingActionPrivileges
+                ? i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
+                : undefined,
+              toolTipProps: { position: 'right' },
+            },
+          ],
+        },
       ];
     },
     [
@@ -601,6 +644,7 @@ export const useBulkActions = ({
       completeBulkEditForm,
       startServices,
       isManualRuleRunEnabled,
+      isBulkEditAlertSuppressionEnabled,
     ]
   );
 
