@@ -1518,8 +1518,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('allows rules with "immutable: true"', async () => {
         const rule = getCustomQueryRuleParams({
           rule_id: 'rule-immutable',
-          // TODO: should we allow "create" types to specify immutable, or do we now need a distinct "import" type to use here?
-          // @ts-expect-error
+          // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
           immutable: true,
         });
         const ndjson = combineToNdJson(rule);
