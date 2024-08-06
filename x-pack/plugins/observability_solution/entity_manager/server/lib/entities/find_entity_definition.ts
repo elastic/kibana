@@ -72,9 +72,12 @@ async function getEntityDefinitionState(
     ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
   ];
   const [ingestPipelines, indexTemplatesInstalled, transforms] = await Promise.all([
-    esClient.ingest.getPipeline({
-      id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
-    }),
+    esClient.ingest.getPipeline(
+      {
+        id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
+      },
+      { ignore: [404] }
+    ),
     esClient.indices.existsIndexTemplate({
       name: `${
         (getEntityLatestIndexTemplateV1(definition.id),
