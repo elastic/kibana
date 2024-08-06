@@ -1405,10 +1405,40 @@ describe('autocomplete', () => {
       24
     );
     testSuggestions('FROM a | KEEP doubleField', ['doubleField,', 'doubleField| '], undefined, 25);
-    testSuggestions('FROM a | KEEP @timestamp', ['timestamp,', 'timestamp| '], undefined, 24, [
+    testSuggestions('FROM a | KEEP doubleField ', ['| ', ','], undefined, 26);
+
+    // Let's get funky with the field names
+    testSuggestions('FROM a | KEEP @timestamp', ['@timestamp,', '@timestamp| '], undefined, 24, [
       [{ name: '@timestamp', type: 'date' }],
     ]);
-    testSuggestions('FROM a | KEEP doubleField ', ['| ', ','], undefined, 26);
+    testSuggestions('FROM a | KEEP foo.bar', ['foo.bar,', 'foo.bar| '], undefined, 21, [
+      [{ name: 'foo.bar', type: 'double' }],
+    ]);
+    testSuggestions('FROM a | KEEP `foo.bar`', ['foo.bar,', 'foo.bar| '], undefined, 23, [
+      [{ name: 'foo.bar', type: 'double' }],
+    ]);
+    testSuggestions(
+      'FROM a | KEEP `any#Char$Field`',
+      ['`any#Char$Field`,', '`any#Char$Field`| '],
+      undefined,
+      30
+    );
+
+    // Subsequent fields
+    testSuggestions(
+      'FROM a | KEEP doubleField, dateFiel',
+      getFieldNamesByType('any')
+        .filter((s) => s !== 'doubleField')
+        .map(attachTriggerCommand),
+      undefined,
+      35
+    );
+    testSuggestions(
+      'FROM a | KEEP doubleField, dateField',
+      ['dateField,', 'dateField| '],
+      undefined,
+      36
+    );
 
     // LIMIT number
     testSuggestions('FROM a | LIMIT ', ['10 ', '100 ', '1000 '].map(attachTriggerCommand));
