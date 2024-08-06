@@ -8,11 +8,11 @@
 import type { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
+import { KibanaPrivileges } from '@kbn/security-role-management-model';
 
-import type { SecurityLicenseFeatures } from '../../../../common';
 import { Actions } from '../../../../server/authorization';
 import { privilegesFactory } from '../../../../server/authorization/privileges';
-import { KibanaPrivileges } from '../model';
 
 export const createRawKibanaPrivileges = (
   features: KibanaFeature[],

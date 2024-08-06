@@ -7,11 +7,23 @@
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 
+import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';
 import { SecuredFeature } from './secured_feature';
-import type { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common';
-import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
+
+export interface RawKibanaFeaturePrivileges {
+  [featureId: string]: {
+    [privilegeId: string]: string[];
+  };
+}
+
+export interface RawKibanaPrivileges {
+  global: Record<string, string[]>;
+  features: RawKibanaFeaturePrivileges;
+  space: Record<string, string[]>;
+  reserved: Record<string, string[]>;
+}
 
 function toBasePrivilege(entry: [string, string[]]): [string, KibanaPrivilege] {
   const [privilegeId, actions] = entry;
@@ -22,6 +34,17 @@ function recordsToBasePrivilegeMap(
   record: Record<string, string[]>
 ): ReadonlyMap<string, KibanaPrivilege> {
   return new Map(Object.entries(record).map((entry) => toBasePrivilege(entry)));
+}
+
+/**
+ * Determines if the passed privilege spec defines global privileges.
+ * @param privilegeSpec
+ */
+export function isGlobalPrivilegeDefinition(privilegeSpec: RoleKibanaPrivilege): boolean {
+  if (!privilegeSpec.spaces || privilegeSpec.spaces.length === 0) {
+    return true;
+  }
+  return privilegeSpec.spaces.includes('*');
 }
 
 export class KibanaPrivileges {

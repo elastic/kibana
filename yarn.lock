@@ -6296,6 +6296,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
   version "0.0.0"
   uid ""
