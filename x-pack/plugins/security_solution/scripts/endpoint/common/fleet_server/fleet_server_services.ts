@@ -41,9 +41,9 @@ import {
 } from '@kbn/dev-utils';
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
+import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
-import { isServerlessKibanaFlavor } from '../stack_services';
 import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {

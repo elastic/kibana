@@ -19,6 +19,7 @@ import {
   apmIndicesSavedObjectDefinition,
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
+import { getServices } from './services/get_services';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -32,16 +33,18 @@ export class ApmDataAccessPlugin
     const apmDataAccessConfig = this.initContext.config.get<APMDataAccessConfig>();
     const apmIndicesFromConfigFile = apmDataAccessConfig.indices;
 
+    const getApmIndices = async (savedObjectsClient: SavedObjectsClientContract) => {
+      const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
+      return { ...apmIndicesFromConfigFile, ...apmIndicesFromSavedObject };
+    };
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
     // expose
     return {
       apmIndicesFromConfigFile,
-      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
-        const apmIndicesFromSavedObject = await getApmIndicesSavedObject(savedObjectsClient);
-        return { ...apmIndicesFromConfigFile, ...apmIndicesFromSavedObject };
-      },
+      getApmIndices,
+      getServices,
     };
   }
 
