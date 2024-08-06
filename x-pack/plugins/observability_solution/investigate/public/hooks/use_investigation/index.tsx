@@ -51,7 +51,6 @@ export interface UseInvestigationApi {
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
-  lockItem: (id: string) => Promise<void>;
   unlockItem: (id: string) => Promise<void>;
   setItemParameters: (
     id: string,
@@ -232,15 +231,8 @@ function useInvestigationWithoutContext({
     [investigationStore]
   );
 
-  const {
-    copyItem,
-    lockItem,
-    setGlobalParameters,
-    setItemTitle,
-    setTitle,
-    unlockItem,
-    updateItem,
-  } = investigationStore;
+  const { copyItem, setGlobalParameters, setItemTitle, setTitle, unlockItem, updateItem } =
+    investigationStore;
 
   const { storedItem: investigations, setStoredItem: setInvestigations } = useLocalStorage<
     Investigation[]
@@ -356,7 +348,6 @@ function useInvestigationWithoutContext({
     deleteItem,
     investigation,
     loadInvestigation,
-    lockItem,
     revision: renderableRevision,
     setGlobalParameters,
     setItemParameters,

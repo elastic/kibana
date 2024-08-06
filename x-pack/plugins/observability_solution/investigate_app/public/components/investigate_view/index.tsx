@@ -37,7 +37,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     copyItem,
     deleteItem,
     investigation,
-    lockItem,
     setItemParameters,
     setGlobalParameters,
     unlockItem,
@@ -166,7 +165,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                   return deleteItem(deletedItem.id);
                 }}
                 onItemLockToggle={async (toggledItem) => {
-                  return toggledItem.locked ? unlockItem(toggledItem.id) : lockItem(toggledItem.id);
+                  return toggledItem.locked ? unlockItem(toggledItem.id) : noop();
                 }}
                 fadeLockedItems={searchBarFocused}
                 onItemOverrideRemove={async (updatedItem, override) => {
