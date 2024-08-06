@@ -27,12 +27,18 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
   const [range, setRange] = useDateRange();
 
-  const { addItem, copyItem, deleteItem, investigation, setGlobalParameters, revision } =
-    investigate.useInvestigation({
-      user,
-      from: range.start.toISOString(),
-      to: range.end.toISOString(),
-    });
+  const {
+    addItem,
+    copyItem,
+    deleteItem,
+    investigation,
+    setGlobalParameters,
+    renderableInvestigation,
+  } = investigate.useInvestigation({
+    user,
+    from: range.start.toISOString(),
+    to: range.end.toISOString(),
+  });
 
   const [_editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
 
@@ -44,30 +50,30 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   createWidgetRef.current = createWidget;
 
   useEffect(() => {
-    const itemIds = revision?.items.map((item) => item.id) ?? [];
+    const itemIds = renderableInvestigation?.items.map((item) => item.id) ?? [];
     setEditingItem((prevEditingItem) => {
       if (prevEditingItem && !itemIds.includes(prevEditingItem.id)) {
         return undefined;
       }
       return prevEditingItem;
     });
-  }, [revision]);
+  }, [renderableInvestigation]);
 
   useEffect(() => {
     if (
-      revision?.parameters.timeRange.from &&
-      revision?.parameters.timeRange.to &&
-      range.start.toISOString() !== revision.parameters.timeRange.from &&
-      range.end.toISOString() !== revision.parameters.timeRange.to
+      renderableInvestigation?.parameters.timeRange.from &&
+      renderableInvestigation?.parameters.timeRange.to &&
+      range.start.toISOString() !== renderableInvestigation.parameters.timeRange.from &&
+      range.end.toISOString() !== renderableInvestigation.parameters.timeRange.to
     ) {
       setRange({
-        from: revision.parameters.timeRange.from,
-        to: revision.parameters.timeRange.to,
+        from: renderableInvestigation.parameters.timeRange.from,
+        to: renderableInvestigation.parameters.timeRange.to,
       });
     }
   }, [
-    revision?.parameters.timeRange.from,
-    revision?.parameters.timeRange.to,
+    renderableInvestigation?.parameters.timeRange.from,
+    renderableInvestigation?.parameters.timeRange.to,
     range.start,
     range.end,
     setRange,
@@ -76,7 +82,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
 
-    return revision?.items.map((item) => {
+    return renderableInvestigation?.items.map((item) => {
       const definitionForType = widgetDefinitionsByType[item.type];
 
       return (
@@ -92,9 +98,9 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
         } ?? []
       );
     });
-  }, [revision, widgetDefinitions]);
+  }, [renderableInvestigation, widgetDefinitions]);
 
-  if (!investigation || !revision || !gridItems) {
+  if (!investigation || !renderableInvestigation || !gridItems) {
     return <EuiLoadingSpinner />;
   }
 
@@ -113,7 +119,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                     to: datemath.parse(dateRange.to)!.toISOString(),
                   };
                   await setGlobalParameters({
-                    ...revision.parameters,
+                    ...renderableInvestigation.parameters,
                     timeRange: nextDateRange,
                   });
 
@@ -135,14 +141,16 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                   return deleteItem(deletedItem.id);
                 }}
                 onItemEditClick={(itemToEdit) => {
-                  setEditingItem(revision.items.find((item) => item.id === itemToEdit.id));
+                  setEditingItem(
+                    renderableInvestigation.items.find((item) => item.id === itemToEdit.id)
+                  );
                 }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
 
           <AddObservationUI
-            timeRange={revision.parameters.timeRange}
+            timeRange={renderableInvestigation.parameters.timeRange}
             onWidgetAdd={(widget) => {
               return createWidgetRef.current(widget);
             }}
@@ -153,7 +161,7 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
       <EuiFlexItem grow={2}>
         <AddNoteUI
           user={user}
-          timeRange={revision.parameters.timeRange}
+          timeRange={renderableInvestigation.parameters.timeRange}
           onWidgetAdd={(widget) => {
             return createWidgetRef.current(widget);
           }}

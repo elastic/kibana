@@ -33,14 +33,14 @@ export type RenderableInvestigation = Omit<StatefulInvestigation, 'items'> & {
 export interface UseInvestigationApi {
   startNewInvestigation: (id: string) => void;
   loadInvestigation: (id: string) => void;
-  investigation?: Omit<StatefulInvestigation, 'items'>;
-  revision?: RenderableInvestigation;
+  investigations: Investigation[];
+  investigation?: StatefulInvestigation;
+  renderableInvestigation?: RenderableInvestigation;
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
-  investigations: Investigation[];
   deleteInvestigation: (id: string) => Promise<void>;
 }
 
@@ -75,7 +75,6 @@ function useInvestigationWithoutContext({
   );
 
   const investigation$ = investigationStore.asObservable();
-
   const investigation = useObservable(investigation$)?.investigation;
 
   const deleteItem = useCallback(
@@ -310,7 +309,7 @@ function useInvestigationWithoutContext({
     deleteItem,
     investigation,
     loadInvestigation,
-    revision: renderableInvestigation,
+    renderableInvestigation,
     setGlobalParameters,
     setTitle,
     startNewInvestigation,
