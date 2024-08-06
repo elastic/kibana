@@ -47,12 +47,10 @@ export class ObservabilityAIAssistantPlugin
     >
 {
   logger: Logger;
-  config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
     this.logger = context.logger.get();
-    this.config = context.config.get<ObservabilityAIAssistantConfig>();
     initLangtrace();
   }
   public setup(
@@ -113,15 +111,11 @@ export class ObservabilityAIAssistantPlugin
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
     // Using once to make sure the same model ID is used during service init and Knowledge base setup
-    const getModelId = once(async () => {
-      const configModelId = this.config.modelId;
-      if (configModelId) {
-        return configModelId;
-      }
+    const getSearchConnectorModelId = once(async () => {
       const defaultModelId = '.elser_model_2';
       const [_, pluginsStart] = await core.getStartServices();
-      // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
       const license = await firstValueFrom(pluginsStart.licensing.license$);
+
       if (!license.hasAtLeast('enterprise')) {
         return defaultModelId;
       }
@@ -156,7 +150,7 @@ export class ObservabilityAIAssistantPlugin
       logger: this.logger.get('service'),
       core,
       taskManager: plugins.taskManager,
-      getModelId,
+      getSearchConnectorModelId,
     }));
 
     service.register(registerFunctions);
