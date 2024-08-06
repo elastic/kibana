@@ -38,7 +38,6 @@ interface InvestigationStore {
     id: string,
     cb: (prevItem: InvestigateWidget) => Promise<InvestigateWidget>
   ) => Promise<void>;
-  unlockItem: (id: string) => Promise<void>;
   setItemTitle: (id: string, title: string) => Promise<void>;
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
@@ -340,10 +339,6 @@ export function createInvestigationStore({
     },
     setItemTitle: async (itemId, title) => {
       return updateItem(itemId, (prev) => ({ ...prev, title }));
-    },
-
-    unlockItem: async (itemId) => {
-      await regenerateItemAndUpdateRevision(itemId, { locked: false });
     },
     setTitle: async (title: string) => {
       return nextRevision((prevRevision) => {
