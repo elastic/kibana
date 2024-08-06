@@ -34,7 +34,7 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
@@ -47,7 +47,6 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
-import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -364,7 +363,7 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -386,7 +385,7 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
         version: null,
         selectedEventIds: {},
         isSelectAllChecked: false,
@@ -512,7 +511,6 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
-  dataViewPicker: dataViewPickerInitialState,
   notes: {
     entities: {
       '1': {

@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useMemo, useState, useCallback } from 'react';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from './translations';
 
 interface NewTimelineButtonProps {
@@ -27,12 +27,12 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
 
   const createNewTimeline = useCreateTimeline({
     timelineId,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     onClick: togglePopover,
   });
   const createNewTimelineTemplate = useCreateTimeline({
     timelineId,
-    timelineType: TimelineType.template,
+    timelineType: TimelineTypeEnum.template,
     onClick: togglePopover,
   });
 
