@@ -640,6 +640,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '14': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                output_id: { type: 'keyword' },
+              },
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
