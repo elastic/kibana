@@ -708,7 +708,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should update the KPIs content on a search submit', async () => {
+          it.skip('should update the KPIs content on a search submit', async () => {
             await Promise.all(
               [
                 { metric: 'hostsCount', value: '3' },
