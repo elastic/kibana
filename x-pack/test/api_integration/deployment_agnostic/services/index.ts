@@ -22,5 +22,5 @@ export const services = {
   samlAuth: commonFunctionalServices.samlAuthProvider,
   dataViewApi: DataViewApiProvider,
   sloApi: SloApiProvider,
-  // create a new deployment-agonstic service and load here
+  // create a new deployment-agnostic service and load here
 };
