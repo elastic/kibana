@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../hooks/use_theme';
 import { InvestigateTextButton } from '../investigate_text_button';
-import { InvestigateWidgetGridItemOverride } from '../investigate_widget_grid';
 
 export const GRID_ITEM_HEADER_HEIGHT = 40;
 
@@ -23,9 +21,7 @@ interface GridItemProps {
   onTitleChange: (title: string) => void;
   onDelete: () => void;
   loading: boolean;
-  onOverrideRemove: (override: InvestigateWidgetGridItemOverride) => Promise<void>;
   onEditClick: () => void;
-  overrides: InvestigateWidgetGridItemOverride[];
 }
 
 const editTitleButtonClassName = `investigateGridItemTitleEditButton`;
@@ -63,14 +59,6 @@ const headerClassName = css`
   height: ${GRID_ITEM_HEADER_HEIGHT}px;
 `;
 
-const changeBadgeClassName = css`
-  max-width: 96px;
-  .euiText {
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
-`;
-
 export function GridItem({
   id,
   title,
@@ -79,8 +67,6 @@ export function GridItem({
   onDelete,
   onCopy,
   loading,
-  overrides,
-  onOverrideRemove,
   onEditClick,
 }: GridItemProps) {
   const theme = useTheme();
@@ -114,33 +100,6 @@ export function GridItem({
             <EuiText size="s" className={titleItemClassName}>
               {title}
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {overrides.length ? (
-              <EuiFlexGroup direction="row" gutterSize="xs" justifyContent="flexStart">
-                {overrides.map((override) => (
-                  <EuiFlexItem key={override.id} grow={false}>
-                    <EuiBadge
-                      color="primary"
-                      className={changeBadgeClassName}
-                      iconType="cross"
-                      iconSide="right"
-                      iconOnClick={() => {
-                        onOverrideRemove(override);
-                      }}
-                      iconOnClickAriaLabel={i18n.translate(
-                        'xpack.investigateApp.gridItem.removeOverrideButtonAriaLabel',
-                        {
-                          defaultMessage: 'Remove filter',
-                        }
-                      )}
-                    >
-                      <EuiText size="xs">{override.label}</EuiText>
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false} className="gridItemControls">
             <EuiFlexGroup

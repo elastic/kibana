@@ -8,7 +8,7 @@ import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, noop, omit } from 'lodash';
+import { keyBy, noop } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
@@ -33,7 +33,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     copyItem,
     deleteItem,
     investigation,
-    setItemParameters,
     setGlobalParameters,
     revision,
   } = investigate.useInvestigation({
@@ -97,7 +96,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           rows: item.rows,
           chrome: definitionForType.chrome,
           loading: item.loading,
-          overrides: [],
         } ?? []
       );
     });
@@ -145,16 +143,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 }}
                 onItemDelete={async (deletedItem) => {
                   return deleteItem(deletedItem.id);
-                }}
-                onItemOverrideRemove={async (updatedItem, override) => {
-                  // TODO: remove filters
-                  const itemToUpdate = revision.items.find((item) => item.id === updatedItem.id);
-                  if (itemToUpdate) {
-                    return setItemParameters(updatedItem.id, {
-                      ...revision.parameters,
-                      ...omit(itemToUpdate.parameters, override.id),
-                    });
-                  }
                 }}
                 onItemEditClick={(itemToEdit) => {
                   setEditingItem(revision.items.find((item) => item.id === itemToEdit.id));

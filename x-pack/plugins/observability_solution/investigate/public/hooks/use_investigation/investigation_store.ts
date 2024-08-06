@@ -44,7 +44,6 @@ interface InvestigationStore {
   }>;
   getInvestigation: () => Promise<Readonly<StatefulInvestigation>>;
   setGlobalParameters: (globalWidgetParameters: GlobalWidgetParameters) => Promise<void>;
-  setItemParameters: (id: string, parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   destroy: () => void;
 }
@@ -202,46 +201,6 @@ export function createInvestigationStore({
     });
   }
 
-  const regenerateItemAndUpdateRevision = async (
-    itemId: string,
-    partials: Partial<InvestigateWidget>
-  ) => {
-    await updateRevisionInPlace((prevRevision) => {
-      return {
-        ...prevRevision,
-        items: prevRevision.items.map((item) => {
-          if (item.id === itemId) {
-            return { ...item, loading: true, ...partials };
-          }
-          return item;
-        }),
-      };
-    });
-
-    await nextRevision(async (prevRevision) => {
-      return {
-        ...prevRevision,
-        items: await Promise.all(
-          prevRevision.items.map(async (item) => {
-            if (item.id === itemId) {
-              return {
-                ...(await regenerateItem({
-                  user,
-                  globalWidgetParameters: prevRevision.parameters,
-                  signal: controller.signal,
-                  widget: item,
-                  widgetDefinitions,
-                })),
-                loading: false,
-              };
-            }
-            return item;
-          })
-        ),
-      };
-    });
-  };
-
   const asObservable = observable$.asObservable();
 
   return {
@@ -338,9 +297,6 @@ export function createInvestigationStore({
       return nextRevision((prevRevision) => {
         return { ...prevRevision, title };
       });
-    },
-    setItemParameters: async (itemId, nextParameters) => {
-      await regenerateItemAndUpdateRevision(itemId, { parameters: nextParameters });
     },
   };
 }

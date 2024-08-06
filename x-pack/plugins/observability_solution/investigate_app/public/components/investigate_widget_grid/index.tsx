@@ -36,11 +36,6 @@ interface GridSection {
 
 type Section = SingleComponentSection | GridSection;
 
-export interface InvestigateWidgetGridItemOverride {
-  id: string;
-  label: React.ReactNode;
-}
-
 export interface InvestigateWidgetGridItem {
   title: string;
   description: string;
@@ -50,7 +45,6 @@ export interface InvestigateWidgetGridItem {
   rows: number;
   chrome?: ChromeOption;
   loading: boolean;
-  overrides: InvestigateWidgetGridItemOverride[];
 }
 
 interface InvestigateWidgetGridProps {
@@ -58,10 +52,6 @@ interface InvestigateWidgetGridProps {
   onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemOverrideRemove: (
-    item: InvestigateWidgetGridItem,
-    override: InvestigateWidgetGridItemOverride
-  ) => Promise<void>;
   onItemTitleChange: (item: InvestigateWidgetGridItem, title: string) => Promise<void>;
   onItemEditClick: (item: InvestigateWidgetGridItem) => void;
 }
@@ -127,7 +117,6 @@ function GridSectionRenderer({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemOverrideRemove,
   onItemTitleChange,
   onItemEditClick,
 }: InvestigateWidgetGridProps) {
@@ -139,7 +128,6 @@ function GridSectionRenderer({
     onItemsChange,
     onItemCopy,
     onItemDelete,
-    onItemOverrideRemove,
     onItemTitleChange,
     onItemEditClick,
   };
@@ -170,13 +158,9 @@ function GridSectionRenderer({
           onDelete={() => {
             return itemCallbacksRef.current.onItemDelete(item);
           }}
-          onOverrideRemove={(override) => {
-            return itemCallbacksRef.current.onItemOverrideRemove(item, override);
-          }}
           onEditClick={() => {
             return itemCallbacksRef.current.onItemEditClick(item);
           }}
-          overrides={item.overrides}
           loading={item.loading}
         >
           {item.element}
@@ -262,7 +246,6 @@ export function InvestigateWidgetGrid({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemOverrideRemove,
   onItemTitleChange,
   onItemEditClick,
 }: InvestigateWidgetGridProps) {
@@ -317,9 +300,6 @@ export function InvestigateWidgetGrid({
 
                   return onItemsChange(nextItems);
                 }}
-                onItemOverrideRemove={(item, override) => {
-                  return onItemOverrideRemove(item, override);
-                }}
                 onItemTitleChange={(item, title) => {
                   return onItemTitleChange(item, title);
                 }}
@@ -340,15 +320,11 @@ export function InvestigateWidgetGrid({
                 title={section.item.title}
                 description={section.item.description}
                 loading={section.item.loading}
-                overrides={section.item.overrides}
                 onCopy={() => {
                   return onItemCopy(section.item);
                 }}
                 onDelete={() => {
                   return onItemDelete(section.item);
-                }}
-                onOverrideRemove={(override) => {
-                  return onItemOverrideRemove(section.item, override);
                 }}
                 onTitleChange={(nextTitle) => {
                   return onItemTitleChange(section.item, nextTitle);

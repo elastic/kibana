@@ -51,10 +51,6 @@ export interface UseInvestigationApi {
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
-  setItemParameters: (
-    id: string,
-    parameters: GlobalWidgetParameters & Record<string, any>
-  ) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
   setTitle: (title: string) => Promise<void>;
   investigations: Investigation[];
@@ -223,13 +219,6 @@ function useInvestigationWithoutContext({
     [user, widgetDefinitions, investigationStore]
   );
 
-  const setItemParameters = useCallback(
-    async (id: string, nextGlobalWidgetParameters: GlobalWidgetParameters) => {
-      return investigationStore.setItemParameters(id, nextGlobalWidgetParameters);
-    },
-    [investigationStore]
-  );
-
   const { copyItem, setGlobalParameters, setItemTitle, setTitle, updateItem } = investigationStore;
 
   const { storedItem: investigations, setStoredItem: setInvestigations } = useLocalStorage<
@@ -348,7 +337,6 @@ function useInvestigationWithoutContext({
     loadInvestigation,
     revision: renderableRevision,
     setGlobalParameters,
-    setItemParameters,
     setItemTitle,
     setTitle,
     startNewInvestigation,
