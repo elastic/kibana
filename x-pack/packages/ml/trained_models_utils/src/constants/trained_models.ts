@@ -156,6 +156,8 @@ export interface ModelDefinition {
   default?: boolean;
   /** Indicates if model version is recommended for deployment based on the cluster configuration */
   recommended?: boolean;
+  /** Indicates if model version is supported by the cluster */
+  supported?: boolean;
   hidden?: boolean;
   /** Software license of a model, e.g. MIT */
   license?: string;
