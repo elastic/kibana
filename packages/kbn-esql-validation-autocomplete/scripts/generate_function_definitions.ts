@@ -219,6 +219,8 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   },
 };
 
+const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
+
 /**
  * Builds a function definition object from a row of the "meta functions" table
  * @param {Array<any>} value — the row of the "meta functions" table, corresponding to a single function definition
@@ -239,10 +241,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
         ...signature,
         params: signature.params.map((param: any) => ({
           ...param,
-          type: param.type,
+          type: convertDateTime(param.type),
           description: undefined,
         })),
-        returnType: signature.returnType,
+        returnType: convertDateTime(signature.returnType),
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
           ? signature.params.filter((param: any) => !param.optional).length
