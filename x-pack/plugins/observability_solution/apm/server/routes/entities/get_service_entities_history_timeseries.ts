@@ -36,8 +36,8 @@ export async function getServiceEntitiesHistoryTimeseries({
   environment,
 }: Params) {
   const { intervalString } = getBucketSize({
-    start: new Date(start).getTime(),
-    end: new Date(end).getTime(),
+    start,
+    end,
     minBucketSize: 60,
   });
 
