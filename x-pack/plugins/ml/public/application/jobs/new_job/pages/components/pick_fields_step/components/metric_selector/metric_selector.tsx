@@ -34,7 +34,7 @@ export const MetricSelector: FC<Props> = ({
     <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
       <EuiFlexItem>
         <EuiFormRow
-          label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationView.addMetric', {
+          label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric', {
             defaultMessage: 'Add metric',
           })}
         >

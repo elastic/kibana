@@ -17,7 +17,7 @@ import type { DropDownLabel, DropDownProps } from '../agg_select';
 import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
-import { MetricSelector } from './metric_selector';
+import { MetricSelector } from '../metric_selector';
 import { ChartGrid } from './chart_grid';
 import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
