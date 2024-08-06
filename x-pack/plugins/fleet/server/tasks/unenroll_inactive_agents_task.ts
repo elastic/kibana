@@ -28,7 +28,7 @@ import { agentPolicyService } from '../services';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.0';
-const TITLE = 'Fleet Deleted Files Periodic Tasks';
+const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';

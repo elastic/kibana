@@ -738,7 +738,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         description={
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in minutes. If configured, inactive agents will be automatically unenrolled and their API keys will be invalidated after they've been inactive for this value in minutes. This can be useful for policies containing ephemeral agents, such as those in a Docker or Kubernetes environment."
+            defaultMessage="An optional timeout in seconds. If configured, inactive agents will be automatically unenrolled and their API keys will be invalidated after they've been inactive for this value in seconds. This can be useful for policies containing ephemeral agents, such as those in a Docker or Kubernetes environment."
           />
         }
       >
