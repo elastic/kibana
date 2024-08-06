@@ -2037,7 +2037,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await pMap(
         packagePolicies,
         (packagePolicy) => {
-          this.update(soClient, esClient, packagePolicy.id, getPackagePolicyUpdate(packagePolicy));
+          return this.update(
+            soClient,
+            esClient,
+            packagePolicy.id,
+            getPackagePolicyUpdate(packagePolicy)
+          );
         },
         {
           concurrency: 50,
