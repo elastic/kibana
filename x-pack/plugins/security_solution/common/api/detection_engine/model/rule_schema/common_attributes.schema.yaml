@@ -48,6 +48,7 @@ components:
     ExternalSourceUpdatedAt:
       type: string
       format: date-time
+      example: '2021-08-31T00:00:00Z'
       description: The date and time that the external/prebuilt rule was last updated in its source repository.
 
     IsExternalRuleCustomized:
