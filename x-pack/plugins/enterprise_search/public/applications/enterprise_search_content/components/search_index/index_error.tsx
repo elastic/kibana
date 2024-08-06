@@ -66,7 +66,7 @@ function hasProperties(field: MappingProperty): field is MappingPropertyBase {
 }
 
 function isLocalModel(model: InferenceServiceSettings): model is LocalInferenceServiceSettings {
-  return Boolean((model as LocalInferenceServiceSettings).service_settings.model_id);
+  return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
 }
 
 export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
@@ -93,22 +93,25 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
     const fetchErrors = async () => {
       const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
       const endpoints = await ml?.mlApi?.inferenceModels.getAllInferenceEndpoints();
-      if (!trainedModelStats || !endpoints) {
+
+      if (!trainedModelStats || !endpoints?.endpoints) {
         return [];
       }
 
       const semanticTextFieldsWithErrors = semanticTextFields
         .map((field) => {
           const model = endpoints.endpoints.find(
-            (endpoint) => endpoint.model_id === field.source.inference_id
+            (endpoint) => endpoint.inference_id === field.source.inference_id
           );
           if (!model) {
             return {
               error: i18n.translate(
                 'xpack.enterpriseSearch.indexOverview.indexErrors.missingModelError',
                 {
-                  defaultMessage: 'Model not found for inference endpoint {inferenceId}',
+                  defaultMessage:
+                    'Inference endpoint not found for {inferenceId} in field {fieldName}',
                   values: {
+                    fieldName: field.path,
                     inferenceId: field.source.inference_id as string,
                   },
                 }
