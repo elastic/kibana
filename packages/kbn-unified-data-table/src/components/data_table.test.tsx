@@ -393,6 +393,7 @@ describe('UnifiedDataTable', () => {
                 sampleSize={150}
               />
             </React.Fragment>,
+            "allowDensity": false,
             "allowResetButton": false,
             "allowRowHeight": false,
           },
@@ -425,6 +426,7 @@ describe('UnifiedDataTable', () => {
                 sampleSize={200}
               />
             </React.Fragment>,
+            "allowDensity": false,
             "allowResetButton": false,
             "allowRowHeight": false,
           },
