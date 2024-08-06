@@ -32,7 +32,6 @@ describe('getSourcererDataView', () => {
       loading: false,
       id: 'test-id',
       title: 'test-pattern',
-      indexFields: {},
       fields: {},
       patternList: ['test-pattern'],
       dataView: {

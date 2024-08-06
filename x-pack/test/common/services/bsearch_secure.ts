@@ -10,10 +10,10 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
-import type SuperTest from 'supertest';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
+import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { FtrService } from '../ftr_provider_context';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {
@@ -28,7 +28,7 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
 };
 
 interface SendOptions {
-  supertestWithoutAuth: SuperTest.Agent;
+  supertestWithoutAuth: SupertestWithoutAuthProviderType;
   auth: { username: string; password: string };
   referer?: string;
   kibanaVersion?: string;
