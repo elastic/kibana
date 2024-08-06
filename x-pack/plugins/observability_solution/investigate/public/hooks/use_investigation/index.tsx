@@ -20,9 +20,9 @@ import {
 import { useLocalStorage } from '../use_local_storage';
 import { createNewInvestigation } from './create_new_investigation';
 import {
-  createInvestigationStore,
   StatefulInvestigation,
   StatefulInvestigationRevision,
+  createInvestigationStore,
 } from './investigation_store';
 
 export type RenderableInvestigateWidget = InvestigateWidget & {
@@ -43,8 +43,6 @@ export interface UseInvestigationApi {
   loadInvestigation: (id: string) => void;
   investigation?: Omit<StatefulInvestigation, 'revisions'>;
   revision?: RenderableInvestigationRevision;
-  isAtLatestRevision: boolean;
-  isAtEarliestRevision: boolean;
   setItemTitle: (id: string, title: string) => Promise<void>;
   updateItem: (
     id: string,
@@ -103,10 +101,6 @@ function useInvestigationWithoutContext({
   const currentRevision = useMemo(() => {
     return investigation?.revisions.find((revision) => revision.id === investigation.revision);
   }, [investigation?.revision, investigation?.revisions]);
-
-  const isAtEarliestRevision = investigation?.revisions[0].id === currentRevision?.id;
-
-  const isAtLatestRevision = last(investigation?.revisions)?.id === currentRevision?.id;
 
   const deleteItem = useCallback(
     async (id: string) => {
@@ -361,8 +355,6 @@ function useInvestigationWithoutContext({
     copyItem,
     deleteItem,
     investigation,
-    isAtEarliestRevision,
-    isAtLatestRevision,
     loadInvestigation,
     lockItem,
     revision: renderableRevision,
