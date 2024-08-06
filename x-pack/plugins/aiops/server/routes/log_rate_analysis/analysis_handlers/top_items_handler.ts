@@ -185,7 +185,7 @@ export const topItemsHandlerFactory =
       } else if (isTextFieldCandidates(payload)) {
         const { textFieldCandidates: fieldNames } = payload;
 
-        const topCategoriesForField = await await fetchTopCategories({
+        const topCategoriesForField = await fetchTopCategories({
           esClient,
           logger,
           emitError: responseStream.pushError,
