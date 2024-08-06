@@ -163,10 +163,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 onItemDelete={async (deletedItem) => {
                   return deleteItem(deletedItem.id);
                 }}
-                onItemLockToggle={async (toggledItem) => {
-                  return noop();
-                }}
-                fadeLockedItems={searchBarFocused}
                 onItemOverrideRemove={async (updatedItem, override) => {
                   // TODO: remove filters
                   const itemToUpdate = revision.items.find((item) => item.id === updatedItem.id);

@@ -48,7 +48,6 @@ export interface InvestigateWidgetGridItem {
   id: string;
   columns: number;
   rows: number;
-  locked: boolean;
   chrome?: ChromeOption;
   loading: boolean;
   overrides: InvestigateWidgetGridItemOverride[];
@@ -59,14 +58,12 @@ interface InvestigateWidgetGridProps {
   onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemLockToggle: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemOverrideRemove: (
     item: InvestigateWidgetGridItem,
     override: InvestigateWidgetGridItemOverride
   ) => Promise<void>;
   onItemTitleChange: (item: InvestigateWidgetGridItem, title: string) => Promise<void>;
   onItemEditClick: (item: InvestigateWidgetGridItem) => void;
-  fadeLockedItems: boolean;
 }
 
 const ROW_HEIGHT = 32;
@@ -130,11 +127,9 @@ function GridSectionRenderer({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemLockToggle,
   onItemOverrideRemove,
   onItemTitleChange,
   onItemEditClick,
-  fadeLockedItems,
 }: InvestigateWidgetGridProps) {
   const WithFixedWidth = useMemo(() => WidthProvider(Responsive), []);
 
@@ -144,7 +139,6 @@ function GridSectionRenderer({
     onItemsChange,
     onItemCopy,
     onItemDelete,
-    onItemLockToggle,
     onItemOverrideRemove,
     onItemTitleChange,
     onItemEditClick,
@@ -176,10 +170,6 @@ function GridSectionRenderer({
           onDelete={() => {
             return itemCallbacksRef.current.onItemDelete(item);
           }}
-          locked={item.locked}
-          onLockToggle={() => {
-            itemCallbacksRef.current.onItemLockToggle(item);
-          }}
           onOverrideRemove={(override) => {
             return itemCallbacksRef.current.onItemOverrideRemove(item, override);
           }}
@@ -188,13 +178,12 @@ function GridSectionRenderer({
           }}
           overrides={item.overrides}
           loading={item.loading}
-          faded={fadeLockedItems && item.locked}
         >
           {item.element}
         </GridItem>
       </div>
     ));
-  }, [items, fadeLockedItems]);
+  }, [items]);
 
   // react-grid calls `onLayoutChange` every time
   // `layouts` changes, except when on mount. So...
@@ -273,8 +262,6 @@ export function InvestigateWidgetGrid({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemLockToggle,
-  fadeLockedItems,
   onItemOverrideRemove,
   onItemTitleChange,
   onItemEditClick,
@@ -317,9 +304,6 @@ export function InvestigateWidgetGrid({
                 onItemDelete={(deletedItem) => {
                   return onItemDelete(deletedItem);
                 }}
-                onItemLockToggle={(toggledItem) => {
-                  return onItemLockToggle(toggledItem);
-                }}
                 onItemsChange={(itemsInSection) => {
                   const nextItems = sections.flatMap((sectionAtIndex) => {
                     if ('item' in sectionAtIndex) {
@@ -342,7 +326,6 @@ export function InvestigateWidgetGrid({
                 onItemEditClick={(item) => {
                   return onItemEditClick(item);
                 }}
-                fadeLockedItems={fadeLockedItems}
               />
             </EuiFlexItem>
           );
@@ -356,9 +339,7 @@ export function InvestigateWidgetGrid({
                 id={section.item.id}
                 title={section.item.title}
                 description={section.item.description}
-                faded={section.item.locked && fadeLockedItems}
                 loading={section.item.loading}
-                locked={section.item.locked}
                 overrides={section.item.overrides}
                 onCopy={() => {
                   return onItemCopy(section.item);
@@ -371,9 +352,6 @@ export function InvestigateWidgetGrid({
                 }}
                 onTitleChange={(nextTitle) => {
                   return onItemTitleChange(section.item, nextTitle);
-                }}
-                onLockToggle={() => {
-                  return onItemLockToggle(section.item);
                 }}
                 onEditClick={() => {
                   return onItemEditClick(section.item);

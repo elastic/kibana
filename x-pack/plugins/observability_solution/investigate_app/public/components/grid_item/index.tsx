@@ -6,7 +6,6 @@
  */
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import classNames from 'classnames';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTheme } from '../../hooks/use_theme';
@@ -20,13 +19,10 @@ interface GridItemProps {
   title: string;
   description: string;
   children: React.ReactNode;
-  locked: boolean;
   onCopy: () => void;
   onTitleChange: (title: string) => void;
   onDelete: () => void;
-  onLockToggle: () => void;
   loading: boolean;
-  faded: boolean;
   onOverrideRemove: (override: InvestigateWidgetGridItemOverride) => Promise<void>;
   onEditClick: () => void;
   overrides: InvestigateWidgetGridItemOverride[];
@@ -43,17 +39,6 @@ const titleItemClassName = css`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-`;
-
-const fadedClassName = css`
-  opacity: 0.5 !important;
-`;
-
-const lockedControlClassName = css`
-  opacity: 0.9 !important;
-  &:hover {
-    opacity: 1 !important;
   }
 `;
 
@@ -91,12 +76,9 @@ export function GridItem({
   title,
   description,
   children,
-  locked,
-  onLockToggle,
   onDelete,
   onCopy,
   loading,
-  faded,
   overrides,
   onOverrideRemove,
   onEditClick,
@@ -118,7 +100,7 @@ export function GridItem({
     <EuiFlexGroup
       direction="column"
       gutterSize="none"
-      className={faded ? classNames(containerClassName, fadedClassName) : containerClassName}
+      className={containerClassName}
       alignItems="stretch"
     >
       <EuiFlexItem grow={false}>
@@ -190,17 +172,6 @@ export function GridItem({
                   iconType="pencil"
                   onClick={() => {
                     onEditClick();
-                  }}
-                  disabled={loading}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InvestigateTextButton
-                  iconType={locked ? 'lock' : 'lockOpen'}
-                  className={locked ? lockedControlClassName : ''}
-                  color={locked ? 'primary' : 'text'}
-                  onClick={() => {
-                    onLockToggle();
                   }}
                   disabled={loading}
                 />
