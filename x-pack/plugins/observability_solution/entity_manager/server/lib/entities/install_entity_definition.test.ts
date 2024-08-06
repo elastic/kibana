@@ -128,31 +128,6 @@ const assertHasDeletedTransforms = (
   expect(esClient.transform.deleteTransform).toBeCalledTimes(2);
 };
 
-const assertHasUninstalledDefinition = (
-  definition: EntityDefinition,
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) => {
-  assertHasDeletedTransforms(definition, esClient);
-
-  expect(esClient.ingest.deletePipeline).toBeCalledTimes(2);
-  expect(soClient.delete).toBeCalledTimes(1);
-
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(2);
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
-    {
-      name: `entities_v1_history_${definition.id}_index_template`,
-    },
-    { ignore: [404] }
-  );
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
-    {
-      name: `entities_v1_latest_${definition.id}_index_template`,
-    },
-    { ignore: [404] }
-  );
-};
-
 describe('install_entity_definition', () => {
   describe('installBuiltInEntityDefinitions', () => {
     it('should install and start definition when not found', async () => {
