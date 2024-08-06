@@ -16,8 +16,8 @@
 
 import { z } from 'zod';
 
-export type GetPrivilegesResponse = z.infer<typeof GetPrivilegesResponse>;
-export const GetPrivilegesResponse = z.object({
+export type ReadPrivilegesResponse = z.infer<typeof ReadPrivilegesResponse>;
+export const ReadPrivilegesResponse = z.object({
   is_authenticated: z.boolean(),
   has_encryption_key: z.boolean(),
 });

@@ -7553,7 +7553,7 @@
           {
             "parentPluginId": "fleet",
             "id": "def-server.FleetSetupDeps.usageCollection",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "usageCollection",
             "description": [],
