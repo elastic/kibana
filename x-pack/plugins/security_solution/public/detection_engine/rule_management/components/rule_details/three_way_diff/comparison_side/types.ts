@@ -6,7 +6,7 @@
  */
 
 export interface SubfieldChange {
-  subfieldName: string;
-  oldSubfieldValue: string;
-  newSubfieldValue: string;
+  readonly subfieldName: string;
+  readonly oldSubfieldValue: string;
+  readonly newSubfieldValue: string;
 }

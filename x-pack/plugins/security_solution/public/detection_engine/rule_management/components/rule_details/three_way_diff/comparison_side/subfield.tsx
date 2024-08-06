@@ -10,6 +10,24 @@ import type { DiffableAllFields } from '../../../../../../../common/api/detectio
 import { DiffView } from '../../json_diff/diff_view';
 import { SubfieldHeader } from './subfield_header';
 
+const FIELDS_WITH_SUBFIELDS: Array<keyof DiffableAllFields> = [
+  'data_source',
+  'kql_query',
+  'eql_query',
+  'esql_query',
+  'threat_query',
+  'rule_schedule',
+  'rule_name_override',
+  'timestamp_override',
+  'timeline_template',
+  'building_block',
+  'threshold',
+];
+
+function shouldDisplaySubfieldLabelForField(fieldName: keyof DiffableAllFields): boolean {
+  return FIELDS_WITH_SUBFIELDS.includes(fieldName);
+}
+
 interface SubfieldProps {
   fieldName: keyof DiffableAllFields;
   subfieldName: string;
@@ -24,7 +42,9 @@ export const Subfield = ({
   newSubfieldValue,
 }: SubfieldProps) => (
   <>
-    <SubfieldHeader fieldName={fieldName} subfieldName={subfieldName} />
+    {shouldDisplaySubfieldLabelForField(fieldName) && (
+      <SubfieldHeader subfieldName={subfieldName} />
+    )}
     <DiffView oldSource={oldSubfieldValue} newSource={newSubfieldValue} viewType="unified" />
   </>
 );

@@ -120,7 +120,7 @@ const renderGutter: RenderGutter = ({ change }) => {
  * @param {Change[]} changes - An array of changes between two strings.
  * @returns {string} A unified diff string representing the changes.
  */
-const convertChangesToUnifiedDiffString = (changes: Change[]) => {
+const convertChangesToUnifiedDiffString = (changes: Change[]): string => {
   const unifiedDiff: string = unidiff.formatLines(changes, {
     context: 3,
   });
@@ -175,7 +175,10 @@ const CustomStyles: FC<PropsWithChildren<unknown>> = ({ children }) => {
       width: ${euiTheme.size.xl};
     }
 
-    /* Hide the redundant second gutter column in "unified" view */
+    /*
+      Hide the redundant second gutter column in "unified" view.
+      Hiding it with "display: none" would break the layout, so we set its width to 0 and make its content invisible.
+    */
     .${TABLE_CLASS_NAME}.diff-unified .diff-gutter-col + .diff-gutter-col {
       width: 0;
     }

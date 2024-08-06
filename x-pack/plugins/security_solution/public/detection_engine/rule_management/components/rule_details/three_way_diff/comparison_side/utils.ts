@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import stringify from 'json-stable-stringify';
 import { Version } from '../versions_picker/constants';
 import type {
   DiffableAllFields,
@@ -31,3 +32,18 @@ export function pickFieldValueForVersion<FieldName extends keyof DiffableAllFiel
   const versionFieldToPick = `${version}_version` as const;
   return fieldThreeWayDiff[versionFieldToPick];
 }
+
+/**
+ * Stringifies a field value to an alphabetically sorted JSON string.
+ */
+export const stringifyToSortedJson = (fieldValue: unknown): string => {
+  if (fieldValue === undefined) {
+    return '';
+  }
+
+  if (typeof fieldValue === 'string') {
+    return fieldValue;
+  }
+
+  return stringify(fieldValue, { space: 2 });
+};
