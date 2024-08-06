@@ -636,8 +636,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .getDataViewsContextMenu()
               .then((menu) => PageObjects.observabilityLogsExplorer.getPanelEntries(menu));
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[1]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
           // Test back ascending order
@@ -649,6 +650,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
             expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
           });
         });
 
