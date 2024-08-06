@@ -8,7 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { HOST_NAME } from '@kbn/apm-types/es_fields';
-import type { TimeRangeMetadata } from '../../../common';
+import { getBucketSize, type TimeRangeMetadata } from '../../../common';
 import { getPreferredBucketSizeAndDataSource } from '../../../common/utils/get_preferred_bucket_size_and_data_source';
 import { ApmDocumentType } from '../../../common/document_type';
 import type { ApmDataAccessServicesParams } from '../get_services';
@@ -30,7 +30,7 @@ export function createGetHostNames({ apmEventClient }: ApmDataAccessServicesPara
   return async ({ start, end, size = MAX_SIZE, query, documentSources }: HostNamesRequest) => {
     const sourcesToUse = getPreferredBucketSizeAndDataSource({
       sources: documentSources.filter((s) => suitableTypes.includes(s.documentType)),
-      bucketSizeInSeconds: (end - start) * 1000,
+      bucketSizeInSeconds: getBucketSize({ start, end, numBuckets: 50 }).bucketSize,
     });
 
     const esResponse = await apmEventClient.search('get_apm_host_names', {
