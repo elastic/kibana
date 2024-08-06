@@ -55,8 +55,8 @@ expressions `1 + 2`, function call expressions `fn()`, identifier expressions
 
 As of this writing, the following expressions are defined:
 
-- Column identifier expression, `{type: "column"}`, like `@timestamp`
 - Source identifier expression, `{type: "source"}`, like `tsdb_index`
+- Column identifier expression, `{type: "column"}`, like `@timestamp`
 - Function call expression, `{type: "function"}`, like `fn(123)`
 - Literal expression, `{type: "literal"}`, like `123`, `"hello"`
 - List literal expression, `{type: "list"}`, like `[1, 2, 3]`, `["a", "b", "c"]`, `[true, false]`
