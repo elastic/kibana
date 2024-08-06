@@ -172,7 +172,6 @@ paths:
               properties:
                 comments:
                   $ref: '#/components/schemas/ExceptionListItemCommentArray'
-                  default: []
                 description:
                   $ref: '#/components/schemas/ExceptionListItemDescription'
                 entries:
@@ -185,10 +184,8 @@ paths:
                   $ref: '#/components/schemas/ExceptionListItemName'
                 os_types:
                   $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
                 tags:
                   $ref: '#/components/schemas/ExceptionListItemTags'
-                  default: []
                 type:
                   $ref: '#/components/schemas/ExceptionListItemType'
               required:
@@ -196,6 +193,9 @@ paths:
                 - name
                 - description
                 - entries
+                - os_types
+                - tags
+                - comments
         description: Exception list item's properties
         required: true
       responses:
@@ -244,30 +244,27 @@ paths:
         content:
           application/json:
             schema:
+              description: Either `id` or `item_id` must be specified
               type: object
               properties:
                 _version:
                   type: string
                 comments:
                   $ref: '#/components/schemas/ExceptionListItemCommentArray'
-                  default: []
                 description:
                   $ref: '#/components/schemas/ExceptionListItemDescription'
                 entries:
                   $ref: '#/components/schemas/ExceptionListItemEntryArray'
                 id:
                   $ref: '#/components/schemas/ExceptionListItemId'
-                  description: Either `id` or `item_id` must be specified
                 item_id:
                   $ref: '#/components/schemas/ExceptionListItemHumanId'
-                  description: Either `id` or `item_id` must be specified
                 meta:
                   $ref: '#/components/schemas/ExceptionListItemMeta'
                 name:
                   $ref: '#/components/schemas/ExceptionListItemName'
                 os_types:
                   $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
                 tags:
                   $ref: '#/components/schemas/ExceptionListItemTags'
                 type:
@@ -277,6 +274,8 @@ paths:
                 - name
                 - description
                 - entries
+                - os_types
+                - comments
         description: Exception list item's properties
         required: true
       responses:
@@ -489,7 +488,6 @@ components:
       type: string
     ExceptionListHumanId:
       $ref: '#/components/schemas/NonEmptyString'
-      description: 'Human readable string identifier, e.g. `trusted-linux-processes`'
     ExceptionListId:
       $ref: '#/components/schemas/NonEmptyString'
     ExceptionListItem:
@@ -729,10 +727,12 @@ components:
     ExceptionListItemName:
       $ref: '#/components/schemas/NonEmptyString'
     ExceptionListItemOsTypeArray:
+      default: []
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array
     ExceptionListItemTags:
+      default: []
       items:
         $ref: '#/components/schemas/NonEmptyString'
       type: array
@@ -752,10 +752,12 @@ components:
         - windows
       type: string
     ExceptionListOsTypeArray:
+      default: []
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array
     ExceptionListTags:
+      default: []
       items:
         type: string
       type: array
@@ -770,9 +772,11 @@ components:
         - endpoint_blocklists
       type: string
     ExceptionListVersion:
+      default: 1
       minimum: 1
       type: integer
     ExceptionNamespaceType:
+      default: single
       description: >
         Determines whether the exception container is available in all Kibana
         spaces or just the space

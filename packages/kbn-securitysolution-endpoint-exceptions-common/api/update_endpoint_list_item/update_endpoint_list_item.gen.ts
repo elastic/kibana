@@ -31,24 +31,21 @@ import {
 import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_item_entry.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
+/**
+ * Either `id` or `item_id` must be specified
+ */
 export type UpdateEndpointListItemRequestBody = z.infer<typeof UpdateEndpointListItemRequestBody>;
 export const UpdateEndpointListItemRequestBody = z.object({
-  /**
-   * Either `id` or `item_id` must be specified
-   */
   id: ExceptionListItemId.optional(),
-  /**
-   * Either `id` or `item_id` must be specified
-   */
   item_id: ExceptionListItemHumanId.optional(),
   type: ExceptionListItemType,
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
+  os_types: ExceptionListItemOsTypeArray,
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
-  comments: ExceptionListItemCommentArray.optional().default([]),
+  comments: ExceptionListItemCommentArray,
   _version: z.string().optional(),
 });
 export type UpdateEndpointListItemRequestBodyInput = z.input<

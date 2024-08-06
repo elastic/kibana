@@ -37,10 +37,10 @@ export const CreateEndpointListItemRequestBody = z.object({
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional().default([]),
+  os_types: ExceptionListItemOsTypeArray,
+  tags: ExceptionListItemTags,
   meta: ExceptionListItemMeta.optional(),
-  comments: ExceptionListItemCommentArray.optional().default([]),
+  comments: ExceptionListItemCommentArray,
 });
 export type CreateEndpointListItemRequestBodyInput = z.input<
   typeof CreateEndpointListItemRequestBody

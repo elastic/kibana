@@ -29,20 +29,20 @@ paths:
                   $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
                 os_types:
                   $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
                 tags:
                   $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
-                  default: []
                 meta:
                   $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
                 comments:
                   $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemCommentArray'
-                  default: []
               required:
                 - type
                 - name
                 - description
                 - entries
+                - os_types
+                - tags
+                - comments
       responses:
         200:
           description: Successful response
