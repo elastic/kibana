@@ -39,7 +39,6 @@ import {
   registerLocalizationUsageCollector,
   registerUiCountersUsageCollector,
   registerConfigUsageCollector,
-  registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
   registerSavedObjectsCountUsageCollector,
   registerEventLoopDelaysCollector,
@@ -128,11 +127,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
     registerUiCountersUsageCollector(usageCollection, this.logger);
 
-    registerUsageCountersRollups(
-      this.logger.get('usage-counters-rollup'),
-      getSavedObjectsClient,
-      pluginStop$
-    );
     registerUsageCountersUsageCollector(usageCollection, this.logger);
 
     registerOpsStatsCollector(usageCollection, metric$);
