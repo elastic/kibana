@@ -442,7 +442,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('delete', () => {
-      it('should correctly delete asset criticality', async () => {
+      it('should correctly delete asset criticality if it exists', async () => {
         const assetCriticality = {
           id_field: 'host.name',
           id_value: 'delete-me',
@@ -451,7 +451,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await assetCriticalityRoutes.upsert(assetCriticality);
 
-        await assetCriticalityRoutes.delete('host.name', 'delete-me');
+        const res = await assetCriticalityRoutes.delete('host.name', 'delete-me');
+
+        expect(res.body.deleted).to.eql(true);
+        expect(_.omit(res.body.record, '@timestamp')).to.eql(assetCriticality);
         const doc = await getAssetCriticalityDoc({
           idField: 'host.name',
           idValue: 'delete-me',
@@ -459,6 +462,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(doc).to.eql(undefined);
+      });
+
+      it('should not return 404 if the asset criticality does not exist', async () => {
+        const res = await assetCriticalityRoutes.delete('host.name', 'doesnt-exist');
+
+        expect(res.body.deleted).to.eql(false);
+        expect(res.body.record).to.eql(undefined);
       });
 
       it('should return 403 if the advanced setting is disabled', async () => {
