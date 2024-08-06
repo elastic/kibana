@@ -13,7 +13,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { useSetInputEditor } from '../../../hooks';
-import { ConsoleMenu } from '../../../components';
+import { ContextMenu } from './components';
 import {
   useServicesContext,
   useEditorReadContext,
@@ -156,7 +156,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
-          <ConsoleMenu
+          <ContextMenu
             getCurl={getCurlCallback}
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
