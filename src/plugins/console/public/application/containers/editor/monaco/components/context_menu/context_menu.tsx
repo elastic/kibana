@@ -1,13 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import React, { useState, useCallback } from 'react';
 import {
   EuiIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
 import { NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LanguageSelectorModal } from './language_selector_modal';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -19,6 +30,8 @@ interface Props {
 
 export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notifications }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('cURL');
   const [curlCode, setCurlCode] = useState('');
   const [curlError, setCurlError] = useState(null);
 
@@ -62,6 +75,10 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
     }
   };
 
+  const changeDefaultLanguage = (language: string) => {
+    setCurrentLanguage(language);
+  };
+
   const onButtonClick = () => {
     setIsPopoverOpen((prev) => !prev);
   };
@@ -102,26 +119,50 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
       data-test-subj="consoleMenuCopyAsCurl"
       id="ConCopyAsCurl"
       disabled={!window.navigator?.clipboard}
-      onClick={() => {
+      onClick={(e: React.MouseEvent) => {
+        const target = e.target as HTMLButtonElement;
+
+        if (target.dataset.name === 'changeLanguage') {
+          setLanguageSelectorVisibility(true);
+          return;
+        }
+
         closePopover();
         copyAsCurl();
       }}
       icon="copyClipboard"
     >
-      <FormattedMessage
-        id="console.requestOptions.copyAsUrlButtonLabel"
-        defaultMessage="Copy cURL command!!"
-      />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize='s' alignItems="center">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  tagName="span"
+                  id="console.requestOptions.copyAsUrlButtonLabel"
+                  defaultMessage="Copy as"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <strong>{currentLanguage}</strong>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink data-name="changeLanguage">
+              Change
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="consoleMenuAutoIndent"
       key="Auto indent"
       onClick={handleAutoIndent}
-      icon="arrowEnd"
+      icon="kqlFunction"
     >
       <FormattedMessage
         id="console.requestOptions.autoIndentButtonLabel"
-        defaultMessage="Apply indentations"
+        defaultMessage="Auto indent"
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
@@ -132,23 +173,33 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
     >
       <FormattedMessage
         id="console.requestOptions.openDocumentationButtonLabel"
-        defaultMessage="View documentation"
+        defaultMessage="Open API reference"
       />
     </EuiContextMenuItem>,
   ];
 
   return (
-    <span onMouseEnter={mouseEnter}>
-      <EuiPopover
-        id="contextMenu"
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
-      </EuiPopover>
-    </span>
+    <>
+      <span onMouseEnter={mouseEnter}>
+        <EuiPopover
+          id="contextMenu"
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
+        </EuiPopover>
+      </span>
+      {isLanguageSelectorVisible && (
+        <LanguageSelectorModal
+          currentLanguage={currentLanguage}
+          changeDefaultLanguage={changeDefaultLanguage}
+          closeModal={() => setLanguageSelectorVisibility(false)}
+          hidePopover={() => setIsPopoverOpen(false)}
+        />
+      )}
+    </>
   );
 };
