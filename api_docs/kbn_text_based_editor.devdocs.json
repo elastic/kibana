@@ -227,7 +227,7 @@
         "tags": [],
         "label": "TextBasedLanguagesEditorProps",
         "description": [],
-        "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+        "path": "packages/kbn-text-based-editor/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +243,7 @@
             "signature": [
               "{ esql: string; }"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,7 +267,7 @@
               },
               ") => void"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -287,7 +287,7 @@
                     "text": "AggregateQuery"
                   }
                 ],
-                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+                "path": "packages/kbn-text-based-editor/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -315,7 +315,7 @@
               },
               " | undefined, abortController?: AbortController | undefined) => Promise<void>"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -336,7 +336,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+                "path": "packages/kbn-text-based-editor/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -351,60 +351,13 @@
                 "signature": [
                   "AbortController | undefined"
                 ],
-                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+                "path": "packages/kbn-text-based-editor/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/text-based-editor",
-            "id": "def-public.TextBasedLanguagesEditorProps.expandCodeEditor",
-            "type": "Function",
-            "tags": [],
-            "label": "expandCodeEditor",
-            "description": [
-              "Can be used to expand/minimize the editor"
-            ],
-            "signature": [
-              "(status: boolean) => void"
-            ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/text-based-editor",
-                "id": "def-public.TextBasedLanguagesEditorProps.expandCodeEditor.$1",
-                "type": "boolean",
-                "tags": [],
-                "label": "status",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/text-based-editor",
-            "id": "def-public.TextBasedLanguagesEditorProps.isCodeEditorExpanded",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCodeEditorExpanded",
-            "description": [
-              "If it is true, the editor initializes with height EDITOR_INITIAL_HEIGHT_EXPANDED"
-            ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/text-based-editor",
@@ -418,7 +371,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -434,7 +387,7 @@
             "signature": [
               "Error[] | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -450,7 +403,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -466,7 +419,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,23 +435,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/text-based-editor",
-            "id": "def-public.TextBasedLanguagesEditorProps.isDarkMode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isDarkMode",
-            "description": [
-              "Indicator if the editor is on dark mode"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -512,23 +449,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/text-based-editor",
-            "id": "def-public.TextBasedLanguagesEditorProps.hideMinimizeButton",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideMinimizeButton",
-            "description": [
-              "If true it hides the minimize button and the user can't return to the minimized version\nUseful when the application doesn't want to give this capability"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -544,7 +465,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -560,7 +481,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -576,7 +497,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -592,7 +513,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -608,7 +529,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,23 +545,23 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/text-based-editor",
-            "id": "def-public.TextBasedLanguagesEditorProps.hideHeaderWhenExpanded",
+            "id": "def-public.TextBasedLanguagesEditorProps.hasOutline",
             "type": "CompoundType",
             "tags": [],
-            "label": "hideHeaderWhenExpanded",
+            "label": "hasOutline",
             "description": [
-              "hide header buttons when editor is expanded"
+              "adds border in the editor"
             ],
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "path": "packages/kbn-text-based-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
