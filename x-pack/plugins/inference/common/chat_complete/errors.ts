@@ -76,6 +76,13 @@ export function createToolValidationError(
   return new InferenceTaskError(ChatCompletionErrorCode.ToolValidationError, message, meta);
 }
 
+export function isToolValidationError(error?: Error): error is ChatCompletionToolValidationError {
+  return (
+    error instanceof InferenceTaskError &&
+    error.code === ChatCompletionErrorCode.ToolValidationError
+  );
+}
+
 export function isTokenLimitReachedError(
   error: Error
 ): error is ChatCompletionTokenLimitReachedError {

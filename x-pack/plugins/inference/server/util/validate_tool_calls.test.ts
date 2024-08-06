@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isToolValidationError } from '../../common/chat_complete/errors';
 import { ToolChoiceType } from '../../common/chat_complete/tools';
 import { validateToolCalls } from './validate_tool_calls';
 
@@ -79,13 +80,13 @@ describe('validateToolCalls', () => {
   });
 
   it('throws an error if the function call has invalid arguments', () => {
-    expect(() =>
+    function validate() {
       validateToolCalls({
         toolCalls: [
           {
             function: {
               name: 'my_function',
-              arguments: '{ "foo": "bar" }',
+              arguments: JSON.stringify({ foo: 'bar' }),
             },
             toolCallId: '1',
           },
@@ -105,8 +106,25 @@ describe('validateToolCalls', () => {
             },
           },
         },
-      })
-    ).toThrowErrorMatchingInlineSnapshot(`"Tool call arguments for my_function were invalid"`);
+      });
+    }
+    expect(() => validate()).toThrowErrorMatchingInlineSnapshot(
+      `"Tool call arguments for my_function were invalid"`
+    );
+
+    try {
+      validate();
+    } catch (error) {
+      if (isToolValidationError(error)) {
+        expect(error.meta).toEqual({
+          arguments: JSON.stringify({ foo: 'bar' }),
+          errorsText: `data must have required property 'bar'`,
+          name: 'my_function',
+        });
+      } else {
+        fail('Expected toolValidationError');
+      }
+    }
   });
 
   it('successfully validates and parses a valid tool call', () => {
