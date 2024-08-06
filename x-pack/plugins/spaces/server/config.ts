@@ -40,6 +40,20 @@ export const ConfigSchema = schema.object({
       defaultValue: true,
     }),
   }),
+  allowSolutionVisibility: offeringBasedSchema({
+    serverless: schema.literal(false),
+    traditional: schema.boolean({
+      validate: (rawValue) => {
+        // This setting should not be configurable on-prem to avoid bugs when e.g. existing spaces
+        // have custom solution but admins would be unable to change the navigation solution if the
+        // UI/APIs are disabled.
+        if (rawValue === false) {
+          return 'Solution visibility can only be disabled on serverless';
+        }
+      },
+      defaultValue: true,
+    }),
+  }),
 });
 
 export function createConfig$(context: PluginInitializerContext) {
