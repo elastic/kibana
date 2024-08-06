@@ -367,13 +367,10 @@ paths:
       operationId: GetEndpointMetadata
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            type: object
-            properties:
-              id:
-                type: string
+            type: string
       responses:
         '200':
           content:
@@ -421,6 +418,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/policy/summaries:
     get:
+      deprecated: true
       operationId: GetAgentPolicySummary
       parameters:
         - in: query
