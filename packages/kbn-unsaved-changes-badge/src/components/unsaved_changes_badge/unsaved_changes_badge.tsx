@@ -148,7 +148,7 @@ export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
   const button = (
     <EuiBadge
       data-test-subj="unsavedChangesBadge"
-      color="warning"
+      color="#F6E58D"
       iconType="arrowDown"
       iconSide="right"
       onClick={togglePopover}
