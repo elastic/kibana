@@ -1405,6 +1405,9 @@ describe('autocomplete', () => {
       24
     );
     testSuggestions('FROM a | KEEP doubleField', ['doubleField,', 'doubleField| '], undefined, 25);
+    testSuggestions('FROM a | KEEP @timestamp', ['timestamp,', 'timestamp| '], undefined, 24, [
+      [{ name: '@timestamp', type: 'date' }],
+    ]);
     testSuggestions('FROM a | KEEP doubleField ', ['| ', ','], undefined, 26);
 
     // LIMIT number

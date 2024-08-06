@@ -667,10 +667,12 @@ async function getExpressionSuggestionsByType(
           if (column) {
             // now we know that the user has already entered a column,
             // so suggest comma and pipe
+            const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
+            const textToUse = lastWord.replace(NON_ALPHANUMERIC_REGEXP, '');
             return getFinalSuggestions().map((s) => ({
               ...s,
-              filterText: lastWord,
-              text: lastWord + s.text,
+              filterText: textToUse,
+              text: textToUse + s.text,
             }));
           }
         }
