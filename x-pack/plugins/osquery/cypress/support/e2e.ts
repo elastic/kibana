@@ -37,7 +37,7 @@ import { login } from '@kbn/security-solution-plugin/public/management/cypress/t
 import type { ServerlessRoleName } from './roles';
 
 import { waitUntil } from '../tasks/wait_until';
-import { isServerless } from '../tasks/serverless';
+import { isCloudServerless, isServerless } from '../tasks/serverless';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -79,7 +79,8 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('login', (role) => {
-  if (isServerless) {
+  if (isServerless && !isCloudServerless) {
+    // Do not use login.with in MKI env, default to login which will route to proper login method
     return login.with(role, 'changeme');
   }
 

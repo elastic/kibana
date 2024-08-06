@@ -11,6 +11,7 @@ import { safeLoad as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import type { YamlRoleDefinitions } from '@kbn/test-suites-serverless/shared/lib';
 import { setupUserDataLoader } from '@kbn/test-suites-serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
+import { samlAuthentication } from '@kbn/test-suites-xpack/security_solution_cypress/cypress/support/saml_auth';
 import { getFailedSpecVideos } from './support/filter_videos';
 
 const ROLES_YAML_FILE_PATH = path.join(
@@ -58,6 +59,7 @@ export const getCypressBaseConfig = (
         numTestsKeptInMemory: 3,
         setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
           setupUserDataLoader(on, config, { roleDefinitions, additionalRoleName: 'viewer' });
+          samlAuthentication(on, config);
           on('after:spec', getFailedSpecVideos);
 
           return config;
