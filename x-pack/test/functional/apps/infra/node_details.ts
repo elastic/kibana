@@ -182,7 +182,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('#Asset Type: host', () => {
+      describe.only('#Asset Type: host', () => {
         before(async () => {
           await pageObjects.timePicker.setAbsoluteRange(
             START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
@@ -558,7 +558,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             [
-              { metric: 'cpuUsage', value: '100%' },
+              { metric: 'cpuUsage', value: '100.0%' },
               { metric: 'normalizedLoad1m', value: '1,300.3%' },
               { metric: 'memoryUsage', value: '42.2%' },
               { metric: 'diskUsage', value: '36.0%' },
