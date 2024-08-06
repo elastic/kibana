@@ -19274,7 +19274,9 @@
     {
       "query": "row var = mv_sort(5, \"a\")",
       "error": [],
-      "warning": []
+      "warning": [
+        "Invalid option [\"a\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "row mv_sort(5, \"a\")",
