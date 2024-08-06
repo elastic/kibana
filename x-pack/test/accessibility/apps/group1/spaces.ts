@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
 
-  // FIXME
-  describe.skip('Kibana Spaces Accessibility', () => {
+  describe('Kibana Spaces Accessibility', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');

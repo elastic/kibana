@@ -31,8 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // FIXME
-    describe.skip('global all base privilege', () => {
+    describe('global all base privilege', () => {
       before(async () => {
         await security.role.create('global_all_role', {
           kibana: [
@@ -103,7 +102,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        await testSubjects.existOrFail('spaces-edit-page');
+        await testSubjects.existOrFail('spaces-view-page');
       });
     });
 
