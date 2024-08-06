@@ -1535,6 +1535,28 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('allows (but ignores) rules with a value for rule_source', async () => {
+        const rule = getCustomQueryRuleParams({
+          rule_id: 'rule-source',
+          // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
+          rule_source: {
+            type: 'internal',
+          },
+        });
+        const ndjson = combineToNdJson(rule);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).toMatchObject({
+          success: true,
+        });
+      });
+
       it('rejects rules without a rule_id', async () => {
         const rule = getCustomQueryRuleParams({});
         delete rule.rule_id;
