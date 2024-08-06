@@ -88,6 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
     'user.name': ['root'],
   };
 
+  // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with an active ML Job', () => {
       before(async () => {
