@@ -16,13 +16,11 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { agentStatusesToSummary } from '../../../common/services';
-
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { FleetError, FleetUnauthorizedError } from '../../errors';
-
 import { appContextService } from '../app_context';
-
+import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { getAgentById, removeSOAttributes } from './crud';
@@ -54,7 +52,7 @@ export async function getAgentStatusForAgentPolicy(
 
   const clauses: QueryDslQueryContainer[] = [];
 
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (useSpaceAwareness && spaceId) {
     if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(

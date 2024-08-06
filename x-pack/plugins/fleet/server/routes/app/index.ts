@@ -8,17 +8,17 @@
 import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
-
 import { APP_API_ROUTES } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
-
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
+import { type FleetConfigType } from '../../config';
 
 export const getCheckPermissionsHandler: FleetRequestHandler<
   unknown,
@@ -160,23 +160,26 @@ const serviceTokenBodyValidation = (data: any, validationResult: RouteValidation
   return ok({ remote });
 };
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.versioned
-    .post({
-      path: '/internal/fleet/enable_space_awareness',
-      access: 'internal',
-      fleetAuthz: {
-        fleet: { all: true },
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: {},
-      },
-      postEnableSpaceAwarenessHandler
-    );
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
 
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .post({
+        path: '/internal/fleet/enable_space_awareness',
+        access: 'internal',
+        fleetAuthz: {
+          fleet: { all: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {},
+        },
+        postEnableSpaceAwarenessHandler
+      );
+  }
   router.versioned
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,

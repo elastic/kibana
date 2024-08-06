@@ -7,10 +7,10 @@
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
-import { appContextService } from '..';
+import { isSpaceAwarenessEnabled } from './helpers';
 
-export function addNamespaceFilteringToQuery(query: any, namespace?: string) {
-  const useSpaceAwareness = appContextService.getExperimentalFeatures()?.useSpaceAwareness;
+export async function addNamespaceFilteringToQuery(query: any, namespace?: string) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !namespace) {
     return query;
   }
