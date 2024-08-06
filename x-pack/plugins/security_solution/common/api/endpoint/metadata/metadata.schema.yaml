@@ -44,14 +44,11 @@ paths:
       x-codegen-enabled: false
       x-labels: [ess, serverless]
       parameters:
-        - name: query
+        - name: id
           in: path
           required: true
           schema:
-            type: object
-            properties:
-              id:
-                type: string
+            type: string
       responses:
         '200':
           description: OK
