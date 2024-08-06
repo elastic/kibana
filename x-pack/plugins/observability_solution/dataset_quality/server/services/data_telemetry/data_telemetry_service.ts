@@ -15,15 +15,13 @@ import {
   takeUntil,
   exhaustMap,
   switchMap,
-  concatMap,
   map,
   of,
   EMPTY,
 } from 'rxjs';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
 import {
   BREATHE_DELAY_MEDIUM,
@@ -33,18 +31,18 @@ import {
   MAX_STREAMS_TO_REPORT,
   STARTUP_DELAY,
   TELEMETRY_INTERVAL,
-  TELEMETRY_CHANNEL,
+  LOGS_DATASET_INDEX_PATTERNS,
 } from './constants';
 import {
-  addMappingsToDataStreams,
-  addStreamNameAndNamespace,
-  groupStatsByStreamName,
-  addDataStreamBasicStats,
-  getDataStreamsInfoForStreamOfLogs,
-  streamStatsToTelemetryEvents,
+  getAllIndices,
+  addMappingsToIndices,
+  addNamespace,
+  groupStatsByPatternName,
+  addIndexBasicStats,
+  indexStatsToTelemetryEvents,
 } from './helpers';
 
-import { DataTelemetryEvent, StreamOfLog } from './types';
+import { DataTelemetryEvent } from './types';
 
 export class DataTelemetryService {
   private readonly logger: Logger;
@@ -53,7 +51,7 @@ export class DataTelemetryService {
   private telemetryStart?: TelemetryPluginStart;
 
   // @ts-ignore: Unused variable
-  private telemetrySetup?: TelemetryPluginSetup;
+  private analytics?: AnalyticsServiceSetup;
 
   // @ts-ignore: Unused variable
   private isInProgress = false;
@@ -61,21 +59,17 @@ export class DataTelemetryService {
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
 
-  // @ts-ignore: Unused variable
-  private clusterInfo?: InfoResponse;
-
   constructor(logger: Logger) {
     this.logger = logger;
   }
 
-  public setup(telemetrySetup?: TelemetryPluginSetup) {
-    this.telemetrySetup = telemetrySetup;
+  public setup(analytics: AnalyticsServiceSetup) {
+    this.analytics = analytics;
   }
 
   public async start(telemetryStart?: TelemetryPluginStart, core?: CoreStart) {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
-    this.clusterInfo = await this.fetchClusterInfo();
 
     this.logger.debug(`[Logs Data Telemetry] Starting the service`);
     timer(STARTUP_DELAY, TELEMETRY_INTERVAL)
@@ -106,65 +100,56 @@ export class DataTelemetryService {
   }
 
   private collectAndSend() {
-    // Gather data streams related to each stream of log
-    const streamOfLogs = Object.values(StreamOfLog);
+    // Gather data streams and indices related to each stream of log
     if (this.esClient) {
-      return getDataStreamsInfoForStreamOfLogs({
+      return getAllIndices({
         esClient: this.esClient,
-        streamOfLogs,
+        logsIndexPatterns: LOGS_DATASET_INDEX_PATTERNS,
         excludeStreamsStartingWith: [...NON_LOG_SIGNALS, ...EXCLUDE_ELASTIC_LOGS],
         breatheDelay: BREATHE_DELAY_MEDIUM,
       }).pipe(
-        switchMap((dataStreamsInfo) => {
-          if (dataStreamsInfo.length > MAX_STREAMS_TO_REPORT) {
+        switchMap((dataStreamsAndIndicesInfo) => {
+          if (dataStreamsAndIndicesInfo.length > MAX_STREAMS_TO_REPORT) {
             this.logger.debug(
               `[Logs Data Telemetry] Number of data streams exceeds ${MAX_STREAMS_TO_REPORT}. Skipping telemetry collection.`
             );
             return EMPTY;
           }
-          return of(dataStreamsInfo);
+          return of(dataStreamsAndIndicesInfo);
         }),
         delay(BREATHE_DELAY_SHORT),
-        switchMap((dataStreamsInfo) => {
-          return addMappingsToDataStreams({
+        switchMap((dataStreamsAndIndicesInfo) => {
+          return addMappingsToIndices({
             esClient: this.esClient!,
-            dataStreamsInfo,
+            dataStreamsInfo: dataStreamsAndIndicesInfo,
             breatheDelay: BREATHE_DELAY_MEDIUM,
           });
         }),
         delay(BREATHE_DELAY_SHORT),
-        switchMap((dataStreamsInfo) => {
-          return addStreamNameAndNamespace({
-            dataStreamsInfo,
+        switchMap((dataStreamsAndIndicesInfo) => {
+          return addNamespace({
+            dataStreamsInfo: dataStreamsAndIndicesInfo,
             breatheDelay: BREATHE_DELAY_SHORT,
           });
         }),
         delay(BREATHE_DELAY_SHORT),
-        switchMap((streams) => {
-          return addDataStreamBasicStats({
+        switchMap((infoWithNamespace) => {
+          return addIndexBasicStats({
             esClient: this.esClient!,
-            streams,
+            indices: infoWithNamespace,
             breatheDelay: BREATHE_DELAY_MEDIUM,
           });
         }),
         delay(BREATHE_DELAY_SHORT),
-        map((dataStreamsInfo) => {
-          return groupStatsByStreamName(dataStreamsInfo);
+        map((infoWithNamespace) => {
+          return groupStatsByPatternName(infoWithNamespace);
         }),
-        switchMap((statsByStream) => {
-          return from(this.fetchClusterInfo()).pipe(
-            map((clusterInfo) => {
-              return streamStatsToTelemetryEvents(statsByStream, clusterInfo);
-            })
-          );
+        map((statsByPattern) => {
+          return indexStatsToTelemetryEvents(statsByPattern);
         }),
         delay(BREATHE_DELAY_SHORT),
         switchMap((dataTelemetryEvents) => {
-          return from(this.getTelemetryChannelUrl(TELEMETRY_CHANNEL)).pipe(
-            concatMap((telemetryUrl) => {
-              return this.send(dataTelemetryEvents, telemetryUrl);
-            })
-          );
+          return from(this.reportEvents(dataTelemetryEvents));
         })
       );
     } else {
@@ -177,27 +162,8 @@ export class DataTelemetryService {
     }
   }
 
-  private async fetchClusterInfo(): Promise<InfoResponse | undefined> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error(
-        '[Logs Data Telemetry]  elasticsearch client is unavailable: cannot retrieve cluster information'
-      );
-    }
-
-    try {
-      return await this.esClient.info();
-    } catch (e) {
-      this.logger.warn(`[Logs Data Telemetry] Error fetching cluster information: ${e}`);
-    }
-  }
-
-  private async getTelemetryChannelUrl(channel: string) {
-    return ''; // TODO: Implement fetching telemetry URL
-  }
-
-  // @ts-ignore: Unused function
-  private async send(events: DataTelemetryEvent[], telemetryUrl: string) {
-    // TODO: Implement sending events to the telemetry URL over HTTP
+  private async reportEvents(events: DataTelemetryEvent[]) {
+    // TODO: Implement reporting events via analytics service
     return Promise.resolve(events);
   }
 

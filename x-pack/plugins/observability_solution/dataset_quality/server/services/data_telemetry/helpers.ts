@@ -5,44 +5,60 @@
  * 2.0.
  */
 
-import { from, of, Observable, concatMap, delay, map, toArray } from 'rxjs';
-import { InfoResponse, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
+import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
+import { MappingTypeMapping, MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IndexName } from '@kbn/ml-data-frame-analytics-utils/src/types';
+import type { DatasetIndexPattern } from './types';
 
 import {
-  DataStreamBasicInfo,
+  IndexBasicInfo,
   DataStreamStatsByNamespace,
   DataStreamStats,
   DataTelemetryEvent,
 } from './types';
 
 /**
- * Retrieves unique data streams for all streams of logs.
- * Excludes streams for known signals other than logs e.g. alerts, metrics etc as well log streams which are not
- * relevant for data telemetry.
+ * Retrieves all indices and data streams for each stream of logs.
  */
-export function getDataStreamsInfoForStreamOfLogs({
+export function getAllIndices({
   esClient,
-  streamOfLogs,
+  logsIndexPatterns,
   excludeStreamsStartingWith,
   breatheDelay,
 }: {
   esClient: ElasticsearchClient;
-  streamOfLogs: string[];
+  logsIndexPatterns: DatasetIndexPattern[];
   excludeStreamsStartingWith: string[];
   breatheDelay: number; // Breathing time between each request to prioritize other cluster operations
-}): Observable<DataStreamBasicInfo[]> {
-  const uniqueDataStreamsSet = new Set<string>();
-  const dataStreamsInfo: DataStreamBasicInfo[] = [];
+}): Observable<IndexBasicInfo[]> {
+  const uniqueIndices = new Set<string>();
+  const indicesInfo: IndexBasicInfo[] = [];
 
-  return from(streamOfLogs).pipe(
-    concatMap((streamOfLog) =>
-      of(streamOfLog).pipe(
+  return from(logsIndexPatterns).pipe(
+    concatMap((pattern) =>
+      of(pattern).pipe(
         delay(breatheDelay),
-        concatMap(() => from(getDataStreamsInfoForPattern({ esClient, pattern: streamOfLog }))),
-        map((dataStreamsForStreamOfLog) => {
-          return dataStreamsForStreamOfLog.filter(
+        concatMap(() => {
+          return forkJoin([
+            from(getDataStreamsInfoForPattern({ esClient, pattern })),
+            from(getIndicesInfoForPattern({ esClient, pattern })),
+          ]);
+        }),
+        map(([patternDataStreamsInfo, patternIndicesInfo]) => {
+          return [...patternDataStreamsInfo, ...patternIndicesInfo];
+        }),
+        map((indicesAndDataStreams) => {
+          // Exclude indices that have already been dealt with
+          return indicesAndDataStreams.filter((dataStream) => {
+            return !uniqueIndices.has(dataStream.name);
+          });
+        }),
+        map((indicesAndDataStreams) => {
+          // Exclude internal indices
+          return indicesAndDataStreams.filter((dataStream) => !dataStream.name.startsWith('.'));
+        }),
+        map((indicesAndDataStreams) => {
+          return indicesAndDataStreams.filter(
             // Exclude streams starting with known signals
             (dataStream) =>
               !excludeStreamsStartingWith.some((excludeStream) =>
@@ -50,72 +66,76 @@ export function getDataStreamsInfoForStreamOfLogs({
               )
           );
         }),
-        map((logDataStreams) =>
-          logDataStreams.filter((dataStream) => {
-            if (uniqueDataStreamsSet.has(dataStream.name)) {
-              return false;
-            }
-            uniqueDataStreamsSet.add(dataStream.name);
-            return true;
-          })
-        ),
+        map((indicesAndDataStreams) => {
+          indicesAndDataStreams.forEach((dataStream) => {
+            uniqueIndices.add(dataStream.name);
+          });
+          return indicesAndDataStreams;
+        }),
         map((dataStreamsInfoRecords) => {
-          dataStreamsInfo.push(...dataStreamsInfoRecords);
+          indicesInfo.push(...dataStreamsInfoRecords);
           return dataStreamsInfoRecords;
         })
       )
     ),
     toArray(),
-    map(() => dataStreamsInfo)
+    map(() => indicesInfo)
   );
 }
 
-export function addMappingsToDataStreams({
+/**
+ * Retrieves and adds the mapping of the index if it is not already present.
+ */
+export function addMappingsToIndices({
   esClient,
   dataStreamsInfo,
   breatheDelay,
 }: {
   esClient: ElasticsearchClient;
-  dataStreamsInfo: DataStreamBasicInfo[];
+  dataStreamsInfo: IndexBasicInfo[];
   breatheDelay: number;
-}): Observable<DataStreamBasicInfo[]> {
+}): Observable<IndexBasicInfo[]> {
   return from(dataStreamsInfo).pipe(
     delay(breatheDelay),
     concatMap((info) =>
-      of(info).pipe(
-        concatMap(() =>
-          getDataStreamIndexMappings({
-            esClient,
-            indexName: info.name,
-            latestIndex: info.latestIndex,
-          })
-        ),
-        map((mapping) => {
-          info.mapping = mapping;
-          return info;
-        })
-      )
+      info.mapping
+        ? of(info)
+        : of(info).pipe(
+            concatMap(() =>
+              getIndexMapping({
+                esClient,
+                indexName: info.name,
+                latestIndex: info.latestIndex,
+              })
+            ),
+            map((mapping) => {
+              info.mapping = mapping;
+              return info;
+            })
+          )
     ),
     toArray()
   );
 }
 
-export function addStreamNameAndNamespace({
+/**
+ * Adds the namespace of the index from index mapping if available.
+ */
+export function addNamespace({
   dataStreamsInfo,
   breatheDelay,
 }: {
-  dataStreamsInfo: DataStreamBasicInfo[];
+  dataStreamsInfo: IndexBasicInfo[];
   breatheDelay: number;
-}): Observable<DataStreamBasicInfo[]> {
+}): Observable<IndexBasicInfo[]> {
   return from(dataStreamsInfo).pipe(
     delay(breatheDelay),
-    concatMap((info) =>
-      of(info).pipe(
-        map((dataStream) => getStreamNameAndNamespace(dataStream)),
-        map(({ namespace, streamName }) => {
-          info.namespace = namespace;
-          info.streamName = streamName;
-          return info;
+    concatMap((indexInfo) =>
+      of(indexInfo).pipe(
+        map((dataStream) => getIndexNamespace(dataStream)),
+        map((namespace) => {
+          indexInfo.namespace = namespace;
+          return indexInfo;
         })
       )
     ),
@@ -123,15 +143,15 @@ export function addStreamNameAndNamespace({
   );
 }
 
-export function groupStatsByStreamName(dataStreamsStats: DataStreamStatsByNamespace[]) {
+export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNamespace[]) {
   const statsByStream = dataStreamsStats.reduce<Map<string, DataStreamStats>>((acc, stats) => {
-    if (!stats.streamName) {
+    if (!stats.patternName) {
       return acc;
     }
 
-    if (!acc.get(stats.streamName)) {
-      acc.set(stats.streamName, {
-        streamName: stats.streamName,
+    if (!acc.get(stats.patternName)) {
+      acc.set(stats.patternName, {
+        streamName: stats.patternName,
         totalNamespaces: 0,
         totalDocuments: 0,
         totalSize: 0,
@@ -139,7 +159,7 @@ export function groupStatsByStreamName(dataStreamsStats: DataStreamStatsByNamesp
       });
     }
 
-    const streamStats = acc.get(stats.streamName)!;
+    const streamStats = acc.get(stats.patternName)!;
     streamStats.totalNamespaces += stats.namespace ? 1 : 0;
     streamStats.totalDocuments += stats.totalDocuments;
     streamStats.totalSize += stats.totalSize;
@@ -151,90 +171,104 @@ export function groupStatsByStreamName(dataStreamsStats: DataStreamStatsByNamesp
   return Array.from(statsByStream.values());
 }
 
-export function addDataStreamBasicStats({
+export function addIndexBasicStats({
   esClient,
-  streams,
+  indices,
   breatheDelay,
 }: {
   esClient: ElasticsearchClient;
-  streams: DataStreamBasicInfo[];
+  indices: IndexBasicInfo[];
   breatheDelay: number;
 }) {
-  return from(streams).pipe(
+  return from(indices).pipe(
     delay(breatheDelay),
-    concatMap((info) => from(getDataStreamStats(esClient, info))),
+    concatMap((info) => from(getIndexStats(esClient, info))),
     toArray()
   );
 }
 
+/**
+ * Retrieves information about data streams matching a given pattern.
+ * @param {Object} options - The options for retrieving data stream information.
+ * @param {ElasticsearchClient} options.esClient - The Elasticsearch client.
+ * @param {string} options.pattern - The pattern to match data streams.
+ * @returns {Promise<Array<Object>>} - A promise that resolves to an array of data stream information.
+ */
 async function getDataStreamsInfoForPattern({
   esClient,
   pattern,
 }: {
   esClient: ElasticsearchClient;
-  pattern: string;
-}) {
+  pattern: DatasetIndexPattern;
+}): Promise<IndexBasicInfo[]> {
   const resp = await esClient.indices.getDataStream({
-    name: pattern,
+    name: pattern.pattern,
+    expand_wildcards: 'all',
   });
 
   return resp.data_streams.map((dataStream) => ({
+    patternName: pattern.patternName,
     name: dataStream.name,
     latestIndex: dataStream.indices.length
       ? dataStream.indices[dataStream.indices.length - 1].index_name
       : undefined,
+    mapping: undefined,
     meta: dataStream._meta,
   }));
 }
 
-async function getDataStreamIndexMappings({
+async function getIndicesInfoForPattern({
+  esClient,
+  pattern,
+}: {
+  esClient: ElasticsearchClient;
+  pattern: DatasetIndexPattern;
+}): Promise<IndexBasicInfo[]> {
+  const resp = await esClient.indices.get({
+    index: pattern.pattern,
+  });
+
+  return Object.entries(resp).map(([index, indexInfo]) => ({
+    patternName: pattern.patternName,
+    name: index,
+    latestIndex: index,
+    mapping: indexInfo.mappings,
+    meta: indexInfo.mappings?._meta,
+  }));
+}
+
+async function getIndexMapping({
   esClient,
   indexName,
   latestIndex,
 }: {
   esClient: ElasticsearchClient;
-  indexName: IndexName;
+  indexName: string;
   latestIndex?: string;
-}) {
+}): Promise<MappingTypeMapping> {
   const resp = await esClient.indices.getMapping({
     index: latestIndex ?? indexName,
   });
 
-  return Object.values(resp)?.[0];
+  return resp[latestIndex ?? indexName].mappings;
 }
 
 /**
- * Determines the stream name as well as the namespace of a dataStream.
+ * Retrieves the namespace of index.
  *
- * Note that determining the namespace in the data stream name is not reliable due to the fact that the namespace
- * could contain hyphens. Thus it first looks into the mapping and if it is not found, it considers the last part of the
- * dataStream name as the namespace.
+ * @param {Object} indexInfo - The information about the index.
+ * @returns {string} - The namespace of the data stream found in the mapping.
  */
-function getStreamNameAndNamespace(dataStreamInfo: DataStreamBasicInfo) {
+function getIndexNamespace(indexInfo: IndexBasicInfo) {
   const dataStreamMapping: MappingPropertyBase | undefined =
-    dataStreamInfo?.mapping?.mappings?.properties?.data_stream;
+    indexInfo?.mapping?.properties?.data_stream;
 
-  const namespaceInMapping = (dataStreamMapping?.properties?.namespace as { value?: string })
-    ?.value;
-
-  // Consider the namespace as the last part of the dataStream name
-  const nameParts = dataStreamInfo.name.split('-');
-  const namespaceInName = nameParts.pop();
-
-  const namespace = namespaceInMapping ?? namespaceInName;
-  const streamName = namespace
-    ? dataStreamInfo.name.replace(`-${namespace}`, '')
-    : nameParts.join('-');
-
-  return {
-    namespace,
-    streamName,
-  };
+  return (dataStreamMapping?.properties?.namespace as { value?: string })?.value;
 }
 
-export async function getDataStreamStats(
+export async function getIndexStats(
   esClient: ElasticsearchClient,
-  info: DataStreamBasicInfo
+  info: IndexBasicInfo
 ): Promise<DataStreamStatsByNamespace> {
   const resp = await esClient.indices.stats({
     index: info.name,
@@ -245,7 +279,7 @@ export async function getDataStreamStats(
   const totalIndices = Object.keys(resp.indices ?? []).length;
 
   return {
-    streamName: info.streamName ?? '',
+    patternName: info.patternName,
     namespace: info.namespace ?? '',
     totalDocuments: totalDocs ?? 0,
     totalSize: totalSize ?? 0,
@@ -253,14 +287,9 @@ export async function getDataStreamStats(
   };
 }
 
-export function streamStatsToTelemetryEvents(
-  stats: DataStreamStats[],
-  clusterInfo?: InfoResponse
-): DataTelemetryEvent[] {
+export function indexStatsToTelemetryEvents(stats: DataStreamStats[]): DataTelemetryEvent[] {
   return stats.map((stat) => ({
-    '@timestamp': new Date().toISOString(),
-    'cluster-uuid': clusterInfo?.cluster_uuid ?? '',
-    stream_name: stat.streamName,
+    pattern_name: stat.streamName,
     number_of_documents: stat.totalDocuments,
     number_of_indices: stat.totalIndices,
     number_of_namespaces: stat.totalNamespaces,

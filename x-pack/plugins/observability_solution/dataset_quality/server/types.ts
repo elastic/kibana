@@ -6,12 +6,13 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
-import { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
   fleet: FleetSetupContract;
-  telemetry: TelemetryPluginSetup;
+  analytics: AnalyticsServiceSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {

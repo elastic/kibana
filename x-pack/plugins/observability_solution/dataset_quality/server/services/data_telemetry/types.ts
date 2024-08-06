@@ -5,36 +5,25 @@
  * 2.0.
  */
 
-import {
-  IndicesGetMappingIndexMappingRecord,
-  Metadata,
-} from '@elastic/elasticsearch/lib/api/types';
+import { MappingTypeMapping, Metadata } from '@elastic/elasticsearch/lib/api/types';
 
-export enum StreamOfLog {
-  Logs = '*logs*',
-  Filebeat = '*filebeat*',
-  Functionbeat = '*functionbeat*',
-  Heartbeat = '*heartbeat*',
-  Logstash = '*logstash*',
-  Telegraf = 'telegraf*',
-  Prometheus = 'prometheusbeat*',
-  Fluentd = 'fluentd*',
-  Fluentbit = 'fluentbit*',
-  Nginx = '*nginx*',
-  Apache = '*apache*',
+export interface DatasetIndexPattern {
+  pattern: string;
+  patternName: string;
+  shipper?: string;
 }
 
-export interface DataStreamBasicInfo {
+export interface IndexBasicInfo {
+  patternName: string;
   name: string;
   latestIndex?: string;
   meta?: Metadata;
-  mapping?: IndicesGetMappingIndexMappingRecord;
+  mapping?: MappingTypeMapping;
   namespace?: string;
-  streamName?: string;
 }
 
 export interface DataStreamStatsByNamespace {
-  streamName: string;
+  patternName: string;
   namespace: string;
   totalDocuments: number;
   totalSize: number;
@@ -50,9 +39,7 @@ export interface DataStreamStats {
 }
 
 export interface DataTelemetryEvent {
-  'cluster-uuid': string;
-  '@timestamp': string;
-  stream_name: string;
+  pattern_name: string;
   number_of_documents: number;
   number_of_indices: number;
   number_of_namespaces: number;

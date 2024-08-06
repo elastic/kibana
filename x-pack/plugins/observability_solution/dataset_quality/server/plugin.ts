@@ -59,7 +59,7 @@ export class DatasetQualityServerPlugin implements Plugin {
     });
 
     // Setup Data Telemetry Service
-    this.dataTelemetryService.setup(plugins.telemetry);
+    this.dataTelemetryService.setup(core.analytics);
 
     return {};
   }
