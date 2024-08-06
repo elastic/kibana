@@ -281,7 +281,6 @@ export const LensTopNavMenu = ({
   initialContext,
   indexPatternService,
   currentDoc,
-  onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
@@ -1112,7 +1111,6 @@ export const LensTopNavMenu = ({
         )
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

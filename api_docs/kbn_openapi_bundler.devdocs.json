@@ -46,7 +46,7 @@
             "id": "def-common.bundle.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled-{version}.schema.yaml',\n  options,\n}",
+            "label": "{\n  sourceGlob,\n  outputFilePath = 'bundled_{version}.schema.yaml',\n  options,\n}",
             "description": [],
             "signature": [
               {
@@ -209,9 +209,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ mergedSpecInfo?: Partial<",
-              "OpenAPIV3",
-              ".InfoObject> | undefined; } | undefined"
+              "MergerOptions | undefined"
             ],
             "path": "packages/kbn-openapi-bundler/src/openapi_merger.ts",
             "deprecated": false,

@@ -65,9 +65,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
       );
 
-      it('renders an empty data prompt', async () => {
+      it('renders an empty data prompt and redirects to the onboarding page', async () => {
         await pageObjects.common.navigateToApp('infraOps');
-        await pageObjects.infraHome.getNoMetricsIndicesPrompt();
+        await pageObjects.infraHome.noDataPromptExists();
+        await pageObjects.infraHome.noDataPromptAddDataClick();
+
+        await retry.try(async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=infra`;
+          expect(currentUrl).to.equal(expectedUrlPattern);
+        });
       });
 
       // Unskip once asset details error handling has been implemented
@@ -573,8 +582,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'system.core.steal.pct',
           'system.cpu.nice.pct',
           'system.cpu.idle.pct',
-          'system.cpu.iowait.pct',
-          'system.cpu.irq.pct',
         ];
 
         for (const field of fields) {
