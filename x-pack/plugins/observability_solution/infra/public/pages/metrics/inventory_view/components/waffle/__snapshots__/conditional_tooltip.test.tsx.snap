@@ -49,6 +49,22 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
       data-test-subj="conditionalTooltipContent-metric"
     >
+      Inbound traffic
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
       Outbound traffic
     </div>
     <div
@@ -65,7 +81,23 @@ exports[`ConditionalToolTip renders correctly 1`] = `
       class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
       data-test-subj="conditionalTooltipContent-metric"
     >
-      Inbound traffic
+      Inbound traffic (Legacy)
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+      data-test-subj="conditionalTooltipContent-value"
+    >
+      8 Mbit/s
+    </div>
+  </div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem eui-textTruncate eui-displayBlock emotion-euiFlexItem-grow-1"
+      data-test-subj="conditionalTooltipContent-metric"
+    >
+      Outbound traffic (Legacy)
     </div>
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
