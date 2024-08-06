@@ -50,7 +50,7 @@ export function ApiProvider({ getPageObjects, getService }: FtrProviderContext) 
       }
 
       const cleanUp = async () => {
-        // Make sure we are back on the default space
+        // Make sure we are back on the default space before deleting the current space
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces', {
           basePath: '',
           shouldUseHashForSubUrl: false,

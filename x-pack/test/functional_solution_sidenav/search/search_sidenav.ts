@@ -22,8 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         shouldUseHashForSubUrl: false,
       });
 
-      // Create a space with the observability solution and navigate to its home page
-      ({ cleanUp } = await spaces.api.createAndNavigateToSpace({ solution: 'oblt' }));
+      // Create a space with the search solution and navigate to its home page
+      ({ cleanUp } = await spaces.api.createAndNavigateToSpace({ solution: 'es' }));
     });
 
     after(async () => {
@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('observability sidenav & breadcrumbs', () => {
+    describe('search sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links (smoke tests)', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
@@ -39,21 +39,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
-        await solutionNavigation.sidenav.expectSectionExists('observability_project_nav');
+        await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'observabilityOnboarding',
+          deepLinkId: 'enterpriseSearch',
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'observabilityOnboarding',
+          deepLinkId: 'enterpriseSearch',
         });
 
-        // check the AI & ML subsection
-        await solutionNavigation.sidenav.openSection('observability_project_nav.aiMl'); // open AI & ML subsection
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI & ML' });
+        // check the Content > Indices section
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: 'enterpriseSearchContent:searchIndices',
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'enterpriseSearchContent:searchIndices',
+        });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'ml:anomalyDetection',
+          deepLinkId: 'enterpriseSearchContent:searchIndices',
         });
 
         // navigate to a different section
@@ -65,10 +68,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'observabilityOnboarding',
+          deepLinkId: 'enterpriseSearch',
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'observabilityOnboarding',
+          deepLinkId: 'enterpriseSearch',
         });
 
         await expectNoPageReload();
