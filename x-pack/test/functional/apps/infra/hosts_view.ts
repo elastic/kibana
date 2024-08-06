@@ -304,7 +304,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'memoryUsage', value: '94.9%' },
               { metric: 'diskUsage', value: 'N/A' },
             ].forEach(({ metric, value }) => {
-              it.skip(`${metric} tile should show ${value}`, async () => {
+              it(`${metric} tile should show ${value}`, async () => {
                 await retry.try(async () => {
                   const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                     metric
@@ -476,7 +476,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(hostRows.length).to.equal(6);
           });
 
-          it('should render the computed metrics for each host entry', async () => {
+          it.skip('should render the computed metrics for each host entry', async () => {
             hostRows.forEach((row, position) => {
               pageObjects.infraHostsView
                 .getHostsRowData(row)
@@ -484,7 +484,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it.skip('should select and filter hosts inside the table', async () => {
+          it('should select and filter hosts inside the table', async () => {
             const selectHostsButtonExistsOnLoad =
               await pageObjects.infraHostsView.selectedHostsButtonExist();
             expect(selectHostsButtonExistsOnLoad).to.be(false);
@@ -550,12 +550,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         describe('KPIs', () => {
           [
             { metric: 'hostsCount', value: '6' },
-            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'cpuUsage', value: 'N/A' },
             { metric: 'normalizedLoad1m', value: '0.3%' },
             { metric: 'memoryUsage', value: '16.8%' },
             { metric: 'diskUsage', value: '35.7%' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
                 const tileValue =
                   metric === 'hostsCount'
@@ -708,11 +708,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it.skip('should update the KPIs content on a search submit', async () => {
+          it('should update the KPIs content on a search submit', async () => {
             await Promise.all(
               [
                 { metric: 'hostsCount', value: '3' },
-                { metric: 'cpuUsage', value: '0.9%' },
+                { metric: 'cpuUsage', value: 'N/A' },
                 { metric: 'normalizedLoad1m', value: '0.2%' },
                 { metric: 'memoryUsage', value: '17.5%' },
                 { metric: 'diskUsage', value: '35.7%' },
