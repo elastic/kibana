@@ -18,7 +18,7 @@ import {
   dataVariableTemplateRegex,
   startsWithMethodRegex,
 } from './constants';
-import { parseMethodUrlLine } from './tokens_utils';
+import { parseLine } from './tokens_utils';
 
 const { collapseLiteralStrings } = XJson;
 /*
@@ -245,7 +245,7 @@ export const getRequestFromEditor = (
   if (!methodUrlLine) {
     return null;
   }
-  const { method, url } = parseMethodUrlLine(methodUrlLine);
+  const { method, url } = parseLine(methodUrlLine, false);
   if (!method || !url) {
     return null;
   }

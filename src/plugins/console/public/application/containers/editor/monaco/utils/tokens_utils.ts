@@ -16,26 +16,24 @@ import {
   whitespacesRegex,
 } from './constants';
 
-export const parseMethodUrlLine = (line: string) => {
-  line = line.trim();
-  const parts = line.split(whitespacesRegex);
-  return { method: parts[0], url: parts[1] };
-};
 /*
  * This function parses a line with the method and url.
  * The url is parsed into path and params, each parsed into tokens.
- * Returns method, urlPathTokens and urlParamsTokens which are arrays of strings.
+ * Returns method, url, urlPathTokens and urlParamsTokens which are arrays of strings.
  */
-export const parseLine = (line: string): ParsedLineTokens => {
-  // try to parse into method and url (split on whitespace)
-  const parts = line.split(whitespacesRegex);
+export const parseLine = (line: string, parseUrlIntoTokens: boolean = true): ParsedLineTokens => {
+  line = line.trim();
+  const firstWhitespaceIndex = line.indexOf(' ');
   // 1st part is the method
-  const method = parts[0].toUpperCase();
+  const method = line.slice(0, firstWhitespaceIndex).trim();
   // 2nd part is the url
-  const url = parts[1];
-  // try to parse into url path and url params (split on question mark)
-  const { urlPathTokens, urlParamsTokens } = parseUrl(url);
-  return { method, urlPathTokens, urlParamsTokens };
+  const url = removeTrailingWhitespaces(line.slice(firstWhitespaceIndex).trim());
+  if (parseUrlIntoTokens) {
+    // try to parse into url path and url params (split on question mark)
+    const { urlPathTokens, urlParamsTokens } = parseUrl(url);
+    return { method, url, urlPathTokens, urlParamsTokens };
+  }
+  return { method, url, urlPathTokens: [], urlParamsTokens: [] };
 };
 
 /*
@@ -449,6 +447,7 @@ export const containsUrlParams = (lineContent: string): boolean => {
  */
 interface ParsedLineTokens {
   method: string;
+  url: string;
   urlPathTokens: string[];
   urlParamsTokens: string[][];
 }
