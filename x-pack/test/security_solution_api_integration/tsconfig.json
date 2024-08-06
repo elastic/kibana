@@ -8,7 +8,7 @@
     "**/*",
     "../../../typings/**/*",
     "../../../packages/kbn-test/types/ftr_globals/**/*",
-  ], 
+  ],
   "exclude": [
     "target/**/*"
   ],
@@ -47,6 +47,7 @@
     "@kbn/utility-types",
     "@kbn/timelines-plugin",
     "@kbn/dev-cli-runner",
+    "@kbn/search-types",
     "@kbn/security-plugin",
     "@kbn/test-suites-src",
   ]
