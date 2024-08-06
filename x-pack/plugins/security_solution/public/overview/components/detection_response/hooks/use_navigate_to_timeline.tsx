@@ -16,7 +16,7 @@ import {
 } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/actions';
 import { sourcererSelectors } from '../../../../common/store';
@@ -36,7 +36,7 @@ export const useNavigateToTimeline = () => {
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
   const navigateToTimeline = useCallback(
