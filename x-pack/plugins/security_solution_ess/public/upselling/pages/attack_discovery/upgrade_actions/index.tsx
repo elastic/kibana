@@ -8,40 +8,45 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
+import { useKibana } from '../../../../common/services';
 import * as i18n from './translations';
 
-const UpgradeActionsComponent = ({ basePath }: { basePath: string }) => (
-  <EuiFlexGroup
-    data-test-subj="upgradeButtons"
-    gutterSize="s"
-    justifyContent="spaceAround"
-    wrap={true}
-  >
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        data-test-subj="upgradeDocs"
-        href="https://www.elastic.co/subscriptions"
-        iconType="popout"
-        iconSide="right"
-        target="_blank"
-      >
-        {i18n.UPGRADE_DOCS}
-      </EuiButton>
-    </EuiFlexItem>
+const UpgradeActionsComponent = () => {
+  const { services } = useKibana();
 
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        data-test-subj="upgradeCta"
-        href={`${basePath}/app/management/stack/license_management`}
-        iconType="gear"
-        target="_blank"
-      >
-        {i18n.UPGRADE_CTA}
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+  return (
+    <EuiFlexGroup
+      data-test-subj="upgradeButtons"
+      gutterSize="s"
+      justifyContent="spaceAround"
+      wrap={true}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="upgradeDocs"
+          href="https://www.elastic.co/subscriptions"
+          iconType="popout"
+          iconSide="right"
+          target="_blank"
+        >
+          {i18n.UPGRADE_DOCS}
+        </EuiButton>
+      </EuiFlexItem>
 
-UpgradeActionsComponent.displayName = 'UpgradeActions';
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="upgradeCta"
+          href={services.application.getUrlForApp('management', {
+            path: 'stack/license_management',
+          })}
+          iconType="gear"
+          target="_blank"
+        >
+          {i18n.UPGRADE_CTA}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const UpgradeActions = React.memo(UpgradeActionsComponent);

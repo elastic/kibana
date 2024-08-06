@@ -11,11 +11,21 @@ import React from 'react';
 import * as i18n from './translations';
 import { UpgradeActions } from '.';
 
-describe('UpgradeActions', () => {
-  const basePath = '/some/base/path';
+jest.mock('../../../../common/services', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        getUrlForApp: jest
+          .fn()
+          .mockReturnValue('http://localhost:5601/app/management/stack/license_management'),
+      },
+    },
+  }),
+}));
 
+describe('UpgradeActions', () => {
   beforeEach(() => {
-    render(<UpgradeActions basePath={basePath} />);
+    render(<UpgradeActions />);
   });
 
   describe('upgrade docs button', () => {
@@ -40,7 +50,7 @@ describe('UpgradeActions', () => {
     it('links to the license management page', () => {
       expect(screen.getByTestId('upgradeCta')).toHaveAttribute(
         'href',
-        `${basePath}/app/management/stack/license_management`
+        'http://localhost:5601/app/management/stack/license_management'
       );
     });
   });

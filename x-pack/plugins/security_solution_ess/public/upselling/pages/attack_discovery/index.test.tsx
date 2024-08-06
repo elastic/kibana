@@ -13,6 +13,11 @@ import * as i18n from './translations';
 jest.mock('../../../common/services', () => ({
   useKibana: jest.fn(() => ({
     services: {
+      application: {
+        getUrlForApp: jest
+          .fn()
+          .mockReturnValue('http://localhost:5601/app/management/stack/license_management'),
+      },
       http: {
         basePath: {
           get: () => 'some-base-path',

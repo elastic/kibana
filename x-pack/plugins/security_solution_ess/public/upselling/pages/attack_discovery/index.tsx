@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AttackDiscoveryUpsellingPage } from '@kbn/security-solution-upselling/pages/attack_discovery';
 import React, { useMemo } from 'react';
 
-import { useKibana } from '../../../common/services';
 import { UpgradeActions } from './upgrade_actions';
 import * as i18n from './translations';
 
@@ -18,17 +17,15 @@ import * as i18n from './translations';
  * the platform agnostic `AttackDiscoveryUpsellingPage` component.
  */
 const AttackDiscoveryUpsellingPageESSComponent: React.FC = () => {
-  const { http } = useKibana().services;
-
   const actions = useMemo(
     () => (
       <EuiFlexGroup data-test-subj="essActions" justifyContent="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <UpgradeActions basePath={http.basePath.get()} />
+          <UpgradeActions />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [http.basePath]
+    []
   );
 
   return (

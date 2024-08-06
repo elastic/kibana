@@ -17,11 +17,10 @@ const PageTitleComponent: React.FC = () => {
   return (
     <EuiFlexGroup
       alignItems="center"
-      css={css`
-        vertical-align: baseline;
-      `}
       data-test-subj="pageTitle"
       gutterSize="none"
+      responsive={false}
+      wrap={true}
     >
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="attackDiscoveryPageTitle" size="l">
@@ -30,14 +29,10 @@ const PageTitleComponent: React.FC = () => {
       </EuiFlexItem>
 
       <EuiFlexItem
-        grow={false}
         css={css`
-          vertical-align: baseline;
-          padding-left: ${euiTheme.size.m};
-          * {
-            vertical-align: baseline;
-          }
+          margin: ${euiTheme.size.s} 0 0 ${euiTheme.size.m};
         `}
+        grow={false}
       >
         <EuiBetaBadge
           color="hollow"
