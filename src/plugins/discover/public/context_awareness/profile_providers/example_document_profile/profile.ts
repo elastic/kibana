@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import { DocumentProfileProvider, DocumentType } from '../../profiles';
 
 export const exampleDocumentProfileProvider: DocumentProfileProvider = {
@@ -24,9 +24,4 @@ export const exampleDocumentProfileProvider: DocumentProfileProvider = {
       },
     };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
 };

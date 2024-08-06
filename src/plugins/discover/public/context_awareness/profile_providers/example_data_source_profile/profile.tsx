@@ -7,7 +7,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -110,9 +110,4 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
       context: { category: DataSourceCategory.Logs },
     };
   },
-};
-
-const getFieldValue = (record: DataTableRecord, field: string) => {
-  const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
 };
