@@ -53,6 +53,7 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
           </>
         </EuiToolTip>
       }
+      fullWidth
     >
       <EuiTextArea
         placeholder={i18n.translate(

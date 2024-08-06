@@ -47,7 +47,7 @@ export const HostPreviewPanelFooter = ({
         <EuiFlexItem grow={false}>
           <EuiLink onClick={openHostFlyout} target="_blank" data-test-subj={'open-host-flyout'}>
             {i18n.translate('xpack.securitySolution.flyout.host.preview.viewDetailsLabel', {
-              defaultMessage: 'Open host details flyout',
+              defaultMessage: 'Show full host details',
             })}
           </EuiLink>
         </EuiFlexItem>

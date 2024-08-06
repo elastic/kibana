@@ -5,7 +5,37 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
+import { Readable } from 'stream';
 import { StreamParser } from './types';
+
+export const parseGeminiStreamAsAsyncIterator = async function* (
+  stream: Readable,
+  logger: Logger,
+  abortSignal?: AbortSignal
+) {
+  if (abortSignal) {
+    abortSignal.addEventListener('abort', () => {
+      stream.destroy();
+    });
+  }
+  try {
+    for await (const chunk of stream) {
+      const decoded = chunk.toString();
+      const parsed = parseGeminiResponse(decoded);
+      // Split the parsed string into chunks of 5 characters
+      for (let i = 0; i < parsed.length; i += 5) {
+        yield parsed.substring(i, i + 5);
+      }
+    }
+  } catch (err) {
+    if (abortSignal?.aborted) {
+      logger.info('Gemini stream parsing was aborted.');
+    } else {
+      throw err;
+    }
+  }
+};
 
 export const parseGeminiStream: StreamParser = async (
   stream,
@@ -18,15 +48,10 @@ export const parseGeminiStream: StreamParser = async (
     const decoded = chunk.toString();
     const parsed = parseGeminiResponse(decoded);
     if (tokenHandler) {
-      const splitByQuotes = parsed.split(`"`);
-      splitByQuotes.forEach((chunkk, index) => {
-        // add quote back on except for last chunk
-        const splitBySpace = `${chunkk}${index === splitByQuotes.length - 1 ? '' : '"'}`.split(` `);
-
-        for (const char of splitBySpace) {
-          tokenHandler(`${char} `);
-        }
-      });
+      // Split the parsed string into chunks of 5 characters
+      for (let i = 0; i < parsed.length; i += 5) {
+        tokenHandler(parsed.substring(i, i + 5));
+      }
     }
     responseBody += parsed;
   });

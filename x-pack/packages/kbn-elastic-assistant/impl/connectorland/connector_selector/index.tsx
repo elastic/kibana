@@ -30,7 +30,6 @@ interface Props {
   selectedConnectorId?: string;
   displayFancy?: (displayText: string) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
-  isFlyoutMode: boolean;
   stats?: AttackDiscoveryStats | null;
 }
 
@@ -47,7 +46,6 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     selectedConnectorId,
     onConnectorSelectionChange,
     setIsOpen,
-    isFlyoutMode,
     stats = null,
   }) => {
     const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
@@ -177,7 +175,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     return (
       <>
-        {isFlyoutMode && !connectorExists && !connectorOptions.length ? (
+        {!connectorExists && !connectorOptions.length ? (
           <EuiButtonEmpty
             data-test-subj="addNewConnectorButton"
             iconType="plusInCircle"

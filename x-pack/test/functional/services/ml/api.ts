@@ -247,18 +247,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         log.debug(`Inference endpoint '${inferenceId}' already exists. Nothing to create.`);
         return;
       }
-      const { body, status } = await esSupertest
-        .put(`/_inference/${taskType}/${inferenceId}`)
+      const response = await kbnSupertest
+        .put(`/internal/ml/_inference/${taskType}/${inferenceId}`)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
-      this.assertResponseStatusCode(200, status, body);
 
-      return body;
+      this.assertResponseStatusCode(200, response.status, response.body);
+      log.debug('> Inference endpoint created');
+      return response;
     },
 
     async deleteInferenceEndpoint(inferenceId: string, taskType: string) {
       const { body, status } = await esSupertest.delete(`/_inference/${taskType}/${inferenceId}`);
       this.assertResponseStatusCode(200, status, body);
-
+      expect(body)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for delete inference endpoint should be acknowledged');
       return body;
     },
 

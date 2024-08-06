@@ -120,6 +120,7 @@ export const ConfigRT = rt.type({
     reduceWeekendTrafficBy: rt.number,
     ephemeralProjectIds: rt.number,
     alignEventsToInterval: rt.boolean,
+    artificialIndexDelay: rt.number,
   }),
   schedule: rt.array(ScheduleRT),
 });

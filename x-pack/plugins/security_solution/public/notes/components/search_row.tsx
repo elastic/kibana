@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { userSearchedNotes, selectNotesTableSearch } from '..';
+import { userSearchedNotes } from '..';
 
 const SearchRowContainer = styled.div`
   &:not(:last-child) {
@@ -36,8 +36,6 @@ export const SearchRow = React.memo(() => {
     []
   );
 
-  const notesSearch = useSelector(selectNotesTableSearch);
-
   const onQueryChange = useCallback(
     ({ queryText }) => {
       dispatch(userSearchedNotes(queryText.trim()));
@@ -49,12 +47,7 @@ export const SearchRow = React.memo(() => {
     <SearchRowContainer>
       <SearchRowFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiSearchBar
-            box={searchBox}
-            onChange={onQueryChange}
-            query={notesSearch}
-            defaultQuery={''}
-          />
+          <EuiSearchBar box={searchBox} onChange={onQueryChange} defaultQuery="" />
         </EuiFlexItem>
       </SearchRowFlexGroup>
     </SearchRowContainer>

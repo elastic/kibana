@@ -23,7 +23,6 @@ interface Props {
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
@@ -42,7 +41,6 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isSettingsModalVisible,
     setIsSettingsModalVisible,
     selectedConversationId,
-    isFlyoutMode,
     onConversationSelected,
     conversations,
     conversationsLoaded,
@@ -92,7 +90,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             isDisabled={isDisabled}
             iconType="gear"
             size="xs"
-            {...(isFlyoutMode ? { color: 'text' } : {})}
+            color="text"
           />
         </EuiToolTip>
 
@@ -103,7 +101,6 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             onConversationSelected={onConversationSelected}
             onClose={handleCloseModal}
             onSave={handleSave}
-            isFlyoutMode={isFlyoutMode}
             conversations={conversations}
             conversationsLoaded={conversationsLoaded}
           />

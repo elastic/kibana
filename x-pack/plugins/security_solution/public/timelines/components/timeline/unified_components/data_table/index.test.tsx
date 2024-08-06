@@ -17,7 +17,7 @@ import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
-import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../../sourcerer/containers');
 
@@ -35,10 +35,8 @@ const onEventClosedMock = jest.fn();
 const onChangePageMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
-const closeFlyoutMock = jest.fn();
-const isExpandableFlyoutDisabled = false;
 
-jest.mock('../hooks/use_unified_timeline_expandable_flyout');
+jest.mock('@kbn/expandable-flyout');
 
 const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
@@ -98,10 +96,8 @@ const getTimelineFromStore = (
 describe('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
-    (useUnifiedTableExpandableFlyout as jest.Mock).mockReturnValue({
-      isExpandableFlyoutDisabled,
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
-      closeFlyout: closeFlyoutMock,
     });
   });
   afterEach(() => {

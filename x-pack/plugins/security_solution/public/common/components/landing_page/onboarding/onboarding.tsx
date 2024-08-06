@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { AVCResultsBanner2024 } from '@kbn/avc-banner';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
@@ -24,7 +25,6 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
-import { AVCResultsBanner2024 } from '../../avc_banner/avc_results_banner_2024';
 
 interface OnboardingProps {
   indicesExist?: boolean;

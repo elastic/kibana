@@ -37,6 +37,7 @@ export const RELATED_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
   - You can add as many append processors you need to cover all the fields that you detected.
   - If conditions should always use a ? character when accessing nested fields, in case the field might not always be available, see example processors above.
   - When an if condition is not needed the argument should not be used for the processor object.
+  - The if condition must be located within the processor object.
   - Do not respond with anything except the array of processors as a valid JSON objects enclosed with 3 backticks (\`), see example response below.
   </guidelines>
   
