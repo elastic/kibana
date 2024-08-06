@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { ESProcessorItem, Pipeline } from '../../common';
+import { load } from 'js-yaml';
+import { join as joinPath } from 'path';
+import { Environment, FileSystemLoader } from 'nunjucks';
 import { deepCopy } from './util';
+import type { ESProcessorItem, Pipeline } from '../../common';
 
 export function combineProcessors(
   initialPipeline: Pipeline,
@@ -15,7 +18,7 @@ export function combineProcessors(
   // Create a deep copy of the initialPipeline to avoid modifying the original input
   const currentPipeline = deepCopy(initialPipeline);
 
-  // Add the new processors right before the last 2 removeprocessor in the initial pipeline.
+  // Add the new processors right before the last 2 remove processor in the initial pipeline.
   // This is so all the processors if conditions are not accessing possibly removed fields.
   const currentProcessors = currentPipeline.processors;
   const combinedProcessors = [
@@ -25,4 +28,17 @@ export function combineProcessors(
   ];
   currentPipeline.processors = combinedProcessors;
   return currentPipeline;
+}
+
+// The related and categorization graphs returns a simplified array of append processors.
+// This function converts the simplified array to the full ESProcessorItem array.
+export function createAppendProcessors(processors: object[], graphType: string): ESProcessorItem[] {
+  const templatesPath = joinPath(__dirname, '../templates/processors');
+  const env = new Environment(new FileSystemLoader(templatesPath), {
+    autoescape: false,
+  });
+  const template = env.getTemplate(`${graphType}.yml.njk`);
+  const renderedTemplate = template.render({ processors });
+  const appendProcessors = load(renderedTemplate) as ESProcessorItem[];
+  return appendProcessors;
 }

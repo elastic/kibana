@@ -78,6 +78,9 @@ Here is some context that you can reference for your task, read it carefully as 
 <compatibility_matrix>
 {compatibility_matrix}
 </compatibility_matrix>
+<previous_errors>
+{previous_errors}
+</previous_errors>
 </context>`,
   ],
   [
@@ -93,15 +96,14 @@ For each pipeline result you review step by step, remember the below steps:
 1. Check if each of the pipeline results have at least one event.category and event.type added to them. If not then try to correlate the results with the current processors and see if either a new append processor should be added to the list with a matching if condition, or if any of the if conditions should be modified as they are not matching that is in the results.
 2. If the results have at least one event.category and event.type value, see if more of them could match, if so it could be added to the relevant append processor which added the initial values.
 3. When adding more values to event.type and event.category please keep in mind the compatibility_matrix in the context to make sure only compatible event.type , event.category pairs that are compatible are created.
-4. Ensure that all append processors has allow_duplicates: false, as seen in the example response.
+4. If previous errors above is not empty, do not add any processors that would cause any of the same errors again, if you are unsure, then remove the processor from the list.
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
--  You can use as many append processors as you need to add all relevant ECS categories and types combinations.
+- You can use as many append processors as you need to add all relevant ECS categories and types combinations.
 - If conditions should always use a ? character when accessing nested fields, in case the field might not always be available, see example processors above.
 - When an if condition is not needed the argument should not be used for the processor object.
 - If not updates are needed you respond with the initially provided current processors.
-- Each append processor needs to have the allow_duplicates: false argument, as shown in the below example response.
 - Do not respond with anything except updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.
 </guidelines>
 

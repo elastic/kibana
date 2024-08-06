@@ -31,6 +31,7 @@ export interface CategorizationState {
   packageName: string;
   dataStreamName: string;
   errors: object;
+  previousErrors: string;
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
@@ -70,6 +71,7 @@ export interface RelatedState {
   packageName: string;
   dataStreamName: string;
   errors: object;
+  previousErrors: string;
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;

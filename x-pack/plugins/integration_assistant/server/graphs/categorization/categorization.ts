@@ -11,7 +11,7 @@ import type {
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { CategorizationState } from '../../types';
-import { combineProcessors } from '../../util/processors';
+import { combineProcessors, createAppendProcessors } from '../../util/processors';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 
 export async function handleCategorization(
@@ -29,7 +29,9 @@ export async function handleCategorization(
     ecs_types: state?.ecsTypes,
   })) as ESProcessorItem[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const appendProcessors = createAppendProcessors(currentProcessors, 'categorization');
+
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, appendProcessors);
 
   return {
     currentPipeline,

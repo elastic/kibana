@@ -65,6 +65,10 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  previousErrors: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
+  },
   pipelineResults: {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [],

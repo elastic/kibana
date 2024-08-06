@@ -1,0 +1,11 @@
+{% for processor in processors %}
+  - append:
+      field: {{ processor.field }}
+      value: {% raw %}'{{{{% endraw %} {{ processor.value_field }} {% raw %}}}}'{% endraw %}
+      {% if processor.if %}
+      if: {{ processor.if }}
+      {% else %}
+      if: ctx.{{ processor.value_field.replace('.', '?.') }} != null
+      {% endif %}
+      allow_duplicates: false
+{% endfor %}

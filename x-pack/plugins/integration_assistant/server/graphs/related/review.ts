@@ -11,7 +11,7 @@ import type {
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { RelatedState } from '../../types';
-import { combineProcessors } from '../../util/processors';
+import { combineProcessors, createAppendProcessors } from '../../util/processors';
 import { RELATED_REVIEW_PROMPT } from './prompts';
 
 export async function handleReview(
@@ -25,10 +25,13 @@ export async function handleReview(
   const currentProcessors = (await relatedReviewGraph.invoke({
     current_processors: JSON.stringify(state.currentProcessors, null, 2),
     ex_answer: state.exAnswer,
+    previous_errors: state.previousErrors,
     pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
   })) as ESProcessorItem[];
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
+  const appendProcessors = createAppendProcessors(currentProcessors, 'related');
+
+  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, appendProcessors);
 
   return {
     currentPipeline,
