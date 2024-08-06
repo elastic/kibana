@@ -34,10 +34,6 @@ interface InvestigationStore {
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (id: string, item: InvestigateWidgetCreate) => Promise<void>;
-  updateItem: (
-    id: string,
-    cb: (prevItem: InvestigateWidget) => Promise<InvestigateWidget>
-  ) => Promise<void>;
   setItemTitle: (id: string, title: string) => Promise<void>;
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
@@ -223,9 +219,6 @@ export function createInvestigationStore({
           }),
         };
       });
-    },
-    updateItem: async (itemId, cb) => {
-      return updateItem(itemId, cb);
     },
     copyItem: (itemId) => {
       return nextRevision((prevRevision) => {
