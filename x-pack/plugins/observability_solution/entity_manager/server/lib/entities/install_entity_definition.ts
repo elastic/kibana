@@ -38,13 +38,13 @@ import {
   stopAndDeleteHistoryTransform,
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
-import { uninstallEntityDefinition } from './uninstall_entity_definition';
 import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 import { deleteTemplate, upsertTemplate } from '../manage_index_templates';
 import { getEntitiesLatestIndexTemplateConfig } from './templates/entities_latest_template';
 import { getEntitiesHistoryIndexTemplateConfig } from './templates/entities_history_template';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
+import { EntityDefinitionWithState } from './types';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -53,11 +53,19 @@ export interface InstallDefinitionParams {
   logger: Logger;
 }
 
-/**
- * install an entity definition and all its required components after
- * validating that the definition id is valid and available.
- * attempt to remove all installed components if the installation fails.
- */
+const throwIfRejected = (values: Array<PromiseFulfilledResult<any> | PromiseRejectedResult>) => {
+  const rejectedPromise = values.find(
+    (value) => value.status === 'rejected'
+  ) as PromiseRejectedResult;
+  if (rejectedPromise) {
+    throw new Error(rejectedPromise.reason);
+  }
+  return values;
+};
+
+// install an entity definition and all its required components after
+// validating that the definition id is valid and available.
+// attempt to remove all installed components if the installation fails.
 export async function installEntityDefinition({
   esClient,
   soClient,
@@ -74,22 +82,29 @@ export async function installEntityDefinition({
       );
     }
 
-    return _installEntityDefinition({ esClient, soClient, definition, logger });
+    return install({ esClient, soClient, definition, logger });
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
 
-    await Promise.allSettled([
+    await deleteEntityDefinition(soClient, definition).catch((err) => {
+      if (err instanceof EntityDefinitionNotFound) {
+        return;
+      }
+      throw err;
+    });
+
+    await Promise.all([
       stopAndDeleteHistoryTransform(esClient, definition, logger),
       stopAndDeleteHistoryBackfillTransform(esClient, definition, logger),
       stopAndDeleteLatestTransform(esClient, definition, logger),
     ]);
 
-    await Promise.allSettled([
+    await Promise.all([
       deleteHistoryIngestPipeline(esClient, definition, logger),
       deleteLatestIngestPipeline(esClient, definition, logger),
     ]);
 
-    await Promise.allSettled([
+    await Promise.all([
       deleteTemplate({
         esClient,
         logger,
@@ -102,18 +117,74 @@ export async function installEntityDefinition({
       }),
     ]);
 
-    await deleteEntityDefinition(soClient, definition).catch((err) => {
-      if (err instanceof EntityDefinitionNotFound) {
-        return;
-      }
-      throw err;
-    });
-
     throw e;
   }
 }
 
-export async function _installEntityDefinition({
+export async function installBuiltInEntityDefinitions({
+  esClient,
+  soClient,
+  logger,
+  definitions,
+}: Omit<InstallDefinitionParams, 'definition'> & {
+  definitions: EntityDefinition[];
+}): Promise<EntityDefinition[]> {
+  if (definitions.length === 0) return [];
+
+  logger.debug(`Starting installation of ${definitions.length} built-in definitions`);
+  const installPromises = definitions.map(async (builtInDefinition) => {
+    const installedDefinitions = await findEntityDefinitions({
+      esClient,
+      soClient,
+      id: builtInDefinition.id,
+    });
+
+    if (installedDefinitions.length === 0) {
+      return await installAndStartDefinition({
+        definition: builtInDefinition,
+        esClient,
+        soClient,
+        logger,
+      });
+    }
+
+    // verify existing installation
+    const installedDefinition = installedDefinitions[0];
+    if (!shouldReinstall(installedDefinition, builtInDefinition)) {
+      if (!installedDefinition.state.running) {
+        logger.debug(`Starting transforms for definition [${installedDefinition.id}]`);
+        await startTransform(esClient, installedDefinition, logger);
+      }
+      return installedDefinition;
+    }
+
+    logger.debug(
+      `Detected failed or outdated installation of definition [${installedDefinition.id}] v${installedDefinition.version}, installing v${builtInDefinition.version}`
+    );
+    await reinstall({
+      soClient,
+      esClient,
+      logger,
+      definition: installedDefinition,
+      latestDefinition: builtInDefinition,
+    });
+    await startTransform(esClient, builtInDefinition, logger);
+
+    return builtInDefinition;
+  });
+
+  return await Promise.all(installPromises);
+}
+
+export async function installAndStartDefinition(params: InstallDefinitionParams) {
+  const definition = await installEntityDefinition(params);
+  await startTransform(params.esClient, definition, params.logger);
+  return definition;
+}
+
+// perform installation of an entity definition including all
+// the necessary components
+async function install({
   esClient,
   soClient,
   definition,
@@ -146,13 +217,13 @@ export async function _installEntityDefinition({
       logger,
       template: getEntitiesLatestIndexTemplateConfig(definition.id),
     }),
-  ]);
+  ]).then(throwIfRejected);
 
   logger.debug(`Installing ingest pipelines for definition ${definition.id}`);
   await Promise.allSettled([
     createAndInstallHistoryIngestPipeline(esClient, definition, logger),
     createAndInstallLatestIngestPipeline(esClient, definition, logger),
-  ]);
+  ]).then(throwIfRejected);
 
   logger.debug(`Installing transforms for definition ${definition.id}`);
   await Promise.allSettled([
@@ -161,67 +232,77 @@ export async function _installEntityDefinition({
       ? createAndInstallHistoryBackfillTransform(esClient, definition, logger)
       : Promise.resolve(),
     createAndInstallLatestTransform(esClient, definition, logger),
-  ]);
+  ]).then(throwIfRejected);
 
   await updateEntityDefinition(soClient, definition.id, { installStatus: 'installed' });
 
   return entityDefinition;
 }
 
-export async function installBuiltInEntityDefinitions({
+// stop and delete the current transforms and reinstall all the components
+async function reinstall({
   esClient,
   soClient,
+  definition,
+  latestDefinition,
   logger,
-  definitions,
-}: Omit<InstallDefinitionParams, 'definition'> & {
-  definitions: EntityDefinition[];
-}): Promise<EntityDefinition[]> {
-  if (definitions.length === 0) return [];
+}: InstallDefinitionParams & { latestDefinition: EntityDefinition }): Promise<EntityDefinition> {
+  logger.debug(
+    `Reinstalling definition ${definition.id} from v${definition.version} to v${latestDefinition.version}`
+  );
 
-  logger.debug(`Starting installation of ${definitions.length} built-in definitions`);
-  const installPromises = definitions.map(async (builtInDefinition) => {
-    const installedDefinitions = await findEntityDefinitions({
-      esClient,
-      soClient,
-      id: builtInDefinition.id,
+  try {
+    await updateEntityDefinition(soClient, latestDefinition.id, {
+      ...latestDefinition,
+      installStatus: 'installing',
+      installStartedAt: new Date().toISOString(),
     });
 
-    if (installedDefinitions.length === 0) {
-      return await installAndStartDefinition({
-        definition: builtInDefinition,
-        esClient,
-        soClient,
-        logger,
-      });
-    }
+    logger.debug(`Stopping transforms for definition ${definition.id} v${definition.version}`);
+    await Promise.all([
+      stopAndDeleteHistoryTransform(esClient, definition, logger),
+      isBackfillEnabled(definition)
+        ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
+        : Promise.resolve(),
+      stopAndDeleteLatestTransform(esClient, definition, logger),
+    ]);
 
-    const definition = installedDefinitions[0];
-    // verify current installation
-    if (!definition.state.installed || semver.neq(definition.version, builtInDefinition.version)) {
-      logger.debug(
-        `Detected partial or outdated installation of definition [${definition.id}] v${definition.version}, reinstalling v${builtInDefinition.version}`
-      );
-      await uninstallEntityDefinition({ esClient, soClient, logger, definition });
-      return await installAndStartDefinition({
-        definition: builtInDefinition,
-        esClient,
-        soClient,
-        logger,
-      });
-    }
+    await install({
+      esClient,
+      soClient,
+      logger,
+      definition: latestDefinition,
+    });
 
-    if (!definition.state.running) {
-      logger.debug(`Starting transforms for definition [${definition.id}]`);
-      await startTransform(esClient, definition, logger);
-    }
-    return definition;
-  });
+    return latestDefinition;
+  } catch (err) {
+    await updateEntityDefinition(soClient, latestDefinition.id, {
+      installStatus: 'failed',
+    });
 
-  return await Promise.all(installPromises);
+    throw err;
+  }
 }
 
-export async function installAndStartDefinition(params: InstallDefinitionParams) {
-  const definition = await installEntityDefinition(params);
-  await startTransform(params.esClient, definition, params.logger);
-  return definition;
-}
+const INSTALLATION_TIMEOUT = 5 * 60 * 1000;
+const shouldReinstall = (
+  definition: EntityDefinitionWithState,
+  latestDefinition: EntityDefinition
+) => {
+  const { installStatus, installStartedAt } = definition;
+  if (installStatus === 'installing') {
+    if (Date.now() - Date.parse(installStartedAt!) < INSTALLATION_TIMEOUT) {
+      // ongoing installation
+      return false;
+    }
+  }
+
+  const isStale =
+    installStatus === 'installing' &&
+    Date.now() - Date.parse(installStartedAt!) >= INSTALLATION_TIMEOUT;
+  const isOutdated =
+    installStatus === 'installed' && semver.neq(definition.version, latestDefinition.version);
+  const isFailed = installStatus === 'failed';
+  const isPartial = installStatus === 'installed' && !definition.state.installed;
+  return isStale || isOutdated || isFailed || isPartial;
+};

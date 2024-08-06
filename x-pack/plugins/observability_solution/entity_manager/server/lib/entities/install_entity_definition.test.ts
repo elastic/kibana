@@ -95,9 +95,8 @@ const assertHasStartedTransform = (definition: EntityDefinition, esClient: Elast
   );
 };
 
-const assertHasUninstalledDefinition = (
+const assertHasDeletedTransforms = (
   definition: EntityDefinition,
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
   expect(esClient.transform.stopTransform).toBeCalledTimes(2);
@@ -127,6 +126,15 @@ const assertHasUninstalledDefinition = (
   );
 
   expect(esClient.transform.deleteTransform).toBeCalledTimes(2);
+};
+
+const assertHasUninstalledDefinition = (
+  definition: EntityDefinition,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) => {
+  assertHasDeletedTransforms(definition, esClient);
+
   expect(esClient.ingest.deletePipeline).toBeCalledTimes(2);
   expect(soClient.delete).toBeCalledTimes(1);
 
@@ -178,13 +186,17 @@ describe('install_entity_definition', () => {
             type: 'entity-definition',
             references: [],
             score: 0,
-            attributes: mockEntityDefinition,
+            attributes: {
+              ...mockEntityDefinition,
+              installStatus: 'installed',
+            },
           },
         ],
         total: 1,
         page: 1,
         per_page: 10,
       };
+
       soClient.find.mockResolvedValueOnce(definitionSOResult).mockResolvedValueOnce({
         saved_objects: [],
         total: 0,
@@ -199,7 +211,7 @@ describe('install_entity_definition', () => {
         logger: loggerMock.create(),
       });
 
-      assertHasUninstalledDefinition(mockEntityDefinition, soClient, esClient);
+      assertHasDeletedTransforms(mockEntityDefinition, esClient);
       assertHasCreatedDefinition(mockEntityDefinition, soClient, esClient);
       assertHasStartedTransform(mockEntityDefinition, esClient);
     });
@@ -218,7 +230,10 @@ describe('install_entity_definition', () => {
             type: 'entity-definition',
             references: [],
             score: 0,
-            attributes: mockEntityDefinition,
+            attributes: {
+              ...mockEntityDefinition,
+              installStatus: 'installed',
+            },
           },
         ],
         total: 1,
@@ -240,7 +255,7 @@ describe('install_entity_definition', () => {
         logger: loggerMock.create(),
       });
 
-      assertHasUninstalledDefinition(mockEntityDefinition, soClient, esClient);
+      assertHasDeletedTransforms(mockEntityDefinition, esClient);
       assertHasCreatedDefinition(updatedDefinition, soClient, esClient);
       assertHasStartedTransform(updatedDefinition, esClient);
     });

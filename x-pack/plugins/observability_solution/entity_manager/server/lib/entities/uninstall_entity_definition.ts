@@ -38,18 +38,28 @@ export async function uninstallEntityDefinition({
   logger: Logger;
   deleteData?: boolean;
 }) {
-  await stopAndDeleteHistoryTransform(esClient, definition, logger);
-  if (isBackfillEnabled(definition)) {
-    await stopAndDeleteHistoryBackfillTransform(esClient, definition, logger);
-  }
-  await stopAndDeleteLatestTransform(esClient, definition, logger);
-  await deleteHistoryIngestPipeline(esClient, definition, logger);
-  await deleteLatestIngestPipeline(esClient, definition, logger);
-  await deleteTemplate({ esClient, logger, name: getEntityHistoryIndexTemplateV1(definition.id) });
-  await deleteTemplate({ esClient, logger, name: getEntityLatestIndexTemplateV1(definition.id) });
+  await Promise.all([
+    stopAndDeleteHistoryTransform(esClient, definition, logger),
+    stopAndDeleteLatestTransform(esClient, definition, logger),
+    isBackfillEnabled(definition)
+      ? stopAndDeleteHistoryBackfillTransform(esClient, definition, logger)
+      : Promise.resolve(),
+  ]);
+
+  await Promise.all([
+    deleteHistoryIngestPipeline(esClient, definition, logger),
+    deleteLatestIngestPipeline(esClient, definition, logger),
+  ]);
+
+  await Promise.all([
+    deleteTemplate({ esClient, logger, name: getEntityHistoryIndexTemplateV1(definition.id) }),
+    deleteTemplate({ esClient, logger, name: getEntityLatestIndexTemplateV1(definition.id) }),
+  ]);
+
   if (deleteData) {
     await deleteIndices(esClient, definition, logger);
   }
+
   await deleteEntityDefinition(soClient, definition);
 }
 
