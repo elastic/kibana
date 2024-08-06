@@ -19,6 +19,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
   EuiIcon,
+  EuiButton,
 } from '@elastic/eui';
 import {
   type SingleDatasetLocatorParams,
@@ -242,6 +243,41 @@ export const AutoDetectPanel: FunctionComponent = () => {
                 ) : null}
               </>
             ),
+          },
+          {
+            title: 'Add more data',
+            status:
+              status === 'dataReceived'
+                ? 'complete'
+                : status === 'awaitingData' || status === 'inProgress'
+                ? 'current'
+                : 'incomplete',
+            children:
+              status === 'dataReceived' ? (
+                <>
+                  <EuiText>
+                    <p>
+                      {i18n.translate(
+                        'xpack.observability_onboarding.autoDetectPanel.p.addMoreDataLabel',
+                        {
+                          defaultMessage:
+                            'To add more integrations, go to the integrations page to install required assets and extend your configuration',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingAutoDetectPanelGoToIntegrationsButton"
+                    fill
+                    href="/app/integrations"
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.autoDetectPanel.goToIntegrationsButtonLabel',
+                      { defaultMessage: 'Go to integrations' }
+                    )}
+                  </EuiButton>
+                </>
+              ) : null,
           },
         ]}
       />

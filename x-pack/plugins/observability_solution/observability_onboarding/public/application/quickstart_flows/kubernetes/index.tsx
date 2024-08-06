@@ -7,12 +7,14 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
   EuiSteps,
   EuiStepStatus,
+  EuiText,
 } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { i18n } from '@kbn/i18n';
@@ -74,6 +76,32 @@ export const KubernetesPanel: React.FC = () => {
       ),
       status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive && <DataIngestStatus onboardingId={data.onboardingId} />,
+    },
+    {
+      title: 'Add more data',
+      status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
+      children: isMonitoringStepActive ? (
+        <>
+          <EuiText>
+            <p>
+              {i18n.translate('xpack.observability_onboarding.autoDetectPanel.p.addMoreDataLabel', {
+                defaultMessage:
+                  'To add more integrations, go to the integrations page to install required assets and extend your configuration',
+              })}
+            </p>
+          </EuiText>
+          <EuiButton
+            data-test-subj="observabilityOnboardingAutoDetectPanelGoToIntegrationsButton"
+            fill
+            href="/app/integrations"
+          >
+            {i18n.translate(
+              'xpack.observability_onboarding.autoDetectPanel.goToIntegrationsButtonLabel',
+              { defaultMessage: 'Go to integrations' }
+            )}
+          </EuiButton>
+        </>
+      ) : null,
     },
   ];
 
