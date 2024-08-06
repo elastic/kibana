@@ -58,7 +58,10 @@ export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
 export const ELASTIC_MODEL_TAG = 'elastic';
 
-export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object.freeze({
+export const ELASTIC_MODEL_DEFINITIONS: Record<
+  string,
+  Omit<ModelDefinition, 'supported'>
+> = Object.freeze({
   [ELSER_ID_V1]: {
     modelName: 'elser',
     hidden: true,
