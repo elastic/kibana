@@ -313,6 +313,7 @@ paths:
                 - description
                 - type
                 - namespace_type
+                - os_types
         description: Exception list's properties
         required: true
       responses:

@@ -39,7 +39,7 @@ export const UpdateExceptionListRequestBody = z.object({
   description: ExceptionListDescription,
   type: ExceptionListType,
   namespace_type: ExceptionNamespaceType,
-  os_types: ExceptionListOsTypeArray.optional(),
+  os_types: ExceptionListOsTypeArray,
   tags: ExceptionListTags.optional(),
   meta: ExceptionListMeta.optional(),
   version: ExceptionListVersion.optional(),

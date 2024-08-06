@@ -44,6 +44,7 @@ paths:
                 - description
                 - type
                 - namespace_type
+                - os_types
       responses:
         200:
           description: Successful response
