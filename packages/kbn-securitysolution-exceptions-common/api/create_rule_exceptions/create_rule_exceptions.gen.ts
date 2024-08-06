@@ -42,7 +42,9 @@ export const CreateRuleExceptionListItemComment = z.object({
 export type CreateRuleExceptionListItemCommentArray = z.infer<
   typeof CreateRuleExceptionListItemCommentArray
 >;
-export const CreateRuleExceptionListItemCommentArray = z.array(CreateRuleExceptionListItemComment);
+export const CreateRuleExceptionListItemCommentArray = z
+  .array(CreateRuleExceptionListItemComment)
+  .default([]);
 
 export type CreateRuleExceptionListItemProps = z.infer<typeof CreateRuleExceptionListItemProps>;
 export const CreateRuleExceptionListItemProps = z.object({
@@ -51,12 +53,12 @@ export const CreateRuleExceptionListItemProps = z.object({
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional().default([]),
+  namespace_type: ExceptionNamespaceType,
+  os_types: ExceptionListItemOsTypeArray,
+  tags: ExceptionListItemTags,
   meta: ExceptionListItemMeta.optional(),
   expire_time: z.string().datetime().optional(),
-  comments: CreateRuleExceptionListItemCommentArray.optional().default([]),
+  comments: CreateRuleExceptionListItemCommentArray,
 });
 
 export type CreateRuleExceptionListItemsRequestParams = z.infer<

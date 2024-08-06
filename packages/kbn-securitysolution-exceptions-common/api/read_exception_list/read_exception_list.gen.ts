@@ -34,7 +34,7 @@ export const ReadExceptionListRequestQuery = z.object({
    * Either `id` or `list_id` must be specified
    */
   list_id: ExceptionListHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
+  namespace_type: ExceptionNamespaceType,
 });
 export type ReadExceptionListRequestQueryInput = z.input<typeof ReadExceptionListRequestQuery>;
 

@@ -36,7 +36,7 @@ export const DeleteExceptionListItemRequestQuery = z.object({
    * Either `id` or `item_id` must be specified
    */
   item_id: ExceptionListItemHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
+  namespace_type: ExceptionNamespaceType,
 });
 export type DeleteExceptionListItemRequestQueryInput = z.input<
   typeof DeleteExceptionListItemRequestQuery

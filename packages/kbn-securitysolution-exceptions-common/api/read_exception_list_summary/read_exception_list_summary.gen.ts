@@ -35,7 +35,7 @@ export const ReadExceptionListSummaryRequestQuery = z.object({
    * Exception list's human readable identifier
    */
   list_id: ExceptionListHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
+  namespace_type: ExceptionNamespaceType,
   /**
    * Search filter clause
    */

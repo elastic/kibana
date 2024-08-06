@@ -42,29 +42,28 @@ export const UpdateExceptionListItemComment = z.object({
 export type UpdateExceptionListItemCommentArray = z.infer<
   typeof UpdateExceptionListItemCommentArray
 >;
-export const UpdateExceptionListItemCommentArray = z.array(UpdateExceptionListItemComment);
+export const UpdateExceptionListItemCommentArray = z
+  .array(UpdateExceptionListItemComment)
+  .default([]);
 
+/**
+ * Either `id` or `item_id` must be specified
+ */
 export type UpdateExceptionListItemRequestBody = z.infer<typeof UpdateExceptionListItemRequestBody>;
 export const UpdateExceptionListItemRequestBody = z.object({
-  /**
-   * Either `id` or `item_id` must be specified
-   */
   id: ExceptionListItemId.optional(),
-  /**
-   * Either `id` or `item_id` must be specified
-   */
   item_id: ExceptionListItemHumanId.optional(),
   list_id: ExceptionListHumanId.optional(),
   type: ExceptionListItemType,
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
+  namespace_type: ExceptionNamespaceType,
+  os_types: ExceptionListItemOsTypeArray,
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
   expire_time: z.string().datetime().optional(),
-  comments: UpdateExceptionListItemCommentArray.optional().default([]),
+  comments: UpdateExceptionListItemCommentArray,
   _version: z.string().optional(),
 });
 export type UpdateExceptionListItemRequestBodyInput = z.input<

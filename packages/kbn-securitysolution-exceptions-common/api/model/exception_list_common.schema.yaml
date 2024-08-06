@@ -11,7 +11,6 @@ components:
 
     ExceptionListHumanId:
       $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
 
     ExceptionListType:
       type: string
@@ -39,6 +38,7 @@ components:
       enum:
         - agnostic
         - single
+      default: single
       description: |
         Determines whether the exception container is available in all Kibana spaces or just the space
         in which it is created, where:
@@ -50,6 +50,7 @@ components:
       type: array
       items:
         type: string
+      default: []
 
     ExceptionListOsType:
       type: string
@@ -62,10 +63,12 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
+      default: []
 
     ExceptionListVersion:
       type: integer
       minimum: 1
+      default: 1
 
     ExceptionList:
       type: object
@@ -145,6 +148,7 @@ components:
       type: array
       items:
         $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      default: []
 
     ExceptionListItemOsType:
       type: string
@@ -157,6 +161,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ExceptionListOsType'
+      default: []
 
     ExceptionListItemComment:
       type: object

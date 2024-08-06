@@ -23,9 +23,6 @@ import { ExceptionListItemEntryArray } from './exception_list_item_entry.gen';
 export type ExceptionListId = z.infer<typeof ExceptionListId>;
 export const ExceptionListId = NonEmptyString;
 
-/**
- * Human readable string identifier, e.g. `trusted-linux-processes`
- */
 export type ExceptionListHumanId = z.infer<typeof ExceptionListHumanId>;
 export const ExceptionListHumanId = NonEmptyString;
 
@@ -60,12 +57,13 @@ in which it is created, where:
 
   */
 export type ExceptionNamespaceType = z.infer<typeof ExceptionNamespaceType>;
-export const ExceptionNamespaceType = z.enum(['agnostic', 'single']);
-export type ExceptionNamespaceTypeEnum = typeof ExceptionNamespaceType.enum;
-export const ExceptionNamespaceTypeEnum = ExceptionNamespaceType.enum;
+export const ExceptionNamespaceType = z.enum(['agnostic', 'single']).default('single');
+const ExceptionNamespaceTypeNonDefault = z.enum(['agnostic', 'single']);
+export type ExceptionNamespaceTypeEnum = typeof ExceptionNamespaceTypeNonDefault.enum;
+export const ExceptionNamespaceTypeEnum = ExceptionNamespaceTypeNonDefault.enum;
 
 export type ExceptionListTags = z.infer<typeof ExceptionListTags>;
-export const ExceptionListTags = z.array(z.string());
+export const ExceptionListTags = z.array(z.string()).default([]);
 
 export type ExceptionListOsType = z.infer<typeof ExceptionListOsType>;
 export const ExceptionListOsType = z.enum(['linux', 'macos', 'windows']);
@@ -73,10 +71,10 @@ export type ExceptionListOsTypeEnum = typeof ExceptionListOsType.enum;
 export const ExceptionListOsTypeEnum = ExceptionListOsType.enum;
 
 export type ExceptionListOsTypeArray = z.infer<typeof ExceptionListOsTypeArray>;
-export const ExceptionListOsTypeArray = z.array(ExceptionListOsType);
+export const ExceptionListOsTypeArray = z.array(ExceptionListOsType).default([]);
 
 export type ExceptionListVersion = z.infer<typeof ExceptionListVersion>;
-export const ExceptionListVersion = z.number().int().min(1);
+export const ExceptionListVersion = z.number().int().min(1).default(1);
 
 export type ExceptionList = z.infer<typeof ExceptionList>;
 export const ExceptionList = z.object({
@@ -118,7 +116,7 @@ export type ExceptionListItemMeta = z.infer<typeof ExceptionListItemMeta>;
 export const ExceptionListItemMeta = z.object({}).catchall(z.unknown());
 
 export type ExceptionListItemTags = z.infer<typeof ExceptionListItemTags>;
-export const ExceptionListItemTags = z.array(NonEmptyString);
+export const ExceptionListItemTags = z.array(NonEmptyString).default([]);
 
 export type ExceptionListItemOsType = z.infer<typeof ExceptionListItemOsType>;
 export const ExceptionListItemOsType = z.enum(['linux', 'macos', 'windows']);
@@ -126,7 +124,7 @@ export type ExceptionListItemOsTypeEnum = typeof ExceptionListItemOsType.enum;
 export const ExceptionListItemOsTypeEnum = ExceptionListItemOsType.enum;
 
 export type ExceptionListItemOsTypeArray = z.infer<typeof ExceptionListItemOsTypeArray>;
-export const ExceptionListItemOsTypeArray = z.array(ExceptionListOsType);
+export const ExceptionListItemOsTypeArray = z.array(ExceptionListOsType).default([]);
 
 export type ExceptionListItemComment = z.infer<typeof ExceptionListItemComment>;
 export const ExceptionListItemComment = z.object({

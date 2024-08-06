@@ -34,7 +34,7 @@ export const ReadExceptionListItemRequestQuery = z.object({
    * Either `id` or `item_id` must be specified
    */
   item_id: ExceptionListItemHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
+  namespace_type: ExceptionNamespaceType,
 });
 export type ReadExceptionListItemRequestQueryInput = z.input<
   typeof ReadExceptionListItemRequestQuery

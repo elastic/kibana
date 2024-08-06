@@ -40,7 +40,9 @@ export const CreateExceptionListItemComment = z.object({
 export type CreateExceptionListItemCommentArray = z.infer<
   typeof CreateExceptionListItemCommentArray
 >;
-export const CreateExceptionListItemCommentArray = z.array(CreateExceptionListItemComment);
+export const CreateExceptionListItemCommentArray = z
+  .array(CreateExceptionListItemComment)
+  .default([]);
 
 export type CreateExceptionListItemRequestBody = z.infer<typeof CreateExceptionListItemRequestBody>;
 export const CreateExceptionListItemRequestBody = z.object({
@@ -50,12 +52,12 @@ export const CreateExceptionListItemRequestBody = z.object({
   name: ExceptionListItemName,
   description: ExceptionListItemDescription,
   entries: ExceptionListItemEntryArray,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional().default([]),
+  namespace_type: ExceptionNamespaceType,
+  os_types: ExceptionListItemOsTypeArray,
+  tags: ExceptionListItemTags,
   meta: ExceptionListItemMeta.optional(),
   expire_time: z.string().datetime().optional(),
-  comments: CreateExceptionListItemCommentArray.optional().default([]),
+  comments: CreateExceptionListItemCommentArray,
 });
 export type CreateExceptionListItemRequestBodyInput = z.input<
   typeof CreateExceptionListItemRequestBody

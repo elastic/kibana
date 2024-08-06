@@ -36,11 +36,11 @@ export const CreateExceptionListRequestBody = z.object({
   name: ExceptionListName,
   description: ExceptionListDescription,
   type: ExceptionListType,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
+  namespace_type: ExceptionNamespaceType,
   os_types: ExceptionListOsTypeArray.optional(),
-  tags: ExceptionListTags.optional().default([]),
+  tags: ExceptionListTags,
   meta: ExceptionListMeta.optional(),
-  version: ExceptionListVersion.optional().default(1),
+  version: ExceptionListVersion,
 });
 export type CreateExceptionListRequestBodyInput = z.input<typeof CreateExceptionListRequestBody>;
 
