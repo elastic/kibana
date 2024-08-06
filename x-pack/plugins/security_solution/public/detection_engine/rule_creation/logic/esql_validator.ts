@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import type { QueryClient } from '@tanstack/react-query';
 import { isAggregatingQuery } from '@kbn/securitysolution-utils';
 
-import type { ESQLAst, ESQLCommandOption } from '@kbn/esql-ast';
+import type { ESQLAst } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -48,22 +48,35 @@ const constructSyntaxError = (error: Error) => {
   };
 };
 
+const getMetadataOption = (ast: ESQLAst) => {
+  const fromCommand = ast.find((astItem) => astItem.type === 'command' && astItem.name === 'from');
+
+  if (!fromCommand?.args) {
+    return undefined;
+  }
+
+  // Check whether the `from` command has `metadata` operator
+  for (const fromArg of fromCommand.args) {
+    if (isOptionItem(fromArg) && fromArg.name === 'metadata') {
+      return fromArg;
+    }
+  }
+
+  return undefined;
+};
+
 /**
  * checks whether query has metadata _id operator
  */
 export const computeHasMetadataOperator = (ast: ESQLAst) => {
-  const fromCommand = ast.find((astItem) => astItem.type === 'command' && astItem.name === 'from');
-
   // Check whether the `from` command has `metadata` operator
-  const metadataOption = fromCommand?.args.find(
-    (fromArg) => isOptionItem(fromArg) && fromArg.name === 'metadata'
-  );
+  const metadataOption = getMetadataOption(ast);
   if (!metadataOption) {
     return false;
   }
 
   // Check whether the `metadata` operator has `_id` argument
-  const idColumnItem = (metadataOption as ESQLCommandOption).args.find(
+  const idColumnItem = metadataOption.args.find(
     (fromArg) => isColumnItem(fromArg) && fromArg.name === '_id'
   );
   if (!idColumnItem) {
