@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Common Osquery Attributes
   version: '2023-10-31'
-paths: { }
+paths: {}
 components:
   schemas:
     Id:
@@ -33,56 +33,53 @@ components:
       $ref: '#/components/schemas/AgentSelection'
       nullable: true
 
-
     Description:
       type: string
 
     DescriptionOrUndefined:
-      $ref: '#/components/schemas/Description'
+      type: string
       nullable: true
-
 
     Platform:
       type: string
 
     PlatformOrUndefined:
-      $ref: '#/components/schemas/Platform'
+      type: string
       nullable: true
-
 
     Query:
       type: string
 
     QueryOrUndefined:
-      $ref: '#/components/schemas/Query'
+      type: string
       nullable: true
 
     Version:
       type: string
 
     VersionOrUndefined:
-      $ref: '#/components/schemas/Version'
+      type: string
       nullable: true
 
     Interval:
       type: string
 
     IntervalOrUndefined:
-      $ref: '#/components/schemas/Interval'
+      type: string
       nullable: true
 
     Snapshot:
       type: boolean
 
     SnapshotOrUndefined:
-      $ref: '#/components/schemas/Snapshot'
+      type: boolean
       nullable: true
 
     Removed:
       type: boolean
 
     RemovedOrUndefined:
-      $ref: '#/components/schemas/Removed'
+      type: boolean
       nullable: true
 
     PackName:
@@ -92,22 +89,21 @@ components:
       type: string
 
     SavedQueryIdOrUndefined:
-      $ref: '#/components/schemas/SavedQueryId'
+      type: string
       nullable: true
-
 
     PackId:
       type: string
 
     PackIdOrUndefined:
-      $ref: '#/components/schemas/PackId'
+      type: string
       nullable: true
 
     Enabled:
       type: boolean
 
     EnabledOrUndefined:
-      $ref: '#/components/schemas/Enabled'
+      type: boolean
       nullable: true
 
     PolicyIds:
@@ -116,7 +112,9 @@ components:
         type: string
 
     PolicyIdsOrUndefined:
-      $ref: '#/components/schemas/PolicyIds'
+      type: array
+      items:
+        type: string
       nullable: true
 
     ExecutionContext:
@@ -129,11 +127,9 @@ components:
           type: string
           nullable: true
 
-
     ExecutionContextOrUndefined:
       $ref: '#/components/schemas/ExecutionContext'
       nullable: true
-
 
     ECSMappingItem:
       type: object
@@ -153,16 +149,16 @@ components:
         $ref: '#/components/schemas/ECSMappingItem'
 
     ECSMappingOrUndefined:
-      $ref: '#/components/schemas/ECSMapping'
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/ECSMappingItem'
       nullable: true
-
 
     StringArrayOrUndefined:
       type: array
       items:
         type: string
         nullable: true
-
 
     ArrayQueriesItem:
       type: object
@@ -217,7 +213,6 @@ components:
         - $ref: '#/components/schemas/ArrayQueries'
         - $ref: '#/components/schemas/ObjectQueries'
 
-
     QueriesOrUndefined:
       $ref: '#/components/schemas/Queries'
       nullable: true
@@ -240,10 +235,9 @@ components:
 
     SortOrderOrUndefined:
       oneOf:
-
         - type: string
           nullable: true
-        - enum: [ asc, desc ]
+        - enum: [asc, desc]
 
     Shards:
       type: object
@@ -252,4 +246,4 @@ components:
 
     DefaultSuccessResponse:
       type: object
-      properties: { }
+      properties: {}

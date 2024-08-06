@@ -37,43 +37,43 @@ export type Description = z.infer<typeof Description>;
 export const Description = z.string();
 
 export type DescriptionOrUndefined = z.infer<typeof DescriptionOrUndefined>;
-export const DescriptionOrUndefined = Description.nullable();
+export const DescriptionOrUndefined = z.string().nullable();
 
 export type Platform = z.infer<typeof Platform>;
 export const Platform = z.string();
 
 export type PlatformOrUndefined = z.infer<typeof PlatformOrUndefined>;
-export const PlatformOrUndefined = Platform.nullable();
+export const PlatformOrUndefined = z.string().nullable();
 
 export type Query = z.infer<typeof Query>;
 export const Query = z.string();
 
 export type QueryOrUndefined = z.infer<typeof QueryOrUndefined>;
-export const QueryOrUndefined = Query.nullable();
+export const QueryOrUndefined = z.string().nullable();
 
 export type Version = z.infer<typeof Version>;
 export const Version = z.string();
 
 export type VersionOrUndefined = z.infer<typeof VersionOrUndefined>;
-export const VersionOrUndefined = Version.nullable();
+export const VersionOrUndefined = z.string().nullable();
 
 export type Interval = z.infer<typeof Interval>;
 export const Interval = z.string();
 
 export type IntervalOrUndefined = z.infer<typeof IntervalOrUndefined>;
-export const IntervalOrUndefined = Interval.nullable();
+export const IntervalOrUndefined = z.string().nullable();
 
 export type Snapshot = z.infer<typeof Snapshot>;
 export const Snapshot = z.boolean();
 
 export type SnapshotOrUndefined = z.infer<typeof SnapshotOrUndefined>;
-export const SnapshotOrUndefined = Snapshot.nullable();
+export const SnapshotOrUndefined = z.boolean().nullable();
 
 export type Removed = z.infer<typeof Removed>;
 export const Removed = z.boolean();
 
 export type RemovedOrUndefined = z.infer<typeof RemovedOrUndefined>;
-export const RemovedOrUndefined = Removed.nullable();
+export const RemovedOrUndefined = z.boolean().nullable();
 
 export type PackName = z.infer<typeof PackName>;
 export const PackName = z.string();
@@ -82,25 +82,25 @@ export type SavedQueryId = z.infer<typeof SavedQueryId>;
 export const SavedQueryId = z.string();
 
 export type SavedQueryIdOrUndefined = z.infer<typeof SavedQueryIdOrUndefined>;
-export const SavedQueryIdOrUndefined = SavedQueryId.nullable();
+export const SavedQueryIdOrUndefined = z.string().nullable();
 
 export type PackId = z.infer<typeof PackId>;
 export const PackId = z.string();
 
 export type PackIdOrUndefined = z.infer<typeof PackIdOrUndefined>;
-export const PackIdOrUndefined = PackId.nullable();
+export const PackIdOrUndefined = z.string().nullable();
 
 export type Enabled = z.infer<typeof Enabled>;
 export const Enabled = z.boolean();
 
 export type EnabledOrUndefined = z.infer<typeof EnabledOrUndefined>;
-export const EnabledOrUndefined = Enabled.nullable();
+export const EnabledOrUndefined = z.boolean().nullable();
 
 export type PolicyIds = z.infer<typeof PolicyIds>;
 export const PolicyIds = z.array(z.string());
 
 export type PolicyIdsOrUndefined = z.infer<typeof PolicyIdsOrUndefined>;
-export const PolicyIdsOrUndefined = PolicyIds.nullable();
+export const PolicyIdsOrUndefined = z.array(z.string()).nullable();
 
 export type ExecutionContext = z.infer<typeof ExecutionContext>;
 export const ExecutionContext = z.object({
@@ -121,7 +121,7 @@ export type ECSMapping = z.infer<typeof ECSMapping>;
 export const ECSMapping = z.object({}).catchall(ECSMappingItem);
 
 export type ECSMappingOrUndefined = z.infer<typeof ECSMappingOrUndefined>;
-export const ECSMappingOrUndefined = ECSMapping.nullable();
+export const ECSMappingOrUndefined = z.object({}).catchall(ECSMappingItem).nullable();
 
 export type StringArrayOrUndefined = z.infer<typeof StringArrayOrUndefined>;
 export const StringArrayOrUndefined = z.array(z.string().nullable());

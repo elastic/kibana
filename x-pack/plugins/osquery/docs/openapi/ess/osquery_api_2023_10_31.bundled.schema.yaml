@@ -401,15 +401,9 @@ components:
     DefaultSuccessResponse:
       type: object
       properties: {}
-    Description:
-      type: string
     DescriptionOrUndefined:
-      $ref: '#/components/schemas/Description'
       nullable: true
-    ECSMapping:
-      additionalProperties:
-        $ref: '#/components/schemas/ECSMappingItem'
-      type: object
+      type: string
     ECSMappingItem:
       type: object
       properties:
@@ -422,13 +416,13 @@ components:
                 type: string
               type: array
     ECSMappingOrUndefined:
-      $ref: '#/components/schemas/ECSMapping'
+      additionalProperties:
+        $ref: '#/components/schemas/ECSMappingItem'
       nullable: true
-    Enabled:
-      type: boolean
+      type: object
     EnabledOrUndefined:
-      $ref: '#/components/schemas/Enabled'
       nullable: true
+      type: boolean
     FindLiveQueryRequestQuery:
       type: object
       properties:
@@ -482,8 +476,8 @@ components:
     Interval:
       type: string
     IntervalOrUndefined:
-      $ref: '#/components/schemas/Interval'
       nullable: true
+      type: string
     KueryOrUndefined:
       nullable: true
       type: string
@@ -513,8 +507,8 @@ components:
     PackId:
       type: string
     PackIdOrUndefined:
-      $ref: '#/components/schemas/PackId'
       nullable: true
+      type: string
     PackName:
       type: string
     PageOrUndefined:
@@ -523,42 +517,34 @@ components:
     PageSizeOrUndefined:
       nullable: true
       type: integer
-    Platform:
-      type: string
     PlatformOrUndefined:
-      $ref: '#/components/schemas/Platform'
       nullable: true
-    PolicyIds:
+      type: string
+    PolicyIdsOrUndefined:
       items:
         type: string
-      type: array
-    PolicyIdsOrUndefined:
-      $ref: '#/components/schemas/PolicyIds'
       nullable: true
+      type: array
     Query:
       type: string
     QueryOrUndefined:
-      $ref: '#/components/schemas/Query'
       nullable: true
-    Removed:
-      type: boolean
+      type: string
     RemovedOrUndefined:
-      $ref: '#/components/schemas/Removed'
       nullable: true
+      type: boolean
     SavedQueryId:
       type: string
     SavedQueryIdOrUndefined:
-      $ref: '#/components/schemas/SavedQueryId'
       nullable: true
+      type: string
     Shards:
       additionalProperties:
         type: number
       type: object
-    Snapshot:
-      type: boolean
     SnapshotOrUndefined:
-      $ref: '#/components/schemas/Snapshot'
       nullable: true
+      type: boolean
     SortOrderOrUndefined:
       oneOf:
         - nullable: true
@@ -605,11 +591,9 @@ components:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
-    Version:
-      type: string
     VersionOrUndefined:
-      $ref: '#/components/schemas/Version'
       nullable: true
+      type: string
   securitySchemes:
     BasicAuth:
       scheme: basic
