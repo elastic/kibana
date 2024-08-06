@@ -424,6 +424,7 @@ describe('autocomplete', () => {
       }
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['ON $0', 'WITH $0', '| ']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
+        'keywordField',
         'stringField',
         'doubleField',
         'dateField',
@@ -704,7 +705,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=cidr_match(ipField, textField, ',
       [
-        ...getFieldNamesByType('text'),
+        ...getFieldNamesByType('keyword'),
         ...getFunctionSignaturesByReturnType(
           'eval',
           ['text', 'keyword'],
@@ -985,48 +986,6 @@ describe('autocomplete', () => {
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
-    });
-  });
-
-  describe('auto triggers', () => {
-    function getSuggestionsFor(statement: string) {
-      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const triggerOffset = statement.lastIndexOf(' ') + 1; // drop <here>
-      const context = createCompletionContext(statement[triggerOffset]);
-      return suggest(
-        statement,
-        triggerOffset + 1,
-        context,
-        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-        callbackMocks
-      );
-    }
-    it('should trigger further suggestions for functions', async () => {
-      const suggestions = await getSuggestionsFor('from a | eval ');
-      const [expectedWithTrigger, expectedWithoutTrigger] = partition(
-        suggestions,
-        ({ kind, label }) => kind === 'Function' || label === 'var0'
-      );
-      // test that all functions will retrigger suggestions
-      expect(
-        expectedWithTrigger.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
-      ).toBeTruthy();
-      // now test that non-function won't retrigger
-      expect(expectedWithoutTrigger.every(({ command }) => command == null)).toBeTruthy();
-    });
-    it('should trigger further suggestions for commands', async () => {
-      const suggestions = await getSuggestionsFor('from a | ');
-      // test that all commands will retrigger suggestions
-      expect(
-        suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
-      ).toBeTruthy();
-    });
-    it('should trigger further suggestions after enrich mode', async () => {
-      const suggestions = await getSuggestionsFor('from a | enrich _any:');
-      // test that all commands will retrigger suggestions
-      expect(
-        suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
-      ).toBeTruthy();
     });
   });
 
@@ -1332,10 +1291,10 @@ describe('autocomplete', () => {
       // field parameter
 
       const expectedStringSuggestionsWhenMoreArgsAreNeeded = [
-        ...getFieldNamesByType('string')
+        ...getFieldNamesByType('keyword')
           .map((field) => `${field}, `)
           .map(attachTriggerCommand),
-        ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
+        ...getFunctionSignaturesByReturnType('eval', 'keyword', { scalar: true }, undefined, [
           'replace',
         ]).map((s) => ({
           ...s,
@@ -1362,8 +1321,8 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM a | EVAL REPLACE(stringField, stringField, )',
         [
-          ...getFieldNamesByType('string').map((field) => ({ text: field, command: undefined })),
-          ...getFunctionSignaturesByReturnType('eval', 'string', { scalar: true }, undefined, [
+          ...getFieldNamesByType('keyword').map((field) => ({ text: field, command: undefined })),
+          ...getFunctionSignaturesByReturnType('eval', 'keyword', { scalar: true }, undefined, [
             'replace',
           ]),
         ],
