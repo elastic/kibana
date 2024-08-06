@@ -6,17 +6,12 @@
  */
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { last, omit, pull } from 'lodash';
+import { last, pull } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 } from 'uuid';
 import type { GlobalWidgetParameters } from '../..';
-import type {
-  InvestigateWidget,
-  InvestigateWidgetCreate,
-  Investigation,
-  WorkflowBlock,
-} from '../../../common';
+import type { InvestigateWidget, InvestigateWidgetCreate, Investigation } from '../../../common';
 import type { WidgetDefinition } from '../../types';
 import {
   InvestigateWidgetApiContextProvider,
@@ -68,7 +63,6 @@ export interface UseInvestigationApi {
     parameters: GlobalWidgetParameters & Record<string, any>
   ) => Promise<void>;
   setGlobalParameters: (parameters: GlobalWidgetParameters) => Promise<void>;
-  blocks: WorkflowBlock[];
   setTitle: (title: string) => Promise<void>;
   investigations: Investigation[];
   deleteInvestigation: (id: string) => Promise<void>;
@@ -117,11 +111,8 @@ function useInvestigationWithoutContext({
 
   const isAtLatestRevision = last(investigation?.revisions)?.id === currentRevision?.id;
 
-  const [blocksById, setBlocksById] = useState<Record<string, WorkflowBlock[]>>({});
-
   const deleteItem = useCallback(
     async (id: string) => {
-      setBlocksById((prevBlocks) => omit(prevBlocks, id));
       return investigationStore.deleteItem(id);
     },
     [investigationStore]
@@ -146,21 +137,6 @@ function useInvestigationWithoutContext({
             onWidgetAdd: async (create) => {
               return addItemRef.current(create);
             },
-            blocks: {
-              publish: (nextBlocks) => {
-                const nextIds = nextBlocks.map((block) => block.id);
-                setBlocksById((prevBlocksById) => ({
-                  ...prevBlocksById,
-                  [id]: (prevBlocksById[id] ?? []).concat(nextBlocks),
-                }));
-                return () => {
-                  setBlocksById((prevBlocksById) => ({
-                    ...prevBlocksById,
-                    [id]: (prevBlocksById[id] ?? []).filter((block) => !nextIds.includes(block.id)),
-                  }));
-                };
-              },
-            },
           };
 
           const onDelete = () => {
@@ -176,7 +152,6 @@ function useInvestigationWithoutContext({
               <InvestigateWidgetApiContextProvider value={api}>
                 {widgetDefinition
                   ? widgetDefinition.render({
-                      blocks: api.blocks,
                       onWidgetAdd: api.onWidgetAdd,
                       onDelete,
                       widget: props.widget,
@@ -206,8 +181,6 @@ function useInvestigationWithoutContext({
     async (widget: InvestigateWidgetCreate) => {
       try {
         const id = v4();
-
-        setBlocksById((prevBlocksById) => ({ ...prevBlocksById, [id]: [] }));
 
         await investigationStore.addItem(id, widget);
       } catch (error) {
@@ -257,8 +230,6 @@ function useInvestigationWithoutContext({
       });
 
       setInvestigationStore(createdInvestigationStore);
-
-      setBlocksById({});
     },
     [user, widgetDefinitions, investigationStore]
   );
@@ -269,12 +240,6 @@ function useInvestigationWithoutContext({
     },
     [investigationStore]
   );
-
-  const lastItemId = last(currentRevision?.items)?.id;
-
-  const blocks = useMemo(() => {
-    return lastItemId && blocksById[lastItemId] ? blocksById[lastItemId] : [];
-  }, [blocksById, lastItemId]);
 
   const {
     copyItem,
@@ -397,7 +362,6 @@ function useInvestigationWithoutContext({
 
   return {
     addItem,
-    blocks,
     copyItem,
     deleteItem,
     investigation,

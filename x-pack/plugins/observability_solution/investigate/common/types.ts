@@ -64,13 +64,3 @@ export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };
-
-export interface WorkflowBlock {
-  id: string;
-  content?: string;
-  description?: string;
-  loading: boolean;
-  onClick?: () => void;
-  color?: keyof PickByValue<EuiThemeComputed<{}>['colors'], string>;
-  children?: React.ReactNode;
-}
