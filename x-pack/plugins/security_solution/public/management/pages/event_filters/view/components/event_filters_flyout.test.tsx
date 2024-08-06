@@ -244,7 +244,7 @@ describe('Event filter flyout', () => {
       const cancelButton = renderResult.getByTestId('cancelExceptionAddButton');
       expect(onCancelMock).toHaveBeenCalledTimes(0);
 
-      userEvent.click(cancelButton);
+      await userEvent.click(cancelButton);
       expect(onCancelMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -287,7 +287,7 @@ describe('Event filter flyout', () => {
       const cancelButton = renderResult.getByTestId('cancelExceptionAddButton');
       expect(onCancelMock).toHaveBeenCalledTimes(0);
 
-      userEvent.click(cancelButton);
+      await userEvent.click(cancelButton);
       expect(onCancelMock).toHaveBeenCalledTimes(0);
     });
 
@@ -314,7 +314,7 @@ describe('Event filter flyout', () => {
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
       expect(confirmButton.hasAttribute('disabled')).toBeFalsy();
       expect(onCancelMock).toHaveBeenCalledTimes(0);
-      userEvent.click(confirmButton);
+      await userEvent.click(confirmButton);
 
       expect(useToasts().addSuccess).toHaveBeenCalled();
       expect(onCancelMock).toHaveBeenCalledTimes(1);

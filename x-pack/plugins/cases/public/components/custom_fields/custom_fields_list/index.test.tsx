@@ -93,7 +93,7 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         await within(list).findByTestId(
           `${customFieldsConfigurationMock[0].key}-custom-field-delete`
         )
@@ -107,7 +107,7 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         await within(list).findByTestId(
           `${customFieldsConfigurationMock[0].key}-custom-field-delete`
         )
@@ -115,7 +115,7 @@ describe('CustomFieldsList', () => {
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByText('Delete'));
+      await userEvent.click(await screen.findByText('Delete'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
@@ -130,7 +130,7 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         await within(list).findByTestId(
           `${customFieldsConfigurationMock[0].key}-custom-field-delete`
         )
@@ -138,7 +138,7 @@ describe('CustomFieldsList', () => {
 
       expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByText('Cancel'));
+      await userEvent.click(await screen.findByText('Cancel'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
@@ -157,7 +157,7 @@ describe('CustomFieldsList', () => {
 
       const list = await screen.findByTestId('custom-fields-list');
 
-      userEvent.click(
+      await userEvent.click(
         await within(list).findByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
       );
 

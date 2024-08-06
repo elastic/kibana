@@ -31,7 +31,7 @@ describe('VideoToast', () => {
 
   it('should open the video in a new tab when the gif is clicked', () => {
     const videoGif = screen.getByTestId('video-gif');
-    userEvent.click(videoGif);
+    await userEvent.click(videoGif);
     expect(window.open).toHaveBeenCalledWith(
       'https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW',
       '_blank'
@@ -40,7 +40,7 @@ describe('VideoToast', () => {
 
   it('should open the video in a new tab when the "Watch overview video" button is clicked', () => {
     const watchVideoButton = screen.getByRole('button', { name: 'Watch overview video' });
-    userEvent.click(watchVideoButton);
+    await userEvent.click(watchVideoButton);
     expect(window.open).toHaveBeenCalledWith(
       'https://videos.elastic.co/watch/BrDaDBAAvdygvemFKNAkBW',
       '_blank'
@@ -49,7 +49,7 @@ describe('VideoToast', () => {
 
   it('should call the onClose callback when the close button is clicked', () => {
     const closeButton = screen.getByTestId('toastCloseButton');
-    userEvent.click(closeButton);
+    await userEvent.click(closeButton);
     expect(onCloseMock).toHaveBeenCalled();
   });
 });

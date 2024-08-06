@@ -55,7 +55,7 @@ describe('AnomalyChartsInitializer', () => {
       expect(confirmButton).toBeDefined();
       expect(onCreate).toHaveBeenCalledTimes(0);
 
-      userEvent.click(confirmButton!);
+      await userEvent.click(confirmButton!);
       expect(onCreate).toHaveBeenCalledWith({
         jobIds: ['job1', 'job2'],
         title: defaultTitle,

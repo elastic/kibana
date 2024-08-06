@@ -72,7 +72,7 @@ describe('CloseAlert', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
+    await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(
       within(screen.getByTestId('opsgenie-source-row')).getByDisplayValue('a source')
@@ -92,7 +92,7 @@ describe('CloseAlert', () => {
     (field, dataTestSubj, input, callback) => {
       render(<CloseAlert {...options} />);
 
-      userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
+      await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
       fireEvent.change(screen.getByTestId(dataTestSubj), { target: { value: input } });
 
@@ -103,7 +103,7 @@ describe('CloseAlert', () => {
   it('shows the additional options when clicking the more options button', () => {
     render(<CloseAlert {...options} />);
 
-    userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
+    await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(screen.getByTestId('opsgenie-source-row')).toBeInTheDocument();
   });

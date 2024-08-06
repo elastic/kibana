@@ -131,7 +131,7 @@ describe('SimpleConnectorForm', () => {
     await fillForm(res);
 
     await act(async () => {
-      userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
     });
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -178,7 +178,7 @@ describe('SimpleConnectorForm', () => {
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

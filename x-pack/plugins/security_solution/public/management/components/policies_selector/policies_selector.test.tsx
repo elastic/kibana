@@ -52,12 +52,12 @@ describe('Policies selector', () => {
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
-      userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
 
-      userEvent.click(element.getByText('Unassigned entries'));
+      await userEvent.click(element.getByText('Unassigned entries'));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
         { checked: 'on', id: 'abc123', name: 'test policy A' },
         { checked: 'off', id: 'global', name: 'Global entries' },
@@ -71,10 +71,10 @@ describe('Policies selector', () => {
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
-      userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(element.getByText(policy.name));
+      await userEvent.click(element.getByText(policy.name));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
         { checked: 'off', id: 'abc123', name: 'test policy A' },
         { checked: 'off', id: 'global', name: 'Global entries' },
@@ -87,10 +87,10 @@ describe('Policies selector', () => {
       const defaultExcludedPolicies = 'global';
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
-      userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(element.getByText('Global entries'));
+      await userEvent.click(element.getByText('Global entries'));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
         { checked: 'on', id: 'abc123', name: 'test policy A' },
         { checked: undefined, id: 'global', name: 'Global entries' },
@@ -103,7 +103,7 @@ describe('Policies selector', () => {
     it('should filter policy by name', async () => {
       const element = getElement({});
 
-      userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), policy.name);
@@ -113,7 +113,7 @@ describe('Policies selector', () => {
     it('should filter with no results', async () => {
       const element = getElement({});
 
-      userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), 'no results');
@@ -124,7 +124,7 @@ describe('Policies selector', () => {
     it('should filter with special chars', async () => {
       const element = getElement({});
 
-      userEvent.click(element.getByTestId('policiesSelectorButton'));
+      await userEvent.click(element.getByTestId('policiesSelectorButton'));
       await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), '*');

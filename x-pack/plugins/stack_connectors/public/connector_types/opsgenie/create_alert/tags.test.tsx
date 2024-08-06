@@ -36,7 +36,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxClearButton'));
+    await userEvent.click(screen.getByTestId('comboBoxClearButton'));
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
@@ -55,7 +55,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTitle('Remove super from selection in this group'));
+    await userEvent.click(screen.getByTitle('Remove super from selection in this group'));
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
@@ -76,7 +76,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
 
@@ -99,7 +99,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
@@ -114,7 +114,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
@@ -122,7 +122,7 @@ describe('Tags', () => {
     });
 
     act(() => {
-      userEvent.click(screen.getByText('The tags of the rule.'), undefined, {
+      await userEvent.click(screen.getByText('The tags of the rule.'), undefined, {
         skipPointerEventsCheck: true,
       });
     });
@@ -146,7 +146,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('opsgenie-tags-rule-tags')).not.toBeInTheDocument();

@@ -31,7 +31,7 @@ describe('When displaying the side panel', () => {
       renderAndOpenHelp = (props) => {
         render(props);
         act(() => {
-          userEvent.click(renderResult.getByTestId('test-header-helpButton'));
+          await userEvent.click(renderResult.getByTestId('test-header-helpButton'));
         });
 
         expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();

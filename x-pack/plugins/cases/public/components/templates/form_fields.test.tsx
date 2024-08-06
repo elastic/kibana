@@ -233,7 +233,7 @@ describe('form fields', () => {
       'this is a first template'
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -274,7 +274,7 @@ describe('form fields', () => {
     const caseCategory = await screen.findByTestId('caseCategory');
     userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -319,11 +319,11 @@ describe('form fields', () => {
     userEvent.clear(textCustomField);
     userEvent.paste(textCustomField, 'My text test value 1');
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -375,7 +375,7 @@ describe('form fields', () => {
 
     userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -427,7 +427,7 @@ describe('form fields', () => {
 
     const caseTags = await screen.findByTestId('template-tags');
 
-    userEvent.click(within(caseTags).getByTestId('comboBoxToggleListButton'));
+    await userEvent.click(within(caseTags).getByTestId('comboBoxToggleListButton'));
     await waitForEuiPopoverOpen();
 
     /**

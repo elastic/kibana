@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -44,9 +44,7 @@ describe('useCopyToClipboardAction', () => {
       await findByText('Copy field/value pair as KQL syntax to clipboard')
     ).toBeInTheDocument();
 
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await userEvent.click(button);
 
     // EUI implements copy-to-clipboard with deprecated `document.execCommand`.
     // We can assert that is has been triggered, but the combo with jsdom doesn't
@@ -69,9 +67,7 @@ describe('useCopyToClipboardAction', () => {
     // use a `find*` query to asynchronously poll for it.
     expect(await findByText('Copy group items as KQL syntax to clipboard')).toBeInTheDocument();
 
-    await act(async () => {
-      await userEvent.click(button);
-    });
+    await userEvent.click(button);
 
     // EUI implements copy-to-clipboard with deprecated `document.execCommand`.
     // We can assert that is has been triggered, but the combo with jsdom doesn't

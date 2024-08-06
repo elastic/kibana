@@ -61,7 +61,7 @@ describe('FormFields ', () => {
     });
 
     userEvent.type(await screen.findByTestId('custom-field-label-input'), 'hello');
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

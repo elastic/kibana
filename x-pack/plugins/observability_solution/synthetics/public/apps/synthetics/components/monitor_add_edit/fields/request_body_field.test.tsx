@@ -103,7 +103,7 @@ describe('<RequestBodyField />', () => {
     }
 
     expect(formButton).toHaveAttribute('aria-selected', 'true');
-    userEvent.click(getByText('Add form field'));
+    await userEvent.click(getByText('Add form field'));
     expect(getByText('Key')).toBeInTheDocument();
     expect(getByText('Value')).toBeInTheDocument();
     const keyValueTextBox = getAllByRole('textbox')[0];

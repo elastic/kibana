@@ -77,7 +77,7 @@ describe('LayerHeader', () => {
       }
     );
     const openChartSwitch = () => {
-      userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
+      await userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
     };
     const queryChartOptionByLabel = (label: string) => {
       return screen.queryByRole('presentation', { name: label });

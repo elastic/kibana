@@ -322,12 +322,12 @@ describe('dimension editor', () => {
           state: { ...localState, secondaryPrefix: customPrefix },
         });
 
-        userEvent.click(settingNone());
+        await userEvent.click(settingNone());
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
         );
 
-        userEvent.click(settingAuto());
+        await userEvent.click(settingAuto());
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
         );
@@ -475,7 +475,7 @@ describe('dimension editor', () => {
         if (!supportingVis) {
           throw new Error(`Supporting visualization ${type} not found`);
         }
-        userEvent.click(supportingVis);
+        await userEvent.click(supportingVis);
       };
 
       return {
@@ -648,7 +648,7 @@ describe('dimension editor', () => {
             throw new Error('horizontal button not found');
           }
 
-          userEvent.click(progressOptions.horizontal);
+          await userEvent.click(progressOptions.horizontal);
 
           expect(mockSetState).toHaveBeenCalledWith({
             ...metricAccessorState,

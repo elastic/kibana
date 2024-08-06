@@ -33,7 +33,7 @@ describe('tag selector', () => {
       </I18nProvider>
     );
 
-    userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByRole('button'));
 
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.queryByText('tag2')).toBeNull();

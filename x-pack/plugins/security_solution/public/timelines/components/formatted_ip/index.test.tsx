@@ -106,7 +106,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('network-details'));
+    await userEvent.click(screen.getByTestId('network-details'));
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {
         id: NetworkPanelKey,

@@ -64,7 +64,7 @@ describe('<FindingsFlyout/>', () => {
   describe('Rule Tab', () => {
     it('displays rule text details', () => {
       const { getByText, getAllByText } = render(<TestComponent />);
-      userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       getAllByText(mockFindingsHit.rule.name);
       getByText(mockFindingsHit.rule.benchmark.name);
@@ -76,14 +76,14 @@ describe('<FindingsFlyout/>', () => {
 
     it('displays missing info callout when data source is not CSP', () => {
       const { getByText } = render(<TestComponent finding={mockWizFinding} />);
-      userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       getByText('Some fields not provided by Wiz');
     });
 
     it('does not display missing info callout when data source is CSP', () => {
       const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
-      userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
@@ -93,7 +93,7 @@ describe('<FindingsFlyout/>', () => {
   describe('Table Tab', () => {
     it('displays resource name and id', () => {
       const { getAllByText } = render(<TestComponent />);
-      userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
       getAllByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.resource.id);
@@ -101,7 +101,7 @@ describe('<FindingsFlyout/>', () => {
 
     it('does not display missing info callout for 3Ps', () => {
       const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
-      userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
@@ -111,7 +111,7 @@ describe('<FindingsFlyout/>', () => {
   describe('JSON Tab', () => {
     it('does not display missing info callout for 3Ps', () => {
       const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
-      userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
+      await userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
@@ -121,7 +121,7 @@ describe('<FindingsFlyout/>', () => {
   it('should allow pagination with next', async () => {
     const { getByTestId } = render(<TestComponent />);
 
-    userEvent.click(getByTestId('pagination-button-next'));
+    await userEvent.click(getByTestId('pagination-button-next'));
 
     expect(onPaginate).toHaveBeenCalledWith(1);
   });
@@ -129,7 +129,7 @@ describe('<FindingsFlyout/>', () => {
   it('should allow pagination with previous', async () => {
     const { getByTestId } = render(<TestComponent flyoutIndex={1} />);
 
-    userEvent.click(getByTestId('pagination-button-previous'));
+    await userEvent.click(getByTestId('pagination-button-previous'));
 
     expect(onPaginate).toHaveBeenCalledWith(0);
   });

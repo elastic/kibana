@@ -263,7 +263,7 @@ describe('When using ConsoleManager', () => {
 
     it('should hide the console page overlay', async () => {
       await render();
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
 
       expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });

@@ -48,7 +48,7 @@ describe('layer settings', () => {
       renderLayerSettings();
       expect(props.setState).not.toHaveBeenCalled();
       const toggle = screen.getByRole('switch');
-      userEvent.click(toggle);
+      await userEvent.click(toggle);
       expect(props.setState).toHaveBeenLastCalledWith({
         ...props.state,
         layers: [
@@ -61,7 +61,7 @@ describe('layer settings', () => {
       cleanup();
 
       renderLayerSettings({ state: getState(true) });
-      userEvent.click(screen.getByRole('switch'));
+      await userEvent.click(screen.getByRole('switch'));
       expect(props.setState).toHaveBeenLastCalledWith({
         ...props.state,
         layers: [

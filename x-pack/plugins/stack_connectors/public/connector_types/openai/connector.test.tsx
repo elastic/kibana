@@ -146,7 +146,7 @@ describe('ConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       await waitFor(async () => {
@@ -175,7 +175,7 @@ describe('ConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('ConnectorFields renders', () => {
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();

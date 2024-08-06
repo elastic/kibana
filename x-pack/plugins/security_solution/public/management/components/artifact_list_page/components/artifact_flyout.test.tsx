@@ -82,7 +82,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await render();
 
     act(() => {
-      userEvent.click(renderResult.getByTestId(testId));
+      await userEvent.click(renderResult.getByTestId(testId));
     });
 
     expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
@@ -158,7 +158,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         releaseApiUpdateResponse = deferrable.resolve;
 
         act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         });
       });
 
@@ -195,7 +195,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         });
 
         act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         });
 
         await waitFor(() => {
@@ -228,7 +228,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           });
 
           act(() => {
-            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+            await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
           });
 
           await waitFor(() =>
@@ -281,7 +281,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         });
 
         act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         });
       });
 
@@ -354,7 +354,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
       it('should show the warning modal', async () => {
         await render();
         act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
+          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         });
         expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
         expect(renderResult.getByTestId('artifactConfirmModal-header').textContent).toEqual(

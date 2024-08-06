@@ -147,7 +147,7 @@ describe('Onboarding Component new section', () => {
         renderResult = mockedContext.render(
           <EndpointPolicyCreateExtension newPolicy={getMockNewPackage()} onChange={jest.fn()} />
         );
-        userEvent.click(screen.getByDisplayValue(preset));
+        await userEvent.click(screen.getByDisplayValue(preset));
         expect(renderResult.getByDisplayValue(preset)).toBeChecked();
 
         if (result === 'should see') {

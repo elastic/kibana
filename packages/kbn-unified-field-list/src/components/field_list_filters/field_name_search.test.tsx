@@ -35,7 +35,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     expect(props.onChange).toBeCalledTimes(1);
   });
 
-  it('should accept the updates from the top', () => {
+  it('should accept the updates from the top', async () => {
     const FieldNameSearchWithWrapper = ({ defaultNameFilter = '' }) => {
       const [nameFilter, setNameFilter] = useState(defaultNameFilter);
       const props: FieldNameSearchProps = {
@@ -54,7 +54,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     render(<FieldNameSearchWithWrapper defaultNameFilter="this" />);
     expect(screen.getByRole('searchbox')).toHaveValue('this');
     const button = screen.getByRole('button', { name: 'update nameFilter' });
-    userEvent.click(button);
+    await userEvent.click(button);
     expect(screen.getByRole('searchbox')).toHaveValue('that');
   });
 });

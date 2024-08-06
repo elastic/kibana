@@ -104,7 +104,7 @@ describe('Create ', () => {
 
     userEvent.clear(textCustomField);
     userEvent.paste(textCustomField, 'this is a sample text!');
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -133,7 +133,7 @@ describe('Create ', () => {
       sampleText
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     expect(
       await screen.findByText(
@@ -162,7 +162,7 @@ describe('Create ', () => {
       await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`),
       sampleText
     );
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     expect(
       await screen.findByText(
@@ -188,7 +188,7 @@ describe('Create ', () => {
     userEvent.clear(
       await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
     );
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     expect(
       await screen.findByText(`${customFieldConfiguration.label} is required.`)
@@ -214,7 +214,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({}, true);

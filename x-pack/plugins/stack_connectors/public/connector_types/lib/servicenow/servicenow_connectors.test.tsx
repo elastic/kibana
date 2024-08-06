@@ -277,7 +277,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('update-connector-btn'));
+      await userEvent.click(await screen.findByTestId('update-connector-btn'));
 
       const updateConnectorForm = await screen.findByTestId('updateConnectorForm');
       const urlInput = await within(updateConnectorForm).findByTestId('credentialsApiUrlFromInput');
@@ -291,7 +291,9 @@ describe('ServiceNowActionConnectorFields renders', () => {
       userEvent.paste(urlInput, 'https://example.com');
       userEvent.paste(usernameInput, 'user');
       userEvent.paste(passwordInput, 'pass');
-      userEvent.click(await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit'));
+      await userEvent.click(
+        await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
+      );
 
       await waitFor(() => {
         expect(getAppInfoMock).toHaveBeenCalledTimes(1);
@@ -332,7 +334,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('update-connector-btn'));
+      await userEvent.click(await screen.findByTestId('update-connector-btn'));
 
       const updateConnectorForm = await screen.findByTestId('updateConnectorForm');
       const urlInput = await within(updateConnectorForm).findByTestId('credentialsApiUrlFromInput');
@@ -346,7 +348,9 @@ describe('ServiceNowActionConnectorFields renders', () => {
       userEvent.paste(urlInput, 'https://example.com');
       userEvent.paste(usernameInput, 'user');
       userEvent.paste(passwordInput, 'pass');
-      userEvent.click(await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit'));
+      await userEvent.click(
+        await within(updateConnectorForm).findByTestId('snUpdateInstallationSubmit')
+      );
 
       await waitFor(() => {
         expect(getAppInfoMock).toHaveBeenCalledTimes(1);
@@ -396,7 +400,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
           </ConnectorFormTestProvider>
         );
 
-        userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
         await waitFor(() => {
           expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
@@ -425,7 +429,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       const {
         secrets: { clientSecret, privateKey },
@@ -457,7 +461,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         });
       });
 
-      userEvent.click(screen.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -481,7 +485,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         });
       });
 
-      userEvent.click(screen.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

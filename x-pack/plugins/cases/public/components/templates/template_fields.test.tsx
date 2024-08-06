@@ -92,7 +92,7 @@ describe('Template fields', () => {
       'this is a first template'
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -129,7 +129,7 @@ describe('Template fields', () => {
 
     userEvent.paste(await screen.findByTestId('template-description-input'), '..');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

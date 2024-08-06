@@ -130,7 +130,7 @@ describe('CasesCell', () => {
     appMockRender.render(<CasesCell {...props} />);
     expect(screen.getByText('Test case')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Test case'));
+    await userEvent.click(screen.getByText('Test case'));
     expect(navigateToCaseView).toBeCalledWith({ caseId: 'test-id' });
   });
 });

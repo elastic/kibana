@@ -65,7 +65,7 @@ describe('TimelineWrapper', () => {
       </TestProviders>
     );
 
-    userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
+    await userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
 
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })

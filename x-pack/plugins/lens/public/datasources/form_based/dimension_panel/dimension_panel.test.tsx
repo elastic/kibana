@@ -349,7 +349,7 @@ describe('FormBasedDimensionEditor', () => {
       columnId: 'col2',
       filterOperations: () => false,
     });
-    userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
+    await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
 
@@ -358,7 +358,7 @@ describe('FormBasedDimensionEditor', () => {
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
     const comboBoxInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-    userEvent.click(comboBoxButton);
+    await userEvent.click(comboBoxButton);
 
     const allOptions = [
       'Records',

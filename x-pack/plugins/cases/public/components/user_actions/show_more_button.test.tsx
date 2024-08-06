@@ -41,7 +41,7 @@ describe('ShowMoreButton', () => {
   it('calls onShowMoreClick on button click', () => {
     appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
-    userEvent.click(screen.getByTestId('cases-show-more-user-actions'));
+    await userEvent.click(screen.getByTestId('cases-show-more-user-actions'));
     expect(showMoreClickMock).toHaveBeenCalled();
   });
 });

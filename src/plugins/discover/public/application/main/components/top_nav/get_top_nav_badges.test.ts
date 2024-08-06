@@ -28,7 +28,7 @@ describe('getTopNavBadges()', function () {
     expect(topNavBadges).toMatchInlineSnapshot(`Array []`);
   });
 
-  test('should return the unsaved changes badge when has changes', () => {
+  test('should return the unsaved changes badge when has changes', async () => {
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: true,
       services: discoverServiceMock,
@@ -49,13 +49,13 @@ describe('getTopNavBadges()', function () {
     expect(unsavedChangesBadge.badgeText).toEqual('Unsaved changes');
 
     render(unsavedChangesBadge.renderCustomBadge!({ badgeText: 'Unsaved changes' }));
-    userEvent.click(screen.getByRole('button')); // open menu
+    await userEvent.click(screen.getByRole('button')); // open menu
     expect(screen.queryByText('Save')).not.toBeNull();
     expect(screen.queryByText('Save as')).not.toBeNull();
     expect(screen.queryByText('Revert changes')).not.toBeNull();
   });
 
-  test('should not show save in unsaved changed badge for read-only user', () => {
+  test('should not show save in unsaved changed badge for read-only user', async () => {
     const discoverServiceMockReadOnly = createDiscoverServicesMock();
     discoverServiceMockReadOnly.capabilities.discover.save = false;
     const topNavBadges = getTopNavBadges({
@@ -70,7 +70,7 @@ describe('getTopNavBadges()', function () {
     expect(unsavedChangesBadge.badgeText).toEqual('Unsaved changes');
 
     render(unsavedChangesBadge.renderCustomBadge!({ badgeText: 'Unsaved changes' }));
-    userEvent.click(screen.getByRole('button')); // open menu
+    await userEvent.click(screen.getByRole('button')); // open menu
     expect(screen.queryByText('Save')).toBeNull();
     expect(screen.queryByText('Save as')).toBeNull();
     expect(screen.queryByText('Revert changes')).not.toBeNull();
@@ -93,7 +93,7 @@ describe('getTopNavBadges()', function () {
       expect(topNavBadges[0].badgeText).toEqual('Managed');
     });
 
-    test('should not show save in unsaved changed badge', () => {
+    test('should not show save in unsaved changed badge', async () => {
       const topNavBadges = getTopNavBadges({
         hasUnsavedChanges: true,
         services: discoverServiceMock,
@@ -106,7 +106,7 @@ describe('getTopNavBadges()', function () {
       expect(unsavedChangesBadge.badgeText).toEqual('Unsaved changes');
 
       render(unsavedChangesBadge.renderCustomBadge!({ badgeText: 'Unsaved changes' }));
-      userEvent.click(screen.getByRole('button')); // open menu
+      await userEvent.click(screen.getByRole('button')); // open menu
       expect(screen.queryByText('Save')).toBeNull();
     });
   });

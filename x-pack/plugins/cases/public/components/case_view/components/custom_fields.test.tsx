@@ -132,7 +132,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(await screen.findByRole('switch'));
+    await userEvent.click(await screen.findByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -153,7 +153,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click((await screen.findAllByRole('switch'))[0]);
+    await userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -174,7 +174,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click((await screen.findAllByRole('switch'))[0]);
+    await userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -195,7 +195,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
     );
 
@@ -204,7 +204,9 @@ describe('Case View Page files tab', () => {
       '!!!'
     );
 
-    userEvent.click(await screen.findByTestId('case-text-custom-field-submit-button-test_key_1'));
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
+    );
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
@@ -224,7 +226,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
     );
 
@@ -237,7 +239,9 @@ describe('Case View Page files tab', () => {
       ' updated!!'
     );
 
-    userEvent.click(await screen.findByTestId('case-text-custom-field-submit-button-test_key_1'));
+    await userEvent.click(
+      await screen.findByTestId('case-text-custom-field-submit-button-test_key_1')
+    );
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({

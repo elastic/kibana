@@ -43,7 +43,8 @@ describe('gauge toolbar', () => {
     propsOverrides?: Partial<VisualizationToolbarProps<GaugeVisualizationState>>
   ) => {
     const rtlRender = render(<GaugeToolbar {...defaultProps} {...propsOverrides} />);
-    const openPopover = () => userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
+    const openPopover = () =>
+      await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
     openPopover();
     return {
       ...rtlRender,

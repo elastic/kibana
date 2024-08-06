@@ -65,7 +65,7 @@ describe('SeriesName', function () {
 
     const editButton = screen.getByRole('button');
     // toggle editing
-    userEvent.click(editButton);
+    await userEvent.click(editButton);
 
     await waitFor(() => {
       input = screen.getByTestId('exploratoryViewSeriesNameInput') as HTMLInputElement;
@@ -73,7 +73,7 @@ describe('SeriesName', function () {
       expect(input).toBeInTheDocument();
     });
 
-    userEvent.click(input);
+    await userEvent.click(input);
     userEvent.type(input, newName);
 
     // submit

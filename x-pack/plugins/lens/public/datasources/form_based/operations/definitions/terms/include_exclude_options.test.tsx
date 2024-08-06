@@ -52,7 +52,7 @@ describe('IncludeExcludeComponent', () => {
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     fireEvent.click(screen.getByRole('option', { name: 'ABC' }));
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('ABC');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
@@ -64,7 +64,7 @@ describe('IncludeExcludeComponent', () => {
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test.*');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
@@ -95,7 +95,7 @@ describe('IncludeExcludeComponent', () => {
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
       'ABC',
       'FEF',
@@ -121,7 +121,7 @@ describe('IncludeExcludeComponent', () => {
       includeIsRegex: false,
       tableRows,
     });
-    userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
+    await userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
     expect(onUpdateSpy).toHaveBeenCalledWith('include', [], 'includeIsRegex', true);
   });
 
@@ -133,13 +133,13 @@ describe('IncludeExcludeComponent', () => {
       tableRows,
     });
     const typedValues = ['test.*', 'ABC'];
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[0]}{Enter}`
     );
 
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[1]}{Enter}`

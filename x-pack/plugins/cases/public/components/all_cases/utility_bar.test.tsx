@@ -119,7 +119,7 @@ describe('Severity form field', () => {
   it('opens the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
   });
@@ -127,11 +127,11 @@ describe('Severity form field', () => {
   it('closes the bulk actions correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
 
-    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     expect(await screen.findByTestId('case-table-bulk-actions-context-menu'));
 
-    userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
+    await userEvent.click(await screen.findByTestId('case-table-bulk-actions-link-icon'));
 
     await waitForElementToBeRemoved(screen.queryByTestId('case-table-bulk-actions-context-menu'));
   });
@@ -140,7 +140,7 @@ describe('Severity form field', () => {
     appMockRender.render(<CasesTableUtilityBar {...props} />);
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    userEvent.click(await screen.findByTestId('all-cases-refresh-link-icon'));
+    await userEvent.click(await screen.findByTestId('all-cases-refresh-link-icon'));
 
     await waitFor(() => {
       expect(deselectCases).toHaveBeenCalled();
@@ -187,7 +187,7 @@ describe('Severity form field', () => {
   it('clears the filters correctly', async () => {
     appMockRender.render(<CasesTableUtilityBar {...props} showClearFiltersButton={true} />);
 
-    userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
 
     await waitFor(() => {
       expect(props.onClearFilters).toHaveBeenCalled();
@@ -301,7 +301,7 @@ describe('Severity form field', () => {
       expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
       expect(await screen.findByTestId('dismiss-warning')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('dismiss-warning'));
+      await userEvent.click(await screen.findByTestId('dismiss-warning'));
 
       expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     });
@@ -353,7 +353,7 @@ describe('Severity form field', () => {
         expect(await screen.findByTestId('all-cases-maximum-limit-warning')).toBeInTheDocument();
         expect(await screen.findByTestId('do-not-show-warning')).toBeInTheDocument();
 
-        userEvent.click(await screen.findByTestId('do-not-show-warning'));
+        await userEvent.click(await screen.findByTestId('do-not-show-warning'));
 
         act(() => {
           jest.advanceTimersByTime(1000);

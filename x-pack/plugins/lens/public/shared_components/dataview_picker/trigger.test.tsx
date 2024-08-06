@@ -41,7 +41,7 @@ describe('TriggerButton', () => {
           title="My title"
         />
       );
-      userEvent.click(screen.getByText('Trigger'));
+      await userEvent.click(screen.getByText('Trigger'));
 
       expect(toggleFn).toHaveBeenCalled();
     });

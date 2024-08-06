@@ -114,9 +114,9 @@ describe('blocklist form', () => {
 
   it('should show name required message after name input blur', () => {
     render();
-    userEvent.click(screen.getByTestId('blocklist-form-name-input'));
+    await userEvent.click(screen.getByTestId('blocklist-form-name-input'));
     expect(screen.queryByText(ERRORS.NAME_REQUIRED)).toBeNull();
-    userEvent.click(screen.getByTestId('blocklist-form-os-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-os-select'));
     expect(screen.queryByText(ERRORS.NAME_REQUIRED)).toBeTruthy();
   });
 
@@ -160,7 +160,7 @@ describe('blocklist form', () => {
 
   it('should allow user to select between 3 OSs', () => {
     render();
-    userEvent.click(screen.getByTestId('blocklist-form-os-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-os-select'));
     expect(screen.queryAllByRole('option').length).toEqual(3);
     expect(screen.queryByRole('option', { name: 'Windows' })).toBeTruthy();
     expect(screen.queryByRole('option', { name: 'Linux' })).toBeTruthy();
@@ -169,9 +169,9 @@ describe('blocklist form', () => {
 
   it('should correctly edit OS', async () => {
     render();
-    userEvent.click(screen.getByTestId('blocklist-form-os-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-os-select'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: 'Linux' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Linux' }));
     const expected = createOnChangeArgs({
       item: createItem({
         os_types: [OperatingSystem.LINUX],
@@ -190,7 +190,7 @@ describe('blocklist form', () => {
     render();
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Windows, ');
 
-    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(3);
     expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
@@ -201,7 +201,7 @@ describe('blocklist form', () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
 
-    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(2);
     expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
@@ -212,7 +212,7 @@ describe('blocklist form', () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
 
-    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     expect(screen.queryAllByRole('option').length).toEqual(2);
     expect(screen.queryByRole('option', { name: /hash/i })).toBeTruthy();
     expect(screen.queryByRole('option', { name: /path/i })).toBeTruthy();
@@ -221,9 +221,9 @@ describe('blocklist form', () => {
 
   it('should correctly edit field', async () => {
     render();
-    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: /path/i }));
+    await userEvent.click(screen.getByRole('option', { name: /path/i }));
     const expected = createOnChangeArgs({
       item: createItem({
         entries: [createEntry('file.path.caseless', [])],
@@ -236,9 +236,9 @@ describe('blocklist form', () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.MAC] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Mac, ');
 
-    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: /path/i }));
+    await userEvent.click(screen.getByRole('option', { name: /path/i }));
     const expected = createOnChangeArgs({
       item: createItem({
         os_types: [OperatingSystem.MAC],
@@ -252,9 +252,9 @@ describe('blocklist form', () => {
     render(createProps({ item: createItem({ os_types: [OperatingSystem.LINUX] }) }));
     expect(screen.getByTestId('blocklist-form-os-select').textContent).toEqual('Linux, ');
 
-    userEvent.click(screen.getByTestId('blocklist-form-field-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-field-select'));
     await waitForEuiPopoverOpen();
-    userEvent.click(screen.getByRole('option', { name: /path/i }));
+    await userEvent.click(screen.getByRole('option', { name: /path/i }));
     const expected = createOnChangeArgs({
       item: createItem({
         os_types: [OperatingSystem.LINUX],
@@ -307,9 +307,9 @@ describe('blocklist form', () => {
 
   it('should show value required after value input blur', () => {
     render(createProps({ item: createItem({ entries: [createEntry('file.hash.*', [])] }) }));
-    userEvent.click(screen.getByRole('combobox'));
+    await userEvent.click(screen.getByRole('combobox'));
     expect(screen.queryByText(ERRORS.VALUE_REQUIRED)).toBeNull();
-    userEvent.click(screen.getByTestId('blocklist-form-os-select'));
+    await userEvent.click(screen.getByTestId('blocklist-form-os-select'));
     expect(screen.queryByText(ERRORS.VALUE_REQUIRED)).toBeTruthy();
   });
 
@@ -327,7 +327,7 @@ describe('blocklist form', () => {
         }),
       })
     );
-    userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
     const expected = createOnChangeArgs({
       item: createItem({ entries: [createEntry('file.hash.*', [])] }),
     });
@@ -385,10 +385,10 @@ describe('blocklist form', () => {
     ] as PolicyData[];
     render(createProps({ policies }));
     const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
-    userEvent.click(byPolicyButton);
+    await userEvent.click(byPolicyButton);
     expect(byPolicyButton).toBeEnabled();
 
-    userEvent.click(screen.getByText(policies[1].name));
+    await userEvent.click(screen.getByText(policies[1].name));
     const expected = createOnChangeArgs({
       item: createItem({
         tags: [`policy:${policies[1].id}`],
@@ -412,9 +412,9 @@ describe('blocklist form', () => {
     expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
 
     const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
-    userEvent.click(byPolicyButton);
+    await userEvent.click(byPolicyButton);
     expect(byPolicyButton).toBeEnabled();
-    userEvent.click(screen.getByText(policies[0].name));
+    await userEvent.click(screen.getByText(policies[0].name));
     const expected = createOnChangeArgs({
       item: createItem({
         tags: policies.map((policy) => `policy:${policy.id}`),

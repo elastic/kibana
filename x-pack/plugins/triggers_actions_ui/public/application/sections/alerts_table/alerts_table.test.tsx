@@ -371,7 +371,7 @@ describe('AlertsTable', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(
+      await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
         undefined,
         {
@@ -381,7 +381,7 @@ describe('AlertsTable', () => {
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
         undefined,
         {
@@ -389,7 +389,7 @@ describe('AlertsTable', () => {
         }
       );
 
-      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -402,7 +402,7 @@ describe('AlertsTable', () => {
       const renderResult = render(
         <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
       );
-      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
         skipPointerEventsCheck: true,
       });
 

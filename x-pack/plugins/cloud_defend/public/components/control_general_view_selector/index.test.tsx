@@ -117,7 +117,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(options[3].textContent).toBe('deleteFile');
 
     act(() => {
-      userEvent.click(options[3]); // select deleteFile
+      await userEvent.click(options[3]); // select deleteFile
     });
 
     const updatedSelector: Selector = onChange.mock.calls[0][0];
@@ -147,7 +147,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(options[1].textContent).toBe('exec');
 
     act(() => {
-      userEvent.click(options[1]); // select exec
+      await userEvent.click(options[1]); // select exec
     });
 
     const updatedSelector: Selector = onChange.mock.calls[0][0];
@@ -172,7 +172,7 @@ describe('<ControlGeneralViewSelector />', () => {
     const conditions = getSelectorConditions('file');
     expect(options).toHaveLength(conditions.length - 1); // -1 since operation is already present
 
-    await waitFor(() => userEvent.click(options[1])); // add second option "containerImageName"
+    await waitFor(() => await userEvent.click(options[1])); // add second option "containerImageName"
 
     // rerender and check that containerImageName is not in the list anymore
     const updatedSelector: Selector = { ...onChange.mock.calls[0][0] };

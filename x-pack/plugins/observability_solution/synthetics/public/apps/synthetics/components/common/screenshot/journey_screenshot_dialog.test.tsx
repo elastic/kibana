@@ -60,14 +60,14 @@ describe('JourneyScreenshotDialog', () => {
     const { getByTestId, queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();
-    userEvent.click(getByTestId('screenshotImageNextButton'));
+    await userEvent.click(getByTestId('screenshotImageNextButton'));
   });
 
   it('respects maxSteps', () => {
     const { getByTestId, queryByTestId } = render(<JourneyScreenshotDialog {...testProps} />);
 
     expect(queryByTestId('screenshotImageLoadingProgress')).not.toBeInTheDocument();
-    userEvent.click(getByTestId('screenshotImageNextButton'));
+    await userEvent.click(getByTestId('screenshotImageNextButton'));
     expect(getByTestId('screenshotImageNextButton')).toHaveProperty('disabled');
   });
 

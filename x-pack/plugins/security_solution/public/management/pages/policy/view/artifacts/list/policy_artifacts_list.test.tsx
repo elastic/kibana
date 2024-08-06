@@ -110,7 +110,7 @@ describe('Policy details artifacts list', () => {
       expect(renderResult.getAllByTestId('artifacts-collapsed-list-card')).toHaveLength(1);
     });
 
-    userEvent.click(
+    await userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-expandCollapse')
     );
 
@@ -153,7 +153,7 @@ describe('Policy details artifacts list', () => {
     );
     await render();
     // click the actions button
-    userEvent.click(
+    await userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-actions-button')
     );
     expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
@@ -167,7 +167,7 @@ describe('Policy details artifacts list', () => {
       getFoundExceptionListItemSchemaMock()
     );
     await render();
-    userEvent.click(
+    await userEvent.click(
       renderResult.getByTestId('artifacts-collapsed-list-card-header-actions-button')
     );
 
@@ -191,7 +191,7 @@ describe('Policy details artifacts list', () => {
       );
       await render(false);
       // click the actions button
-      userEvent.click(
+      await userEvent.click(
         await renderResult.findByTestId('artifacts-collapsed-list-card-header-actions-button')
       );
       expect(renderResult.queryByTestId('remove-from-policy-action')).toBeFalsy();

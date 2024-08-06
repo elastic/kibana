@@ -286,7 +286,7 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen, withTags: true });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -315,13 +315,13 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('case-severity-selection'));
+      await userEvent.click(screen.getByTestId('case-severity-selection'));
       await waitForEuiPopoverOpen();
 
       expect(screen.getByTestId('case-severity-selection-high')).toBeVisible();
 
-      userEvent.click(screen.getByTestId('case-severity-selection-high'));
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('case-severity-selection-high'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -373,7 +373,7 @@ describe('Create case', () => {
 
       userEvent.type(categoryComboBox, `${newCategory}{enter}`);
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -404,8 +404,8 @@ describe('Create case', () => {
 
       const syncAlertsButton = within(screen.getByTestId('caseSyncAlerts')).getByTestId('input');
 
-      userEvent.click(syncAlertsButton);
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(syncAlertsButton);
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -441,7 +441,7 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -515,11 +515,11 @@ describe('Create case', () => {
       userEvent.clear(textCustomField);
       userEvent.paste(textCustomField, 'My text test value 1');
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
       );
 
-      userEvent.click(await screen.findByTestId('create-case-submit'));
+      await userEvent.click(await screen.findByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -580,7 +580,7 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
@@ -642,7 +642,7 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toBeCalled();
@@ -679,7 +679,7 @@ describe('Create case', () => {
 
       userEvent.type(categoryComboBox, `${category}{enter}`);
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -710,8 +710,8 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+      await userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -726,7 +726,7 @@ describe('Create case', () => {
       userEvent.paste(checkbox, 'Denial of Service');
       userEvent.keyboard('{enter}');
       userEvent.selectOptions(screen.getByTestId('severitySelect'), ['4']);
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();
@@ -787,8 +787,8 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
+      await userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await userEvent.click(screen.getByTestId('dropdown-connector-servicenow-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
@@ -797,10 +797,10 @@ describe('Create case', () => {
       userEvent.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
       expect(screen.getByTestId('severitySelect')).toHaveValue('4');
 
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+      await userEvent.click(screen.getByTestId('dropdown-connectors'));
+      await userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalledWith({
@@ -845,16 +845,16 @@ describe('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(afterCaseCreated).toHaveBeenCalled();
@@ -913,7 +913,7 @@ describe('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(createAttachments).toHaveBeenCalledTimes(1);
@@ -949,7 +949,7 @@ describe('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitForComponentToUpdate();
 
@@ -990,17 +990,17 @@ describe('Create case', () => {
     await waitForFormToRender(screen);
     await fillFormReactTestingLib({ renderer: screen });
 
-    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await userEvent.click(screen.getByTestId('dropdown-connectors'));
 
     await waitFor(() => {
       expect(screen.getByTestId('dropdown-connector-resilient-2')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
       skipPointerEventsCheck: true,
     });
 
-    userEvent.click(screen.getByTestId('create-case-submit'));
+    await userEvent.click(screen.getByTestId('create-case-submit'));
 
     await waitFor(() => {
       expect(postCase).toHaveBeenCalled();
@@ -1045,7 +1045,7 @@ describe('Create case', () => {
       await waitForFormToRender(screen);
       await fillFormReactTestingLib({ renderer: screen });
 
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitForComponentToUpdate();
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
@@ -1091,8 +1091,8 @@ describe('Create case', () => {
         jest.advanceTimersByTime(500);
       });
 
-      userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
-      userEvent.click(screen.getByTestId('create-case-submit'));
+      await userEvent.click(await screen.findByText(`${userProfiles[0].user.full_name}`));
+      await userEvent.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
         expect(postCase).toHaveBeenCalled();

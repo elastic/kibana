@@ -87,7 +87,7 @@ describe('UserRepresentation', () => {
       </RemovableItem>
     );
 
-    userEvent.click(screen.getByTestId('remove-button'));
+    await userEvent.click(screen.getByTestId('remove-button'));
 
     expect(onRemoveItem).toBeCalled();
   });

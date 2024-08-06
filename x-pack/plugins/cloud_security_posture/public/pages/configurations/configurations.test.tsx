@@ -131,7 +131,7 @@ describe('<Findings />', () => {
       userEvent.paste(queryInput, `rule.section : ${finding1.rule.section}`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
 
@@ -139,7 +139,7 @@ describe('<Findings />', () => {
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
 
       userEvent.clear(queryInput);
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
     });
     it('renders no results message and reset button when search query does not match', async () => {
@@ -160,7 +160,7 @@ describe('<Findings />', () => {
       userEvent.paste(queryInput, `rule.section : Invalid`);
 
       const submitButton = screen.getByTestId('querySubmitButton');
-      userEvent.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() =>
         expect(screen.getByText(/no results match your search criteria/i)).toBeInTheDocument()
@@ -170,7 +170,7 @@ describe('<Findings />', () => {
         name: /reset filters/i,
       });
 
-      userEvent.click(resetButton);
+      await userEvent.click(resetButton);
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
     });
     it('add filter', async () => {
@@ -187,7 +187,9 @@ describe('<Findings />', () => {
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
-      userEvent.click(screen.getByTestId('addFilter'), undefined, { skipPointerEventsCheck: true });
+      await userEvent.click(screen.getByTestId('addFilter'), undefined, {
+        skipPointerEventsCheck: true,
+      });
 
       await waitFor(() =>
         expect(screen.getByTestId('filterFieldSuggestionList')).toBeInTheDocument()
@@ -203,7 +205,7 @@ describe('<Findings />', () => {
       const filterOperatorListInput = within(screen.getByTestId('filterOperatorList')).getByTestId(
         'comboBoxSearchInput'
       );
-      userEvent.click(filterOperatorListInput, undefined, { skipPointerEventsCheck: true });
+      await userEvent.click(filterOperatorListInput, undefined, { skipPointerEventsCheck: true });
 
       const filterOption = within(
         screen.getByTestId('comboBoxOptionsList filterOperatorList-optionsList')
@@ -213,7 +215,7 @@ describe('<Findings />', () => {
       const filterParamsInput = within(screen.getByTestId('filterParams')).getByRole('textbox');
       userEvent.paste(filterParamsInput, finding1.rule.section);
 
-      userEvent.click(screen.getByTestId('saveFilter'), undefined, {
+      await userEvent.click(screen.getByTestId('saveFilter'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -271,7 +273,7 @@ describe('<Findings />', () => {
       const deleteFilter = screen.getByRole('button', {
         name: `Delete rule.section: ${finding1.rule.section}`,
       });
-      userEvent.click(deleteFilter);
+      await userEvent.click(deleteFilter);
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -332,7 +334,7 @@ describe('<Findings />', () => {
       const passedFindingsButton = screen.getByRole('button', {
         name: /passed findings: 1/i,
       });
-      userEvent.click(passedFindingsButton);
+      await userEvent.click(passedFindingsButton);
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
 
@@ -368,7 +370,7 @@ describe('<Findings />', () => {
       const failedFindingsButton = screen.getByRole('button', {
         name: /failed findings: 1/i,
       });
-      userEvent.click(failedFindingsButton);
+      await userEvent.click(failedFindingsButton);
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
 

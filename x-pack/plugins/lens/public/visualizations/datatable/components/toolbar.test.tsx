@@ -49,7 +49,7 @@ describe('datatable toolbar', () => {
     const rtlRender = render(<DataTableToolbar {...defaultProps} {...overrides} />);
 
     const togglePopover = () => {
-      userEvent.click(screen.getByRole('button', { name: /visual options/i }));
+      await userEvent.click(screen.getByRole('button', { name: /visual options/i }));
     };
     togglePopover();
 

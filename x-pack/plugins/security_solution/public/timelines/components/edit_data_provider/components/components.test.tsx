@@ -47,7 +47,7 @@ describe('ControlledComboboxInput', () => {
     renderControlledComboboxInput();
     const removeButton = screen.getByTestId('is-one-of-combobox-input').querySelector('button');
 
-    userEvent.click(removeButton as HTMLButtonElement);
+    await userEvent.click(removeButton as HTMLButtonElement);
     expect(onChangeCallbackMock).toHaveBeenLastCalledWith([]);
   });
 

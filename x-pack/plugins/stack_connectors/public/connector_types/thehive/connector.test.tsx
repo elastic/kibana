@@ -65,7 +65,7 @@ describe('TheHiveActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       waitFor(() => {
@@ -104,7 +104,7 @@ describe('TheHiveActionConnectorFields renders', () => {
       });
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });

@@ -136,11 +136,11 @@ describe('CustomFields', () => {
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
       'hello'
     );
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid

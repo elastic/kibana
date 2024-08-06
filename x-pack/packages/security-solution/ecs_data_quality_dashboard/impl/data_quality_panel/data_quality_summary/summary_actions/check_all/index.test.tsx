@@ -167,7 +167,7 @@ describe('CheckAll', () => {
     expect(screen.getByTestId('checkAll').hasAttribute('disabled')).toBeFalsy();
   });
 
-  test('it renders the expected button text when a check is running', () => {
+  test('it renders the expected button text when a check is running', async () => {
     render(
       <TestExternalProviders>
         <TestDataQualityProviders
@@ -194,7 +194,7 @@ describe('CheckAll', () => {
 
     const button = screen.getByTestId('checkAll');
 
-    userEvent.click(button); // <-- START the check
+    await userEvent.click(button); // <-- START the check
 
     expect(screen.getByTestId('checkAll')).toHaveTextContent(CANCEL);
   });
@@ -237,7 +237,7 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      userEvent.click(button); // <-- START the check
+      await userEvent.click(button); // <-- START the check
 
       await waitFor(() => {
         expect(formatNumberResult).toEqual('123,456,789'); // a comma-separated `value`, because it's numeric
@@ -280,7 +280,7 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      userEvent.click(button); // <-- START the check
+      await userEvent.click(button); // <-- START the check
 
       await waitFor(() => {
         expect(formatNumberResult).toEqual(EMPTY_STAT); // a placeholder, because `value` is undefined
@@ -292,7 +292,7 @@ describe('CheckAll', () => {
     const setCheckAllIndiciesChecked = jest.fn();
     const setCheckAllTotalIndiciesToCheck = jest.fn();
 
-    beforeEach(() => {
+    beforeEach(async () => {
       jest.clearAllMocks();
 
       render(
@@ -321,9 +321,9 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      userEvent.click(button); // <-- START the check
+      await userEvent.click(button); // <-- START the check
 
-      userEvent.click(button); // <-- STOP the check
+      await userEvent.click(button); // <-- STOP the check
     });
 
     test('it invokes `setCheckAllIndiciesChecked` twice: when the check was started, and when it was cancelled', () => {
@@ -373,7 +373,7 @@ describe('CheckAll', () => {
 
       const button = screen.getByTestId('checkAll');
 
-      userEvent.click(button); // <-- start the check
+      await userEvent.click(button); // <-- start the check
 
       const totalIndexNames = Object.values(patternIndexNames).reduce(
         (total, indices) => total + indices.length,

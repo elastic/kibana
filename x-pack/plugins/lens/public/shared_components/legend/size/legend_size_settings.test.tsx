@@ -21,7 +21,7 @@ describe('legend size settings', () => {
     };
     return render(<LegendSizeSettings {...defaultProps} {...props} />);
   };
-  const openSelect = () => userEvent.click(screen.getByRole('button'));
+  const openSelect = () => await userEvent.click(screen.getByRole('button'));
   const chooseOption = (option: string) => {
     openSelect();
     fireEvent.click(screen.getByRole('option', { name: option }));

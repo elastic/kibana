@@ -69,7 +69,7 @@ describe('<PolicySettings />', () => {
   it('User can disable control features', async () => {
     const { getByTestId } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-controltoggle'));
+    await userEvent.click(getByTestId('cloud-defend-controltoggle'));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
     const controlInput = getInputFromPolicy(policy, INPUT_CONTROL);

@@ -40,7 +40,7 @@ describe('AlertPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
@@ -57,10 +57,10 @@ describe('AlertPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
@@ -73,14 +73,14 @@ describe('AlertPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByText('Remove'));
+    await userEvent.click(await screen.findByText('Remove'));
 
     await waitFor(() => {
       expect(props.onDelete).toHaveBeenCalled();

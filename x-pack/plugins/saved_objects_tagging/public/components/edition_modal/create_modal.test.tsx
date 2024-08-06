@@ -58,7 +58,7 @@ describe('create modal', () => {
 
     const submitButton = screen.getByRole('button', { name: /create/i });
 
-    userEvent.click(submitButton);
+    await userEvent.click(submitButton);
 
     expect(tagClientUnmanaged.create).not.toHaveBeenCalled();
   });
@@ -85,7 +85,7 @@ describe('create modal', () => {
 
     const submitButton = screen.getByRole('button', { name: /create/i });
 
-    userEvent.click(submitButton);
+    await userEvent.click(submitButton);
 
     expect(tagClientUnmanaged.create).not.toHaveBeenCalled();
   });

@@ -49,7 +49,8 @@ describe('Legend Settings', () => {
       <LegendSettingsPopover {...defaultProps} {...overrideProps} />,
       renderOptions
     );
-    const openLegendPopover = () => userEvent.click(screen.getByRole('button', { name: 'Legend' }));
+    const openLegendPopover = () =>
+      await userEvent.click(screen.getByRole('button', { name: 'Legend' }));
     openLegendPopover();
 
     return {

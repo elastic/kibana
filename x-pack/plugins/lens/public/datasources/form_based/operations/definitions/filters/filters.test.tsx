@@ -312,7 +312,7 @@ describe('filters', () => {
         />
       );
 
-      userEvent.click(screen.getAllByTestId('indexPattern-filters-existingFilterTrigger')[1]);
+      await userEvent.click(screen.getAllByTestId('indexPattern-filters-existingFilterTrigger')[1]);
       fireEvent.change(screen.getByTestId('indexPattern-filters-label'), {
         target: { value: 'Dest5' },
       });
@@ -371,7 +371,7 @@ describe('filters', () => {
           />
         );
 
-        userEvent.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
+        await userEvent.click(screen.getByTestId('lns-customBucketContainer-remove-1'));
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
           ...layer,

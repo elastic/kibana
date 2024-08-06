@@ -29,7 +29,7 @@ describe('Policy form Detect Prevent Protection level component', () => {
   let renderResult: ReturnType<typeof render>;
 
   const clickProtection = (level: 'detect' | 'prevent') => {
-    userEvent.click(renderResult.getByTestId(`test-${level}Radio`).querySelector('label')!);
+    await userEvent.click(renderResult.getByTestId(`test-${level}Radio`).querySelector('label')!);
   };
 
   const isProtectionChecked = (level: 'detect' | 'prevent'): boolean => {

@@ -57,7 +57,7 @@ describe('When on the trusted applications page', () => {
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
     userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-    userEvent.click(renderResult.getByTestId('searchButton'));
+    await userEvent.click(renderResult.getByTestId('searchButton'));
     await waitFor(() => {
       expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenCalled();
     });
@@ -91,7 +91,7 @@ describe('When on the trusted applications page', () => {
         const actionsButton = await waitFor(
           () => renderResult.getAllByTestId('trustedAppsListPage-card-header-actions-button')[0]
         );
-        userEvent.click(actionsButton);
+        await userEvent.click(actionsButton);
 
         expect(renderResult.getByTestId('trustedAppsListPage-card-cardEditAction')).toBeTruthy();
         expect(renderResult.getByTestId('trustedAppsListPage-card-cardDeleteAction')).toBeTruthy();

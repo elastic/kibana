@@ -132,7 +132,7 @@ export const enterConsoleCommand = (
 
   act(() => {
     if (useKeyboard) {
-      userEvent.click(keyCaptureInput);
+      await userEvent.click(keyCaptureInput);
       userEvent.keyboard(cmd);
     } else {
       userEvent.type(keyCaptureInput, cmd);

@@ -127,7 +127,7 @@ describe('indexpattern_datasource utils', () => {
         render(<I18nProvider>{warningMessages[0].longMessage}</I18nProvider>);
 
         expect(screen.getByTestId('lnsPrecisionWarningEnableAccuracy')).toBeInTheDocument();
-        userEvent.click(screen.getByTestId('lnsPrecisionWarningEnableAccuracy'));
+        await userEvent.click(screen.getByTestId('lnsPrecisionWarningEnableAccuracy'));
 
         expect(setStateMock).toHaveBeenCalledTimes(1);
       });
@@ -188,7 +188,7 @@ describe('indexpattern_datasource utils', () => {
       expect({ ...warnings[0], longMessage: '' }).toMatchSnapshot();
 
       render(<I18nProvider>{warnings[0].longMessage}</I18nProvider>);
-      userEvent.click(screen.getByText('Rank by rarity'));
+      await userEvent.click(screen.getByText('Rank by rarity'));
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);
       expect(newState.layers.id.columns.col1.label).toEqual('Rare values of category');

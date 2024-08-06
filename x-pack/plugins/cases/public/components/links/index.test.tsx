@@ -144,7 +144,7 @@ describe('CaseDetailsLink', () => {
 
   test('it calls navigateToCaseViewClick on click', () => {
     render(<CaseDetailsLink {...props} />);
-    userEvent.click(screen.getByText('test detail name'));
+    await userEvent.click(screen.getByText('test detail name'));
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: props.detailName,
     });

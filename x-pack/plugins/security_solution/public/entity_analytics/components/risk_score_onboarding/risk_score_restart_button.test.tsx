@@ -58,7 +58,7 @@ describe('RiskScoreRestartButton', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
+      await userEvent.click(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`));
 
       await waitFor(() => {
         expect(screen.getByTestId(`restart_${riskScoreEntity}_risk_score`)).toHaveProperty(

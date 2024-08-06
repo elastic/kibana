@@ -40,7 +40,7 @@ describe('SubmitCaseButton', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByTestId('create-case-submit'));
+    await userEvent.click(await screen.findByTestId('create-case-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalled());
   });
@@ -53,7 +53,7 @@ describe('SubmitCaseButton', () => {
     );
 
     const button = await screen.findByTestId('create-case-submit');
-    userEvent.click(button);
+    await userEvent.click(button);
 
     await waitFor(() => expect(button).toBeDisabled());
   });

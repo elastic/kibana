@@ -152,8 +152,8 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
@@ -167,7 +167,7 @@ describe('SystemPrompt', () => {
         customPromptText
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
@@ -199,8 +199,8 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
@@ -214,7 +214,7 @@ describe('SystemPrompt', () => {
         customPromptText
       );
 
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS)
       );
 
@@ -224,7 +224,7 @@ describe('SystemPrompt', () => {
         ).toBeChecked();
       });
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
@@ -260,8 +260,8 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
@@ -275,7 +275,7 @@ describe('SystemPrompt', () => {
         customPromptText
       );
 
-      userEvent.click(
+      await userEvent.click(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxInput'
         )
@@ -290,11 +290,11 @@ describe('SystemPrompt', () => {
       });
 
       // select Default Conversation
-      userEvent.click(
+      await userEvent.click(
         screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(DEFAULT_CONVERSATION_TITLE))
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).not.toBeInTheDocument();
@@ -328,8 +328,8 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
@@ -344,13 +344,13 @@ describe('SystemPrompt', () => {
         )
       ).toBeVisible();
 
-      userEvent.click(
+      await userEvent.click(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxClearButton'
         )
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
@@ -411,8 +411,8 @@ describe('SystemPrompt', () => {
           />
         </TestProviders>
       );
-      userEvent.click(screen.getByTestId('edit'));
-      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+      await userEvent.click(screen.getByTestId('edit'));
+      await userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
 
       expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
 
@@ -428,7 +428,7 @@ describe('SystemPrompt', () => {
       ).toBeVisible();
 
       // removed selected conversation
-      userEvent.click(
+      await userEvent.click(
         within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
           'comboBoxClearButton'
         )
@@ -442,7 +442,7 @@ describe('SystemPrompt', () => {
         'second[Enter]'
       );
 
-      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+      await userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();

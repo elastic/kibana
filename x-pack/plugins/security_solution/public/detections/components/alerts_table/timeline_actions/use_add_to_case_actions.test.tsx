@@ -178,7 +178,7 @@ describe('useAddToCaseActions', () => {
     renderContextMenu(result.current.addToCaseActionItems);
 
     expect(screen.getByTestId('add-to-new-case-action')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('add-to-new-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-new-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });
@@ -205,7 +205,7 @@ describe('useAddToCaseActions', () => {
     renderContextMenu(result.current.addToCaseActionItems);
 
     expect(screen.getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    userEvent.click(screen.getByTestId('add-to-existing-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-existing-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });

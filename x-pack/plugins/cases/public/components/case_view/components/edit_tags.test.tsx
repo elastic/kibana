@@ -52,12 +52,12 @@ describe('EditTags ', () => {
   it('edit tag from options on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
     userEvent.paste(await screen.findByRole('combobox'), `${sampleTags[0]}`);
     userEvent.keyboard('{enter}');
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
+    await userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
   });
@@ -65,14 +65,14 @@ describe('EditTags ', () => {
   it('add new tags on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
     userEvent.paste(await screen.findByRole('combobox'), 'dude');
     userEvent.keyboard('{enter}');
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
+    await userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
@@ -80,14 +80,14 @@ describe('EditTags ', () => {
   it('trims the tags on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
     userEvent.paste(await screen.findByRole('combobox'), 'dude      ');
     userEvent.keyboard('{enter}');
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
+    await userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
@@ -95,14 +95,14 @@ describe('EditTags ', () => {
   it('cancels on cancel', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
     userEvent.paste(await screen.findByRole('combobox'), 'new');
     userEvent.keyboard('{enter}');
 
     expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
 
-    userEvent.click(await screen.findByTestId('edit-tags-cancel'));
+    await userEvent.click(await screen.findByTestId('edit-tags-cancel'));
 
     await waitFor(() => {
       expect(onSubmit).not.toBeCalled();
@@ -114,7 +114,7 @@ describe('EditTags ', () => {
   it('shows error when tag is empty', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
@@ -129,7 +129,7 @@ describe('EditTags ', () => {
 
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 

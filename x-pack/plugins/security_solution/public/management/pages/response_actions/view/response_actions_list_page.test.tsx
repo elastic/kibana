@@ -210,7 +210,7 @@ describe('Response actions history page', () => {
 
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -252,7 +252,7 @@ describe('Response actions history page', () => {
       render();
       const { getAllByTestId, getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -280,7 +280,7 @@ describe('Response actions history page', () => {
 
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -395,7 +395,7 @@ describe('Response actions history page', () => {
 
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -424,7 +424,7 @@ describe('Response actions history page', () => {
 
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       const selectedFilterOptions = allFilterOptions.reduce<string[]>((acc, option) => {
@@ -445,7 +445,7 @@ describe('Response actions history page', () => {
       render();
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId('pagination-button-1'));
+      await userEvent.click(getByTestId('pagination-button-1'));
       expect(history.location.search).toEqual('?page=2&pageSize=10');
     });
 
@@ -453,10 +453,10 @@ describe('Response actions history page', () => {
       render();
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId('tablePaginationPopoverButton'));
+      await userEvent.click(getByTestId('tablePaginationPopoverButton'));
       const pageSizeOption = getByTestId('tablePagination-20-rows');
       pageSizeOption.style.pointerEvents = 'all';
-      userEvent.click(pageSizeOption);
+      await userEvent.click(pageSizeOption);
 
       expect(history.location.search).toEqual('?page=1&pageSize=20');
     });
@@ -465,12 +465,12 @@ describe('Response actions history page', () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
-        userEvent.click(option);
+        await userEvent.click(option);
       });
 
       expect(history.location.search).toEqual(
@@ -482,13 +482,13 @@ describe('Response actions history page', () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option, i) => {
         if ([0, 1, 2].includes(i)) {
           option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
@@ -499,12 +499,12 @@ describe('Response actions history page', () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
-        userEvent.click(option);
+        await userEvent.click(option);
       });
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
@@ -530,9 +530,9 @@ describe('Response actions history page', () => {
       expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
 
       // pick another relative date
-      userEvent.click(quickMenuButton);
+      await userEvent.click(quickMenuButton);
       await waitForEuiPopoverOpen();
-      userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
+      await userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
 
       expect(history.location.search).toEqual('?endDate=now&startDate=now-15m');
@@ -558,7 +558,7 @@ describe('Response actions history page', () => {
       // expand some rows
       expandButtons.forEach((button, i) => {
         if ([0, 1].includes(i)) {
-          userEvent.click(button);
+          await userEvent.click(button);
         }
       });
 
@@ -570,13 +570,13 @@ describe('Response actions history page', () => {
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
         if (option.title.includes('Triggered')) {
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
@@ -590,13 +590,13 @@ describe('Response actions history page', () => {
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
         if (!option.title.includes('Triggered')) {
-          userEvent.click(option);
+          await userEvent.click(option);
         }
       });
 
@@ -609,12 +609,12 @@ describe('Response actions history page', () => {
       const filterPrefix = 'actions-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
-        userEvent.click(option);
+        await userEvent.click(option);
       });
 
       expect(history.location.search).toEqual(
@@ -623,7 +623,7 @@ describe('Response actions history page', () => {
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       clearAllButton.style.pointerEvents = 'all';
-      userEvent.click(clearAllButton);
+      await userEvent.click(clearAllButton);
       expect(history.location.search).toEqual('');
     });
 
@@ -631,12 +631,12 @@ describe('Response actions history page', () => {
       const filterPrefix = 'hosts-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
-        userEvent.click(option);
+        await userEvent.click(option);
       });
 
       expect(history.location.search).toEqual(
@@ -645,7 +645,7 @@ describe('Response actions history page', () => {
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       clearAllButton.style.pointerEvents = 'all';
-      userEvent.click(clearAllButton);
+      await userEvent.click(clearAllButton);
       expect(history.location.search).toEqual('');
     });
 
@@ -653,19 +653,19 @@ describe('Response actions history page', () => {
       const filterPrefix = 'statuses-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
-        userEvent.click(option);
+        await userEvent.click(option);
       });
 
       expect(history.location.search).toEqual('?statuses=failed%2Cpending%2Csuccessful');
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       clearAllButton.style.pointerEvents = 'all';
-      userEvent.click(clearAllButton);
+      await userEvent.click(clearAllButton);
       expect(history.location.search).toEqual('');
     });
 
@@ -676,12 +676,12 @@ describe('Response actions history page', () => {
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      await userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
 
       allFilterOptions.forEach((option) => {
         option.style.pointerEvents = 'all';
-        userEvent.click(option);
+        await userEvent.click(option);
       });
 
       expect(history.location.search).toEqual(
@@ -690,7 +690,7 @@ describe('Response actions history page', () => {
 
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       clearAllButton.style.pointerEvents = 'all';
-      userEvent.click(clearAllButton);
+      await userEvent.click(clearAllButton);
       expect(history.location.search).toEqual('');
     });
   });

@@ -43,7 +43,7 @@ describe('Category', () => {
     );
 
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -59,7 +59,7 @@ describe('Category', () => {
     );
 
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -75,7 +75,7 @@ describe('Category', () => {
     );
 
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -92,7 +92,7 @@ describe('Category', () => {
 
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -113,7 +113,7 @@ describe('Category', () => {
 
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -135,7 +135,7 @@ describe('Category', () => {
     );
 
     userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -151,7 +151,7 @@ describe('Category', () => {
     );
 
     userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -167,7 +167,7 @@ describe('Category', () => {
     );
 
     userEvent.type(screen.getByRole('combobox'), ' {enter}');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -184,15 +184,15 @@ describe('Category', () => {
     );
 
     userEvent.type(screen.getByRole('combobox'), ' {enter}');
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith({}, false);
     });
 
-    userEvent.click(await screen.findByTestId('comboBoxClearButton'));
-    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+    await userEvent.click(await screen.findByTestId('comboBoxClearButton'));
+    await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid

@@ -57,7 +57,7 @@ describe('AxesSettingsPopover', () => {
     const renderResult = render(<AxisSettingsPopover {...defaultProps} {...props} />);
 
     const togglePopover = () => {
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
     };
     togglePopover();
 

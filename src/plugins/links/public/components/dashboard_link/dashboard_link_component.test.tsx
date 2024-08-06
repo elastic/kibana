@@ -78,7 +78,7 @@ describe('Dashboard link component', () => {
     expect(externalIcon).toBeNull();
 
     // calls `navigate` on click
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: [],
@@ -125,7 +125,7 @@ describe('Dashboard link component', () => {
     expect(externalIcon?.getAttribute('data-euiicon-type')).toBe('popout');
 
     // calls `window.open`
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(parentApi.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
@@ -279,7 +279,7 @@ describe('Dashboard link component', () => {
 
     const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
-    userEvent.click(link);
+    await userEvent.click(link);
     expect(parentApi.locator?.navigate).toBeCalledTimes(0);
     expect(window.open).toBeCalledTimes(0);
   });

@@ -124,18 +124,18 @@ describe('created_by filter', () => {
     // 5 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
     expect(await popover.findAllByTestId(/userProfileSelectableOption/)).toHaveLength(3);
 
-    userEvent.click(popover.getByTestId('userProfileSelectableOption-user1'));
+    await userEvent.click(popover.getByTestId('userProfileSelectableOption-user1'));
 
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 
-    userEvent.click(popover.getByTestId('userProfileSelectableOption-user2'));
+    await userEvent.click(popover.getByTestId('userProfileSelectableOption-user2'));
 
     // 2 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(2);
@@ -150,11 +150,11 @@ describe('created_by filter', () => {
     // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
-    userEvent.click(await popover.findByTestId('userProfileSelectableOption-null'));
+    await userEvent.click(await popover.findByTestId('userProfileSelectableOption-null'));
 
     // just 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
@@ -177,7 +177,7 @@ describe('created_by filter', () => {
     // 3 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(3);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
@@ -202,7 +202,7 @@ describe('created_by filter', () => {
     // 1 item in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(1);
 
-    userEvent.click(screen.getByTestId('userFilterPopoverButton'));
+    await userEvent.click(screen.getByTestId('userFilterPopoverButton'));
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);

@@ -120,7 +120,7 @@ describe('Field Renderers', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
+      await userEvent.click(screen.getByTestId('DefaultFieldRendererOverflow-button'));
       expect(screen.getByRole('dialog')).toBeInTheDocument();
       expect(screen.getByTestId('more-container').textContent).toEqual('item6item7');
     });

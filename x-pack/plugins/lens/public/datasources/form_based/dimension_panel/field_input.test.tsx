@@ -262,7 +262,7 @@ describe('FieldInput', () => {
       selectedColumn: getStringBasedOperationColumn(),
       updateLayer: updateLayerSpy,
     });
-    userEvent.click(screen.getByRole('combobox'));
+    await userEvent.click(screen.getByRole('combobox'));
     fireEvent.click(screen.getByTestId('lns-fieldOption-bytes'));
     expect(updateLayerSpy).toHaveBeenCalled();
   });
@@ -274,7 +274,7 @@ describe('FieldInput', () => {
       updateLayer: updateLayerSpy,
     });
 
-    userEvent.click(screen.getByRole('combobox'));
+    await userEvent.click(screen.getByRole('combobox'));
     fireEvent.click(screen.getByTestId('lns-fieldOption-source'));
 
     expect(updateLayerSpy).not.toHaveBeenCalled();

@@ -172,7 +172,7 @@ describe('DatatableComponent', () => {
 
   test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
     renderDatatableComponent({ renderMode: 'view' });
-    userEvent.click(screen.getByRole('button', { name: 'a' }));
+    await userEvent.click(screen.getByRole('button', { name: 'a' }));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)
       .getAllByRole('button')
@@ -183,7 +183,7 @@ describe('DatatableComponent', () => {
   test('it invokes executeTriggerActions with correct context on click on top value', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true] });
     userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
-    userEvent.click(screen.getByTestId('lensDatatableFilterOut'));
+    await userEvent.click(screen.getByTestId('lensDatatableFilterOut'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -204,7 +204,7 @@ describe('DatatableComponent', () => {
   test('it invokes executeTriggerActions with correct context on click on timefield', async () => {
     renderDatatableComponent({ columnFilterable: [true, true, true] });
     userEvent.hover(screen.getAllByTestId('dataGridRowCell')[1]);
-    userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
+    await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -265,7 +265,7 @@ describe('DatatableComponent', () => {
     });
 
     userEvent.hover(screen.getAllByTestId('dataGridRowCell')[0]);
-    userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
+    await userEvent.click(screen.getByTestId('lensDatatableFilterFor'));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -311,7 +311,7 @@ describe('DatatableComponent', () => {
       'data-euiicon-type',
       'sortDown'
     );
-    userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-b'));
+    await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-b'));
     fireEvent.click(screen.getByRole('button', { name: 'Sort ascending' }));
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -483,7 +483,9 @@ describe('DatatableComponent', () => {
         'true'
       );
       const newIndex = 3;
-      userEvent.click(screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` }));
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
       ).toHaveAttribute('aria-current', 'true');
@@ -523,7 +525,7 @@ describe('DatatableComponent', () => {
       renderDatatableComponent({
         args,
       });
-      userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+      await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       const sizeToChangeTo = 100;
       fireEvent.click(screen.getByRole('button', { name: `${sizeToChangeTo} rows` }));
 
@@ -554,7 +556,9 @@ describe('DatatableComponent', () => {
         data,
       });
       const newIndex = 3;
-      userEvent.click(screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` }));
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
       ).toHaveAttribute('aria-current', 'true');
@@ -592,7 +596,9 @@ describe('DatatableComponent', () => {
         data,
       });
       const newIndex = 3;
-      userEvent.click(screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` }));
+      await userEvent.click(
+        screen.getByRole('link', { name: `Page ${newIndex} of ${numberOfPages}` })
+      );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
       ).toHaveAttribute('aria-current', 'true');

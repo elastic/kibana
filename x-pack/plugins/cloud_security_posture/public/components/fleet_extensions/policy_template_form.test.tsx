@@ -276,7 +276,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     const { getByLabelText } = render(<WrappedComponent newPolicy={k8sPolicy} />);
     const option = getByLabelText('EKS');
-    userEvent.click(option);
+    await userEvent.click(option);
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
@@ -1549,10 +1549,10 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
 
       // select agent-based and check for cloudformation option
-      userEvent.click(setupTechnologySelector);
+      await userEvent.click(setupTechnologySelector);
       const agentlessOption = getByRole('option', { name: /agentless/i });
       await waitForEuiPopoverOpen();
-      userEvent.click(agentlessOption);
+      await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1581,7 +1581,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // navigate to GCP
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
-      userEvent.click(gcpSelectorButton);
+      await userEvent.click(gcpSelectorButton);
 
       const setupTechnologySelectorAccordion = queryByTestId(
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
@@ -1610,10 +1610,10 @@ describe('<CspPolicyTemplateForm />', () => {
       expect(credentialsFileField).not.toBeInTheDocument();
 
       // select agent-based and check for Cloud Shell option
-      userEvent.click(setupTechnologySelector);
+      await userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
       await waitForEuiPopoverOpen();
-      userEvent.click(agentBasedOption);
+      await userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
@@ -1635,7 +1635,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // navigate to GCP
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
-      userEvent.click(gcpSelectorButton);
+      await userEvent.click(gcpSelectorButton);
 
       const setupTechnologySelectorAccordion = queryByTestId(
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
@@ -1677,7 +1677,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // navigate to Azure
       const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
-      userEvent.click(azureSelectorButton);
+      await userEvent.click(azureSelectorButton);
 
       const setupTechnologySelectorAccordion = queryByTestId(
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
@@ -1694,10 +1694,10 @@ describe('<CspPolicyTemplateForm />', () => {
       });
 
       // select agent-based and check for ARM template option
-      userEvent.click(setupTechnologySelector);
+      await userEvent.click(setupTechnologySelector);
       const agentlessOption = getByRole('option', { name: /agentless/i });
       await waitForEuiPopoverOpen();
-      userEvent.click(agentlessOption);
+      await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
       const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
@@ -1730,7 +1730,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // navigate to Azure
       const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
-      userEvent.click(azureSelectorButton);
+      await userEvent.click(azureSelectorButton);
 
       const setupTechnologySelectorAccordion = queryByTestId(
         SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
@@ -1738,10 +1738,10 @@ describe('<CspPolicyTemplateForm />', () => {
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // select agentless and check for ARM template option
-      userEvent.click(setupTechnologySelector);
+      await userEvent.click(setupTechnologySelector);
       const agentlessOption = getByRole('option', { name: /agentless/i });
       await waitForEuiPopoverOpen();
-      userEvent.click(agentlessOption);
+      await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
       const clientIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);

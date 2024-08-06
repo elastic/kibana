@@ -68,7 +68,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
         ).toBeInTheDocument();
       });
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
         expect(
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
@@ -108,7 +108,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
         ).toBeInTheDocument();
       });
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
         expect(
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
@@ -149,7 +149,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
         ).toBeInTheDocument();
       });
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
         expect(
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
@@ -187,7 +187,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
         ).toBeInTheDocument();
       });
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
         expect(
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
@@ -227,8 +227,8 @@ describe('publishing subject', () => {
       await waitFor(() => {
         expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
       });
-      userEvent.click(screen.getByRole('button'));
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
         expect(screen.getByText('valueFoo: foo2')).toBeInTheDocument();
       });
@@ -260,7 +260,7 @@ describe('publishing subject', () => {
       await waitFor(() => {
         expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
       });
-      userEvent.click(screen.getByRole('button'));
+      await userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
         expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
       });

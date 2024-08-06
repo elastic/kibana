@@ -247,7 +247,7 @@ describe('chart_switch', () => {
     );
 
     const openChartSwitch = () => {
-      userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
+      await userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
     };
 
     const queryWarningNode = (subType: string) =>

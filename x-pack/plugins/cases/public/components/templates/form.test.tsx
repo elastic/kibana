@@ -532,7 +532,7 @@ describe('TemplateForm', () => {
 
     userEvent.paste(textCustomField, 'My text test value 1');
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 
@@ -622,7 +622,7 @@ describe('TemplateForm', () => {
 
     const toggleField = customFieldsConfigurationMock[1];
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
     );
 

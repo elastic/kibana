@@ -103,7 +103,7 @@ describe('FormatSelector', () => {
       const durationEndInput = within(
         screen.getByTestId('indexPattern-dimension-duration-end')
       ).getByRole('combobox');
-      userEvent.click(durationEndInput);
+      await userEvent.click(durationEndInput);
       fireEvent.click(screen.getByText('Hours'));
       jest.advanceTimersByTime(256);
       expect(props.onChange).toBeCalledWith({

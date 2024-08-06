@@ -58,8 +58,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a new selector', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -80,8 +80,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a file response', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -102,8 +102,8 @@ describe('<ControlGeneralView />', () => {
   it('allows a user to add a process response', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
-    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
+    await userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitFor(() => await userEvent.click(getByTestId('cloud-defend-btnAddProcessResponse')));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -190,7 +190,7 @@ describe('<ControlGeneralView />', () => {
       />
     );
 
-    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
     expect(getByTestId('cloud-defend-btnAddFileSelector')).toBeDisabled();
   });
 

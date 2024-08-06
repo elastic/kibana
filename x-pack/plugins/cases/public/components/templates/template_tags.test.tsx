@@ -93,7 +93,7 @@ describe('TemplateTags', () => {
     userEvent.paste(comboBoxEle, 'template');
     userEvent.keyboard('{enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
@@ -118,7 +118,7 @@ describe('TemplateTags', () => {
     userEvent.paste(comboBoxEle, 'test');
     userEvent.keyboard('{enter}');
 
-    userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(

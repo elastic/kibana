@@ -274,7 +274,7 @@ describe('Jira Fields', () => {
 
     expect(await screen.findByText('Person Task')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('comboBoxClearButton'));
+    await userEvent.click(await screen.findByTestId('comboBoxClearButton'));
 
     expect(checkbox).toHaveValue('');
   });
@@ -322,7 +322,7 @@ describe('Jira Fields', () => {
       expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
     });
 
-    userEvent.click(await screen.findByTestId('submit-form'));
+    await userEvent.click(await screen.findByTestId('submit-form'));
 
     expect(await screen.findByText('Issue type is required')).toBeInTheDocument();
   });

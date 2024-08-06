@@ -32,7 +32,7 @@ describe('Policy Advanced Settings section', () => {
   let renderResult: ReturnType<typeof render>;
 
   const clickShowHideButton = () => {
-    userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
+    await userEvent.click(renderResult.getByTestId(testSubj.showHideButton));
   };
 
   beforeEach(() => {

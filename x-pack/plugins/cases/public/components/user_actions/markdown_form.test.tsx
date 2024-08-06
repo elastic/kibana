@@ -140,7 +140,7 @@ describe('UserActionMarkdown ', () => {
 
       // append content and save
       userEvent.type(result.container.querySelector('textarea')!, appendContent);
-      userEvent.click(result.getByTestId('editable-save-markdown'));
+      await userEvent.click(result.getByTestId('editable-save-markdown'));
 
       // wait for the state to update
       await waitFor(() => {
@@ -148,11 +148,11 @@ describe('UserActionMarkdown ', () => {
       });
 
       // toggle to non-edit state
-      userEvent.click(result.getByTestId('test-button'));
+      await userEvent.click(result.getByTestId('test-button'));
       expect(result.getByTestId('scrollable-markdown')).toBeTruthy();
 
       // toggle to edit state again
-      userEvent.click(result.getByTestId('test-button'));
+      await userEvent.click(result.getByTestId('test-button'));
 
       // this is the correct behaviour. The textarea holds the new content
       expect(result.container.querySelector('textarea')!.value).toEqual(newContent);

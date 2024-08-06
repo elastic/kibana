@@ -88,7 +88,7 @@ describe('Values', () => {
 
     function changeAndBlur(newValue: string) {
       userEvent.type(getNumberInput(), newValue);
-      userEvent.click(
+      await userEvent.click(
         screen.getByRole('button', { name: /testing blur by clicking outside button/i })
       );
     }

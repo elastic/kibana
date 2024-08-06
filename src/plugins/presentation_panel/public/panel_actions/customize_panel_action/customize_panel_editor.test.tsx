@@ -73,10 +73,10 @@ describe('customize panel editor', () => {
       );
     });
 
-    it('should set panel title on apply', () => {
+    it('should set panel title on apply', async () => {
       renderPanelEditor();
       userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
-      userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
+      await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
       expect(setTitle).toBeCalledWith('New title');
     });
 
@@ -96,12 +96,12 @@ describe('customize panel editor', () => {
       expect(titleInput).toHaveValue('');
     });
 
-    it('Resets panel title to default when reset button is pressed', () => {
+    it('Resets panel title to default when reset button is pressed', async () => {
       api.defaultPanelTitle = new BehaviorSubject<string | undefined>('Default title');
       setTitle('Initial title');
       renderPanelEditor();
       userEvent.type(screen.getByTestId('customEmbeddablePanelTitleInput'), 'New title');
-      userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelTitleButton'));
+      await userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelTitleButton'));
       expect(screen.getByTestId('customEmbeddablePanelTitleInput')).toHaveValue('Default title');
     });
 
@@ -143,13 +143,13 @@ describe('customize panel editor', () => {
       );
     });
 
-    it('should set panel description on apply', () => {
+    it('should set panel description on apply', async () => {
       renderPanelEditor();
       userEvent.type(
         screen.getByTestId('customEmbeddablePanelDescriptionInput'),
         'New description'
       );
-      userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
+      await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
       expect(setDescription).toBeCalledWith('New description');
     });
 
@@ -169,7 +169,7 @@ describe('customize panel editor', () => {
       expect(descriptionInput).toHaveValue('');
     });
 
-    it('Resets panel description to default when reset button is pressed', () => {
+    it('Resets panel description to default when reset button is pressed', async () => {
       api.defaultPanelDescription = new BehaviorSubject<string | undefined>('Default description');
       setDescription('Initial description');
       renderPanelEditor();
@@ -177,7 +177,7 @@ describe('customize panel editor', () => {
         screen.getByTestId('customEmbeddablePanelDescriptionInput'),
         'New description'
       );
-      userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelDescriptionButton'));
+      await userEvent.click(screen.getByTestId('resetCustomEmbeddablePanelDescriptionButton'));
       expect(screen.getByTestId('customEmbeddablePanelDescriptionInput')).toHaveValue(
         'Default description'
       );

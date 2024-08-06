@@ -75,7 +75,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       includeSubfeatures: false,
     });
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -96,7 +96,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
       includeSubfeatures: false,
     });
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -122,7 +122,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
     expectedUpdatedPolicy.windows.popup.malware.message = 'foo';
 
     render();
-    userEvent.click(renderResult.getByTestId('test'));
+    await userEvent.click(renderResult.getByTestId('test'));
 
     expect(formProps.additionalOnSwitchChange).toHaveBeenCalledWith({
       value: false,
@@ -157,7 +157,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
         includeSubfeatures: false,
       });
       render();
-      userEvent.click(renderResult.getByTestId('test'));
+      await userEvent.click(renderResult.getByTestId('test'));
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,
@@ -174,7 +174,7 @@ describe('Policy form ProtectionSettingCardSwitch component', () => {
         includeSubfeatures: false,
       });
       render();
-      userEvent.click(renderResult.getByTestId('test'));
+      await userEvent.click(renderResult.getByTestId('test'));
 
       expect(formProps.onChange).toHaveBeenCalledWith({
         isValid: true,

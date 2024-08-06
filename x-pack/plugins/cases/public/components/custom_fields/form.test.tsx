@@ -79,7 +79,7 @@ describe('CustomFieldsForm ', () => {
     });
 
     userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
     userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
 
     await act(async () => {
@@ -107,7 +107,7 @@ describe('CustomFieldsForm ', () => {
     });
 
     userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -133,7 +133,7 @@ describe('CustomFieldsForm ', () => {
     });
 
     userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    await userEvent.click(await screen.findByTestId('text-custom-field-required'));
     userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), ' ');
 
     await act(async () => {

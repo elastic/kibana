@@ -89,7 +89,7 @@ describe('Policy Attack Surface Reduction Card', () => {
       'true'
     );
 
-    userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -109,7 +109,7 @@ describe('Policy Attack Surface Reduction Card', () => {
       'false'
     );
 
-    userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

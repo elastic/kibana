@@ -145,7 +145,7 @@ describe('data table dimension editor', () => {
     expect(btnGroups.alignment.selected).toHaveTextContent('Center');
   });
 
-  it('should set state for the right column', () => {
+  it('should set state for the right column', async () => {
     state.columns = [
       {
         columnId: 'foo',
@@ -155,7 +155,7 @@ describe('data table dimension editor', () => {
       },
     ];
     renderTableDimensionEditor();
-    userEvent.click(screen.getByRole('button', { name: 'Center' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Center' }));
     jest.advanceTimersByTime(256);
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -208,10 +208,10 @@ describe('data table dimension editor', () => {
     }
   );
 
-  it('should set the coloring mode to the right column', () => {
+  it('should set the coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    userEvent.click(screen.getByRole('button', { name: 'Cell' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Cell' }));
     jest.advanceTimersByTime(256);
     expect(props.setState).toHaveBeenCalledWith({
       ...state,

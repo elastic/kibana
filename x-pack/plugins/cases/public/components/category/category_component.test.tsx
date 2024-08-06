@@ -71,7 +71,7 @@ describe('Category ', () => {
     render(<CategoryComponent {...defaultProps} />);
     await showEuiComboBoxOptions();
 
-    userEvent.click(screen.getByText('foo'));
+    await userEvent.click(screen.getByText('foo'));
 
     expect(onChange).toHaveBeenCalledWith('foo');
   });

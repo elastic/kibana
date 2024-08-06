@@ -65,7 +65,7 @@ describe('TableSearch', () => {
 
     await screen.findByDisplayValue('My search');
 
-    userEvent.click(await screen.findByTestId('clearSearchButton'));
+    await userEvent.click(await screen.findByTestId('clearSearchButton'));
 
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
   });

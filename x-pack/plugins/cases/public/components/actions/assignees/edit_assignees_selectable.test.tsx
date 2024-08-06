@@ -118,7 +118,7 @@ describe('EditAssigneesSelectable', () => {
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      userEvent.click(result.getByText(userProfile.user.full_name));
+      await userEvent.click(result.getByText(userProfile.user.full_name));
     }
 
     expect(props.onChangeAssignees).toBeCalledTimes(3);
@@ -140,7 +140,7 @@ describe('EditAssigneesSelectable', () => {
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      userEvent.click(result.getByText(userProfile.user.full_name));
+      await userEvent.click(result.getByText(userProfile.user.full_name));
     }
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(3);
@@ -162,7 +162,7 @@ describe('EditAssigneesSelectable', () => {
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      userEvent.click(result.getByText(userProfile.user.full_name));
+      await userEvent.click(result.getByText(userProfile.user.full_name));
     }
 
     for (const [uid, icon] of [
@@ -253,11 +253,11 @@ describe('EditAssigneesSelectable', () => {
     });
 
     // selects
-    userEvent.click(result.getByTestId(searchedUserDataTestSubj));
+    await userEvent.click(result.getByTestId(searchedUserDataTestSubj));
     // deselect
-    userEvent.click(result.getByTestId(searchedUserDataTestSubj));
+    await userEvent.click(result.getByTestId(searchedUserDataTestSubj));
     // clear search results
-    userEvent.click(result.getByTestId('clearSearchButton'));
+    await userEvent.click(result.getByTestId('clearSearchButton'));
 
     await waitFor(() => {
       expect(result.getByText('Damaged Raccoon'));
@@ -308,7 +308,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByTestId(searchedUserDataTestSubj));
     });
 
-    userEvent.click(result.getByTestId(searchedUserDataTestSubj));
+    await userEvent.click(result.getByTestId(searchedUserDataTestSubj));
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: [
         'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -326,7 +326,7 @@ describe('EditAssigneesSelectable', () => {
     });
 
     // @ts-ignore: full name exists
-    userEvent.click(result.getByText(userProfiles[0].user.full_name));
+    await userEvent.click(result.getByText(userProfiles[0].user.full_name));
 
     // @ts-ignore: full name exists
     expect(result.getByText(userProfiles[0].user.full_name)).toBeInTheDocument();
@@ -415,7 +415,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByText('Unknown')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('Unknown'));
+    await userEvent.click(result.getByText('Unknown'));
 
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: ['123'],
@@ -433,7 +433,7 @@ describe('EditAssigneesSelectable', () => {
       expect(result.getByText('Unknown')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByText('Unknown'));
+    await userEvent.click(result.getByText('Unknown'));
 
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: [],
@@ -449,7 +449,7 @@ describe('EditAssigneesSelectable', () => {
     });
 
     expect(result.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
-    userEvent.click(result.getByRole('button', { name: 'Remove all assignees' }));
+    await userEvent.click(result.getByRole('button', { name: 'Remove all assignees' }));
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeAssignees).toBeCalledWith({

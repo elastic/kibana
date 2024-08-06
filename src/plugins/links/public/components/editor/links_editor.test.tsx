@@ -89,7 +89,7 @@ describe('LinksEditor', () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference />);
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
-    userEvent.click(saveButton);
+    await userEvent.click(saveButton);
     await waitFor(() => expect(defaultProps.onSaveToLibrary).toHaveBeenCalledTimes(1));
     expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });
@@ -98,7 +98,7 @@ describe('LinksEditor', () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference={false} />);
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
-    userEvent.click(saveButton);
+    await userEvent.click(saveButton);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledTimes(1);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
   });

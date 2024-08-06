@@ -105,7 +105,7 @@ describe('AddComment ', () => {
     const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
     userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+    await userEvent.click(screen.getByTestId('submit-comment'));
 
     await waitFor(() => expect(onCommentSaving).toBeCalled());
     await waitFor(() =>

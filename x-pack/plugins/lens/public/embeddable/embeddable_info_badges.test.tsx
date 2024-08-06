@@ -14,7 +14,7 @@ import { UserMessage } from '../types';
 describe('EmbeddableFeatureBadge', () => {
   function renderPopup(messages: UserMessage[], count: number = messages.length) {
     render(<EmbeddableFeatureBadge messages={messages} />);
-    userEvent.click(screen.getByText(`${count}`));
+    await userEvent.click(screen.getByText(`${count}`));
   }
 
   it('should render no badge', () => {
@@ -38,7 +38,7 @@ describe('EmbeddableFeatureBadge', () => {
       />
     );
     expect(screen.getByText('1')).toBeInTheDocument();
-    userEvent.click(screen.getByText('1'));
+    await userEvent.click(screen.getByText('1'));
     expect(await screen.findByText('Long text')).toBeInTheDocument();
   });
 

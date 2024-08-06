@@ -145,7 +145,7 @@ describe('CasesParamsFields renders', () => {
     it('renders grouping by field options', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+      await userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
       await showEuiComboBoxOptions();
 
@@ -157,13 +157,13 @@ describe('CasesParamsFields renders', () => {
     it('updates grouping by field', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+      await userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
       await showEuiComboBoxOptions();
 
       expect(await screen.findByText('host.ip')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByText('host.ip'));
+      await userEvent.click(await screen.findByText('host.ip'));
 
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['host.ip']);
     });
@@ -198,7 +198,7 @@ describe('CasesParamsFields renders', () => {
 
       render(<CasesParamsFields {...defaultProps} />);
 
-      userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
+      await userEvent.click(await screen.findByTestId('group-by-alert-field-combobox'));
 
       await showEuiComboBoxOptions();
 
@@ -235,7 +235,7 @@ describe('CasesParamsFields renders', () => {
 
       expect(await screen.findByTestId('reopen-case')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('reopen-case'));
+      await userEvent.click(await screen.findByTestId('reopen-case'));
 
       expect(editAction.mock.calls[0][1].reopenClosedCases).toEqual(true);
     });

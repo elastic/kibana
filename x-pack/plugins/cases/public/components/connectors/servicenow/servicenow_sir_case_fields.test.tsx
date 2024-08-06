@@ -170,7 +170,7 @@ describe('ServiceNowSIR Fields', () => {
         );
 
         const checkbox = screen.getByTestId(`${subj}Checkbox`);
-        userEvent.click(checkbox);
+        await userEvent.click(checkbox);
 
         expect(checkbox).not.toBeChecked();
       })
@@ -201,7 +201,7 @@ describe('ServiceNowSIR Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    userEvent.click(screen.getByTestId('destIpCheckbox'));
+    await userEvent.click(screen.getByTestId('destIpCheckbox'));
     userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
     userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
 

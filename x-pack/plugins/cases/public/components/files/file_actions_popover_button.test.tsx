@@ -48,7 +48,7 @@ describe('FileActionsPopoverButton', () => {
   it('clicking the button opens the popover', async () => {
     appMockRender.render(<FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />);
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
@@ -65,7 +65,7 @@ describe('FileActionsPopoverButton', () => {
       <FileActionsPopoverButton caseId={basicCaseId} theFile={{ ...basicFileMock, hash: {} }} />
     );
 
-    userEvent.click(
+    await userEvent.click(
       await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
     );
 
@@ -89,7 +89,7 @@ describe('FileActionsPopoverButton', () => {
     );
 
     expect(popoverButton).toBeInTheDocument();
-    userEvent.click(popoverButton);
+    await userEvent.click(popoverButton);
 
     expect(
       await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
@@ -99,7 +99,7 @@ describe('FileActionsPopoverButton', () => {
 
     expect(copyFileHashButton).toBeInTheDocument();
 
-    userEvent.click(copyFileHashButton);
+    await userEvent.click(copyFileHashButton);
 
     expect(await screen.findByTestId(`cases-files-copy-sha1-hash-button`)).toBeInTheDocument();
     expect(screen.queryByTestId('cases-files-copy-md5-hash-button')).not.toBeInTheDocument();
@@ -114,7 +114,7 @@ describe('FileActionsPopoverButton', () => {
     );
 
     expect(popoverButton).toBeInTheDocument();
-    userEvent.click(popoverButton);
+    await userEvent.click(popoverButton);
 
     expect(
       await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
@@ -124,7 +124,7 @@ describe('FileActionsPopoverButton', () => {
 
     expect(copyFileHashButton).toBeInTheDocument();
 
-    userEvent.click(copyFileHashButton);
+    await userEvent.click(copyFileHashButton);
 
     expect(await screen.findByTestId('cases-files-copy-md5-hash-button')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-copy-sha1-hash-button')).toBeInTheDocument();
@@ -162,16 +162,20 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
+      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
         skipPointerEventsCheck: true,
       });
-      userEvent.click(await screen.findByTestId('cases-files-copy-md5-hash-button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(
+        await screen.findByTestId('cases-files-copy-md5-hash-button'),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
       await waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicFileMock.hash?.md5);
@@ -183,16 +187,20 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
+      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
         skipPointerEventsCheck: true,
       });
-      userEvent.click(await screen.findByTestId('cases-files-copy-sha1-hash-button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(
+        await screen.findByTestId('cases-files-copy-sha1-hash-button'),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
       await waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicFileMock.hash?.sha1);
@@ -204,16 +212,20 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
+      await userEvent.click(await screen.findByTestId('cases-files-copy-hash-button'), undefined, {
         skipPointerEventsCheck: true,
       });
-      userEvent.click(await screen.findByTestId('cases-files-copy-sha256-hash-button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(
+        await screen.findByTestId('cases-files-copy-sha256-hash-button'),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
       await waitFor(() => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicFileMock.hash?.sha256);
@@ -227,11 +239,11 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      userEvent.click(await screen.findByTestId('cases-files-delete-button'), undefined, {
+      await userEvent.click(await screen.findByTestId('cases-files-delete-button'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -243,17 +255,17 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
-      userEvent.click(await screen.findByTestId('cases-files-delete-button'), undefined, {
+      await userEvent.click(await screen.findByTestId('cases-files-delete-button'), undefined, {
         skipPointerEventsCheck: true,
       });
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+      await userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
         expect(mutate).toHaveBeenCalledTimes(1);
@@ -273,7 +285,7 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 
@@ -287,7 +299,7 @@ describe('FileActionsPopoverButton', () => {
         <FileActionsPopoverButton caseId={basicCaseId} theFile={basicFileMock} />
       );
 
-      userEvent.click(
+      await userEvent.click(
         await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
       );
 

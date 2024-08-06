@@ -57,7 +57,7 @@ describe('open in discover drilldown', () => {
         context={{} as ActionFactoryContext}
       />
     );
-    userEvent.click(screen.getByRole('switch'));
+    await userEvent.click(screen.getByRole('switch'));
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
 

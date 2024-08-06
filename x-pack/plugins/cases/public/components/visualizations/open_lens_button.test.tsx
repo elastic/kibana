@@ -43,7 +43,7 @@ describe('OpenLensButton', () => {
     // @ts-expect-error: props are correct
     appMockRender.render(<OpenLensButton {...props} />);
 
-    userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
+    await userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
 
     expect(navigateToPrefilledEditor).toBeCalledWith(
       {

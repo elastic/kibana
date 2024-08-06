@@ -84,7 +84,7 @@ describe('EditableMarkdown', () => {
       target: { value: newValue },
     });
 
-    userEvent.click(await screen.findByTestId('editable-save-markdown'));
+    await userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onSaveContent).toHaveBeenCalledWith(newValue);
@@ -95,7 +95,7 @@ describe('EditableMarkdown', () => {
   it('Does not call onSaveContent if no change from current text', async () => {
     appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('editable-save-markdown'));
+    await userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
@@ -106,7 +106,7 @@ describe('EditableMarkdown', () => {
   it('Cancel button click calls only onChangeEditable', async () => {
     appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
+    await userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onSaveContent).not.toHaveBeenCalled();

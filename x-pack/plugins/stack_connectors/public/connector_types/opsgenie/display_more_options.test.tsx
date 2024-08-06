@@ -35,7 +35,7 @@ describe('DisplayMoreOptions', () => {
   it('calls toggleShowingMoreOptions when clicked', () => {
     render(<DisplayMoreOptions {...options} />);
 
-    userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
+    await userEvent.click(screen.getByTestId('opsgenie-display-more-options'));
 
     expect(toggleShowingMoreOptions).toHaveBeenCalledTimes(1);
   });
