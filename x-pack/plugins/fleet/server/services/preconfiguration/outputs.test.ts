@@ -32,6 +32,9 @@ const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 jest.mock('../app_context', () => ({
   appContextService: {
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+    getExperimentalFeatures: () => ({
+      useSpaceAwareness: true,
+    }),
     getLogger: () =>
       new Proxy(
         {},
