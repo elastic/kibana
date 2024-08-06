@@ -323,7 +323,6 @@ export function AddCisIntegrationFormPageProvider({
     await chosenOption.click();
   };
 
-
   const doesStringExistInCodeBlock = async (str: string) => {
     const flyout = await testSubjects.find('agentEnrollmentFlyout');
     const codeBlock = await flyout.findByXpath('//code');
@@ -438,7 +437,6 @@ export function AddCisIntegrationFormPageProvider({
     await clickSaveButton();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
-  
 
   const editAgentlessIntegration = async (testSubjectId: string, value: string) => {
     await navigateToIntegrationCspList();
