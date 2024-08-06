@@ -9,7 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import * as i18n from '../translations';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { exportSelectedTimeline } from '../../../containers/api';
 import { downloadBlob } from '../../../../common/utils/download_blob';
@@ -30,7 +30,7 @@ const ExportTimeline: React.FC<{
 
       addSuccess({
         title:
-          timelineType === TimelineType.template
+          timelineType === TimelineTypeEnum.template
             ? i18n.SUCCESSFULLY_EXPORTED_TIMELINE_TEMPLATES(exportCount)
             : i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
         'data-test-subj': 'addObjectToContainerSuccess',

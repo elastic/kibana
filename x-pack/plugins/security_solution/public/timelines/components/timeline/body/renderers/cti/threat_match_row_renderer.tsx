@@ -6,12 +6,12 @@
  */
 
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { RowRendererId } from '../../../../../../../common/api/timeline';
+import { RowRendererIdEnum } from '../../../../../../../common/api/timeline';
 import { hasThreatMatchValue } from './helpers';
 import { renderThreatMatchRows } from './threat_match_rows';
 
 export const threatMatchRowRenderer: RowRenderer = {
-  id: RowRendererId.threat_match,
+  id: RowRendererIdEnum.threat_match,
   isInstance: hasThreatMatchValue,
   renderRow: renderThreatMatchRows,
 };
