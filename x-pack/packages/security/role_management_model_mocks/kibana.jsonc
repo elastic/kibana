@@ -1,0 +1,5 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/security-role-management-model-mocks",
+  "owner": "@elastic/kibana-security"
+}

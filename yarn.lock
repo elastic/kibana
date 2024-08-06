@@ -6300,6 +6300,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-role-management-model-mocks@link:x-pack/packages/security/role_management_model_mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-role-management-model@link:x-pack/packages/security/role_management_model":
   version "0.0.0"
   uid ""

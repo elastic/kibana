@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Role } from '@kbn/security-plugin-types-common';
+import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
-import type { Role } from '../../../../../../../common';
-import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {

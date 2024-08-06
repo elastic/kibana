@@ -12,11 +12,10 @@ import React from 'react';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { SecuredSubFeature } from '@kbn/security-role-management-model';
+import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SubFeatureForm } from './sub_feature_form';
-import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 // Note: these tests are not concerned with the proper display of privileges,
