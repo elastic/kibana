@@ -29,7 +29,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   } = useKibana();
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
   const [range, setRange] = useDateRange();
-  const [searchBarFocused, setSearchBarFocused] = useState(false);
 
   const {
     addItem,
@@ -138,12 +137,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                   });
 
                   setRange(nextDateRange);
-                }}
-                onFocus={() => {
-                  setSearchBarFocused(true);
-                }}
-                onBlur={() => {
-                  setSearchBarFocused(false);
                 }}
               />
             </EuiFlexItem>
