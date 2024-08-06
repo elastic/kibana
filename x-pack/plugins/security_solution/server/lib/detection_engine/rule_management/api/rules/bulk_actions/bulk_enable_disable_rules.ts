@@ -33,6 +33,7 @@ export const bulkEnableDisableRules = async ({
   mlAuthz,
 }: BulkEnableDisableRulesArgs): Promise<BulkEnableDisableRulesOutcome> => {
   const errors: Array<PromisePoolError<RuleAlertType, Error>> = [];
+  const updatedRules: RuleAlertType[] = [];
 
   // In the first step, we validate if the rules can be enabled
   const validatedRules: RuleAlertType[] = [];
@@ -62,6 +63,18 @@ export const bulkEnableDisableRules = async ({
     operation === 'enable'
       ? await rulesClient.bulkEnableRules({ ids: ruleIds })
       : await rulesClient.bulkDisableRules({ ids: ruleIds });
+
+  const failedRuleIds = results.errors.map(({ rule: { id } }) => id);
+
+  updatedRules.push(
+    ...rules.flatMap((rule) => {
+      if (failedRuleIds.includes(rule.id)) {
+        return [];
+      }
+      return rule;
+    })
+  );
+
   errors.push(
     ...results.errors.map(({ rule: { id }, message }) => {
       const rule = rules.find((r) => r.id === id);
@@ -74,7 +87,7 @@ export const bulkEnableDisableRules = async ({
   );
 
   return {
-    updatedRules: results.rules as RuleAlertType[],
+    updatedRules,
     errors,
   };
 };

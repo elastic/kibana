@@ -278,9 +278,7 @@ const bulkEnableRulesWithOCC = async (
                 scope: ['alerting'],
                 enabled: true,
               });
-            }
-
-            if (!shouldScheduleTask) {
+            } else {
               taskIdsToEnable.push(rule.id);
             }
 

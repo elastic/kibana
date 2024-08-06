@@ -2001,7 +2001,12 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
   });
 
-  test('should throw framework error and disable the task when rule is not enabled', async () => {
+  test('should log framework error and disable the task when rule is not enabled', async () => {
+    taskRunnerFactoryInitializerParams.taskManager.bulkDisable.mockImplementation(async () => ({
+      tasks: [{ ...mockedTaskInstance, id: mockedRawRuleSO.id, enabled: false }],
+      errors: [],
+    }));
+
     const taskRunner = new TaskRunner({
       ruleType,
       internalSavedObjectsRepository,
@@ -2038,6 +2043,19 @@ describe('Task Runner', () => {
     expect(taskRunnerFactoryInitializerParams.taskManager.bulkDisable).toHaveBeenCalledWith([
       mockedRawRuleSO.id,
     ]);
+
+    expect(
+      await taskRunnerFactoryInitializerParams.taskManager.bulkDisable([mockedRawRuleSO.id])
+    ).toEqual({
+      errors: [],
+      tasks: [
+        {
+          ...mockedTaskInstance,
+          id: mockedRawRuleSO.id,
+          enabled: false,
+        },
+      ],
+    });
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
