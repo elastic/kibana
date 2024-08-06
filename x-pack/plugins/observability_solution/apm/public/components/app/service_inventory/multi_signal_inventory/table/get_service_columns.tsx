@@ -46,13 +46,11 @@ type ServicesDetailedStatisticsAPIResponse =
 export function getServiceColumns({
   query,
   breakpoints,
-  link,
   timeseriesDataLoading,
   timeseriesData,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
-  link: any;
   timeseriesDataLoading: boolean;
   timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
@@ -226,7 +224,7 @@ export function getServiceColumns({
       name: (
         <ColumnHeader
           label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-            defaultMessage: 'Log error rate',
+            defaultMessage: 'Log error %',
           })}
           formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
           toolTip={

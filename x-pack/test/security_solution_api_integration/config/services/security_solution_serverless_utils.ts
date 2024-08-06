@@ -7,7 +7,7 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
-import { RoleCredentials } from '../../../../test_serverless/shared/services';
+import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SecuritySolutionUtils } from './types';
 
@@ -26,7 +26,6 @@ export function SecuritySolutionServerlessUtils({
     ...config.get('servers.kibana'),
     auth: false,
   });
-  const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
 
   async function invalidateApiKey(credentials: RoleCredentials) {
     await svlUserManager.invalidateM2mApiKeyWithRoleScope(credentials);
@@ -62,6 +61,7 @@ export function SecuritySolutionServerlessUtils({
       const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
       rolesCredentials.set(role, credentials);
 
+      const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
       return agentWithCommonHeaders.set(credentials.apiKeyHeader);
     },
   };

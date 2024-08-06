@@ -9,6 +9,7 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
+import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
@@ -17,9 +18,9 @@ import {
   QueryParams,
   SortOrder,
   ServiceProviderKeys,
-  TaskTypes,
 } from '../components/all_inference_endpoints/types';
 import { DeploymentStatusEnum } from '../components/all_inference_endpoints/types';
+import { useTrainedModelStats } from './use_trained_model_stats';
 
 interface UseTableDataReturn {
   tableData: InferenceEndpointUI[];
@@ -33,9 +34,20 @@ export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   queryParams: QueryParams,
   filterOptions: FilterOptions,
-  searchKey: string,
-  deploymentStatus: Record<string, DeploymentStatusEnum>
+  searchKey: string
 ): UseTableDataReturn => {
+  const { data: trainedModelStats } = useTrainedModelStats();
+
+  const deploymentStatus = trainedModelStats?.trained_model_stats.reduce((acc, modelStat) => {
+    if (modelStat.model_id) {
+      acc[modelStat.model_id] =
+        modelStat?.deployment_stats?.state === 'started'
+          ? DeploymentStatusEnum.deployed
+          : DeploymentStatusEnum.notDeployed;
+    }
+    return acc;
+  }, {} as Record<string, DeploymentStatusEnum>);
+
   const tableData: InferenceEndpointUI[] = useMemo(() => {
     let filteredEndpoints = inferenceEndpoints;
 
@@ -62,7 +74,7 @@ export const useTableData = (
         if (isElasticService) {
           const modelId = endpoint.service_settings?.model_id;
           deploymentStatusValue =
-            modelId && deploymentStatus[modelId] !== undefined
+            modelId && deploymentStatus?.[modelId]
               ? deploymentStatus[modelId]
               : DeploymentStatusEnum.notDeployable;
         }

@@ -15,14 +15,6 @@ import { TimelineType } from '../../../../../common/api/timeline';
 import type { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
-export const omitTypenameAndEmpty = (
-  k: string,
-  v: string | object | Array<string | object>
-): string | object | Array<string | object> | undefined =>
-  k !== '__typename' && v != null ? v : undefined;
-
-export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
-
 export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({

@@ -18,7 +18,7 @@ export const procedureNames = [
   'mSearch',
 ] as const;
 
-export type ProcedureName = typeof procedureNames[number];
+export type ProcedureName = (typeof procedureNames)[number];
 
 export const versionSchema = schema.number({
   validate: (value) => {

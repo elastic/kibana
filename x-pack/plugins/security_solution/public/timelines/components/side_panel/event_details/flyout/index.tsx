@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { FlyoutBody } from './body';
-export { FlyoutHeader } from './header';
+// TODO: DELETE FIND WHEN FOOTER IS MOVED TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
 export { FlyoutFooter } from './footer';
