@@ -25,5 +25,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./threshold_alert_suppression'));
     loadTestFile(require.resolve('./non_ecs_fields'));
     loadTestFile(require.resolve('./custom_query'));
+    loadTestFile(require.resolve('./custom_query_lucene'));
   });
 };
