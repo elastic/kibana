@@ -333,7 +333,7 @@ export class SpacesGridPage extends Component<Props, State> {
           }
           if (enabledFeatureCount === 0) {
             return (
-              <EuiText color={'danger'}>
+              <EuiText color={'danger'} size="s">
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
                   defaultMessage="No features visible"
