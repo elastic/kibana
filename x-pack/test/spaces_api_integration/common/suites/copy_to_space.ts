@@ -12,6 +12,7 @@ import {
   SavedObjectsImportFailure,
   SavedObjectsImportAmbiguousConflictError,
 } from '@kbn/core/server';
+import { SuperTest } from 'supertest';
 import { getAggregatedSpaceData, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
@@ -98,7 +99,9 @@ interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
 }
 export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
   const testDataLoader = getTestDataLoader(context);
-  const supertestWithoutAuth = context.getService('supertestWithoutAuth');
+  const supertestWithoutAuth = context.getService(
+    'supertestWithoutAuth'
+  ) as unknown as SuperTest<any>;
   const es = context.getService('es');
 
   const collectSpaceContents = async () => {

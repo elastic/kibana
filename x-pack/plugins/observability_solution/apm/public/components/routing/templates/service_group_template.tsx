@@ -101,7 +101,7 @@ export function ServiceGroupTemplate({
                 ]
               : []),
             {
-              title: selectedTab.label,
+              title: selectedTab.breadcrumbLabel || selectedTab.label,
               href: selectedTab.href,
             } as { title: string; href: string },
           ]
@@ -147,6 +147,7 @@ export function ServiceGroupTemplate({
 
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key: 'service-inventory' | 'service-map';
+  breadcrumbLabel?: string;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
@@ -157,6 +158,9 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
+      breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+        defaultMessage: 'Inventory',
+      }),
       label: (
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -184,9 +188,10 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, breadcrumbLabel }) => ({
       href,
       label,
       isSelected: key === selectedTab,
+      breadcrumbLabel,
     }));
 }

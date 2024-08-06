@@ -27,7 +27,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { TimelineStatus } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { appSelectors } from '../../../../../common/store/app';
 import { AddNote } from '../../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../../notes/translations';
@@ -140,7 +140,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     []
   );
   const [newNote, setNewNote] = useState('');
-  const isImmutable = timelineStatus === TimelineStatus.immutable;
+  const isImmutable = timelineStatus === TimelineStatusEnum.immutable;
   const appNotes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
 
   const allTimelineNoteIds = useMemo(() => {
