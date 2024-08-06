@@ -68,7 +68,7 @@ export async function getEntities({
               ...environmentQuery(environment, SERVICE_ENVIRONMENT),
               ...entitiesRangeQuery(start, end),
               ...termQuery(ENTITY_TYPE, EntityType.SERVICE),
-              ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
+              ...termQuery(SERVICE_NAME, serviceName),
             ],
           },
         },
