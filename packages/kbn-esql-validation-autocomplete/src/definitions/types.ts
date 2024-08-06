@@ -31,6 +31,7 @@ export const dataTypes = [
   'version',
   'null',
   'time_duration',
+  'unsupported',
 ] as const;
 
 export const isSupportedDataType = (type: string): type is SupportedDataType =>
@@ -53,9 +54,13 @@ type ArrayType =
   | 'datetime[]'
   | 'date_period[]';
 
-export type FunctionParameterType = SupportedDataType | ArrayType | 'any' | 'time_literal'; // TODO what is time_literal in Elasticsearch speak? date_duration?
+export type FunctionParameterType =
+  | Omit<SupportedDataType, 'unsupported'>
+  | ArrayType
+  | 'any'
+  | 'time_literal'; // TODO what is time_literal in Elasticsearch speak? date_duration?
 
-export type FunctionReturnType = SupportedDataType | 'any' | 'void';
+export type FunctionReturnType = Omit<SupportedDataType, 'unsupported'> | 'any' | 'void';
 
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';

@@ -11,32 +11,39 @@ import { validateQuery } from '../validation/validation';
 import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { CodeActionOptions } from './types';
+import { ESQLRealField } from '../validation/types';
+import { SupportedDataType } from '../definitions/types';
 
 function getCallbackMocks() {
   return {
-    getFieldsFor: jest.fn(async ({ query }) =>
-      /enrich/.test(query)
-        ? [
-            { name: 'otherField', type: 'string' },
-            { name: 'yetAnotherField', type: 'number' },
-          ]
-        : /unsupported_index/.test(query)
-        ? [{ name: 'unsupported_field', type: 'unsupported' }]
-        : [
-            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-              name: `${type}Field`,
-              type,
-            })),
-            { name: 'geoPointField', type: 'geo_point' },
-            { name: 'any#Char$Field', type: 'number' },
-            { name: 'kubernetes.something.something', type: 'number' },
-            {
-              name: `listField`,
-              type: `list`,
-            },
-            { name: '@timestamp', type: 'date' },
-          ]
-    ),
+    getFieldsFor: jest.fn<Promise<ESQLRealField[]>, any>(async ({ query }) => {
+      if (/enrich/.test(query)) {
+        const fields: ESQLRealField[] = [
+          { name: 'otherField', type: 'keyword' },
+          { name: 'yetAnotherField', type: 'double' },
+        ];
+        return fields;
+      }
+
+      if (/unsupported_index/.test(query)) {
+        const fields: ESQLRealField[] = [{ name: 'unsupported_field', type: 'unsupported' }];
+        return fields;
+      }
+
+      const localDataTypes: SupportedDataType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
+      const fields: ESQLRealField[] = [
+        ...localDataTypes.map((type) => ({
+          name: `${type}Field`,
+          type,
+        })),
+        { name: 'geoPointField', type: 'geo_point' },
+        { name: 'any#Char$Field', type: 'double' },
+        { name: 'kubernetes.something.something', type: 'double' },
+        { name: '@timestamp', type: 'date' },
+      ];
+
+      return fields;
+    }),
     getSources: jest.fn(async () =>
       ['index', '.secretIndex', 'my-index'].map((name) => ({
         name,

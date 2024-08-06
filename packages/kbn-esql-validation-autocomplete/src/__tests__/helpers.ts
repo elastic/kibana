@@ -8,21 +8,24 @@
 
 import { camelCase } from 'lodash';
 import { dataTypes } from '../definitions/types';
+import { ESQLRealField } from '../validation/types';
 
-export const fields = [
+export const fields: ESQLRealField[] = [
   ...dataTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },
 ];
 
-export const enrichFields = [
+export const enrichFields: ESQLRealField[] = [
   { name: 'otherField', type: 'text' },
   { name: 'yetAnotherField', type: 'double' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const unsupported_field = [{ name: 'unsupported_field', type: 'unsupported' }];
+export const unsupported_field: ESQLRealField[] = [
+  { name: 'unsupported_field', type: 'unsupported' },
+];
 
 export const indexes = [
   'a_index',
@@ -58,7 +61,8 @@ export function getCallbackMocks() {
         return unsupported_field;
       }
       if (/dissect|grok/.test(query)) {
-        return [{ name: 'firstWord', type: 'text' }];
+        const field: ESQLRealField = { name: 'firstWord', type: 'text' };
+        return [field];
       }
       return fields;
     }),

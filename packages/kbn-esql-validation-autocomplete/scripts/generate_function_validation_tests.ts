@@ -301,8 +301,8 @@ function generateWhereCommandTestsForEvalFunction(
   // TODO: not sure why there's this constraint...
   const supportedFunction = signatures.some(
     ({ returnType, params }) =>
-      [...ESQL_NUMBER_TYPES, 'string'].includes(returnType) &&
-      params.every(({ type }) => [...ESQL_NUMBER_TYPES, 'string'].includes(type))
+      [...ESQL_NUMBER_TYPES, 'string'].includes(returnType as string) &&
+      params.every(({ type }) => [...ESQL_NUMBER_TYPES, 'string'].includes(type as string))
   );
 
   if (!supportedFunction) {
@@ -312,7 +312,7 @@ function generateWhereCommandTestsForEvalFunction(
   const supportedSignatures = signatures.filter(({ returnType }) =>
     // TODO — not sure why the tests have this limitation... seems like any type
     // that can be part of a boolean expression should be allowed in a where clause
-    [...ESQL_NUMBER_TYPES, 'string'].includes(returnType)
+    [...ESQL_NUMBER_TYPES, 'string'].includes(returnType as string)
   );
   for (const { params, returnType, ...restSign } of supportedSignatures) {
     const correctMapping = getFieldMapping(params);
@@ -905,7 +905,7 @@ function generateStatsCommandTestsForGroupingFunction(
         fieldReplacedType
           // if a param of type time_literal or chrono_literal it will always be a literal
           // so no way to test the constantOnly thing
-          .filter((type) => !['time_literal', 'chrono_literal'].includes(type))
+          .filter((type) => !['time_literal'].includes(type as string))
           .map((type) => `Argument of [${name}] must be a constant, received [${type}Field]`)
       );
     }
@@ -986,6 +986,7 @@ const fieldTypesToConstants: Record<SupportedDataType, string> = {
   cartesian_shape: 'to_cartesianshape("POINT (30 10)")',
   null: 'NULL',
   time_duration: 'to_timeduration("3 hours")',
+  unsupported: '',
 };
 
 const supportedTypesAndFieldNames = dataTypes.map((type) => ({
@@ -1103,7 +1104,7 @@ function getFieldMapping(
   };
 
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
-    const typeString: string = type;
+    const typeString: string = type as string;
     if (isSupportedDataType(typeString)) {
       if (useLiterals && literalOptions) {
         return {

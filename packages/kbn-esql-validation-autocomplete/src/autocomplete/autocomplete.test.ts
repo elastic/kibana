@@ -211,7 +211,9 @@ describe('autocomplete', () => {
       ]);
       testSuggestions(`from a | where stringField >= stringField ${op} doubleField == `, [
         ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
+        ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES as string[], {
+          scalar: true,
+        }),
       ]);
     }
     testSuggestions('from a | stats a=avg(doubleField) | where a ', [
@@ -594,19 +596,27 @@ describe('autocomplete', () => {
     ]);
     testSuggestions('from a | eval a=round(doubleField) + ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+        scalar: true,
+      }),
     ]);
     testSuggestions('from a | eval a=round(doubleField)+ ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+        scalar: true,
+      }),
     ]);
     testSuggestions('from a | eval a=doubleField+ ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+        scalar: true,
+      }),
     ]);
     testSuggestions('from a | eval a=`any#Char$Field`+ ', [
       ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, { scalar: true }),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+        scalar: true,
+      }),
     ]);
     testSuggestions(
       'from a | stats avg(doubleField) by stringField | eval ',
@@ -808,7 +818,7 @@ describe('autocomplete', () => {
               // get all possible types for this param
               const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
                 allParamDefs,
-                (p) => p.constantOnly || /_literal/.test(p.type)
+                (p) => p.constantOnly || /_literal/.test(p.type as string)
               );
 
               const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) =>
@@ -829,16 +839,22 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
+                      ),
+                      ...getFieldNamesByType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
+                      ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[],
                         { scalar: true },
                         undefined,
                         [fn.name]
                       ),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                      ...getLiteralsByType(
+                        getTypesFromParamDefs(constantOnlyParamDefs) as string[]
+                      ),
                     ].map(addCommaIfRequired),
                 ' '
               );
@@ -849,16 +865,22 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
+                      ),
+                      ...getFieldNamesByType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
+                      ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[],
                         { scalar: true },
                         undefined,
                         [fn.name]
                       ),
-                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
+                      ...getLiteralsByType(
+                        getTypesFromParamDefs(constantOnlyParamDefs) as string[]
+                      ),
                     ].map(addCommaIfRequired),
                 ' '
               );

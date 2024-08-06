@@ -18,6 +18,8 @@ import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
+import { ESQLRealField } from '../../validation/types';
+import { dataTypes } from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -38,19 +40,8 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...[
-    'string',
-    'keyword',
-    'double',
-    'date',
-    'boolean',
-    'ip',
-    'geo_point',
-    'geo_shape',
-    'cartesian_point',
-    'cartesian_shape',
-  ].map((type) => ({
+export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+  ...dataTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
@@ -178,7 +169,7 @@ export function getFunctionSignaturesByReturnType(
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -249,7 +240,7 @@ export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
 }
 
 export function createCustomCallbackMocks(
-  customFields?: Array<{ name: string; type: string }>,
+  customFields?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;

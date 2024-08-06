@@ -127,7 +127,7 @@ function getFieldMapping(
     date: 'now()',
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
-    const typeString: string = type;
+    const typeString: string = type as string;
     if (dataTypes.includes(typeString as SupportedDataType)) {
       if (useLiterals && literalOptions) {
         return {

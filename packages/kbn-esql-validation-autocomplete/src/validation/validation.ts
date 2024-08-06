@@ -111,7 +111,7 @@ function validateFunctionLiteralArg(
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
+            argType: argDef.type as string,
             value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
             givenType: actualArg.literalType,
           },
@@ -139,7 +139,7 @@ function validateFunctionLiteralArg(
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type,
+              argType: argDef.type as string,
               value: actualArg.name,
               givenType: 'duration',
             },
@@ -169,7 +169,7 @@ function validateInlineCastArg(
         messageId: 'wrongArgumentType',
         values: {
           name: astFunction.name,
-          argType: parameterDefinition.type,
+          argType: parameterDefinition.type as string,
           value: arg.text,
           givenType: arg.castType,
         },
@@ -206,7 +206,7 @@ function validateNestedFunctionArg(
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
-          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType as string },
           locations: actualArg.location,
         })
       );
@@ -219,9 +219,9 @@ function validateNestedFunctionArg(
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: parameterDefinition.type,
+            argType: parameterDefinition.type as string,
             value: actualArg.text,
-            givenType: argFn.signatures[0].returnType,
+            givenType: argFn.signatures[0].returnType as string,
           },
           locations: actualArg.location,
         })
@@ -301,7 +301,7 @@ function validateFunctionColumnArg(
         messageId: 'wrongArgumentType',
         values: {
           name: astFunction.name,
-          argType: parameterDefinition.type,
+          argType: parameterDefinition.type as string,
           value: actualArg.name,
           givenType: columnHit!.type,
         },
@@ -534,14 +534,14 @@ function validateFunction(
         });
       });
 
-      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
               outerArg,
               astFunction.name,
-              argDef.type,
+              argDef.type as string,
               parentCommand,
               references
             )
