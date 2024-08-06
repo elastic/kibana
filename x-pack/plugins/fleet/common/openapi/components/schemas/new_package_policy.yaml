@@ -22,7 +22,6 @@ properties:
     type: string
   output_id:
     type: string
-    deprecated: true
   inputs:
     type: array
     items:

@@ -7484,8 +7484,7 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string",
-            "deprecated": true
+            "type": "string"
           },
           "inputs": {
             "type": "array",
