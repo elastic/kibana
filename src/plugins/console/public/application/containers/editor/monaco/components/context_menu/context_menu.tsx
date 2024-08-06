@@ -21,6 +21,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LanguageSelectorModal } from './language_selector_modal';
 import { i18n } from '@kbn/i18n';
 
+import { useServicesContext } from '../../../../../contexts';
+import { StorageKeys } from '../../../../../../services';
+import { DEFAULT_LANGUAGE } from '../../../../../../../common/constants';
+
 interface Props {
   getCurl: () => Promise<string>;
   getDocumentation: () => Promise<string | null>;
@@ -29,9 +33,13 @@ interface Props {
 }
 
 export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notifications }: Props) => {
+  // Get default language from local storage
+  const { services: { storage } } = useServicesContext();
+  const defaultLanguage = storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState('cURL');
+  const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
   const [curlCode, setCurlCode] = useState('');
   const [curlError, setCurlError] = useState(null);
 

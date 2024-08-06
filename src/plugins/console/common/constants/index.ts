@@ -8,7 +8,7 @@
 
 export { MAJOR_VERSION } from './plugin';
 export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';
-export { DEFAULT_VARIABLES } from './variables';
+export { DEFAULT_VARIABLES, DEFAULT_LANGUAGE } from './variables';
 export {
   AUTOCOMPLETE_DEFINITIONS_FOLDER,
   GENERATED_SUBFOLDER,

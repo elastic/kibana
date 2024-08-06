@@ -42,9 +42,9 @@ const DEFAULT_BADGE = (
   </strong>
 )
 
-export const LanguageSelectorModal = ({ closeModal, currentLanguage, changeDefaultLanguage }: Props) => {
+export const LanguageSelectorModal = ({ closeModal, hidePopover, currentLanguage, changeDefaultLanguage }: Props) => {
   const modalTitleId = useGeneratedHtmlId();
-  const [selectedLanguage, setSelectedLanguage] = useState<string | undefined>(currentLanguage);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
   const [options, setOptions] = useState<Array<EuiSelectableOption> >(
     AVAILABLE_LANGUAGES.map((lang): EuiSelectableOption => ({ label: lang }))
   );
@@ -67,9 +67,15 @@ export const LanguageSelectorModal = ({ closeModal, currentLanguage, changeDefau
 
   const onCopyCode = () => {
     const selectedOption = options.find((option) => option.checked);
+    const language = selectedOption?.label || selectedLanguage;
 
-    changeDefaultLanguage(selectedOption?.label || currentLanguage);
+    // If the default language is changed, update the local storage setting
+    if (currentLanguage !== language) {
+      changeDefaultLanguage(selectedLanguage);
+    }
+
     closeModal();
+    hidePopover();
   };
 
   return (

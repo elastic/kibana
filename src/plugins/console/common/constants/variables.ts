@@ -12,3 +12,6 @@ export const DEFAULT_VARIABLES = [
   { id: uuidv4(), name: 'exampleVariable1', value: '_search' },
   { id: uuidv4(), name: 'exampleVariable2', value: 'match_all' },
 ];
+
+// Default language used in the language selector modal
+export const DEFAULT_LANGUAGE = 'cURL';
