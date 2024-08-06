@@ -58,16 +58,31 @@ interface InMemoryPackagePolicyAndAgentPolicy {
 
 const IntegrationDetailsLink = memo<{
   packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
-}>(({ packagePolicy }) => {
+  agentPolicies: InMemoryPackagePolicyAndAgentPolicy['agentPolicies'];
+}>(({ packagePolicy, agentPolicies }) => {
   const { getHref } = useLink();
+  const policySupportsAgentless = agentPolicies?.some((policy) => policy.supports_agentless);
   return (
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
-      title={packagePolicy.name}
-      href={getHref('integration_policy_edit', {
-        packagePolicyId: packagePolicy.id,
-      })}
+      {...(policySupportsAgentless
+        ? {
+            disabled: true,
+            title: i18n.translate(
+              'xpack.fleet.epm.packageDetails.integrationList.disabledEditTitle',
+              {
+                defaultMessage:
+                  'Editing an agentless integration is not supported. Add a new integration if needed.',
+              }
+            ),
+          }
+        : {
+            href: getHref('integration_policy_edit', {
+              packagePolicyId: packagePolicy.id,
+            }),
+            title: packagePolicy.name,
+          })}
     >
       {packagePolicy.name}
     </EuiLink>
@@ -182,8 +197,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
           defaultMessage: 'Integration policy',
         }),
-        render(_, { packagePolicy }) {
-          return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
+        render(_, { agentPolicies, packagePolicy }) {
+          return (
+            <IntegrationDetailsLink packagePolicy={packagePolicy} agentPolicies={agentPolicies} />
+          );
         },
       },
       {

@@ -1082,10 +1082,18 @@
         "tags": [],
         "label": "getInitialESQLQuery",
         "description": [
-          "\nBuilds an ES|QL query for the provided index or index pattern"
+          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName"
         ],
         "signature": [
-          "(indexOrIndexPattern: string) => string"
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => string"
         ],
         "path": "packages/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
         "deprecated": false,
@@ -1094,12 +1102,18 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getInitialESQLQuery.$1",
-            "type": "string",
+            "type": "Object",
             "tags": [],
-            "label": "indexOrIndexPattern",
+            "label": "dataView",
             "description": [],
             "signature": [
-              "string"
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
             ],
             "path": "packages/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
             "deprecated": false,
@@ -1357,6 +1371,21 @@
         "description": [],
         "signature": [
           "\"enableESQL\""
+        ],
+        "path": "packages/kbn-esql-utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/esql-feedback\""
         ],
         "path": "packages/kbn-esql-utils/constants.ts",
         "deprecated": false,
