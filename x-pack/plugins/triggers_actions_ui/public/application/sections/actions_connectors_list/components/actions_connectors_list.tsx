@@ -434,50 +434,34 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
             options: actionTypesList,
           },
         ],
-        toolsLeft: (selectedItems.length === 0 || !canDelete
-          ? []
-          : [
-              <EuiButton
-                key="delete"
-                iconType="trash"
-                color="danger"
-                data-test-subj="bulkDelete"
-                onClick={() => onDelete(selectedItems)}
-                title={
-                  canDelete
-                    ? undefined
-                    : i18n.translate(
-                        'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
-                        { defaultMessage: 'Unable to delete connectors' }
-                      )
-                }
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
-                  defaultMessage="Delete {count}"
-                  values={{
-                    count: selectedItems.length,
-                  }}
-                />
-              </EuiButton>,
-            ]
-        ).concat(
-          canSave
-            ? [
+        toolsLeft:
+          selectedItems.length === 0 || !canDelete
+            ? []
+            : [
                 <EuiButton
-                  data-test-subj="createActionButton"
-                  key="create-action"
-                  fill
-                  onClick={() => setAddFlyoutVisibility(true)}
+                  key="delete"
+                  iconType="trash"
+                  color="danger"
+                  data-test-subj="bulkDelete"
+                  onClick={() => onDelete(selectedItems)}
+                  title={
+                    canDelete
+                      ? undefined
+                      : i18n.translate(
+                          'xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle',
+                          { defaultMessage: 'Unable to delete connectors' }
+                        )
+                  }
                 >
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionButtonLabel"
-                    defaultMessage="Create connector"
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel"
+                    defaultMessage="Delete {count}"
+                    values={{
+                      count: selectedItems.length,
+                    }}
                   />
                 </EuiButton>,
-              ]
-            : []
-        ),
+              ],
       }}
     />
   );

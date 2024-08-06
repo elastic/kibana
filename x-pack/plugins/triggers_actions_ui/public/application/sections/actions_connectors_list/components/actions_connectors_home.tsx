@@ -149,7 +149,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           onTestConnector={(connector) =>
             setEditConnectorProps({ initialConnector: connector, tab: EditConnectorTabs.Test })
           }
-          onConnectorCreated={() => {}}
           actionTypeRegistry={actionTypeRegistry}
         />
       )}
