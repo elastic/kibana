@@ -21,6 +21,7 @@ import {
 import { parseLine } from './tokens_utils';
 
 const { collapseLiteralStrings } = XJson;
+
 /*
  * This function replaces any variables with its values stored in localStorage.
  * For example 'GET ${exampleVariable1} -> 'GET _search'.
@@ -141,44 +142,6 @@ export const getRequestEndLineNumber = (
   return endLineNumber;
 };
 
-const isJsonString = (str: string) => {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-};
-
-/*
- * Internal helpers
- */
-const replaceVariables = (
-  text: string,
-  variables: DevToolsVariable[],
-  isDataVariable: boolean
-): string => {
-  const variableRegex = isDataVariable ? dataVariableTemplateRegex : urlVariableTemplateRegex;
-  if (variableRegex.test(text)) {
-    text = text.replaceAll(variableRegex, (match, key) => {
-      const variable = variables.find(({ name }) => name === key);
-      const value = variable?.value;
-
-      if (isDataVariable && value) {
-        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
-        return isJsonString(value) ? value : `"${value}"`;
-      }
-
-      return value ?? match;
-    });
-  }
-  return text;
-};
-
-const containsComments = (text: string) => {
-  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
-};
-
 /**
  * This function takes a string containing unformatted Console requests and
  * returns a text in which the requests are auto-indented.
@@ -236,6 +199,11 @@ export const getAutoIndentedRequests = (
   return formattedTextLines.join('\n');
 };
 
+/*
+ * This function extracts a normalized method and url from the editor and
+ * the "raw" text of the request body without any changes to it. The only normalization
+ * for request body is to split several json objects into an array of strings.
+ */
 export const getRequestFromEditor = (
   model: monaco.editor.ITextModel,
   startLineNumber: number,
@@ -267,6 +235,57 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
+// ---------------------------------- Internal helpers ----------------------------------
+
+const isJsonString = (str: string) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
+const replaceVariables = (
+  text: string,
+  variables: DevToolsVariable[],
+  isDataVariable: boolean
+): string => {
+  const variableRegex = isDataVariable ? dataVariableTemplateRegex : urlVariableTemplateRegex;
+  if (variableRegex.test(text)) {
+    text = text.replaceAll(variableRegex, (match, key) => {
+      const variable = variables.find(({ name }) => name === key);
+      const value = variable?.value;
+
+      if (isDataVariable && value) {
+        // If the variable value is an object, add it as it is. Otherwise, surround it with quotes.
+        return isJsonString(value) ? value : `"${value}"`;
+      }
+
+      return value ?? match;
+    });
+  }
+  return text;
+};
+
+const containsComments = (text: string) => {
+  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
+};
+
+const cleanUpWhitespaces = (line: string): string => {
+  return line.trim().replaceAll(/\s+/g, ' ');
+};
+
+const indentData = (dataString: string): string => {
+  try {
+    const parsedData = parse(dataString);
+
+    return JSON.stringify(parsedData, null, 2);
+  } catch (e) {
+    return dataString;
+  }
+};
+
 const splitDataIntoJsonObjects = (dataString: string): string[] => {
   const jsonSplitRegex = /}\s*{/;
   if (dataString.match(jsonSplitRegex)) {
@@ -284,18 +303,4 @@ const splitDataIntoJsonObjects = (dataString: string): string[] => {
     });
   }
   return [dataString];
-};
-
-export const cleanUpWhitespaces = (line: string): string => {
-  return line.trim().replaceAll(/\s+/g, ' ');
-};
-
-const indentData = (dataString: string): string => {
-  try {
-    const parsedData = parse(dataString);
-
-    return JSON.stringify(parsedData, null, 2);
-  } catch (e) {
-    return dataString;
-  }
 };

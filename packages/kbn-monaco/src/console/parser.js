@@ -37,6 +37,9 @@ export const createParser = () => {
       requestStartOffset = at - 1;
       requests.push({ startOffset: requestStartOffset });
     },
+    updateRequestEnd = function () {
+      requestEndOffset = at - 1;
+    },
     addRequestEnd = function() {
       const lastRequest = getLastRequest();
       lastRequest.endOffset = requestEndOffset;
@@ -390,13 +393,16 @@ export const createParser = () => {
       white();
       addRequestStart();
       method();
+      updateRequestEnd();
       strictWhite();
       url();
+      updateRequestEnd();
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();
       if (ch == '{') {
         object();
+        updateRequestEnd();
       }
       // multi doc request
       strictWhite(); // advance to one new line
@@ -405,6 +411,7 @@ export const createParser = () => {
       while (ch == '{') {
         // another object
         object();
+        updateRequestEnd();
         strictWhite();
         newLine();
         strictWhite();
