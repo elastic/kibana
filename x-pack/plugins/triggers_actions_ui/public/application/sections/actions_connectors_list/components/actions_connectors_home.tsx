@@ -10,14 +10,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { omit } from 'lodash';
+import { EuiButton, EuiButtonEmpty, EuiPageHeader, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -27,11 +21,17 @@ import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
+import { ActionConnector, EditConnectorTabs } from '../../../../types';
+import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
 export interface MatchParams {
   section: Section;
+}
+interface EditConnectorProps {
+  initialConnector?: ActionConnector;
+  tab?: EditConnectorTabs;
 }
 
 export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -44,6 +44,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
   const [isCreateConnectorFlyoutVisible, setIsCreateConnectorFlyoutVisible] =
     useState<boolean>(false);
+  const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
 
   const tabs: Array<{
     id: Section;
@@ -106,20 +107,18 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           defaultMessage: 'Connect third-party software with your alerting data.',
         })}
         rightSideItems={[
-          <EuiFlexItem>
-            <EuiButton
-              data-test-subj="createConnectorButton"
-              fill
-              iconType="plusInCircle"
-              iconSide="left"
-              onClick={() => setIsCreateConnectorFlyoutVisible(true)}
-              isLoading={false}
-            >
-              {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
-                defaultMessage: 'Create connector',
-              })}
-            </EuiButton>
-          </EuiFlexItem>,
+          <EuiButton
+            data-test-subj="createConnectorButton"
+            fill
+            iconType="plusInCircle"
+            iconSide="left"
+            onClick={() => setIsCreateConnectorFlyoutVisible(true)}
+            isLoading={false}
+          >
+            {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
+              defaultMessage: 'Create connector',
+            })}
+          </EuiButton>,
           <EuiButtonEmpty
             data-test-subj="documentationButton"
             key="documentation-button"
@@ -147,8 +146,26 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           onClose={() => {
             setIsCreateConnectorFlyoutVisible(false);
           }}
-          // onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+          onTestConnector={(connector) =>
+            setEditConnectorProps({ initialConnector: connector, tab: EditConnectorTabs.Test })
+          }
           onConnectorCreated={() => {}}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      )}
+      {editConnectorProps.initialConnector && (
+        <EditConnectorFlyout
+          key={`${editConnectorProps.initialConnector.id}${
+            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+          }`}
+          connector={editConnectorProps.initialConnector}
+          tab={editConnectorProps.tab}
+          onClose={() => {
+            setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+          }}
+          onConnectorUpdated={(connector) => {
+            setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
+          }}
           actionTypeRegistry={actionTypeRegistry}
         />
       )}
