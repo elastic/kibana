@@ -66,6 +66,7 @@ interface PanelFooterProps {
  */
 export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
   const { euiTheme } = useEuiTheme();
+  // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
   const flyoutZIndex = useMemo(
     () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }),
     [euiTheme]
