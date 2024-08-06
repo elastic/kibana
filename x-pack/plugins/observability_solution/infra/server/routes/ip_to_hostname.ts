@@ -52,10 +52,10 @@ export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
         }
         const hostDoc = first(hits.hits)!;
         return response.ok({ body: { host: hostDoc._source.host.name } });
-      } catch (error) {
+      } catch ({ statusCode = 500, message = 'Unknown error occurred' }) {
         return response.customError({
-          statusCode: error.statusCode || 500,
-          body: { message: error.message || 'Unknown error occurred' },
+          statusCode,
+          body: { message },
         });
       }
     }

@@ -23,14 +23,12 @@ if [[ -d /opt/local-ssd/buildkite ]]; then
   mkdir -p "$TMPDIR"
 fi
 
-if command -v jq >/dev/null 2>&1; then
-  KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
-  export KIBANA_PKG_BRANCH
-  export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
+KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
+export KIBANA_PKG_BRANCH
+export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 
-  KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
-  export KIBANA_PKG_VERSION
-fi
+KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
+export KIBANA_PKG_VERSION
 
 # Detects and exports the final target branch when using a merge queue
 if [[ "${BUILDKITE_BRANCH:-}" == "gh-readonly-queue"* ]]; then
