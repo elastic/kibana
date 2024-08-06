@@ -8,22 +8,10 @@
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
+import type { RawKibanaPrivileges } from '@kbn/security-authorization-core';
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';
 import { SecuredFeature } from './secured_feature';
-
-export interface RawKibanaFeaturePrivileges {
-  [featureId: string]: {
-    [privilegeId: string]: string[];
-  };
-}
-
-export interface RawKibanaPrivileges {
-  global: Record<string, string[]>;
-  features: RawKibanaFeaturePrivileges;
-  space: Record<string, string[]>;
-  reserved: Record<string, string[]>;
-}
 
 function toBasePrivilege(entry: [string, string[]]): [string, KibanaPrivilege] {
   const [privilegeId, actions] = entry;

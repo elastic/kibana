@@ -6272,6 +6272,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-authorization-core@link:x-pack/packages/security/authorization_core":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-form-components@link:x-pack/packages/security/form_components":
   version "0.0.0"
   uid ""

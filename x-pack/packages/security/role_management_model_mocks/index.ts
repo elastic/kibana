@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { licenseMock } from '@kbn/security-authorization-core/src/__fixtures__/licensing.mock';
+export { createFeature } from './src/kibana_features';
+export { createKibanaPrivileges, createRawKibanaPrivileges } from './src/kibana_privileges';

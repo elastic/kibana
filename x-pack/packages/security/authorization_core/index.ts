@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { licenseMock } from '@kbn/security-authorization-core/src/__fixtures__/licensing.mock';
+export { Actions } from './src/actions';
+export { privilegesFactory } from './src/privileges';
+export type {
+  CasesSupportedOperations,
+  PrivilegesService,
+  RawKibanaPrivileges,
+  RawKibanaFeaturePrivileges,
+} from './src/privileges';

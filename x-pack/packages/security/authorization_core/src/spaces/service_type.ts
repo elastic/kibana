@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type { PrivilegesService } from './privileges';
-export type { CasesSupportedOperations } from './feature_privilege_builder';
-export { privilegesFactory } from './privileges';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+
+export type SpacesService = SpacesPluginSetup['spacesService'];
