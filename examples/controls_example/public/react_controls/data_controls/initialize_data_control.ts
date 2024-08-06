@@ -10,7 +10,11 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, first, switchMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import {
+  DataView,
+  DataViewField,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+} from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
@@ -21,12 +25,16 @@ import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DefaultDataControlState } from './types';
+import { DataControlApi, DataControlFieldFormatter, DefaultDataControlState } from './types';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
   state: DefaultDataControlState,
+  /**
+   * `This state manager` should only include the state that the data control editor is
+   * responsible for managing
+   */
   editorStateManager: ControlStateManager<EditorState>,
   controlGroup: ControlGroupApi,
   services: {
@@ -49,6 +57,10 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
+  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
+    String(toFormat)
+  );
 
   const stateManager: ControlStateManager<DefaultDataControlState> = {
     ...defaultControl.stateManager,
@@ -106,7 +118,13 @@ export const initializeDataControl = <EditorState extends object = {}>(
       } else {
         clearBlockingError();
       }
+
+      field$.next(field);
       defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
+      const spec = field?.toSpec();
+      if (spec) {
+        fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
+      }
     }
   );
 
@@ -116,6 +134,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
       ...stateManager,
       ...editorStateManager,
     } as ControlStateManager<DefaultDataControlState & EditorState>;
+
     const initialState = (
       Object.keys(mergedStateManager) as Array<keyof DefaultDataControlState & EditorState>
     ).reduce((prev, key) => {
@@ -158,6 +177,8 @@ export const initializeDataControl = <EditorState extends object = {}>(
     panelTitle,
     defaultPanelTitle,
     dataViews,
+    field$,
+    fieldFormatter,
     onEdit,
     filters$,
     setOutputFilter: (newFilter: Filter | undefined) => {

@@ -601,9 +601,9 @@
               "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppDeepLink",
+                "section": "def-public.AppDeepLink",
                 "text": "AppDeepLink"
               },
               "<string>[]; updater$: ",
@@ -611,9 +611,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUpdater",
+                "section": "def-public.AppUpdater",
                 "text": "AppUpdater"
               },
               ">; }) => void; }"
@@ -1251,7 +1251,7 @@
           {
             "parentPluginId": "slo",
             "id": "def-server.PluginSetup.usageCollection",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "usageCollection",
             "description": [],
@@ -1260,9 +1260,11 @@
                 "pluginId": "usageCollection",
                 "scope": "server",
                 "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              }
+                "section": "def-server.ICollectorSet",
+                "text": "ICollectorSet"
+              },
+              " & ",
+              "UsageCountersServiceSetup"
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
             "deprecated": false,
