@@ -18,6 +18,7 @@ import {
   EuiFlexGroupProps,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ import { LogErrorRateChart } from '../charts/log_error_rate_chart';
 import { LogRateChart } from '../charts/log_rate_chart';
 import { AddAPMCallOut } from './add_apm_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -53,10 +55,27 @@ export function LogsServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const { data, status } = useFetcher(
+    (callAPI) => {
+      return callAPI('GET /internal/apm/entities/services/{serviceName}/summary', {
+        params: { path: { serviceName }, query: { end, environment, start } },
+      });
+    },
+    [end, environment, serviceName, start]
+  );
+
   const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
 
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
+
+  if (isPending(status)) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EuiLoadingSpinner size="xl" />
+      </div>
+    );
+  }
 
   return (
     <AnnotationsContextProvider
@@ -76,43 +95,50 @@ export function LogsServiceOverview() {
             <EuiSpacer size="l" />
           </>
         ) : null}
-        <EuiCallOut
-          title={i18n.translate('xpack.apm.logsServiceOverview.euiCallOut.noLogMetricsHaveLabel', {
-            defaultMessage: 'No log metrics have been detected against this service',
-          })}
-          color="warning"
-          iconType="warning"
-        >
-          <FormattedMessage
-            id="xpack.apm.logsServiceOverview.pleaseEnsureYouAreCallOutLabel"
-            defaultMessage="Please ensure you are surfacing {logLevelLink} in your logs to display log metrics. {learnMoreLink}"
-            values={{
-              logLevelLink: (
-                <EuiLink
-                  data-test-subj="apmNotAvailableLogsMetricsLink"
-                  href="https://www.elastic.co/guide/en/ecs/current/ecs-log.html#field-log-level"
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.apm.logsServiceOverview.logLevelLink', {
-                    defaultMessage: 'log.level',
-                  })}
-                </EuiLink>
-              ),
-              learnMoreLink: (
-                <EuiLink
-                  data-test-subj="apmNotAvailableLogsMetricsLink"
-                  href="https://ela.st/service-logs-level"
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.apm.logsServiceOverview.learnMoreLink', {
-                    defaultMessage: 'Learn more',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-        <EuiSpacer size="l" />
+        {data?.entity.hasLogMetrics === false ? (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.logsServiceOverview.euiCallOut.noLogMetricsHaveLabel',
+                {
+                  defaultMessage: 'No log metrics have been detected against this service',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <FormattedMessage
+                id="xpack.apm.logsServiceOverview.pleaseEnsureYouAreCallOutLabel"
+                defaultMessage="Please ensure you are surfacing {logLevelLink} in your logs to display log metrics. {learnMoreLink}"
+                values={{
+                  logLevelLink: (
+                    <EuiLink
+                      data-test-subj="apmNotAvailableLogsMetricsLink"
+                      href="https://www.elastic.co/guide/en/ecs/current/ecs-log.html#field-log-level"
+                      target="_blank"
+                    >
+                      {i18n.translate('xpack.apm.logsServiceOverview.logLevelLink', {
+                        defaultMessage: 'log.level',
+                      })}
+                    </EuiLink>
+                  ),
+                  learnMoreLink: (
+                    <EuiLink
+                      data-test-subj="apmNotAvailableLogsMetricsLink"
+                      href="https://ela.st/service-logs-level"
+                      target="_blank"
+                    >
+                      {i18n.translate('xpack.apm.logsServiceOverview.learnMoreLink', {
+                        defaultMessage: 'Learn more',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
 
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
