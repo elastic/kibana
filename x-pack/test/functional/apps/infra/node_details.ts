@@ -211,7 +211,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'memoryUsage', value: '94.9%' },
             { metric: 'diskUsage', value: 'N/A' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
@@ -558,12 +558,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             [
-              { metric: 'cpuUsage', value: '99.6%' },
+              { metric: 'cpuUsage', value: '100%' },
               { metric: 'normalizedLoad1m', value: '1,300.3%' },
               { metric: 'memoryUsage', value: '42.2%' },
               { metric: 'diskUsage', value: '36.0%' },
             ].forEach(({ metric, value }) => {
-              it.skip(`${metric} tile should show ${value}`, async () => {
+              it(`${metric} tile should show ${value}`, async () => {
                 await retry.tryForTime(3 * 1000, async () => {
                   const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                     metric

@@ -173,12 +173,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           [
-            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'cpuUsage', value: 'N/A' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
             { metric: 'diskUsage', value: '35.0%' },
           ].forEach(({ metric, value }) => {
-            it.skip(`${metric} tile should show ${value}`, async () => {
+            it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
                 const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
                   metric
