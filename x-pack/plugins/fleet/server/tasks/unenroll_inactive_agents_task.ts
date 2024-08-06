@@ -21,7 +21,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
+import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService, auditLoggingService } from '../services';
@@ -33,6 +33,7 @@ const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
+const POLICIES_BATCHSIZE = 500;
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
@@ -112,47 +113,54 @@ export class UnenrollInactiveAgentsTask {
       `[UnenrollInactiveAgentsTask] Fetching agent policies with unenroll_timeout > 0`
     );
     // find all agent policies that are not managed and having unenroll_timeout > 0
+    // limit the search to POLICIES_BATCHSIZE at a time and loop until there are no agent policies left
     const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
-    const agentPolicies = await agentPolicyService.list(soClient, {
-      kuery: policiesKuery,
-      perPage: SO_SEARCH_LIMIT,
-    });
-    this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Found "${agentPolicies.items.length}" agent policies with unenroll_timeout > 0`
-    );
-    if (!agentPolicies?.items.length) {
-      this.endRun('Found no policies to process');
-      return;
-    }
+    let hasMore = true;
+    let page = 1;
+    while (hasMore) {
+      const agentPolicies = await agentPolicyService.list(soClient, {
+        perPage: POLICIES_BATCHSIZE,
+        page: page++,
+        kuery: policiesKuery,
+      });
+      this.logger.debug(
+        `[UnenrollInactiveAgentsTask] Found "${agentPolicies.items.length}" agent policies with unenroll_timeout > 0`
+      );
+      if (!agentPolicies?.items.length) {
+        hasMore = false;
+        this.endRun('Found no policies to process');
+        return;
+      }
 
-    // find inactive agents enrolled on above policies
-    // limit batch size to UNENROLLMENT_BATCHSIZE to avoid scale issues
-    const kuery = `(${AGENTS_PREFIX}.policy_id:${agentPolicies.items
-      .map((policy) => `"${policy.id}"`)
-      .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
-    const res = await getAgentsByKuery(esClient, soClient, {
-      kuery,
-      showInactive: true,
-      page: 1,
-      perPage: UNENROLLMENT_BATCHSIZE,
-    });
-    if (!res.agents.length) {
-      this.endRun('No inactive agents to unenroll');
-      return;
+      // find inactive agents enrolled on above policies
+      // limit batch size to UNENROLLMENT_BATCHSIZE to avoid scale issues
+      const kuery = `(${AGENTS_PREFIX}.policy_id:${agentPolicies.items
+        .map((policy) => `"${policy.id}"`)
+        .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
+      const res = await getAgentsByKuery(esClient, soClient, {
+        kuery,
+        showInactive: true,
+        page: 1,
+        perPage: UNENROLLMENT_BATCHSIZE,
+      });
+      if (!res.agents.length) {
+        this.endRun('No inactive agents to unenroll');
+        return;
+      }
+      this.logger.debug(
+        `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll. Attempting unenrollment`
+      );
+      const unenrolledBatch = await unenrollBatch(soClient, esClient, res.agents, {
+        revoke: true,
+        force: true,
+      });
+      auditLoggingService.writeCustomAuditLog({
+        message: `Recurrent unenrollment of inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${unenrolledBatch.actionId}]`,
+      });
+      this.logger.debug(
+        `[UnenrollInactiveAgentsTask] Executed unenrollment of inactive agents with actionId: ${unenrolledBatch.actionId}`
+      );
     }
-    this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll. Attempting unenrollment`
-    );
-    const unenrolledBatch = await unenrollBatch(soClient, esClient, res.agents, {
-      revoke: true,
-      force: true,
-    });
-    auditLoggingService.writeCustomAuditLog({
-      message: `Recurrent unenrollment of inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${unenrolledBatch.actionId}]`,
-    });
-    this.logger.debug(
-      `[UnenrollInactiveAgentsTask] Executed unenrollment of inactive agents with actionId: ${unenrolledBatch.actionId}`
-    );
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
