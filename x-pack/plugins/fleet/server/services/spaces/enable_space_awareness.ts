@@ -26,7 +26,7 @@ export async function enableSpaceAwarenessMigration() {
   try {
     const existingSettings = await getSettings(soClient);
     if (existingSettings.use_space_awareness_migration_status === 'success') {
-      throw new FleetError('Migration is already done.');
+      return;
     }
 
     if (
