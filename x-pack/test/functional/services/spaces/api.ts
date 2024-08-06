@@ -68,9 +68,16 @@ export function ApiProvider({ getPageObjects, getService }: FtrProviderContext) 
     async createAndNavigateToSpace(options?: CreateOptions) {
       const res = await this.create(options);
 
+      const currentUrl = await browser.getCurrentUrl();
+
+      const urlMatch = currentUrl.match(/^(https?:\/\/[^/]+)(\/.*)/);
+      let baseUrl = 'http://localhost:5620';
+      if (urlMatch) {
+        baseUrl = urlMatch[1];
+      }
       // Navigate to the root of the space to make sure the redirect to the correct home will occur
       // This is why we don't use common.navigateToUrl, which requires an "app" to be provided.
-      await browser.navigateTo(`http://localhost:5620/s/${res.id}`);
+      await browser.navigateTo(`${baseUrl}/s/${res.id}`);
       return res;
     },
     async get(spaceId: string) {
