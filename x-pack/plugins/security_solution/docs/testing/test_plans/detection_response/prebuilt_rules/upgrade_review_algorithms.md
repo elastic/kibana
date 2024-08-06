@@ -31,10 +31,11 @@ Status: `in progress`.
     - [**Scenario: `ABC` - Rule field is a non-solvable `data_source` object**](#scenario-abc---rule-field-is-a-non-solvable-data_source-object)
   - [Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same-and-the-rule-base-version-doesnt-exist----aa)
     - [**Scenario: `-AA` - Rule field is any type**](#scenario--aa---rule-field-is-any-type)
-  - [Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same-and-the-rule-base-version-doesnt-exist----bc)
-    - [**Scenario: `-BC` - Rule field is a number or single line string**](#scenario--bc---rule-field-is-a-number-or-single-line-string)
-    - [**Scenario: `-BC` - Rule field is an array of scalar values**](#scenario--bc---rule-field-is-an-array-of-scalar-values)
-    - [**Scenario: `-BC` - Rule field is a solvable `data_source` object**](#scenario--bc---rule-field-is-a-solvable-data_source-object)
+  - [Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-AB`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same-and-the-rule-base-version-doesnt-exist----ab)
+    - [**Scenario: `-AB` - Rule field is a number or single line string**](#scenario--ab---rule-field-is-a-number-or-single-line-string)
+    - [**Scenario: `-AB` - Rule field is an array of scalar values**](#scenario--ab---rule-field-is-an-array-of-scalar-values)
+    - [**Scenario: `-AB` - Rule field is a solvable `data_source` object**](#scenario--ab---rule-field-is-a-solvable-data_source-object)
+    - [**Scenario: `-AB` - Rule field is a non-solvable `data_source` object**](#scenario--ab---rule-field-is-a-non-solvable-data_source-object)
 
 ## Useful information
 
@@ -79,13 +80,13 @@ And <field_name> field should not be returned from the `upgrade/_review` API end
 And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name  | base_version                              | current_version                           | target_version                            | merged_version                            |
-| single line string | name        | "A"                                       | "A"                                       | "A"                                       | "A"                                       |
-| multi line string  | description | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
-| number             | risk_score  | 1                                         | 1                                         | 1                                         | 1                                         |
-| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
-| data_source        | data_source | ["one", "two", "three"]                   | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
-| data_source        | data_source | "A"                                       | "A"                                       | "A"                                       | "A"                                       |
+| algorithm          | field_name  | base_version                                                        | current_version                                                     | target_version                                                      | merged_version                                                      |
+| single line string | name        | "A"                                                                 | "A"                                                                 | "A"                                                                 | "A"                                                                 |
+| multi line string  | description | "My description.\nThis is a second line."                           | "My description.\nThis is a second line."                           | "My description.\nThis is a second line."                           | "My description.\nThis is a second line."                           |
+| number             | risk_score  | 1                                                                   | 1                                                                   | 1                                                                   | 1                                                                   |
+| array of scalars   | tags        | ["one", "two", "three"]                                             | ["one", "three", "two"]                                             | ["three", "one", "two"]                                             | ["one", "three", "two"]                                             |
+| data_source        | data_source | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} |
+| data_source        | data_source | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            |
 ```
 
 ### Rule field doesn't have an update but has a custom value - `ABA`
@@ -102,13 +103,13 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name  | base_version                              | current_version                                 | target_version                            | merged_version                                  |
-| single line string | name        | "A"                                       | "B"                                             | "A"                                       | "B"                                             |
-| multi line string  | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
-| number             | risk_score  | 1                                         | 2                                               | 1                                         | 2                                               |
-| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "three"]                   | ["one", "two", "four"]                          |
-| data_source        | data_source | ["one", "two", "three"]                   | "A"                                             | ["one", "two", "three"]                   | "A"                                             |
-| data_source        | data_source | "A"                                       | ["one", "two", "three"]                         | "A"                                       | ["one", "two", "three"]                         |
+| algorithm          | field_name  | base_version                                                        | current_version                                                     | target_version                                                      | merged_version                                                      |
+| single line string | name        | "A"                                                                 | "B"                                                                 | "A"                                                                 | "B"                                                                 |
+| multi line string  | description | "My description.\nThis is a second line."                           | "My GREAT description.\nThis is a second line."                     | "My description.\nThis is a second line."                           | "My GREAT description.\nThis is a second line."                     |
+| number             | risk_score  | 1                                                                   | 2                                                                   | 1                                                                   | 2                                                                   |
+| array of scalars   | tags        | ["one", "two", "three"]                                             | ["one", "two", "four"]                                              | ["one", "two", "three"]                                             | ["one", "two", "four"]                                              |
+| data_source        | data_source | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            |
+| data_source        | data_source | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} |
 ```
 
 ### Rule field has an update and doesn't have a custom value - `AAB`
@@ -125,13 +126,13 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name  | base_version                              | current_version                           | target_version                                  | merged_version                                  |
-| single line string | name        | "A"                                       | "A"                                       | "B"                                             | "B"                                             |
-| multi line string  | description | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
-| number             | risk_score  | 1                                         | 1                                         | 2                                               | 2                                               |
-| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "four"]                          |
-| data_source        | data_source | ["one", "two", "three"]                   | ["one", "two", "three"]                   | "A"                                             | "A"                                             |
-| data_source        | data_source | "A"                                       | "A"                                       | ["one", "two", "three"]                         | ["one", "two", "three"]                         |
+| algorithm          | field_name  | base_version                                                        | current_version                                                     | target_version                                                      | merged_version                                                      |
+| single line string | name        | "A"                                                                 | "A"                                                                 | "B"                                                                 | "B"                                                                 |
+| multi line string  | description | "My description.\nThis is a second line."                           | "My description.\nThis is a second line."                           | "My GREAT description.\nThis is a second line."                     | "My GREAT description.\nThis is a second line."                     |
+| number             | risk_score  | 1                                                                   | 1                                                                   | 2                                                                   | 2                                                                   |
+| array of scalars   | tags        | ["one", "two", "three"]                                             | ["one", "two", "three"]                                             | ["one", "two", "four"]                                              | ["one", "two", "four"]                                              |
+| data_source        | data_source | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            |
+| data_source        | data_source | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} |
 ```
 
 ### Rule field has an update and a custom value that are the same - `ABB`
@@ -149,13 +150,13 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name  | base_version                              | current_version                                 | target_version                                  | merged_version                                  |
-| single line string | name        | "A"                                       | "B"                                             | "B"                                             | "B"                                             |
-| multi line string  | description | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
-| number             | risk_score  | 1                                         | 2                                               | 2                                               | 2                                               |
-| array of scalars   | tags        | ["one", "two", "three"]                   | ["one", "two", "four"]                          | ["one", "two", "four"]                          | ["one", "two", "four"]                          |
-| data_source        | data_source | ["one", "two", "three"]                   | "A"                                             | "A"                                             | "A"                                             |
-| data_source        | data_source | "A"                                       | ["one", "two", "three"]                         | ["one", "two", "three"]                         | ["one", "two", "three"]                         |
+| algorithm          | field_name  | base_version                                                        | current_version                                                     | target_version                                                      | merged_version                                                      |
+| single line string | name        | "A"                                                                 | "B"                                                                 | "B"                                                                 | "B"                                                                 |
+| multi line string  | description | "My description.\nThis is a second line."                           | "My GREAT description.\nThis is a second line."                     | "My GREAT description.\nThis is a second line."                     | "My GREAT description.\nThis is a second line."                     |
+| number             | risk_score  | 1                                                                   | 2                                                                   | 2                                                                   | 2                                                                   |
+| array of scalars   | tags        | ["one", "two", "three"]                                             | ["one", "two", "four"]                                              | ["one", "two", "four"]                                              | ["one", "two", "four"]                                              |
+| data_source        | data_source | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            |
+| data_source        | data_source | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
@@ -256,9 +257,9 @@ And data_source field should be returned from the `upgrade/_review` API endpoint
 And data_source field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm    | base_version            | current_version                | target_version          | merged_version                   |
-| data_source  | ["one", "two", "three"] | ["two", "one", "four"]         | ["one", "two", "five"]  | ["one", "two", "four", "five"]   |
-| data_source  | "A"                     | ["one", "one", "two", "three"] | ["one", "two", "five"]  | ["one", "two", "three", "five"]  |
+| algorithm    | base_version                                                        | current_version                                                            | target_version                                                     | merged_version                                                              |
+| data_source  | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["two", "one", "four"]}         | {type: "index_patterns", "index_patterns": ["one", "two", "five"]} | {type: "index_patterns", "index_patterns": ["one", "two", "four", "five"]}  |
+| data_source  | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "five"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three", "five"]} |
 ```
 
 #### **Scenario: `ABC` - Rule field is a non-solvable `data_source` object**
@@ -274,12 +275,12 @@ And data_source field should be returned from the `upgrade/_review` API endpoint
 And data_source field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm    | base_version            | current_version         | target_version          | merged_version          |
-| data_source  | ["one", "two", "three"] | "A"                     | "B"                     | "A"                     |
-| data_source  | "A"                     | ["one", "two", "three"] | "B"                     | ["one", "two", "three"] |
-| data_source  | "A"                     | "B"                     | ["one", "two", "three"] | "B"                     |
-| data_source  | ["one", "two", "three"] | ["one", "two", "four"]  | "C"                     | ["one", "two", "four"]  |
-| data_source  | ["one", "two", "three"] | "A"                     | ["one", "two", "five"]  | "A"                     |
+| algorithm    | base_version                                                        | current_version                                                     | target_version                                                      | merged_version                                                      |
+| data_source  | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "B"}                            | {type: "data_view", "data_view_id": "A"}                            |
+| data_source  | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "B"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} |
+| data_source  | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "B"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "B"}                            |
+| data_source  | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "four"]}  | {type: "data_view", "data_view_id": "C"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "four"]}  |
+| data_source  | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"}                            | {type: "index_patterns", "index_patterns": ["one", "two", "five"]}  | {type: "data_view", "data_view_id": "A"}                            |
 ```
 
 ### Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`
@@ -297,18 +298,18 @@ And <field_name> field should not be returned from the `upgrade/_review` API end
 And <field_name> field should not be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name  | base_version | current_version                           | target_version                            | merged_version                            |
-| single line string | name        | N/A          | "A"                                       | "A"                                       | "A"                                       |
-| multi line string  | description | N/A          | "My description.\nThis is a second line." | "My description.\nThis is a second line." | "My description.\nThis is a second line." |
-| number             | risk_score  | N/A          | 1                                         | 1                                         | 1                                         |
-| array of scalars   | tags        | N/A          | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
-| data_source        | data_source | N/A          | ["one", "three", "two"]                   | ["three", "one", "two"]                   | ["one", "three", "two"]                   |
-| data_source        | data_source | N/A          | "A"                                       | "A"                                       | "A"                                       |
+| algorithm          | field_name  | base_version | current_version                                                     | target_version                                                      | merged_version                                                      |
+| single line string | name        | N/A          | "A"                                                                 | "A"                                                                 | "A"                                                                 |
+| multi line string  | description | N/A          | "My description.\nThis is a second line."                           | "My description.\nThis is a second line."                           | "My description.\nThis is a second line."                           |
+| number             | risk_score  | N/A          | 1                                                                   | 1                                                                   | 1                                                                   |
+| array of scalars   | tags        | N/A          | ["one", "three", "two"]                                             | ["three", "one", "two"]                                             | ["one", "three", "two"]                                             |
+| data_source        | data_source | N/A          | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} |
+| data_source        | data_source | N/A          | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            | {type: "data_view", "data_view_id": "A"}                            |
 ```
 
-### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`
+### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-AB`
 
-#### **Scenario: `-BC` - Rule field is a number or single line string**
+#### **Scenario: `-AC` - Rule field is a number or single line string**
 
 **Automation**: 4 integration tests with mock rules + a set of unit tests for the algorithms
 
@@ -325,10 +326,10 @@ Examples:
 | single line string | name        | N/A          | "B"                                       | "C"                                             | "C"                                             |
 | multi line string  | description | N/A          | "My description.\nThis is a second line." | "My GREAT description.\nThis is a second line." | "My GREAT description.\nThis is a second line." |
 | number             | risk_score  | N/A          | 2                                         | 3                                               | 3                                               |
-| data_source        | data_source | N/A          | "A"                                       | "A"                                             | "A"                                             |
+| data_source        | data_source | N/A          | {type: "data_view", "data_view_id": "A"}  | {type: "data_view", "data_view_id": "B"}        | {type: "data_view", "data_view_id": "B"}        |
 ```
 
-#### **Scenario: `-BC` - Rule field is an array of scalar values**
+#### **Scenario: `-AB` - Rule field is an array of scalar values**
 
 **Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
 
@@ -349,7 +350,7 @@ Examples:
 | array of scalars | tags       | N/A          | ["one", "two", "four"] | ["one", "two", "five"] | ["one", "two", "four", "five"] |
 ```
 
-#### **Scenario: `-BC` - Rule field is a solvable `data_source` object**
+#### **Scenario: `-AB` - Rule field is a solvable `data_source` object**
 
 **Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
 
@@ -366,6 +367,25 @@ And data_source field should be returned from the `upgrade/_review` API endpoint
 And data_source field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm    | base_version | current_version                | target_version          | merged_version                   |
-| data_source  | N/A          | ["two", "one", "three"]        | ["one", "two", "four"]  | ["one", "two", "three", "four"]  |
+| algorithm    | base_version | current_version                                                     | target_version                                                     | merged_version                                                              |
+| data_source  | N/A          | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "index_patterns", "index_patterns": ["one", "two", "four"]} | {type: "index_patterns", "index_patterns": ["one", "two", "three", "four"]} |
+
+```
+
+#### **Scenario: `-AB` - Rule field is a non-solvable `data_source` object**
+
+**Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
+
+```Gherkin
+Given at least 1 installed prebuilt rule has a new version available
+And the base version of the rule cannot be determined
+And customized data_source field is different than the Elastic update in this upgrade (current version != target version)
+And current version and target version are not both array fields in data_source
+Then for data_source field the diff algorithm should output the target version as the merged version with a non-solvable conflict
+And data_source field should be returned from the `upgrade/_review` API endpoint
+And data_source field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm    | base_version | current_version                                                     | target_version                           | merged_version                           |
+| data_source  | N/A          | {type: "index_patterns", "index_patterns": ["one", "two", "three"]} | {type: "data_view", "data_view_id": "A"} | {type: "data_view", "data_view_id": "A"} |
 ```
