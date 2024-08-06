@@ -62,14 +62,15 @@ describe('Storage explorer page', () => {
 
   describe('summary stats', () => {
     it('will still load with kuery', () => {
-      cy.intercept('GET', '/internal/profiling/storage_explorer/summary?*', {fixture: 'storage_explorer_summary.json'}).as('summaryStats');
+      cy.intercept('GET', '/internal/profiling/storage_explorer/summary?*', {
+        fixture: 'storage_explorer_summary.json',
+      }).as('summaryStats');
       cy.visitKibana('/app/profiling/storage-explorer', {
         rangeFrom,
         rangeTo,
         kuery: 'host.id : "1234"',
       });
       cy.wait('@summaryStats').then(({ request, response }) => {
-
         const {
           dailyDataGenerationBytes,
           diskSpaceUsedPct,
@@ -87,6 +88,7 @@ describe('Storage explorer page', () => {
         expect(parseFloat(totalNumberOfHosts)).to.be.gt(0);
         expect(parseFloat(totalProfilingSizeBytes)).to.be.gt(0);
         expect(parseFloat(totalSymbolsSizeBytes)).to.be.gt(0);
+        /*  eslint-disable @typescript-eslint/no-unused-expressions */
         expect(kuery).to.be.empty;
       });
     });
