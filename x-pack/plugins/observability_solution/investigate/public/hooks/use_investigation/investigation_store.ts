@@ -72,11 +72,7 @@ async function regenerateItem({
     throw new Error(`Definition for widget ${widget.type} not found`);
   }
 
-  const nextParameters = mergePlainObjects(
-    globalWidgetParameters,
-    widget.parameters,
-    widget.locked ? {} : globalWidgetParameters
-  );
+  const nextParameters = mergePlainObjects(widget.parameters, globalWidgetParameters);
 
   const widgetData = await definition.generate({
     parameters: nextParameters,
@@ -309,7 +305,7 @@ export function createInvestigationStore({
         return {
           ...prevRevision,
           items: prevRevision.items.map((item) => {
-            return { ...item, loading: !item.locked };
+            return { ...item, loading: true };
           }),
         };
       });
@@ -320,18 +316,16 @@ export function createInvestigationStore({
           parameters,
           items: await Promise.all(
             prevRevision.items.map(async (item) => {
-              return item.locked
-                ? item
-                : {
-                    ...(await regenerateItem({
-                      widget: item,
-                      globalWidgetParameters: parameters,
-                      signal: controller.signal,
-                      user,
-                      widgetDefinitions,
-                    })),
-                    loading: false,
-                  };
+              return {
+                ...(await regenerateItem({
+                  widget: item,
+                  globalWidgetParameters: parameters,
+                  signal: controller.signal,
+                  user,
+                  widgetDefinitions,
+                })),
+                loading: false,
+              };
             })
           ),
         };

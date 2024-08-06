@@ -7,14 +7,12 @@
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
-import { DATE_FORMAT_ID } from '@kbn/management-settings-ids';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { keyBy, noop, omit, pick } from 'lodash';
+import { keyBy, noop, omit } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
-import { getOverridesFromGlobalParameters } from '../../utils/get_overrides_from_global_parameters';
 import { AddNoteUI } from '../add_note_ui';
 import { AddObservationUI } from '../add_observation_ui';
 import { InvestigateSearchBar } from '../investigate_search_bar';
@@ -22,7 +20,6 @@ import { InvestigateWidgetGrid } from '../investigate_widget_grid';
 
 function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const {
-    core: { uiSettings },
     dependencies: {
       start: { investigate },
     },
@@ -99,19 +96,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
           columns: item.columns,
           rows: item.rows,
           chrome: definitionForType.chrome,
-          locked: item.locked,
           loading: item.loading,
-          overrides: item.locked
-            ? getOverridesFromGlobalParameters(
-                pick(item.parameters, 'filters', 'timeRange'),
-                revision.parameters,
-                uiSettings.get<string>(DATE_FORMAT_ID) ?? 'Browser'
-              )
-            : [],
+          overrides: [],
         } ?? []
       );
     });
-  }, [revision, widgetDefinitions, uiSettings]);
+  }, [revision, widgetDefinitions]);
 
   if (!investigation || !revision || !gridItems) {
     return <EuiLoadingSpinner />;

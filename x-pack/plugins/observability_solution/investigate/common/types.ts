@@ -54,12 +54,11 @@ export interface InvestigateWidget<
   description?: string;
   columns: InvestigateWidgetColumnSpan;
   rows: number;
-  locked: boolean;
 }
 
 export type InvestigateWidgetCreate<TParameters extends Record<string, any> = {}> = Pick<
   InvestigateWidget,
-  'title' | 'description' | 'columns' | 'rows' | 'type' | 'locked'
+  'title' | 'description' | 'columns' | 'rows' | 'type'
 > & {
   parameters: DeepPartial<GlobalWidgetParameters> & TParameters;
 };
