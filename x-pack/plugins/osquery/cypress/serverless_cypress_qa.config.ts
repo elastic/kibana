@@ -11,14 +11,13 @@ import { getCypressBaseConfig } from './cypress_base.config';
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig(
   getCypressBaseConfig({
-    execTimeout: 60000,
-    pageLoadTimeout: 60000,
-    responseTimeout: 60000,
-    viewportHeight: 946,
-    viewportWidth: 1680,
-
+    e2e: {
+      experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
+    },
     env: {
-      grepTags: '@serverless --@brokenInServerless --@skipInServerless',
+      // Uncomment to enable logging
+      // TOOLING_LOG_LEVEL: 'verbose',
+      grepTags: '@serverless --@skipInServerless --@brokenInServerless --@skipInServerlessMKI',
     },
   })
 );
