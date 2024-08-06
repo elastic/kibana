@@ -49,7 +49,6 @@ export type FunctionParameterType =
   | 'counter_integer[]'
   | 'counter_long[]'
   | 'counter_double[]'
-  | 'string[]'
   | 'keyword[]'
   | 'text[]'
   | 'boolean[]'
