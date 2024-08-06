@@ -33,6 +33,7 @@ const pages = {
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
+    connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
