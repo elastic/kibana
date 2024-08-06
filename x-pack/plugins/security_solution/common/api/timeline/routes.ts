@@ -28,3 +28,9 @@ export {
   PersistFavoriteRouteResponse,
   PersistFavoriteRouteRequestBody,
 } from './persist_favorite/persist_favorite_route.gen';
+
+export {
+  PersistPinnedEventRouteRequestBody,
+  PersistPinnedEventResponse,
+  PersistPinnedEventRouteResponse,
+} from './pinned_events/pinned_events_route.gen';

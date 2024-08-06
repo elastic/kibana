@@ -10,7 +10,7 @@ import * as rt from 'io-ts';
 import { BareNoteSchema, SavedTimelineRuntimeType } from '../model/api';
 import { unionWithNullType } from '../../../utility_types';
 
-import { pinnedEventIds } from '../pinned_events/pinned_events_route';
+const pinnedEventIds = unionWithNullType(rt.array(rt.string));
 
 export const eventNotes = unionWithNullType(rt.array(BareNoteSchema));
 export const globalNotes = unionWithNullType(rt.array(BareNoteSchema));

@@ -12,16 +12,17 @@ import { stringEnum, unionWithNullType } from '../../../utility_types';
 
 import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
-import type { PinnedEvent } from '../pinned_events/pinned_events_route';
 import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import { ErrorSchema } from './error_schema';
 import type { DataProviderType } from './components.gen';
 import {
   BareNote,
+  BarePinnedEvent,
   DataProviderTypeEnum,
   FavoriteTimelineResponse,
   type FavoriteTimelineResult,
   type Note,
+  PinnedEvent,
   RowRendererId,
   RowRendererIdEnum,
   SortFieldTimeline,
@@ -36,10 +37,12 @@ import {
 
 export {
   BareNote,
+  BarePinnedEvent,
   DataProviderType,
   DataProviderTypeEnum,
   FavoriteTimelineResponse,
   Note,
+  PinnedEvent,
   RowRendererId,
   RowRendererIdEnum,
   SortFieldTimeline,

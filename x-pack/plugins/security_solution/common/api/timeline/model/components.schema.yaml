@@ -476,12 +476,10 @@ components:
             serializedQuery:
               type: string
               nullable: true
-    PinnedEvent:
+    BarePinnedEvent:
       type: object
-      required: [eventId, pinnedEventId, timelineId, version]
+      required: [eventId, timelineId]
       properties:
-        pinnedEventId:
-          type: string
         eventId:
           type: string
         timelineId:
@@ -498,8 +496,16 @@ components:
         updatedBy:
           type: string
           nullable: true
-        version:
-          type: string
+    PinnedEvent:
+      allOf:
+        - $ref: '#/components/schemas/BarePinnedEvent'
+        - type: object
+          required: [pinnedEventId, version]
+          properties:
+            pinnedEventId:
+              type: string
+            version:
+              type: string
     Sort:
       oneOf:
         - $ref: '#/components/schemas/SortObject'

@@ -232,17 +232,23 @@ export const Note = BareNote.merge(
   })
 );
 
-export type PinnedEvent = z.infer<typeof PinnedEvent>;
-export const PinnedEvent = z.object({
-  pinnedEventId: z.string(),
+export type BarePinnedEvent = z.infer<typeof BarePinnedEvent>;
+export const BarePinnedEvent = z.object({
   eventId: z.string(),
   timelineId: z.string(),
   created: z.number().nullable().optional(),
   createdBy: z.string().nullable().optional(),
   updated: z.number().nullable().optional(),
   updatedBy: z.string().nullable().optional(),
-  version: z.string(),
 });
+
+export type PinnedEvent = z.infer<typeof PinnedEvent>;
+export const PinnedEvent = BarePinnedEvent.merge(
+  z.object({
+    pinnedEventId: z.string(),
+    version: z.string(),
+  })
+);
 
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
 export const TimelineResponse = SavedTimeline.merge(
@@ -278,13 +284,6 @@ export const BareNoteWithoutExternalRefs = z.object({
   createdBy: z.string().nullable().optional(),
   updated: z.number().nullable().optional(),
   updatedBy: z.string().nullable().optional(),
-});
-
-export type ResponseNote = z.infer<typeof ResponseNote>;
-export const ResponseNote = z.object({
-  code: z.number(),
-  message: z.string(),
-  note: Note,
 });
 
 export type GlobalNote = z.infer<typeof GlobalNote>;

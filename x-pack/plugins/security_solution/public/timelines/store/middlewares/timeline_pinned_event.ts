@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { get, omit } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
 import type { State } from '../../../common/store/types';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,
@@ -65,7 +64,7 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           timelineId: timeline.savedObjectId,
         });
 
-        const response: PinnedEventResponse = get('data.persistPinnedEventOnTimeline', result);
+        const response = result.data.persistPinnedEventOnTimeline;
         if (response && response.code === 403) {
           store.dispatch(showCallOutUnauthorizedMsg());
         }
@@ -73,9 +72,9 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
         refreshTimelines(store.getState());
 
         const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
-        // The response is null in case we unpinned an event.
+        // The response does not contain the eventId when we unpinned the event.
         // In that case we want to remove the locally pinned event.
-        if (!response) {
+        if (!('eventId' in response)) {
           return store.dispatch(
             updateTimeline({
               id: action.payload.id,
