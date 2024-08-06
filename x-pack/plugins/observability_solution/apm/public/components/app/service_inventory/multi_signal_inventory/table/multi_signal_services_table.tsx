@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { omit } from 'lodash';
 import React, { useMemo } from 'react';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, isFailure, isPending } from '../../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
@@ -26,7 +25,7 @@ export enum ServiceInventoryFieldName {
   Throughput = 'metrics.throughput',
   Latency = 'metrics.latency',
   FailedTransactionRate = 'metrics.failedTransactionRate',
-  LogRatePerMinute = 'metrics.logRatePerMinute',
+  logRate = 'metrics.logRate',
   LogErrorRate = 'metrics.logErrorRate',
 }
 
@@ -53,18 +52,16 @@ export function MultiSignalServicesTable({
 }: Props) {
   const breakpoints = useBreakpoints();
   const { query } = useApmParams('/services');
-  const { link } = useApmRouter();
 
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
       // removes pagination and sort instructions from the query so it won't be passed down to next route
       query: omit(query, 'page', 'pageSize', 'sortDirection', 'sortField'),
       breakpoints,
-      link,
       timeseriesDataLoading,
       timeseriesData,
     });
-  }, [query, breakpoints, link, timeseriesDataLoading, timeseriesData]);
+  }, [query, breakpoints, timeseriesDataLoading, timeseriesData]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>

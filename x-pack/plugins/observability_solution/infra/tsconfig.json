@@ -105,9 +105,10 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-containers",
     "@kbn/deeplinks-observability",
-    "@kbn/event-annotation-common"
+    "@kbn/event-annotation-common",
+    "@kbn/core-analytics-browser",
+    "@kbn/observability-alerting-rule-utils",
+    "@kbn/shared-ux-page-no-data-types"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

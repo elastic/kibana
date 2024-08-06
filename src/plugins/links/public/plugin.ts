@@ -22,17 +22,14 @@ import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { LinksSerializedState } from './types';
+import { LinksRuntimeState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
-import {
-  deserializeLinksSavedObject,
-  linksSerializeStateIsByReference,
-} from './lib/deserialize_from_library';
+import { deserializeLinksSavedObject } from './lib/deserialize_from_library';
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -64,10 +61,11 @@ export class LinksPlugin
       });
 
       plugins.embeddable.registerReactEmbeddableSavedObject({
-        onAdd: (container, savedObject) => {
-          container.addNewPanel({
+        onAdd: async (container, savedObject) => {
+          const initialState = await deserializeLinksSavedObject(savedObject);
+          container.addNewPanel<LinksRuntimeState>({
             panelType: CONTENT_ID,
-            initialState: { savedObjectId: savedObject.id },
+            initialState,
           });
         },
         embeddableType: CONTENT_ID,
@@ -103,7 +101,8 @@ export class LinksPlugin
                 editor: {
                   onEdit: async (savedObjectId: string) => {
                     const { openEditorFlyout } = await import('./editor/open_editor_flyout');
-                    const initialState = await deserializeLinksSavedObject({ savedObjectId });
+                    const linksSavedObject = await getLinksClient().get(savedObjectId);
+                    const initialState = await deserializeLinksSavedObject(linksSavedObject.item);
                     await openEditorFlyout({ initialState });
                   },
                 },
@@ -128,14 +127,11 @@ export class LinksPlugin
 
       plugins.dashboard.registerDashboardPanelPlacementSetting(
         CONTENT_ID,
-        async (serializedState?: LinksSerializedState) => {
-          if (!serializedState) return {};
-          const { links, layout } = linksSerializeStateIsByReference(serializedState)
-            ? await deserializeLinksSavedObject(serializedState)
-            : serializedState.attributes;
-          const isHorizontal = layout === 'horizontal';
+        async (runtimeState?: LinksRuntimeState) => {
+          if (!runtimeState) return {};
+          const isHorizontal = runtimeState.layout === 'horizontal';
           const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-          const height = isHorizontal ? 4 : (links?.length ?? 1 * 3) + 4;
+          const height = isHorizontal ? 4 : (runtimeState.links?.length ?? 1 * 3) + 4;
           return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
         }
       );

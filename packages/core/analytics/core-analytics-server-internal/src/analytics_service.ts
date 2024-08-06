@@ -7,8 +7,8 @@
  */
 
 import { of } from 'rxjs';
-import type { AnalyticsClient } from '@kbn/ebt/client';
-import { createAnalytics } from '@kbn/ebt/client';
+import type { AnalyticsClient } from '@elastic/ebt/client';
+import { createAnalytics } from '@elastic/ebt/client';
 import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
@@ -24,9 +24,6 @@ export class AnalyticsService {
     this.analyticsClient = createAnalytics({
       isDev: core.env.mode.dev,
       logger: core.logger.get('analytics'),
-      // TODO: We need to be able to edit sendTo once we resolve the telemetry config.
-      //  For now, we are relying on whether it's a distributable or running from source.
-      sendTo: core.env.packageInfo.dist ? 'production' : 'staging',
     });
 
     this.registerBuildInfoAnalyticsContext(core);

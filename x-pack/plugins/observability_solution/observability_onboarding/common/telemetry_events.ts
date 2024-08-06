@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type EventTypeOpts } from '@kbn/ebt/client';
+import { type EventTypeOpts } from '@elastic/ebt/client';
 
 export const OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT: EventTypeOpts<{
   flow?: string;

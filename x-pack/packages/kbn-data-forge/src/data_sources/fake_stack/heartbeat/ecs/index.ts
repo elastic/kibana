@@ -23,7 +23,7 @@ const components = [
 ];
 
 export const indexTemplate: IndexTemplateDef = {
-  namespace: HEARTBEAT,
+  name: `logs-${HEARTBEAT}@template`,
   template: { ...template, composed_of: components.map(({ name }) => name) },
   components,
 };

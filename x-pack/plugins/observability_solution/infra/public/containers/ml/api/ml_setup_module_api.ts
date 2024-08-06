@@ -8,8 +8,8 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../common/infra_ml';
-import { decodeOrThrow } from '../../../../common/runtime_types';
 
 interface RequestArgs {
   moduleId: string;
@@ -92,8 +92,19 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorRT = rt.type({
+  reason: rt.string,
+  type: rt.string,
+});
+
 const setupErrorResponseRT = rt.type({
-  msg: rt.string,
+  status: rt.number,
+  error: rt.intersection([
+    setupErrorRT,
+    rt.type({
+      root_cause: rt.array(setupErrorRT),
+    }),
+  ]),
 });
 
 const datafeedSetupResponseRT = rt.intersection([

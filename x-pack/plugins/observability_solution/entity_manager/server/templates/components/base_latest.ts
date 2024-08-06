@@ -20,6 +20,22 @@ export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTempl
   template: {
     mappings: {
       properties: {
+        entity: {
+          properties: {
+            displayName: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
+            },
+            firstSeenTimestamp: {
+              type: 'date',
+            },
+          },
+        },
         labels: {
           type: 'object',
         },

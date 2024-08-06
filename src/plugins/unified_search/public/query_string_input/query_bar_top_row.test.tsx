@@ -310,7 +310,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(true);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectedTimestamp')).toBe('@timestamp');
     expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toBe(false);
   });
 
@@ -335,7 +335,7 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TEXT_BASED_EDITOR).length).toBe(1);
-    expect(component.find(TEXT_BASED_EDITOR).prop('detectTimestamp')).toBe(false);
+    expect(component.find(TEXT_BASED_EDITOR).prop('detectedTimestamp')).toBeUndefined();
     expect(component.find(TIMEPICKER_SELECTOR).prop('isDisabled')).toMatchInlineSnapshot(`
       Object {
         "display": <span

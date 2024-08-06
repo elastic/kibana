@@ -155,7 +155,7 @@ export function Dependencies({ currentRuleId, dependencies, onChange }: Dependen
         <p>
           {i18n.translate('xpack.slo.rules.dependencies.description', {
             defaultMessage:
-              'Configure rule dependencies and designate the serverity action groups you want to use to suppress the current rule. For instance, if you choose to suppress on the "Critical" and "High" action groups, the current rule will abstain from executing any actions of its severity groups when the associated rule dependency breaches its threshold. Instead, it will execute a "Suppressed" action group in response to the dependency trigger.',
+              'Configure rule dependencies and designate the severity action groups you want to use to suppress the current rule. For instance, if you choose to suppress on the "Critical" and "High" action groups, the current rule will abstain from executing any actions of its severity groups when the associated rule dependency breaches its threshold. Instead, it will execute a "Suppressed" action group in response to the dependency trigger.',
           })}
         </p>
       </EuiText>

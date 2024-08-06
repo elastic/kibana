@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-exceptions-common",
+  "owner": "@elastic/security-detection-engine"
+}

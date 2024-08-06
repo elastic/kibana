@@ -7,8 +7,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { UsageCountersService, UsageCountersServiceSetup } from './usage_counters_service';
+import type { UsageCountersService } from './usage_counters_service';
 import type { UsageCounter } from './usage_counter';
+import type { UsageCountersServiceSetup } from './types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<UsageCountersServiceSetup> = {
@@ -16,9 +17,14 @@ const createSetupContractMock = () => {
     getUsageCounterByDomainId: jest.fn(),
   };
 
-  setupContract.createUsageCounter.mockReturnValue({
-    incrementCounter: jest.fn(),
-  } as unknown as jest.Mocked<UsageCounter>);
+  setupContract.createUsageCounter.mockImplementation(
+    (domainId: string, params?: { retentionPeriodDays?: number }) =>
+      ({
+        domainId,
+        ...(params?.retentionPeriodDays && { retentionPeriodDays: params.retentionPeriodDays }),
+        incrementCounter: jest.fn(),
+      } as unknown as jest.Mocked<UsageCounter>)
+  );
 
   return setupContract;
 };

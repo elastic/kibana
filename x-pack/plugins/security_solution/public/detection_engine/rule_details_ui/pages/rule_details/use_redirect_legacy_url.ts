@@ -26,7 +26,7 @@ export const useLegacyUrlRedirect = ({ rule, spacesApi }: UseLegacyUrlRedirectPa
           path,
           aliasPurpose: rule.alias_purpose,
           objectNoun: i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
+            'xpack.securitySolution.sections.ruleDetails.redirectObjectNoun',
             { defaultMessage: 'rule' }
           ),
         });

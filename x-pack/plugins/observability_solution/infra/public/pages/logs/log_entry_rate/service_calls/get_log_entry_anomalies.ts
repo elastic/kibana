@@ -7,13 +7,13 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { IdFormatByJobType } from '../../../../../common/http_api/latest';
 import {
   getLogEntryAnomaliesRequestPayloadRT,
   getLogEntryAnomaliesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH,
 } from '../../../../../common/http_api';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { AnomaliesSort, Pagination } from '../../../../../common/log_analysis';
 
 interface RequestArgs {

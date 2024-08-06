@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { GetListRequestQuery, GetListResponse } from '@kbn/securitysolution-lists-common/api';
+import { ReadListRequestQuery, ReadListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -27,7 +27,7 @@ export const readListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetListRequestQuery),
+            query: buildRouteValidationWithZod(ReadListRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -38,14 +38,15 @@ export const readListRoute = (router: ListsPluginRouter): void => {
           const { id } = request.query;
           const lists = await getListClient(context);
           const list = await lists.getList({ id });
+
           if (list == null) {
             return siemResponse.error({
               body: `list id: "${id}" does not exist`,
               statusCode: 404,
             });
-          } else {
-            return response.ok({ body: GetListResponse.parse(list) });
           }
+
+          return response.ok({ body: ReadListResponse.parse(list) });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

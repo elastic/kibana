@@ -30,6 +30,7 @@ describe.skip(
         ],
       },
     },
+    pageLoadTimeout: 1 * 60 * 1000,
   },
   () => {
     const HEARTBEAT_COUNT = 2001;

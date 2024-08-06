@@ -169,6 +169,9 @@ describe('GeminiConnector', () => {
                 temperature: 0,
                 maxOutputTokens: 8192,
               },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
             }),
             headers: {
               Authorization: 'Bearer mock_access_token',
@@ -184,10 +187,7 @@ describe('GeminiConnector', () => {
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
         const timeout = 60000;
-        await connector.invokeAI(
-          { ...aiAssistantBody, timeout, signal },
-          connectorMetricsCollector
-        );
+        await connector.invokeAI({ ...aiAssistantBody, timeout, signal });
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
@@ -204,6 +204,9 @@ describe('GeminiConnector', () => {
                 temperature: 0,
                 maxOutputTokens: 8192,
               },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
             }),
             headers: {
               Authorization: 'Bearer mock_access_token',
@@ -254,6 +257,9 @@ describe('GeminiConnector', () => {
                 temperature: 0,
                 maxOutputTokens: 8192,
               },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
             }),
             responseType: 'stream',
             headers: {
@@ -270,10 +276,7 @@ describe('GeminiConnector', () => {
       it('signal and timeout is properly passed to streamApi', async () => {
         const signal = jest.fn();
         const timeout = 60000;
-        await connector.invokeStream(
-          { ...aiAssistantBody, timeout, signal },
-          connectorMetricsCollector
-        );
+        await connector.invokeStream({ ...aiAssistantBody, timeout, signal });
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
@@ -290,6 +293,9 @@ describe('GeminiConnector', () => {
                 temperature: 0,
                 maxOutputTokens: 8192,
               },
+              safety_settings: [
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              ],
             }),
             responseType: 'stream',
             headers: {

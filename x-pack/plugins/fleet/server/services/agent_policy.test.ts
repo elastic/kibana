@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import {
@@ -115,6 +113,7 @@ function getAgentPolicyCreateMock() {
   return soClient;
 }
 let mockedLogger: jest.Mocked<Logger>;
+
 describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
@@ -315,6 +314,66 @@ describe('Agent policy', () => {
         schema_version: '1.1.1',
         is_protected: false,
       });
+    });
+
+    it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ agentless: true } as any);
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      const res = await agentPolicyService.create(soClient, esClient, {
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+      expect(res).toEqual({
+        id: 'mocked',
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+        status: 'active',
+        is_managed: true,
+        revision: 1,
+        updated_at: expect.anything(),
+        updated_by: 'system',
+        schema_version: '1.1.1',
+        is_protected: false,
+      });
+    });
+
+    it('should throw error when attempting to create policy with supports_agentless true on cloud environment that does not support the agentless feature', async () => {
+      jest
+        .spyOn(appContextService, 'getExperimentalFeatures')
+        .mockReturnValue({ agentless: true } as any);
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(soClient, esClient, {
+          name: 'test',
+          namespace: 'default',
+          supports_agentless: true,
+        })
+      ).rejects.toThrowError(
+        new AgentPolicyInvalidError(
+          'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
+        )
+      );
     });
   });
 
@@ -730,7 +789,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -805,7 +864,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -1171,6 +1230,7 @@ describe('Agent policy', () => {
       mockedGetFullAgentPolicy.mockResolvedValue({
         id: 'policy123',
         revision: 1,
+        namespaces: ['mySpace'],
         inputs: [
           {
             id: 'input-123',
@@ -1223,10 +1283,16 @@ describe('Agent policy', () => {
             }),
             expect.objectContaining({
               '@timestamp': expect.anything(),
-              data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+              data: {
+                id: 'policy123',
+                inputs: [{ id: 'input-123' }],
+                revision: 1,
+                namespaces: ['mySpace'],
+              },
               default_fleet_server: false,
               policy_id: 'policy123',
               revision_idx: 1,
+              namespaces: ['mySpace'],
             }),
           ],
           refresh: 'wait_for',

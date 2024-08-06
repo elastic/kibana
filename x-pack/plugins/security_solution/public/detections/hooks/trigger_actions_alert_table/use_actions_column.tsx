@@ -29,11 +29,10 @@ export const getUseActionColumnHook =
 
     // we only want to show the note icon if the expandable flyout and the new notes system are enabled
     // TODO delete most likely in 8.16
-    const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
     const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
       'securitySolutionNotesEnabled'
     );
-    if (expandableFlyoutDisabled || !securitySolutionNotesEnabled) {
+    if (!securitySolutionNotesEnabled) {
       ACTION_BUTTON_COUNT--;
     }
 

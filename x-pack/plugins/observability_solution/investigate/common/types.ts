@@ -8,19 +8,12 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { DeepPartial, PickByValue } from 'utility-types';
-
-export interface InvestigateUser {
-  name: string;
-}
+import type { AuthenticatedUser } from '@kbn/core/public';
 
 export interface GlobalWidgetParameters {
   timeRange: {
     from: string;
     to: string;
-  };
-  query: {
-    query: string;
-    language: 'kuery';
   };
   filters: Filter[];
 }
@@ -32,12 +25,19 @@ export enum InvestigateWidgetColumnSpan {
   Four = 4,
 }
 
-export interface InvestigateTimeline {
+export interface InvestigationRevision {
   id: string;
-  title: string;
-  '@timestamp': number;
-  user: InvestigateUser;
   items: InvestigateWidget[];
+  parameters: GlobalWidgetParameters;
+}
+
+export interface Investigation {
+  id: string;
+  '@timestamp': number;
+  user: AuthenticatedUser;
+  revisions: InvestigationRevision[];
+  title: string;
+  revision: string;
 }
 
 export interface InvestigateWidget<
@@ -48,7 +48,7 @@ export interface InvestigateWidget<
   created: number;
   last_updated: number;
   type: string;
-  user: InvestigateUser;
+  user: AuthenticatedUser;
   parameters: GlobalWidgetParameters & TParameters;
   data: TData;
   title: string;

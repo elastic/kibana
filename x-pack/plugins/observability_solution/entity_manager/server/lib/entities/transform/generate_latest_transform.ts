@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { EntityDefinition } from '@kbn/entities-schema';
 import {
   ENTITY_DEFAULT_LATEST_FREQUENCY,
   ENTITY_DEFAULT_LATEST_SYNC_DELAY,
 } from '../../../../common/constants_entities';
-import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 import {
   generateHistoryIndexName,
-  generateLatestTransformId,
-  generateLatestIngestPipelineId,
   generateLatestIndexName,
+  generateLatestIngestPipelineId,
+  generateLatestTransformId,
 } from '../helpers/generate_component_id';
+import { generateIdentityAggregations } from './generate_identity_aggregations';
+import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 import { generateLatestMetricAggregations } from './generate_metric_aggregations';
 
 export function generateLatestTransform(
@@ -53,22 +54,11 @@ export function generateLatestTransform(
         ['entity.id']: {
           terms: { field: 'entity.id' },
         },
-        ['entity.displayName']: {
-          terms: { field: 'entity.displayName.keyword' },
-        },
-        ...definition.identityFields.reduce(
-          (acc, id) => ({
-            ...acc,
-            [`entity.identityFields.${id.field}`]: {
-              terms: { field: `entity.identityFields.${id.field}`, missing_bucket: id.optional },
-            },
-          }),
-          {}
-        ),
       },
       aggs: {
         ...generateLatestMetricAggregations(definition),
         ...generateLatestMetadataAggregations(definition),
+        ...generateIdentityAggregations(definition),
         'entity.lastSeenTimestamp': {
           max: {
             field: 'entity.lastSeenTimestamp',

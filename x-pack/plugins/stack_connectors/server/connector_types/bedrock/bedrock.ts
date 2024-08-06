@@ -16,6 +16,8 @@ import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
+  InvokeAIRawActionParamsSchema,
+  InvokeAIRawActionResponseSchema,
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
@@ -27,6 +29,8 @@ import {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  InvokeAIRawActionParams,
+  InvokeAIRawActionResponse,
   RunApiLatestResponse,
 } from '../../../common/bedrock/types';
 import {
@@ -90,6 +94,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
       schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_AI_RAW,
+      method: 'invokeAIRaw',
+      schema: InvokeAIRawActionParamsSchema,
     });
   }
 
@@ -184,16 +194,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     return { available: response.success };
   }
 
-  private async runApiDeprecated(
-    params: SubActionRequestParams<RunActionResponse>, // : SubActionRequestParams<RunApiLatestResponseSchema>
+  private async runApiRaw(
+    params: SubActionRequestParams<RunActionResponse | InvokeAIRawActionResponse>,
     connectorMetricsCollector: ConnectorMetricsCollector
-  ): Promise<RunActionResponse> {
-    const response = await this.request(params, connectorMetricsCollector);
+  ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
+    const response = await this.request(params);
     return response.data;
   }
 
   private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse>, // : SubActionRequestParams<RunApiLatestResponseSchema>
+    params: SubActionRequestParams<RunApiLatestResponse>,
     connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse> {
     const response = await this.request(params, connectorMetricsCollector);
@@ -212,9 +222,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   public async runApi(
-    { body, model: reqModel, signal, timeout }: RunActionParams,
+    { body, model: reqModel, signal, timeout, raw }: RunActionParams,
     connectorMetricsCollector: ConnectorMetricsCollector
-  ): Promise<RunActionResponse> {
+  ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/model/${currentModel}/invoke`;
@@ -228,9 +238,13 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       // give up to 2 minutes for response
       timeout: timeout ?? DEFAULT_TIMEOUT_MS,
     };
+
+    if (raw) {
+      return this.runApiRaw({ ...requestArgs, responseSchema: InvokeAIRawActionResponseSchema });
+    }
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
     if (usesDeprecatedArguments(body)) {
-      return this.runApiDeprecated(
+      return this.runApiRaw(
         { ...requestArgs, responseSchema: RunActionResponseSchema },
         connectorMetricsCollector
       );
@@ -283,12 +297,23 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
   public async invokeStream(
-    { messages, model, stopSequences, system, temperature, signal, timeout }: InvokeAIActionParams,
+    {
+      messages,
+      model,
+      stopSequences,
+      system,
+      temperature,
+      signal,
+      timeout,
+      tools,
+    }: InvokeAIActionParams | InvokeAIRawActionParams,
     connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<IncomingMessage> {
     const res = (await this.streamApi(
       {
-        body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+        body: JSON.stringify(
+          formatBedrockBody({ messages, stopSequences, system, temperature, tools })
+        ),
         model,
         signal,
         timeout,
@@ -319,7 +344,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: InvokeAIActionParams,
     connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi(
+    const res = (await this.runApi(
       {
         body: JSON.stringify(
           formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
@@ -329,8 +354,38 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         timeout,
       },
       connectorMetricsCollector
-    );
+    )) as RunActionResponse;
     return { message: res.completion.trim() };
+  }
+
+  public async invokeAIRaw({
+    messages,
+    model,
+    stopSequences,
+    system,
+    temperature,
+    maxTokens = DEFAULT_TOKEN_LIMIT,
+    signal,
+    timeout,
+    tools,
+    anthropicVersion,
+  }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
+    const res = await this.runApi({
+      body: JSON.stringify({
+        messages,
+        stop_sequences: stopSequences,
+        system,
+        temperature,
+        max_tokens: maxTokens,
+        tools,
+        anthropic_version: anthropicVersion,
+      }),
+      model,
+      signal,
+      timeout,
+      raw: true,
+    });
+    return res;
   }
 }
 
@@ -340,19 +395,22 @@ const formatBedrockBody = ({
   temperature = 0,
   system,
   maxTokens = DEFAULT_TOKEN_LIMIT,
+  tools,
 }: {
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<{ role: string; content?: string }>;
   stopSequences?: string[];
   temperature?: number;
   maxTokens?: number;
   // optional system message to be sent to the API
   system?: string;
+  tools?: Array<{ name: string; description: string }>;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
   max_tokens: maxTokens,
   stop_sequences: stopSequences,
   temperature,
+  tools,
 });
 
 /**
@@ -362,12 +420,12 @@ const formatBedrockBody = ({
  * @param messages
  */
 const ensureMessageFormat = (
-  messages: Array<{ role: string; content: string }>,
+  messages: Array<{ role: string; content?: string }>,
   systemPrompt?: string
-): { messages: Array<{ role: string; content: string }>; system?: string } => {
+): { messages: Array<{ role: string; content?: string }>; system?: string } => {
   let system = systemPrompt ? systemPrompt : '';
 
-  const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
+  const newMessages = messages.reduce((acc: Array<{ role: string; content?: string }>, m) => {
     const lastMessage = acc[acc.length - 1];
     if (m.role === 'system') {
       system = `${system.length ? `${system}\n` : ''}${m.content}`;

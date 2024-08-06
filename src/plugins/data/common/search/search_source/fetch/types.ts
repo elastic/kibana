@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SearchSourceSearchOptions } from '../../..';
 import { GetConfigFn } from '../../../types';
 
@@ -17,7 +19,11 @@ import { GetConfigFn } from '../../../types';
  * where `ISearchRequestParams` is used externally instead.
  * FIXME: replace with estypes.SearchRequest?
  */
-export type SearchRequest = Record<string, any>;
+export type SearchRequest<T extends Record<string, any> = Record<string, any>> = {
+  index?: DataView | string;
+  query?: Array<Query | AggregateQuery>;
+  filters?: Filter[] | (() => Filter[]);
+} & Omit<T, 'index' | 'query' | 'filters'>;
 
 export interface FetchHandlers {
   getConfig: GetConfigFn;

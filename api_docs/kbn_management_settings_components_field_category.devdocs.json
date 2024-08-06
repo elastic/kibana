@@ -2,26 +2,10 @@
   "id": "@kbn/management-settings-components-field-category",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategories",
+        "id": "def-public.FieldCategories",
         "type": "Function",
         "tags": [],
         "label": "FieldCategories",
@@ -32,9 +16,9 @@
           "({ categorizedFields, categoryCounts, unsavedChanges, onClearQuery, isSavingEnabled, onFieldChange, }: ",
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.FieldCategoriesProps",
+            "section": "def-public.FieldCategoriesProps",
             "text": "FieldCategoriesProps"
           },
           ") => JSX.Element"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategories.$1",
+            "id": "def-public.FieldCategories.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  categorizedFields,\n  categoryCounts,\n  unsavedChanges = {},\n  onClearQuery,\n  isSavingEnabled,\n  onFieldChange,\n}",
@@ -53,9 +37,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-category",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-                "section": "def-common.FieldCategoriesProps",
+                "section": "def-public.FieldCategoriesProps",
                 "text": "FieldCategoriesProps"
               }
             ],
@@ -70,7 +54,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategory",
+        "id": "def-public.FieldCategory",
         "type": "Function",
         "tags": [],
         "label": "FieldCategory",
@@ -81,9 +65,9 @@
           "(props: ",
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.FieldCategoryProps",
+            "section": "def-public.FieldCategoryProps",
             "text": "FieldCategoryProps"
           },
           ") => JSX.Element"
@@ -94,7 +78,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategory.$1",
+            "id": "def-public.FieldCategory.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -104,9 +88,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-category",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-                "section": "def-common.FieldCategoryProps",
+                "section": "def-public.FieldCategoryProps",
                 "text": "FieldCategoryProps"
               }
             ],
@@ -121,7 +105,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoryKibanaProvider",
+        "id": "def-public.FieldCategoryKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "FieldCategoryKibanaProvider",
@@ -132,9 +116,9 @@
           "React.FunctionComponent<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowKibanaDependencies",
+            "section": "def-public.FieldRowKibanaDependencies",
             "text": "FieldRowKibanaDependencies"
           },
           ">>"
@@ -146,7 +130,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoryKibanaProvider.$1",
+            "id": "def-public.FieldCategoryKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -160,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoryKibanaProvider.$2",
+            "id": "def-public.FieldCategoryKibanaProvider.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -177,7 +161,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoryProvider",
+        "id": "def-public.FieldCategoryProvider",
         "type": "Function",
         "tags": [],
         "label": "FieldCategoryProvider",
@@ -188,9 +172,9 @@
           "({ children, ...services }: ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowProviderProps",
+            "section": "def-public.FieldRowProviderProps",
             "text": "FieldRowProviderProps"
           },
           ") => JSX.Element"
@@ -202,7 +186,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoryProvider.$1",
+            "id": "def-public.FieldCategoryProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "__0",
@@ -210,9 +194,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-                "section": "def-common.FieldRowProviderProps",
+                "section": "def-public.FieldRowProviderProps",
                 "text": "FieldRowProviderProps"
               }
             ],
@@ -227,7 +211,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.ClearQueryLinkProps",
+        "id": "def-public.ClearQueryLinkProps",
         "type": "Interface",
         "tags": [],
         "label": "ClearQueryLinkProps",
@@ -240,7 +224,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.ClearQueryLinkProps.fieldCount",
+            "id": "def-public.ClearQueryLinkProps.fieldCount",
             "type": "number",
             "tags": [],
             "label": "fieldCount",
@@ -253,7 +237,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.ClearQueryLinkProps.displayCount",
+            "id": "def-public.ClearQueryLinkProps.displayCount",
             "type": "number",
             "tags": [],
             "label": "displayCount",
@@ -266,7 +250,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.ClearQueryLinkProps.onClearQuery",
+            "id": "def-public.ClearQueryLinkProps.onClearQuery",
             "type": "Function",
             "tags": [],
             "label": "onClearQuery",
@@ -287,7 +271,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoriesProps",
+        "id": "def-public.FieldCategoriesProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldCategoriesProps",
@@ -297,25 +281,25 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.FieldCategoriesProps",
+            "section": "def-public.FieldCategoriesProps",
             "text": "FieldCategoriesProps"
           },
           " extends Pick<",
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.FieldCategoryProps",
+            "section": "def-public.FieldCategoryProps",
             "text": "FieldCategoryProps"
           },
           ", \"onClearQuery\">,Pick<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowProps",
+            "section": "def-public.FieldRowProps",
             "text": "FieldRowProps"
           },
           ", \"onFieldChange\" | \"isSavingEnabled\">"
@@ -326,7 +310,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoriesProps.categorizedFields",
+            "id": "def-public.FieldCategoriesProps.categorizedFields",
             "type": "Object",
             "tags": [],
             "label": "categorizedFields",
@@ -336,9 +320,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.CategorizedFields",
+                "section": "def-public.CategorizedFields",
                 "text": "CategorizedFields"
               }
             ],
@@ -348,7 +332,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoriesProps.categoryCounts",
+            "id": "def-public.FieldCategoriesProps.categoryCounts",
             "type": "Object",
             "tags": [],
             "label": "categoryCounts",
@@ -356,9 +340,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.CategoryCounts",
+                "section": "def-public.CategoryCounts",
                 "text": "CategoryCounts"
               }
             ],
@@ -368,7 +352,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoriesProps.unsavedChanges",
+            "id": "def-public.FieldCategoriesProps.unsavedChanges",
             "type": "Object",
             "tags": [],
             "label": "unsavedChanges",
@@ -378,9 +362,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsTypesPluginApi",
-                "section": "def-common.UnsavedFieldChanges",
+                "section": "def-public.UnsavedFieldChanges",
                 "text": "UnsavedFieldChanges"
               },
               " | undefined"
@@ -394,7 +378,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoryProps",
+        "id": "def-public.FieldCategoryProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldCategoryProps",
@@ -404,17 +388,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.FieldCategoryProps",
+            "section": "def-public.FieldCategoryProps",
             "text": "FieldCategoryProps"
           },
           " extends Pick<",
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.ClearQueryLinkProps",
+            "section": "def-public.ClearQueryLinkProps",
             "text": "ClearQueryLinkProps"
           },
           ", \"onClearQuery\" | \"fieldCount\">"
@@ -425,7 +409,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoryProps.category",
+            "id": "def-public.FieldCategoryProps.category",
             "type": "string",
             "tags": [],
             "label": "category",
@@ -438,7 +422,7 @@
           },
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoryProps.children",
+            "id": "def-public.FieldCategoryProps.children",
             "type": "CompoundType",
             "tags": [],
             "label": "children",
@@ -449,17 +433,17 @@
               "React.ReactElement<",
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-                "section": "def-common.FieldRowProps",
+                "section": "def-public.FieldRowProps",
                 "text": "FieldRowProps"
               },
               ", \"FieldRow\"> | React.ReactElement<",
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-                "section": "def-common.FieldRowProps",
+                "section": "def-public.FieldRowProps",
                 "text": "FieldRowProps"
               },
               ", \"FieldRow\">[]"
@@ -473,7 +457,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoryProviderProps",
+        "id": "def-public.FieldCategoryProviderProps",
         "type": "Interface",
         "tags": [],
         "label": "FieldCategoryProviderProps",
@@ -483,17 +467,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-category",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
-            "section": "def-common.FieldCategoryProviderProps",
+            "section": "def-public.FieldCategoryProviderProps",
             "text": "FieldCategoryProviderProps"
           },
           " extends ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.FieldRowServices",
+            "section": "def-public.FieldRowServices",
             "text": "FieldRowServices"
           }
         ],
@@ -503,7 +487,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-components-field-category",
-            "id": "def-common.FieldCategoryProviderProps.children",
+            "id": "def-public.FieldCategoryProviderProps.children",
             "type": "CompoundType",
             "tags": [],
             "label": "children",
@@ -523,7 +507,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoryKibanaDependencies",
+        "id": "def-public.FieldCategoryKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "FieldCategoryKibanaDependencies",
@@ -533,17 +517,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.KibanaDependencies",
+            "section": "def-public.KibanaDependencies",
             "text": "KibanaDependencies"
           },
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputKibanaDependencies",
+            "section": "def-public.FieldInputKibanaDependencies",
             "text": "FieldInputKibanaDependencies"
           }
         ],
@@ -554,7 +538,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-components-field-category",
-        "id": "def-common.FieldCategoryServices",
+        "id": "def-public.FieldCategoryServices",
         "type": "Type",
         "tags": [],
         "label": "FieldCategoryServices",
@@ -564,17 +548,17 @@
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputServices",
+            "section": "def-public.FieldInputServices",
             "text": "FieldInputServices"
           },
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.Services",
+            "section": "def-public.Services",
             "text": "Services"
           }
         ],
@@ -584,6 +568,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

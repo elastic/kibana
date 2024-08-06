@@ -1164,21 +1164,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableMultiSignal\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
         "type": "string",
         "tags": [],
@@ -1396,6 +1381,21 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "description": [],
+        "signature": [
+          "\"observability:entityCentricExperience\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
