@@ -120,12 +120,14 @@ Before you upgrade to 8.15.0, review the breaking changes, then mitigate the imp
 
 Alerting::
 * Allow decimals in the threshold filed for the Failed transaction rate threshold rule ({kibana-pull}184647[#184647]).
+
 ////
 !!TODO!! The above PR had a lengthy release note description:
 Now we allow the decimals value in the threshold filed for the Failed transaction rate threshold rule e.g. `30.50`% or `0.1` %
 ////
 Cases::
 * Allow users to create case using templates ({kibana-pull}187138[#187138]).
+* The Cases webhook connector now supports SSL certificate authentication ({kibana-pull}185925[#185925]).
 Dashboard::
 * Redesign the "Add Panel" Experience ({kibana-pull}183764[#183764]).
 Discover::
@@ -169,7 +171,7 @@ SharedUX::
 The new *Connection details* overlay features a cleaner UI for Elasticsearch endpoint URL and Cloud ID token retrieval. As well as the new *"API key"* tab, which is a simplified interface for creating an API key with all the default settings, except the expiration time is set to 90 days. If user wants a more granular API keys, there is a link which navigates to the right section in Stack Management.
 ////
 Other::
-* The Cases webhook connector now supports SSL certificate authentication ({kibana-pull}185925[#185925]).
+
 * Update links for integration buttons in observability solutions ({kibana-pull}184477[#184477]).
 * Adds SLO status, SLI value, error budget remaining and consumed in burn rate alert context ({kibana-pull}184471[#184471]).
 * Feat(slo): prevent initial backfill ({kibana-pull}184312[#184312]).
@@ -192,6 +194,8 @@ For detailed information about the 8.15.0 release, review the enhancements and b
 === Enhancements
 Alerting::
 * Allow decimals in the threshold filed for the Failed transaction rate threshold rule ({kibana-pull}184647[#184647]).
+* Adds support of additional fields for ServiceNow ITSM and SecOps ({kibana-pull}184023[#184023]).
+* Added support for the additional info field in the ServiceNow ITOM connector ({kibana-pull}183380[#183380]).
 ////
 !!TODO!! The above PR had a lengthy release note description:
 Now we allow the decimals value in the threshold filed for the Failed transaction rate threshold rule e.g. `30.50`% or `0.1` %
@@ -199,6 +203,7 @@ Now we allow the decimals value in the threshold filed for the Failed transactio
 Cases::
 * Cases custom fields and the cases webhook are now GA ({kibana-pull}187880[#187880]).
 * Allow users to create case using templates ({kibana-pull}187138[#187138]).
+* The Cases webhook connector now supports SSL certificate authentication ({kibana-pull}185925[#185925]).
 Dashboard::
 * Scroll to panel on minimize ({kibana-pull}184696[#184696]).
 * Redesign the "Add Panel" Experience ({kibana-pull}183764[#183764]).
@@ -318,14 +323,11 @@ Reporting internal storage has been changed from using regular indices to a data
 Other::
 * Improve metadata autocomplete suggestions with comma and pipe ({kibana-pull}188338[#188338]).
 * Automatically encapsulate index names with special chars with quotes ({kibana-pull}187899[#187899]).
-* Adds a preview button to alerts inside the risk contribution panel ({kibana-pull}187148[#187148]).
 * Capitalize things ({kibana-pull}186340[#186340]).
 * Enable links to Dataset Quality from Management and Logs Explorer ({kibana-pull}186143[#186143]).
-* The Cases webhook connector now supports SSL certificate authentication ({kibana-pull}185925[#185925]).
 * Update question contents to match new designs ({kibana-pull}184866[#184866]).
 * Gemini Connector Assistant Integration ({kibana-pull}184741[#184741]).
 * Editor supports integrations ({kibana-pull}184716[#184716]).
-* AI settings ({kibana-pull}184678[#184678]).
 * Allows to comment out the current line with the keyboard ({kibana-pull}184637[#184637]).
 * Telemetry collection support for Logstash agent driven monitoring ({kibana-pull}184480[#184480]).
 * Update links for integration buttons in observability solutions ({kibana-pull}184477[#184477]).
@@ -337,7 +339,6 @@ Other::
 * Render a Discover-like table in the assistant instead of a Lens chart ({kibana-pull}184106[#184106]).
 * Adds UI controls to mark KB entries as public ({kibana-pull}184094[#184094]).
 * Change navigation behavior for the o11y guide cards to pre-select the correct solution ({kibana-pull}184065[#184065]).
-* Adds support of additional fields for ServiceNow ITSM and SecOps ({kibana-pull}184023[#184023]).
 ////
 !!TODO!! The above PR had a lengthy release note description:
 Pass any field to ServiceNow using the ServiceNow ITSM and SecOps connectors with a JSON field called "additional fields".
@@ -346,7 +347,6 @@ Pass any field to ServiceNow using the ServiceNow ITSM and SecOps connectors wit
 * Adds `spaceId` to entities ({kibana-pull}183943[#183943]).
 * Query all search connectors by default but allow user to override ({kibana-pull}183712[#183712]).
 * Gemini connector integration ({kibana-pull}183668[#183668]).
-* Added support for the additional info field in the ServiceNow ITOM connector ({kibana-pull}183380[#183380]).
 * Adds downstream dependency service name to logs and errors to improve alert insights ({kibana-pull}183215[#183215]).
 * The POC for creating entity-centric indices using entity definitions ({kibana-pull}183205[#183205]).
 * Config: add support for `${VAR:default}` syntax ({kibana-pull}182139[#182139]).
@@ -474,7 +474,6 @@ Fixes a bug where retest on failure was not able to be turned off when creating 
 * Allow users to save mappings with errors ({kibana-pull}188326[#188326]).
 * Fixes AI Assistant Settings when plugin disabled ({kibana-pull}188160[#188160]).
 * Hide ai assistant menu item when in a disabled space ({kibana-pull}188017[#188017]).
-* Remove links to legacy risk scoring docs ({kibana-pull}187585[#187585]).
 * Fixes x-axis timezone on alertSummaryWidget full size ({kibana-pull}187468[#187468]).
 * Fixes synthetics/uptime fields alerts autocomplete for query bar ({kibana-pull}186588[#186588]).
 * Fixes TLS cert view for > 3 monitors per cert ({kibana-pull}186204[#186204]).
