@@ -82,7 +82,7 @@ export async function installEntityDefinition({
       );
     }
 
-    return install({ esClient, soClient, definition, logger });
+    return await install({ esClient, soClient, definition, logger });
   } catch (e) {
     logger.error(`Failed to install entity definition ${definition.id}: ${e}`);
 
@@ -290,12 +290,6 @@ const shouldReinstall = (
   latestDefinition: EntityDefinition
 ) => {
   const { installStatus, installStartedAt } = definition;
-  if (installStatus === 'installing') {
-    if (Date.now() - Date.parse(installStartedAt!) < INSTALLATION_TIMEOUT) {
-      // ongoing installation
-      return false;
-    }
-  }
 
   const isStale =
     installStatus === 'installing' &&
@@ -304,5 +298,6 @@ const shouldReinstall = (
     installStatus === 'installed' && semver.neq(definition.version, latestDefinition.version);
   const isFailed = installStatus === 'failed';
   const isPartial = installStatus === 'installed' && !definition.state.installed;
+
   return isStale || isOutdated || isFailed || isPartial;
 };

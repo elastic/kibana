@@ -68,15 +68,11 @@ interface DeleteTemplateOptions {
 export async function upsertTemplate({ esClient, template, logger }: TemplateManagementOptions) {
   try {
     await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(template), { logger });
+    logger.debug(() => `Installed entity manager index template: ${JSON.stringify(template)}`);
   } catch (error: any) {
     logger.error(`Error updating entity manager index template: ${error.message}`);
     throw error;
   }
-
-  logger.info(
-    `Entity manager index template is up to date (use debug logging to see what was installed)`
-  );
-  logger.debug(() => `Entity manager index template: ${JSON.stringify(template)}`);
 }
 
 export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {
@@ -96,13 +92,9 @@ export async function upsertComponent({ esClient, component, logger }: Component
     await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(component), {
       logger,
     });
+    logger.debug(() => `Installed entity manager component template: ${JSON.stringify(component)}`);
   } catch (error: any) {
     logger.error(`Error updating entity manager component template: ${error.message}`);
     throw error;
   }
-
-  logger.info(
-    `Entity manager component template is up to date (use debug logging to see what was installed)`
-  );
-  logger.debug(() => `Entity manager component template: ${JSON.stringify(component)}`);
 }

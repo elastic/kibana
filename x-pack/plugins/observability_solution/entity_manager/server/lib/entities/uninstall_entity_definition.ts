@@ -51,14 +51,14 @@ export async function uninstallEntityDefinition({
     deleteLatestIngestPipeline(esClient, definition, logger),
   ]);
 
+  if (deleteData) {
+    await deleteIndices(esClient, definition, logger);
+  }
+
   await Promise.all([
     deleteTemplate({ esClient, logger, name: getEntityHistoryIndexTemplateV1(definition.id) }),
     deleteTemplate({ esClient, logger, name: getEntityLatestIndexTemplateV1(definition.id) }),
   ]);
-
-  if (deleteData) {
-    await deleteIndices(esClient, definition, logger);
-  }
 
   await deleteEntityDefinition(soClient, definition);
 }

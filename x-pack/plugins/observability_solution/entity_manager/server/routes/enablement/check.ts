@@ -66,7 +66,8 @@ export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext
                 running: Boolean(state.running && installedDefinition?.state.running),
                 outdated:
                   state.outdated ||
-                  semver.neq(installedDefinition?.version, builtInDefinition.version),
+                  (installedDefinition &&
+                    semver.neq(installedDefinition.version, builtInDefinition.version)),
               };
             },
             { installed: true, running: true, outdated: false }
