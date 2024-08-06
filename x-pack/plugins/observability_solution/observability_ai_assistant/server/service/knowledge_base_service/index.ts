@@ -29,7 +29,7 @@ interface Dependencies {
   };
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
-  getModelId: () => Promise<string>;
+  getSearchConnectorModelId: () => Promise<string>;
 }
 
 export interface RecalledEntry {
@@ -40,7 +40,7 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isNotFoundError(error: Error) {
+function isModelMissingOrUnavailableError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
     (error.body.error.type === 'resource_not_found_exception' ||
@@ -124,7 +124,7 @@ export class KnowledgeBaseService {
         ...endpoint,
       };
     } catch (error) {
-      if (isNotFoundError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         return {
           ready: false,
         };
@@ -257,7 +257,7 @@ export class KnowledgeBaseService {
     this.dependencies.logger.debug(
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
-    const modelId = await this.dependencies.getModelId();
+    const modelId = await this.dependencies.getSearchConnectorModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
@@ -266,7 +266,7 @@ export class KnowledgeBaseService {
         categories,
         namespace,
       }).catch((error) => {
-        if (isNotFoundError(error)) {
+        if (isModelMissingOrUnavailableError(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -407,7 +407,7 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isNotFoundError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -474,7 +474,7 @@ export class KnowledgeBaseService {
 
       return Promise.resolve();
     } catch (error) {
-      if (isNotFoundError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;

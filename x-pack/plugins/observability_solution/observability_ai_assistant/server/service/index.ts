@@ -66,7 +66,7 @@ type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> }
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private readonly getModelId: () => Promise<string>;
+  private readonly getSearchConnectorModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
 
   private readonly registrations: RegistrationCallback[] = [];
@@ -75,16 +75,16 @@ export class ObservabilityAIAssistantService {
     logger,
     core,
     taskManager,
-    getModelId,
+    getSearchConnectorModelId,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
     taskManager: TaskManagerSetupContract;
-    getModelId: () => Promise<string>;
+    getSearchConnectorModelId: () => Promise<string>;
   }) {
     this.core = core;
     this.logger = logger;
-    this.getModelId = getModelId;
+    this.getSearchConnectorModelId = getSearchConnectorModelId;
 
     this.registerInit();
 
@@ -127,7 +127,7 @@ export class ObservabilityAIAssistantService {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
       // TODO: unused, remove
-      // const elserModelId = await this.getModelId();
+      // const elserModelId = await this.getSearchConnectorModelId();
 
       const esClient = {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,
@@ -209,7 +209,7 @@ export class ObservabilityAIAssistantService {
         logger: this.logger.get('kb'),
         esClient,
         taskManagerStart: pluginsStart.taskManager,
-        getModelId: this.getModelId,
+        getSearchConnectorModelId: this.getSearchConnectorModelId,
       });
 
       this.logger.info('Successfully set up index assets');
