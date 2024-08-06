@@ -18,7 +18,7 @@ import {
  * Differences from this and the createRulesSchema are
  *   - rule_id is required
  *   - id is optional (but ignored in the import code - rule_id is exclusively used for imports)
- *   - immutable is optional but if it is any value other than false it will be rejected
+ *   - immutable is optional (but ignored in the import code)
  *   - created_at is optional (but ignored in the import code)
  *   - updated_at is optional (but ignored in the import code)
  *   - created_by is optional (but ignored in the import code)
@@ -29,7 +29,7 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    immutable: z.literal(false).default(false),
+    immutable: z.boolean().optional(),
     /*
       Overriding `required_fields` from ResponseFields because 
       in ResponseFields `required_fields` has the output type, 

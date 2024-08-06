@@ -1515,7 +1515,29 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('supporting prebuilt rule customization', () => {
-      it('allows rules with "immutable: true"', async () => {});
+      it('allows rules with "immutable: true"', async () => {
+        const rule = getCustomQueryRuleParams({
+          rule_id: 'rule-immutable',
+          // TODO: should we allow "create" types to specify immutable, or do we now need a distinct "import" type to use here?
+          // @ts-expect-error
+          immutable: true,
+        });
+        const ndjson = combineToNdJson(rule);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).toEqual(
+          expect.objectContaining({
+            success: true,
+          })
+        );
+      });
+
       it('rejects rules without a rule_id', async () => {});
 
       describe('calculation of the rule_source fields', () => {
