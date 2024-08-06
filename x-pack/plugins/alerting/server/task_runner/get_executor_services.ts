@@ -18,18 +18,15 @@ import {
   createWrappedScopedClusterClientFactory,
   WrappedScopedClusterClient,
 } from '../lib/wrap_scoped_cluster_client';
+import {
+  WrappedSearchSourceClient,
+  wrapSearchSourceClient,
+} from '../lib/wrap_search_source_client';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { PublicRuleMonitoringService, PublicRuleResultService } from '../types';
 import { withAlertingSpan } from './lib';
 import { TaskRunnerContext } from './types';
-
-interface RuleData {
-  name: string;
-  alertTypeId: string;
-  id: string;
-  spaceId: string;
-}
 
 interface GetExecutorServicesOpts {
   context: TaskRunnerContext;
@@ -38,15 +35,13 @@ interface GetExecutorServicesOpts {
   logger: Logger;
   ruleMonitoringService: RuleMonitoringService;
   ruleResultService: RuleResultService;
-  ruleData: RuleData;
+  ruleData: {
+    name: string;
+    alertTypeId: string;
+    id: string;
+    spaceId: string;
+  };
   ruleTaskTimeout?: string;
-}
-
-interface WrappedClientOptions {
-  rule: RuleData;
-  logger: Logger;
-  abortController: AbortController;
-  requestTimeout?: number;
 }
 
 export interface ExecutorServices {
@@ -56,10 +51,7 @@ export interface ExecutorServices {
   uiSettingsClient: IUiSettingsClient;
   wrappedScopedClusterClient: WrappedScopedClusterClient;
   getDataViews: () => Promise<DataViewsContract>;
-  getWrappedClientOptions: () => {
-    fakeRequest: KibanaRequest;
-    wrappedClientOptions: WrappedClientOptions;
-  };
+  getWrappedSearchSourceClient: () => Promise<WrappedSearchSourceClient>;
 }
 
 export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
@@ -100,6 +92,14 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts) => {
       );
       return dataViews;
     },
-    getWrappedClientOptions: () => ({ wrappedClientOptions, fakeRequest }),
+    getWrappedSearchSourceClient: async () => {
+      const searchSourceClient = await withAlertingSpan('alerting:get-search-source-client', () =>
+        context.data.search.searchSource.asScoped(fakeRequest)
+      );
+      return wrapSearchSourceClient({
+        ...wrappedClientOptions,
+        searchSourceClient,
+      });
+    },
   };
 };

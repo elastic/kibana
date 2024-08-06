@@ -31,10 +31,7 @@ import { ExecutorServices } from './get_executor_services';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
 import { withAlertingSpan } from './lib';
-import {
-  WrappedSearchSourceClient,
-  wrapSearchSourceClient,
-} from '../lib/wrap_search_source_client';
+import { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -233,19 +230,12 @@ export class RuleTypeRunner<
                   shouldWriteAlerts: () =>
                     this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                   uiSettingsClient: executorServices.uiSettingsClient,
-                  getDataViews: async () => executorServices.getDataViews(),
+                  getDataViews: executorServices.getDataViews,
                   getSearchSourceClient: async () => {
-                    const { fakeRequest, wrappedClientOptions } =
-                      executorServices.getWrappedClientOptions();
-
-                    const searchSourceClient = await withAlertingSpan(
-                      'alerting:get-search-source-client',
-                      () => this.options.context.data.search.searchSource.asScoped(fakeRequest)
-                    );
-                    wrappedSearchSourceClient = wrapSearchSourceClient({
-                      ...wrappedClientOptions,
-                      searchSourceClient,
-                    });
+                    if (!wrappedSearchSourceClient) {
+                      wrappedSearchSourceClient =
+                        await executorServices.getWrappedSearchSourceClient();
+                    }
                     return wrappedSearchSourceClient.searchSourceClient;
                   },
                 },
