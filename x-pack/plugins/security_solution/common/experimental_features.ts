@@ -43,16 +43,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the automated response actions in rule + alerts
-   */
-  responseActionsEnabled: true,
-
-  /**
-   * Enables the automated endpoint response action in rule + alerts
-   */
-  endpointResponseActionsEnabled: true,
-
-  /**
    * Enables the `upload` endpoint response action (v8.9)
    */
   responseActionUploadEnabled: true,
