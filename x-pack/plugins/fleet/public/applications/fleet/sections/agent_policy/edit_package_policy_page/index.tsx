@@ -63,11 +63,12 @@ import { RootPrivilegesCallout } from '../create_package_policy_page/single_page
 
 import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
 
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
-import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
