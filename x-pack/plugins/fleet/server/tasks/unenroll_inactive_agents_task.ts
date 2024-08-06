@@ -117,6 +117,7 @@ export class UnenrollInactiveAgentsTask {
     const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
     let hasMore = true;
     let page = 1;
+    let agentCounter = 0;
     while (hasMore) {
       const agentPolicies = await agentPolicyService.list(soClient, {
         perPage: POLICIES_BATCHSIZE,
@@ -147,6 +148,11 @@ export class UnenrollInactiveAgentsTask {
         this.endRun('No inactive agents to unenroll');
         return;
       }
+      agentCounter += res.agents.length;
+      if (agentCounter >= UNENROLLMENT_BATCHSIZE) {
+        this.endRun('Reached the maximum amount of agents to unenroll, exiting.');
+        return;
+      }
       this.logger.debug(
         `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll. Attempting unenrollment`
       );
@@ -155,10 +161,10 @@ export class UnenrollInactiveAgentsTask {
         force: true,
       });
       auditLoggingService.writeCustomAuditLog({
-        message: `Recurrent unenrollment of inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${unenrolledBatch.actionId}]`,
+        message: `Recurrent unenrollment of ${agentCounter} inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${unenrolledBatch.actionId}]`,
       });
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Executed unenrollment of inactive agents with actionId: ${unenrolledBatch.actionId}`
+        `[UnenrollInactiveAgentsTask] Executed unenrollment of ${agentCounter} inactive agents with actionId: ${unenrolledBatch.actionId}`
       );
     }
   }
