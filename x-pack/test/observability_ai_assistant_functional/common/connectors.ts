@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { LlmProxy } from '../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-export async function createConnector(proxy: LlmProxy, supertest: SuperTest.Agent) {
+export async function createConnector(proxy: LlmProxy, supertest: SuperTestAgent) {
   await supertest
     .post('/api/actions/connector')
     .set('kbn-xsrf', 'foo')
@@ -24,7 +24,7 @@ export async function createConnector(proxy: LlmProxy, supertest: SuperTest.Agen
     .expect(200);
 }
 
-export async function deleteConnectors(supertest: SuperTest.Agent) {
+export async function deleteConnectors(supertest: SuperTestAgent) {
   const connectors = await supertest.get('/api/actions/connectors').expect(200);
   const promises = connectors.body.map((connector: { id: string }) => {
     return supertest
