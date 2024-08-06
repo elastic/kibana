@@ -52,7 +52,6 @@ function getWidgetFromSuggestion({
     },
     columns: makeItWide ? InvestigateWidgetColumnSpan.Four : InvestigateWidgetColumnSpan.One,
     rows,
-    locked: false,
   });
 }
 
