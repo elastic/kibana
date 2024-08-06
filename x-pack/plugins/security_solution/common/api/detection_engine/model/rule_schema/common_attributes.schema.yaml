@@ -43,7 +43,12 @@ components:
     IsRuleImmutable:
       type: boolean
       deprecated: true
-      description: This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
+      description: '[DEPRECATION WARNING TODO] - This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.'
+
+    ExternalSourceUpdatedAt:
+      type: string
+      format: date-time
+      description: The date and time that the external/prebuilt rule was last updated in its source repository.
 
     IsExternalRuleCustomized:
       type: boolean
@@ -70,6 +75,8 @@ components:
             - external
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
+        source_updated_at:
+          $ref: '#/components/schemas/ExternalSourceUpdatedAt'
       required:
         - type
         - is_customized
