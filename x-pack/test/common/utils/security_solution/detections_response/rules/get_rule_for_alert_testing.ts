@@ -32,12 +32,14 @@ export const getRuleForAlertTesting = (
 });
 
 export const getLuceneRuleForTesting = (): QueryRuleCreateProps => ({
+  rule_id: 'lucene-rule-1',
+  enabled: true,
   name: 'Incident 496 test rule',
   description: 'Ensures lucene rules generate alerts',
   risk_score: 1,
   severity: 'high',
   type: 'query',
-  index: ['auditbeat*'],
+  index: ['auditbeat-*'],
   query:
     '((event.category: (network OR network_traffic) AND type: (tls OR http)) OR event.dataset: (network_traffic.tls OR network_traffic.http)) AND destination.domain:/[a-z]{3}.stage.[0-9]{8}..*/',
   language: 'lucene',
