@@ -52,7 +52,7 @@ describe('DataTelemetryService', () => {
   let mockTelemetryStart: jest.Mocked<TelemetryPluginStart>;
   let mockLogger: jest.Mocked<Logger>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockEsClient = {
       indices: {
         stats: jest.fn().mockImplementation((params) => {
@@ -92,7 +92,7 @@ describe('DataTelemetryService', () => {
 
     service = new DataTelemetryService(mockLogger);
     service.setup(mockAnalyticsSetup);
-    service.start(mockTelemetryStart, {
+    await service.start(mockTelemetryStart, {
       elasticsearch: { client: { asInternalUser: mockEsClient } },
     } as any);
 
