@@ -281,8 +281,9 @@ paths:
                     type: object
                     properties:
                       getOneTimeline:
-                        $ref: '#/components/schemas/TimelineResponse'
-                        nullable: true
+                        oneOf:
+                          - $ref: '#/components/schemas/TimelineResponse'
+                          - type: object
                     required:
                       - getOneTimeline
                 required:
