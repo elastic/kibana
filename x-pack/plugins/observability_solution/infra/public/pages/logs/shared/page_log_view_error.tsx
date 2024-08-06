@@ -21,7 +21,7 @@ import { LogsPageTemplate } from './page_template';
 
 export const LogViewErrorPage: React.FC<{
   errors: Error[];
-  onRetry: () => void;
+  onRetry?: () => void;
 }> = ({ errors, onRetry }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
@@ -54,29 +54,33 @@ export const LogViewErrorPage: React.FC<{
             ))}
           </>
         }
-        actions={[
-          <EuiButton
-            data-test-subj="infraLogViewErrorPageTryAgainButton"
-            onClick={onRetry}
-            iconType="refresh"
-            fill
-          >
-            <FormattedMessage
-              id="xpack.infra.logSourceErrorPage.tryAgainButtonLabel"
-              defaultMessage="Try again"
-            />
-          </EuiButton>,
-          <EuiButtonEmpty
-            data-test-subj="infraLogViewErrorPageChangeConfigurationButton"
-            iconType="gear"
-            {...settingsLinkProps}
-          >
-            <FormattedMessage
-              id="xpack.infra.logSourceErrorPage.navigateToSettingsButtonLabel"
-              defaultMessage="Change configuration"
-            />
-          </EuiButtonEmpty>,
-        ]}
+        actions={
+          onRetry
+            ? [
+                <EuiButton
+                  data-test-subj="infraLogViewErrorPageTryAgainButton"
+                  onClick={onRetry}
+                  iconType="refresh"
+                  fill
+                >
+                  <FormattedMessage
+                    id="xpack.infra.logSourceErrorPage.tryAgainButtonLabel"
+                    defaultMessage="Try again"
+                  />
+                </EuiButton>,
+                <EuiButtonEmpty
+                  data-test-subj="infraLogViewErrorPageChangeConfigurationButton"
+                  iconType="gear"
+                  {...settingsLinkProps}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.logSourceErrorPage.navigateToSettingsButtonLabel"
+                    defaultMessage="Change configuration"
+                  />
+                </EuiButtonEmpty>,
+              ]
+            : undefined
+        }
       />
     </LogsPageTemplate>
   );
