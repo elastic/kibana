@@ -160,5 +160,64 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
     });
+    describe('ai assistant no privileges', () => {
+      before(async () => {
+        await security.role.create('ai_assistant_role', {
+          kibana: [
+            {
+              feature: {
+                // need some obs app or obs menu wont show where we can click on AI Assistant
+                infrastructure: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('ai_assistant_user', {
+          password: 'ai_assistant_user-password',
+          roles: ['ai_assistant_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.forceLogout();
+
+        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
+          expectSpaceSelector: false,
+        });
+      });
+      it('shows no AI Assistant link in solution nav', async () => {
+        // navigate to an observability app so the left side o11y menu shows up
+        await PageObjects.common.navigateToUrl('infraOps', '', {
+          ensureCurrentUrl: true,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.missingOrFail(ui.pages.links.solutionMenuLink);
+      });
+      it('shows no AI Assistant buttin in global nav', async () => {
+        await testSubjects.missingOrFail(ui.pages.links.globalHeaderButton);
+      });
+      it('shows no AI Assistant conversations link in global search', async () => {
+        await PageObjects.navigationalSearch.searchFor('observability ai assistant');
+        const results = await PageObjects.navigationalSearch.getDisplayedResults();
+        expect(results.length).to.eql(0);
+      });
+      it('cannot navigate to AI Assistant page', async () => {
+        await PageObjects.common.navigateToUrl('obsAIAssistant', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
+        });
+        await testSubjects.missingOrFail(ui.pages.conversations.conversationsPage);
+      });
+      after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+        await PageObjects.security.forceLogout();
+        await Promise.all([
+          security.role.delete('ai_assistant_role'),
+          security.user.delete('ai_assistant_user'),
+        ]);
+      });
+    });
   });
 }

@@ -34,6 +34,7 @@ const pages = {
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
     connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
+    conversationsPage: 'observabilityAiAssistantConversationsPage',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
