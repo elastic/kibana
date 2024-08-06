@@ -6,19 +6,15 @@
  */
 
 import React from 'react';
-
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom/extend-expect';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditFilterList } from './edit_filter_list';
 
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
-}));
-
-// Define the required mocks used for loading, saving and validating the filter list.
-jest.mock('./utils', () => ({
-  isValidFilterListId: () => true,
-  saveFilterList: jest.fn(),
 }));
 
 // Mock the call for loading the list of filters.
@@ -33,26 +29,15 @@ const mockTestFilter = {
     jobs: ['dns_exfiltration'],
   },
 };
+const mockFilters = jest.fn().mockImplementation(() => Promise.resolve(mockTestFilter));
 const mockKibanaContext = {
   services: {
-    data: {
-      query: {
-        timefilter: {
-          timefilter: {
-            disableTimeRangeSelector: jest.fn(),
-            disableAutoRefreshSelector: jest.fn(),
-          },
-        },
-      },
-    },
-    docLinks: { links: { ml: { anomalyDetectionJobTips: 'https://anomalyDetectionJobTips' } } },
+    docLinks: { links: { ml: { customRules: 'test' } } },
     notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
     mlServices: {
       mlApiServices: {
         filters: {
-          filters: () => {
-            return Promise.resolve(mockTestFilter);
-          },
+          filters: mockFilters,
         },
       },
     },
@@ -77,69 +62,122 @@ const props = {
   canDeleteFilter: true,
 };
 
-function prepareEditTest() {
-  const wrapper = mountWithIntl(<EditFilterList {...props} />);
+async function prepareEditTest() {
+  const component = render(
+    <IntlProvider locale="en">
+      <EditFilterList {...props} />
+    </IntlProvider>
+  );
 
-  // Cannot find a way to generate the snapshot after the Promise in the mock ml.filters
-  // has resolved.
-  // So set the loaded filter state directly to ensure the snapshot is generated against
-  // the test filter and not the default empty state.
-  const instance = wrapper.instance();
-  instance.setLoadedFilterState(mockTestFilter);
-  wrapper.update();
-
-  return wrapper;
+  return component;
 }
 
 describe('EditFilterList', () => {
-  test('renders the edit page for a new filter list and updates ID', () => {
-    const wrapper = mountWithIntl(<EditFilterList {...props} />);
-    expect(wrapper).toMatchSnapshot();
+  test('renders the edit page for a new filter list and updates ID', async () => {
+    const { getByTestId, getByText } = render(
+      <IntlProvider locale="en">
+        <EditFilterList {...props} />
+      </IntlProvider>
+    );
 
-    const instance = wrapper.instance();
-    instance.updateNewFilterId('new_filter_list');
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    // The filter list should be empty.
+    expect(getByText('No items have been added')).toBeInTheDocument();
+
+    const mlNewFilterListIdInput = getByTestId('mlNewFilterListIdInput');
+    expect(mlNewFilterListIdInput).toBeInTheDocument();
+
+    await userEvent.type(mlNewFilterListIdInput, 'new_filter_list');
+
+    await waitFor(() => {
+      expect(mlNewFilterListIdInput).toHaveValue('new_filter_list');
+    });
+
+    // After entering a valid ID, the save button should be enabled.
+    expect(getByTestId('mlFilterListSaveButton')).toBeEnabled();
+
+    await userEvent.clear(mlNewFilterListIdInput);
+
+    // Emptied again, the save button should be disabled.
+    await waitFor(() => {
+      expect(getByTestId('mlFilterListSaveButton')).toBeDisabled();
+    });
+
+    await userEvent.type(mlNewFilterListIdInput, '#invalid#$%^', { delay: 1 });
+
+    await waitFor(() => {
+      expect(mlNewFilterListIdInput).toHaveValue('#invalid#$%^');
+    });
+
+    // After entering an invalid ID, the save button should still be disabled.
+    await waitFor(() => {
+      expect(getByTestId('mlFilterListSaveButton')).toBeDisabled();
+    });
+
+    expect(mockFilters).toHaveBeenCalledTimes(0);
   });
 
-  test('renders the edit page for an existing filter list and updates description', () => {
-    const wrapper = prepareEditTest();
-    expect(wrapper).toMatchSnapshot();
+  test('renders the edit page for an existing filter list and updates description', async () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <EditFilterList {...props} filterId="safe_domains" />
+      </IntlProvider>
+    );
 
-    const instance = wrapper.instance();
-    instance.updateDescription('Known safe web domains');
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
+
+    waitFor(() => {
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue(
+        'List of known safe domains'
+      );
+    });
+
+    const mlFilterListEditDescriptionButton = getByTestId('mlFilterListEditDescriptionButton');
+
+    expect(mlFilterListEditDescriptionButton).toBeInTheDocument();
+
+    // Workaround with `pointerEventsCheck` so we don't get "Error: unable to click element as it has or inherits pointer-events set to "none"."
+    await userEvent.click(mlFilterListEditDescriptionButton, { pointerEventsCheck: 0 });
+
+    const mlFilterListDescriptionInput = getByTestId('mlFilterListDescriptionInput');
+
+    waitFor(() => {
+      expect(mlFilterListDescriptionInput).toBeInTheDocument();
+      expect(mlFilterListDescriptionInput).toHaveValue('List of known safe domains');
+    });
+
+    await userEvent.clear(mlFilterListDescriptionInput);
+    await userEvent.type(mlFilterListDescriptionInput, 'Known safe web domains');
+    await userEvent.click(mlFilterListEditDescriptionButton);
+
+    waitFor(() => {
+      expect(getByTestId('mlNewFilterListDescriptionText')).toHaveValue('Known safe web domains');
+    });
   });
 
-  test('updates the items per page', () => {
-    const wrapper = prepareEditTest();
-    const instance = wrapper.instance();
+  test('updates the items per page', async () => {
+    const component = await prepareEditTest();
+    const instance = component.container.firstChild;
 
     instance.setItemsPerPage(500);
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    expect(component.asFragment()).toMatchSnapshot();
   });
 
-  test('renders after selecting an item and deleting it', () => {
-    const wrapper = prepareEditTest();
-    const instance = wrapper.instance();
+  test('renders after selecting an item and deleting it', async () => {
+    const component = await prepareEditTest();
+    const instance = component.container.firstChild;
 
     instance.setItemSelected(mockTestFilter.items[1], true);
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    expect(component.asFragment()).toMatchSnapshot();
 
     instance.deleteSelectedItems();
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    expect(component.asFragment()).toMatchSnapshot();
   });
 
-  test('adds new items to filter list', () => {
-    const wrapper = prepareEditTest();
-    const instance = wrapper.instance();
+  test('adds new items to filter list', async () => {
+    const component = await prepareEditTest();
+    const instance = component.container.firstChild;
 
     instance.addItems(['amazon.com', 'spotify.com']);
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+    expect(component.asFragment()).toMatchSnapshot();
   });
 });
