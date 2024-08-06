@@ -92,6 +92,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { ControlGroupApi } from '@kbn/controls-example-plugin/public';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -148,6 +149,7 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
+  public controlGroupApi?: ControlGroupApi;
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -312,6 +314,10 @@ export class DashboardContainer
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
     this.executionContext = initialInput.executionContext;
+  }
+
+  public setControlGroupApi(controlGroupApi: ControlGroupApi) {
+    this.controlGroupApi = controlGroupApi;
   }
 
   public getAppContext() {
