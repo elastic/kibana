@@ -9,8 +9,6 @@ paths:
       operationId: UpdateExceptionList
       x-codegen-enabled: true
       summary: Updates an exception list
-      tags:
-        - Exceptions API
       requestBody:
         description: Exception list's properties
         required: true

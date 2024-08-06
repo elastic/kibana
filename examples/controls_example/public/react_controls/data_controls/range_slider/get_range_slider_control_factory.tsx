@@ -67,13 +67,12 @@ export const getRangesliderControlFactory = (
         value$.next(nextValue);
       }
 
-      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
+      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
         {
           step: step$,
-          value: value$,
         },
         controlGroupApi,
         services
@@ -101,7 +100,11 @@ export const getRangesliderControlFactory = (
         },
         {
           ...dataControl.comparators,
-          step: [step$, (nextStep: number | undefined) => step$.next(nextStep)],
+          step: [
+            step$,
+            (nextStep: number | undefined) => step$.next(nextStep),
+            (a, b) => (a ?? 1) === (b ?? 1),
+          ],
           value: [value$, setValue],
         }
       );
@@ -238,7 +241,7 @@ export const getRangesliderControlFactory = (
               max={max}
               min={min}
               onChange={setValue}
-              step={step}
+              step={step ?? 1}
               value={value}
               uuid={uuid}
             />

@@ -20,7 +20,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe.skip(
+describe(
   'Response console',
   {
     env: {
@@ -56,8 +56,8 @@ describe.skip(
             policy = indexedPolicy.integrationPolicies[0];
 
             return enableAllPolicyProtections(policy.id).then(() => {
-              // Create and enroll a new Endpoint host
-              return createEndpointHost(policy.policy_ids[0]).then((host) => {
+              // At this point 8.14.2 is GA and this functionality is not available until 8.15.0
+              return createEndpointHost(policy.policy_ids[0], '8.15.0').then((host) => {
                 createdHost = host as CreateAndEnrollEndpointHostResponse;
               });
             });

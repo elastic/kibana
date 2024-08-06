@@ -74,9 +74,9 @@ paths:
           description: Internal server error response
       summary: Deletes a list
       tags:
-        - List API
+        - Security Solution Lists API
     get:
-      operationId: GetList
+      operationId: ReadList
       parameters:
         - description: List's `id` value
           in: query
@@ -125,7 +125,7 @@ paths:
           description: Internal server error response
       summary: Retrieves a list using its id field
       tags:
-        - List API
+        - Security Solution Lists API
     patch:
       operationId: PatchList
       requestBody:
@@ -192,7 +192,7 @@ paths:
           description: Internal server error response
       summary: Patches a list
       tags:
-        - List API
+        - Security Solution Lists API
     post:
       operationId: CreateList
       requestBody:
@@ -266,7 +266,7 @@ paths:
           description: Internal server error response
       summary: Creates a list
       tags:
-        - List API
+        - Security Solution Lists API
     put:
       operationId: UpdateList
       requestBody:
@@ -335,7 +335,7 @@ paths:
           description: Internal server error response
       summary: Updates a list
       tags:
-        - List API
+        - Security Solution Lists API
   /api/lists/_find:
     get:
       operationId: FindLists
@@ -448,7 +448,7 @@ paths:
           description: Internal server error response
       summary: Finds lists
       tags:
-        - List API
+        - Security Solution Lists API
   /api/lists/index:
     delete:
       operationId: DeleteListIndex
@@ -498,9 +498,9 @@ paths:
           description: Internal server error response
       summary: Deletes list data streams
       tags:
-        - List API
+        - Security Solution Lists API
     get:
-      operationId: GetListIndex
+      operationId: ReadListIndex
       responses:
         '200':
           content:
@@ -550,7 +550,7 @@ paths:
           description: Internal server error response
       summary: Get list data stream existence status
       tags:
-        - List API
+        - Security Solution Lists API
     post:
       operationId: CreateListIndex
       responses:
@@ -599,7 +599,7 @@ paths:
           description: Internal server error response
       summary: Creates necessary list data streams
       tags:
-        - List API
+        - Security Solution Lists API
   /api/lists/items:
     delete:
       operationId: DeleteListItem
@@ -680,9 +680,9 @@ paths:
           description: Internal server error response
       summary: Deletes a list item
       tags:
-        - List item API
+        - Security Solution Lists API
     get:
-      operationId: GetListItem
+      operationId: ReadListItem
       parameters:
         - description: Required if `list_id` and `value` are not specified
           in: query
@@ -747,7 +747,7 @@ paths:
           description: Internal server error response
       summary: Gets a list item
       tags:
-        - List item API
+        - Security Solution Lists API
     patch:
       operationId: PatchListItem
       requestBody:
@@ -818,7 +818,7 @@ paths:
           description: Internal server error response
       summary: Patches a list item
       tags:
-        - List item API
+        - Security Solution Lists API
     post:
       operationId: CreateListItem
       requestBody:
@@ -890,7 +890,7 @@ paths:
           description: Internal server error response
       summary: Creates a list item
       tags:
-        - List item API
+        - Security Solution Lists API
     put:
       operationId: UpdateListItem
       requestBody:
@@ -953,7 +953,7 @@ paths:
           description: Internal server error response
       summary: Updates a list item
       tags:
-        - List item API
+        - Security Solution Lists API
   /api/lists/items/_export:
     post:
       description: Exports list item values from the specified list
@@ -1008,7 +1008,7 @@ paths:
           description: Internal server error response
       summary: Exports list items
       tags:
-        - List items Import/Export API
+        - Security Solution Lists API
   /api/lists/items/_find:
     get:
       operationId: FindListItems
@@ -1127,7 +1127,7 @@ paths:
           description: Internal server error response
       summary: Finds list items
       tags:
-        - List API
+        - Security Solution Lists API
   /api/lists/items/_import:
     post:
       description: >
@@ -1234,10 +1234,10 @@ paths:
           description: Internal server error response
       summary: Imports list items
       tags:
-        - List items Import/Export API
+        - Security Solution Lists API
   /api/lists/privileges:
     get:
-      operationId: GetListPrivileges
+      operationId: ReadListPrivileges
       responses:
         '200':
           content:
@@ -1284,7 +1284,7 @@ paths:
           description: Internal server error response
       summary: Gets list privileges
       tags:
-        - List API
+        - Security Solution Lists API
 components:
   schemas:
     FindListItemsCursor:
@@ -1520,3 +1520,6 @@ components:
       type: http
 security:
   - BasicAuth: []
+tags:
+  - description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.'
+    name: Security Solution Lists API
