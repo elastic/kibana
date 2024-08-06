@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import { useRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -18,13 +17,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  type EuiSearchBarProps,
+  EuiProgress,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
   EuiToolTip,
-  EuiProgress,
+  type EuiSearchBarProps,
 } from '@elastic/eui';
 import { groupBy, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -95,6 +96,7 @@ export type ModelItem = TrainedModelConfigResponse & {
    */
   stateDescription?: string;
   recommended?: boolean;
+  supported: boolean;
   /**
    * Model name, e.g. elser
    */
@@ -130,6 +132,7 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   pageSize: 10,
   sortField: modelIdColumnName,
   sortDirection: 'asc',
+  showAll: false,
 });
 
 interface Props {
@@ -287,9 +290,13 @@ export const ModelsList: FC<Props> = ({
         );
         const forDownload = await trainedModelsApiService.getTrainedModelDownloads();
         const notDownloaded: ModelItem[] = forDownload
-          .filter(({ model_id: modelId, hidden, recommended }) => {
-            if (recommended && idMap.has(modelId)) {
-              idMap.get(modelId)!.recommended = true;
+          .filter(({ model_id: modelId, hidden, recommended, supported }) => {
+            if (idMap.has(modelId)) {
+              const model = idMap.get(modelId)!;
+              if (recommended) {
+                model.recommended = true;
+              }
+              model.supported = supported;
             }
             return !idMap.has(modelId) && !hidden;
           })
@@ -307,6 +314,7 @@ export const ModelsList: FC<Props> = ({
               arch: modelDefinition.arch,
               softwareLicense: modelDefinition.license,
               licenseUrl: modelDefinition.licenseUrl,
+              supported: modelDefinition.supported,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];
@@ -628,29 +636,28 @@ export const ModelsList: FC<Props> = ({
       }),
       truncateText: false,
       'data-test-subj': 'mlModelsTableColumnDescription',
-      render: ({ description, recommended, tags }: ModelItem) => {
+      render: ({ description, recommended, tags, supported }: ModelItem) => {
         if (!description) return null;
         const descriptionText = description.replace('(Tech Preview)', '');
-        return recommended ? (
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                defaultMessage="Recommended model version for your cluster's hardware configuration"
-              />
-            }
-          >
+
+        const tooltipContent =
+          supported === false ? (
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.notSupportedDownloadContent"
+              defaultMessage="Model version is not supported by your cluster's hardware configuration"
+            />
+          ) : recommended === false ? (
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.notRecommendedDownloadContent"
+              defaultMessage="Model version is not optimized for your cluster's hardware configuration"
+            />
+          ) : null;
+
+        return tooltipContent ? (
+          <EuiToolTip content={tooltipContent}>
             <>
               {descriptionText}&nbsp;
-              {tags.includes(ELASTIC_MODEL_TAG) ? (
-                <b>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                    defaultMessage="(Recommended)"
-                  />
-                </b>
-              ) : null}
-              <EuiIcon type={'starEmpty'} />
+              <EuiIcon type={'warning'} color="warning" />
             </>
           </EuiToolTip>
         ) : (
@@ -859,6 +866,14 @@ export const ModelsList: FC<Props> = ({
   const isElserCalloutVisible =
     !isElserCalloutDismissed && items.findIndex((i) => i.model_id === ELSER_ID_V1) >= 0;
 
+  const tableItems = useMemo(() => {
+    if (pageState.showAll) {
+      return items;
+    } else {
+      return items.filter((item) => item.supported !== false);
+    }
+  }, [items, pageState.showAll]);
+
   if (!isInitialized) return null;
 
   return (
@@ -866,8 +881,24 @@ export const ModelsList: FC<Props> = ({
       <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats ? (
-          <EuiFlexItem grow={false}>
-            <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.showAllLabel"
+                      defaultMessage="Show all"
+                    />
+                  }
+                  checked={!!pageState.showAll}
+                  onChange={(e) => updatePageState({ showAll: e.target.checked })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
@@ -892,7 +923,7 @@ export const ModelsList: FC<Props> = ({
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          items={items}
+          items={tableItems}
           itemId={ModelsTableToConfigMapping.id}
           loading={isLoading}
           search={search}
