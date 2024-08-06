@@ -17,6 +17,9 @@ export const useOnboardingStyles = () => {
       wrapperStyles: css({
         margin: `0 -${euiTheme.size.l}`,
       }),
+      headerSectionStyles: css({
+        backgroundColor: euiTheme.colors.lightestShade,
+      }),
       progressSectionStyles: css({
         backgroundColor: euiTheme.colors.lightestShade,
         padding: `${euiTheme.size.xxl} ${euiTheme.size.xxl} ${euiTheme.size.m}`,
