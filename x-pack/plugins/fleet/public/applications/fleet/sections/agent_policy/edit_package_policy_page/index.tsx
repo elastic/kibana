@@ -190,7 +190,7 @@ export const EditPackagePolicyForm = memo<{
         })
       : policyId
       ? getHref('policy_details', { policyId })
-      : '/';
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
@@ -200,7 +200,7 @@ export const EditPackagePolicyForm = memo<{
         })
       : policyId
       ? getHref('policy_details', { policyId })
-      : '/';
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);

@@ -113,9 +113,9 @@ export const allowedExperimentalValues = Object.freeze({
   securitySolutionNotesEnabled: false,
 
   /**
-   * Enables entity and alert previews
+   * Disables entity and alert previews
    */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -130,7 +130,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
    */
-  assistantBedrockChat: false,
+  assistantBedrockChat: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -237,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the manual rule run
    */
-  manualRuleRunEnabled: true,
+  manualRuleRunEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters

@@ -103,7 +103,7 @@ function prepareNestedFunction(fnSignature: FunctionDefinition): string {
         },
       ],
     },
-    { withTypes: false }
+    { withTypes: false, capitalize: false }
   )[0].declaration;
 }
 function getFieldMapping(
@@ -450,40 +450,8 @@ describe('validation logic', () => {
       });
     });
 
-    describe('meta', () => {
-      testErrorsAndWarnings('meta', ["SyntaxError: missing 'functions' at '<EOF>'"]);
-      testErrorsAndWarnings('meta functions', []);
-      testErrorsAndWarnings('meta functions()', [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-      ]);
-      testErrorsAndWarnings('meta functions blah', [
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'a'",
-        "SyntaxError: token recognition error at: 'h'",
-      ]);
-      testErrorsAndWarnings('meta info', [
-        "SyntaxError: token recognition error at: 'i'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'fo'",
-        "SyntaxError: missing 'functions' at '<EOF>'",
-      ]);
-    });
-
     describe('show', () => {
       testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
-      testErrorsAndWarnings('show functions', [
-        "SyntaxError: token recognition error at: 'f'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 'c'",
-        "SyntaxError: token recognition error at: 't'",
-        "SyntaxError: token recognition error at: 'io'",
-        "SyntaxError: token recognition error at: 'n'",
-        "SyntaxError: token recognition error at: 's'",
-        "SyntaxError: missing 'info' at '<EOF>'",
-      ]);
       testErrorsAndWarnings('show info', []);
       testErrorsAndWarnings('show numberField', [
         "SyntaxError: token recognition error at: 'n'",
@@ -1555,22 +1523,6 @@ describe('validation logic', () => {
         });
       });
 
-      it('should call fields callbacks also for meta command', async () => {
-        const callbackMocks = getCallbackMocks();
-        await validateQuery(
-          `meta functions | keep name`,
-          getAstAndSyntaxErrors,
-          undefined,
-          callbackMocks
-        );
-        expect(callbackMocks.getSources).not.toHaveBeenCalled();
-        expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
-        expect(callbackMocks.getFieldsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
-          query: 'meta functions',
-        });
-      });
-
       it('should call fields callbacks also for show command', async () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(
@@ -1784,8 +1736,8 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_diff("year", concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
-            'Argument of [date_diff] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [string]',
+            'Argument of [date_diff] must be [date], found value [concat("20","22")] type [string]',
           ]
         );
       });
@@ -2666,7 +2618,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", concat("20", "22"))',
           [
-            'Argument of [date_extract] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_extract] must be [date], found value [concat("20","22")] type [string]',
           ]
         );
       });
@@ -2710,7 +2662,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval date_format(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_format(stringField, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_format(stringField, concat("20", "22"))', [
-          'Argument of [date_format] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [date_format] must be [date], found value [concat("20","22")] type [string]',
         ]);
       });
 
@@ -2815,15 +2767,15 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval date_trunc(nullVar, nullVar)', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, "2022")', []);
         testErrorsAndWarnings('from a_index | eval date_trunc(1 year, concat("20", "22"))', [
-          'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | eval date_trunc("2022", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | eval date_trunc(concat("20", "22"), concat("20", "22"))',
           [
-            'Argument of [date_trunc] must be [time_literal], found value [concat("20", "22")] type [string]',
-            'Argument of [date_trunc] must be [date], found value [concat("20", "22")] type [string]',
+            'Argument of [date_trunc] must be [time_literal], found value [concat("20","22")] type [string]',
+            'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [string]',
           ]
         );
       });
@@ -9170,7 +9122,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats max(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats max("2022")', []);
         testErrorsAndWarnings('from a_index | stats max(concat("20", "22"))', [
-          'Argument of [max] must be [number], found value [concat("20", "22")] type [string]',
+          'Argument of [max] must be [number], found value [concat("20","22")] type [string]',
         ]);
       });
 
@@ -9314,7 +9266,7 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | stats min(nullVar)', []);
         testErrorsAndWarnings('from a_index | stats min("2022")', []);
         testErrorsAndWarnings('from a_index | stats min(concat("20", "22"))', [
-          'Argument of [min] must be [number], found value [concat("20", "22")] type [string]',
+          'Argument of [min] must be [number], found value [concat("20","22")] type [string]',
         ]);
       });
 
@@ -9632,34 +9584,34 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings('from a_index | stats bucket("2022", 1 year)', []);
         testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 1 year)', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | stats by bucket(concat("20", "22"), 1 year)', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "a")', []);
         testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), 5, "a", "a")', [
-          'Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]',
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [string]',
         ]);
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), concat("20", "22"))',
-          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+          ['Argument of [bucket] must be [date], found value [concat("20","22")] type [string]']
         );
 
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "a", "2022")', []);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), 5, "a", concat("20", "22"))',
-          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+          ['Argument of [bucket] must be [date], found value [concat("20","22")] type [string]']
         );
 
         testErrorsAndWarnings('from a_index | stats bucket("2022", 5, "2022", "a")', []);
 
         testErrorsAndWarnings(
           'from a_index | stats bucket(concat("20", "22"), 5, concat("20", "22"), "a")',
-          ['Argument of [bucket] must be [date], found value [concat("20", "22")] type [string]']
+          ['Argument of [bucket] must be [date], found value [concat("20","22")] type [string]']
         );
       });
 

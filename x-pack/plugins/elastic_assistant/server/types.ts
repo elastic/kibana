@@ -33,7 +33,10 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
@@ -103,6 +106,7 @@ export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {

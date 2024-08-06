@@ -68,7 +68,7 @@ export interface UserEntityOverviewProps {
 
 export const USER_PREVIEW_BANNER = {
   title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
-    defaultMessage: 'Preview user',
+    defaultMessage: 'Preview user details',
   }),
   backgroundColor: 'warning',
   textColor: 'warning',
@@ -82,7 +82,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({

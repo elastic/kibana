@@ -30,6 +30,11 @@ export const updateApiKeyRoute = (
       validate: {
         params: paramSchema,
       },
+      options: {
+        summary: 'Update the API key for an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: true,
+      },
     },
     handleDisabledApiKeysError(
       router.handleLegacyErrors(async function (context, req, res) {
