@@ -15,11 +15,18 @@ export function isValidFilterListId(id) {
 
 // Saves a filter list, running an update if the supplied loadedFilterList, holding the
 // original filter list to which edits are being applied, is defined with a filter_id property.
-export function saveFilterList(toastNotifications, filterId, description, items, loadedFilterList) {
+export function saveFilterList(
+  toastNotifications,
+  mlApiServices,
+  filterId,
+  description,
+  items,
+  loadedFilterList
+) {
   return new Promise((resolve, reject) => {
     if (loadedFilterList === undefined || loadedFilterList.filter_id === undefined) {
       // Create a new filter.
-      addFilterList(toastNotifications, filterId, description, items)
+      addFilterList(toastNotifications, mlApiServices, filterId, description, items)
         .then((newFilter) => {
           resolve(newFilter);
         })
@@ -28,7 +35,7 @@ export function saveFilterList(toastNotifications, filterId, description, items,
         });
     } else {
       // Edit to existing filter.
-      updateFilterList(loadedFilterList, description, items)
+      updateFilterList(mlApiServices, loadedFilterList, description, items)
         .then((updatedFilter) => {
           resolve(updatedFilter);
         })

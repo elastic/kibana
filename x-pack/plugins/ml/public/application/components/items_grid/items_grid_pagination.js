@@ -101,13 +101,18 @@ export class ItemsGridPagination extends Component {
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiPopover
+            data-test-subj="mlItemsGridPaginationPopover"
             id="customizablePagination"
             button={button}
             isOpen={this.state.isPopoverOpen}
             closePopover={this.closePopover}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel items={items} className="ml-items-grid-page-size-menu" />
+            <EuiContextMenuPanel
+              data-test-subj="mlItemsGridPaginationMenuPanel"
+              items={items}
+              className="ml-items-grid-page-size-menu"
+            />
           </EuiPopover>
         </EuiFlexItem>
 

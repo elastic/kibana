@@ -286,6 +286,7 @@ export class EditFilterListUI extends Component {
     const filterId = this.props.filterId !== undefined ? this.props.filterId : newFilterId;
     saveFilterList(
       this.props.kibana.services.notifications.toasts,
+      this.props.kibana.services.mlServices.mlApiServices,
       filterId,
       description,
       items,

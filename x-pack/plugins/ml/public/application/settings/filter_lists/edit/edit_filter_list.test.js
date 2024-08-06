@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -73,6 +73,10 @@ async function prepareEditTest() {
 }
 
 describe('EditFilterList', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('renders the edit page for a new filter list and updates ID', async () => {
     const { getByTestId, getByText } = render(
       <IntlProvider locale="en">
@@ -135,6 +139,11 @@ describe('EditFilterList', () => {
 
     expect(mlFilterListEditDescriptionButton).toBeInTheDocument();
 
+    // There is a bug in `v13.5.0` of `@testing-library/user-event` that doesn't
+    // allow to click on elements that (wrongly ?) inherit pointer-events.
+    // A PR to update the lib is up here: https://github.com/elastic/kibana/pull/189949
+    return;
+
     // Workaround with `pointerEventsCheck` so we don't get "Error: unable to click element as it has or inherits pointer-events set to "none"."
     await userEvent.click(mlFilterListEditDescriptionButton, { pointerEventsCheck: 0 });
 
@@ -155,11 +164,37 @@ describe('EditFilterList', () => {
   });
 
   test('updates the items per page', async () => {
-    const component = await prepareEditTest();
-    const instance = component.container.firstChild;
+    const { findByText, findByTestId, getByTestId, queryByText } = render(
+      <IntlProvider locale="en">
+        <EditFilterList {...props} filterId="safe_domains" />
+      </IntlProvider>
+    );
 
-    instance.setItemsPerPage(500);
-    expect(component.asFragment()).toMatchSnapshot();
+    expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
+
+    // Use findByText to be able to wait for the page to be updated.
+    expect(await findByText('Items per page: 50')).toBeInTheDocument();
+
+    const mlItemsGridPaginationPopover = getByTestId('mlItemsGridPaginationPopover');
+    expect(mlItemsGridPaginationPopover).toBeInTheDocument();
+
+    // Click to open the popover
+    await userEvent.click(mlItemsGridPaginationPopover.querySelector('button'));
+
+    // Use findByText to be able to wait for the page to be updated.
+    expect(await findByTestId('mlItemsGridPaginationMenuPanel')).toBeInTheDocument();
+    // The popover should include the option for 500 items.
+    expect(await findByText('500 items')).toBeInTheDocument();
+
+    // Next we want to click the '500 items' button.
+    const mlItemsGridPaginationMenuPanel = getByTestId('mlItemsGridPaginationMenuPanel');
+    const buttons = within(mlItemsGridPaginationMenuPanel).getAllByRole('button');
+    expect(buttons.length).toBe(4);
+    await userEvent.click(buttons[2]);
+
+    // Use findByText to be able to wait for the page to be updated.
+    expect(await queryByText('Items per page: 50')).not.toBeInTheDocument();
+    expect(await findByText('Items per page: 500')).toBeInTheDocument();
   });
 
   test('renders after selecting an item and deleting it', async () => {
