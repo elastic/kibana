@@ -548,14 +548,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
+    const { setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
       isAgentlessEnabled,
       handleSetupTechnologyChange,
     });
     const shouldRenderAgentlessSelector =
-      (!isEditPage && isAgentlessAvailable) ||
-      (isEditPage && setupTechnology === SetupTechnology.AGENTLESS);
+      isEditPage && setupTechnology === SetupTechnology.AGENTLESS;
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {

@@ -8,7 +8,18 @@
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBetaBadge, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import { SetupTechnology } from '../../../../../types';
 
@@ -23,50 +34,51 @@ export const SetupTechnologySelector = ({
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const agentlessOptionBadge = (isDropDownDisplay: boolean) => {
+    const title = isDropDownDisplay ? (
+      <strong>
+        <FormattedMessage
+          id="xpack.fleet.setupTechnology.agentlessDrowpownDisplay"
+          defaultMessage="Agentless"
+        />
+      </strong>
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.setupTechnology.agentlessInputDisplay"
+        defaultMessage="Agentless"
+      />
+    );
+    return (
+      <EuiFlexGroup alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        <EuiFlexItem css={{ paddingTop: !isDropDownDisplay ? euiTheme.size.xs : undefined }}>
+          <EuiBetaBadge
+            label={i18n.translate(
+              'xpack.fleet.setupTechnology.agentlessInputDisplay.techPreviewBadge.label',
+              {
+                defaultMessage: 'Beta',
+              }
+            )}
+            size="m"
+            color="hollow"
+            tooltipContent={i18n.translate(
+              'xpack.fleet.setupTechnology.agentlessInputDisplay.techPreviewBadge.tooltip',
+              {
+                defaultMessage:
+                  'This functionality is in technical preview and may be changed in a future release. Please help us by reporting any bugs.',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   const options = [
     {
-      value: SetupTechnology.AGENTLESS,
-      inputDisplay: (
-        <>
-          <FormattedMessage
-            id="xpack.fleet.setupTechnology.agentlessInputDisplay"
-            defaultMessage="Agentless"
-          />
-          &nbsp;
-          <EuiBetaBadge
-            label="Beta"
-            size="s"
-            tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
-          />
-        </>
-      ),
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.fleet.setupTechnology.agentlessDrowpownDisplay"
-              defaultMessage="Agentless"
-            />
-          </strong>
-          &nbsp;
-          <EuiBetaBadge
-            label="Beta"
-            size="s"
-            tooltipContent="This module is not GA. Please help us by reporting any bugs."
-          />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.setupTechnology.agentlessDrowpownDescription"
-                defaultMessage="Set up the integration without an agent"
-              />
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-    {
       value: SetupTechnology.AGENT_BASED,
+      'data-test-subj': 'setup-technology-agent-based-option',
       inputDisplay: (
         <FormattedMessage
           id="xpack.fleet.setupTechnology.agentbasedInputDisplay"
@@ -86,6 +98,24 @@ export const SetupTechnologySelector = ({
               <FormattedMessage
                 id="xpack.fleet.setupTechnology.agentbasedDrowpownDescription"
                 defaultMessage="Set up the integration with an agent"
+              />
+            </p>
+          </EuiText>
+        </>
+      ),
+    },
+    {
+      value: SetupTechnology.AGENTLESS,
+      inputDisplay: agentlessOptionBadge(false),
+      'data-test-subj': 'setup-technology-agentless-option',
+      dropdownDisplay: (
+        <>
+          {agentlessOptionBadge(true)}
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.setupTechnology.agentlessDrowpownDescription"
+                defaultMessage="Set up the integration without an agent"
               />
             </p>
           </EuiText>

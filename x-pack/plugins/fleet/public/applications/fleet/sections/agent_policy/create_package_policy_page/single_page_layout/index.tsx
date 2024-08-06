@@ -398,8 +398,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
           />
 
-          {/* TODO move SetupTechnologySelector out of extensionView */}
-          {!extensionView && isAgentlessIntegration(packageInfo) && (
+          {isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               disabled={false}
               setupTechnology={selectedSetupTechnology}
