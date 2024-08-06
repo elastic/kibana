@@ -40,12 +40,17 @@ const DEFAULT_BADGE = (
       })}
     </EuiTextColor>
   </strong>
-)
+);
 
-export const LanguageSelectorModal = ({ closeModal, hidePopover, currentLanguage, changeDefaultLanguage }: Props) => {
+export const LanguageSelectorModal = ({
+  closeModal,
+  hidePopover,
+  currentLanguage,
+  changeDefaultLanguage,
+}: Props) => {
   const modalTitleId = useGeneratedHtmlId();
   const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
-  const [options, setOptions] = useState<Array<EuiSelectableOption> >(
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
     AVAILABLE_LANGUAGES.map((lang): EuiSelectableOption => ({ label: lang }))
   );
 
@@ -55,15 +60,18 @@ export const LanguageSelectorModal = ({ closeModal, hidePopover, currentLanguage
     return options.map((option) => ({
       ...option,
       ...(noOptionsSelected && option.label === selectedLanguage && { checked: 'on' }),
-      append: option.label === selectedLanguage
-        ? DEFAULT_BADGE
-        : <EuiLink onClick={() => setSelectedLanguage(option.label)}>
+      append:
+        option.label === selectedLanguage ? (
+          DEFAULT_BADGE
+        ) : (
+          <EuiLink onClick={() => setSelectedLanguage(option.label)}>
             {i18n.translate('console.requestPanel.contextMenu.defaultSelectedLanguage', {
               defaultMessage: 'Set as default',
             })}
-        </EuiLink>,
+          </EuiLink>
+        ),
     }));
-  }, [options, selectedLanguage]);
+  }, [options, selectedLanguage, noOptionsSelected]);
 
   const onCopyCode = () => {
     const selectedOption = options.find((option) => option.checked);
@@ -93,14 +101,14 @@ export const LanguageSelectorModal = ({ closeModal, hidePopover, currentLanguage
         <EuiSelectable
           css={{ maxWidth: 550 }}
           options={optionsList as EuiSelectableOption[]}
-          onChange={(options) => setOptions(options)}
+          onChange={(changedOptions) => setOptions(changedOptions)}
           singleSelection="always"
           listProps={{
             onFocusBadge: false,
             isVirtualized: false,
           }}
         >
-          {list => list}
+          {(list) => list}
         </EuiSelectable>
       </EuiModalBody>
 

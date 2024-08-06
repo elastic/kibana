@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LanguageSelectorModal } from './language_selector_modal';
 import { i18n } from '@kbn/i18n';
+import { LanguageSelectorModal } from './language_selector_modal';
 
 import { useServicesContext } from '../../../../../contexts';
 import { StorageKeys } from '../../../../../../services';
@@ -34,7 +34,9 @@ interface Props {
 
 export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notifications }: Props) => {
   // Get default language from local storage
-  const { services: { storage } } = useServicesContext();
+  const {
+    services: { storage },
+  } = useServicesContext();
   const defaultLanguage = storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -140,27 +142,25 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
       }}
       icon="copyClipboard"
     >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize='s' alignItems="center">
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  tagName="span"
-                  id="console.requestOptions.copyAsUrlButtonLabel"
-                  defaultMessage="Copy as"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <strong>{currentLanguage}</strong>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink data-name="changeLanguage">
-              Change
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                tagName="span"
+                id="console.requestOptions.copyAsUrlButtonLabel"
+                defaultMessage="Copy as"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <strong>{currentLanguage}</strong>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink data-name="changeLanguage">Change</EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="consoleMenuAutoIndent"
