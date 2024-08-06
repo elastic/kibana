@@ -6,7 +6,11 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  deleteEntityDefinitionParamsSchema,
+  deleteEntityDefinitionQuerySchema,
+} from '@kbn/entities-schema';
 import { SetupRouteOptions } from '../types';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
@@ -22,12 +26,8 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
     {
       path: '/internal/entities/definition/{id}',
       validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-        query: schema.object({
-          deleteData: schema.maybe(schema.boolean({ defaultValue: false })),
-        }),
+        params: buildRouteValidationWithZod(deleteEntityDefinitionParamsSchema.strict()),
+        query: buildRouteValidationWithZod(deleteEntityDefinitionQuerySchema.strict()),
       },
     },
     async (context, req, res) => {

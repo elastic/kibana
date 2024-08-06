@@ -33,7 +33,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return `${docLinks.links.observability.syntheticsAlerting}`;
   },
   ruleParamsExpression: (paramProps: RuleTypeParamsExpressionProps<StatusRuleParams>) => (
-    <MonitorStatusAlert core={core} plugins={plugins} params={paramProps} />
+    <MonitorStatusAlert coreStart={core} plugins={plugins} params={paramProps} />
   ),
   validate: (_ruleParams: StatusRuleParams) => {
     return { errors: {} };

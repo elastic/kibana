@@ -3327,6 +3327,9 @@
       "ownerId": {
         "type": "keyword"
       },
+      "partition": {
+        "type": "integer"
+      },
       "retryAt": {
         "type": "date"
       },

@@ -43,7 +43,6 @@ import {
   isSupportedFunction,
   isTimeIntervalItem,
   inKnownTimeInterval,
-  printFunctionSignature,
   sourceExists,
   getColumnExists,
   hasWildcard,
@@ -77,6 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
+import { isStringType } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -220,7 +220,7 @@ function validateNestedFunctionArg(
           values: {
             name: astFunction.name,
             argType: parameterDefinition.type,
-            value: printFunctionSignature(actualArg, false) || actualArg.name,
+            value: actualArg.text,
             givenType: argFn.signatures[0].returnType,
           },
           locations: actualArg.location,
@@ -880,6 +880,7 @@ function validateColumnForCommand(
 
       if (columnParamsWithInnerTypes.length) {
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
+          if (innerType === 'string' && isStringType(columnRef.type)) return false;
           return innerType !== 'any' && innerType !== columnRef.type;
         });
         if (hasSomeWrongInnerTypes) {

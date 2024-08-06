@@ -8,7 +8,7 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
-
+import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -53,10 +53,28 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     services: { lens },
   } = useKibanaContextForPlugin();
   const { service } = useDatasetQualityContext();
-  const { trackDetailsNavigated, navigationTargets, navigationSources } =
-    useDatasetDetailsTelemetry();
+
+  const {
+    trackDatasetDetailsBreakdownFieldChanged,
+    trackDetailsNavigated,
+    navigationTargets,
+    navigationSources,
+  } = useDatasetDetailsTelemetry();
 
   const { dataStreamStat, timeRange, breakdownField } = useDatasetQualityFlyout();
+
+  const isBreakdownFieldEcs = useSelector(
+    service,
+    (state) => state.context.flyout.isBreakdownFieldEcs
+  );
+
+  const isBreakdownFieldEcsAsserted = useSelector(service, (state) => {
+    return (
+      state.matches('flyout.initializing.assertBreakdownFieldIsEcs.done') &&
+      state.history?.matches('flyout.initializing.assertBreakdownFieldIsEcs.fetching') &&
+      isBreakdownFieldEcs !== null
+    );
+  });
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
@@ -85,6 +103,10 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     },
     [service]
   );
+
+  useEffect(() => {
+    if (isBreakdownFieldEcsAsserted) trackDatasetDetailsBreakdownFieldChanged();
+  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldEcsAsserted]);
 
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;

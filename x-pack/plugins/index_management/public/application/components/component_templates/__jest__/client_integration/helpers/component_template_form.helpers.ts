@@ -189,4 +189,5 @@ export type ComponentTemplateFormTestSubjects =
   | 'aliasesEditor'
   | 'mappingsEditor'
   | 'settingsEditor'
+  | 'affectedMappingsList'
   | 'versionField.input';

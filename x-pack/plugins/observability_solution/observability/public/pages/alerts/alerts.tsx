@@ -281,7 +281,7 @@ function InternalAlertsPage() {
                       configurationId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                       query={mergeBoolQueries(esQuery, groupQuery)}
                       showAlertStatusWithFlapping
-                      pageSize={ALERTS_PER_PAGE}
+                      initialPageSize={ALERTS_PER_PAGE}
                       cellContext={{ observabilityRuleTypeRegistry }}
                       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                     />

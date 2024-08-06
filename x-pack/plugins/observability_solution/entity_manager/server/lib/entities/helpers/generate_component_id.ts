@@ -7,6 +7,7 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
+  ENTITY_HISTORY_BACKFILL_PREFIX_V1,
   ENTITY_HISTORY_INDEX_PREFIX_V1,
   ENTITY_HISTORY_PREFIX_V1,
   ENTITY_LATEST_INDEX_PREFIX_V1,
@@ -16,6 +17,11 @@ import {
 // History
 function generateHistoryId(definition: EntityDefinition) {
   return `${ENTITY_HISTORY_PREFIX_V1}-${definition.id}`;
+}
+
+// History Backfill
+export function generateHistoryBackfillTransformId(definition: EntityDefinition) {
+  return `${ENTITY_HISTORY_BACKFILL_PREFIX_V1}-${definition.id}`;
 }
 
 export const generateHistoryTransformId = generateHistoryId;

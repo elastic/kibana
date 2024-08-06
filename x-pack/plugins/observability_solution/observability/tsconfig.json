@@ -108,8 +108,10 @@
     "@kbn/event-annotation-components",
     "@kbn/slo-schema",
     "@kbn/license-management-plugin",
+    "@kbn/observability-alerting-rule-utils",
+    "@kbn/core-ui-settings-server-mocks",
     "@kbn/grouping",
-    "@kbn/alerts-grouping"
+    "@kbn/alerts-grouping",
   ],
   "exclude": [
     "target/**/*"

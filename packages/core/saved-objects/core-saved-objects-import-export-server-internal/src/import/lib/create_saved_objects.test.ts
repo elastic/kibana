@@ -102,7 +102,7 @@ const legacyUrlAliasForObj10 = createLegacyUrlAliasObject(obj10.originId!, obj10
 
 describe('#createSavedObjects', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let bulkCreate: typeof savedObjectsClient['bulkCreate'];
+  let bulkCreate: (typeof savedObjectsClient)['bulkCreate'];
 
   /**
    * Creates an options object to be used as an argument for createSavedObjects

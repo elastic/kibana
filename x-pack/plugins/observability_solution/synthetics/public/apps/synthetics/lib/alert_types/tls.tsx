@@ -31,7 +31,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   },
   ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSParams>) => (
     <TLSAlert
-      core={core}
+      coreStart={core}
       plugins={plugins}
       ruleParams={params.ruleParams}
       setRuleParams={params.setRuleParams}

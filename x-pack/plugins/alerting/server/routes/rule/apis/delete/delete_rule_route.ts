@@ -24,9 +24,17 @@ export const deleteRuleRoute = (
       options: {
         access: 'public',
         summary: `Delete a rule`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
-        params: deleteRuleRequestParamsSchemaV1,
+        request: {
+          params: deleteRuleRequestParamsSchemaV1,
+        },
+        response: {
+          204: {
+            description: 'Indicates a successful call.',
+          },
+        },
       },
     },
     router.handleLegacyErrors(

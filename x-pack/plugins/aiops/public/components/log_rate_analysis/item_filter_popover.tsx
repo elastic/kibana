@@ -101,6 +101,14 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
     );
   }, [uniqueItemNames]);
 
+  // If the supplied list of initial skipped items changes, only update if
+  // the list hasn't been touched yet.
+  useEffect(() => {
+    if (!isTouched) {
+      setSkippedItems(initialSkippedItems);
+    }
+  }, [initialSkippedItems, isTouched]);
+
   const selectedItemCount = uniqueItemNames.length - skippedItems.length;
 
   return (

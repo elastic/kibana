@@ -101,9 +101,14 @@ export function TrainedModelsDeploymentModal({
   useEffect(() => {
     const models = inferenceIdsInPendingList.map(
       (inferenceId) => inferenceToModelIdMap?.[inferenceId]
-    );
+    ); // filter out third-party models
     for (const model of models) {
-      if (model && !model.isDownloading && !model.isDeployed) {
+      if (
+        model?.trainedModelId &&
+        model.isDeployable &&
+        !model.isDownloading &&
+        !model.isDeployed
+      ) {
         // Sometimes the model gets stuck in a ready to deploy state, so we need to trigger deployment manually
         startModelAllocation(model.trainedModelId);
       }
