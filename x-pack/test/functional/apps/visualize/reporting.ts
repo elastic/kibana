@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('PNG reports: sample data created in 7.6', () => {
       const reportFileName = 'tsvb';
 
-      before(async () => {
+      before('apply kibana server settings: timeDefaults and defaultIndex', async () => {
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
             '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('get the report download URL');
         const url = await PageObjects.reporting.getReportURL(60000);
-        log.debug('download the report');
+        log.debug(`download the report at ${url}`);
         const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
         const sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
