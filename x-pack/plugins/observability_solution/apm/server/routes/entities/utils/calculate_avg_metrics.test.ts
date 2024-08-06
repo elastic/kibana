@@ -183,4 +183,54 @@ describe('mergeMetrics', () => {
 
     expect(result).toEqual({});
   });
+
+  it('returns metrics with zero value', () => {
+    const metrics = [
+      {
+        failedTransactionRate: 0,
+        latency: 4,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [0],
+      latency: [4],
+      logErrorRate: [5],
+      logRate: [5],
+      throughput: [5],
+    });
+  });
+
+  it('does not return metrics with null', () => {
+    const metrics = [
+      {
+        failedTransactionRate: null,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+      {
+        failedTransactionRate: 5,
+        latency: null,
+        logErrorRate: 5,
+        logRate: 5,
+        throughput: 5,
+      },
+    ];
+
+    const result = mergeMetrics(metrics);
+
+    expect(result).toEqual({
+      failedTransactionRate: [5],
+      logErrorRate: [5, 5],
+      logRate: [5, 5],
+      throughput: [5, 5],
+    });
+  });
 });
