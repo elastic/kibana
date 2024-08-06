@@ -15,10 +15,7 @@ import { DocumentDetailsContext } from '../shared/context';
 import { PreviewPanelFooter } from './footer';
 import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 describe('<PreviewPanelFooter />', () => {
   beforeAll(() => {

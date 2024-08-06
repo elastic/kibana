@@ -30,10 +30,7 @@ import { USER_PREVIEW_BANNER } from './user_entity_overview';
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
