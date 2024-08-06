@@ -1515,63 +1515,65 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('supporting prebuilt rule customization', () => {
-      it('allows rules with "immutable: true"', async () => {
-        const rule = getCustomQueryRuleParams({
-          rule_id: 'rule-immutable',
-          // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
-          immutable: true,
+      describe('compatibility with prebuilt rule fields', () => {
+        it('allows rules with "immutable: true"', async () => {
+          const rule = getCustomQueryRuleParams({
+            rule_id: 'rule-immutable',
+            // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
+            immutable: true,
+          });
+          const ndjson = combineToNdJson(rule);
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: true,
+          });
         });
-        const ndjson = combineToNdJson(rule);
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
+        it('allows (but ignores) rules with a value for rule_source', async () => {
+          const rule = getCustomQueryRuleParams({
+            rule_id: 'rule-source',
+            // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
+            rule_source: {
+              type: 'internal',
+            },
+          });
+          const ndjson = combineToNdJson(rule);
 
-        expect(body).toMatchObject({
-          success: true,
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: true,
+          });
         });
-      });
 
-      it('allows (but ignores) rules with a value for rule_source', async () => {
-        const rule = getCustomQueryRuleParams({
-          rule_id: 'rule-source',
-          // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
-          rule_source: {
-            type: 'internal',
-          },
-        });
-        const ndjson = combineToNdJson(rule);
+        it('rejects rules without a rule_id', async () => {
+          const rule = getCustomQueryRuleParams({});
+          delete rule.rule_id;
+          const ndjson = combineToNdJson(rule);
 
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
 
-        expect(body).toMatchObject({
-          success: true,
-        });
-      });
-
-      it('rejects rules without a rule_id', async () => {
-        const rule = getCustomQueryRuleParams({});
-        delete rule.rule_id;
-        const ndjson = combineToNdJson(rule);
-
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body.errors).toHaveLength(1);
-        expect(body.errors[0]).toMatchObject({
-          error: { message: 'rule_id: Required', status_code: 400 },
+          expect(body.errors).toHaveLength(1);
+          expect(body.errors[0]).toMatchObject({
+            error: { message: 'rule_id: Required', status_code: 400 },
+          });
         });
       });
 
