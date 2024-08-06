@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { isArray } from 'lodash/fp';
+import { EuiFlexGroup, EuiIconTip, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { firstNonNullValue, GroupPanelRenderer } from '@kbn/grouping/src';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
 import { Tags } from '../../../components/tags';
-import { unknown } from './constants';
+import { ungrouped } from './constants';
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsByGroupingAgg> = (
   selectedGroup,
@@ -57,13 +58,25 @@ RuleNameGroupContent.displayName = 'RuleNameGroup';
 const InstanceIdGroupContent = React.memo<{
   instanceId?: string;
 }>(({ instanceId }) => {
+  const isUngrouped = instanceId === '*';
   return (
     <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">
-              {instanceId === '*' ? unknown : instanceId ?? '--'}
+              {isUngrouped ? ungrouped : instanceId ?? '--'}
+              &nbsp;
+              {isUngrouped && (
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.observability.alert.grouping.ungrouped.info"
+                      defaultMessage='There is no "group by" field selected in rule definition.'
+                    />
+                  }
+                />
+              )}
             </h5>
           </EuiTitle>
         </EuiFlexItem>

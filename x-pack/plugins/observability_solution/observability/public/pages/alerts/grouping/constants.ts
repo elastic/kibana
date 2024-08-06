@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 
-export const unknown = i18n.translate('xpack.observability.alert.grouping.unknown.label', {
-  defaultMessage: 'Unknown',
+export const ungrouped = i18n.translate('xpack.observability.alert.grouping.ungrouped.label', {
+  defaultMessage: 'Ungrouped',
 });
 
 export const ruleName = i18n.translate('xpack.observability.alert.grouping.ruleName.label', {
