@@ -64,11 +64,20 @@ export function BenchmarkPagePageProvider({ getService, getPageObjects }: FtrPro
     },
   };
 
-  const navigateToBenchnmarkPage = async () => {
+  const navigateToBenchnmarkPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
       `cloud_security_posture/benchmarks/`,
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
