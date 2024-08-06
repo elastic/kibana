@@ -40,7 +40,6 @@ export type FunctionParameterType =
   | SupportedFieldType
   | 'null'
   | 'any'
-  | 'chrono_literal'
   | 'time_literal'
   | 'time_duration'
   | 'double[]'
