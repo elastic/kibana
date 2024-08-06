@@ -69,9 +69,9 @@ are allowed to generate reports.
 [NOTE]
 ============================================================================
 The `xpack.reporting.roles` settings are for a deprecated system of access control in Reporting. Turning off
-this feature allows API Keys to generate reports, and allows reporting access through {kib} application
-privileges. We recommend you explicitly turn off reporting's deprecated access control feature by adding
-`xpack.reporting.roles.enabled: false` in kibana.yml. This will enable you to create custom roles that provide
+this feature allows API keys to generate reports, and allows reporting access through {kib} application
+privileges. We recommend that you explicitly turn off reporting's deprecated access control feature by adding
+`xpack.reporting.roles.enabled: false` to kibana.yml. This will enable you to create custom roles that provide
 application privileges for reporting, as described in <<grant-user-access, granting users access to
 reporting>>.
 ============================================================================
@@ -89,7 +89,7 @@ to be `true`. Defaults to `[ "reporting_user" ]`.
 [[reporting-job-queue-settings]]
 === Background job settings
 
-Reporting generates reports in the {kib} server as background tasks, and jobs are coordinated using documents
+Reporting generates reports on the {kib} server as background tasks, and jobs are coordinated using documents
 in {es}. Depending on how often you generate reports and the overall number of reports, you might need to
 change the following settings.
 
@@ -178,7 +178,7 @@ An array of hosts that should not go through the proxy server and should use a d
 ==== {kib} server settings for headless browser connection
 
 To generate screenshots for PNG and PDF reports, Reporting opens the {kib} web interface using a local
-connection on the server. In most cases, using a local connection to the {kib} server presents no issue. If
+connection to the server. In most cases, using a local connection to the {kib} server presents no issue. If
 you prefer the headless browser to connect to {kib} using a specific hostname, there are a number of
 settings that allow the headless browser to connect to {kib} through a proxy, rather than directly.
 
