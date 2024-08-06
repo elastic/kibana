@@ -10,7 +10,7 @@ import { installBuiltInEntityDefinitions } from './install_entity_definition';
 import { EntityManagerServerSetup } from '../../types';
 import { checkIfEntityDiscoveryAPIKeyIsValid, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
-import { ERROR_API_KEY_NOT_FOUND, ERROR_API_KEY_NOT_VALID } from '../../../common/errors';
+import { ERROR_API_KEY_NOT_FOUND } from '../../../common/errors';
 
 export async function upgradeBuiltInEntityDefinitions({
   definitions,
@@ -29,7 +29,9 @@ export async function upgradeBuiltInEntityDefinitions({
 
   const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
   if (!isValid) {
-    return { success: false, reason: ERROR_API_KEY_NOT_VALID };
+    throw new Error(
+      'Stored API key is not valid, skipping built-in definition upgrade. You can re-enable Entity Discovery to update the key.'
+    );
   }
 
   const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
