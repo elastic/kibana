@@ -166,8 +166,6 @@ export class CommonPageObject extends FtrService {
         }
       }
     });
-
-    this.checkForEuiProviderWarning();
   }
 
   /**
