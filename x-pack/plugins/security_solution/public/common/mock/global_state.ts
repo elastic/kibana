@@ -6,7 +6,7 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
@@ -34,7 +34,7 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
@@ -60,7 +60,6 @@ export const mockSourcererState: SourcererState = {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
-    indexFields: mockIndexFields as FieldSpec[],
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
@@ -365,7 +364,7 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -387,7 +386,7 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
         version: null,
         selectedEventIds: {},
         isSelectAllChecked: false,

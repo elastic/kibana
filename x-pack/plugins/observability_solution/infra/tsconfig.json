@@ -109,9 +109,8 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/observability-alerting-rule-utils",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/shared-ux-page-no-data-types"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

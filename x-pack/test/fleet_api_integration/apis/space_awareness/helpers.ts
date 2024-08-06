@@ -40,6 +40,7 @@ export async function cleanFleetActionIndices(esClient: Client) {
       esClient.deleteByQuery({
         index: AGENT_POLICY_INDEX,
         q: '*',
+        refresh: true,
       }),
       esClient.deleteByQuery({
         index: AGENT_ACTIONS_INDEX,
@@ -51,6 +52,7 @@ export async function cleanFleetActionIndices(esClient: Client) {
         {
           index: AGENT_ACTIONS_RESULTS_INDEX,
           q: '*',
+          refresh: true,
         },
         ES_INDEX_OPTIONS
       ),
