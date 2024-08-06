@@ -5260,6 +5260,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-plugin@link:x-pack/plugins/inference":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
   version "0.0.0"
   uid ""

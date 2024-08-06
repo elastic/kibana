@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-// TODO: DELETE FIND WHEN FOOTER IS MOVED TO FLYOUT FOLDER - https://github.com/elastic/security-team/issues/7462
-export { FlyoutFooter } from './footer';
+import type { Message } from '.';
+import { ToolOptions } from './tools';
+
+export type ChatCompleteRequestBody = {
+  connectorId: string;
+  stream?: boolean;
+  system?: string;
+  messages: Message[];
+} & ToolOptions;
