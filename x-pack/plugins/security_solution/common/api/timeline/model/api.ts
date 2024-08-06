@@ -619,15 +619,13 @@ export interface KueryFilterQueryResult {
   expression?: Maybe<string>;
 }
 
-<<<<<<< HEAD
 export interface ESQLOptionsResult {
   query?: Maybe<string>;
   sort?: Maybe<Sort>;
-=======
+}
 export interface SerializedKueryQueryResult {
   kuery?: Maybe<KueryFilterQueryResult>;
   serializedQuery?: Maybe<string>;
->>>>>>> upstream/main
 }
 
 export interface TimelineResult {
