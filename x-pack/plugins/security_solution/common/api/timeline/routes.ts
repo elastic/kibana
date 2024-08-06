@@ -34,3 +34,9 @@ export {
   PersistPinnedEventResponse,
   PersistPinnedEventRouteResponse,
 } from './pinned_events/pinned_events_route.gen';
+
+export {
+  GetNotesRequestQuery,
+  GetNotesResponse,
+  GetNotesResult,
+} from './get_notes/get_notes_route.gen';
