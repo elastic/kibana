@@ -5,21 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
-type ServicesEntitiesDetailedStatisticsReturn =
-  APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
   const apmApiClient = getService('apmApiClient');
-  const synthtrace = getService('apmSynthtraceEsClient');
-  const logSynthtrace = getService('logSynthtraceEsClient');
 
   const start = '2024-01-01T00:00:00.000Z';
   const end = '2024-01-01T00:59:59.999Z';
