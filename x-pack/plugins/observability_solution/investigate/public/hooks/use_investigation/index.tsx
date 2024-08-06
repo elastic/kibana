@@ -43,7 +43,6 @@ export interface UseInvestigationApi {
   loadInvestigation: (id: string) => void;
   investigation?: Omit<StatefulInvestigation, 'revisions'>;
   revision?: RenderableInvestigationRevision;
-  setItemTitle: (id: string, title: string) => Promise<void>;
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
@@ -214,7 +213,7 @@ function useInvestigationWithoutContext({
     [user, widgetDefinitions, investigationStore]
   );
 
-  const { copyItem, setGlobalParameters, setItemTitle, setTitle } = investigationStore;
+  const { copyItem, setGlobalParameters, setTitle } = investigationStore;
 
   const { storedItem: investigations, setStoredItem: setInvestigations } = useLocalStorage<
     Investigation[]
@@ -332,7 +331,6 @@ function useInvestigationWithoutContext({
     loadInvestigation,
     revision: renderableRevision,
     setGlobalParameters,
-    setItemTitle,
     setTitle,
     startNewInvestigation,
     investigations,

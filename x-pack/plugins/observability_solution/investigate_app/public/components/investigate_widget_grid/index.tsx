@@ -12,9 +12,9 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { ItemCallback, Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { EuiBreakpoint, EUI_BREAKPOINTS, useBreakpoints } from '../../hooks/use_breakpoints';
+import { EUI_BREAKPOINTS, EuiBreakpoint, useBreakpoints } from '../../hooks/use_breakpoints';
 import { useTheme } from '../../hooks/use_theme';
-import { GridItem, GRID_ITEM_HEADER_HEIGHT } from '../grid_item';
+import { GRID_ITEM_HEADER_HEIGHT, GridItem } from '../grid_item';
 import './styles.scss';
 
 const gridContainerClassName = css`
@@ -52,7 +52,6 @@ interface InvestigateWidgetGridProps {
   onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemTitleChange: (item: InvestigateWidgetGridItem, title: string) => Promise<void>;
   onItemEditClick: (item: InvestigateWidgetGridItem) => void;
 }
 
@@ -117,7 +116,6 @@ function GridSectionRenderer({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemTitleChange,
   onItemEditClick,
 }: InvestigateWidgetGridProps) {
   const WithFixedWidth = useMemo(() => WidthProvider(Responsive), []);
@@ -128,7 +126,6 @@ function GridSectionRenderer({
     onItemsChange,
     onItemCopy,
     onItemDelete,
-    onItemTitleChange,
     onItemEditClick,
   };
 
@@ -149,9 +146,6 @@ function GridSectionRenderer({
           id={item.id}
           title={item.title}
           description={item.description}
-          onTitleChange={(title) => {
-            return itemCallbacksRef.current.onItemTitleChange(item, title);
-          }}
           onCopy={() => {
             return itemCallbacksRef.current.onItemCopy(item);
           }}
@@ -246,7 +240,6 @@ export function InvestigateWidgetGrid({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemTitleChange,
   onItemEditClick,
 }: InvestigateWidgetGridProps) {
   const sections = useMemo<Section[]>(() => {
@@ -300,9 +293,6 @@ export function InvestigateWidgetGrid({
 
                   return onItemsChange(nextItems);
                 }}
-                onItemTitleChange={(item, title) => {
-                  return onItemTitleChange(item, title);
-                }}
                 onItemEditClick={(item) => {
                   return onItemEditClick(item);
                 }}
@@ -325,9 +315,6 @@ export function InvestigateWidgetGrid({
                 }}
                 onDelete={() => {
                   return onItemDelete(section.item);
-                }}
-                onTitleChange={(nextTitle) => {
-                  return onItemTitleChange(section.item, nextTitle);
                 }}
                 onEditClick={() => {
                   return onItemEditClick(section.item);

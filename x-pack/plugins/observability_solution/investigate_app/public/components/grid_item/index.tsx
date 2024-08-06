@@ -18,7 +18,6 @@ interface GridItemProps {
   description: string;
   children: React.ReactNode;
   onCopy: () => void;
-  onTitleChange: (title: string) => void;
   onDelete: () => void;
   loading: boolean;
   onEditClick: () => void;

@@ -34,7 +34,6 @@ interface InvestigationStore {
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (id: string, item: InvestigateWidgetCreate) => Promise<void>;
-  setItemTitle: (id: string, title: string) => Promise<void>;
   asObservable: () => Observable<{
     investigation: StatefulInvestigation;
   }>;
@@ -159,44 +158,6 @@ export function createInvestigationStore({
     });
   }
 
-  async function updateItem(
-    itemId: string,
-    cb: (prevItem: InvestigateWidget) => MaybePromise<InvestigateWidget>
-  ) {
-    await updateRevisionInPlace(async (prevRevision) => {
-      const prevItem = prevRevision.items.find((item) => item.id === itemId);
-      if (!prevItem) {
-        throw new Error('Could not find item by id ' + itemId);
-      }
-      return {
-        ...prevRevision,
-        items: prevRevision.items.map((item) => {
-          if (item === prevItem) {
-            return { ...prevItem, loading: true };
-          }
-          return item;
-        }),
-      };
-    });
-
-    await nextRevision(async (prevRevision) => {
-      const prevItem = prevRevision.items.find((item) => item.id === itemId);
-      if (!prevItem) {
-        throw new Error('Could not find item by id ' + itemId);
-      }
-      const nextItem = await cb(prevItem);
-      return {
-        ...prevRevision,
-        items: prevRevision.items.map((item) => {
-          if (item === prevItem) {
-            return { ...nextItem, loading: false };
-          }
-          return item;
-        }),
-      };
-    });
-  }
-
   const asObservable = observable$.asObservable();
 
   return {
@@ -282,9 +243,6 @@ export function createInvestigationStore({
           ),
         };
       });
-    },
-    setItemTitle: async (itemId, title) => {
-      return updateItem(itemId, (prev) => ({ ...prev, title }));
     },
     setTitle: async (title: string) => {
       return nextRevision((prevRevision) => {

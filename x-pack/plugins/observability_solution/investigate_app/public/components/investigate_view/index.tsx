@@ -27,19 +27,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
   const widgetDefinitions = useMemo(() => investigate.getWidgetDefinitions(), [investigate]);
   const [range, setRange] = useDateRange();
 
-  const {
-    addItem,
-    setItemTitle,
-    copyItem,
-    deleteItem,
-    investigation,
-    setGlobalParameters,
-    revision,
-  } = investigate.useInvestigation({
-    user,
-    from: range.start.toISOString(),
-    to: range.end.toISOString(),
-  });
+  const { addItem, copyItem, deleteItem, investigation, setGlobalParameters, revision } =
+    investigate.useInvestigation({
+      user,
+      from: range.start.toISOString(),
+      to: range.end.toISOString(),
+    });
 
   const [_editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
 
@@ -134,9 +127,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 items={gridItems}
                 onItemsChange={async (nextGridItems) => {
                   noop();
-                }}
-                onItemTitleChange={async (item, title) => {
-                  return setItemTitle(item.id, title);
                 }}
                 onItemCopy={async (copiedItem) => {
                   return copyItem(copiedItem.id);
