@@ -34,6 +34,14 @@ export function generateHistoryTransform(
     filter.push(getElasticsearchQueryOrThrow(definition.filter));
   }
 
+  if (definition.identityFields.some(({ optional }) => !optional)) {
+    definition.identityFields
+      .filter(({ optional }) => !optional)
+      .forEach(({ field }) => {
+        filter.push({ exists: { field } });
+      });
+  }
+
   filter.push({
     range: {
       [definition.history.timestampField]: {
@@ -74,6 +82,14 @@ export function generateBackfillHistoryTransform(
         },
       },
     });
+  }
+
+  if (definition.identityFields.some(({ optional }) => !optional)) {
+    definition.identityFields
+      .filter(({ optional }) => !optional)
+      .forEach(({ field }) => {
+        filter.push({ exists: { field } });
+      });
   }
 
   return generateTransformPutRequest({
