@@ -61,7 +61,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         {
           query: {
             ...params,
-            type: DEFAULT_DATASET_TYPE,
           },
         }
       )
@@ -90,7 +89,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         {
           query: {
             ...params,
-            type: DEFAULT_DATASET_TYPE,
           },
         }
       )

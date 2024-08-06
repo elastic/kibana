@@ -10,13 +10,17 @@ import { mapPercentageToQuality } from '../../common/utils';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
+import { DictionaryType } from '../state_machines/dataset_quality_controller/src/types';
+import { flattenStats } from './flatten_stats';
 
 export function generateDatasets(
-  dataStreamStats: DataStreamStatType[] = [],
-  degradedDocStats: DegradedDocsStat[] = [],
+  dataStreamStats: DictionaryType<DataStreamStatType>,
+  degradedDocStats: DictionaryType<DegradedDocsStat>,
   integrations: Integration[]
 ): DataStreamStat[] {
-  if (!dataStreamStats.length && !integrations.length) {
+  const dataStreams = flattenStats(dataStreamStats);
+
+  if (!dataStreams.length && !integrations.length) {
     return [];
   }
 
@@ -48,8 +52,10 @@ export function generateDatasets(
     { datasetIntegrationMap: {}, integrationsMap: {} }
   );
 
-  if (!dataStreamStats.length) {
-    return degradedDocStats.map((degradedDocStat) =>
+  const degradedDocs = flattenStats(degradedDocStats);
+
+  if (!dataStreams.length) {
+    return degradedDocs.map((degradedDocStat) =>
       DataStreamStat.fromDegradedDocStat({ degradedDocStat, datasetIntegrationMap })
     );
   }
@@ -62,8 +68,8 @@ export function generateDatasets(
       docsCount: DegradedDocsStat['docsCount'];
       quality: DegradedDocsStat['quality'];
     }
-  > = degradedDocStats.reduce(
-    (degradedMapAcc, { dataset, percentage, count, docsCount, quality }) =>
+  > = degradedDocs.reduce(
+    (degradedMapAcc, { dataset, percentage, count, docsCount }) =>
       Object.assign(degradedMapAcc, {
         [dataset]: {
           percentage,
@@ -75,7 +81,7 @@ export function generateDatasets(
     {}
   );
 
-  return dataStreamStats?.map((dataStream) => {
+  return dataStreams.map((dataStream) => {
     const dataset = DataStreamStat.create(dataStream);
 
     return {

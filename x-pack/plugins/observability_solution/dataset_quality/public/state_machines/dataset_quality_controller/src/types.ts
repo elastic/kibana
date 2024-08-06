@@ -7,7 +7,7 @@
 
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { QualityIndicators, SortDirection } from '../../../../common/types';
+import { DataStreamType, QualityIndicators, SortDirection } from '../../../../common/types';
 import { Dashboard, DatasetUserPrivileges } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { DatasetTableSortField, DegradedFieldSortField } from '../../../hooks';
@@ -54,6 +54,7 @@ interface FiltersCriteria {
   integrations: string[];
   namespaces: string[];
   qualities: QualityIndicators[];
+  types: DataStreamType[];
   query?: string;
 }
 
@@ -84,17 +85,19 @@ export interface WithFilters {
   filters: FiltersCriteria;
 }
 
+export type DictionaryType<T> = Record<DataStreamType, T[]>;
+
 export interface WithDataStreamStats {
   datasetUserPrivileges: DatasetUserPrivileges;
-  dataStreamStats: DataStreamStatType[];
+  dataStreamStats: DictionaryType<DataStreamStatType>;
 }
 
 export interface WithDegradedDocs {
-  degradedDocStats: DegradedDocsStat[];
+  degradedDocStats: DictionaryType<DegradedDocsStat>;
 }
 
 export interface WithNonAggregatableDatasets {
-  nonAggregatableDatasets: string[];
+  nonAggregatableDatasets: DictionaryType<string[]>;
 }
 
 export interface WithDatasets {
@@ -106,9 +109,9 @@ export interface WithIntegrations {
   integrations: Integration[];
 }
 
-export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
+export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
-  Partial<WithDegradedDocs> &
+  WithDegradedDocs &
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
@@ -120,31 +123,23 @@ type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
 
 export type DatasetQualityControllerTypeState =
   | {
-      value: 'datasets.fetching';
+      value: 'stats.datasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded';
+      value: 'stats.datasets.loaded';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.idle';
+      value: 'stats.degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'degradedDocs.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'datasets.loaded';
+      value: 'stats.nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
       value: 'integrations.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -248,6 +243,10 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_QUERY';
       query: string;
+    }
+  | {
+      type: 'UPDATE_TYPES';
+      types: DataStreamType[];
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
