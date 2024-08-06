@@ -166,7 +166,9 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
+    if (this.definition.module) {
+      startContext.injection.getContainer()?.load(createPluginStartModule(startContext));
+    }
 
     if (!this.instance) {
       return;
