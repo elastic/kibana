@@ -14,10 +14,7 @@ import {
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleCleanUpTask } from './clean_up_task';
-import {
-  getAgentPoliciesAsInternalUser,
-  getAgentPolicyAsInternalUser,
-} from '../../routes/settings/private_locations/get_agent_policies';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
@@ -76,7 +73,6 @@ export class SyntheticsPrivateLocation {
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>,
-    agentPolicyNamespaces: Record<string, string> = {},
     testRunId?: string,
     runOnce?: boolean
   ): Promise<NewPackagePolicy | null> {
@@ -100,11 +96,7 @@ export class SyntheticsPrivateLocation {
       }
       const configNameSpace = config[ConfigKey.NAMESPACE];
 
-      newPolicy.namespace = await this.getPolicyNamespace(
-        configNameSpace,
-        privateLocation,
-        agentPolicyNamespaces
-      );
+      newPolicy.namespace = await this.getPolicyNamespace(configNameSpace, privateLocation);
 
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
@@ -151,8 +143,6 @@ export class SyntheticsPrivateLocation {
 
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy();
-    // agentPolicyNamespaces is used to cache agent policy namespaces to avoid multiple calls to the API
-    const agentPolicyNamespaces = {};
 
     for (const { config, globalParams } of configs) {
       try {
@@ -173,7 +163,6 @@ export class SyntheticsPrivateLocation {
             newPolicyTemplate,
             spaceId,
             globalParams,
-            agentPolicyNamespaces,
             testRunId,
             runOnce
           );
@@ -242,16 +231,12 @@ export class SyntheticsPrivateLocation {
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
 
-      // agentPolicyNamespaces is used to cache agent policy namespaces to avoid multiple calls to the API
-      const agentPolicyNamespaces = {};
-
       const newPolicy = await this.generateNewPolicy(
         config,
         location,
         newPolicyTemplate,
         spaceId,
-        globalParams,
-        agentPolicyNamespaces
+        globalParams
       );
 
       const pkgPolicy = {
@@ -281,9 +266,6 @@ export class SyntheticsPrivateLocation {
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
 
-    // agentPolicyNamespaces is used to cache agent policy namespaces to avoid multiple calls to the API
-    const agentPolicyNamespaces = {};
-
     const existingPolicies = await this.getExistingPolicies(
       configs.map(({ config }) => config),
       allPrivateLocations,
@@ -306,8 +288,7 @@ export class SyntheticsPrivateLocation {
               privateLocation,
               newPolicyTemplate,
               spaceId,
-              globalParams,
-              agentPolicyNamespaces
+              globalParams
             );
 
             if (!newPolicy) {
@@ -462,26 +443,14 @@ export class SyntheticsPrivateLocation {
     return await getAgentPoliciesAsInternalUser(this.server);
   }
 
-  async getPolicyNamespace(
-    configNameSpace: string,
-    privateLocation: PrivateLocationAttributes,
-    agentPolicyNamespaces: Record<string, string> = {}
-  ) {
+  async getPolicyNamespace(configNameSpace: string, privateLocation: PrivateLocationAttributes) {
     if (configNameSpace && configNameSpace !== DEFAULT_NAMESPACE_STRING) {
       return configNameSpace;
     }
     if (privateLocation.namespace) {
       return privateLocation.namespace;
     }
-    if (agentPolicyNamespaces[privateLocation.id]) {
-      return agentPolicyNamespaces[privateLocation.id];
-    }
-    if (agentPolicyNamespaces[privateLocation.id] === undefined) {
-      const agentPolicy = await getAgentPolicyAsInternalUser(this.server, privateLocation.id);
-      agentPolicyNamespaces[privateLocation.id] = agentPolicy?.namespace ?? '';
-      return agentPolicy?.namespace ?? DEFAULT_NAMESPACE_STRING;
-    }
-    return DEFAULT_NAMESPACE_STRING;
+    return undefined;
   }
 }
 

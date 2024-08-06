@@ -100,54 +100,32 @@ describe('SyntheticsPrivateLocation', () => {
   describe('getPolicyNamespace', () => {
     it('prioritizes config namespace', async () => {
       const configNamespace = 'nonDefaultSpace';
-      const agentPolicyNamespaces = {};
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const result = await syntheticsPrivateLocation.getPolicyNamespace(
         configNamespace,
-        mockPrivateLocation,
-        agentPolicyNamespaces
+        mockPrivateLocation
       );
       expect(result).toEqual(configNamespace);
     });
 
     it('returns private location namespace when config namespace is default', async () => {
-      const agentPolicyNamespaces = {};
       const privateLocationNamespace = 'privateLocationNamespace';
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const result = await syntheticsPrivateLocation.getPolicyNamespace(
-        'default',
-        { ...mockPrivateLocation, namespace: privateLocationNamespace },
-        agentPolicyNamespaces
-      );
+      const result = await syntheticsPrivateLocation.getPolicyNamespace('default', {
+        ...mockPrivateLocation,
+        namespace: privateLocationNamespace,
+      });
       expect(result).toEqual(privateLocationNamespace);
     });
 
-    it('returns cached agent policy namespace when available, config namespace is default, and private location namespace is undefined', async () => {
+    it('falls back to undefined when config namespace and private location namespace are not defined', async () => {
       const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
-      const agentPolicyNamespaces = {
-        [mockPrivateLocation.id]: agentPolicyNamespaceCached,
-      };
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const result = await syntheticsPrivateLocation.getPolicyNamespace(
         'default',
-        mockPrivateLocation,
-        agentPolicyNamespaces
+        mockPrivateLocation
       );
-      expect(result).toEqual(agentPolicyNamespaceCached);
-    });
-
-    it('falls back to fetching agent policy namespace when undefined in cache', async () => {
-      const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
-      const agentPolicyNamespaces = {
-        notTheCorrectCacheId: agentPolicyNamespaceCached,
-      };
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const result = await syntheticsPrivateLocation.getPolicyNamespace(
-        'default',
-        mockPrivateLocation,
-        agentPolicyNamespaces
-      );
-      expect(result).toEqual(agentPolicyNamespace);
+      expect(result).toEqual(undefined);
     });
   });
 
