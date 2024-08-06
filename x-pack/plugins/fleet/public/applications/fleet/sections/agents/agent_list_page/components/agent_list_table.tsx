@@ -278,14 +278,14 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: VERSION_FIELD,
       sortable: true,
-      width: '180px',
+      width: '220px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
               <EuiFlexItem grow={false}>
                 <EuiText size="s" className="eui-textNoWrap">
                   {safeMetadata(version)}
