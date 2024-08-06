@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
@@ -14,11 +12,14 @@ import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } fr
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { context } from '@kbn/kibana-react-plugin/public';
 
-import { isManagedJob } from '../../../jobs_utils';
-
+import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { mlJobServiceFactory } from '../../../../services/job_service';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
+
+import { isManagedJob } from '../../../jobs_utils';
 
 import {
   closeJobs,

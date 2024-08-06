@@ -81,17 +81,7 @@ jest.mock('./utils', () => ({
 const mockAddDanger = jest.fn();
 const mockKibanaContext = {
   services: {
-    data: {
-      query: {
-        timefilter: {
-          timefilter: {
-            disableTimeRangeSelector: jest.fn(),
-            disableAutoRefreshSelector: jest.fn(),
-          },
-        },
-      },
-    },
-    docLinks: { links: { ml: { anomalyDetectionJobTips: 'https://anomalyDetectionJobTips' } } },
+    docLinks: { links: { ml: { calendars: 'test' } } },
     notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
     mlServices: {
       mlApiServices: {
