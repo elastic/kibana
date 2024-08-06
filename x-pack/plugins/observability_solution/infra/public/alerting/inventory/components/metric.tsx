@@ -172,17 +172,19 @@ export const MetricExpression = ({
     [customMetric, debouncedOnChangeCustom]
   );
 
-  const metricsToRemove: string[] = metrics.reduce(
-    (metricToRemove, currentMetric) => {
-      if (Object.keys(V2ToLegacyMapping).includes(currentMetric.value)) {
-        metricToRemove.push(V2ToLegacyMapping[currentMetric.value as V2MetricType]);
-      }
-      return metricToRemove;
-    },
-    ['']
-  );
+  const metricsToRemove: string[] = metrics
+    .reduce(
+      (metricToRemove, currentMetric) => {
+        if (Object.keys(V2ToLegacyMapping).includes(currentMetric.value)) {
+          metricToRemove.push(V2ToLegacyMapping[currentMetric.value as V2MetricType]);
+        }
+        return metricToRemove;
+      },
+      ['']
+    )
+    .filter(Boolean);
 
-  const availablefieldsOptions = useMemo(
+  const availableFieldsOptions = useMemo(
     () =>
       metrics
         .filter(
@@ -321,14 +323,14 @@ export const MetricExpression = ({
                 <EuiComboBox
                   fullWidth
                   singleSelection={{ asPlainText: true }}
-                  data-test-subj="availablefieldsOptionsComboBox"
+                  data-test-subj="availableFieldsOptionsComboBox"
                   // @ts-expect-error upgrade typescript v5.1.6
                   isInvalid={errors.metric.length > 0}
                   placeholder={firstFieldOption.text}
-                  options={availablefieldsOptions}
-                  noSuggestions={!availablefieldsOptions.length}
+                  options={availableFieldsOptions}
+                  noSuggestions={!availableFieldsOptions.length}
                   selectedOptions={
-                    metric ? availablefieldsOptions.filter((a) => a.value === metric.value) : []
+                    metric ? availableFieldsOptions.filter((a) => a.value === metric.value) : []
                   }
                   renderOption={(o: any) => o.label}
                   onChange={(selectedOptions) => {
