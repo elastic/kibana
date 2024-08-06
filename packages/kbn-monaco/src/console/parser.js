@@ -37,26 +37,6 @@ export const createParser = () => {
       requestStartOffset = at - 1;
       requests.push({ startOffset: requestStartOffset });
     },
-    addRequestMethod = function(method) {
-      const lastRequest = getLastRequest();
-      lastRequest.method = method;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
-    },
-    addRequestUrl = function(url) {
-      const lastRequest = getLastRequest();
-      lastRequest.url = url;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
-    },
-    addRequestData = function(data) {
-      const lastRequest = getLastRequest();
-      const dataArray = lastRequest.data || [];
-      dataArray.push(data);
-      lastRequest.data = dataArray;
-      requests.push(lastRequest);
-      requestEndOffset = at - 1;
-    },
     addRequestEnd = function() {
       const lastRequest = getLastRequest();
       lastRequest.endOffset = requestEndOffset;
@@ -409,17 +389,14 @@ export const createParser = () => {
     request = function () {
       white();
       addRequestStart();
-      const parsedMethod = method();
-      addRequestMethod(parsedMethod);
+      method();
       strictWhite();
-      const parsedUrl = url();
-      addRequestUrl(parsedUrl);
+      url();
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();
       if (ch == '{') {
-        const parsedObject = object();
-        addRequestData(parsedObject);
+        object();
       }
       // multi doc request
       strictWhite(); // advance to one new line
@@ -427,8 +404,7 @@ export const createParser = () => {
       strictWhite();
       while (ch == '{') {
         // another object
-        const parsedObject = object();
-        addRequestData(parsedObject);
+        object();
         strictWhite();
         newLine();
         strictWhite();
