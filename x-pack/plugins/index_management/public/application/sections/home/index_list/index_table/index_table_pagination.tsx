@@ -25,7 +25,7 @@ export const IndexTablePagination = ({
   setURLParam,
 }: IndexTablePaginationProps) => {
   const { pageSize, onTableChange } = useEuiTablePersist({
-    tableId: 'componentTemplates',
+    tableId: 'indices',
     customOnTableChange: ({ page }) => {
       setURLParam('pageSize', page?.size);
       pageSizeChanged(page?.size);

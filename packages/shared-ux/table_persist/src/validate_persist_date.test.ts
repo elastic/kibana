@@ -109,11 +109,11 @@ describe('validatePersistData', () => {
       });
     });
 
-    it('does not accept sort if its field property is not of type string', () => {
+    it('does not accept sort if its field property is not of type string, number, or symbol', () => {
       const data = {
         pageSize: TEST_VALID_DATA.pageSize,
         sort: {
-          field: 123,
+          field: false,
           direction: 'asc',
         },
       };

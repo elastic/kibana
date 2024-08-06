@@ -14,23 +14,28 @@ import {
 } from './constants';
 import { createStorage } from './storage';
 import { validatePersistData } from './validate_persist_data';
+import { PersistData } from './types';
 
 interface EuiTablePersistProps {
+  /** A unique id that will be included in the local storage variable for this table. */
   tableId: string;
+  /** (Optional) If the table has a custom onTableChange, it should be provided here. */
   customOnTableChange?: (change: Criteria<any>) => void;
+  /** (Optional) If the table has a custom initial page, it should be provided here.
+   * Defaults to {@link INITIAL_DEFAULT_PAGE_SIZE} */
   initialPageSize?: number;
+  /** (Optional) If the table has a custom initial sort, it should be provided here. */
   initialSort?: any;
+  /** (Optional) If the table has a custom page size options list, it should be provided here.
+   * Defaults to {@link DEFAULT_PAGE_SIZE_OPTIONS} */
   pageSizeOptions?: number[];
 }
 
-interface PersistData {
-  pageSize?: number;
-  sort?: {
-    field: string | number | symbol;
-    direction: 'asc' | 'desc';
-  };
-}
-
+/**
+ * A hook that stores and retrieves from local storage the table page size and sort criteria.
+ * Returns the persisting page size and sort and the onTableChange handler that should be passed
+ * as props to an Eui table component.
+ */
 export const useEuiTablePersist = ({
   tableId,
   customOnTableChange,
@@ -43,9 +48,9 @@ export const useEuiTablePersist = ({
     prefix: LOCAL_STORAGE_PREFIX,
   });
 
-  const storedPersistData: PersistData = storage.get(tableId, undefined);
+  const storedPersistData = storage.get(tableId, undefined);
 
-  const { pageSize: storagePageSize, sort: storageSort } = validatePersistData(
+  const { pageSize: storagePageSize, sort: storageSort }: PersistData = validatePersistData(
     storedPersistData,
     pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS
   );
