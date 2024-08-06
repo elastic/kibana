@@ -1531,11 +1531,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        expect(body).toEqual(
-          expect.objectContaining({
-            success: true,
-          })
-        );
+        expect(body).toMatchObject({
+          success: true,
+        });
       });
 
       it('rejects rules without a rule_id', async () => {
@@ -1551,11 +1549,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.errors).toHaveLength(1);
-        expect(body.errors[0]).toEqual(
-          expect.objectContaining({
-            error: expect.objectContaining({ message: 'rule_id: Required', status_code: 400 }),
-          })
-        );
+        expect(body.errors[0]).toMatchObject({
+          error: { message: 'rule_id: Required', status_code: 400 },
+        });
       });
 
       describe('calculation of the rule_source fields', () => {
