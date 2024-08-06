@@ -62,16 +62,6 @@ const props = {
   canDeleteFilter: true,
 };
 
-async function prepareEditTest() {
-  const component = render(
-    <IntlProvider locale="en">
-      <EditFilterList {...props} />
-    </IntlProvider>
-  );
-
-  return component;
-}
-
 describe('EditFilterList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -120,7 +110,10 @@ describe('EditFilterList', () => {
     expect(mockFilters).toHaveBeenCalledTimes(0);
   });
 
-  test('renders the edit page for an existing filter list and updates description', async () => {
+  // There is a bug in `v13.5.0` of `@testing-library/user-event` that doesn't
+  // allow to click on elements that (wrongly ?) inherit pointer-events.
+  // A PR to update the lib is up here: https://github.com/elastic/kibana/pull/189949
+  test.skip('renders the edit page for an existing filter list and updates description', async () => {
     const { getByTestId } = render(
       <IntlProvider locale="en">
         <EditFilterList {...props} filterId="safe_domains" />
@@ -138,11 +131,6 @@ describe('EditFilterList', () => {
     const mlFilterListEditDescriptionButton = getByTestId('mlFilterListEditDescriptionButton');
 
     expect(mlFilterListEditDescriptionButton).toBeInTheDocument();
-
-    // There is a bug in `v13.5.0` of `@testing-library/user-event` that doesn't
-    // allow to click on elements that (wrongly ?) inherit pointer-events.
-    // A PR to update the lib is up here: https://github.com/elastic/kibana/pull/189949
-    return;
 
     // Workaround with `pointerEventsCheck` so we don't get "Error: unable to click element as it has or inherits pointer-events set to "none"."
     await userEvent.click(mlFilterListEditDescriptionButton, { pointerEventsCheck: 0 });
@@ -198,21 +186,86 @@ describe('EditFilterList', () => {
   });
 
   test('renders after selecting an item and deleting it', async () => {
-    const component = await prepareEditTest();
-    const instance = component.container.firstChild;
+    const { findByText, getAllByTestId, getByTestId, queryByText } = render(
+      <IntlProvider locale="en">
+        <EditFilterList {...props} filterId="safe_domains" />
+      </IntlProvider>
+    );
 
-    instance.setItemSelected(mockTestFilter.items[1], true);
-    expect(component.asFragment()).toMatchSnapshot();
+    expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
 
-    instance.deleteSelectedItems();
-    expect(component.asFragment()).toMatchSnapshot();
+    // Use findByText to be able to wait for the page to be updated.
+    expect(await findByText('google.com')).toBeInTheDocument();
+    expect(await findByText('google.co.uk')).toBeInTheDocument();
+    expect(await findByText('elastic.co')).toBeInTheDocument();
+    expect(await findByText('youtube.com')).toBeInTheDocument();
+
+    const checkboxes = getAllByTestId('mlGridItemCheckbox');
+    expect(checkboxes.length).toBe(4);
+
+    // Click the checkbox for google.co.uk and then the delete button.
+    await userEvent.click(checkboxes[1]);
+    await userEvent.click(getByTestId('mlFilterListDeleteItemButton'));
+
+    expect(await findByText('google.com')).toBeInTheDocument();
+    expect(await queryByText('google.co.uk')).not.toBeInTheDocument();
+    expect(await findByText('elastic.co')).toBeInTheDocument();
+    expect(await findByText('youtube.com')).toBeInTheDocument();
+    expect(getAllByTestId('mlGridItemCheckbox')).toHaveLength(3);
   });
 
-  test('adds new items to filter list', async () => {
-    const component = await prepareEditTest();
-    const instance = component.container.firstChild;
+  // There is a bug in `v13.5.0` of `@testing-library/user-event` that doesn't
+  // allow to click on elements that (wrongly ?) inherit pointer-events.
+  // A PR to update the lib is up here: https://github.com/elastic/kibana/pull/189949
+  test.skip('adds new items to filter list', async () => {
+    const { getByTestId, getByText, findByText, findByTestId, queryByTestId, queryByText } = render(
+      <IntlProvider locale="en">
+        <EditFilterList {...props} filterId="safe_domains" />
+      </IntlProvider>
+    );
 
-    instance.addItems(['amazon.com', 'spotify.com']);
-    expect(component.asFragment()).toMatchSnapshot();
+    expect(mockFilters).toHaveBeenCalledWith({ filterId: 'safe_domains' });
+
+    // Use findByText to be able to wait for the page to be updated.
+    expect(await findByText('google.com')).toBeInTheDocument();
+    expect(await findByText('google.co.uk')).toBeInTheDocument();
+    expect(await findByText('elastic.co')).toBeInTheDocument();
+    expect(await findByText('youtube.com')).toBeInTheDocument();
+    expect(await queryByText('amazon.com')).not.toBeInTheDocument();
+    expect(await queryByText('spotify.com')).not.toBeInTheDocument();
+
+    const mlFilterListOpenNewItemsPopoverButton = queryByTestId(
+      'mlFilterListOpenNewItemsPopoverButton'
+    );
+    expect(mlFilterListOpenNewItemsPopoverButton).toBeInTheDocument();
+    await userEvent.click(mlFilterListOpenNewItemsPopoverButton);
+
+    // Assert that the popover was opened.
+    expect(await findByTestId('mlFilterListAddItemPopoverContent')).toBeInTheDocument();
+
+    // Assert that the textarea is present and empty.
+    const mlFilterListAddItemTextArea = getByTestId('mlFilterListAddItemTextArea');
+    expect(mlFilterListAddItemTextArea).toBeInTheDocument();
+    expect(mlFilterListAddItemTextArea).toHaveValue('');
+
+    // Assert that the add items button prenset but disabled.
+    const mlFilterListAddItemsButton = getByTestId('mlFilterListAddItemsButton');
+    expect(mlFilterListAddItemsButton).toBeInTheDocument();
+    expect(mlFilterListAddItemsButton).toBeDisabled();
+
+    // Enter items in the textarea and click the add items button
+    await userEvent.type(mlFilterListAddItemTextArea, 'amazon.com\nspotify.com');
+    await userEvent.click(mlFilterListAddItemsButton);
+
+    // Assert that the popover is closed again
+    expect(await queryByTestId('mlFilterListAddItemPopover')).not.toBeInTheDocument();
+
+    // Assert that the item grid has been updated.
+    expect(getByText('google.com')).toBeInTheDocument();
+    expect(getByText('google.co.uk')).toBeInTheDocument();
+    expect(getByText('elastic.co')).toBeInTheDocument();
+    expect(getByText('youtube.com')).toBeInTheDocument();
+    expect(getByText('amazon.com')).toBeInTheDocument();
+    expect(getByText('spotify.com')).toBeInTheDocument();
   });
 });
