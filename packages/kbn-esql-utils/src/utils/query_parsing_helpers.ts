@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { type ESQLSource, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import type { ESQLSource, ESQLFunction, ESQLColumn, ESQLSingleAstItem } from '@kbn/esql-ast';
+import { getAstAndSyntaxErrors, Walker, walk } from '@kbn/esql-ast';
 
 const DEFAULT_ESQL_LIMIT = 500;
 
@@ -53,3 +54,39 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
   const pipes = (esql || '').split('|');
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }
+
+/**
+ * When the ?start and ?end params are used, we want to retrieve the timefield from the query.
+ * @param esql:string
+ * @returns string
+ */
+export const getTimeFieldFromESQLQuery = (esql: string) => {
+  const { ast } = getAstAndSyntaxErrors(esql);
+  const functions: ESQLFunction[] = [];
+
+  walk(ast, {
+    visitFunction: (node) => functions.push(node),
+  });
+
+  const params = Walker.params(ast);
+  const timeNamedParam = params.find((param) => param.value === 'start' || param.value === 'end');
+  if (!timeNamedParam || !functions.length) {
+    return undefined;
+  }
+  const allFunctionsWithNamedParams = functions.filter(
+    ({ location }) =>
+      location.min <= timeNamedParam.location.min && location.max >= timeNamedParam.location.max
+  );
+
+  if (!allFunctionsWithNamedParams.length) {
+    return undefined;
+  }
+  const lowLevelFunction = allFunctionsWithNamedParams[allFunctionsWithNamedParams.length - 1];
+
+  const column = lowLevelFunction.args.find((arg) => {
+    const argument = arg as ESQLSingleAstItem;
+    return argument.type === 'column';
+  }) as ESQLColumn;
+
+  return column?.name;
+};

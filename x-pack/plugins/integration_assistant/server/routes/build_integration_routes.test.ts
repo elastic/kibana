@@ -58,4 +58,15 @@ describe('registerIntegrationBuilderRoutes', () => {
     expect(response.body).toEqual({ test: 'test' });
     expect(response.status).toEqual(200);
   });
+
+  describe('when the integration assistant is not available', () => {
+    beforeEach(() => {
+      context.integrationAssistant.isAvailable.mockReturnValue(false);
+    });
+
+    it('returns a 404', async () => {
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(404);
+    });
+  });
 });

@@ -21,7 +21,7 @@ import {
   apmLabsButton,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
-  apmEnableMultiSignal,
+  entityCentricExperience,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -342,14 +342,13 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
-  [apmEnableMultiSignal]: {
+  [entityCentricExperience]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableMultiSignal', {
-      defaultMessage: 'Multi signal APM',
+    name: i18n.translate('xpack.observability.entityCentricExperience', {
+      defaultMessage: 'Entity-centric experience',
     }),
-    description: i18n.translate('xpack.observability.apmEnableMultiSignalDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the multi-signal feature in APM, which allows you to monitor services from logs and traces.',
+    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
+      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },

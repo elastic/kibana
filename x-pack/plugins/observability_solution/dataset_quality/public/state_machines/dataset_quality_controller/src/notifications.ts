@@ -71,9 +71,34 @@ export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) =
   });
 };
 
+export const fetchDataStreamIntegrationFailedNotifier = (
+  toasts: IToasts,
+  error: Error,
+  integrationName?: string
+) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.flyout.fetchIntegrationsFailed', {
+      defaultMessage: "We couldn't get {integrationName} integration info.",
+      values: {
+        integrationName,
+      },
+    }),
+    text: error.message,
+  });
+};
+
 export const noDatasetSelected = i18n.translate(
   'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
   {
     defaultMessage: 'No data set have been selected',
   }
 );
+
+export const assertBreakdownFieldEcsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality. assertBreakdownFieldEcsFailed', {
+      defaultMessage: "We couldn't retrieve breakdown field metadata.",
+    }),
+    text: error.message,
+  });
+};

@@ -40,9 +40,7 @@
           "label": "PlaygroundProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<",
-            "PlaygroundProviderProps",
-            " & { children?: React.ReactNode; }>"
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
@@ -81,58 +79,15 @@
         },
         {
           "parentPluginId": "searchPlayground",
-          "id": "def-public.SearchPlaygroundPluginStart.PlaygroundToolbar",
-          "type": "Function",
-          "tags": [],
-          "label": "PlaygroundToolbar",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
-          ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundToolbar.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P & { children?: React.ReactNode; }"
-              ],
-              "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundToolbar.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        },
-        {
-          "parentPluginId": "searchPlayground",
           "id": "def-public.SearchPlaygroundPluginStart.Playground",
           "type": "Function",
           "tags": [],
           "label": "Playground",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            "React.FunctionComponent<",
+            "AppProps",
+            " & { children?: React.ReactNode; }>"
           ],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,

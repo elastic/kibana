@@ -6,21 +6,27 @@
  */
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useSystemPromptEditor } from './use_system_prompt_editor';
-import { Prompt } from '../../../types';
 import {
   mockSystemPrompt,
   mockSuperheroSystemPrompt,
   mockSystemPrompts,
 } from '../../../../mock/system_prompt';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { useAssistantContext } from '../../../../assistant_context';
 
+jest.mock('../../../../assistant_context');
 // Mock functions for the tests
 const mockOnSelectedSystemPromptChange = jest.fn();
 const mockSetUpdatedSystemPromptSettings = jest.fn();
+const mockSetPromptsBulkActions = jest.fn();
 const mockPreviousSystemPrompts = [...mockSystemPrompts];
 
 describe('useSystemPromptEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      currentAppId: 'securitySolutionUI',
+    });
   });
 
   test('should delete a system prompt by id', () => {
@@ -28,6 +34,8 @@ describe('useSystemPromptEditor', () => {
       useSystemPromptEditor({
         onSelectedSystemPromptChange: mockOnSelectedSystemPromptChange,
         setUpdatedSystemPromptSettings: mockSetUpdatedSystemPromptSettings,
+        setPromptsBulkActions: mockSetPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
@@ -41,11 +49,13 @@ describe('useSystemPromptEditor', () => {
   });
 
   test('should handle selection of an existing system prompt', () => {
-    const existingPrompt: Prompt = mockSystemPrompt;
+    const existingPrompt: PromptResponse = mockSystemPrompt;
     const { result } = renderHook(() =>
       useSystemPromptEditor({
         onSelectedSystemPromptChange: mockOnSelectedSystemPromptChange,
         setUpdatedSystemPromptSettings: mockSetUpdatedSystemPromptSettings,
+        setPromptsBulkActions: mockSetPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
@@ -65,6 +75,8 @@ describe('useSystemPromptEditor', () => {
       useSystemPromptEditor({
         onSelectedSystemPromptChange: mockOnSelectedSystemPromptChange,
         setUpdatedSystemPromptSettings: mockSetUpdatedSystemPromptSettings,
+        setPromptsBulkActions: mockSetPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
@@ -72,11 +84,12 @@ describe('useSystemPromptEditor', () => {
       result.current.onSystemPromptSelectionChange(newPromptId);
     });
 
-    const newPrompt: Prompt = {
+    const newPrompt: PromptResponse = {
       id: newPromptId,
       content: '',
       name: newPromptId,
       promptType: 'system',
+      consumer: 'securitySolutionUI',
     };
 
     expect(mockOnSelectedSystemPromptChange).toHaveBeenCalledWith(newPrompt);
@@ -90,10 +103,12 @@ describe('useSystemPromptEditor', () => {
       useSystemPromptEditor({
         onSelectedSystemPromptChange: mockOnSelectedSystemPromptChange,
         setUpdatedSystemPromptSettings: mockSetUpdatedSystemPromptSettings,
+        setPromptsBulkActions: mockSetPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
-    const expectedPrompt: Prompt = mockSuperheroSystemPrompt;
+    const expectedPrompt: PromptResponse = mockSuperheroSystemPrompt;
 
     act(() => {
       result.current.onSystemPromptSelectionChange(expectedPrompt);

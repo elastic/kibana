@@ -14,5 +14,9 @@
   ],
   "exclude": [
     "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
   ]
 }

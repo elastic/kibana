@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
 import { OperationDefinition } from '.';
 import {

@@ -6,6 +6,7 @@
  */
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import type {
   AugmentedSecurityJobFields,
   Module,
@@ -111,13 +112,11 @@ export const getInstalledJobs = (
   moduleJobs: SecurityJob[],
   compatibleModuleIds: string[]
 ): SecurityJob[] =>
-  jobSummaryData
-    .filter(({ groups }) => groups.includes('siem') || groups.includes('security'))
-    .map<SecurityJob>((jobSummary) => ({
-      ...jobSummary,
-      ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
-      isInstalled: true,
-    }));
+  jobSummaryData.filter(isSecurityJob).map((jobSummary) => ({
+    ...jobSummary,
+    ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
+    isInstalled: true,
+  }));
 
 /**
  * Combines installed jobs + moduleSecurityJobs that don't overlap and sorts by name asc

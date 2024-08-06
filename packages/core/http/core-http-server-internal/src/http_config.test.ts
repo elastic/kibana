@@ -9,6 +9,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
+import { permissionsPolicyConfig } from './permissions_policy';
 import { ExternalUrlConfig } from './external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
@@ -654,7 +655,13 @@ describe('HttpConfig', () => {
       },
     });
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
@@ -668,7 +675,13 @@ describe('HttpConfig', () => {
   it('defaults restrictInternalApis to false', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const rawPermissionsPolicyConfig = permissionsPolicyConfig.schema.validate({});
+    const httpConfig = new HttpConfig(
+      rawConfig,
+      rawCspConfig,
+      ExternalUrlConfig.DEFAULT,
+      rawPermissionsPolicyConfig
+    );
     expect(httpConfig.restrictInternalApis).toBe(false);
   });
 });

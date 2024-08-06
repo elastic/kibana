@@ -65,6 +65,7 @@ export const attachTimeline = (newCase: TestCase) => {
       cy.get('body').type('{esc}');
       cy.get(INSERT_TIMELINE_BTN).click();
       cy.get(LOADING_INDICATOR).should('not.exist');
+      cy.get('[data-test-subj="selectable-input"]').click();
       cy.get(TIMELINE_SEARCHBOX).should('exist');
       cy.get(TIMELINE_SEARCHBOX).should('be.visible');
 

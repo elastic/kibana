@@ -220,9 +220,17 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       type: 'machine_learning',
       anomaly_threshold: 65,
       machine_learning_job_id: ['auth_high_count_logon_events', 'auth_high_count_logon_fails'],
+      alert_suppression: {
+        group_by: ['host.name'],
+        duration: { unit: 'm', value: 5 },
+        missing_fields_strategy: 'suppress',
+      },
     }),
     ['security-rule.query', 'security-rule.language']
-  ) as typeof CUSTOM_QUERY_INDEX_PATTERN_RULE;
+  ) as Omit<
+    ReturnType<typeof createRuleAssetSavedObject>,
+    'security-rule.query' | 'security-rule.language'
+  >;
 
   const THRESHOLD_RULE_INDEX_PATTERN = createRuleAssetSavedObject({
     name: 'Threshold index pattern rule',
@@ -500,24 +508,30 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         });
 
         it('Machine learning rule properties', function () {
-          clickAddElasticRulesButton();
-
-          openRuleInstallPreview(MACHINE_LEARNING_RULE['security-rule'].name);
-
-          assertCommonPropertiesShown(commonProperties);
-
           const {
+            name,
+            alert_suppression: alertSuppression,
             anomaly_threshold: anomalyThreshold,
             machine_learning_job_id: machineLearningJobIds,
           } = MACHINE_LEARNING_RULE['security-rule'] as {
+            name: string;
             anomaly_threshold: number;
             machine_learning_job_id: string[];
+            alert_suppression: AlertSuppression;
           };
+
+          clickAddElasticRulesButton();
+          openRuleInstallPreview(name);
+
+          assertCommonPropertiesShown(commonProperties);
+
           assertMachineLearningPropertiesShown(
             anomalyThreshold,
             machineLearningJobIds,
             this.mlModules
           );
+
+          assertAlertSuppressionPropertiesShown(alertSuppression);
         });
 
         it('Threshold rule properties', () => {

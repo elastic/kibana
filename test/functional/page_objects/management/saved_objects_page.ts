@@ -357,7 +357,7 @@ export class SavedObjectsPageObject extends FtrService {
           error: await error.getVisibleText(),
         };
       })
-    );
+    ).then((result) => result.sort((a, b) => a.id.localeCompare(b.id)));
   }
 
   async getTableSummary() {
@@ -385,6 +385,7 @@ export class SavedObjectsPageObject extends FtrService {
     await this.testSubjects.click('savedObjectsManagementDelete');
     if (confirmDelete) {
       await this.testSubjects.click('confirmModalConfirmButton');
+      await this.testSubjects.waitForDeleted('confirmModalConfirmButton');
       await this.waitTableIsLoaded();
     }
   }

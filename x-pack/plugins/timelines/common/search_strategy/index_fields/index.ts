@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { IFieldSubType } from '@kbn/es-query';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 import type { Maybe } from '../common';
 
@@ -67,25 +65,10 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   runtimeMappings: MappingRuntimeFields;
 }
 
-/**
- * @deprecated use fields list on dataview / "indexPattern"
- * about to use browserFields? Reconsider! Maybe you can accomplish
- * everything you need via the `fields` property on the data view
- * you are working with? Or perhaps you need a description for a
- * particular field? Consider using the EcsFlat module from `@kbn/ecs`
- */
-export interface BrowserField {
-  aggregatable: boolean;
-  fields: Record<string, Partial<BrowserField>>; // FIXME: missing in FieldSpec
-  format: string;
-  indexes: string[]; // FIXME: missing in FieldSpec
-  name: string;
-  searchable: boolean;
-  type: string;
-  esTypes?: string[];
-  subType?: IFieldSubType; // not sure
-  readFromDocValues: boolean;
-  runtimeField?: RuntimeField;
+type FieldCategoryName = string;
+
+export interface FieldCategory {
+  fields: Record<string, Partial<FieldSpec>>;
 }
 
 /**
@@ -95,7 +78,6 @@ export interface BrowserField {
  * you are working with? Or perhaps you need a description for a
  * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
-export type BrowserFields = Record<string, Partial<BrowserField>>;
+export type BrowserFields = Record<FieldCategoryName, FieldCategory>;
 
 export const EMPTY_BROWSER_FIELDS = {};
-export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

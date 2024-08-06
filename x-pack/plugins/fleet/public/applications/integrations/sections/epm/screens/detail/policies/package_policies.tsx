@@ -31,6 +31,7 @@ import {
   AgentPolicyRefreshContext,
   useIsPackagePolicyUpgradable,
   useAuthz,
+  useMultipleAgentPolicies,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -40,8 +41,6 @@ import {
   PackagePolicyActionsMenu,
 } from '../../../../../components';
 import { SideBarColumn } from '../../../components/side_bar_column';
-
-import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
@@ -59,16 +58,31 @@ interface InMemoryPackagePolicyAndAgentPolicy {
 
 const IntegrationDetailsLink = memo<{
   packagePolicy: InMemoryPackagePolicyAndAgentPolicy['packagePolicy'];
-}>(({ packagePolicy }) => {
+  agentPolicies: InMemoryPackagePolicyAndAgentPolicy['agentPolicies'];
+}>(({ packagePolicy, agentPolicies }) => {
   const { getHref } = useLink();
+  const policySupportsAgentless = agentPolicies?.some((policy) => policy.supports_agentless);
   return (
     <EuiLink
       className="eui-textTruncate"
       data-test-subj="integrationNameLink"
-      title={packagePolicy.name}
-      href={getHref('integration_policy_edit', {
-        packagePolicyId: packagePolicy.id,
-      })}
+      {...(policySupportsAgentless
+        ? {
+            disabled: true,
+            title: i18n.translate(
+              'xpack.fleet.epm.packageDetails.integrationList.disabledEditTitle',
+              {
+                defaultMessage:
+                  'Editing an agentless integration is not supported. Add a new integration if needed.',
+              }
+            ),
+          }
+        : {
+            href: getHref('integration_policy_edit', {
+              packagePolicyId: packagePolicy.id,
+            }),
+            title: packagePolicy.name,
+          })}
     >
       {packagePolicy.name}
     </EuiLink>
@@ -183,8 +197,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.name', {
           defaultMessage: 'Integration policy',
         }),
-        render(_, { packagePolicy }) {
-          return <IntegrationDetailsLink packagePolicy={packagePolicy} />;
+        render(_, { agentPolicies, packagePolicy }) {
+          return (
+            <IntegrationDetailsLink packagePolicy={packagePolicy} agentPolicies={agentPolicies} />
+          );
         },
       },
       {
@@ -231,13 +247,17 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       {
         field: 'packagePolicy.policy_ids',
         name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.agentPolicy', {
-          defaultMessage: 'Agent policy',
+          defaultMessage: 'Agent policies',
         }),
         truncateText: true,
-        render(id, { agentPolicies }) {
+        render(id, { agentPolicies, packagePolicy }) {
           return agentPolicies.length > 0 ? (
-            canShowMultiplePoliciesCell && agentPolicies.length > 1 ? (
-              <MultipleAgentPoliciesSummaryLine policies={agentPolicies} />
+            canShowMultiplePoliciesCell ? (
+              <MultipleAgentPoliciesSummaryLine
+                policies={agentPolicies}
+                packagePolicyId={packagePolicy.id}
+                onAgentPoliciesChange={refreshPolicies}
+              />
             ) : (
               <AgentPolicySummaryLine policy={agentPolicies[0]} />
             )
@@ -328,6 +348,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       canAddFleetServers,
       canAddAgents,
       showAddAgentHelpForPackagePolicyId,
+      refreshPolicies,
     ]
   );
 

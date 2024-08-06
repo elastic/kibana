@@ -20,7 +20,6 @@ import {
   startElasticsearch,
   KibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
 
 describe('when migrating to a new version', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -144,6 +143,5 @@ describe('when migrating to a new version', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 });

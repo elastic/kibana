@@ -8,25 +8,11 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { BrowserFields } from '@kbn/timelines-plugin/common';
 
-const DEFAULT_INDEX_PATTERN = [
-  'apm-*-transaction*',
-  'auditbeat-*',
-  'endgame-*',
-  'filebeat-*',
-  'logs-*',
-  'packetbeat-*',
-  'traces-apm*',
-  'winlogbeat-*',
-  '-*elastic-cloud-logs-*',
-];
-
 export const mockBrowserFields: BrowserFields = {
   agent: {
     fields: {
       'agent.ephemeral_id': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'agent.ephemeral_id',
         searchable: true,
         type: 'string',
@@ -34,8 +20,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'agent.hostname': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'agent.hostname',
         searchable: true,
         type: 'string',
@@ -43,8 +27,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'agent.id': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'agent.id',
         searchable: true,
         type: 'string',
@@ -52,8 +34,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'agent.name': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'agent.name',
         searchable: true,
         type: 'string',
@@ -65,8 +45,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'auditd.data.a0': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat'],
         name: 'auditd.data.a0',
         searchable: true,
         type: 'string',
@@ -74,8 +52,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'auditd.data.a1': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat'],
         name: 'auditd.data.a1',
         searchable: true,
         type: 'string',
@@ -83,8 +59,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'auditd.data.a2': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat'],
         name: 'auditd.data.a2',
         searchable: true,
         type: 'string',
@@ -96,8 +70,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       '@timestamp': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: '@timestamp',
         searchable: true,
         type: 'date',
@@ -110,7 +82,6 @@ export const mockBrowserFields: BrowserFields = {
         esTypes: [],
         searchable: true,
         aggregatable: false,
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
       message: {
         name: 'message',
@@ -118,8 +89,6 @@ export const mockBrowserFields: BrowserFields = {
         esTypes: ['text'],
         searchable: true,
         aggregatable: false,
-        format: 'string',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
     },
   },
@@ -127,8 +96,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'client.address': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'client.address',
         searchable: true,
         type: 'string',
@@ -136,8 +103,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'client.bytes': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'client.bytes',
         searchable: true,
         type: 'number',
@@ -145,8 +110,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'client.domain': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'client.domain',
         searchable: true,
         type: 'string',
@@ -154,8 +117,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'client.geo.country_iso_code': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'client.geo.country_iso_code',
         searchable: true,
         type: 'string',
@@ -167,8 +128,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'cloud.account.id': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'cloud.account.id',
         searchable: true,
         type: 'string',
@@ -176,8 +135,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'cloud.availability_zone': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'cloud.availability_zone',
         searchable: true,
         type: 'string',
@@ -189,8 +146,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'container.id': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'container.id',
         searchable: true,
         type: 'string',
@@ -198,8 +153,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'container.image.name': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'container.image.name',
         searchable: true,
         type: 'string',
@@ -207,8 +160,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'container.image.tag': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'container.image.tag',
         searchable: true,
         type: 'string',
@@ -220,8 +171,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'destination.address': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.address',
         searchable: true,
         type: 'string',
@@ -229,8 +178,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.bytes': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.bytes',
         searchable: true,
         type: 'number',
@@ -238,8 +185,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.domain': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.domain',
         searchable: true,
         type: 'string',
@@ -247,8 +192,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.ip': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.ip',
         searchable: true,
         type: 'ip',
@@ -256,8 +199,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.port': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.port',
         searchable: true,
         type: 'number',
@@ -268,8 +209,6 @@ export const mockBrowserFields: BrowserFields = {
   event: {
     fields: {
       'event.end': {
-        format: '',
-        indexes: DEFAULT_INDEX_PATTERN,
         name: 'event.end',
         searchable: true,
         type: 'date',
@@ -282,8 +221,6 @@ export const mockBrowserFields: BrowserFields = {
         esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
-        format: 'string',
-        indexes: DEFAULT_INDEX_PATTERN,
       },
       'event.category': {
         name: 'event.category',
@@ -291,17 +228,13 @@ export const mockBrowserFields: BrowserFields = {
         esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
-        format: 'string',
-        indexes: DEFAULT_INDEX_PATTERN,
       },
       'event.severity': {
         name: 'event.severity',
         type: 'number',
         esTypes: ['long'],
-        format: 'number',
         searchable: true,
         aggregatable: true,
-        indexes: DEFAULT_INDEX_PATTERN,
       },
     },
   },
@@ -313,8 +246,6 @@ export const mockBrowserFields: BrowserFields = {
         esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
-        format: 'string',
-        indexes: DEFAULT_INDEX_PATTERN,
       },
     },
   },
@@ -322,8 +253,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'source.ip': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'source.ip',
         searchable: true,
         type: 'ip',
@@ -331,8 +260,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'source.port': {
         aggregatable: true,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'source.port',
         searchable: true,
         type: 'number',
@@ -348,8 +275,6 @@ export const mockBrowserFields: BrowserFields = {
         esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
-        format: 'string',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
     },
   },
@@ -357,8 +282,6 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'nestedField.firstAttributes': {
         aggregatable: false,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'nestedField.firstAttributes',
         searchable: true,
         type: 'string',
@@ -370,8 +293,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'nestedField.secondAttributes': {
         aggregatable: false,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'nestedField.secondAttributes',
         searchable: true,
         type: 'string',
@@ -383,8 +304,6 @@ export const mockBrowserFields: BrowserFields = {
       },
       'nestedField.thirdAttributes': {
         aggregatable: false,
-        format: '',
-        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'nestedField.thirdAttributes',
         searchable: true,
         type: 'date',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
+import { serverUnavailable, gatewayTimeout, badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -14,16 +14,18 @@ import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
-import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
+import {
+  INDEX_QUEUED_DOCUMENTS_TASK_ID,
+  INDEX_QUEUED_DOCUMENTS_TASK_TYPE,
+  resourceNames,
+} from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
-import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import { recallFromConnectors } from './recall_from_connectors';
 
 interface Dependencies {
   esClient: { asInternalUser: ElasticsearchClient };
-  resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
   getModelId: () => Promise<string>;
@@ -37,14 +39,20 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isAlreadyExistsError(error: Error) {
+function isModelMissingOrUnavailableError(error: Error) {
   return (
     error instanceof errors.ResponseError &&
     (error.body.error.type === 'resource_not_found_exception' ||
       error.body.error.type === 'status_exception')
   );
 }
-
+function isCreateModelValidationError(error: Error) {
+  return (
+    error instanceof errors.ResponseError &&
+    error.statusCode === 400 &&
+    error.body?.error?.type === 'action_request_validation_exception'
+  );
+}
 function throwKnowledgeBaseNotReady(body: any) {
   throw serverUnavailable(`Knowledge base is not ready yet`, body);
 }
@@ -82,52 +90,73 @@ export class KnowledgeBaseService {
     const elserModelId = await this.dependencies.getModelId();
 
     const retryOptions = { factor: 1, minTimeout: 10000, retries: 12 };
-
-    const installModel = async () => {
-      this.dependencies.logger.info('Installing ELSER model');
-      await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
-        {
-          model_id: elserModelId,
-          input: {
-            field_names: ['text_field'],
-          },
-          wait_for_completion: true,
-        },
-        { requestTimeout: '20m' }
-      );
-      this.dependencies.logger.info('Finished installing ELSER model');
-    };
-
-    const getIsModelInstalled = async () => {
-      const getResponse = await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
+    const getModelInfo = async () => {
+      return await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
         model_id: elserModelId,
         include: 'definition_status',
       });
-
-      this.dependencies.logger.debug(
-        'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
-      );
-
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
     };
 
-    await pRetry(async () => {
-      let isModelInstalled: boolean = false;
+    const isModelInstalledAndReady = async () => {
       try {
-        isModelInstalled = await getIsModelInstalled();
+        const getResponse = await getModelInfo();
+        this.dependencies.logger.debug(
+          () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
+        );
+
+        return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
       } catch (error) {
-        if (isAlreadyExistsError(error)) {
-          await installModel();
-          isModelInstalled = await getIsModelInstalled();
+        if (isModelMissingOrUnavailableError(error)) {
+          return false;
+        } else {
+          throw error;
         }
       }
+    };
 
-      if (!isModelInstalled) {
-        throwKnowledgeBaseNotReady({
-          message: 'Model is not fully defined',
-        });
+    const installModelIfDoesNotExist = async () => {
+      const modelInstalledAndReady = await isModelInstalledAndReady();
+      if (!modelInstalledAndReady) {
+        await installModel();
       }
-    }, retryOptions);
+    };
+
+    const installModel = async () => {
+      this.dependencies.logger.info('Installing ELSER model');
+      try {
+        await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
+          {
+            model_id: elserModelId,
+            input: {
+              field_names: ['text_field'],
+            },
+            wait_for_completion: true,
+          },
+          { requestTimeout: '20m' }
+        );
+      } catch (error) {
+        if (isCreateModelValidationError(error)) {
+          throw badRequest(error);
+        } else {
+          throw error;
+        }
+      }
+      this.dependencies.logger.info('Finished installing ELSER model');
+    };
+
+    const pollForModelInstallCompleted = async () => {
+      await pRetry(async () => {
+        this.dependencies.logger.info('Polling installation of ELSER model');
+        const modelInstalledAndReady = await isModelInstalledAndReady();
+        if (!modelInstalledAndReady) {
+          throwKnowledgeBaseNotReady({
+            message: 'Model is not fully defined',
+          });
+        }
+      }, retryOptions);
+    };
+    await installModelIfDoesNotExist();
+    await pollForModelInstallCompleted();
 
     try {
       await this.dependencies.esClient.asInternalUser.ml.startTrainedModelDeployment({
@@ -137,7 +166,7 @@ export class KnowledgeBaseService {
     } catch (error) {
       this.dependencies.logger.debug('Error starting model deployment');
       this.dependencies.logger.debug(error);
-      if (!isAlreadyExistsError(error)) {
+      if (!isModelMissingOrUnavailableError(error)) {
         throw error;
       }
     }
@@ -158,7 +187,7 @@ export class KnowledgeBaseService {
       }
 
       this.dependencies.logger.debug('Model is not allocated yet');
-      this.dependencies.logger.debug(JSON.stringify(response));
+      this.dependencies.logger.debug(() => JSON.stringify(response));
 
       throw gatewayTimeout();
     }, retryOptions);
@@ -194,7 +223,7 @@ export class KnowledgeBaseService {
   private async processOperation(operation: KnowledgeBaseEntryOperation) {
     if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
       await this.dependencies.esClient.asInternalUser.deleteByQuery({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         query: {
           bool: {
             filter: [
@@ -333,7 +362,7 @@ export class KnowledgeBaseService {
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
-      index: [this.dependencies.resources.aliases.kb],
+      index: [resourceNames.aliases.kb],
       query: esQuery,
       size: 20,
       _source: {
@@ -366,7 +395,7 @@ export class KnowledgeBaseService {
     entries: RecalledEntry[];
   }> => {
     this.dependencies.logger.debug(
-      `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
+      () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
     const modelId = await this.dependencies.getModelId();
 
@@ -378,7 +407,7 @@ export class KnowledgeBaseService {
         namespace,
         modelId,
       }).catch((error) => {
-        if (isAlreadyExistsError(error)) {
+        if (isModelMissingOrUnavailableError(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -431,7 +460,7 @@ export class KnowledgeBaseService {
   ): Promise<UserInstruction[]> => {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         query: {
           bool: {
             must: [
@@ -475,7 +504,7 @@ export class KnowledgeBaseService {
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         ...(query
           ? {
               query: {
@@ -519,7 +548,7 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;
@@ -537,7 +566,7 @@ export class KnowledgeBaseService {
   }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.index({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         id,
         document: {
           '@timestamp': new Date().toISOString(),
@@ -545,7 +574,7 @@ export class KnowledgeBaseService {
           user,
           namespace,
         },
-        pipeline: this.dependencies.resources.pipelines.kb,
+        pipeline: resourceNames.pipelines.kb,
         refresh: 'wait_for',
       });
     } catch (error) {
@@ -579,14 +608,14 @@ export class KnowledgeBaseService {
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.delete({
-        index: this.dependencies.resources.aliases.kb,
+        index: resourceNames.aliases.kb,
         id,
         refresh: 'wait_for',
       });
 
       return Promise.resolve();
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isModelMissingOrUnavailableError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
       throw error;

@@ -123,6 +123,8 @@ export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
   UPDATE_PATTERN: `${API_ROOT}/settings`,
   ENROLLMENT_INFO_PATTERN: `${INTERNAL_ROOT}/settings/enrollment`,
+  SPACE_INFO_PATTERN: `${API_ROOT}/space_settings`,
+  SPACE_UPDATE_PATTERN: `${API_ROOT}/space_settings`,
 };
 
 // App API routes
@@ -212,8 +214,9 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
 
-// Fleet debug routes
+export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
 
+// Fleet debug routes
 export const FLEET_DEBUG_ROUTES = {
   INDEX_PATTERN: `${INTERNAL_ROOT}/debug/index`,
   SAVED_OBJECTS_PATTERN: `${INTERNAL_ROOT}/debug/saved_objects`,

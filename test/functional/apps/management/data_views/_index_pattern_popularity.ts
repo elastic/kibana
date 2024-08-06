@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const log = getService('log');
   const PageObjects = getPageObjects(['settings', 'common']);
 
@@ -58,6 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can be saved', async function () {
       // Saving the popularity change
       await PageObjects.settings.controlChangeSave();
+      await browser.refresh();
       await PageObjects.settings.openControlsByName(fieldName);
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);

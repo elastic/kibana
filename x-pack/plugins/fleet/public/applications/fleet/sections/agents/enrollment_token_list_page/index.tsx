@@ -128,6 +128,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       const agentPolicy = agentPoliciesById[enrollmentKey.policy_id];
       return !agentPolicy?.is_managed;
     }) || [];
+  const filteredTotal = rowItems.length;
 
   const columns = [
     {
@@ -294,7 +295,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: total,
+          totalItemCount: filteredTotal,
           pageSizeOptions,
         }}
         onChange={({ page }: { page: { index: number; size: number } }) => {

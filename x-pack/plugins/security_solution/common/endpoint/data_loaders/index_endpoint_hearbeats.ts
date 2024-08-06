@@ -34,7 +34,8 @@ interface EndpointHeartbeat {
 export const indexEndpointHeartbeats = async (
   esClient: Client,
   log: ToolingLog,
-  count: number
+  count: number = 1,
+  unbilledCount: number = 1
 ): Promise<IndexedEndpointHeartbeats> => {
   log.debug(`Indexing ${count} endpoint heartbeats`);
   const startTime = new Date();
@@ -59,22 +60,23 @@ export const indexEndpointHeartbeats = async (
     return heartbeatDoc;
   });
 
-  // billable: false are not billed
-  const invalidDocs: EndpointHeartbeat[] = [
-    {
+  const unbilledDocs: EndpointHeartbeat[] = Array.from({ length: unbilledCount }).map((_, i) => {
+    const ingested = new Date(startTime.getTime() + i).toISOString();
+
+    return {
       '@timestamp': '2024-06-11T13:03:37Z',
       agent: {
-        id: 'agent-billable-false',
+        id: `agent-billable-false-${i}`,
       },
       event: {
         agent_id_status: 'auth_metadata_missing',
-        ingested: new Date().toISOString(),
+        ingested,
       },
       billable: false,
-    },
-  ];
+    };
+  });
 
-  const operations = docs.concat(invalidDocs).flatMap((doc) => [
+  const operations = docs.concat(unbilledDocs).flatMap((doc) => [
     {
       index: {
         _index: ENDPOINT_HEARTBEAT_INDEX,

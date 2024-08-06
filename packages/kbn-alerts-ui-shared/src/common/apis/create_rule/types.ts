@@ -14,10 +14,10 @@ export interface CreateRuleBody<Params extends RuleTypeParams = RuleTypeParams> 
   enabled: Rule<Params>['enabled'];
   consumer: Rule<Params>['consumer'];
   tags: Rule<Params>['tags'];
-  throttle?: Rule<Params>['throttle'];
   params: Rule<Params>['params'];
   schedule: Rule<Params>['schedule'];
   actions: Rule<Params>['actions'];
+  throttle?: Rule<Params>['throttle'];
   notifyWhen?: Rule<Params>['notifyWhen'];
   alertDelay?: Rule<Params>['alertDelay'];
 }

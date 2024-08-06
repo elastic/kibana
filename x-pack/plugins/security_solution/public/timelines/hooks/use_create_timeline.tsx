@@ -12,7 +12,7 @@ import { defaultHeaders } from '../components/timeline/body/column_headers/defau
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
-import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
@@ -22,6 +22,7 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { timelineDefaults } from '../store/defaults';
 
 export interface UseCreateTimelineParams {
   /**
@@ -31,7 +32,7 @@ export interface UseCreateTimelineParams {
   /**
    * Type of the timeline (default, template)
    */
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   /**
    * Callback to be called when the timeline is created
    */
@@ -49,8 +50,8 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
   const { id: dataViewId, patternList: selectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
@@ -75,15 +76,20 @@ export const useCreateTimeline = ({
           selectedPatterns,
         })
       );
+
       dispatch(
         timelineActions.createTimeline({
-          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+          columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
           dataViewId,
           id,
           indexNames: selectedPatterns,
           show,
           timelineType,
           updated: undefined,
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         })
       );
 
@@ -118,7 +124,7 @@ export const useCreateTimeline = ({
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,
-      unifiedComponentsInTimelineEnabled,
+      unifiedComponentsInTimelineDisabled,
     ]
   );
 

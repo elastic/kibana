@@ -11,6 +11,7 @@ import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
 import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
 
 export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -32,21 +33,23 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<CheckPipelineResponse>> => {
-        const { rawSamples, pipeline } = req.body;
-        const services = await context.resolve(['core']);
-        const { client } = services.core.elasticsearch;
-        try {
-          const { errors, pipelineResults } = await testPipeline(rawSamples, pipeline, client);
-          if (errors?.length) {
-            return res.badRequest({ body: JSON.stringify(errors) });
+      withAvailability(
+        async (context, req, res): Promise<IKibanaResponse<CheckPipelineResponse>> => {
+          const { rawSamples, pipeline } = req.body;
+          const services = await context.resolve(['core']);
+          const { client } = services.core.elasticsearch;
+          try {
+            const { errors, pipelineResults } = await testPipeline(rawSamples, pipeline, client);
+            if (errors?.length) {
+              return res.badRequest({ body: JSON.stringify(errors) });
+            }
+            return res.ok({
+              body: CheckPipelineResponse.parse({ results: { docs: pipelineResults } }),
+            });
+          } catch (e) {
+            return res.badRequest({ body: e });
           }
-          return res.ok({
-            body: CheckPipelineResponse.parse({ results: { docs: pipelineResults } }),
-          });
-        } catch (e) {
-          return res.badRequest({ body: e });
         }
-      }
+      )
     );
 }

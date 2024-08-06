@@ -11,6 +11,8 @@ import { createFleetTestRendererMock } from '../../../../mock';
 import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 import { useAuthz } from '../../../../hooks/use_authz';
 
+import { useGetSpaceSettings } from '../../hooks';
+
 import { AgentsApp } from '.';
 
 jest.mock('../../../../hooks/use_fleet_status', () => ({
@@ -49,7 +51,9 @@ describe('AgentApp', () => {
         readAgents: true,
         allAgents: true,
       },
+      integrations: {},
     } as any);
+    jest.mocked(useGetSpaceSettings).mockReturnValue({} as any);
   });
 
   it('should render the loading component if the status is loading', async () => {

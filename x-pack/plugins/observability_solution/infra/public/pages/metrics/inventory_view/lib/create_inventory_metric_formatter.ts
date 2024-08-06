@@ -7,7 +7,7 @@
 
 import { get, isNumber } from 'lodash';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { InfraFormatterType } from '../../../../lib/lib';
+import { InfraFormatterType } from '../../../../common/inventory/types';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInputRT,
@@ -65,6 +65,8 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
   rx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   tx: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  rxV2: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
+  txV2: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   logRate: {
     formatter: InfraFormatterType.abbreviatedNumber,
     template: '{{value}}/s',

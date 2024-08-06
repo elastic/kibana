@@ -26,7 +26,7 @@ interface HandlerOpts {
   path: string;
   user: ReportingUser;
   context: ReportingRequestHandlerContext;
-  req: KibanaRequest<TypeOf<typeof validate['params']>>;
+  req: KibanaRequest<TypeOf<(typeof validate)['params']>>;
   res: KibanaResponseFactory;
 }
 

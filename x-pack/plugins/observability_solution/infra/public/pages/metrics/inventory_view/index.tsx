@@ -10,10 +10,8 @@ import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { FilterBar } from './components/filter_bar';
+import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { LayoutView } from './components/layout_view';
-import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
@@ -39,7 +37,7 @@ export const SnapshotPage = () => {
         <WaffleTimeProvider>
           <WaffleFiltersProvider>
             <div className={APP_WRAPPER_CLASS}>
-              <MetricsPageTemplate
+              <InfraPageTemplate
                 pageHeader={{
                   pageTitle: inventoryTitle,
                   rightSideItems: [<SavedViews />, <SurveySection />],
@@ -53,20 +51,8 @@ export const SnapshotPage = () => {
                   },
                 }}
               >
-                <SnapshotContainer
-                  render={({ loading, nodes, reload, interval }) => (
-                    <>
-                      <FilterBar interval={interval} />
-                      <LayoutView
-                        loading={loading}
-                        nodes={nodes}
-                        reload={reload}
-                        interval={interval}
-                      />
-                    </>
-                  )}
-                />
-              </MetricsPageTemplate>
+                <SnapshotContainer />
+              </InfraPageTemplate>
             </div>
           </WaffleFiltersProvider>
         </WaffleTimeProvider>

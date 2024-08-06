@@ -20,11 +20,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('persistable attachment', () => {
     before(async () => {
-      await svlCommonPage.loginWithRole('developer');
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     describe('lens visualization', () => {

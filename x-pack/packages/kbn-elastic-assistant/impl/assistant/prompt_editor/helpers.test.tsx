@@ -7,11 +7,11 @@
 
 import { getPromptById } from './helpers';
 import { mockSystemPrompt, mockSuperheroSystemPrompt } from '../../mock/system_prompt';
-import type { Prompt } from '../types';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 describe('helpers', () => {
   describe('getPromptById', () => {
-    const prompts: Prompt[] = [mockSystemPrompt, mockSuperheroSystemPrompt];
+    const prompts: PromptResponse[] = [mockSystemPrompt, mockSuperheroSystemPrompt];
 
     it('returns the correct prompt by id', () => {
       const result = getPromptById({ prompts, id: mockSuperheroSystemPrompt.id });

@@ -234,7 +234,7 @@ export function alertingServiceProvider(
       try {
         const dataViewsService = await getDataViewsService();
 
-        const dataViews = await dataViewsService.find(indexPattern);
+        const dataViews = await dataViewsService.findLazy(indexPattern);
         const dataView = dataViews.find((dView) => dView.getIndexPattern() === indexPattern);
 
         if (!dataView) return;

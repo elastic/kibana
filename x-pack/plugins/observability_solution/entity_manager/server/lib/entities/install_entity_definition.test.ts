@@ -12,14 +12,16 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { installBuiltInEntityDefinitions } from './install_entity_definition';
-import { builtInServicesEntityDefinition } from './built_in/services';
+import { builtInServicesFromLogsEntityDefinition } from './built_in/services';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
+import {
+  generateHistoryIngestPipelineId,
+  generateHistoryTransformId,
+  generateLatestIngestPipelineId,
+  generateLatestTransformId,
+} from './helpers/generate_component_id';
 import { generateHistoryTransform } from './transform/generate_history_transform';
 import { generateLatestTransform } from './transform/generate_latest_transform';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
 
 const assertHasCreatedDefinition = (
   definition: EntityDefinition,
@@ -30,24 +32,45 @@ const assertHasCreatedDefinition = (
   expect(soClient.create).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition, {
     id: definition.id,
     overwrite: true,
+    managed: definition.managed,
   });
+
+  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_history_${definition.id}_index_template`,
+    })
+  );
+  expect(esClient.indices.putIndexTemplate).toBeCalledWith(
+    expect.objectContaining({
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    })
+  );
 
   expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
-    id: generateHistoryIngestPipelineId(builtInServicesEntityDefinition),
+    id: generateHistoryIngestPipelineId(builtInServicesFromLogsEntityDefinition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: '0.1.0',
+      managed: true,
+    },
   });
   expect(esClient.ingest.putPipeline).toBeCalledWith({
-    id: generateLatestIngestPipelineId(builtInServicesEntityDefinition),
+    id: generateLatestIngestPipelineId(builtInServicesFromLogsEntityDefinition),
     processors: expect.anything(),
+    _meta: {
+      definitionVersion: '0.1.0',
+      managed: true,
+    },
   });
 
   expect(esClient.transform.putTransform).toBeCalledTimes(2);
   expect(esClient.transform.putTransform).toBeCalledWith(
-    generateHistoryTransform(builtInServicesEntityDefinition)
+    generateHistoryTransform(builtInServicesFromLogsEntityDefinition)
   );
   expect(esClient.transform.putTransform).toBeCalledWith(
-    generateLatestTransform(builtInServicesEntityDefinition)
+    generateLatestTransform(builtInServicesFromLogsEntityDefinition)
   );
 };
 
@@ -55,13 +78,13 @@ const assertHasStartedTransform = (definition: EntityDefinition, esClient: Elast
   expect(esClient.transform.startTransform).toBeCalledTimes(2);
   expect(esClient.transform.startTransform).toBeCalledWith(
     {
-      transform_id: generateHistoryTransformId(builtInServicesEntityDefinition),
+      transform_id: generateHistoryTransformId(builtInServicesFromLogsEntityDefinition),
     },
     expect.anything()
   );
   expect(esClient.transform.startTransform).toBeCalledWith(
     {
-      transform_id: generateLatestTransformId(builtInServicesEntityDefinition),
+      transform_id: generateLatestTransformId(builtInServicesFromLogsEntityDefinition),
     },
     expect.anything()
   );
@@ -101,12 +124,26 @@ const assertHasUninstalledDefinition = (
   expect(esClient.transform.deleteTransform).toBeCalledTimes(2);
   expect(esClient.ingest.deletePipeline).toBeCalledTimes(2);
   expect(soClient.delete).toBeCalledTimes(1);
+
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(2);
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: `entities_v1_history_${definition.id}_index_template`,
+    },
+    { ignore: [404] }
+  );
+  expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    {
+      name: `entities_v1_latest_${definition.id}_index_template`,
+    },
+    { ignore: [404] }
+  );
 };
 
 describe('install_entity_definition', () => {
   describe('installBuiltInEntityDefinitions', () => {
     it('should install and start definition when not found', async () => {
-      const builtInDefinitions = [builtInServicesEntityDefinition];
+      const builtInDefinitions = [builtInServicesFromLogsEntityDefinition];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       const soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 10 });
@@ -116,15 +153,14 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
-      assertHasCreatedDefinition(builtInServicesEntityDefinition, soClient, esClient);
-      assertHasStartedTransform(builtInServicesEntityDefinition, esClient);
+      assertHasCreatedDefinition(builtInServicesFromLogsEntityDefinition, soClient, esClient);
+      assertHasStartedTransform(builtInServicesFromLogsEntityDefinition, esClient);
     });
 
     it('should reinstall when partial state found', async () => {
-      const builtInDefinitions = [builtInServicesEntityDefinition];
+      const builtInDefinitions = [builtInServicesFromLogsEntityDefinition];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       // mock partially installed definition
       esClient.ingest.getPipeline.mockResolvedValue({});
@@ -133,11 +169,11 @@ describe('install_entity_definition', () => {
       const definitionSOResult = {
         saved_objects: [
           {
-            id: builtInServicesEntityDefinition.id,
+            id: builtInServicesFromLogsEntityDefinition.id,
             type: 'entity-definition',
             references: [],
             score: 0,
-            attributes: builtInServicesEntityDefinition,
+            attributes: builtInServicesFromLogsEntityDefinition,
           },
         ],
         total: 1,
@@ -159,21 +195,20 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
-      assertHasUninstalledDefinition(builtInServicesEntityDefinition, soClient, esClient);
-      assertHasCreatedDefinition(builtInServicesEntityDefinition, soClient, esClient);
-      assertHasStartedTransform(builtInServicesEntityDefinition, esClient);
+      assertHasUninstalledDefinition(builtInServicesFromLogsEntityDefinition, soClient, esClient);
+      assertHasCreatedDefinition(builtInServicesFromLogsEntityDefinition, soClient, esClient);
+      assertHasStartedTransform(builtInServicesFromLogsEntityDefinition, esClient);
     });
 
     it('should start a stopped definition', async () => {
-      const builtInDefinitions = [builtInServicesEntityDefinition];
+      const builtInDefinitions = [builtInServicesFromLogsEntityDefinition];
       const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
       // mock installed but stopped definition
       esClient.ingest.getPipeline.mockResolvedValue({
-        [generateHistoryIngestPipelineId(builtInServicesEntityDefinition)]: {},
-        [generateLatestIngestPipelineId(builtInServicesEntityDefinition)]: {},
+        [generateHistoryIngestPipelineId(builtInServicesFromLogsEntityDefinition)]: {},
+        [generateLatestIngestPipelineId(builtInServicesFromLogsEntityDefinition)]: {},
       });
       esClient.transform.getTransformStats.mockResolvedValue({
         // @ts-expect-error
@@ -184,11 +219,11 @@ describe('install_entity_definition', () => {
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
-            id: builtInServicesEntityDefinition.id,
+            id: builtInServicesFromLogsEntityDefinition.id,
             type: 'entity-definition',
             references: [],
             score: 0,
-            attributes: builtInServicesEntityDefinition,
+            attributes: builtInServicesFromLogsEntityDefinition,
           },
         ],
         total: 1,
@@ -200,11 +235,10 @@ describe('install_entity_definition', () => {
         soClient,
         builtInDefinitions,
         logger: loggerMock.create(),
-        spaceId: 'default',
       });
 
       expect(soClient.create).toHaveBeenCalledTimes(0);
-      assertHasStartedTransform(builtInServicesEntityDefinition, esClient);
+      assertHasStartedTransform(builtInServicesFromLogsEntityDefinition, esClient);
     });
   });
 });

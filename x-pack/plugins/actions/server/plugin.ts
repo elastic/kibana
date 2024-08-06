@@ -32,7 +32,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   IEventLogClientService,
@@ -553,7 +553,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      security: plugins.security,
+      security: core.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
@@ -647,7 +647,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       request,
       authorizationMode,
       authorization: this.security?.authz,
-      authentication: this.security?.authc,
     });
   };
 

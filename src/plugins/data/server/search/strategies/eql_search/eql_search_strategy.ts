@@ -44,7 +44,7 @@ export const eqlSearchStrategyProvider = (
     },
 
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
-      logger.debug(`_eql/search ${JSON.stringify(request.params) || id}`);
+      logger.debug(() => `_eql/search ${JSON.stringify(request.params) || id}`);
 
       const client = esClient.asCurrentUser.eql;
 

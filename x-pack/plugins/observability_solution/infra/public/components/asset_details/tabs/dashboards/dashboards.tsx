@@ -33,6 +33,7 @@ import {
 import { useLocation } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import { isEqual } from 'lodash';
+import { isPending } from '../../../../hooks/use_fetcher';
 import type { AssetDashboardLoadedParams } from '../../../../services/telemetry/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildAssetIdFilter } from '../../../../utils/filters/build';
@@ -46,7 +47,7 @@ import { EditDashboard, GotoDashboardLink, LinkDashboard, UnlinkDashboard } from
 import { useFetchCustomDashboards } from '../../hooks/use_fetch_custom_dashboards';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { FETCH_STATUS, useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
+import { useDashboardFetcher } from '../../hooks/use_dashboards_fetcher';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
@@ -150,6 +151,8 @@ export function Dashboards() {
           ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
           : [],
       timeRange: { from: dateRange.from, to: dateRange.to },
+      // forces data reload
+      lastReloadRequestTime: Date.now(),
     });
   }, [
     metrics.dataView,
@@ -196,7 +199,7 @@ export function Dashboards() {
     };
   }, [renderMode.mode, share.url.locators, getLocatorParams]);
 
-  if (loading || status === FETCH_STATUS.LOADING) {
+  if ((loading || isPending(status)) && !dashboards?.length) {
     return (
       <EuiPanel hasBorder>
         <EuiEmptyPrompt

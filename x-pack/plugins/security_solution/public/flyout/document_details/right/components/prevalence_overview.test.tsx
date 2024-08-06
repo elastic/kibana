@@ -72,6 +72,23 @@ describe('<PrevalenceOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('should not render link and icon if isPreviewMode is true', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByTestId, queryByTestId } = renderPrevalenceOverview({
+      ...mockContextValue,
+      isPreviewMode: true,
+    });
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
+  });
+
   it('should render loading', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: true,

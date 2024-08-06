@@ -78,7 +78,7 @@ FROM kibana_sample_data_logs
 . Click **▶Run**.
 +
 [role="screenshot"]
-image:images/esql-full-query.png[]
+image:images/esql-full-query.png[An image of the full query result]
 +
 . Click **Save** to save the query and visualization to a dashboard. 
 

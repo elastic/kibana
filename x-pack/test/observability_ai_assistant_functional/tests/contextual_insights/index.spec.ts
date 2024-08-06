@@ -159,7 +159,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await openContextualInsights();
 
-        await interceptor.waitAndComplete();
+        await interceptor.completeAfterIntercept();
 
         await retry.tryForTime(5 * 1000, async () => {
           const llmResponse = await testSubjects.getVisibleText(ui.pages.contextualInsights.text);

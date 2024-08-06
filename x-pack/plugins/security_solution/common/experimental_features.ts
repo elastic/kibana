@@ -81,6 +81,12 @@ export const allowedExperimentalValues = Object.freeze({
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: true,
 
+  /** Enables the `kill-process` response action for SentinelOne */
+  responseActionsSentinelOneKillProcessEnabled: false,
+
+  /** Enable the `processes` response actions for SentinelOne */
+  responseActionsSentinelOneProcessesEnabled: false,
+
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
@@ -93,29 +99,14 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionScanEnabled: false,
 
   /**
-   * Enables top charts on Alerts Page
-   */
-  alertsPageChartsEnabled: true,
-
-  /**
-   * Enables the alert type column in KPI visualizations on Alerts Page
-   */
-  alertTypeEnabled: false,
-
-  /**
-   * Disables expandable flyout
-   */
-  expandableFlyoutDisabled: false,
-
-  /**
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
 
   /**
-   * Enables entity and alert previews
+   * Disables entity and alert previews
    */
-  entityAlertPreviewEnabled: false,
+  entityAlertPreviewDisabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -123,13 +114,17 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
    */
   assistantKnowledgeBaseByDefault: false,
 
   /**
+   * Enables the Assistant BedrockChat Langchain model, introduced in `8.15.0`.
+   */
+  assistantBedrockChat: true,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
 
@@ -158,11 +153,6 @@ export const allowedExperimentalValues = Object.freeze({
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
-
-  /**
-   * Enables alerts suppression for ES|QL rules
-   */
-  alertSuppressionForEsqlRuleEnabled: false,
 
   /**
    * Enables the risk engine privileges route
@@ -198,9 +188,9 @@ export const allowedExperimentalValues = Object.freeze({
    */
   timelineEsqlTabDisabled: false,
   /*
-   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   * Disables experimental Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
    */
-  unifiedComponentsInTimelineEnabled: false,
+  unifiedComponentsInTimelineDisabled: false,
 
   /*
    * Disables date pickers and sourcerer in analyzer if needed.
@@ -227,22 +217,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
-  unifiedManifestEnabled: false,
-
-  /**
-   *  Enables Security AI Assistant's Flyout mode
-   */
-  aiAssistantFlyoutMode: true,
+  unifiedManifestEnabled: true,
 
   /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
-
-  /**
-   * Enables the new rule's bulk action to manage custom highlighted fields
-   */
-  bulkCustomHighlightedFieldsEnabled: false,
 
   /**
    * Enables the manual rule run
@@ -253,6 +233,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: false,
+
+  /**
+   * Enables the new data ingestion hub
+   */
+  dataIngestionHubEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

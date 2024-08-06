@@ -14,7 +14,7 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
-import { upsertComponent, upsertTemplate } from './lib/manage_index_templates';
+import { upsertComponent } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import {
   EntityManagerPluginSetupDependencies,
@@ -22,11 +22,11 @@ import {
   EntityManagerServerSetup,
 } from './types';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { entitiesBaseComponentTemplateConfig } from './templates/components/base';
 import { entitiesEventComponentTemplateConfig } from './templates/components/event';
-import { entitiesIndexTemplateConfig } from './templates/entities_template';
 import { entityDefinition, EntityDiscoveryApiKeyType } from './saved_objects';
 import { entitiesEntityComponentTemplateConfig } from './templates/components/entity';
+import { entitiesLatestBaseComponentTemplateConfig } from './templates/components/base_latest';
+import { entitiesHistoryBaseComponentTemplateConfig } from './templates/components/base_history';
 
 export type EntityManagerServerPluginSetup = ReturnType<EntityManagerServerPlugin['setup']>;
 export type EntityManagerServerPluginStart = ReturnType<EntityManagerServerPlugin['start']>;
@@ -73,7 +73,6 @@ export class EntityManagerServerPlugin
     setupRoutes<RequestHandlerContext>({
       router,
       logger: this.logger,
-      spaces: plugins.spaces,
       server: this.server,
     });
 
@@ -95,7 +94,12 @@ export class EntityManagerServerPlugin
       upsertComponent({
         esClient,
         logger: this.logger,
-        component: entitiesBaseComponentTemplateConfig,
+        component: entitiesHistoryBaseComponentTemplateConfig,
+      }),
+      upsertComponent({
+        esClient,
+        logger: this.logger,
+        component: entitiesLatestBaseComponentTemplateConfig,
       }),
       upsertComponent({
         esClient,
@@ -107,11 +111,7 @@ export class EntityManagerServerPlugin
         logger: this.logger,
         component: entitiesEntityComponentTemplateConfig,
       }),
-    ])
-      .then(() =>
-        upsertTemplate({ esClient, logger: this.logger, template: entitiesIndexTemplateConfig })
-      )
-      .catch(() => {});
+    ]).catch(() => {});
 
     return {};
   }

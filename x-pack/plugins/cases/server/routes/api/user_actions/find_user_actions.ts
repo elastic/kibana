@@ -22,7 +22,12 @@ export const findUserActionsRoute = createCasesRoute({
   },
   routerOptions: {
     access: 'public',
-    summary: `Get user activity for a case`,
+    summary: `Find case activity`,
+    tags: ['oas-tag:cases'],
+    description: 'Returns a paginated list of user activity for a case.',
+    // You must have `read` privileges for the **Cases** feature in the
+    // **Management**, **Observability**, or **Security** section of the Kibana
+    // feature privileges, depending on the owner of the case you're seeking.
   },
   handler: async ({ context, request, response }) => {
     try {

@@ -13,7 +13,7 @@ import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
   InfraWaffleMapOptions,
-} from '../../../../../lib/lib';
+} from '../../../../../common/inventory/types';
 import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
 

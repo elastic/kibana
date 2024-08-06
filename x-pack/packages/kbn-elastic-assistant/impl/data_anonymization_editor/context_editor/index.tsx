@@ -98,8 +98,8 @@ const ContextEditorComponent: React.FC<Props> = ({
   );
 
   const columns = useMemo(
-    () => getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization }),
-    [hasUpdateAIAssistantAnonymization, onListUpdated, rawData]
+    () => getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization, compressed }),
+    [hasUpdateAIAssistantAnonymization, onListUpdated, rawData, compressed]
   );
 
   const rows = useMemo(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -20,6 +21,7 @@ export interface RouteDefinitionParams {
   logger: Logger;
   config: ConfigType;
   encryptionKeyRotationService: PublicMethodsOf<EncryptionKeyRotationService>;
+  buildFlavor: BuildFlavor;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

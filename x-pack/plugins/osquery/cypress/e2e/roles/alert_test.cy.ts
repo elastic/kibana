@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { disableNewFeaturesTours } from '../../tasks/navigation';
 import { initializeDataViews } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
-import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/180853
-describe.skip('Alert Test', { tags: ['@ess'] }, () => {
+describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleName: string;
   let ruleId: string;
 
@@ -28,10 +27,11 @@ describe.skip('Alert Test', { tags: ['@ess'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 
-      cy.visit('/app/security/rules');
+      cy.visit('/app/security/rules', {
+        onBeforeLoad: (win) => disableNewFeaturesTours(win),
+      });
       clickRuleName(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
-      closeAlertsStepTourIfVisible();
 
       cy.wait(500);
       cy.getBySel('securitySolutionFlyoutInvestigationGuideButton').click();

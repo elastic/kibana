@@ -10,6 +10,7 @@ import { BuildIntegrationRequestBody, INTEGRATION_BUILDER_PATH } from '../../com
 import { buildPackage } from '../integration_builder';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
 
 export function registerIntegrationBuilderRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -28,7 +29,7 @@ export function registerIntegrationBuilderRoutes(
           },
         },
       },
-      async (_, request, response) => {
+      withAvailability(async (_, request, response) => {
         const { integration } = request.body;
         try {
           const zippedIntegration = await buildPackage(integration);
@@ -40,6 +41,6 @@ export function registerIntegrationBuilderRoutes(
         } catch (e) {
           return response.customError({ statusCode: 500, body: e });
         }
-      }
+      })
     );
 }

@@ -25,7 +25,7 @@ import type {
 } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';

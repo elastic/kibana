@@ -9,11 +9,14 @@ import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
+import {
+  generateHistoryTransformId,
+  generateHistoryIngestPipelineId,
+  generateLatestTransformId,
+  generateLatestIngestPipelineId,
+} from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
+import { EntityDefinitionWithState } from './types';
 
 export async function findEntityDefinitions({
   soClient,
@@ -29,7 +32,7 @@ export async function findEntityDefinitions({
   id?: string;
   page?: number;
   perPage?: number;
-}): Promise<Array<EntityDefinition & { state: { installed: boolean; running: boolean } }>> {
+}): Promise<EntityDefinitionWithState[]> {
   const filter = compact([
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`

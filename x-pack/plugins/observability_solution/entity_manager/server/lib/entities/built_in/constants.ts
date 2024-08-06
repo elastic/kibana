@@ -7,9 +7,9 @@
 
 export const BUILT_IN_ID_PREFIX = 'builtin_';
 export const BUILT_IN_ALLOWED_INDICES = [
-  'apm-*',
   'logs-*',
-  'metrics-*',
   'filebeat*',
+  'metrics-*',
   'metricbeat*',
+  'traces-*',
 ];

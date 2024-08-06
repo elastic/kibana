@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { InfraPageTemplate } from '../../../../components/shared/templates/infra_page_template';
+import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTemplateHeaderBreadcrumbs } from '../../../../components/asset_details/hooks/use_page_header';
-import { useNodeDetails } from '../hooks/use_node_details';
 import { MetricsSideNav } from './side_nav';
 import { MetricsTimeControls } from './time_controls';
 import { SideNavContext, NavItem } from '../lib/side_nav_context';
@@ -20,7 +23,6 @@ import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraMetadata } from '../../../../../common/http_api/metadata_api';
 import { PageError } from './page_error';
 import { MetadataContext } from '../containers/metadata_context';
-import { MetricsPageTemplate } from '../../page_template';
 
 interface Props {
   name: string;
@@ -54,34 +56,41 @@ const parseRange = (range: MetricsTimeInput) => {
 
 export const NodeDetailsPage = (props: Props) => {
   const { breadcrumbs } = useTemplateHeaderBreadcrumbs();
-  const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(props.timeRange));
-  const { metrics, loading, makeRequest, error } = useNodeDetails(
-    props.requiredMetrics,
-    props.nodeId,
-    props.nodeType,
-    props.sourceId,
-    parsedTimeRange,
-    props.cloudId
+
+  const { data, status, error, refetch } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/metrics/node_details', {
+        method: 'POST',
+        body: JSON.stringify({
+          metrics: props.requiredMetrics,
+          nodeId: props.nodeId,
+          nodeType: props.nodeType,
+          timerange: parseRange(props.timeRange),
+          cloudId: props.cloudId,
+          sourceId: props.sourceId,
+        }),
+      });
+
+      return decodeOrThrow(NodeDetailsMetricDataResponseRT)(response);
+    },
+    [
+      props.cloudId,
+      props.nodeId,
+      props.nodeType,
+      props.requiredMetrics,
+      props.sourceId,
+      props.timeRange,
+    ]
   );
 
-  const refetch = useCallback(() => {
-    setParsedTimeRange(parseRange(props.timeRange));
-  }, [props.timeRange]);
-
-  useEffect(() => {
-    setParsedTimeRange(parseRange(props.timeRange));
-  }, [props.timeRange]);
-
-  useEffect(() => {
-    makeRequest();
-  }, [makeRequest, parsedTimeRange]);
+  const { metrics = [] } = data ?? {};
 
   if (error) {
     return <PageError error={error} name={props.name} />;
   }
 
   return (
-    <MetricsPageTemplate
+    <InfraPageTemplate
       pageHeader={{
         pageTitle: props.name,
         rightSideItems: [
@@ -111,7 +120,7 @@ export const NodeDetailsPage = (props: Props) => {
           >
             <MetadataContext.Provider value={props.metadata}>
               <PageBody
-                loading={metrics.length > 0 && props.isAutoReloading ? false : loading}
+                loading={metrics.length > 0 && props.isAutoReloading ? false : isPending(status)}
                 refetch={refetch}
                 type={props.nodeType}
                 metrics={metrics}
@@ -123,6 +132,6 @@ export const NodeDetailsPage = (props: Props) => {
           </SideNavContext.Provider>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </MetricsPageTemplate>
+    </InfraPageTemplate>
   );
 };

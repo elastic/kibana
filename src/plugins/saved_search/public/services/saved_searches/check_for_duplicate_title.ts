@@ -56,5 +56,5 @@ export const checkForDuplicateTitle = async ({
     return Promise.reject(new Error(`Saved search title already exists: ${title}`));
   }
 
-  return true;
+  return;
 };

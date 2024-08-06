@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: DATA_VIEW_ID,
         title: DATA_VIEW,
       });
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {

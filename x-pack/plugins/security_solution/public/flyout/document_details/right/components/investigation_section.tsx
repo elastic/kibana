@@ -39,13 +39,13 @@ export const InvestigationSection = memo(() => {
         />
       }
       localStorageKey={KEY}
-      gutterSize="s"
+      gutterSize="none"
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >
       {eventKind === EventKind.signal && (
         <>
           <InvestigationGuide />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
         </>
       )}
       <HighlightedFields />

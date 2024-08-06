@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -14,6 +16,10 @@ export function AddCisIntegrationFormPageProvider({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
+
+  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
+  const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+  const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 
   const cisAzure = {
     getPostInstallArmTemplateModal: async () => {
@@ -110,38 +116,77 @@ export function AddCisIntegrationFormPageProvider({
     return fieldValue;
   };
 
-  const navigateToAddIntegrationCspmPage = async () => {
+  const navigateToAddIntegrationCspmPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/cspm',
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const navigateToAddIntegrationCspmWithVersionPage = async (packageVersion: string) => {
+  const navigateToAddIntegrationCspmWithVersionPage = async (
+    packageVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet',
       `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const navigateToAddIntegrationCnvmPage = async () => {
+  const navigateToAddIntegrationCnvmPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/vuln_mgmt',
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  const navigateToAddIntegrationKspmPage = async () => {
+  const navigateToAddIntegrationKspmPage = async (space?: string) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/kspm',
-      { shouldUseHashForSubUrl: false }
+      options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -174,12 +219,14 @@ export function AddCisIntegrationFormPageProvider({
     await integrationList[0].click();
   };
 
-  const clickLaunchAndGetCurrentUrl = async (buttonId: string, tabNumber: number) => {
+  const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
     const button = await testSubjects.find(buttonId);
     await button.click();
-    await browser.switchTab(tabNumber);
-    await new Promise((r) => setTimeout(r, 3000));
+    // Wait a bit to allow the new tab to load the URL
+    await sleep(3000);
+    await browser.switchTab(1);
     const currentUrl = await browser.getCurrentUrl();
+    await browser.closeCurrentWindow();
     await browser.switchTab(0);
     return currentUrl;
   };
@@ -201,6 +248,25 @@ export function AddCisIntegrationFormPageProvider({
     const advancedAccordian = await testSubjects.find(text);
     await advancedAccordian.scrollIntoView();
     await advancedAccordian.click();
+  };
+
+  const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
+    await clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+    await clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
+
+    const agentOption = await testSubjects.find(
+      setupTechnology === 'agentless'
+        ? 'setup-technology-agentless-option'
+        : 'setup-technology-agent-based-option'
+    );
+    await agentOption.click();
+  };
+  const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
+    await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
+    await selectValue(
+      AWS_CREDENTIAL_SELECTOR,
+      credentialType === 'direct' ? 'direct_access_keys' : 'temporary_keys'
+    );
   };
 
   const clickOptionButton = async (text: string) => {
@@ -278,6 +344,21 @@ export function AddCisIntegrationFormPageProvider({
     return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
   };
 
+  const getReplaceSecretButton = async (secretField: string) => {
+    return await testSubjects.find(`button-replace-${secretField}`);
+  };
+
+  const inputUniqueIntegrationName = async () => {
+    const flyout = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await flyout.findAllByCssSelector('input[id="name"]');
+    await nameField[0].type(uuidv4());
+  };
+
+  const getSecretComponentReplaceButton = async (secretButtonSelector: string) => {
+    const secretComponentReplaceButton = await testSubjects.find(secretButtonSelector);
+    return secretComponentReplaceButton;
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -298,6 +379,8 @@ export function AddCisIntegrationFormPageProvider({
     getIntegrationFormEditPage,
     findOptionInPage,
     clickOptionButton,
+    selectAwsCredentials,
+    selectSetupTechnology,
     clickSaveButton,
     clickSaveIntegrationButton,
     clickAccordianButton,
@@ -311,5 +394,8 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    getReplaceSecretButton,
+    getSecretComponentReplaceButton,
+    inputUniqueIntegrationName,
   };
 }

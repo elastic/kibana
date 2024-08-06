@@ -91,7 +91,6 @@ class MockServer {
 
   public async inject(request: KibanaRequest, context: RequestHandlerContext = this.contextMock) {
     const validatedRequest = this.validateRequest(request);
-
     const [rejection] = this.resultMock.badRequest.mock.calls;
     if (rejection) {
       throw new Error(`Request was rejected with message: '${rejection}'`);

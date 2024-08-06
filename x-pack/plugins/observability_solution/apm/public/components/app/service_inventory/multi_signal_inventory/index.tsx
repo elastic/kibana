@@ -6,11 +6,11 @@
  */
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { EmptyMessage } from '../../../shared/empty_message';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
@@ -22,13 +22,21 @@ import {
   MultiSignalServicesTable,
   ServiceInventoryFieldName,
 } from './table/multi_signal_services_table';
+import { ServiceListItem } from '../../../../../common/service_inventory';
+import { NoEntitiesEmptyState } from './table/no_entities_empty_state';
+import { Welcome } from '../../../shared/entity_enablement/welcome_modal';
+import { useKibana } from '../../../../context/kibana_context/use_kibana';
+import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
+import { useEntityManagerEnablementContext } from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_DIRECTION = 'desc';
 
-const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
+type MainStatisticsApiResponseWithRequestId = MainStatisticsApiResponse & { requestId: string };
+
+const INITIAL_DATA: MainStatisticsApiResponseWithRequestId = {
   services: [],
   requestId: '',
 };
@@ -74,9 +82,61 @@ function useServicesEntitiesMainStatisticsFetcher() {
   return { mainStatisticsData: data, mainStatisticsStatus: status };
 }
 
-export const MultiSignalInventory = () => {
+function useServicesEntitiesDetailedStatisticsFetcher({
+  mainStatisticsData,
+  mainStatisticsStatus,
+  services,
+}: {
+  mainStatisticsData: MainStatisticsApiResponseWithRequestId;
+  mainStatisticsStatus: FETCH_STATUS;
+  services: ServiceListItem[];
+}) {
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery },
+  } = useApmParams('/services');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const timeseriesDataFetch = useFetcher(
+    (callApmApi) => {
+      const serviceNames = services.map(({ serviceName }) => serviceName);
+
+      if (
+        start &&
+        end &&
+        serviceNames.length > 0 &&
+        mainStatisticsStatus === FETCH_STATUS.SUCCESS
+      ) {
+        return callApmApi('POST /internal/apm/entities/services/detailed_statistics', {
+          params: {
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+            },
+            body: {
+              // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+              serviceNames: JSON.stringify(serviceNames.sort()),
+            },
+          },
+        });
+      }
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mainStatisticsData.requestId, services],
+    { preservePreviousData: false }
+  );
+
+  return { timeseriesDataFetch };
+}
+
+export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
+  const { tourState, updateTourState } = useEntityManagerEnablementContext();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
 
@@ -86,40 +146,73 @@ export const MultiSignalInventory = () => {
     fieldsToSearch: [ServiceInventoryFieldName.ServiceName],
   });
 
+  const { timeseriesDataFetch } = useServicesEntitiesDetailedStatisticsFetcher({
+    mainStatisticsData,
+    mainStatisticsStatus,
+    services: mainStatisticsData.services,
+  });
+
+  const { data, status } = useFetcher((callApmApi) => {
+    return callApmApi('GET /internal/apm/has_entities');
+  }, []);
+
+  useEffect(() => {
+    if (data?.hasData) {
+      services.telemetry.reportEntityInventoryPageState({ state: 'available' });
+    }
+  }, [services.telemetry, data?.hasData]);
+
+  function handleModalClose() {
+    updateTourState({ isModalVisible: false, isTourActive: true });
+  }
+
   return (
     <>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow>
-          <TableSearchBar
-            placeholder={i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
-              defaultMessage: 'Search services by name',
-            })}
-            searchQuery={searchQuery}
-            onChangeSearchQuery={setSearchQuery}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SearchBar showQueryInput={false} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <MultiSignalServicesTable
-            status={mainStatisticsStatus}
-            data={filteredData}
-            initialSortField={initialSortField}
-            initialPageSize={INITIAL_PAGE_SIZE}
-            initialSortDirection={INITIAL_SORT_DIRECTION}
-            noItemsMessage={
-              <EmptyMessage
-                heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
-                  defaultMessage: 'No services found',
+      {!data?.hasData && status === FETCH_STATUS.SUCCESS ? (
+        <NoEntitiesEmptyState />
+      ) : (
+        <>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow>
+              <TableSearchBar
+                placeholder={i18n.translate('xpack.apm.servicesTable.filterServicesPlaceholder', {
+                  defaultMessage: 'Search services by name',
                 })}
+                searchQuery={searchQuery}
+                onChangeSearchQuery={setSearchQuery}
               />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SearchBar showQueryInput={false} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <MultiSignalServicesTable
+                status={mainStatisticsStatus}
+                data={filteredData}
+                initialSortField={initialSortField}
+                initialPageSize={INITIAL_PAGE_SIZE}
+                initialSortDirection={INITIAL_SORT_DIRECTION}
+                timeseriesData={timeseriesDataFetch?.data}
+                timeseriesDataLoading={timeseriesDataFetch.status === FETCH_STATUS.LOADING}
+                noItemsMessage={
+                  <EmptyMessage
+                    heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+                      defaultMessage: 'No services found',
+                    })}
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+      <Welcome
+        isModalVisible={tourState.isModalVisible ?? false}
+        onClose={handleModalClose}
+        onConfirm={handleModalClose}
+      />
     </>
   );
-};
+}

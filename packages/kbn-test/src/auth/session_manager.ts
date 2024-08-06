@@ -146,7 +146,7 @@ export class SamlSessionManager {
     return { Cookie: `sid=${session.getCookieValue()}` };
   }
 
-  async getSessionCookieForRole(role: string) {
+  async getInteractiveUserSessionCookieWithRoleScope(role: string) {
     const session = await this.getSessionByRole(role);
     return session.getCookieValue();
   }
