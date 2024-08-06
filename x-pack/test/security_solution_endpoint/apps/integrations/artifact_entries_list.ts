@@ -261,7 +261,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to update an existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
@@ -295,7 +297,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it(`should be able to delete the existing ${testData.title} entry`, async () => {
-          await createArtifact(testData);
+          await endpointArtifactsTestResources.createArtifact(testData.listId, testData.createBody);
+          await browser.refresh();
+
           await deleteArtifact(testData);
           // We only expect one artifact to have been visible
           await testSubjects.missingOrFail(testData.delete.card);
@@ -332,7 +336,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       const testData = getCreateMultipleData();
-      it(`should get correct atifact when multiple entries are created`, async () => {
+      it(`should get correct artifact when multiple entries are created`, async () => {
         // Create first trusted app
         await createArtifact(testData, {
           policyId: firstPolicy.packagePolicy.id,
