@@ -382,7 +382,11 @@ export async function maybeCreateDockerNetwork(log: ToolingLog) {
   log.indent(-4);
 }
 
-const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = ['connection refused', 'i/o timeout'];
+const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
+  'connection refused',
+  'i/o timeout',
+  'Client.Timeout',
+];
 
 /**
  *
