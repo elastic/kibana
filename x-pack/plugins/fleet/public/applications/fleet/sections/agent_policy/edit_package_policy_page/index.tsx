@@ -67,6 +67,7 @@ import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -105,6 +106,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const { isAgentlessEnabled } = useAgentless();
 
   const {
     // data
@@ -446,7 +448,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
-        isAgentlessEnabled={true}
+        isAgentlessEnabled={isAgentlessEnabled}
       />
     </ExtensionWrapper>
   );
