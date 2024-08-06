@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedTimeline, TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
+import { SavedTimeline, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import {
@@ -55,7 +55,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const templates: SavedTimeline[] = resp.body.timeline;
 
         expect(templates.length).to.greaterThan(0);
-        expect(templates.filter((t) => t.timelineType === TimelineType.default).length).to.equal(0);
+        expect(
+          templates.filter((t) => t.timelineType === TimelineTypeEnum.default).length
+        ).to.equal(0);
       });
     });
     describe('resolve timeline', () => {

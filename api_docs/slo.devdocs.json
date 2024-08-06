@@ -1251,7 +1251,7 @@
           {
             "parentPluginId": "slo",
             "id": "def-server.PluginSetup.usageCollection",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "usageCollection",
             "description": [],
@@ -1260,9 +1260,11 @@
                 "pluginId": "usageCollection",
                 "scope": "server",
                 "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              }
+                "section": "def-server.ICollectorSet",
+                "text": "ICollectorSet"
+              },
+              " & ",
+              "UsageCountersServiceSetup"
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
             "deprecated": false,
