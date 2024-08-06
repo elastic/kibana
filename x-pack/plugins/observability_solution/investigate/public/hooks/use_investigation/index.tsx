@@ -6,7 +6,7 @@
  */
 import type { AuthenticatedUser, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { last, pull } from 'lodash';
+import { pull } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { v4 } from 'uuid';
@@ -19,30 +19,22 @@ import {
 } from '../use_investigate_widget';
 import { useLocalStorage } from '../use_local_storage';
 import { createNewInvestigation } from './create_new_investigation';
-import {
-  StatefulInvestigation,
-  StatefulInvestigationRevision,
-  createInvestigationStore,
-} from './investigation_store';
+import { StatefulInvestigation, createInvestigationStore } from './investigation_store';
 
 export type RenderableInvestigateWidget = InvestigateWidget & {
   loading: boolean;
   element: React.ReactNode;
 };
 
-export type RenderableInvestigationRevision = Omit<StatefulInvestigationRevision, 'items'> & {
+export type RenderableInvestigation = Omit<StatefulInvestigation, 'items'> & {
   items: RenderableInvestigateWidget[];
-};
-
-export type RenderableInvestigateTimeline = Omit<StatefulInvestigation, 'revisions'> & {
-  revisions: RenderableInvestigationRevision[];
 };
 
 export interface UseInvestigationApi {
   startNewInvestigation: (id: string) => void;
   loadInvestigation: (id: string) => void;
-  investigation?: Omit<StatefulInvestigation, 'revisions'>;
-  revision?: RenderableInvestigationRevision;
+  investigation?: Omit<StatefulInvestigation, 'items'>;
+  revision?: RenderableInvestigation;
   copyItem: (id: string) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
   addItem: (options: InvestigateWidgetCreate) => Promise<void>;
@@ -86,10 +78,6 @@ function useInvestigationWithoutContext({
 
   const investigation = useObservable(investigation$)?.investigation;
 
-  const currentRevision = useMemo(() => {
-    return investigation?.revisions.find((revision) => revision.id === investigation.revision);
-  }, [investigation?.revision, investigation?.revisions]);
-
   const deleteItem = useCallback(
     async (id: string) => {
       return investigationStore.deleteItem(id);
@@ -108,7 +96,7 @@ function useInvestigationWithoutContext({
     const unusedComponentIds = Object.keys(widgetComponentsById);
 
     const nextItemsWithContext =
-      currentRevision?.items.map((item) => {
+      investigation?.items.map((item) => {
         let Component = widgetComponentsById.current[item.id];
         if (!Component) {
           const id = item.id;
@@ -154,7 +142,7 @@ function useInvestigationWithoutContext({
     });
 
     return nextItemsWithContext;
-  }, [currentRevision?.items, widgetDefinitions, investigationStore]);
+  }, [investigation?.items, widgetDefinitions, investigationStore]);
 
   const addItem = useCallback(
     async (widget: InvestigateWidgetCreate) => {
@@ -177,10 +165,10 @@ function useInvestigationWithoutContext({
   const addItemRef = useRef(addItem);
   addItemRef.current = addItem;
 
-  const renderableRevision = useMemo(() => {
-    return currentRevision
+  const renderableInvestigation = useMemo(() => {
+    return investigation
       ? {
-          ...currentRevision,
+          ...investigation,
           items: itemsWithContext.map((item) => {
             const { Component, ...rest } = item;
             return {
@@ -190,17 +178,15 @@ function useInvestigationWithoutContext({
           }),
         }
       : undefined;
-  }, [currentRevision, itemsWithContext]);
+  }, [investigation, itemsWithContext]);
 
   const startNewInvestigation = useCallback(
     async (id: string) => {
       const prevInvestigation = await investigationStore.getInvestigation();
 
-      const lastRevision = last(prevInvestigation.revisions)!;
-
       const createdInvestigationStore = createInvestigationStore({
         investigation: createNewInvestigation({
-          globalWidgetParameters: lastRevision.parameters,
+          globalWidgetParameters: prevInvestigation.parameters,
           user,
           id,
         }) as StatefulInvestigation,
@@ -259,7 +245,7 @@ function useInvestigationWithoutContext({
     }
 
     const subscription = investigation$.subscribe(({ investigation: investigationFromStore }) => {
-      const isEmpty = investigationFromStore.revisions.length === 1;
+      const isEmpty = investigationFromStore.items.length === 0;
 
       if (isEmpty) {
         return;
@@ -267,14 +253,9 @@ function useInvestigationWithoutContext({
 
       const toSerialize = {
         ...investigationFromStore,
-        revisions: investigationFromStore.revisions.map((revision) => {
-          return {
-            ...revision,
-            items: revision.items.map((item) => {
-              const { loading, ...rest } = item;
-              return rest;
-            }),
-          };
+        items: investigationFromStore.items.map((item) => {
+          const { loading, ...rest } = item;
+          return rest;
         }),
       };
 
@@ -329,7 +310,7 @@ function useInvestigationWithoutContext({
     deleteItem,
     investigation,
     loadInvestigation,
-    revision: renderableRevision,
+    revision: renderableInvestigation,
     setGlobalParameters,
     setTitle,
     startNewInvestigation,

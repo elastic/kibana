@@ -14,7 +14,6 @@ import {
   GlobalWidgetParameters,
   InvestigateWidgetCreate,
   Investigation,
-  InvestigationRevision,
 } from '../../../common/types';
 import { WidgetDefinition } from '../../types';
 
@@ -22,11 +21,7 @@ export type StatefulInvestigateWidget = InvestigateWidget & {
   loading: boolean;
 };
 
-export type StatefulInvestigation = Omit<Investigation, 'revisions'> & {
-  revisions: StatefulInvestigationRevision[];
-};
-
-export type StatefulInvestigationRevision = Omit<InvestigationRevision, 'items'> & {
+export type StatefulInvestigation = Omit<Investigation, 'items'> & {
   items: StatefulInvestigateWidget[];
 };
 
@@ -98,12 +93,7 @@ export function createInvestigationStore({
   const observable$ = new BehaviorSubject<{ investigation: StatefulInvestigation }>({
     investigation: {
       ...investigation,
-      revisions: investigation.revisions.map((revision) => {
-        return {
-          ...revision,
-          items: revision.items.map((item) => ({ ...item, loading: false })),
-        };
-      }),
+      items: investigation.items.map((item) => ({ ...item, loading: false })),
     },
   });
 
@@ -113,59 +103,14 @@ export function createInvestigationStore({
     observable$.next({ investigation: await cb(observable$.value.investigation) });
   }
 
-  async function updateRevisionInPlace(
-    cb: (prevRevision: StatefulInvestigationRevision) => MaybePromise<StatefulInvestigationRevision>
-  ) {
-    return updateInvestigationInPlace(async (prevInvestigation) => {
-      const currentRevision = prevInvestigation.revisions.find((revision) => {
-        return revision.id === prevInvestigation.revision;
-      })!;
-
-      const newRevision = await cb(currentRevision);
-
-      return {
-        ...prevInvestigation,
-        revisions: prevInvestigation.revisions.map((revision) => {
-          return revision.id === currentRevision.id ? newRevision : revision;
-        }),
-      };
-    });
-  }
-
-  async function nextRevision(
-    cb: (prevRevision: StatefulInvestigationRevision) => MaybePromise<StatefulInvestigationRevision>
-  ) {
-    return updateInvestigationInPlace(async (prevInvestigation) => {
-      const indexOfCurrentRevision = prevInvestigation.revisions.findIndex(
-        (revision) => revision.id === prevInvestigation.revision
-      );
-
-      const currentRevision = prevInvestigation.revisions[indexOfCurrentRevision];
-
-      const newRevision = {
-        ...(await cb(currentRevision)),
-        id: v4(),
-      };
-
-      return {
-        ...prevInvestigation,
-        revisions: prevInvestigation.revisions
-          .slice(0, indexOfCurrentRevision + 1)
-          .concat(newRevision)
-          .slice(-10),
-        revision: newRevision.id,
-      };
-    });
-  }
-
   const asObservable = observable$.asObservable();
 
   return {
     addItem: (itemId, item) => {
-      return nextRevision(async (prevRevision) => {
+      return updateInvestigationInPlace(async (prevInvestigation) => {
         return {
-          ...prevRevision,
-          items: prevRevision.items.concat({
+          ...prevInvestigation,
+          items: prevInvestigation.items.concat({
             ...(await regenerateItem({
               user,
               widgetDefinitions,
@@ -174,7 +119,7 @@ export function createInvestigationStore({
                 ...item,
                 id: itemId,
               },
-              globalWidgetParameters: prevRevision.parameters,
+              globalWidgetParameters: prevInvestigation.parameters,
             })),
             loading: false,
           }),
@@ -182,14 +127,14 @@ export function createInvestigationStore({
       });
     },
     copyItem: (itemId) => {
-      return nextRevision((prevRevision) => {
-        const itemToCopy = prevRevision.items.find((item) => item.id === itemId);
+      return updateInvestigationInPlace((prevInvestigation) => {
+        const itemToCopy = prevInvestigation.items.find((item) => item.id === itemId);
         if (!itemToCopy) {
           throw new Error('Cannot find item for id ' + itemId);
         }
         return {
-          ...prevRevision,
-          items: prevRevision.items.concat({
+          ...prevInvestigation,
+          items: prevInvestigation.items.concat({
             ...itemToCopy,
             id: v4(),
           }),
@@ -197,14 +142,17 @@ export function createInvestigationStore({
       });
     },
     deleteItem: (itemId) => {
-      return nextRevision((prevRevision) => {
-        const itemToDelete = prevRevision.items.find((item) => item.id === itemId);
+      return updateInvestigationInPlace((prevInvestigation) => {
+        const itemToDelete = prevInvestigation.items.find((item) => item.id === itemId);
         if (!itemToDelete) {
-          return prevRevision;
+          return prevInvestigation;
         }
+
         return {
-          ...prevRevision,
-          items: prevRevision.items.filter((itemAtIndex) => itemAtIndex.id !== itemToDelete.id),
+          ...prevInvestigation,
+          items: prevInvestigation.items.filter(
+            (itemAtIndex) => itemAtIndex.id !== itemToDelete.id
+          ),
         };
       });
     },
@@ -214,21 +162,21 @@ export function createInvestigationStore({
       return controller.abort();
     },
     setGlobalParameters: async (parameters) => {
-      await updateRevisionInPlace((prevRevision) => {
+      await updateInvestigationInPlace((prevInvestigation) => {
         return {
-          ...prevRevision,
-          items: prevRevision.items.map((item) => {
+          ...prevInvestigation,
+          items: prevInvestigation.items.map((item) => {
             return { ...item, loading: true };
           }),
         };
       });
 
-      await nextRevision(async (prevRevision) => {
+      await updateInvestigationInPlace(async (prevInvestigation) => {
         return {
-          ...prevRevision,
+          ...prevInvestigation,
           parameters,
           items: await Promise.all(
-            prevRevision.items.map(async (item) => {
+            prevInvestigation.items.map(async (item) => {
               return {
                 ...(await regenerateItem({
                   widget: item,
@@ -245,8 +193,8 @@ export function createInvestigationStore({
       });
     },
     setTitle: async (title: string) => {
-      return nextRevision((prevRevision) => {
-        return { ...prevRevision, title };
+      return updateInvestigationInPlace((prevInvestigation) => {
+        return { ...prevInvestigation, title };
       });
     },
   };
