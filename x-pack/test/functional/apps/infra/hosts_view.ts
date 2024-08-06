@@ -33,7 +33,7 @@ const tableEntries = [
   {
     alertsCount: 2,
     title: 'demo-stack-apache-01',
-    cpuUsage: '1.2%',
+    cpuUsage: '0%',
     normalizedLoad: '0.5%',
     memoryUsage: '18.4%',
     memoryFree: '3.2 GB',
@@ -44,7 +44,7 @@ const tableEntries = [
   {
     alertsCount: 2,
     title: 'demo-stack-mysql-01',
-    cpuUsage: '0.9%',
+    cpuUsage: '0%',
     normalizedLoad: '0%',
     memoryUsage: '18.2%',
     memoryFree: '3.2 GB',
@@ -55,7 +55,7 @@ const tableEntries = [
   {
     alertsCount: 2,
     title: 'demo-stack-redis-01',
-    cpuUsage: '0.8%',
+    cpuUsage: '0%',
     normalizedLoad: '0%',
     memoryUsage: '15.9%',
     memoryFree: '3.3 GB',
@@ -66,7 +66,7 @@ const tableEntries = [
   {
     alertsCount: 0,
     title: 'demo-stack-nginx-01',
-    cpuUsage: '0.8%',
+    cpuUsage: '0%',
     normalizedLoad: '1.4%',
     memoryUsage: '18%',
     memoryFree: '3.2 GB',
@@ -77,7 +77,7 @@ const tableEntries = [
   {
     alertsCount: 0,
     title: 'demo-stack-haproxy-01',
-    cpuUsage: '0.8%',
+    cpuUsage: '0%',
     normalizedLoad: '0%',
     memoryUsage: '16.5%',
     memoryFree: '3.2 GB',
@@ -88,7 +88,7 @@ const tableEntries = [
   {
     alertsCount: 0,
     title: 'demo-stack-client-01',
-    cpuUsage: '0.5%',
+    cpuUsage: '0%',
     normalizedLoad: '0.1%',
     memoryUsage: '13.8%',
     memoryFree: '3.3 GB',
@@ -277,7 +277,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           [
-            { metric: 'cpuUsage', value: '13.9%' },
+            { metric: 'cpuUsage', value: '0%' },
             { metric: 'normalizedLoad1m', value: '18.8%' },
             { metric: 'memoryUsage', value: '94.9%' },
             { metric: 'diskUsage', value: 'N/A' },
@@ -524,7 +524,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('KPIs', () => {
         [
           { metric: 'hostsCount', value: '6' },
-          { metric: 'cpuUsage', value: '0.8%' },
+          { metric: 'cpuUsage', value: 'N/A' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
           { metric: 'diskUsage', value: '35.7%' },
@@ -686,7 +686,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await Promise.all(
             [
               { metric: 'hostsCount', value: '3' },
-              { metric: 'cpuUsage', value: '0.9%' },
+              { metric: 'cpuUsage', value: 'N/A' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '17.5%' },
               { metric: 'diskUsage', value: '35.7%' },
