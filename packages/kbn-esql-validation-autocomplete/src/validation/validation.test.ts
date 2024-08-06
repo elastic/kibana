@@ -2701,28 +2701,11 @@ describe('validation logic', () => {
             'Argument of [date_diff] must be [date], found value [concat("20","22")] type [keyword]',
           ]
         );
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_diff("year", textField, textField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_diff("year", textField, textField)', []);
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_diff(textField, textField, textField)',
-          []
-        );
-        testErrorsAndWarnings('from a_index | eval date_diff(textField, textField, textField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_diff(to_string(booleanField), textField, textField)',
+          'from a_index | eval var = date_diff(to_string(booleanField), dateField, dateField)',
           []
         );
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_diff("year", textField, textField, extraArg)',
-          ['Error: [date_diff] function expects exactly 3 arguments, got 4.']
-        );
-
-        testErrorsAndWarnings('from a_index | sort date_diff("year", textField, textField)', []);
       });
 
       describe('date_extract', () => {
@@ -2804,36 +2787,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_extract(textField, concat("20", "22"))', [
           'Argument of [date_extract] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
-        testErrorsAndWarnings('row var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "a")', []);
-        testErrorsAndWarnings('row date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", "a")', []);
-        testErrorsAndWarnings('row var = date_extract("a", "a")', []);
-        testErrorsAndWarnings('row date_extract("a", "a")', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", textField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", textField)',
-          []
-        );
-
-        testErrorsAndWarnings('from a_index | eval var = date_extract(textField, textField)', []);
-        testErrorsAndWarnings('from a_index | eval date_extract(textField, textField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = date_extract(to_string(booleanField), textField)',
-          []
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", textField, extraArg)',
-          ['Error: [date_extract] function expects exactly 2 arguments, got 3.']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | sort date_extract("ALIGNED_DAY_OF_WEEK_IN_MONTH", textField)',
+          'from a_index | eval var = date_extract(to_string(booleanField), dateField)',
           []
         );
       });
@@ -2884,25 +2840,11 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval date_format(textField, concat("20", "22"))', [
           'Argument of [date_format] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
-        testErrorsAndWarnings('row var = date_format("a", "a")', []);
-        testErrorsAndWarnings('row date_format("a", "a")', []);
-        testErrorsAndWarnings('from a_index | eval var = date_format(keywordField, textField)', []);
-        testErrorsAndWarnings('from a_index | eval date_format(keywordField, textField)', []);
 
         testErrorsAndWarnings(
-          'from a_index | eval var = date_format(to_string(booleanField), textField)',
+          'from a_index | eval var = date_format(to_string(booleanField), dateField)',
           []
         );
-
-        testErrorsAndWarnings('from a_index | eval var = date_format(textField, textField)', []);
-        testErrorsAndWarnings('from a_index | eval date_format(textField, textField)', []);
-
-        testErrorsAndWarnings(
-          'from a_index | eval date_format(keywordField, textField, extraArg)',
-          ['Error: [date_format] function expects no more than 2 arguments, got 3.']
-        );
-
-        testErrorsAndWarnings('from a_index | sort date_format(keywordField, textField)', []);
       });
 
       describe('date_parse', () => {
@@ -3009,20 +2951,6 @@ describe('validation logic', () => {
           'Argument of [date_trunc] must be [time_literal], found value [textField] type [text]',
           'Argument of [date_trunc] must be [date], found value [concat("20","22")] type [keyword]',
         ]);
-        testErrorsAndWarnings('row var = date_trunc(1 year, "a")', []);
-        testErrorsAndWarnings('row date_trunc(1 year, "a")', []);
-        testErrorsAndWarnings('row var = date_trunc("a", "a")', []);
-        testErrorsAndWarnings('row date_trunc("a", "a")', []);
-        testErrorsAndWarnings('from a_index | eval var = date_trunc(1 year, textField)', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, textField)', []);
-        testErrorsAndWarnings('from a_index | eval var = date_trunc(textField, textField)', []);
-        testErrorsAndWarnings('from a_index | eval date_trunc(textField, textField)', []);
-
-        testErrorsAndWarnings('from a_index | eval date_trunc(1 year, textField, extraArg)', [
-          'Error: [date_trunc] function expects exactly 2 arguments, got 3.',
-        ]);
-
-        testErrorsAndWarnings('from a_index | sort date_trunc(1 year, textField)', []);
       });
 
       describe('e', () => {
@@ -3077,6 +3005,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort ends_with(keywordField, keywordField)', []);
         testErrorsAndWarnings('from a_index | eval ends_with(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval ends_with(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval var = ends_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval ends_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval var = ends_with(textField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval ends_with(textField, keywordField)', []);
       });
 
       describe('exp', () => {
@@ -5575,7 +5507,11 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings('row var = mv_slice("a", to_integer(true), to_integer(true))', []);
+        testErrorsAndWarnings(
+          'row var = mv_slice(to_datetime("2021-01-01T00:00:00Z"), to_integer(true), to_integer(true))',
+          []
+        );
+
         testErrorsAndWarnings('row var = mv_slice(to_geopoint("POINT (30 10)"), 5, 5)', []);
         testErrorsAndWarnings('row mv_slice(to_geopoint("POINT (30 10)"), 5, 5)', []);
 
@@ -5590,7 +5526,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = mv_slice(textField, to_integer(booleanField), to_integer(booleanField))',
+          'from a_index | eval var = mv_slice(dateField, to_integer(booleanField), to_integer(booleanField))',
           []
         );
       });
@@ -5647,7 +5583,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row var = mv_sort(5, "a")', []);
         testErrorsAndWarnings('row mv_sort(5, "a")', []);
         testErrorsAndWarnings('row var = mv_sort("a", "a")', []);
-        testErrorsAndWarnings('row mv_sort("a", "a")', []);
+        testErrorsAndWarnings('row mv_sort("a", "a")', [
+          'Invalid option ["a"] for mv_sort. Supported options: ["asc", "desc"].',
+        ]);
         testErrorsAndWarnings('row var = mv_sort(to_version("1.0.0"), "a")', []);
         testErrorsAndWarnings('row mv_sort(to_version("1.0.0"), "a")', []);
         testErrorsAndWarnings('from a_index | eval var = mv_sort(longField, keywordField)', []);
@@ -8203,6 +8141,10 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | sort starts_with(keywordField, keywordField)', []);
         testErrorsAndWarnings('from a_index | eval starts_with(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval starts_with(nullVar, nullVar)', []);
+        testErrorsAndWarnings('from a_index | eval var = starts_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval starts_with(keywordField, textField)', []);
+        testErrorsAndWarnings('from a_index | eval var = starts_with(textField, keywordField)', []);
+        testErrorsAndWarnings('from a_index | eval starts_with(textField, keywordField)', []);
       });
 
       describe('substring', () => {
@@ -8715,12 +8657,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval to_datetime(nullVar)', []);
         testErrorsAndWarnings('from a_index | eval to_datetime("2022")', []);
         testErrorsAndWarnings('from a_index | eval to_datetime(concat("20", "22"))', []);
-
-        testErrorsAndWarnings('from a_index | eval to_datetime(textField, extraArg)', [
-          'Error: [to_datetime] function expects exactly one argument, got 2.',
-        ]);
-
-        testErrorsAndWarnings('from a_index | sort to_datetime(textField)', []);
       });
 
       describe('to_degrees', () => {
@@ -14144,26 +14080,30 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | stats by bucket(dateField, datePeriodField)', [
-          'Argument of [bucket] must be a constant, received [date_periodField]',
+          'Argument of [bucket] must be a constant, received [datePeriodField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats by bin(dateField, datePeriodField)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(dateField, datePeriodField)', [
+          'Argument of [bin] must be a constant, received [datePeriodField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats by bucket(dateField, integerField, now(), now())',
-          []
+          ['Argument of [bucket] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(dateField, integerField, now(), now())',
-          []
+          ['Argument of [bin] must be a constant, received [integerField]']
         );
 
         testErrorsAndWarnings('from a_index | stats by bucket(doubleField, doubleField)', [
           'Argument of [bucket] must be a constant, received [doubleField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats by bin(doubleField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(doubleField, doubleField)', [
+          'Argument of [bin] must be a constant, received [doubleField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats by bucket(doubleField, integerField, doubleField, doubleField)',
@@ -14176,7 +14116,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, doubleField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14190,7 +14134,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, doubleField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14204,7 +14152,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, doubleField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14218,7 +14170,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, integerField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14232,7 +14188,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, integerField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14246,7 +14206,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, integerField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14260,7 +14224,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, longField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14274,7 +14242,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, longField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14288,14 +14260,20 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(doubleField, integerField, longField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings('from a_index | stats by bucket(integerField, doubleField)', [
           'Argument of [bucket] must be a constant, received [doubleField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats by bin(integerField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(integerField, doubleField)', [
+          'Argument of [bin] must be a constant, received [doubleField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats by bucket(integerField, integerField, doubleField, doubleField)',
@@ -14308,7 +14286,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, doubleField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14322,7 +14304,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, doubleField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14336,7 +14322,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, doubleField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14350,7 +14340,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, integerField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14364,7 +14358,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, integerField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14378,7 +14376,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, longField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14392,7 +14394,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, longField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14406,14 +14412,20 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(integerField, integerField, longField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings('from a_index | stats by bucket(longField, doubleField)', [
           'Argument of [bucket] must be a constant, received [doubleField]',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats by bin(longField, doubleField)', []);
+        testErrorsAndWarnings('from a_index | stats by bin(longField, doubleField)', [
+          'Argument of [bin] must be a constant, received [doubleField]',
+        ]);
 
         testErrorsAndWarnings(
           'from a_index | stats by bucket(longField, integerField, doubleField, doubleField)',
@@ -14426,7 +14438,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, doubleField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14440,7 +14456,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, doubleField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14454,7 +14474,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, doubleField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14468,7 +14492,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, integerField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14482,7 +14510,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, integerField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14496,7 +14528,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, integerField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14510,7 +14546,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, longField, doubleField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [doubleField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14524,7 +14564,11 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, longField, integerField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [integerField]',
+          ]
         );
 
         testErrorsAndWarnings(
@@ -14538,18 +14582,24 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings(
           'from a_index | stats by bin(longField, integerField, longField, longField)',
-          []
+          [
+            'Argument of [bin] must be a constant, received [integerField]',
+            'Argument of [bin] must be a constant, received [longField]',
+            'Argument of [bin] must be a constant, received [longField]',
+          ]
         );
 
         testErrorsAndWarnings('from a_index | sort bucket(dateField, datePeriodField)', [
           'SORT does not support function bucket',
         ]);
 
-        testErrorsAndWarnings('from a_index | stats bucket("2022", datePeriodField)', []);
-        testErrorsAndWarnings(
-          'from a_index | stats bucket(concat("20", "22"), datePeriodField)',
-          []
-        );
+        testErrorsAndWarnings('from a_index | stats bucket("2022", datePeriodField)', [
+          'Argument of [bucket] must be a constant, received [datePeriodField]',
+        ]);
+        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), datePeriodField)', [
+          'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
+          'Argument of [bucket] must be a constant, received [datePeriodField]',
+        ]);
       });
 
       describe('percentile', () => {

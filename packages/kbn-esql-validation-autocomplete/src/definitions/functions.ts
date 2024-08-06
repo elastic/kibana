@@ -753,16 +753,16 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'datetime',
+          type: 'date',
           optional: true,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
       minParams: 1,
     },
     {
@@ -1218,12 +1218,12 @@ const dateDiffDefinition: FunctionDefinition = {
         },
         {
           name: 'startTimestamp',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
         {
           name: 'endTimestamp',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -1238,12 +1238,12 @@ const dateDiffDefinition: FunctionDefinition = {
         },
         {
           name: 'startTimestamp',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
         {
           name: 'endTimestamp',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -1308,7 +1308,7 @@ const dateExtractDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -1323,7 +1323,7 @@ const dateExtractDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -1357,7 +1357,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -1372,7 +1372,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -1410,7 +1410,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -1425,7 +1425,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -1440,7 +1440,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -1455,7 +1455,7 @@ const dateParseDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1482,11 +1482,11 @@ const dateTruncDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -1497,11 +1497,11 @@ const dateTruncDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1549,6 +1549,36 @@ const endsWithDefinition: FunctionDefinition = {
         {
           name: 'str',
           type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'suffix',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'suffix',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
           optional: false,
         },
         {
@@ -2707,7 +2737,7 @@ const logDefinition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && arg.value < 0) {
+      if (isLiteralItem(arg) && Number(arg.value) < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2790,7 +2820,7 @@ const log10Definition: FunctionDefinition = {
     // do not really care here about the base and field
     // just need to check both values are not negative
     for (const arg of fnDef.args) {
-      if (isLiteralItem(arg) && arg.value < 0) {
+      if (isLiteralItem(arg) && Number(arg.value) < 0) {
         messages.push({
           type: 'warning' as const,
           code: 'logOfNegativeValue',
@@ -2908,16 +2938,16 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
         {
           name: 'field2',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -3242,7 +3272,7 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -3398,11 +3428,11 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -3545,11 +3575,11 @@ const mvFirstDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -3702,11 +3732,11 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -3839,11 +3869,11 @@ const mvMaxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -4019,11 +4049,11 @@ const mvMinDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -4226,7 +4256,7 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
         {
@@ -4240,7 +4270,7 @@ const mvSliceDefinition: FunctionDefinition = {
           optional: true,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -4461,7 +4491,7 @@ const mvSortDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
         {
@@ -4471,7 +4501,7 @@ const mvSortDefinition: FunctionDefinition = {
           literalOptions: ['asc', 'desc'],
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -4548,6 +4578,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -4563,6 +4594,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'text',
@@ -4578,6 +4610,7 @@ const mvSortDefinition: FunctionDefinition = {
           name: 'order',
           type: 'keyword',
           optional: true,
+          literalOptions: ['asc', 'desc'],
         },
       ],
       returnType: 'version',
@@ -4896,7 +4929,7 @@ const nowDefinition: FunctionDefinition = {
   signatures: [
     {
       params: [],
-      returnType: 'datetime',
+      returnType: 'date',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -6613,6 +6646,36 @@ const startsWithDefinition: FunctionDefinition = {
       params: [
         {
           name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'prefix',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'prefix',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'str',
           type: 'text',
           optional: false,
         },
@@ -7075,11 +7138,11 @@ const toDatetimeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -7089,7 +7152,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -7099,7 +7162,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -7109,7 +7172,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -7119,7 +7182,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -7129,7 +7192,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
     {
       params: [
@@ -7139,7 +7202,7 @@ const toDatetimeDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      returnType: 'datetime',
+      returnType: 'date',
     },
   ],
   supportedCommands: ['stats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -7261,7 +7324,7 @@ const toDoubleDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -7476,7 +7539,7 @@ const toIntegerDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -7641,7 +7704,7 @@ const toLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -7851,7 +7914,7 @@ const toStringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
@@ -7991,7 +8054,7 @@ const toUnsignedLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'datetime',
+          type: 'date',
           optional: false,
         },
       ],
