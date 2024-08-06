@@ -68,7 +68,7 @@ export type {
 
 export const services = {
   ...deploymentAgnosticServices,
-  // create a new deployment-agonstic service and load here
+  // create a new deployment-agnostic service and load here
 };
 ```
 
