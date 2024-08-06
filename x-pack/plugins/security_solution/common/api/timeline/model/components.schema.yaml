@@ -341,7 +341,6 @@ components:
           nullable: true
         timelineId:
           type: string
-          nullable: true
         created:
           type: number
           nullable: true

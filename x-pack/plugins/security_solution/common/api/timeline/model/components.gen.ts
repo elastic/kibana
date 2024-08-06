@@ -217,7 +217,7 @@ export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = z.object({
   eventId: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
-  timelineId: z.string().nullable(),
+  timelineId: z.string(),
   created: z.number().nullable().optional(),
   createdBy: z.string().nullable().optional(),
   updated: z.number().nullable().optional(),
