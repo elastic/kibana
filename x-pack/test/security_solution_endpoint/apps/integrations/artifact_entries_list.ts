@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('For each artifact list under management', function () {
-    targetTags(this, ['@ess', '@skipInServerless']);
+    targetTags(this, ['@ess', '@serverless']);
     this.timeout(60_000 * 5);
 
     let indexedData: IndexedHostsAndAlertsResponse;
