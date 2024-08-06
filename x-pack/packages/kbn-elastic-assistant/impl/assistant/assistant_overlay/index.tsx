@@ -38,9 +38,7 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 
 export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationTitle, setConversationTitle] = useState<string | undefined>(
-    WELCOME_CONVERSATION_TITLE
-  );
+  const [conversationTitle, setConversationTitle] = useState<string>(WELCOME_CONVERSATION_TITLE);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
     useAssistantContext();

@@ -55,7 +55,8 @@ export const useCurrentConversation = ({
 
   useEffect(() => {
     if (setConversationTitle && currentConversation?.title) {
-      setConversationTitle(currentConversation?.title);
+      console.log('setConversationTitle from useE', currentConversation?.title);
+      setConversationTitle(currentConversation.title);
     }
   }, [currentConversation?.title, setConversationTitle]);
 
@@ -98,7 +99,7 @@ export const useCurrentConversation = ({
     },
     [conversations, currentConversation?.id, getConversation]
   );
-  const selectedSystemPrompt = useMemo(
+  const currentSystemPrompt = useMemo(
     () =>
       getDefaultSystemPrompt({
         allSystemPrompts,
@@ -108,7 +109,7 @@ export const useCurrentConversation = ({
   );
 
   const [currentSystemPromptId, setCurrentSystemPromptId] = useState<string | undefined>(
-    selectedSystemPrompt?.id
+    currentSystemPrompt?.id
   );
 
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
@@ -181,6 +182,7 @@ export const useCurrentConversation = ({
     handleOnConversationSelected,
     refetchCurrentUserConversations,
   ]);
+
   return {
     currentConversation,
     currentConversationId,

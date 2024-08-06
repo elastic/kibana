@@ -66,7 +66,7 @@ const CommentContainer = styled('span')`
 
 export interface Props {
   chatHistoryVisible?: boolean;
-  conversationTitle?: string;
+  conversationTitle: string;
   currentUserAvatar?: UserAvatar;
   onCloseFlyout?: () => void;
   promptContextId?: string;
