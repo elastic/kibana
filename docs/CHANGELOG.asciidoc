@@ -169,10 +169,6 @@ SharedUX::
 The new *Connection details* overlay features a cleaner UI for Elasticsearch endpoint URL and Cloud ID token retrieval. As well as the new *"API key"* tab, which is a simplified interface for creating an API key with all the default settings, except the expiration time is set to 90 days. If user wants a more granular API keys, there is a link which navigates to the right section in Stack Management.
 ////
 Other::
-* Adds public list asset criticality API ({kibana-pull}186568[#186568]).
-* Adds criticality column to All Users table In Explore pages ({kibana-pull}186456[#186456]).
-* Adding Asset Criticality column to All Hosts tab in Explore pages ({kibana-pull}186375[#186375]).
-* Create public versions of asset criticality get,upsert,delete and csv upload APIs ({kibana-pull}186169[#186169]).
 * The Cases webhook connector now supports SSL certificate authentication ({kibana-pull}185925[#185925]).
 * Update links for integration buttons in observability solutions ({kibana-pull}184477[#184477]).
 * Adds SLO status, SLI value, error budget remaining and consumed in burn rate alert context ({kibana-pull}184471[#184471]).
@@ -181,7 +177,6 @@ Other::
 * Change navigation behavior for the o11y guide cards to pre-select the correct solution ({kibana-pull}184065[#184065]).
 * The POC for creating entity-centric indices using entity definitions ({kibana-pull}183205[#183205]).
 * Using alert summary widget as the history chart ({kibana-pull}181824[#181824]).
-* Reveal data quality entry on the side-nav in serverless ({kibana-pull}180816[#180816]).
 * Flyout Summary section ({kibana-pull}179479[#179479]).
 
 For more information about the features introduced in 8.15.0, refer to <<whats-new,What's new in 8.15>>.
@@ -324,11 +319,7 @@ Other::
 * Improve metadata autocomplete suggestions with comma and pipe ({kibana-pull}188338[#188338]).
 * Automatically encapsulate index names with special chars with quotes ({kibana-pull}187899[#187899]).
 * Adds a preview button to alerts inside the risk contribution panel ({kibana-pull}187148[#187148]).
-* Adds public list asset criticality API ({kibana-pull}186568[#186568]).
-* Adds criticality column to All Users table In Explore pages ({kibana-pull}186456[#186456]).
-* Adding Asset Criticality column to All Hosts tab in Explore pages ({kibana-pull}186375[#186375]).
 * Capitalize things ({kibana-pull}186340[#186340]).
-* Create public versions of asset criticality get,upsert,delete and csv upload APIs ({kibana-pull}186169[#186169]).
 * Enable links to Dataset Quality from Management and Logs Explorer ({kibana-pull}186143[#186143]).
 * The Cases webhook connector now supports SSL certificate authentication ({kibana-pull}185925[#185925]).
 * Update question contents to match new designs ({kibana-pull}184866[#184866]).
@@ -365,7 +356,6 @@ The Kibana configuration file now supports assigning default value for environme
 ////
 * Using alert summary widget as the history chart ({kibana-pull}181824[#181824]).
 * Update general settings for apm config ({kibana-pull}180944[#180944]).
-* Reveal data quality entry on the side-nav in serverless ({kibana-pull}180816[#180816]).
 * Flyout Summary section ({kibana-pull}179479[#179479]).
 
 [float]
