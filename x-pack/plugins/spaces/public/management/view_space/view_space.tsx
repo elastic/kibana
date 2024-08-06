@@ -128,7 +128,26 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     }
 
     const getRoles = async () => {
-      const result = await spacesManager.getRolesForSpace(spaceId);
+      let result: Role[] = [];
+      try {
+        result = await spacesManager.getRolesForSpace(spaceId);
+      } catch (error) {
+        const message = error?.body?.message ?? error.toString();
+        const statusCode = error?.body?.statusCode ?? null;
+        if (statusCode === 403) {
+          // eslint-disable-next-line no-console
+          console.log('Insufficient permissions to get list of roles for the space');
+          // eslint-disable-next-line no-console
+          console.log(message);
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('Encountered error while getting list of roles for space!');
+          // eslint-disable-next-line no-console
+          console.error(error);
+          throw error;
+        }
+      }
+
       setRoles(result);
       setIsLoadingRoles(false);
     };

@@ -125,7 +125,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
         window.location.reload();
       }
     } catch (error) {
-      const message = error?.body?.message ?? '';
+      const message = error?.body?.message ?? error.toString();
       notifications.toasts.addDanger(
         i18n.translate('xpack.spaces.management.spaceDetails.errorSavingSpaceTitle', {
           defaultMessage: 'Error saving space: {message}',
