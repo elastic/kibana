@@ -9,9 +9,14 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Exception Lists - Items APIs', function () {
     loadTestFile(require.resolve('./create_exception_list_items'));
+    loadTestFile(require.resolve('./create_exception_list_items_rbac'));
     loadTestFile(require.resolve('./read_exception_list_items'));
+    loadTestFile(require.resolve('./read_exception_list_items_rbac'));
     loadTestFile(require.resolve('./update_exception_list_items'));
+    loadTestFile(require.resolve('./update_exception_list_items_rbac'));
     loadTestFile(require.resolve('./delete_exception_list_items'));
+    loadTestFile(require.resolve('./delete_exception_list_items_rbac'));
     loadTestFile(require.resolve('./find_exception_list_items'));
+    loadTestFile(require.resolve('./find_exception_list_items_rbac'));
   });
 }
