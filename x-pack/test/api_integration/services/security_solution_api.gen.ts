@@ -71,6 +71,7 @@ import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common
 import { GetAgentPolicySummaryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/deprecated_agent_policy_summary.gen';
 import { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
+import { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
 import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
@@ -614,6 +615,14 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    getEndpointMetadataList(props: GetEndpointMetadataListProps) {
+      return supertest
+        .get('/api/endpoint/metadata')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     getEndpointSuggestions(props: GetEndpointSuggestionsProps) {
       return supertest
         .post(replaceParams('/api/endpoint/suggestions/{suggestion_type}', props.params))
@@ -1139,6 +1148,9 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;
+}
+export interface GetEndpointMetadataListProps {
+  query: GetEndpointMetadataListRequestQueryInput;
 }
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
