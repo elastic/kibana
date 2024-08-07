@@ -6,19 +6,18 @@
  */
 
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
-import { getFilteredHosts } from './get_filtered_hosts';
+import { getFilteredHostNames, getShouldFetchApmHosts } from './get_filtered_hosts';
 import type { GetHostParameters } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
 import { assertQueryStructure, hasFilters } from '../utils';
-import { maybeGetHostsFromApm } from './get_apm_host_names';
+import { getApmHostNames } from './get_apm_hosts';
 
 export const getHosts = async ({
   metrics,
   from,
   to,
   limit,
-  type,
   query,
   alertsClient,
   apmDataAccessServices,
@@ -26,8 +25,8 @@ export const getHosts = async ({
 }: GetHostParameters): Promise<GetInfraMetricsResponsePayload> => {
   const runFilterQuery = hasFilters(query);
   // filter first to prevent filter clauses from impacting the metrics aggregations.
-  const hostNamesShortList = runFilterQuery
-    ? await getFilteredHostNames({
+  const hostNames = runFilterQuery
+    ? await getHostNames({
         infraMetricsClient,
         apmDataAccessServices,
         from,
@@ -37,9 +36,9 @@ export const getHosts = async ({
       })
     : [];
 
-  if (runFilterQuery && hostNamesShortList.length === 0) {
+  if (runFilterQuery && hostNames.length === 0) {
     return {
-      type: 'host',
+      assetType: 'host',
       nodes: [],
     };
   }
@@ -50,13 +49,12 @@ export const getHosts = async ({
       from,
       to,
       limit,
-      type,
       metrics,
-      hostNamesShortList,
+      hostNames,
     }),
     getHostsAlertsCount({
       alertsClient,
-      hostNamesShortList,
+      hostNames,
       from,
       to,
       limit,
@@ -68,18 +66,21 @@ export const getHosts = async ({
     return acc;
   }, {} as Record<string, { alertsCount: number }>);
 
-  const hosts = hostMetricsResponse.map((item) => {
-    const { alertsCount } = alertsByHostName[item.name] ?? {};
-    return { name: item.name, metrics: item.metrics, metadata: item.metadata, alertsCount };
+  const hosts = hostMetricsResponse.map((host) => {
+    const { alertsCount } = alertsByHostName[host.name] ?? {};
+    return {
+      ...host,
+      alertsCount,
+    };
   });
 
   return {
-    type,
+    assetType: 'host',
     nodes: hosts,
   };
 };
 
-const getFilteredHostNames = async ({
+const getHostNames = async ({
   infraMetricsClient,
   apmDataAccessServices,
   from,
@@ -92,22 +93,27 @@ const getFilteredHostNames = async ({
 >) => {
   assertQueryStructure(query);
 
-  const [hosts, apmHosts] = await Promise.all([
-    getFilteredHosts({
-      infraMetricsClient,
-      query,
-      from,
-      to,
-      limit,
-    }),
-    maybeGetHostsFromApm({
-      infraMetricsClient,
-      apmDataAccessServices,
-      query,
-      from,
-      to,
-    }),
-  ]);
+  const shouldFetchApmHosts = await getShouldFetchApmHosts({
+    infraMetricsClient,
+    from,
+    to,
+    query,
+  });
 
-  return [...new Set([...hosts, ...apmHosts])];
+  // If the query contains fields not shipped by the system module, it will try to find matches in APM Docs
+  return shouldFetchApmHosts && apmDataAccessServices
+    ? getApmHostNames({
+        apmDataAccessServices,
+        query,
+        from,
+        to,
+        limit,
+      })
+    : getFilteredHostNames({
+        infraMetricsClient,
+        query,
+        from,
+        to,
+        limit,
+      });
 };

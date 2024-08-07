@@ -32,7 +32,7 @@ export const HostCountKpi = () => {
   };
 
   const subtitle =
-    searchCriteria.limit < (count ?? 0)
+    searchCriteria.limit < count
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.hostCount.limit', {
           defaultMessage: 'Limited to {limit}',
           values: {
@@ -45,7 +45,7 @@ export const HostCountKpi = () => {
     <MetricChartWrapper
       {...hostsCountChart}
       style={{ height: KPI_CHART_HEIGHT }}
-      value={count ?? 0}
+      value={count}
       subtitle={subtitle}
       toolTip={
         <TooltipContent

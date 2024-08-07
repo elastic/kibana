@@ -7,7 +7,7 @@
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
-import { InfraBackendLibs } from '../infra_types';
+import type { InfraBackendLibs } from '../infra_types';
 
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   body: {
@@ -40,6 +40,7 @@ export async function getInfraMetricsClient({
         'search',
         {
           ...searchParams,
+          ignore_unavailable: true,
           index: metricsIndices,
         },
         request

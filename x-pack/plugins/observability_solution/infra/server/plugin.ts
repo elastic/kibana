@@ -22,7 +22,7 @@ import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server'
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
-import { initInfraServer } from './infra_server';
+import { registerRoutes } from './infra_server';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
@@ -298,7 +298,7 @@ export class InfraServerPlugin
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart, pluginsStart: InfraServerPluginStartDeps) {
+  start(core: CoreStart) {
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
@@ -309,7 +309,7 @@ export class InfraServerPlugin
       savedObjects: core.savedObjects,
     });
 
-    initInfraServer(this.libs, core, pluginsStart);
+    registerRoutes(this.libs);
 
     return {
       inventoryViews,

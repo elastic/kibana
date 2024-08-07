@@ -6,29 +6,30 @@
  * Side Public License, v 1.
  */
 import { InfraDocument, apm, Instance, infra, ApmFields } from '@kbn/apm-synthtrace-client';
+import { random, times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<InfraDocument | ApmFields> = async (runOptions) => {
+const scenario: Scenario<InfraDocument | ApmFields> = async ({
+  logger,
+  scenarioOpts = { numInstances: 10 },
+}) => {
   return {
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
-      const { numServices = 3, numHosts = 10 } = runOptions.scenarioOpts || {};
-      const { logger } = runOptions;
+      const { numInstances } = scenarioOpts;
+      const transactionName = '240rpm/75% 1000ms';
 
-      // Infra hosts Data logic
-
-      const HOSTS = Array(numHosts)
-        .fill(0)
-        .map((_, idx) => infra.host(`my-host-${idx}`));
+      // Only half of the hosts will have have system metrics
+      const hostList = times(numInstances / 2).map((index) => infra.host(`host-${index}`));
 
       const hosts = range
         .interval('30s')
         .rate(1)
         .generator((timestamp) =>
-          HOSTS.flatMap((host) => [
+          hostList.flatMap((host) => [
             host.cpu().timestamp(timestamp),
             host.memory().timestamp(timestamp),
             host.network().timestamp(timestamp),
@@ -39,28 +40,58 @@ const scenario: Scenario<InfraDocument | ApmFields> = async (runOptions) => {
         );
 
       // APM Simple Trace
+      const instances = times(numInstances).map((index) => {
+        return apm
+          .service({
+            name: `synth-node-${index % 3}`,
+            environment: ENVIRONMENT,
+            agentName: 'node-js',
+          })
+          .instance(`host-${index}`);
+      });
 
-      const instances = [...Array(numServices).keys()].map((index) =>
-        apm
-          .service({ name: `synth-node-${index}`, environment: ENVIRONMENT, agentName: 'nodejs' })
-          .instance('instance')
-      );
       const instanceSpans = (instance: Instance) => {
+        const hasHighDuration = Math.random() > 0.5;
+        const throughput = random(1, 10);
+
+        const traces = range.ratePerMinute(throughput).generator((timestamp) => {
+          const parentDuration = hasHighDuration ? random(1000, 5000) : random(100, 1000);
+          const generateError = random(1, 4) % 3 === 0;
+          const span = instance
+            .transaction({ transactionName })
+            .timestamp(timestamp)
+            .duration(parentDuration);
+
+          return !generateError
+            ? span.success()
+            : span.failure().errors(
+                instance
+                  .error({
+                    message: `No handler for ${transactionName}`,
+                    type: 'No handler',
+                    culprit: 'request',
+                  })
+                  .timestamp(timestamp + 50)
+              );
+        });
+
+        const cpuPct = random(0, 1);
+        const memoryFree = random(0, 1000);
         const metricsets = range
           .interval('30s')
           .rate(1)
           .generator((timestamp) =>
             instance
               .appMetrics({
-                'system.memory.actual.free': 800,
+                'system.memory.actual.free': memoryFree,
                 'system.memory.total': 1000,
-                'system.cpu.total.norm.pct': 0.6,
+                'system.cpu.total.norm.pct': cpuPct,
                 'system.process.cpu.total.norm.pct': 0.7,
               })
               .timestamp(timestamp)
           );
 
-        return [metricsets];
+        return [traces, metricsets];
       };
 
       return [

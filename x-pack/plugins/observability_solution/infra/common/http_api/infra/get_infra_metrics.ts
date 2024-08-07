@@ -7,6 +7,7 @@
 
 import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { AssetTypeRT } from '../shared/asset_type';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
@@ -15,6 +16,8 @@ export const InfraMetricTypeRT = rt.keyof({
   diskSpaceUsage: null,
   memory: null,
   memoryFree: null,
+  rx: null,
+  tx: null,
   rxV2: null,
   txV2: null,
 });
@@ -41,7 +44,6 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
     query: rt.UnknownRecord,
   }),
   rt.type({
-    type: rt.literal('host'),
     limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
     metrics: rt.array(InfraMetricTypeRT),
     from: isoToEpochRt,
@@ -49,21 +51,26 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   }),
 ]);
 
+export const GetInfraMetricsRequestParamsRT = AssetTypeRT;
+
 export const InfraAssetMetricsItemRT = rt.intersection([
   rt.type({
     name: rt.string,
     metrics: rt.array(InfraAssetMetricsRT),
     metadata: rt.array(InfraAssetMetadataRT),
+    monitored: rt.boolean,
   }),
   rt.partial({
     alertsCount: rt.number,
   }),
 ]);
 
-export const GetInfraMetricsResponsePayloadRT = rt.type({
-  type: rt.literal('host'),
-  nodes: rt.array(InfraAssetMetricsItemRT),
-});
+export const GetInfraMetricsResponsePayloadRT = rt.intersection([
+  AssetTypeRT,
+  rt.type({
+    nodes: rt.array(InfraAssetMetricsItemRT),
+  }),
+]);
 
 export type InfraAssetMetrics = rt.TypeOf<typeof InfraAssetMetricsRT>;
 export type InfraAssetMetadata = rt.TypeOf<typeof InfraAssetMetadataRT>;

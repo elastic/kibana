@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type {
-  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api';
 import type { RoleCredentials } from '../../../../shared/services';
@@ -27,11 +27,11 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
   const fetchInfraHosts = async (
-    body: GetInfraMetricsRequestBodyPayload,
+    body: GetInfraMetricsRequestBodyPayloadClient,
     roleAuthc: RoleCredentials
   ): Promise<GetInfraMetricsResponsePayload | undefined> => {
     const response = await supertestWithoutAuth
-      .post('/api/metrics/infra')
+      .post('/api/metrics/infra/host')
       .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send(body)
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     return response.body;
   };
 
-  describe('API /metrics/infra', () => {
+  describe('API /metrics/infra/host', () => {
     let roleAuthc: RoleCredentials;
     describe('works', () => {
       describe('with host asset', () => {
@@ -55,28 +55,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('received data', async () => {
           const infraHosts = await fetchInfraHosts(
             {
-              type: 'host',
               limit: 100,
-              metrics: [
-                {
-                  type: 'rx',
-                },
-                {
-                  type: 'tx',
-                },
-                {
-                  type: 'memory',
-                },
-                {
-                  type: 'cpu',
-                },
-                {
-                  type: 'diskSpaceUsage',
-                },
-                {
-                  type: 'memoryFree',
-                },
-              ],
+              metrics: ['rxV2', 'txV2', 'memory', 'cpuTotal', 'diskSpaceUsage', 'memoryFree'],
               query: {
                 bool: {
                   must: [],
@@ -85,10 +65,8 @@ export default function ({ getService }: FtrProviderContext) {
                   must_not: [],
                 },
               },
-              range: {
-                from: timeRange.from,
-                to: timeRange.to,
-              },
+              from: timeRange.from,
+              to: timeRange.to,
             },
             roleAuthc
           );
@@ -114,11 +92,11 @@ export default function ({ getService }: FtrProviderContext) {
               ],
               metrics: [
                 {
-                  name: 'rx',
+                  name: 'rxV2',
                   value: 133425.6,
                 },
                 {
-                  name: 'tx',
+                  name: 'txV2',
                   value: 135892.3,
                 },
                 {
@@ -126,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
                   value: 0.9490000000000001,
                 },
                 {
-                  name: 'cpu',
+                  name: 'cpuTotal',
                   value: 1.021,
                 },
                 {
@@ -138,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
                   value: 1753829376,
                 },
               ],
+              monitored: true,
               name: 'serverless-host',
             });
           } else {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { GetHostParameters } from '../types';
 import { getFilterByIntegration } from '../helpers/query';
 
-export const getFilteredHosts = async ({
+export const getFilteredHostNames = async ({
   infraMetricsClient,
   from,
   to,
@@ -22,20 +22,19 @@ export const getFilteredHosts = async ({
 }) => {
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
-    ignore_unavailable: true,
     body: {
       size: 0,
       track_total_hits: false,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to), ...getFilterByIntegration('system')],
+          filter: [query, ...rangeQuery(from, to), ...existsQuery('system')],
         },
       },
       aggs: {
-        nodes: {
+        uniqueHostNames: {
           terms: {
-            size: limit,
             field: HOST_NAME_FIELD,
+            size: limit,
             order: {
               _key: 'asc',
             },
@@ -45,11 +44,11 @@ export const getFilteredHosts = async ({
     },
   });
 
-  const { nodes } = response.aggregations ?? {};
-  return nodes?.buckets.map((p) => p.key as string) ?? [];
+  const { uniqueHostNames } = response.aggregations ?? {};
+  return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
 };
 
-export const hasSystemIntegrationDocs = async ({
+export const getShouldFetchApmHosts = async ({
   infraMetricsClient,
   from,
   to,
@@ -66,11 +65,11 @@ export const hasSystemIntegrationDocs = async ({
       track_total_hits: true,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to), ...getFilterByIntegration('system')],
+          filter: [query, ...rangeQuery(from, to), getFilterByIntegration('system')],
         },
       },
     },
   });
 
-  return hitCount.hits.total.value > 0;
+  return hitCount.hits.total.value === 0;
 };

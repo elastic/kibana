@@ -7,10 +7,14 @@
 
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
-import { InfraAssetMetadataType } from '../../../../../common/http_api';
+import type { InfraAssetMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
 import type { GetHostParameters } from '../types';
-import { getFilterByIntegration, getInventoryModelAggregations } from '../helpers/query';
+import {
+  getFilterByIntegration,
+  getInventoryModelAggregations,
+  getValidDocumentsFilter,
+} from '../helpers/query';
 import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
 export const getAllHosts = async ({
@@ -18,14 +22,13 @@ export const getAllHosts = async ({
   from,
   to,
   limit,
-  type,
   metrics,
-  hostNamesShortList,
-}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'type' | 'metrics'> & {
-  hostNamesShortList: string[];
+  hostNames,
+}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'metrics'> & {
+  hostNames: string[];
 }) => {
   const metricAggregations = getInventoryModelAggregations(
-    type,
+    'host',
     metrics.map((metric) => metric)
   );
 
@@ -37,15 +40,27 @@ export const getAllHosts = async ({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [
-            ...termsQuery(HOST_NAME_FIELD, ...hostNamesShortList),
-            ...rangeQuery(from, to),
-            ...getFilterByIntegration('system'),
-          ],
+          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
+          should: [...getValidDocumentsFilter()],
         },
       },
       aggs: {
-        nodes: {
+        // find hosts with metrics that are monitored by the system integration.
+        monitoredHosts: {
+          filter: getFilterByIntegration('system'),
+          aggs: {
+            names: {
+              terms: {
+                field: HOST_NAME_FIELD,
+                size: limit,
+                order: {
+                  _key: 'asc',
+                },
+              },
+            },
+          },
+        },
+        allHostsMetrics: {
           terms: {
             field: HOST_NAME_FIELD,
             size: limit,
@@ -80,13 +95,19 @@ export const getAllHosts = async ({
     },
   });
 
-  const result = (response.aggregations?.nodes.buckets ?? [])
+  const monitoredHosts = new Set(
+    response.aggregations?.monitoredHosts.names.buckets.map((p) => p.key) ?? []
+  );
+
+  const result = (response.aggregations?.allHostsMetrics.buckets ?? [])
     .sort((a, b) => {
-      const aValue = getMetricValue(a?.cpu) ?? 0;
-      const bValue = getMetricValue(b?.cpu) ?? 0;
+      const aValue = getMetricValue(a?.cpuTotal) ?? 0;
+      const bValue = getMetricValue(b?.cpuTotal) ?? 0;
+
       return bValue - aValue;
     })
     .map((bucket) => {
+      const hostName = bucket.key as string;
       const metadata = (bucket?.metadata.top ?? [])
         .flatMap((top) => Object.entries(top.metrics))
         .map(([key, value]) => ({
@@ -95,12 +116,13 @@ export const getAllHosts = async ({
         }));
 
       return {
-        name: bucket?.key as string,
+        name: hostName,
         metadata,
         metrics: metrics.map((metric) => ({
           name: metric,
-          value: metric in bucket ? getMetricValue(bucket[metric]) ?? 0 : null,
+          value: getMetricValue(bucket[metric]) || null,
         })),
+        monitored: monitoredHosts.has(hostName),
       };
     });
 

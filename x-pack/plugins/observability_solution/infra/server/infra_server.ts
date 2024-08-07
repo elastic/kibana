@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core-lifecycle-server';
-import { InfraBackendLibs } from './lib/infra_types';
 import { initGetHostsAnomaliesRoute, initGetK8sAnomaliesRoute } from './routes/infra_ml';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initInventoryViewRoutes } from './routes/inventory_views';
@@ -36,13 +34,9 @@ import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
 import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
-import { type InfraServerPluginStartDeps } from './lib/adapters/framework';
+import { InfraBackendLibs } from './lib/infra_types';
 
-export const initInfraServer = (
-  libs: InfraBackendLibs,
-  coreStart: CoreStart,
-  infraPluginsStart: InfraServerPluginStartDeps
-) => {
+export const registerRoutes = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);

@@ -37,7 +37,7 @@ export const KpiCharts = () => {
 
   const getSubtitle = (formulaValue: string) => {
     if (formulaValue.startsWith('max')) {
-      return searchCriteria.limit < (hostCount ?? 0)
+      return searchCriteria.limit < hostCount
         ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max.limit', {
             defaultMessage: 'Max (of {limit} hosts)',
             values: {
@@ -48,7 +48,7 @@ export const KpiCharts = () => {
             defaultMessage: 'Max',
           });
     }
-    return searchCriteria.limit < (hostCount ?? 0)
+    return searchCriteria.limit < hostCount
       ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
           defaultMessage: 'Average (of {limit} hosts)',
           values: {

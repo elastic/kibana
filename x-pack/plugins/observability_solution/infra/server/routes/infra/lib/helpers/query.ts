@@ -6,25 +6,33 @@
  */
 
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_MODULE,
   METRICSET_MODULE,
+  METRICSET_NAME,
   SYSTEM_INTEGRATION,
 } from '../../../../../common/constants';
 import { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
 export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {
-  return [
-    {
-      bool: {
-        should: [
-          ...termQuery(EVENT_MODULE, integration),
-          ...termQuery(METRICSET_MODULE, integration),
-        ],
-        minimum_should_match: 1,
-      },
+  return {
+    bool: {
+      should: [
+        ...termQuery(EVENT_MODULE, integration),
+        ...termQuery(METRICSET_MODULE, integration),
+      ],
+      minimum_should_match: 1,
     },
+  };
+};
+
+export const getValidDocumentsFilter = () => {
+  return [
+    // system module
+    getFilterByIntegration('system'),
+    // apm docs
+    ...termsQuery(METRICSET_NAME, 'transaction'),
   ];
 };
 

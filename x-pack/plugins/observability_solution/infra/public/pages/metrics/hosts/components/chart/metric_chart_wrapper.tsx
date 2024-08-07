@@ -60,30 +60,28 @@ export const MetricChartWrapper = React.memo(
         `}
       >
         {loading && !loadedOnce.current ? (
-          <ChartPlaceholder />
+          <ChartPlaceholder style={style} />
         ) : (
-          <>
-            <EuiToolTip
-              className="eui-fullWidth"
-              delay="regular"
-              content={toolTip}
-              anchorClassName="eui-fullWidth"
+          <EuiToolTip
+            className="eui-fullWidth"
+            delay="regular"
+            content={toolTip}
+            anchorClassName="eui-fullWidth"
+          >
+            <Chart
+              size={style}
+              css={css`
+                .echMetric {
+                  border-radius: ${euiTheme.border.radius.medium};
+                  pointer-events: none;
+                }
+              `}
             >
-              <Chart
-                size={style}
-                css={css`
-                  .echMetric {
-                    border-radius: ${euiTheme.border.radius.medium};
-                    pointer-events: none;
-                  }
-                `}
-              >
-                {loading && <ChartLoadingProgress hasTopMargin={false} />}
-                <Settings baseTheme={baseTheme} />
-                <Metric id={id} data={[[metricsData]]} />
-              </Chart>
-            </EuiToolTip>
-          </>
+              {loading && <ChartLoadingProgress hasTopMargin={false} />}
+              <Settings baseTheme={baseTheme} />
+              <Metric id={id} data={[[metricsData]]} />
+            </Chart>
+          </EuiToolTip>
         )}
       </EuiPanel>
     );

@@ -8,7 +8,6 @@
 import { estypes } from '@elastic/elasticsearch';
 import { GetHostParameters } from '../types';
 import { assertQueryStructure } from '../utils';
-import { hasSystemIntegrationDocs } from './get_filtered_hosts';
 
 export const getApmHostNames = async ({
   apmDataAccessServices,
@@ -16,7 +15,7 @@ export const getApmHostNames = async ({
   to: end,
   query,
   limit,
-}: Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to'> & {
+}: Required<Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to'>> & {
   query: estypes.QueryDslQueryContainer;
   limit?: number;
 }) => {
@@ -30,25 +29,4 @@ export const getApmHostNames = async ({
     end,
     size: limit,
   });
-};
-
-export const maybeGetHostsFromApm = async ({
-  infraMetricsClient,
-  apmDataAccessServices,
-  from,
-  to,
-  query,
-  limit,
-}: Pick<GetHostParameters, 'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to'> & {
-  query: estypes.QueryDslQueryContainer;
-  limit?: number;
-}) => {
-  const hasDocs = await hasSystemIntegrationDocs({
-    infraMetricsClient,
-    from,
-    to,
-    query,
-  });
-
-  return !hasDocs ? await getApmHostNames({ apmDataAccessServices, from, to, query, limit }) : [];
 };

@@ -17,12 +17,12 @@ import { GetHostParameters } from '../types';
 
 export async function getHostsAlertsCount({
   alertsClient,
-  hostNamesShortList,
+  hostNames,
   from,
   to,
   limit,
 }: Pick<GetHostParameters, 'alertsClient' | 'from' | 'to' | 'limit'> & {
-  hostNamesShortList: string[];
+  hostNames: string[];
 }) {
   const rangeQuery = [
     {
@@ -42,7 +42,7 @@ export async function getHostsAlertsCount({
         filter: [
           ...termQuery(ALERT_RULE_PRODUCER, INFRA_ALERT_FEATURE_ID),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...termsQuery(HOST_NAME_FIELD, ...hostNamesShortList),
+          ...termsQuery(HOST_NAME_FIELD, ...hostNames),
           ...rangeQuery,
         ],
       },

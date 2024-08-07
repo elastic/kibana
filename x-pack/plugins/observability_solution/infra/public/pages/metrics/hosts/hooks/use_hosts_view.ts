@@ -26,13 +26,13 @@ import {
 import { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
-  'cpu',
+  'cpuTotal',
   'diskSpaceUsage',
   'memory',
   'memoryFree',
   'normalizedLoad1m',
-  'rxV2',
-  'txV2',
+  'rx',
+  'tx',
 ];
 
 const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
@@ -59,7 +59,7 @@ export const useHostsView = () => {
     async (callApi) => {
       const start = performance.now();
       const metricsResponse = await callApi<GetInfraMetricsResponsePayload>(
-        BASE_INFRA_METRICS_PATH,
+        `${BASE_INFRA_METRICS_PATH}/host`,
         {
           method: 'POST',
           body: payload,
@@ -100,7 +100,6 @@ const createInfraMetricsRequest = ({
   dateRange: StringDateRange;
   limit: number;
 }): GetInfraMetricsRequestBodyPayloadClient => ({
-  type: 'host',
   query: esQuery,
   from: dateRange.from,
   to: dateRange.to,

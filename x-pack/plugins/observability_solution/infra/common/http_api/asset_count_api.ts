@@ -7,10 +7,7 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-
-const AssetTypeRT = rt.type({
-  assetType: rt.literal('host'),
-});
+import { AssetTypeRT } from './shared/asset_type';
 
 export const GetInfraAssetCountRequestBodyPayloadRT = rt.intersection([
   rt.partial({
