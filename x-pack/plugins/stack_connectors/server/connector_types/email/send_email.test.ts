@@ -56,7 +56,7 @@ describe('send_email module', () => {
     });
 
     connectorMetricsCollector = new ConnectorMetricsCollector({
-      logger: mockedLogger,
+      logger: mockLogger,
       connectorId: 'test-connector-id',
     });
   });
