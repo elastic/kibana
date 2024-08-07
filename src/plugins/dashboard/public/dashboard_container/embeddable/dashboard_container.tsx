@@ -333,7 +333,7 @@ export class DashboardContainer
     }));
   }
 
-  public setControlGroupApi = (controlGroupApi: ControlGroupApi) => {
+  public setControlGroupApi(controlGroupApi: ControlGroupApi) {
     (this.controlGroupApi$ as BehaviorSubject<ControlGroupApi | undefined>).next(controlGroupApi);
     startSyncingDashboardControlGroup(this, controlGroupApi);
   }
