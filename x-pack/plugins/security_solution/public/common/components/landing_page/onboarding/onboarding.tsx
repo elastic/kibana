@@ -58,13 +58,8 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const {
-    wrapperStyles,
-    headerSectionStyles,
-    progressSectionStyles,
-    stepsSectionStyles,
-    bannerStyles,
-  } = useOnboardingStyles();
+  const { wrapperStyles, headerSectionStyles, progressSectionStyles, stepsSectionStyles } =
+    useOnboardingStyles();
   const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(
     (params: OnboardingHubStepLinkClickedParams) => {
@@ -102,7 +97,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   return (
     <div className={wrapperStyles}>
       {useIsStillYear2024() && showAVCBanner && (
-        <KibanaPageTemplate.Section paddingSize="none" className={bannerStyles}>
+        <KibanaPageTemplate.Section paddingSize="none">
           <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
         </KibanaPageTemplate.Section>
       )}
