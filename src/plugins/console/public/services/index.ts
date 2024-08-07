@@ -19,6 +19,4 @@ export {
 export { EmbeddableConsoleInfo } from './embeddable_console';
 export { httpService } from './http';
 
-export {
-  convertRequestToLanguage
-} from './api';
+export { convertRequestToLanguage } from './api';

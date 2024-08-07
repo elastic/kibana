@@ -6,13 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { sendRequest } from '../services/use_request';
+import { sendRequest } from './use_request';
 
-export async function convertRequestToLanguage(method: string, path: string, language:string, body: string[]) {
+export async function convertRequestToLanguage({
+  method,
+  path,
+  body,
+  language,
+  esHost,
+}: {
+  method: string;
+  path: string;
+  language: string;
+  esHost: string;
+  body: string[];
+}) {
   return sendRequest({
     path: `/api/console/convert_request_to_language`,
     method: 'post',
-    query: { method, path, language },
+    query: { method, path, language, esHost },
     body,
   });
 }
