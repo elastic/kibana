@@ -135,7 +135,7 @@ import { getPackageAssetsMap } from './epm/packages/get';
 import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
-import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -2080,13 +2080,22 @@ export class PackagePolicyServiceImpl
       if (doesNotHaveRequiredFleetAuthz(authz, fleetRequiredAuthz)) {
         throw new FleetUnauthorizedError('Not authorized to this action on integration policies');
       }
+
+      if ((await isSpaceAwarenessMigrationPending()) === true) {
+        throw new FleetError('Migration to space awareness is pending');
+      }
     };
 
     return new PackagePolicyClientWithAuthz(preflightCheck);
   }
 
   public get asInternalUser() {
-    return new PackagePolicyClientWithAuthz();
+    const preflightCheck = async () => {
+      if ((await isSpaceAwarenessMigrationPending()) === true) {
+        throw new FleetError('Migration to space awareness is pending');
+      }
+    };
+    return new PackagePolicyClientWithAuthz(preflightCheck);
   }
 }
 
@@ -2104,6 +2113,51 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       return await this.preflightCheck(fleetAuthzConfig);
     }
   };
+
+  async bulkCreate(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    packagePolicies: NewPackagePolicyWithId[],
+    options?:
+      | {
+          user?: AuthenticatedUser | undefined;
+          bumpRevision?: boolean | undefined;
+          force?: true | undefined;
+        }
+      | undefined
+  ): Promise<{
+    created: PackagePolicy[];
+    failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+  }> {
+    await this.#runPreflight({
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    });
+    return super.bulkCreate(soClient, esClient, packagePolicies, options);
+  }
+
+  async update(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    id: string,
+    packagePolicyUpdate: UpdatePackagePolicy,
+    options?:
+      | {
+          user?: AuthenticatedUser | undefined;
+          force?: boolean | undefined;
+          skipUniqueNameVerification?: boolean | undefined;
+        }
+      | undefined
+  ): Promise<PackagePolicy> {
+    await this.#runPreflight({
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    });
+
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options);
+  }
 
   async create(
     soClient: SavedObjectsClientContract,
