@@ -20,6 +20,7 @@ export async function createInferenceEndpoint({
   logger: Logger;
 }) {
   try {
+    logger.debug(`Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}"`);
     const response = await esClient.asCurrentUser.transport.request({
       method: 'PUT',
       path: `_inference/sparse_embedding/${AI_ASSISTANT_KB_INFERENCE_ID}`,
@@ -34,7 +35,9 @@ export async function createInferenceEndpoint({
 
     return response;
   } catch (e) {
-    logger.error(`Failed to create inference endpoint: ${e.message}`);
+    logger.error(
+      `Failed to create inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}": ${e.message}`
+    );
     throw e;
   }
 }

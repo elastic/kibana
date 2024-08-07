@@ -12,6 +12,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { resourceNames } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import { getAccessQuery } from '../util/get_access_query';
@@ -104,12 +105,45 @@ export class KnowledgeBaseService {
     });
   }
 
-  async setup(esClient: { asCurrentUser: ElasticsearchClient }) {
+  async setup(esClient: {
+    asCurrentUser: ElasticsearchClient;
+    asInternalUser: ElasticsearchClient;
+  }) {
+    const kbAliasName = resourceNames.aliases.kb;
+
+    await createConcreteWriteIndex({
+      esClient: esClient.asInternalUser,
+      logger: this.dependencies.logger,
+      totalFieldsLimit: 10000,
+      indexPatterns: {
+        alias: kbAliasName,
+        pattern: `${kbAliasName}*`,
+        basePattern: `${kbAliasName}*`,
+        name: `${kbAliasName}-000001`,
+        template: resourceNames.indexTemplate.kb,
+      },
+      dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+    });
+
     return createInferenceEndpoint({ esClient, logger: this.dependencies.logger });
   }
 
   async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
-    return deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+    const kbAliasName = resourceNames.aliases.kb;
+    await esClient.asCurrentUser.indices.delete({
+      index: `${kbAliasName}-000001`,
+      ignore_unavailable: true,
+    });
+
+    try {
+      await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+    } catch (error) {
+      const isResponseError = error instanceof errors.ResponseError;
+      if (isResponseError && error.body.error.type === 'resource_not_found_exception') {
+        return;
+      }
+      throw error;
+    }
   }
 
   async getStatus() {

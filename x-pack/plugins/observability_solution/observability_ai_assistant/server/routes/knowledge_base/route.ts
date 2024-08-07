@@ -62,14 +62,32 @@ const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
       idleSocket: 20 * 60 * 1000, // 20 minutes
     },
   },
-  handler: async (resources): Promise<unknown> => {
+  handler: async (resources): Promise<{ result: string }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    return await client.resetKnowledgeBase();
+    await client.resetKnowledgeBase();
+
+    return { result: 'success' };
+  },
+});
+
+const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/semantic_text_migration',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.migrateKnowledgeBaseToSemanticText();
   },
 });
 
@@ -216,6 +234,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 });
 
 export const knowledgeBaseRoutes = {
+  ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
   ...resetKnowledgeBase,
   ...getKnowledgeBaseStatus,

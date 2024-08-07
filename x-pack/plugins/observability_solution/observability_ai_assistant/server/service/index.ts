@@ -126,9 +126,6 @@ export class ObservabilityAIAssistantService {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
-      // TODO: unused, remove
-      // const elserModelId = await this.getSearchConnectorModelId();
-
       const esClient = {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,
       };
@@ -187,22 +184,6 @@ export class ObservabilityAIAssistantService {
             hidden: true,
           },
         },
-      });
-
-      const kbAliasName = resourceNames.aliases.kb;
-
-      await createConcreteWriteIndex({
-        esClient: esClient.asInternalUser,
-        logger: this.logger,
-        totalFieldsLimit: 10000,
-        indexPatterns: {
-          alias: kbAliasName,
-          pattern: `${kbAliasName}*`,
-          basePattern: `${kbAliasName}*`,
-          name: `${kbAliasName}-000001`,
-          template: resourceNames.indexTemplate.kb,
-        },
-        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       this.kbService = new KnowledgeBaseService({

@@ -40,18 +40,11 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
       timeout: '1h',
       maxAttempts: 5,
       createTaskRunner() {
-        const taskState: TaskState = { isAborted: false };
-
         return {
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
             const esClient = await getEsClient();
-            await runKnowledgeBaseMigration({ taskState, esClient, logger });
-          },
-
-          async cancel() {
-            taskState.isAborted = true;
-            logger.debug(`Task cancelled: "${TASK_TYPE}"`);
+            await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
           },
         };
       },
@@ -70,23 +63,14 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
   });
 }
 
-interface TaskState {
-  isAborted: boolean;
-}
-
-export async function runKnowledgeBaseMigration({
-  taskState,
+export async function runSemanticTextKnowledgeBaseMigration({
   esClient,
   logger,
 }: {
-  taskState?: TaskState;
   esClient: ElasticsearchClient;
   logger: Logger;
 }) {
   logger.debug('Knowledge base migration: Running migration');
-  if (taskState?.isAborted) {
-    throw new Error('Task is aborted');
-  }
 
   try {
     const response = await esClient.search<KnowledgeBaseEntry>({
@@ -137,7 +121,7 @@ export async function runKnowledgeBaseMigration({
 
     await Promise.all(promises);
     logger.debug(`Knowledge base migration: Migrated ${promises.length} entries`);
-    await runKnowledgeBaseMigration({ taskState, esClient, logger });
+    await runSemanticTextKnowledgeBaseMigration({ esClient, logger });
   } catch (e) {
     logger.error('Knowledge base migration: Failed to migrate entries');
     logger.error(e);
