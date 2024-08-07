@@ -62,7 +62,8 @@ import { TableFilters, TableFiltersProps, useTableFilters } from './table_filter
 export type FieldRecord = TableRow;
 
 interface ItemsEntry {
-  rows: FieldRecord[];
+  pinnedItems: FieldRecord[];
+  restItems: FieldRecord[];
   allFields: TableFiltersProps['allFields'];
 }
 
@@ -238,7 +239,7 @@ export const DocViewerTable = ({
     ]
   );
 
-  const { rows, allFields } = Object.keys(flattened)
+  const { pinnedItems, restItems, allFields } = Object.keys(flattened)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
@@ -261,11 +262,11 @@ export const DocViewerTable = ({
         const row = fieldToItem(curFieldName, isPinned);
 
         if (isPinned) {
-          acc.rows.push(row);
+          acc.pinnedItems.push(row);
         } else {
           if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
             // filter only unpinned fields
-            acc.rows.push(row);
+            acc.restItems.push(row);
           }
         }
 
@@ -278,10 +279,13 @@ export const DocViewerTable = ({
         return acc;
       },
       {
-        rows: [],
+        pinnedItems: [],
+        restItems: [],
         allFields: [],
       }
     );
+
+  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
