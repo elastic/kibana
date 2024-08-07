@@ -55,7 +55,7 @@ export const validateKQLStringFilter = (value: string) => {
     kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], []);
   } catch (e) {
     return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter',
+      defaultMessage: `filterQuery must be a valid KQL filter (error: ${e.message})`,
     });
   }
 };

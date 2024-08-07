@@ -36,7 +36,7 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from './translations';
-import { oneOfLiterals, validateKQLStringFilter } from './utils';
+import { oneOfLiterals } from './utils';
 import {
   createCustomThresholdExecutor,
   CustomThresholdLocators,
@@ -56,10 +56,12 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAle
 export const searchConfigurationSchema = schema.object({
   index: schema.oneOf([schema.string(), dataViewSpecSchema]),
   query: schema.object({
-    language: schema.string({
-      validate: validateKQLStringFilter,
-    }),
+    language: schema.string(),
     query: schema.string(),
+    // TODO Enable KQL validation: https://github.com/elastic/kibana/issues/190029
+    // query: schema.string({
+    //   validate: validateKQLStringFilter,
+    // }),
   }),
   filter: schema.maybe(
     schema.arrayOf(
@@ -103,9 +105,11 @@ export function thresholdRuleType(
           name: schema.string(),
           aggType: schema.literal('count'),
           filter: schema.maybe(
-            schema.string({
-              validate: validateKQLStringFilter,
-            })
+            schema.string()
+            // TODO Enable KQL validation: https://github.com/elastic/kibana/issues/190029
+            // schema.string({
+            //   validate: validateKQLStringFilter,
+            // })
           ),
           field: schema.never(),
         }),
