@@ -32,8 +32,8 @@ const getDefaultServerlessRole = (projectType: string) => {
 };
 
 export class ServerlessAuthProvider implements AuthProvider {
-  private projectType: string;
-  private rolesDefinitonPath: string;
+  private readonly projectType: string;
+  private readonly rolesDefinitonPath: string;
 
   constructor(config: Config) {
     const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
