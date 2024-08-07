@@ -100,7 +100,7 @@ class MyPlugin implements Plugin {
         const myPluginRepositoryClient =
           createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions>(core);
 
-        myPluginRepositoryClient('GET /internal/my_plugin/route').then(console.log);
+        myPluginRepositoryClient.fetch('GET /internal/my_plugin/route').then(console.log);
     }
 }
 ```
@@ -110,7 +110,7 @@ This example prints 'Hello, my route!' and the type of the response is **inferre
 We pass in the type of the repository that we (_type_) imported from the server. The second generic parameter for `createRepositoryClient` is optional.  
 We also export the type of the client itself so we can use it to type the client as we pass it around.  
 
-When using the client, the first argument is the route to call and this is auto completed to only the available routes.
+When using the client's `fetch` function, the first argument is the route to call and this is auto completed to only the available routes.
 The second argument is optional in this case but allows you to send in any extra options. 
 
 The client translates the endpoint and the options (including request parameters) to the right Core HTTP request.
@@ -324,7 +324,7 @@ class MyPlugin implements Plugin {
        const myPluginRepositoryClient =
         createRepositoryClient<MyPluginRouteRepository, DefaultClientOptions & MyPluginClientOptions>(core);
 
-        myPluginRepositoryClient('GET /internal/my_plugin/route', {
+        myPluginRepositoryClient.fetch('GET /internal/my_plugin/route', {
             makeSafe: true,
             headers: {
                 my_plugin_header: 'I am a header',

@@ -29,9 +29,9 @@ describe('createRepositoryClient', () => {
         handler: jest.fn().mockResolvedValue('OK'),
       },
     };
-    const client = createRepositoryClient<typeof repository>(coreSetupMock);
+    const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
-    client('GET /internal/handler');
+    fetch('GET /internal/handler');
 
     expect(getMock).toHaveBeenCalledTimes(1);
     expect(getMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
@@ -48,9 +48,9 @@ describe('createRepositoryClient', () => {
         handler: jest.fn().mockResolvedValue('OK'),
       },
     };
-    const client = createRepositoryClient<typeof repository>(coreSetupMock);
+    const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
-    client('GET /api/handler 2024-08-05');
+    fetch('GET /api/handler 2024-08-05');
 
     expect(getMock).toHaveBeenCalledTimes(1);
     expect(getMock).toHaveBeenNthCalledWith(1, '/api/handler', {
@@ -67,9 +67,9 @@ describe('createRepositoryClient', () => {
         handler: jest.fn().mockResolvedValue('OK'),
       },
     };
-    const client = createRepositoryClient<typeof repository>(coreSetupMock);
+    const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
-    client('GET /internal/handler', {
+    fetch('GET /internal/handler', {
       headers: {
         some_header: 'header_value',
       },
@@ -98,9 +98,9 @@ describe('createRepositoryClient', () => {
         handler: jest.fn().mockResolvedValue('OK'),
       },
     };
-    const client = createRepositoryClient<typeof repository>(coreSetupMock);
+    const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
-    client('GET /internal/handler/{param}', {
+    fetch('GET /internal/handler/{param}', {
       params: {
         path: {
           param: 'param_value',
@@ -128,9 +128,9 @@ describe('createRepositoryClient', () => {
         handler: jest.fn().mockResolvedValue('OK'),
       },
     };
-    const client = createRepositoryClient<typeof repository>(coreSetupMock);
+    const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
-    client('GET /internal/handler', {
+    fetch('GET /internal/handler', {
       params: {
         body: {
           payload: 'body_value',
@@ -160,9 +160,9 @@ describe('createRepositoryClient', () => {
         handler: jest.fn().mockResolvedValue('OK'),
       },
     };
-    const client = createRepositoryClient<typeof repository>(coreSetupMock);
+    const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
-    client('GET /internal/handler', {
+    fetch('GET /internal/handler', {
       params: {
         query: {
           parameter: 'query_value',

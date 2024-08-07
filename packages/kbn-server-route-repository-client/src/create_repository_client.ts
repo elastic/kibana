@@ -18,18 +18,20 @@ export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
   TClientOptions extends Record<string, any> = DefaultClientOptions
 >(core: CoreStart | CoreSetup) {
-  return ((endpoint, optionsWithParams) => {
-    const { params, ...options } = (optionsWithParams ?? { params: {} }) as unknown as {
-      params?: Partial<Record<string, any>>;
-    };
+  return {
+    fetch: (endpoint, optionsWithParams) => {
+      const { params, ...options } = (optionsWithParams ?? { params: {} }) as unknown as {
+        params?: Partial<Record<string, any>>;
+      };
 
-    const { method, pathname, version } = formatRequest(endpoint, params?.path);
+      const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
-    return core.http[method](pathname, {
-      ...options,
-      body: params && params.body ? JSON.stringify(params.body) : undefined,
-      query: params?.query,
-      version,
-    });
-  }) as RouteRepositoryClient<TRepository, TClientOptions>;
+      return core.http[method](pathname, {
+        ...options,
+        body: params && params.body ? JSON.stringify(params.body) : undefined,
+        query: params?.query,
+        version,
+      });
+    },
+  } as { fetch: RouteRepositoryClient<TRepository, TClientOptions> };
 }
