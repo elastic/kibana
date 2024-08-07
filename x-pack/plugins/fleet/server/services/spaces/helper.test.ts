@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
 import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
 import { getSettingsOrUndefined } from '../settings';
@@ -26,7 +24,7 @@ function mockGetSettings(settings?: Partial<Settings>) {
   if (settings) {
     jest.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
   } else {
-    jest.mocked(getSettingsOrUndefined).mockRejectedValue(Boom.notFound());
+    jest.mocked(getSettingsOrUndefined).mockResolvedValue(undefined);
   }
 }
 

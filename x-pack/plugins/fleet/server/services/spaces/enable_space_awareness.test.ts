@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -18,11 +17,11 @@ import { enableSpaceAwarenessMigration } from './enable_space_awareness';
 jest.mock('../app_context');
 jest.mock('../settings');
 
-function mockGetSettings(settings?: Partial<Settings>) {
+function mockGetSettingsOrUndefined(settings?: Partial<Settings>) {
   if (settings) {
     jest.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
   } else {
-    jest.mocked(getSettingsOrUndefined).mockRejectedValue(Boom.notFound());
+    jest.mocked(getSettingsOrUndefined).mockResolvedValue(undefined);
   }
 }
 
@@ -41,7 +40,7 @@ describe('enableSpaceAwarenessMigration', () => {
     jest.mocked(saveSettings).mockReset();
   });
   it('should do nothing if migration is already done', async () => {
-    mockGetSettings({
+    mockGetSettingsOrUndefined({
       use_space_awareness_migration_status: 'success',
     });
     await enableSpaceAwarenessMigration();
@@ -60,7 +59,7 @@ describe('enableSpaceAwarenessMigration', () => {
   });
 
   it('should do migration if migration is not pending', async () => {
-    mockGetSettings({});
+    mockGetSettingsOrUndefined({});
 
     soClient.createPointInTimeFinder.mockReturnValueOnce({
       find: jest.fn().mockImplementation(async function* () {
@@ -150,7 +149,7 @@ describe('enableSpaceAwarenessMigration', () => {
   });
 
   it('should set the status to error if an error happen', async () => {
-    mockGetSettings({});
+    mockGetSettingsOrUndefined({});
 
     soClient.createPointInTimeFinder.mockImplementation(() => {
       return {
