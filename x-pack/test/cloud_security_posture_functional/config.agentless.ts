@@ -7,6 +7,7 @@
 
 // import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -26,9 +27,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.internal.fleetServerStandalone=true`,
         `--xpack.fleet.enableExperimental.0=agentless`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api/api/v1/ess`,
-        `--xpack.fleet.agentless.api.tls.certificate=./config/certs/node.crt`,
-        `--xpack.fleet.agentless.api.tls.key=./config/certs/node.key`,
-        `--xpack.fleet.agentless.api.tls.ca=./config/certs/internal_tls_ca.crt`,
+        `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
+        `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
+        `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,
         `--xpack.cloud.id=something-anything`,
       ],
     },
