@@ -1642,8 +1642,7 @@
               "\nReturns a DataProviderType"
             ],
             "signature": [
-              "DataProviderType",
-              " | undefined"
+              "\"default\" | \"template\" | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -4007,9 +4006,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ id: string; type?: ",
-          "DataProviderType",
-          " | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          "{ id: string; type?: \"default\" | \"template\" | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4123,28 +4120,6 @@
             "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.EMPTY_INDEX_FIELDS",
-        "type": "Array",
-        "tags": [],
-        "label": "EMPTY_INDEX_FIELDS",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
