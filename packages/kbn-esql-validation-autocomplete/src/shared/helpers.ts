@@ -645,3 +645,8 @@ export const isParam = (x: unknown): x is ESQLParamLiteral =>
   typeof x === 'object' &&
   (x as ESQLParamLiteral).type === 'literal' &&
   (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Compares two strings in a case-insensitive manner
+ */
+export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
