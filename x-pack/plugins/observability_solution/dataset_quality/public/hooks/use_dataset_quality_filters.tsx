@@ -181,14 +181,12 @@ export const useDatasetQualityFilters = () => {
 
   const onTypesChange = useCallback(
     (newTypeItems: Item[]) => {
-      const checkedItems = newTypeItems.filter((type) => type.checked === 'on');
-
-      if (checkedItems.length > 0) {
-        service.send({
-          type: 'UPDATE_TYPES',
-          types: checkedItems.map((type) => type.label as DataStreamType),
-        });
-      }
+      service.send({
+        type: 'UPDATE_TYPES',
+        types: newTypeItems
+          .filter((quality) => quality.checked === 'on')
+          .map((type) => type.label as DataStreamType),
+      });
     },
     [service]
   );

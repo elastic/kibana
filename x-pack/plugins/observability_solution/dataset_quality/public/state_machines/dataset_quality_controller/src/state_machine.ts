@@ -53,6 +53,9 @@ const generateInvokePerType = ({ src }: { src: string }) => ({
   })),
 });
 
+const isTypeSelected = (type: DataStreamType, context: DatasetQualityControllerContext) =>
+  context.filters.types.length === 0 || context.filters.types.includes(type);
+
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
@@ -808,7 +811,7 @@ export const createDatasetQualityControllerStateMachine = ({
         (context, _event, { data: { type } }) =>
         async (send) => {
           try {
-            const dataStreamStats = await (context.filters.types.includes(type)
+            const dataStreamStats = await (isTypeSelected(type, context)
               ? dataStreamStatsClient.getDataStreamsStats({
                   type,
                   datasetQuery: context.filters.query,
@@ -839,7 +842,7 @@ export const createDatasetQualityControllerStateMachine = ({
           try {
             const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
-            const degradedDocsStats = await (context.filters.types.includes(type)
+            const degradedDocsStats = await (isTypeSelected(type, context)
               ? dataStreamStatsClient.getDataStreamsDegradedStats({
                   type,
                   datasetQuery: context.filters.query,
@@ -865,7 +868,7 @@ export const createDatasetQualityControllerStateMachine = ({
           try {
             const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
-            const nonAggregatableDatasets = await (context.filters.types.includes(type)
+            const nonAggregatableDatasets = await (isTypeSelected(type, context)
               ? dataStreamStatsClient.getNonAggregatableDatasets({
                   type,
                   start,
