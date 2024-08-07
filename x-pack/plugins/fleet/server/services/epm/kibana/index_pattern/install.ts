@@ -14,7 +14,7 @@ const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = Object.values(dataTypes)
   // we don't want to add traces-* as a new global data view
-  .filter(dataType => dataType === dataTypes.Traces);
+  .filter((dataType) => dataType === dataTypes.Traces);
 
 export function getIndexPatternSavedObjects() {
   return indexPatternTypes.map((indexPatternType) => ({
