@@ -47,7 +47,8 @@ const mockEsqlDatatable = {
   columns: [{ id: '_custom_field', name: '_custom_field', meta: { type: 'string' } }],
 };
 
-describe('useAllEsqlRuleFields', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/190063
+describe.skip('useAllEsqlRuleFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getESQLQueryColumnsMock.mockImplementation(({ esqlQuery }) =>
