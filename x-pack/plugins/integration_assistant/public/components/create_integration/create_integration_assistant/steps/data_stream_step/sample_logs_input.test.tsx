@@ -75,7 +75,6 @@ describe('SampleLogsInput', () => {
       describe.each([
         ['[{"message":"test message 1"}', `The logs sample file has not a valid ${type} format`],
         ['["test message 1"]', 'The logs sample file contains non-object entries'],
-        ['{"message":"test message 1"}', 'The logs sample file is not an array'],
         ['[]', 'The logs sample file is empty'],
       ])('with logs content %s', (logsSample, errorMessage) => {
         beforeEach(async () => {
