@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { defaultLogViewId } from '../../../common/log_views';
 import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '../../../common/http_api/deprecations';
 import { logSourcesKibanaAdvancedSettingRT } from '../../../common';
 import { LogsSharedBackendLibs } from '../../lib/logs_shared_types';
@@ -21,34 +22,41 @@ export const initMigrateLogViewSettingsRoute = ({
   framework.router.put(
     { path: MIGRATE_LOG_VIEW_SETTINGS_URL, validate: false },
     async (context, request, response) => {
-      const [_, pluginStartDeps, pluginStart] = await getStartServices();
+      try {
+        const [_, pluginStartDeps, pluginStart] = await getStartServices();
 
-      const logSourcesService =
-        await pluginStartDeps.logsDataAccess.services.logSourcesServiceFactory.getScopedLogSourcesService(
-          request
-        );
-      const logViewsClient = pluginStart.logViews.getScopedClient(request);
+        const logSourcesService =
+          await pluginStartDeps.logsDataAccess.services.logSourcesServiceFactory.getScopedLogSourcesService(
+            request
+          );
+        const logViewsClient = pluginStart.logViews.getScopedClient(request);
 
-      const logView = await logViewsClient.getLogView('default');
+        const logView = await logViewsClient.getLogView('default');
 
-      if (!logView || logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
-        throw new Error(
-          "Unable to migrate log view settings. A log view either doesn't exist or is already using the Kibana advanced setting."
-        );
+        if (!logView || logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
+          return response.customError({
+            body: new Error(
+              "Unable to migrate log view settings. A log view either doesn't exist or is already using the Kibana advanced setting."
+            ),
+            statusCode: 400,
+          });
+        }
+
+        const indices = (
+          await logViewsClient.getResolvedLogView({
+            type: 'log-view-reference',
+            logViewId: defaultLogViewId,
+          })
+        ).indices;
+
+        await logSourcesService.setLogSources([{ indexPattern: indices }]);
+        await logViewsClient.putLogView(defaultLogViewId, {
+          logIndices: { type: 'kibana_advanced_setting' },
+        });
+        return response.ok();
+      } catch (error) {
+        throw error;
       }
-
-      const indices = (
-        await logViewsClient.getResolvedLogView({
-          type: 'log-view-reference',
-          logViewId: 'default',
-        })
-      ).indices;
-
-      await logSourcesService.setLogSources([{ indexPattern: indices }]);
-      await logViewsClient.putLogView('default', {
-        logIndices: { type: 'kibana_advanced_setting' },
-      });
-      return response.ok();
     }
   );
 };
