@@ -31,7 +31,7 @@ export const initMigrateLogViewSettingsRoute = ({
           );
         const logViewsClient = pluginStart.logViews.getScopedClient(request);
 
-        const logView = await logViewsClient.getLogView('default');
+        const logView = await logViewsClient.getLogView(defaultLogViewId);
 
         if (!logView || logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
           return response.customError({

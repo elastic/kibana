@@ -7,6 +7,7 @@
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { i18n } from '@kbn/i18n';
+import { defaultLogViewId } from '../../common/log_views';
 import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '../../common/http_api/deprecations';
 import { logSourcesKibanaAdvancedSettingRT } from '../../common';
 import { LogsSharedPluginStartServicesAccessor } from '../types';
@@ -29,7 +30,7 @@ export const getLogSourcesSettingDeprecationInfo = async ({
     logSourcesService
   );
 
-  const logView = await logViewsClient.getLogView('default');
+  const logView = await logViewsClient.getLogView(defaultLogViewId);
 
   if (logView && !logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
     return [
