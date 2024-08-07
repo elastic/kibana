@@ -213,5 +213,6 @@
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
     "@kbn/security-solution-common",
+    "@kbn/config",
   ]
 }

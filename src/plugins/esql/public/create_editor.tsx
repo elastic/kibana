@@ -30,7 +30,7 @@ export const TextBasedLangEditor = (props: TextBasedLanguagesEditorProps) => {
         ...deps,
       }}
     >
-      <TextBasedLanguagesEditor {...props} isDarkMode={deps.darkMode} />
+      <TextBasedLanguagesEditor {...props} />
     </KibanaContextProvider>
   );
 };
