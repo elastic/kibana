@@ -7,8 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, skip } from 'rxjs';
 
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -138,7 +137,7 @@ export const getSearchControlFactory = (
        * If either the search string or the search technique changes, recalulate the output filter
        */
       const onSearchStringChanged = combineLatest([selections.searchString$, searchTechnique])
-        .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
+        .pipe(debounceTime(200))
         .subscribe(([newSearchString, currentSearchTechnnique]) => {
           const currentDataView = dataControl.api.dataViews.getValue()?.[0];
           const currentField = dataControl.stateManager.fieldName.getValue();
