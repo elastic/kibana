@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
+import type { RowControlColumn } from '../src/types';
 
 const SelectionHeaderCell = () => {
   return (
@@ -116,3 +117,22 @@ export const testLeadingControlColumn: EuiDataGridControlColumn = {
   rowCellRender: SelectionRowCell,
   width: 100,
 };
+
+export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart', 'inspect'].map(
+  (iconType, index): RowControlColumn => ({
+    id: `exampleControl_${iconType}`,
+    headerAriaLabel: `Example Row Control ${iconType}`,
+    renderControl: (Control, rowProps) => {
+      return (
+        <Control
+          data-test-subj={`exampleRowControl-${iconType}`}
+          label={`Example ${iconType}`}
+          iconType={iconType}
+          onClick={() => {
+            alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+          }}
+        />
+      );
+    },
+  })
+);
