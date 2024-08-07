@@ -31,6 +31,15 @@ const parseLogsContent = (
       .split('\n')
       .filter((line) => line.trim() !== '')
       .map((line) => JSON.parse(line));
+
+    // Special case for files that can be parsed as both JSON and NDJSON.
+    if (
+      Array.isArray(parsedContent) &&
+      parsedContent.length === 1 &&
+      Array.isArray(parsedContent[0])
+    ) {
+      parsedContent = parsedContent[0];
+    }
   } catch (parseNDJSONError) {
     try {
       parsedContent = JSON.parse(fileContent);
@@ -38,6 +47,7 @@ const parseLogsContent = (
       return { error: i18n.LOGS_SAMPLE_ERROR.FORMAT(fileType) };
     }
   }
+
 
   if (!Array.isArray(parsedContent)) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
