@@ -558,7 +558,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             [
-              { metric: 'cpuUsage', value: '99.6%' },
+              { metric: 'cpuUsage', value: '100.0%' },
               { metric: 'normalizedLoad1m', value: '1,300.3%' },
               { metric: 'memoryUsage', value: '42.2%' },
               { metric: 'diskUsage', value: '36.0%' },
