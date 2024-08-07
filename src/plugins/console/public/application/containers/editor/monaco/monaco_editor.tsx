@@ -36,7 +36,7 @@ export interface EditorProps {
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const context = useServicesContext();
   const {
-    services: { notifications, esHostService, settings: settingsService, autocompleteInfo },
+    services: { notifications, settings: settingsService, autocompleteInfo },
     docLinkVersion,
     config: { isDevMode },
   } = context;
@@ -59,7 +59,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const getRequestsCallback = useCallback(async (): Promise<any> => {
     const requests = await actionsProvider.current?.getRequests();
     return requests ?? [];
-  }, [esHostService]);
+  }, []);
 
   const getDocumenationLink = useCallback(async () => {
     return actionsProvider.current!.getDocumentationLink(docLinkVersion);

@@ -7,9 +7,9 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import { RouteDependencies } from '../../..';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { convertRequests } from "@elastic/request-converter";
+import { convertRequests } from '@elastic/request-converter';
+import { RouteDependencies } from '../../..';
 
 import { acceptedHttpVerb, nonEmptyString } from '../proxy/validation_config';
 
@@ -18,6 +18,7 @@ const routeValidationConfig = {
     method: acceptedHttpVerb,
     path: nonEmptyString,
     language: schema.string(),
+    esHost: schema.string(),
   }),
   body: schema.arrayOf(schema.string()),
 };
@@ -25,10 +26,13 @@ const routeValidationConfig = {
 export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;
 
-export const registerConvertRequestRoute = ({ router, lib: { handleEsError } }: RouteDependencies) => {
+export const registerConvertRequestRoute = ({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) => {
   const handler: RequestHandler<unknown, Query, Body> = async (ctx, req, response) => {
     const { body, query } = req;
-    const { method, path, language } = query;
+    const { method, path, language, esHost } = query;
 
     try {
       let request = `${method} ${path} \n`;
@@ -38,19 +42,22 @@ export const registerConvertRequestRoute = ({ router, lib: { handleEsError } }: 
         checkOnly: false,
         printResponse: true,
         complete: true,
-        elasticsearchUrl: "http://localhost:9200",
+        elasticsearchUrl: esHost,
       });
 
       return response.ok({
-        body: codeSnippet as string
+        body: codeSnippet as string,
       });
     } catch (error) {
       return handleEsError({ error, response });
     }
   };
 
-  router.post({
-    path: '/api/console/convert_request_to_language',
-    validate: routeValidationConfig,
-  }, handler);
+  router.post(
+    {
+      path: '/api/console/convert_request_to_language',
+      validate: routeValidationConfig,
+    },
+    handler
+  );
 };

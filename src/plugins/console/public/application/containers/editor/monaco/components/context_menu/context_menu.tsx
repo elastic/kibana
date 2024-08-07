@@ -36,10 +36,15 @@ interface Props {
 
 const DELAY_FOR_HIDING_SPINNER = 500;
 
-export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notifications }: Props) => {
+export const ContextMenu = ({
+  getRequests,
+  getDocumentation,
+  autoIndent,
+  notifications,
+}: Props) => {
   // Get default language from local storage
   const {
-    services: { storage },
+    services: { storage, esHostService },
   } = useServicesContext();
   const defaultLanguage = storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE);
 
@@ -68,7 +73,13 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
     // Convert each request using convertRequestToLanguage and handle all promises
     const results = await Promise.allSettled(
       requests.map((request: any) =>
-        convertRequestToLanguage(request.method, request.url, withLanguage, request.data)
+        convertRequestToLanguage({
+          method: request.method,
+          path: request.url,
+          body: request.data,
+          language: withLanguage,
+          esHost: esHostService.getHost(),
+        })
       )
     );
 
@@ -76,7 +87,7 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
     let aggregatedData = '';
     let hasErrors = false;
 
-    results.forEach(result => {
+    results.forEach((result) => {
       if (result.status === 'fulfilled' && !result.value.error) {
         aggregatedData += result.value.data + '\n';
       } else {
@@ -90,7 +101,8 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
       const error = new Error(`Failed to convert request to ${withLanguage}`);
       notifications.toasts.addError(error, {
         title: i18n.translate('console.consoleMenu.copyAsCurlFailedMessage', {
-          defaultMessage: '{requestsCount, plural, one {Request} other {Requests}} could not be copied',
+          defaultMessage:
+            '{requestsCount, plural, one {Request} other {Requests}} could not be copied',
           values: { requestsCount: requests.length },
         }),
       });
@@ -105,11 +117,12 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
             defaultMessage: 'Some requests could not be copied',
           }),
         });
-      // Otherwise we can just copy the data to clipboard
+        // Otherwise we can just copy the data to clipboard
       } else {
         notifications.toasts.add({
           title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
-            defaultMessage: '{requestsCount, plural, one {Request} other {Requests}} copied as {language}',
+            defaultMessage:
+              '{requestsCount, plural, one {Request} other {Requests}} copied as {language}',
             values: { language: withLanguage, requestsCount: requests.length },
           }),
         });
@@ -132,15 +145,17 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
     setRequestConverterLoading(true);
 
     // When copying as worked as expected, close the context menu popover
-    copyAs(withLanguage).then(() => {
-      setIsPopoverOpen(false);
-    }).finally(() => {
-      // Delay hiding the spinner to avoid flickering between the spinner and
-      // the change language button
-      setTimeout(() => {
-        setRequestConverterLoading(false);
-      }, DELAY_FOR_HIDING_SPINNER);
-    });
+    copyAs(withLanguage)
+      .then(() => {
+        setIsPopoverOpen(false);
+      })
+      .finally(() => {
+        // Delay hiding the spinner to avoid flickering between the spinner and
+        // the change language button
+        setTimeout(() => {
+          setRequestConverterLoading(false);
+        }, DELAY_FOR_HIDING_SPINNER);
+      });
   };
 
   const changeDefaultLanguage = (language: string) => {
@@ -216,10 +231,11 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isRequestConverterLoading
-            ? <EuiLoadingSpinner size="s" />
-            : <EuiLink data-name="changeLanguage">Change</EuiLink>
-          }
+          {isRequestConverterLoading ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EuiLink data-name="changeLanguage">Change</EuiLink>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>,
