@@ -66,6 +66,9 @@ export interface ClientConfigType {
   host?: string;
   ui: {
     enabled: boolean;
+    queryBuilder: {
+      enabled: boolean;
+    };
   };
 }
 
