@@ -197,12 +197,21 @@ export function ShowShareModal({
   }
   const baseUrl = setStateToKbnUrl('_g', _g, undefined, window.location.href);
 
-  const shareableUrl = setStateToKbnUrl(
-    '_a',
-    unsavedStateForLocator,
-    { useHash: false, storeInHashQuery: true },
-    unhashUrl(baseUrl)
-  );
+  const _a = getStateFromKbnUrl<DashboardContainerInput>('_a', window.location.href);
+  const shareableUrl =
+    _a === null
+      ? setStateToKbnUrl(
+          '_a',
+          { ...unsavedStateForLocator },
+          { useHash: false, storeInHashQuery: true },
+          unhashUrl(baseUrl)
+        )
+      : setStateToKbnUrl(
+          '_a',
+          { ...unsavedStateForLocator, expandedPanelId: unsavedDashboardState?.expandedPanelId },
+          { useHash: false, storeInHashQuery: true },
+          unhashUrl(baseUrl)
+        );
 
   toggleShareContextMenu({
     isDirty,

@@ -23,12 +23,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { SavedObjectNotFound, replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardContainerInput, SharedDashboardState } from '../../../common';
+import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
 import {
   DashboardContainerFactory,
@@ -42,10 +42,7 @@ import {
   buildApiFromDashboardContainer,
   DashboardAPI,
 } from './dashboard_api';
-import {
-  DASHBOARD_STATE_STORAGE_KEY,
-  createDashboardExpandedPanelUrl,
-} from '../../dashboard_constants';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
@@ -91,13 +88,15 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         } = pluginServices.getServices();
         setScreenshotMode(isScreenshotMode());
       })();
-    }, []);
+    }, [dashboardContainer]);
 
     const id = useMemo(() => uuidv4(), []);
 
     useEffect(() => {
       /* In case the locator prop changes, we need to reassign the value in the container */
-      if (dashboardContainer) dashboardContainer.locator = locator;
+      if (dashboardContainer && locator) {
+        dashboardContainer.locator = locator;
+      }
     }, [dashboardContainer, locator]);
 
     useEffect(() => {
@@ -109,7 +108,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       setDashboardMissing(false);
       setFatalError(undefined);
 
-      if (dashboardContainer) {
+      if (dashboardContainer && !dashboardContainer.expandedPanelId) {
         // When a dashboard already exists, don't rebuild it, just set a new id.
         dashboardContainer.navigateToDashboard(savedObjectId).catch((e) => {
           dashboardContainer?.destroy();
@@ -119,7 +118,6 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
             setDashboardMissing(true);
           }
         });
-        return;
       }
 
       setLoading(true);
@@ -192,6 +190,11 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       if (dashboardMissing) return <Dashboard404Page dashboardRedirect={dashboardRedirect} />;
       if (fatalError) return fatalError.render();
       if (loading) return loadingSpinner;
+      // if (dashboardContainer?.getExpandedPanelId()) {
+      //   const maximizedPanelId = dashboardContainer.getExpandedPanelId();
+      //   console.log('maximizedPanelId', maximizedPanelId);
+      //   return dashboardContainer.setExpandedPanelId(maximizedPanelId);
+      // }
       return <div ref={dashboardRoot} />;
     };
 
@@ -233,52 +236,11 @@ const ParentClassController = ({
 
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
-      const currentUrlRisonBeginningIndex = window.location.href.indexOf('/view/');
-      // const currentUrlRisonEndingIndex = window.location.href.indexOf('?');
-      const dashboardId = window.location.href.substring(
-        currentUrlRisonBeginningIndex + 6
-        // currentUrlRisonEndingIndex
-      );
-
-      console.log(kbnUrlStateStorage.kbnUrlControls.getPendingUrl());
-      // get any _a state that already exists in the url
-      const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
-        DASHBOARD_STATE_STORAGE_KEY
-      );
-      console.log('rawAppStateInUrl', rawAppStateInUrl);
-      // the following is the dashboard id?
-      // http://localhost:5601/bzr/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(filters:!())
-      // need to add the panelId to the url
-      console.log('maxmizedPanelId', maximizedPanelId);
-      const panelInUrl = createDashboardExpandedPanelUrl(dashboardId, maximizedPanelId);
-      console.log('panelInUrl', panelInUrl);
-
-      const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
-        delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
-        return hashQuery;
-      });
-
-      kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
-      // need the _g filters and etc
-      // console.log('dashboard.id', kbnUrlStateStorage);
-      // const fullEditPath = getFullPath(dashboard.locator?.getRedirectUrl());
-      // console.log('full edit path', fullEditPath);
-      // const newUrl = `${fullEditPath}&${DASHBOARD_STATE_STORAGE_KEY}=(panelId:${maximizedPanelId})`;
-      // console.log('newUrl', newUrl);
-      // const nextUrl = replaceUrlHashQuery(newUrl, (query) => {
-      //   delete query[DASHBOARD_STATE_STORAGE_KEY];
-      //   return query;
-      // });
-      // kbnUrlStateStorage.kbnUrlControls.update(newUrl, true);
+      kbnUrlStateStorage.set(DASHBOARD_STATE_STORAGE_KEY, { expandedPanelId: maximizedPanelId });
     } else {
       parentDiv.classList.remove('dshDashboardViewportWrapper');
+      kbnUrlStateStorage.set(DASHBOARD_STATE_STORAGE_KEY, { expandedPanelId: undefined });
     }
-  }, [
-    dashboard,
-    kbnUrlStateStorage,
-    kbnUrlStateStorage.kbnUrlControls,
-    maximizedPanelId,
-    viewportRef.parentElement,
-  ]);
+  }, [dashboard, kbnUrlStateStorage, maximizedPanelId, viewportRef.parentElement]);
   return null;
 };

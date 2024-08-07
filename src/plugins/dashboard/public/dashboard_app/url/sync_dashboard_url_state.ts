@@ -59,18 +59,35 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
   return convertSavedPanelsToPanelMap(appStateInUrl.panels);
 }
 
+const redirectForExpandedPanels = (
+  kbnUrlStateStorage: IKbnUrlStateStorage,
+  stateFromUrl: SharedDashboardState,
+  dashboardAPI: DashboardAPI
+) => {
+  const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
+    hashQuery[DASHBOARD_STATE_STORAGE_KEY] = `(expandedPanelId:'${stateFromUrl?.expandedPanelId}')`;
+    return hashQuery;
+  });
+  kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
+  return dashboardAPI.setExpandedPanelId(stateFromUrl.expandedPanelId);
+};
+
 /**
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
 export const loadAndRemoveDashboardState = (
-  kbnUrlStateStorage: IKbnUrlStateStorage
+  kbnUrlStateStorage: IKbnUrlStateStorage,
+  dashboardAPI: DashboardAPI
 ): Partial<DashboardContainerInput> => {
-  const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
-    DASHBOARD_STATE_STORAGE_KEY
-  );
-  if (!rawAppStateInUrl) return {};
-
-  const panelsMap = getPanelsMap(rawAppStateInUrl);
+  let stateFromUrl;
+  if (kbnUrlStateStorage.get<SharedDashboardState>(DASHBOARD_STATE_STORAGE_KEY) !== null) {
+    stateFromUrl = kbnUrlStateStorage.get<SharedDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
+  }
+  if (!stateFromUrl) return {};
+  if (stateFromUrl?.expandedPanelId) {
+    redirectForExpandedPanels(kbnUrlStateStorage, stateFromUrl, dashboardAPI);
+  }
+  const panelsMap = getPanelsMap(stateFromUrl);
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
@@ -78,12 +95,10 @@ export const loadAndRemoveDashboardState = (
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
   const partialState: Partial<DashboardContainerInput> = {
-    ..._.omit(rawAppStateInUrl, ['panels', 'query']),
+    ..._.omit(stateFromUrl, ['panels', 'query', 'expandedPanelId']),
     ...(panelsMap ? { panels: panelsMap } : {}),
-    ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
-    ...(rawAppStateInUrl.expandedPanelId
-      ? { expandedPanelId: rawAppStateInUrl.expandedPanelId }
-      : {}),
+    ...(stateFromUrl.query ? { query: migrateLegacyQuery(stateFromUrl.query) } : {}),
+    ...(stateFromUrl.expandedPanelId ? { expandedPanelId: stateFromUrl.expandedPanelId } : {}),
   };
 
   return partialState;
@@ -100,8 +115,15 @@ export const startSyncingDashboardUrlState = ({
     .change$(DASHBOARD_STATE_STORAGE_KEY)
     .pipe(debounceTime(10)) // debounce URL updates so react has time to unsubscribe when changing URLs
     .subscribe(() => {
-      const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage);
+      const stateFromUrl = loadAndRemoveDashboardState(kbnUrlStateStorage, dashboardAPI);
       if (Object.keys(stateFromUrl).length === 0) return;
+      else if (Object.keys(stateFromUrl).includes('expandedPanelId')) {
+        kbnUrlStateStorage.set(DASHBOARD_STATE_STORAGE_KEY, {
+          expandedPanelId: stateFromUrl.expandedPanelId,
+        });
+        dashboardAPI.updateInput({ expandedPanelId: stateFromUrl.expandedPanelId });
+        return dashboardAPI.setExpandedPanelId(stateFromUrl.expandedPanelId);
+      }
       dashboardAPI.updateInput(stateFromUrl);
     });
 

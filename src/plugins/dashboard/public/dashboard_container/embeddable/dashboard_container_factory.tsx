@@ -64,6 +64,8 @@ export interface DashboardCreationOptions {
   isEmbeddedExternally?: boolean;
 
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
+
+  getExpandedPanelId?: boolean;
 }
 
 export const dashboardTypeDisplayName = i18n.translate('dashboard.factory.displayName', {

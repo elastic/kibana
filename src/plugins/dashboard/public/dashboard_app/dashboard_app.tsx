@@ -16,6 +16,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DashboardContainerInput } from '../../common';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -68,6 +69,9 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [initialUrlState, setInitialUrlState] = useState<Partial<DashboardContainerInput> | null>(
+    null
+  );
 
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
@@ -118,10 +122,8 @@ export function DashboardApp({
    * Clear search session when leaving dashboard route
    */
   useEffect(() => {
-    return () => {
-      search.session.clear();
-    };
-  }, [search.session]);
+    return () => search.session.clear();
+  }, [initialUrlState, kbnUrlStateStorage, search.session]);
 
   /**
    * Validate saved object load outcome
@@ -135,7 +137,21 @@ export function DashboardApp({
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
     const getInitialInput = () => {
       const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-      const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+      if (dashboardAPI !== null) {
+        if (initialUrlState === null || initialUrlState === undefined) {
+          setInitialUrlState(loadAndRemoveDashboardState(kbnUrlStateStorage, dashboardAPI));
+        }
+        return {
+          ...initialUrlState,
+          ...stateFromLocator,
+          ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+            ? { viewMode: ViewMode.PRINT }
+            : {}),
+          ...(initialUrlState?.expandedPanelId
+            ? { expandedPanelId: initialUrlState.expandedPanelId }
+            : {}),
+        };
+      }
 
       // Override all state with URL + Locator input
       return {
@@ -147,9 +163,13 @@ export function DashboardApp({
         ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
           ? { viewMode: ViewMode.PRINT }
           : {}),
+
+        // if expanded panel is set in the URL, override the locator state
+        ...(initialUrlState?.expandedPanelId
+          ? { expandedPanelId: initialUrlState.expandedPanelId }
+          : {}),
       };
     };
-
     return Promise.resolve<DashboardCreationOptions>({
       getIncomingEmbeddable: () =>
         getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
@@ -176,16 +196,19 @@ export function DashboardApp({
         currentAppId: DASHBOARD_APP_ID,
         getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
       }),
+      getExpandedPanelId: Boolean(dashboardAPI?.getExpandedPanelId()),
     });
   }, [
     history,
-    embedSettings,
-    validateOutcome,
-    getScopedHistory,
-    isScreenshotMode,
-    getStateTransfer,
     kbnUrlStateStorage,
+    validateOutcome,
+    embedSettings,
+    dashboardAPI,
+    getScopedHistory,
+    initialUrlState,
+    isScreenshotMode,
     getScreenshotContext,
+    getStateTransfer,
   ]);
 
   /**
@@ -193,15 +216,20 @@ export function DashboardApp({
    */
   useEffect(() => {
     if (!dashboardAPI) return;
+    if (initialUrlState === null) {
+      setInitialUrlState(loadAndRemoveDashboardState(kbnUrlStateStorage, dashboardAPI));
+    }
+    if (initialUrlState?.expandedPanelId) {
+      return dashboardAPI.setExpandedPanelId(initialUrlState.expandedPanelId);
+    }
     const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
       kbnUrlStateStorage,
       dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId, initialUrlState]);
 
   const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
-
   return (
     <>
       {showNoDataPage && (
