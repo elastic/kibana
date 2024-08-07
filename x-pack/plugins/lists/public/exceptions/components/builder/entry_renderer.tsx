@@ -208,6 +208,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
       const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
+      console.log('entry.field', entry.field);
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -222,7 +223,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             exceptionItemIndex,
             entry.entryIndex
           )}
-          isClearable={false}
+          isClearable={true}
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}

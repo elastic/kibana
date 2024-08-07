@@ -571,6 +571,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           arg.exceptionItems[0],
           exception
         );
+        // need to fix the last part of the ternary to account for when the user backspaces the field name. currently there is dummy code for testing purposes
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
           arg.exceptionItems[0] !== undefined
             ? {
@@ -582,7 +583,10 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 tags: exception?.tags ?? [],
                 meta: exception.meta,
               }
-            : exception;
+            : {
+                ...exception,
+                entries: [{ field: '', operator: 'included', type: 'match', value: 'somevalue' }],
+              };
         const hasValidConditions =
           arg.exceptionItems[0] !== undefined
             ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
