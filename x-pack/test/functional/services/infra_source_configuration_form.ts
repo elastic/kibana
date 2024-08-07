@@ -30,7 +30,9 @@ export function InfraSourceConfigurationFormProvider({
     async getMetricIndicesInput(): Promise<WebElementWrapper> {
       return await testSubjects.findDescendant('~metricIndicesInput', await this.getForm());
     },
-
+    async selectIndicesPanel(): Promise<void> {
+      return await testSubjects.click('logIndicesCheckableCard');
+    },
     /**
      * Logs
      */

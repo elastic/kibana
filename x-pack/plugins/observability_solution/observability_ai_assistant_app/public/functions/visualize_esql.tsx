@@ -353,6 +353,7 @@ export function VisualizeESQL({
                   query={{ esql: query }}
                   flyoutType="overlay"
                   isTableView
+                  initialRowHeight={0}
                 />
               ) : (
                 <lens.EmbeddableComponent
@@ -375,6 +376,7 @@ export function VisualizeESQL({
               dataView={dataViewAsync.value}
               query={{ esql: query }}
               flyoutType="overlay"
+              initialRowHeight={0}
             />
           </EuiFlexItem>
         )}

@@ -35,11 +35,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     // Inventory UI
     async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
+      return testSubjects.click('inventory-hostsView-link');
     },
 
     async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
+      return testSubjects.click('inventory-hostsView-link-badge');
     },
 
     // Table
@@ -247,17 +247,17 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     // Sorting
-    getCpuUsageHeader() {
-      return testSubjects.find('tableHeaderCell_cpu_3');
+    getMemoryHeader() {
+      return testSubjects.find('tableHeaderCell_memory_5');
     },
 
     getTitleHeader() {
       return testSubjects.find('tableHeaderCell_title_2');
     },
 
-    async sortByCpuUsage() {
-      const diskLatency = await this.getCpuUsageHeader();
-      const button = await testSubjects.findDescendant('tableHeaderSortButton', diskLatency);
+    async sortByMemoryUsage() {
+      const memory = await this.getMemoryHeader();
+      const button = await testSubjects.findDescendant('tableHeaderSortButton', memory);
       await button.click();
     },
 
