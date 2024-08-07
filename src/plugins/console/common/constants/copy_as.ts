@@ -8,5 +8,5 @@
 
 // Default language used in the language selector modal
 export const DEFAULT_LANGUAGE = 'cURL';
-
+// Available languages in the language selector modal
 export const AVAILABLE_LANGUAGES = ['cURL', 'Javascript', 'Python'];
