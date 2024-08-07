@@ -19,7 +19,8 @@ import {
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-export const SEARCH_TEXT = 'discover:searchText';
+export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';
+export const LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES = 'unifiedDocViewer:selectedFieldTypes';
 
 const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
   defaultMessage: 'Search field names',
@@ -28,7 +29,7 @@ const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchP
 interface TableFiltersCommonProps {
   // search
   searchTerm: string;
-  onSearchTermChanged: (searchTerm: string) => void;
+  onChangeSearchTerm: (searchTerm: string) => void;
   // field types
   selectedFieldTypes: FieldTypeFilterProps<FieldListItem>['selectedFieldTypes'];
   onChangeFieldTypes: FieldTypeFilterProps<FieldListItem>['onChange'];
@@ -40,7 +41,7 @@ export interface TableFiltersProps extends TableFiltersCommonProps {
 
 export const TableFilters: React.FC<TableFiltersProps> = ({
   searchTerm,
-  onSearchTermChanged,
+  onChangeSearchTerm,
   selectedFieldTypes,
   onChangeFieldTypes,
   allFields,
@@ -50,9 +51,9 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   const onSearchTermChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newSearchTerm = event.currentTarget.value;
-      onSearchTermChanged(newSearchTerm);
+      onChangeSearchTerm(newSearchTerm);
     },
-    [onSearchTermChanged]
+    [onChangeSearchTerm]
   );
 
   return (
@@ -80,10 +81,31 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
 };
 
 const persistSearchTerm = debounce(
-  (newSearchText: string, storage: Storage) => storage.set(SEARCH_TEXT, newSearchText),
+  (newSearchText: string, storage: Storage) =>
+    storage.set(LOCAL_STORAGE_KEY_SEARCH_TERM, newSearchText),
   500,
   { leading: true, trailing: true }
 );
+
+const persistSelectedFieldTypes = debounce(
+  (selectedFieldTypes: FieldTypeKnown[], storage: Storage) =>
+    storage.set(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES, JSON.stringify(selectedFieldTypes)),
+  500,
+  { leading: true, trailing: true }
+);
+
+const getStoredFieldTypes = (storage: Storage) => {
+  const storedFieldTypes = storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES);
+  let parsedFieldTypes: FieldTypeKnown[] = [];
+
+  try {
+    parsedFieldTypes = storedFieldTypes ? JSON.parse(storedFieldTypes) : [];
+  } catch {
+    // ignore invalid JSON
+  }
+
+  return Array.isArray(parsedFieldTypes) ? parsedFieldTypes : [];
+};
 
 interface UseTableFiltersReturn extends TableFiltersCommonProps {
   onFilterField: (
@@ -94,15 +116,25 @@ interface UseTableFiltersReturn extends TableFiltersCommonProps {
 }
 
 export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
-  const [searchTerm, setSearchTerm] = useState(storage.get(SEARCH_TEXT) || '');
-  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
+  const [searchTerm, setSearchTerm] = useState(storage.get(LOCAL_STORAGE_KEY_SEARCH_TERM) || '');
+  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>(
+    getStoredFieldTypes(storage)
+  );
 
-  const onSearchTermChanged = useCallback(
+  const onChangeSearchTerm = useCallback(
     (newSearchTerm: string) => {
       setSearchTerm(newSearchTerm);
       persistSearchTerm(newSearchTerm, storage);
     },
     [storage, setSearchTerm]
+  );
+
+  const onChangeFieldTypes = useCallback(
+    (newFieldTypes: FieldTypeKnown[]) => {
+      setSelectedFieldTypes(newFieldTypes);
+      persistSelectedFieldTypes(newFieldTypes, storage);
+    },
+    [storage, setSelectedFieldTypes]
   );
 
   const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
@@ -128,12 +160,12 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
     () => ({
       // props for TableFilters component
       searchTerm,
-      onSearchTermChanged,
+      onChangeSearchTerm,
       selectedFieldTypes,
-      onChangeFieldTypes: setSelectedFieldTypes,
+      onChangeFieldTypes,
       // the actual filtering function
       onFilterField,
     }),
-    [searchTerm, onSearchTermChanged, selectedFieldTypes, setSelectedFieldTypes, onFilterField]
+    [searchTerm, onChangeSearchTerm, selectedFieldTypes, onChangeFieldTypes, onFilterField]
   );
 };
