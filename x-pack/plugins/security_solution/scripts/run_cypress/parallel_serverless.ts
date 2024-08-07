@@ -327,6 +327,11 @@ export const cli = () => {
           alias: 'c',
           type: 'string',
           default: '',
+        })
+        .option('beforeSpec', {
+          alias: 'b',
+          type: 'string',
+          default: '',
         });
 
       log.info(`
@@ -526,6 +531,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               `);
               }
               process.env.TEST_CLOUD_HOST_NAME = new URL(BASE_ENV_URL).hostname;
+
+              if (argv.beforeSpec) {
+                const beforeSpecFilePath = require.resolve(`../../${argv.beforeSpec}`) as string;
+                const { beforeSpec }: { beforeSpec: (config) => Promise<void> } = await import(
+                  beforeSpecFilePath
+                );
+                await beforeSpec(cyCustomEnv);
+              }
 
               if (isOpen) {
                 await cypress.open({

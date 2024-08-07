@@ -17,16 +17,15 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { ServerlessRoleName } from '../../support/roles';
 
 describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     initializeDataViews();
   });
 
-  beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-  });
+  // beforeEach(() => {
+  //   cy.login(ServerlessRoleName.SOC_MANAGER);
+  // });
 
   it('should properly show static values in form and results', () => {
     navigateTo('/app/osquery');
