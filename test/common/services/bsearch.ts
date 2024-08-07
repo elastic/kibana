@@ -39,7 +39,7 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
 /**
  * Options for the send method
  */
-interface SendOptions {
+export interface SendOptions {
   supertest: SuperTest.Agent;
   options: object;
   strategy: string;

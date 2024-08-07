@@ -193,8 +193,8 @@ const UnifiedFieldListSidebarContainer = memo(
       const deleteField = useMemo(
         () =>
           dataView && dataViewFieldEditor && editField
-            ? (fieldName: string) => {
-                const ref = dataViewFieldEditor.openDeleteModal({
+            ? async (fieldName: string) => {
+                const ref = await dataViewFieldEditor.openDeleteModal({
                   ctx: {
                     dataView,
                   },

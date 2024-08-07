@@ -22,9 +22,6 @@ import { useLicenseManagementLocatorApi } from '../../common/api/use_license_man
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import * as TEST_SUBJECTS from './test_subjects';
 
-jest.mock('./use_csp_integration', () => ({
-  useCspIntegrationInfo: jest.fn(),
-}));
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
