@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -13,17 +15,16 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateIndexButton } from './create_index_button';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { docLinks } from '../../../common/doc_links';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { ConnectLLMButton } from './connect_llm_button';
 import { AddDataSources } from './add_data_sources';
+import { ConnectLLMButton } from './connect_llm_button';
+import { CreateIndexButton } from './create_index_button';
 
-export const SetupPage: React.FC = () => {
+export const ChatSetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
   const { indices, isLoading: isIndicesLoading } = useQueryIndices();
 
@@ -33,7 +34,7 @@ export const SetupPage: React.FC = () => {
 
   return (
     <EuiEmptyPrompt
-      iconType="discuss"
+      iconType={'discuss'}
       data-test-subj="setupPage"
       title={
         <h2>

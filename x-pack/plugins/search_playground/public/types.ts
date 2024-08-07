@@ -28,6 +28,8 @@ import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
 
+export type PlaygroundPageMode = 'chat' | 'query_builder';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
@@ -43,6 +45,9 @@ export interface AppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
   console?: ConsolePluginStart;
+  featureFlags: {
+    searchPlaygroundEnabled: boolean;
+  };
 }
 
 export interface AppServicesContext {
@@ -53,6 +58,9 @@ export interface AppServicesContext {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   console?: ConsolePluginStart;
+  featureFlags: {
+    searchPlaygroundEnabled: boolean;
+  };
 }
 
 export enum ChatFormFields {

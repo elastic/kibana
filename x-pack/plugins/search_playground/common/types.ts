@@ -73,6 +73,9 @@ export interface ChatRequestData {
 export interface SearchPlaygroundConfigType {
   ui: {
     enabled: boolean;
+    queryBuilder: {
+      enabled: boolean;
+    };
   };
 }
 

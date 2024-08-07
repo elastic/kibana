@@ -10,9 +10,9 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { useKibana } from './hooks/use_kibana';
-import { ChatPlaygroundApp } from './components/chat_playground_app';
+import { QueryBuilderApp } from './components/query_builder_app';
 
-export const ChatPlaygroundOverview: React.FC = () => {
+export const QueryBuilderOverview: React.FC = () => {
   const {
     services: { console: consolePlugin },
   } = useKibana();
@@ -27,11 +27,11 @@ export const ChatPlaygroundOverview: React.FC = () => {
       <EuiPageTemplate
         offset={0}
         restrictWidth={false}
-        data-test-subj="svlPlaygroundPage"
+        data-test-subj="svlQueryBuilderPage"
         grow={false}
         panelled={false}
       >
-        <ChatPlaygroundApp showDocs />
+        <QueryBuilderApp showDocs />
         {embeddableConsole}
       </EuiPageTemplate>
     </PlaygroundProvider>
