@@ -23,8 +23,8 @@ export const getAllHosts = async (
 
   const result = (response.aggregations?.nodes.buckets ?? [])
     .sort((a, b) => {
-      const aValue = getMetricValue(a?.cpu) ?? 0;
-      const bValue = getMetricValue(b?.cpu) ?? 0;
+      const aValue = getMetricValue(a?.cpuTotal) ?? 0;
+      const bValue = getMetricValue(b?.cpuTotal) ?? 0;
       return bValue - aValue;
     })
     .map((bucket) => {
