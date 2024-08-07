@@ -28,7 +28,7 @@ const getSomeResults = (): RuleExecutionResult[] => [
     search_duration_ms: 0,
     gap_duration_s: 0,
     security_status: 'failed',
-    security_message: 'Rule failed to execute because rule ran after it was disabled.',
+    security_message: 'Rule did not execute as it is disabled.',
   },
   {
     execution_uuid: '0fde9271-05d0-4bfb-8ff8-815756d28350',

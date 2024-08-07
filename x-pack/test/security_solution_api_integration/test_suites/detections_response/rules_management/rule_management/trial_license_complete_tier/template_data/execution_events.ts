@@ -707,7 +707,7 @@ export const failedRanAfterDisabled = [
       ruleset: 'siem',
     },
     error: {
-      message: 'Rule failed to execute because rule ran after it was disabled.',
+      message: 'Rule did not execute as it is disabled.',
     },
     message: 'siem.queryRule:a890e240-b9fb-11ec-8598-338317271cf4: execution failed',
     ecs: {

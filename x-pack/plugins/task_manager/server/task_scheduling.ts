@@ -175,7 +175,7 @@ export class TaskScheduling {
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => !task.enabled,
+      filter: (task) => !task.enabled || !task.runAt,
       map: (task, i) => {
         if (runSoon) {
           // Run the first task now. Run all other tasks a random number of ms in the future,

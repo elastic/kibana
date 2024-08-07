@@ -661,7 +661,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
       expect(expandedRow).toHaveLength(1);
       expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).toEqual(
-        'Error from last run\nRule failed to execute because rule ran after it was disabled.'
+        'Error from last run\nRule did not execute as it is disabled.'
       );
     });
 

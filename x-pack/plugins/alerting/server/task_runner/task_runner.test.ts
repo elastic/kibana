@@ -2035,7 +2035,7 @@ describe('Task Runner', () => {
     const loggerMeta = logger.error.mock.calls[0][1];
     const loggerCallPrefix = (loggerCall as string).split('-');
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
-      `"Executing Rule default:test:1 has resulted in Error: Rule failed to execute because rule ran after it was disabled."`
+      `"Executing Rule default:test:1 has resulted in Error: Rule did not execute as it is disabled."`
     );
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
 

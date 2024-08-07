@@ -65,7 +65,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     throw createTaskRunError(
       new ErrorWithReason(
         RuleExecutionStatusErrorReasons.Disabled,
-        new Error(`Rule failed to execute because rule ran after it was disabled.`)
+        new Error(`Rule did not execute as it is disabled.`)
       ),
       TaskErrorSource.FRAMEWORK
     );
