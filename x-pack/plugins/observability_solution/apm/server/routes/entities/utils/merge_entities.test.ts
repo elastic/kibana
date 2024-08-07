@@ -27,6 +27,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -47,6 +48,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -69,6 +71,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:env-service-1',
+          hasLogMetrics: true,
         },
       },
       {
@@ -87,6 +90,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'apm-only-1:synthtrace-env-2',
+          hasLogMetrics: true,
         },
       },
       {
@@ -105,6 +109,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-2:env-service-3',
+          hasLogMetrics: true,
         },
       },
       {
@@ -123,6 +128,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-2:env-service-3',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -151,6 +157,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
       {
         agentName: 'java' as AgentName,
@@ -174,6 +181,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-2',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -195,6 +203,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
       {
@@ -213,6 +222,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
       {
@@ -231,6 +241,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name', 'service.environment'],
           id: 'service-1:prod',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -265,6 +276,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -286,6 +298,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -306,6 +319,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
 
@@ -325,6 +339,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
       {
@@ -342,6 +357,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -369,6 +385,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
@@ -390,6 +407,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -410,6 +428,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
 
@@ -429,6 +448,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
       {
@@ -446,6 +466,7 @@ describe('mergeEntities', () => {
           },
           identityFields: ['service.name'],
           id: 'service-1:test',
+          hasLogMetrics: true,
         },
       },
     ];
@@ -473,6 +494,7 @@ describe('mergeEntities', () => {
           },
         ],
         serviceName: 'service-1',
+        hasLogMetrics: true,
       },
     ]);
   });
