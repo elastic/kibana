@@ -14,19 +14,55 @@ import {
   EXPAND_DETAILS_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from '../test_ids';
-import { ExpandableFlyoutState, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import {
+  ExpandableFlyoutApi,
+  ExpandableFlyoutProvider,
+  ExpandableFlyoutState,
+  useExpandableFlyoutApi,
+  useExpandableFlyoutState,
+} from '@kbn/expandable-flyout';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('@kbn/expandable-flyout');
-
 const expandDetails = jest.fn();
+const mockFlyoutCloseLeftPanel = jest.fn();
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(() => {
+    return {
+      closeFlyout: jest.fn(),
+      closeLeftPanel: jest.fn(),
+      closePreviewPanel: jest.fn(),
+      closeRightPanel: jest.fn(),
+      previousPreviewPanel: jest.fn(),
+      openFlyout: jest.fn(),
+      openLeftPanel: jest.fn(),
+      openPreviewPanel: jest.fn(),
+      openRightPanel: jest.fn(),
+    };
+  }),
+  useExpandableFlyoutState: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
+    return (props: T) => {
+      return <Component {...props} />;
+    };
+  },
+  ExpandableFlyout: jest.fn(),
+}));
 
 const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
-  return <I18nProvider>{children}</I18nProvider>;
+  return (
+    <I18nProvider>
+      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+    </I18nProvider>
+  );
 };
 
 describe('<FlyoutNavigation />', () => {
   beforeEach(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      closeLeftPanel: mockFlyoutCloseLeftPanel,
+    } as unknown as ExpandableFlyoutApi);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
   });
 
@@ -61,7 +97,7 @@ describe('<FlyoutNavigation />', () => {
       expect(queryByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
 
       getByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID).click();
-      expect(flyoutContextValue.closeLeftPanel).toHaveBeenCalled();
+      expect(mockFlyoutCloseLeftPanel).toHaveBeenCalled();
     });
   });
 
