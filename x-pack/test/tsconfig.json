@@ -176,6 +176,7 @@
     "@kbn/osquery-plugin",
     "@kbn/entities-schema",
     "@kbn/actions-simulators-plugin",
-    "@kbn/cases-api-integration-test-plugin"
+    "@kbn/cases-api-integration-test-plugin",
+    "@kbn/mock-idp-utils"
   ]
 }
