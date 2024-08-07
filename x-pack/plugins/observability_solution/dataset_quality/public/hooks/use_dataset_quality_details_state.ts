@@ -12,9 +12,14 @@ import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import { BasicDataStream } from '../../common/types';
+import { useKibanaContextForPlugin } from '../utils';
 
 export const useDatasetQualityDetailsState = () => {
   const { service } = useDatasetQualityDetailsContext();
+
+  const {
+    services: { fieldFormats },
+  } = useKibanaContextForPlugin();
 
   const { dataStream, degradedFields, timeRange, breakdownField } =
     useSelector(service, (state) => state.context) ?? {};
@@ -31,6 +36,45 @@ export const useDatasetQualityDetailsState = () => {
       : false
   );
 
+  const dataStreamSettings = useSelector(service, (state) =>
+    state.matches('initializing.dataStreamSettings.initializeIntegrations')
+      ? state.context.dataStreamSettings
+      : undefined
+  );
+
+  const integrationDetails = {
+    integration: useSelector(service, (state) =>
+      state.matches(
+        'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+      )
+        ? state.context.integration
+        : undefined
+    ),
+    dashboard: useSelector(service, (state) =>
+      state.matches(
+        'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.done'
+      )
+        ? state.context.integrationDashboards
+        : undefined
+    ),
+  };
+
+  const canUserAccessDashboards = useSelector(
+    service,
+    (state) =>
+      !state.matches(
+        'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized'
+      )
+  );
+
+  const canUserViewIntegrations = dataStreamSettings?.datasetUserPrivileges?.canViewIntegrations;
+
+  const dataStreamDetails = useSelector(service, (state) =>
+    state.matches('initializing.dataStreamDetails.done')
+      ? state.context.dataStreamDetails
+      : undefined
+  );
+
   const { type, dataset, namespace } = indexNameToDataStreamParts(dataStream);
 
   const datasetDetails: BasicDataStream = {
@@ -42,6 +86,17 @@ export const useDatasetQualityDetailsState = () => {
 
   const loadingState = useSelector(service, (state) => ({
     nonAggregatableDatasetLoading: state.matches('initializing.nonAggregatableDataset.fetching'),
+    dataStreamDetailsLoading: state.matches('initializing.dataStreamDetails.fetching'),
+    dataStreamSettingsLoading: state.matches('initializing.dataStreamSettings.fetching'),
+    integrationDetailsLoadings: state.matches(
+      'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.fetching'
+    ),
+    integrationDetailsLoaded: state.matches(
+      'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+    ),
+    integrationDashboardsLoading: state.matches(
+      'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+    ),
   }));
 
   const updateTimeRange = useCallback(
@@ -60,14 +115,20 @@ export const useDatasetQualityDetailsState = () => {
 
   return {
     service,
+    fieldFormats,
     dataStream,
     datasetDetails,
     degradedFields,
+    dataStreamDetails,
     breakdownField,
     isBreakdownFieldEcs,
     isNonAggregatable,
     timeRange,
     loadingState,
     updateTimeRange,
+    dataStreamSettings,
+    integrationDetails,
+    canUserAccessDashboards,
+    canUserViewIntegrations,
   };
 };

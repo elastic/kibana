@@ -18,7 +18,9 @@ import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
 import { IDataStreamDetailsClient } from '../../services/data_stream_details';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import {
+  Dashboard,
   DataStreamDetails,
+  DataStreamSettings,
   DegradedFieldResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
@@ -26,7 +28,11 @@ import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notificati
 import {
   fetchDataStreamDetailsFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,
+  fetchDataStreamSettingsFailedNotifier,
+  fetchDataStreamIntegrationFailedNotifier,
+  fetchIntegrationDashboardsFailedNotifier,
 } from './notifications';
+import { Integration } from '../../../common/data_streams_stats/integration';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
   initialContext: DatasetQualityDetailsControllerContext
@@ -155,6 +161,88 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 },
               },
             },
+            dataStreamSettings: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadDataStreamSettings',
+                    onDone: {
+                      target: 'initializeIntegrations',
+                      actions: ['storeDataStreamSettings'],
+                    },
+                    onError: {
+                      target: 'done',
+                      actions: ['notifyFetchDataStreamSettingsFailed'],
+                    },
+                  },
+                },
+                initializeIntegrations: {
+                  type: 'parallel',
+                  states: {
+                    integrationDetails: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'loadDataStreamIntegration',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeDataStreamIntegration'],
+                            },
+                            onError: {
+                              target: 'done',
+                              actions: ['notifyFetchDatasetIntegrationsFailed'],
+                            },
+                          },
+                        },
+                        done: {
+                          type: 'final',
+                        },
+                      },
+                    },
+                    integrationDashboards: {
+                      initial: 'fetching',
+                      states: {
+                        fetching: {
+                          invoke: {
+                            src: 'loadIntegrationDashboards',
+                            onDone: {
+                              target: 'done',
+                              actions: ['storeIntegrationDashboards'],
+                            },
+                            onError: [
+                              {
+                                target: 'unauthorized',
+                                cond: 'checkIfActionForbidden',
+                              },
+                              {
+                                target: 'done',
+                                actions: ['notifyFetchIntegrationDashboardsFailed'],
+                              },
+                            ],
+                          },
+                        },
+                        done: {
+                          type: 'final',
+                        },
+                        unauthorized: {
+                          type: 'final',
+                        },
+                      },
+                    },
+                  },
+                },
+                done: {
+                  on: {
+                    UPDATE_TIME_RANGE: {
+                      target: 'fetching',
+                      actions: ['resetDegradedFieldPageAndRowsPerPage'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -222,6 +310,37 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             },
           },
         })),
+        storeDataStreamSettings: assign((_context, event: DoneInvokeEvent<DataStreamSettings>) => {
+          return 'data' in event
+            ? {
+                dataStreamSettings: event.data,
+              }
+            : {};
+        }),
+        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<Integration>) => {
+          return 'data' in event
+            ? {
+                integration: event.data,
+              }
+            : {};
+        }),
+        storeIntegrationDashboards: assign((context, event: DoneInvokeEvent<Dashboard[]>) => {
+          return 'data' in event
+            ? {
+                integrationDashboards: event.data,
+              }
+            : {};
+        }),
+      },
+      guards: {
+        checkIfActionForbidden: (context, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'statusCode' in event.data! &&
+            event.data.statusCode === 403
+          );
+        },
       },
     }
   );
@@ -233,6 +352,7 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
 }
+
 export const createDatasetQualityDetailsControllerStateMachine = ({
   initialContext,
   plugins,
@@ -248,6 +368,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         fetchDataStreamDetailsFailedNotifier(toasts, event.data),
       notifyCheckBreakdownFieldIsEcsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         assertBreakdownFieldEcsFailedNotifier(toasts, event.data),
+      notifyFetchDataStreamSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDataStreamSettingsFailedNotifier(toasts, event.data),
+      notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
+      notifyFetchDatasetIntegrationsFailed: (context, event: DoneInvokeEvent<Error>) => {
+        const integrationName =
+          'dataStreamSettings' in context ? context.dataStreamSettings?.integration : undefined;
+        return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
+      },
     },
     services: {
       checkDatasetIsAggregatable: (context) => {
@@ -299,6 +428,30 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
           start,
           end,
         });
+      },
+      loadDataStreamSettings: (context) => {
+        return dataStreamDetailsClient.getDataStreamSettings({
+          dataStream: context.dataStream,
+        });
+      },
+      loadDataStreamIntegration: (context) => {
+        if ('dataStreamSettings' in context && context.dataStreamSettings?.integration) {
+          const { type } = indexNameToDataStreamParts(context.dataStream);
+          return dataStreamDetailsClient.getDataStreamIntegration({
+            type,
+            integrationName: context.dataStreamSettings.integration,
+          });
+        }
+        return Promise.resolve();
+      },
+      loadIntegrationDashboards: (context) => {
+        if ('dataStreamSettings' in context && context.dataStreamSettings?.integration) {
+          return dataStreamDetailsClient.getIntegrationDashboards({
+            integration: context.dataStreamSettings.integration,
+          });
+        }
+
+        return Promise.resolve();
       },
     },
   });

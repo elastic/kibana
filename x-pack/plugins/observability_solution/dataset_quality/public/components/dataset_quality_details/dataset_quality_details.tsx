@@ -10,15 +10,17 @@ import { dynamic } from '@kbn/shared-ux-utility';
 
 const Header = dynamic(() => import('./header'));
 const Overview = dynamic(() => import('./overview'));
+const Details = dynamic(() => import('./details'));
 
 export function DatasetQualityDetails() {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
-        <Header loading={false} />
+        <Header />
         <EuiHorizontalRule />
         <Overview />
         <EuiHorizontalRule />
+        <Details />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

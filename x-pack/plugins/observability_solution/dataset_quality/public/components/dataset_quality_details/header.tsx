@@ -23,8 +23,9 @@ import { IntegrationIcon } from '../common';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
-export default function Header({ loading }: { loading: boolean }) {
-  const { datasetDetails, timeRange } = useDatasetQualityDetailsState();
+export default function Header() {
+  const { datasetDetails, timeRange, integrationDetails, loadingState } =
+    useDatasetQualityDetailsState();
 
   const { integration, rawName, name: title } = datasetDetails;
   const euiShadow = useEuiShadow('s');
@@ -34,7 +35,9 @@ export default function Header({ loading }: { loading: boolean }) {
     timeRangeConfig: timeRange,
   });
 
-  return loading ? (
+  const pageTitle = integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? title;
+
+  return !loadingState.integrationDetailsLoaded ? (
     <EuiSkeletonTitle
       size="s"
       data-test-subj="datasetQualityFlyoutIntegrationLoading"
@@ -46,7 +49,7 @@ export default function Header({ loading }: { loading: boolean }) {
         <EuiFlexGroup gutterSize="m" alignItems="flexStart" direction="column">
           <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
             <EuiTitle data-test-subj="datasetQualityFlyoutTitle" size="l">
-              <h2>{title}</h2>
+              <h2>{pageTitle}</h2>
             </EuiTitle>
             <div
               css={css`

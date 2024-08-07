@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import {
   flyoutIntegrationDetailsText,
   flyoutIntegrationNameText,
-  flyoutIntegrationVersionText,
+  integrationVersionText,
 } from '../../../common/translations';
 import { IntegrationIcon } from '../common';
 import { FieldsList } from './fields_list';
@@ -60,7 +60,7 @@ export function IntegrationSummary({
           isLoading: false,
         },
         {
-          fieldTitle: flyoutIntegrationVersionText,
+          fieldTitle: integrationVersionText,
           fieldValue: version,
           isLoading: false,
         },

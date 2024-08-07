@@ -32,14 +32,11 @@ import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { generateDatasets } from '../../../utils';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
-  fetchDatasetSettingsFailedNotifier,
   fetchDatasetDetailsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
-  fetchIntegrationDashboardsFailedNotifier,
   fetchIntegrationsFailedNotifier,
   noDatasetSelected,
-  fetchDataStreamIntegrationFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,
 } from './notifications';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../../common/notifications';
@@ -50,6 +47,11 @@ import {
   DefaultDatasetQualityControllerState,
   FlyoutDataset,
 } from './types';
+import {
+  fetchDataStreamSettingsFailedNotifier,
+  fetchIntegrationDashboardsFailedNotifier,
+  fetchDataStreamIntegrationFailedNotifier,
+} from '../../dataset_quality_details_controller/notifications';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
@@ -273,7 +275,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                         },
                         onError: {
                           target: 'done',
-                          actions: ['notifyFetchDatasetSettingsFailed'],
+                          actions: ['notifyFetchDataStreamSettingsFailed'],
                         },
                       },
                     },
@@ -646,7 +648,7 @@ export const createPureDatasetQualityControllerStateMachine = (
             ? {
                 flyout: {
                   ...context.flyout,
-                  datasetSettings: (event.data ?? {}) as DataStreamSettings,
+                  dataStreamSettings: (event.data ?? {}) as DataStreamSettings,
                 },
               }
             : {};
@@ -762,8 +764,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDegradedStatsFailedNotifier(toasts, event.data),
       notifyFetchNonAggregatableDatasetsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
-      notifyFetchDatasetSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDatasetSettingsFailedNotifier(toasts, event.data),
+      notifyFetchDataStreamSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDataStreamSettingsFailedNotifier(toasts, event.data),
       notifyFetchDatasetDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDatasetDetailsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
@@ -830,7 +832,7 @@ export const createDatasetQualityControllerStateMachine = ({
       },
       loadDataStreamSettings: (context) => {
         if (!context.flyout.dataset) {
-          fetchDatasetSettingsFailedNotifier(toasts, new Error(noDatasetSelected));
+          fetchDataStreamSettingsFailedNotifier(toasts, new Error(noDatasetSelected));
 
           return Promise.resolve({});
         }

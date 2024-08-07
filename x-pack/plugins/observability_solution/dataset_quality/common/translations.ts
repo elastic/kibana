@@ -64,31 +64,10 @@ export const flyoutDatasetDetailsText = i18n.translate(
   }
 );
 
-export const flyoutDatasetLastActivityText = i18n.translate(
-  'xpack.datasetQuality.flyoutDatasetLastActivityText',
-  {
-    defaultMessage: 'Last Activity',
-  }
-);
-
-export const flyoutDatasetCreatedOnText = i18n.translate(
-  'xpack.datasetQuality.flyoutDatasetCreatedOnText',
-  {
-    defaultMessage: 'Created on',
-  }
-);
-
 export const flyoutIntegrationDetailsText = i18n.translate(
   'xpack.datasetQuality.flyoutIntegrationDetailsText',
   {
     defaultMessage: 'Integration details',
-  }
-);
-
-export const flyoutIntegrationVersionText = i18n.translate(
-  'xpack.datasetQuality.flyoutIntegrationVersionText',
-  {
-    defaultMessage: 'Version',
   }
 );
 
@@ -361,5 +340,37 @@ export const overviewQualityIssuesAccordionTechPreviewBadge = i18n.translate(
   'xpack.datasetQuality.details.overviewQualityIssuesAccordionTechPreviewBadge',
   {
     defaultMessage: 'TECH PREVIEW',
+  }
+);
+
+export const detailsHeaderTitle = i18n.translate('xpack.datasetQuality.details.detailsTitle', {
+  defaultMessage: 'Details',
+});
+
+export const datasetLastActivityText = i18n.translate(
+  'xpack.datasetQuality.details.datasetLastActivityText',
+  {
+    defaultMessage: 'Last Activity',
+  }
+);
+
+export const datasetCreatedOnText = i18n.translate(
+  'xpack.datasetQuality.details.datasetCreatedOnText',
+  {
+    defaultMessage: 'Created on',
+  }
+);
+
+export const integrationNameText = i18n.translate(
+  'xpack.datasetQuality.details.integrationnameText',
+  {
+    defaultMessage: 'Integration',
+  }
+);
+
+export const integrationVersionText = i18n.translate(
+  'xpack.datasetQuality.details.integrationVersionText',
+  {
+    defaultMessage: 'Version',
   }
 );

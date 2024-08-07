@@ -8,12 +8,15 @@
 import { DoneInvokeEvent } from 'xstate';
 import { DegradedFieldSortField } from '../../hooks';
 import {
+  Dashboard,
   DataStreamDetails,
+  DataStreamSettings,
   DegradedField,
   DegradedFieldResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { TableCriteria, TimeRangeConfig } from '../../../common/types';
+import { Integration } from '../../../common/data_streams_stats/integration';
 
 export interface DataStream {
   name: string;
@@ -60,6 +63,15 @@ export interface WithNonAggregatableDatasetStatus {
   isNonAggregatable: boolean;
 }
 
+export interface WithDataStreamSettings {
+  dataStreamSettings: DataStreamSettings;
+}
+
+export interface WithIntegration {
+  integration: Integration;
+  integrationDashboards?: Dashboard[];
+}
+
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
   'degradedFields' | 'timeRange'
@@ -72,6 +84,7 @@ export type DatasetQualityDetailsControllerTypeState =
         | 'uninitialized'
         | 'initializing.nonAggregatableDataset.fetching'
         | 'initializing.dataStreamDegradedFields.fetching'
+        | 'initializing.dataStreamSettings.fetching'
         | 'initializing.dataStreamDetails.fetching';
       context: WithDefaultControllerState;
     }
@@ -94,6 +107,20 @@ export type DatasetQualityDetailsControllerTypeState =
   | {
       value: 'initializing.dataStreamDegradedFields.done';
       context: WithDefaultControllerState & WithDegradedFieldsData;
+    }
+  | {
+      value:
+        | 'initializing.dataStreamSettings.initializeIntegrations'
+        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.fetching'
+        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.unauthorized';
+      context: WithDefaultControllerState & WithDataStreamSettings;
+    }
+  | {
+      value:
+        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
+        | 'initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.done';
+      context: WithDefaultControllerState & WithDataStreamSettings & WithIntegration;
     };
 
 export type DatasetQualityDetailsControllerContext =
@@ -116,4 +143,7 @@ export type DatasetQualityDetailsControllerEvent =
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<Error>
   | DoneInvokeEvent<boolean>
-  | DoneInvokeEvent<DegradedFieldResponse>;
+  | DoneInvokeEvent<DegradedFieldResponse>
+  | DoneInvokeEvent<DataStreamSettings>
+  | DoneInvokeEvent<Integration>
+  | DoneInvokeEvent<Dashboard[]>;

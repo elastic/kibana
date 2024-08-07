@@ -25,3 +25,37 @@ export const assertBreakdownFieldEcsFailedNotifier = (toasts: IToasts, error: Er
     text: error.message,
   });
 };
+
+export const fetchDataStreamSettingsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.fetchDataStreamSettingsFailed', {
+      defaultMessage: "Data stream settings couldn't be loaded.",
+    }),
+    text: error.message,
+  });
+};
+
+export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.fetchIntegrationDashboardsFailed', {
+      defaultMessage: "We couldn't get your integration dashboards.",
+    }),
+    text: error.message,
+  });
+};
+
+export const fetchDataStreamIntegrationFailedNotifier = (
+  toasts: IToasts,
+  error: Error,
+  integrationName?: string
+) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.fetchIntegrationsFailed', {
+      defaultMessage: "We couldn't get {integrationName} integration info.",
+      values: {
+        integrationName,
+      },
+    }),
+    text: error.message,
+  });
+};
