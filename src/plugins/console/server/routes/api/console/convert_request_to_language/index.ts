@@ -25,7 +25,7 @@ const routeValidationConfig = {
 export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;
 
-export const registerSpecDefinitionsRoute = ({ router, lib: { handleEsError } }: RouteDependencies) => {
+export const registerConvertRequestRoute = ({ router, lib: { handleEsError } }: RouteDependencies) => {
   const handler: RequestHandler<unknown, Query, Body> = async (ctx, req, response) => {
     const { body, query } = req;
     const { method, path, language } = query;
