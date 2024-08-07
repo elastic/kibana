@@ -7,11 +7,17 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { debounce } from 'lodash';
-import { fieldNameWildcardMatcher } from '@kbn/field-utils';
+import { fieldNameWildcardMatcher, type FieldTypeKnown } from '@kbn/field-utils';
+import type { FieldListItem } from '@kbn/unified-field-list';
+import {
+  FieldTypeFilter,
+  type FieldTypeFilterProps,
+} from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
+import { getUnifiedDocViewerServices } from '../../plugin';
 
 const SEARCH_TEXT = 'discover:searchText';
 
@@ -20,14 +26,27 @@ const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchP
 });
 
 interface TableFiltersCommonProps {
+  // search
   searchTerm: string;
   onSearchTermChanged: (searchTerm: string) => void;
+  // field types
+  selectedFieldTypes: FieldTypeFilterProps<FieldListItem>['selectedFieldTypes'];
+  onChangeFieldTypes: FieldTypeFilterProps<FieldListItem>['onChange'];
 }
 
-export const TableFilters: React.FC<TableFiltersCommonProps> = ({
+export interface TableFiltersProps extends TableFiltersCommonProps {
+  allFields: FieldListItem[];
+}
+
+export const TableFilters: React.FC<TableFiltersProps> = ({
   searchTerm,
   onSearchTermChanged,
+  selectedFieldTypes,
+  onChangeFieldTypes,
+  allFields,
 }) => {
+  const { core } = getUnifiedDocViewerServices();
+
   const onSearchTermChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newSearchTerm = event.currentTarget.value;
@@ -37,19 +56,26 @@ export const TableFilters: React.FC<TableFiltersCommonProps> = ({
   );
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFieldSearch
-          data-test-subj="unifiedDocViewerFieldsSearchInput"
-          aria-label={searchPlaceholder}
-          placeholder={searchPlaceholder}
-          fullWidth
-          compressed
-          value={searchTerm}
-          onChange={onSearchTermChange}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFieldSearch
+      data-test-subj="unifiedDocViewerFieldsSearchInput"
+      aria-label={searchPlaceholder}
+      placeholder={searchPlaceholder}
+      fullWidth
+      compressed
+      value={searchTerm}
+      onChange={onSearchTermChange}
+      append={
+        allFields && selectedFieldTypes && onChangeFieldTypes ? (
+          <FieldTypeFilter
+            data-test-subj="unifiedDocViewerFieldsFilterByType"
+            docLinks={core.docLinks}
+            selectedFieldTypes={selectedFieldTypes}
+            allFields={allFields}
+            onChange={onChangeFieldTypes}
+          />
+        ) : undefined
+      }
+    />
   );
 };
 
@@ -60,11 +86,16 @@ const persistSearchTerm = debounce(
 );
 
 interface UseTableFiltersReturn extends TableFiltersCommonProps {
-  onFilterField: (fieldName: string, fieldDisplayName: string | undefined) => boolean;
+  onFilterField: (
+    fieldName: string,
+    fieldDisplayName: string | undefined,
+    fieldType: string | undefined
+  ) => boolean;
 }
 
 export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
   const [searchTerm, setSearchTerm] = useState(storage.get(SEARCH_TEXT) || '');
+  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
 
   const onSearchTermChanged = useCallback(
     (newSearchTerm: string) => {
@@ -75,19 +106,22 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
   );
 
   const onFilterField: UseTableFiltersReturn['onFilterField'] = useCallback(
-    (fieldName, fieldDisplayName) => {
+    (fieldName, fieldDisplayName, fieldType) => {
+      const term = searchTerm?.trim();
       if (
-        !searchTerm?.trim() ||
-        fieldNameWildcardMatcher({ name: fieldName, displayName: fieldDisplayName }, searchTerm)
+        term &&
+        !fieldNameWildcardMatcher({ name: fieldName, displayName: fieldDisplayName }, term)
       ) {
-        return true;
+        return false;
       }
 
-      // TODO: Add support for filtering by field type
+      if (selectedFieldTypes.length > 0 && fieldType) {
+        return selectedFieldTypes.includes(fieldType);
+      }
 
-      return false;
+      return true;
     },
-    [searchTerm]
+    [searchTerm, selectedFieldTypes]
   );
 
   return useMemo(
@@ -95,9 +129,11 @@ export const useTableFilters = (storage: Storage): UseTableFiltersReturn => {
       // props for TableFilters component
       searchTerm,
       onSearchTermChanged,
+      selectedFieldTypes,
+      onChangeFieldTypes: setSelectedFieldTypes,
       // the actual filtering function
       onFilterField,
     }),
-    [searchTerm, onSearchTermChanged, onFilterField]
+    [searchTerm, onSearchTermChanged, selectedFieldTypes, setSelectedFieldTypes, onFilterField]
   );
 };

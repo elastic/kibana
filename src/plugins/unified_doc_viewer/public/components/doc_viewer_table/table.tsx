@@ -57,13 +57,13 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TableFilters, useTableFilters } from './table_filters';
+import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
 
 export type FieldRecord = TableRow;
 
 interface ItemsEntry {
-  pinnedItems: FieldRecord[];
-  restItems: FieldRecord[];
+  rows: FieldRecord[];
+  allFields: TableFiltersProps['allFields'];
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -238,7 +238,7 @@ export const DocViewerTable = ({
     ]
   );
 
-  const { pinnedItems, restItems } = Object.keys(flattened)
+  const { rows, allFields } = Object.keys(flattened)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
@@ -256,25 +256,32 @@ export const DocViewerTable = ({
         if (shouldHideNullValue) {
           return acc;
         }
-        if (pinnedFields.includes(curFieldName)) {
-          acc.pinnedItems.push(fieldToItem(curFieldName, true));
+
+        const isPinned = pinnedFields.includes(curFieldName);
+        const row = fieldToItem(curFieldName, isPinned);
+
+        if (isPinned) {
+          acc.rows.push(row);
         } else {
-          const fieldMapping = mapping(curFieldName);
-          if (onFilterField(curFieldName, fieldMapping?.displayName)) {
+          if (onFilterField(curFieldName, row.field.displayName, row.field.fieldType)) {
             // filter only unpinned fields
-            acc.restItems.push(fieldToItem(curFieldName, false));
+            acc.rows.push(row);
           }
         }
+
+        acc.allFields.push({
+          name: curFieldName,
+          displayName: row.field.displayName,
+          type: row.field.fieldType,
+        });
 
         return acc;
       },
       {
-        pinnedItems: [],
-        restItems: [],
+        rows: [],
+        allFields: [],
       }
     );
-
-  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
@@ -460,7 +467,7 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <TableFilters {...tableFiltersProps} />
+        <TableFilters {...tableFiltersProps} allFields={allFields} />
       </EuiFlexItem>
 
       {rows.length === 0 ? (
