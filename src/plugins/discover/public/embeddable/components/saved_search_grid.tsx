@@ -104,6 +104,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGridMemoized
         {...gridProps}
+        isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
