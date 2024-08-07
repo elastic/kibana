@@ -27,6 +27,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickIncludeStatsSwitch: () => void;
     toggleViewFilterAt: (index: number) => void;
     sortTableOnStorageSize: () => void;
+    sortTableOnName: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
