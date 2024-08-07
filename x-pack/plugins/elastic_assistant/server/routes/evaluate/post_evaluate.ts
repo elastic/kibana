@@ -161,6 +161,8 @@ export const postEvaluateRoute = (
           // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
           const enableKnowledgeBaseByDefault =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const bedrockChatEnabled =
+            assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
           const kbDataClient = enableKnowledgeBaseByDefault
             ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined
             : undefined;
@@ -193,6 +195,7 @@ export const postEvaluateRoute = (
                   const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actionsClient,
                     assistantTools,
+                    bedrockChatEnabled,
                     connectorId,
                     esClient,
                     esStore,

@@ -26,30 +26,42 @@ import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/c
 import { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
 import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
+import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
+import { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
-import { CreateEntityRelationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/relations/create_entity_relation.gen';
+import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
 import {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
+import { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { EndpointIsolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/isolate_route.gen';
 import { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/unisolate_route.gen';
 import {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
+import {
+  ExportTimelinesRequestQueryInput,
+  ExportTimelinesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/timeline/export_timelines/export_timelines_route.gen';
 import { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
+import { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import { GetAgentPolicySummaryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
-import { GetAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/get_signals_migration_status/get_signals_migration_status.gen';
+import { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
+import { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
 import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
-import { GetEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/get_entities.gen';
-import { GetEntityRelationsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/relations/get_entity_relations.gen';
+import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import {
@@ -60,19 +72,31 @@ import {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
+import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
-import { ManageAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
+import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
+import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
   PerformBulkActionRequestQueryInput,
   PerformBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
+import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
+import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
+import { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
+import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
+import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
+import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
 import { RulePreviewRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
+import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -97,6 +121,13 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    assetCriticalityGetPrivileges() {
+      return supertest
+        .get('/internal/asset_criticality/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Create new detection rules in bulk.
@@ -156,6 +187,26 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    bulkUpsertAssetCriticalityRecords(props: BulkUpsertAssetCriticalityRecordsProps) {
+      return supertest
+        .post('/api/asset_criticality/bulk')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+      * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+
+      */
+    cleanDraftTimelines(props: CleanDraftTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_draft')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     createAlertsIndex() {
       return supertest
         .post('/api/detection_engine/index')
@@ -176,11 +227,11 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    createEntityRelation(props: CreateEntityRelationProps) {
+    createAssetCriticalityRecord(props: CreateAssetCriticalityRecordProps) {
       return supertest
-        .post('/internal/entity_store/relations')
+        .post('/api/asset_criticality')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
@@ -190,6 +241,14 @@ Migrations are initiated per index. While the process is neither destructive nor
     createRule(props: CreateRuleProps) {
       return supertest
         .post('/api/detection_engine/rules')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    createTimelines(props: CreateTimelinesProps) {
+      return supertest
+        .post('/api/timeline')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -212,6 +271,22 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    deleteAssetCriticalityRecord(props: DeleteAssetCriticalityRecordProps) {
+      return supertest
+        .delete('/api/asset_criticality')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    deleteNote(props: DeleteNoteProps) {
+      return supertest
+        .delete('/api/note')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     /**
      * Delete a detection rule using the `rule_id` or `id` field.
      */
@@ -222,6 +297,39 @@ Migrations are initiated per index. While the process is neither destructive nor
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    deleteTimelines(props: DeleteTimelinesProps) {
+      return supertest
+        .delete('/api/timeline')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+     */
+    deprecatedTriggerRiskScoreCalculation(props: DeprecatedTriggerRiskScoreCalculationProps) {
+      return supertest
+        .post('/api/risk_scores/calculation/entity')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    disableRiskEngine() {
+      return supertest
+        .post('/internal/risk_score/engine/disable')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    enableRiskEngine() {
+      return supertest
+        .post('/internal/risk_score/engine/enable')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
       return supertest
@@ -256,6 +364,15 @@ Migrations are initiated per index. While the process is neither destructive nor
         .send(props.body as object)
         .query(props.query);
     },
+    exportTimelines(props: ExportTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_export')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
     /**
       * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
 The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
@@ -269,6 +386,14 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
+      return supertest
+        .post('/api/asset_criticality/list')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     /**
      * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
@@ -289,19 +414,24 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    getAlertsIndex() {
+    getAssetCriticalityRecord(props: GetAssetCriticalityRecordProps) {
       return supertest
-        .get('/api/detection_engine/index')
+        .get('/api/asset_criticality')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    getAssetCriticalityStatus() {
+      return supertest
+        .get('/internal/asset_criticality/status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-     * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-     */
-    getAlertsMigrationStatus(props: GetAlertsMigrationStatusProps) {
+    getDraftTimelines(props: GetDraftTimelinesProps) {
       return supertest
-        .post('/api/detection_engine/signals/migration_status')
+        .get('/api/timeline/_draft')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -315,19 +445,14 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    getEntities(props: GetEntitiesProps) {
+    /**
+     * Gets notes
+     */
+    getNotes(props: GetNotesProps) {
       return supertest
-        .get('/entity_store/entities')
+        .get('/api/note')
         .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    getEntityRelations(props: GetEntityRelationsProps) {
-      return supertest
-        .get('/entity_store/relations')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
@@ -339,30 +464,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    /**
-     * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
-     */
-    getPrebuiltRulesAndTimelinesStatus() {
-      return supertest
-        .get('/api/detection_engine/rules/prepackaged/_status')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-      * Retrieves whether or not the user is authenticated, and the user's Kibana
-space and index privileges, which determine if the user can create an
-index for the Elastic Security alerts generated by
-detection engine rules.
-
-      */
-    getPrivileges() {
-      return supertest
-        .get('/api/detection_engine/privileges')
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
       return supertest
         .get(
@@ -370,6 +471,16 @@ detection engine rules.
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
+     */
+    getRiskEngineStatus() {
+      return supertest
+        .get('/internal/risk_score/engine/status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     getRuleExecutionEvents(props: GetRuleExecutionEventsProps) {
@@ -392,6 +503,22 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    getTimeline(props: GetTimelineProps) {
+      return supertest
+        .get('/api/timeline')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    getTimelines(props: GetTimelinesProps) {
+      return supertest
+        .get('/api/timelines')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
@@ -406,6 +533,24 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    importTimelines(props: ImportTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_import')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
+     */
+    initRiskEngine() {
+      return supertest
+        .post('/internal/risk_score/engine/init')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     /**
      * Install and update all Elastic prebuilt detection rules and Timelines.
      */
@@ -416,19 +561,20 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    /**
-      * And tags to detection alerts, and remove them from alerts.
-> info
-> You cannot add and remove the same alert tag in the same request.
-
-      */
-    manageAlertTags(props: ManageAlertTagsProps) {
+    installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
       return supertest
-        .post('/api/detection_engine/signals/tags')
+        .post('/api/timeline/_prepackaged')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    internalUploadAssetCriticalityRecords() {
+      return supertest
+        .post('/internal/asset_criticality/upload_csv')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
@@ -436,6 +582,17 @@ detection engine rules.
     patchRule(props: PatchRuleProps) {
       return supertest
         .patch('/api/detection_engine/rules')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+     */
+    patchTimeline(props: PatchTimelineProps) {
+      return supertest
+        .patch('/api/timeline')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -452,6 +609,90 @@ detection engine rules.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object)
         .query(props.query);
+    },
+    persistFavoriteRoute(props: PersistFavoriteRouteProps) {
+      return supertest
+        .patch('/api/timeline/_favorite')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    persistNoteRoute(props: PersistNoteRouteProps) {
+      return supertest
+        .patch('/api/note')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
+      return supertest
+        .patch('/api/pinned_event')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
+     */
+    previewRiskScore(props: PreviewRiskScoreProps) {
+      return supertest
+        .post('/internal/risk_score/preview')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    readAlertsIndex() {
+      return supertest
+        .get('/api/detection_engine/index')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
+     */
+    readAlertsMigrationStatus(props: ReadAlertsMigrationStatusProps) {
+      return supertest
+        .post('/api/detection_engine/signals/migration_status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+     */
+    readPrebuiltRulesAndTimelinesStatus() {
+      return supertest
+        .get('/api/detection_engine/rules/prepackaged/_status')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+      * Retrieves whether or not the user is authenticated, and the user's Kibana
+space and index privileges, which determine if the user can create an
+index for the Elastic Security alerts generated by
+detection engine rules.
+
+      */
+    readPrivileges() {
+      return supertest
+        .get('/api/detection_engine/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    readRiskEngineSettings() {
+      return supertest
+        .get('/internal/risk_score/engine/settings')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Retrieve a detection rule using the `rule_id` or `id` field.
@@ -472,6 +713,21 @@ detection engine rules.
         .get('/api/detection_engine/tags')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    resolveTimeline(props: ResolveTimelineProps) {
+      return supertest
+        .get('/api/timeline/resolve')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    riskEngineGetPrivileges() {
+      return supertest
+        .get('/internal/risk_engine/privileges')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     rulePreview(props: RulePreviewProps) {
@@ -519,6 +775,20 @@ detection engine rules.
         .send(props.body as object);
     },
     /**
+      * And tags to detection alerts, and remove them from alerts.
+> info
+> You cannot add and remove the same alert tag in the same request.
+
+      */
+    setAlertTags(props: SetAlertTagsProps) {
+      return supertest
+        .post('/api/detection_engine/signals/tags')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Suggests user profiles.
      */
     suggestUserProfiles(props: SuggestUserProfilesProps) {
@@ -528,6 +798,17 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
+    },
+    /**
+     * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
+     */
+    triggerRiskScoreCalculation(props: TriggerRiskScoreCalculationProps) {
+      return supertest
+        .post('/internal/risk_score/calculation/entity')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
       * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
@@ -542,6 +823,13 @@ detection engine rules.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    uploadAssetCriticalityRecords() {
+      return supertest
+        .post('/api/asset_criticality/upload_csv')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
   };
 }
@@ -564,21 +852,42 @@ export interface BulkPatchRulesProps {
 export interface BulkUpdateRulesProps {
   body: BulkUpdateRulesRequestBodyInput;
 }
+export interface BulkUpsertAssetCriticalityRecordsProps {
+  body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;
+}
+export interface CleanDraftTimelinesProps {
+  body: CleanDraftTimelinesRequestBodyInput;
+}
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
-export interface CreateEntityRelationProps {
-  body: CreateEntityRelationRequestBodyInput;
+export interface CreateAssetCriticalityRecordProps {
+  body: CreateAssetCriticalityRecordRequestBodyInput;
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateTimelinesProps {
+  body: CreateTimelinesRequestBodyInput;
 }
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
 }
+export interface DeleteAssetCriticalityRecordProps {
+  query: DeleteAssetCriticalityRecordRequestQueryInput;
+}
+export interface DeleteNoteProps {
+  body: DeleteNoteRequestBodyInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteTimelinesProps {
+  body: DeleteTimelinesRequestBodyInput;
+}
+export interface DeprecatedTriggerRiskScoreCalculationProps {
+  body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
 }
 export interface EndpointIsolateRedirectProps {
   body: EndpointIsolateRedirectRequestBodyInput;
@@ -590,8 +899,15 @@ export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
   body: ExportRulesRequestBodyInput;
 }
+export interface ExportTimelinesProps {
+  query: ExportTimelinesRequestQueryInput;
+  body: ExportTimelinesRequestBodyInput;
+}
 export interface FinalizeAlertsMigrationProps {
   body: FinalizeAlertsMigrationRequestBodyInput;
+}
+export interface FindAssetCriticalityRecordsProps {
+  query: FindAssetCriticalityRecordsRequestQueryInput;
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
@@ -599,18 +915,18 @@ export interface FindRulesProps {
 export interface GetAgentPolicySummaryProps {
   query: GetAgentPolicySummaryRequestQueryInput;
 }
-export interface GetAlertsMigrationStatusProps {
-  query: GetAlertsMigrationStatusRequestQueryInput;
+export interface GetAssetCriticalityRecordProps {
+  query: GetAssetCriticalityRecordRequestQueryInput;
+}
+export interface GetDraftTimelinesProps {
+  query: GetDraftTimelinesRequestQueryInput;
 }
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
   body: GetEndpointSuggestionsRequestBodyInput;
 }
-export interface GetEntitiesProps {
-  query: GetEntitiesRequestQueryInput;
-}
-export interface GetEntityRelationsProps {
-  query: GetEntityRelationsRequestQueryInput;
+export interface GetNotesProps {
+  query: GetNotesRequestQueryInput;
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
@@ -626,21 +942,51 @@ export interface GetRuleExecutionResultsProps {
   query: GetRuleExecutionResultsRequestQueryInput;
   params: GetRuleExecutionResultsRequestParamsInput;
 }
+export interface GetTimelineProps {
+  query: GetTimelineRequestQueryInput;
+}
+export interface GetTimelinesProps {
+  query: GetTimelinesRequestQueryInput;
+}
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
 }
-export interface ManageAlertTagsProps {
-  body: ManageAlertTagsRequestBodyInput;
+export interface ImportTimelinesProps {
+  body: ImportTimelinesRequestBodyInput;
+}
+export interface InstallPrepackedTimelinesProps {
+  body: InstallPrepackedTimelinesRequestBodyInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
+}
+export interface PatchTimelineProps {
+  body: PatchTimelineRequestBodyInput;
 }
 export interface PerformBulkActionProps {
   query: PerformBulkActionRequestQueryInput;
   body: PerformBulkActionRequestBodyInput;
 }
+export interface PersistFavoriteRouteProps {
+  body: PersistFavoriteRouteRequestBodyInput;
+}
+export interface PersistNoteRouteProps {
+  body: PersistNoteRouteRequestBodyInput;
+}
+export interface PersistPinnedEventRouteProps {
+  body: PersistPinnedEventRouteRequestBodyInput;
+}
+export interface PreviewRiskScoreProps {
+  body: PreviewRiskScoreRequestBodyInput;
+}
+export interface ReadAlertsMigrationStatusProps {
+  query: ReadAlertsMigrationStatusRequestQueryInput;
+}
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
+}
+export interface ResolveTimelineProps {
+  query: ResolveTimelineRequestQueryInput;
 }
 export interface RulePreviewProps {
   body: RulePreviewRequestBodyInput;
@@ -654,8 +1000,14 @@ export interface SetAlertAssigneesProps {
 export interface SetAlertsStatusProps {
   body: SetAlertsStatusRequestBodyInput;
 }
+export interface SetAlertTagsProps {
+  body: SetAlertTagsRequestBodyInput;
+}
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface TriggerRiskScoreCalculationProps {
+  body: TriggerRiskScoreCalculationRequestBodyInput;
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;

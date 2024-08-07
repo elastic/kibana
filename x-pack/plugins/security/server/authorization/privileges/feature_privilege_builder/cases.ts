@@ -11,7 +11,7 @@ import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugi
 
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-export type CasesSupportedOperations = typeof allOperations[number];
+export type CasesSupportedOperations = (typeof allOperations)[number];
 
 /**
  * If you add a new operation type (all, push, update, etc) you should also

@@ -197,7 +197,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
-    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    events.forEach((eventConfig) => {
+      core.analytics.registerEventType(eventConfig);
+    });
 
     this.ruleMonitoringService.setup(core, plugins);
 
@@ -305,6 +307,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
+      analytics: core.analytics,
     };
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
@@ -541,6 +544,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+      assistantBedrockChat: config.experimentalFeatures.assistantBedrockChat,
       assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });

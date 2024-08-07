@@ -241,23 +241,11 @@
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.OptInConfig",
-                "text": "OptInConfig"
-              },
+              "OptInConfig",
               ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/ebt",
-                "scope": "common",
-                "docId": "kibKbnEbtPluginApi",
-                "section": "def-common.TelemetryCounter",
-                "text": "TelemetryCounter"
-              },
+              "TelemetryCounter",
               ">; }"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
@@ -276,9 +264,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               }
             ],
@@ -320,9 +308,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               }
             ],
@@ -399,9 +387,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -421,9 +409,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsSetup",
+                "section": "def-public.NotificationsSetup",
                 "text": "NotificationsSetup"
               }
             ],
@@ -466,9 +454,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               }
             ],
@@ -488,9 +476,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -642,9 +630,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
+                "section": "def-public.I18nStart",
                 "text": "I18nStart"
               }
             ],
@@ -675,17 +663,17 @@
               "; fieldStatsServices: ",
               {
                 "pluginId": "@kbn/unified-field-list",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-common.FieldStatsServices",
+                "section": "def-public.FieldStatsServices",
                 "text": "FieldStatsServices"
               },
               "; timeRangeMs?: ",
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.TimeRange",
+                "section": "def-public.TimeRange",
                 "text": "TimeRange"
               },
               " | undefined; dslQuery?: object | undefined; }>>; } | undefined"

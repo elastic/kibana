@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "test-helper",
   "id": "@kbn/ftr-common-functional-ui-services",
   "owner": "@elastic/appex-qa",
   "devOnly": true

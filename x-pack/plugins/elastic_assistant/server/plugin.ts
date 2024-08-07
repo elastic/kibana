@@ -15,6 +15,7 @@ import {
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -45,6 +46,8 @@ export class ElasticAssistantPlugin
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
+  private getElserId?: () => Promise<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -88,8 +91,11 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    const getElserId = createGetElserId(plugins.ml);
-    registerRoutes(router, this.logger, getElserId);
+    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
+    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+
+    registerRoutes(router, this.logger, this.getElserId);
+
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
@@ -107,6 +113,12 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+
+    plugins.licensing.license$.subscribe(() => {
+      if (this.mlTrainedModelsProvider) {
+        this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+      }
+    });
 
     return {
       actions: plugins.actions,
