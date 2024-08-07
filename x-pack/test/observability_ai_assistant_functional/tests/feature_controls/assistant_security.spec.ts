@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await testSubjects.existOrFail(ui.pages.links.solutionMenuLink);
       });
-      it('shows AI Assistant buttin in global nav', async () => {
+      it('shows AI Assistant button in global nav', async () => {
         await testSubjects.existOrFail(ui.pages.links.globalHeaderButton);
       });
       it('shows AI Assistant conversations link in search', async () => {
