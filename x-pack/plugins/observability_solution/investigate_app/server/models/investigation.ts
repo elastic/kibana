@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export interface Investigation {
-  id: string;
-  title: string;
-}
+import * as t from 'io-ts';
+
+export const investigationSchema = t.type({
+  id: t.string,
+  title: t.string,
+});
+
+export type Investigation = t.TypeOf<typeof investigationSchema>;
+export type StoredInvestigation = t.OutputOf<typeof investigationSchema>;

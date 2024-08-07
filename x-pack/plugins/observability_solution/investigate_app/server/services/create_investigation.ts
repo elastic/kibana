@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { CreateInvestigationInput, CreateInvestigationResponse } from '../../common/schema/create';
 import { InvestigationRepository } from './investigation_repository';
 
-export async function createInvestigation(repository: InvestigationRepository) {
-  await repository.save({ id: '1', title: 'title' });
+export async function createInvestigation(
+  params: CreateInvestigationInput,
+  repository: InvestigationRepository
+): Promise<CreateInvestigationResponse> {
+  await repository.save(params);
+
+  return params;
 }

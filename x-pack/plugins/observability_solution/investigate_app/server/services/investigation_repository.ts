@@ -5,37 +5,81 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { Investigation } from '../models/investigation';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { isLeft } from 'fp-ts/lib/Either';
+import { Investigation, StoredInvestigation, investigationSchema } from '../models/investigation';
+import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
 
 export interface InvestigationRepository {
-  save(investigation: Investigation): Promise<Investigation>;
-  findAll(): Promise<Investigation[]>;
+  save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
   deleteById(id: string): Promise<void>;
 }
 
 export function investigationRepositoryFactory({
   soClient,
+  logger,
 }: {
   soClient: SavedObjectsClientContract;
+  logger: Logger;
 }): InvestigationRepository {
+  function toInvestigation(stored: StoredInvestigation): Investigation | undefined {
+    const result = investigationSchema.decode({
+      ...stored,
+    });
+
+    if (isLeft(result)) {
+      logger.error(`Invalid stored Investigation with id [${stored.id}]`);
+      return undefined;
+    }
+
+    return result.right;
+  }
+
+  function toStoredInvestigation(investigation: Investigation): StoredInvestigation {
+    return investigationSchema.encode(investigation);
+  }
+
   return {
-    async save(investigation: Investigation): Promise<Investigation> {
-      return {
-        id: '1',
-        title: 'title',
-      };
+    async save(investigation: Investigation): Promise<void> {
+      await soClient.create(SO_INVESTIGATION_TYPE, toStoredInvestigation(investigation), {
+        id: investigation.id,
+        overwrite: true,
+      });
     },
-    async findAll(): Promise<Investigation[]> {
-      return [];
-    },
+
     async findById(id: string): Promise<Investigation> {
-      return {
-        id: '1',
-        title: 'title',
-      };
+      const response = await soClient.find<StoredInvestigation>({
+        type: SO_INVESTIGATION_TYPE,
+        page: 1,
+        perPage: 1,
+        filter: `investigation.attributes.id:(${id})`,
+      });
+
+      if (response.total === 0) {
+        throw new Error(`Investigation [${id}] not found`);
+      }
+
+      const investigation = toInvestigation(response.saved_objects[0].attributes);
+      if (investigation === undefined) {
+        throw new Error('Invalid stored Investigation');
+      }
+
+      return investigation;
     },
-    async deleteById(id: string): Promise<void> {},
+    async deleteById(id: string): Promise<void> {
+      const response = await soClient.find<StoredInvestigation>({
+        type: SO_INVESTIGATION_TYPE,
+        page: 1,
+        perPage: 1,
+        filter: `investigation.attributes.id:(${id})`,
+      });
+
+      if (response.total === 0) {
+        throw new Error(`Investigation [${id}] not found`);
+      }
+
+      await soClient.delete(SO_INVESTIGATION_TYPE, response.saved_objects[0].id);
+    },
   };
 }

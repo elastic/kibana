@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
-import { investigationRepositoryFactory } from '../services/investigation_repository';
+import { createInvestigationParamsSchema } from '../../common/schema/create';
 import { createInvestigation } from '../services/create_investigation';
-
-const createParamsSchema = t.type({
-  body: t.type({
-    title: t.string,
-  }),
-});
+import { investigationRepositoryFactory } from '../services/investigation_repository';
+import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
   options: {
     tags: [],
   },
-  params: createParamsSchema,
+  params: createInvestigationParamsSchema,
   handler: async (params) => {
     const soClient = (await params.context.core).savedObjects.client;
-    const repository = investigationRepositoryFactory({ soClient });
-    return await createInvestigation(repository);
+    const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
+
+    return await createInvestigation(params.params.body, repository);
   },
 });
 
