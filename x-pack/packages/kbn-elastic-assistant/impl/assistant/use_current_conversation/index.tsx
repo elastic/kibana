@@ -8,31 +8,32 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { QueryObserverResult } from '@tanstack/react-query';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import deepEqual from 'fast-deep-equal';
 import { find } from 'lodash';
+import { getGenAiConfig } from '../../connectorland/helpers';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
-import { UseConversation } from '../use_conversation';
+import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
-import { Conversation } from '../../..';
+import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
 interface Props {
   allSystemPrompts: PromptResponse[];
   conversations: Record<string, Conversation>;
-  createConversation: UseConversation['createConversation'];
-  deleteConversation: UseConversation['deleteConversation'];
-  getConversation: UseConversation['getConversation'];
+
   refetchCurrentUserConversations: () => Promise<
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
-  setConversationTitle?: Dispatch<SetStateAction<string>>;
+  conversationId: string;
+  defaultConnector: any;
+  mayUpdateConversations: boolean;
 }
 export const useCurrentConversation = ({
   allSystemPrompts,
   conversations,
-  createConversation,
-  deleteConversation,
-  getConversation,
+  conversationId,
+  defaultConnector,
   refetchCurrentUserConversations,
-  setConversationTitle,
+  mayUpdateConversations,
 }: Props): {
   currentConversation: Conversation | undefined;
   currentConversationId: string | undefined;
@@ -47,58 +48,21 @@ export const useCurrentConversation = ({
     isStreamRefetch?: boolean;
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
-  setCurrentConversationId: Dispatch<SetStateAction<string | undefined>>;
+  setCurrentConversationId: Dispatch<SetStateAction<string>>;
   setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
 } => {
+  const {
+    createConversation,
+    deleteConversation,
+    getConversation,
+    getDefaultConversation,
+    setApiConfig,
+  } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
-  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (setConversationTitle && currentConversation?.title) {
-      console.log('setConversationTitle from useE', currentConversation?.title);
-      setConversationTitle(currentConversation.title);
-    }
-  }, [currentConversation?.title, setConversationTitle]);
-
-  const refetchCurrentConversation = useCallback(
-    async ({
-      cId,
-      cTitle,
-      isStreamRefetch = false,
-    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
-      if (cId === '' || (cTitle && !conversations[cTitle])) {
-        return;
-      }
-
-      const conversationId = cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
-
-      if (conversationId) {
-        let updatedConversation = await getConversation(conversationId);
-        let retries = 0;
-        const maxRetries = 5;
-
-        // this retry is a workaround for the stream not YET being persisted to the stored conversation
-        while (
-          isStreamRefetch &&
-          updatedConversation &&
-          updatedConversation.messages[updatedConversation.messages.length - 1].role !==
-            'assistant' &&
-          retries < maxRetries
-        ) {
-          retries++;
-          await sleep(2000);
-          updatedConversation = await getConversation(conversationId);
-        }
-
-        if (updatedConversation) {
-          setCurrentConversation(updatedConversation);
-        }
-
-        return updatedConversation;
-      }
-    },
-    [conversations, currentConversation?.id, getConversation]
-  );
+  const [currentConversationId, setCurrentConversationId] = useState<string>(conversationId);
+  /**
+   * START SYSTEM PROMPT
+   */
   const currentSystemPrompt = useMemo(
     () =>
       getDefaultSystemPrompt({
@@ -115,20 +79,96 @@ export const useCurrentConversation = ({
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
     setCurrentSystemPromptId(systemPromptId);
   }, []);
+  /**
+   * END SYSTEM PROMPT
+   */
+
+  /**
+   * Refetches the current conversation, optionally by conversation ID or title.
+   * @param cId - The conversation ID to refetch.
+   * @param cTitle - The conversation title to refetch.
+   * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
+   */
+  const refetchCurrentConversation = useCallback(
+    async ({
+      cId,
+      cTitle,
+      isStreamRefetch = false,
+    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
+      if (cId === '' || (cTitle && !conversations[cTitle])) {
+        return;
+      }
+
+      const cConversationId =
+        cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
+
+      if (cConversationId) {
+        let updatedConversation = await getConversation(cConversationId);
+        let retries = 0;
+        const maxRetries = 5;
+
+        // this retry is a workaround for the stream not YET being persisted to the stored conversation
+        while (
+          isStreamRefetch &&
+          updatedConversation &&
+          updatedConversation.messages[updatedConversation.messages.length - 1].role !==
+            'assistant' &&
+          retries < maxRetries
+        ) {
+          retries++;
+          await sleep(2000);
+          updatedConversation = await getConversation(cConversationId);
+        }
+
+        if (updatedConversation) {
+          setCurrentConversation(updatedConversation);
+        }
+
+        return updatedConversation;
+      }
+    },
+    [conversations, currentConversation?.id, getConversation]
+  );
+
+  const initializeDefaultConversationWithConnector = useCallback(
+    async (defaultConvo: Conversation): Promise<Conversation> => {
+      const apiConfig = getGenAiConfig(defaultConnector);
+      const updatedConvo =
+        (await setApiConfig({
+          conversation: defaultConvo,
+          apiConfig: {
+            ...defaultConvo?.apiConfig,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
+            provider: apiConfig?.apiProvider,
+            model: apiConfig?.defaultModel,
+            defaultSystemPromptId: allSystemPrompts.find((sp) => sp.isNewConversationDefault)?.id,
+          },
+        })) ?? defaultConvo;
+      await refetchCurrentUserConversations();
+      return updatedConvo;
+    },
+    [allSystemPrompts, defaultConnector, refetchCurrentUserConversations, setApiConfig]
+  );
 
   const handleOnConversationSelected = useCallback(
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
-      const updatedConv = await refetchCurrentUserConversations();
+      const allConversations = await refetchCurrentUserConversations();
 
       let selectedConversation;
-      if (cId === '') {
-        setCurrentConversationId(cTitle);
-        selectedConversation = updatedConv?.data?.[cTitle];
-        setCurrentConversationId(cTitle);
-      } else {
-        selectedConversation = await refetchCurrentConversation({ cId });
+
+      // This is a default conversation that has not yet been initialized
+      // add the default connector config
+      if (cId === '' && allConversations?.data?.[cTitle]) {
+        // why might this happen??
+        selectedConversation = allConversations.data[cTitle];
+        const updatedConvo = await initializeDefaultConversationWithConnector(selectedConversation);
+        setCurrentConversationId(updatedConvo.id);
+      } else if (allConversations?.data?.[cId]) {
+        selectedConversation = allConversations?.data?.[cId];
         setCurrentConversationId(cId);
       }
+
       setCurrentSystemPromptId(
         getDefaultSystemPrompt({
           allSystemPrompts,
@@ -136,13 +176,64 @@ export const useCurrentConversation = ({
         })?.id
       );
     },
-    [
-      allSystemPrompts,
-      refetchCurrentConversation,
-      refetchCurrentUserConversations,
-      setCurrentConversationId,
-    ]
+    [allSystemPrompts, initializeDefaultConversationWithConnector, refetchCurrentUserConversations]
   );
+
+  useEffect(() => {
+    if (mayUpdateConversations) {
+      setCurrentConversation((prev) => {
+        const nextConversation =
+          (currentConversationId && conversations[currentConversationId]) ||
+          find(conversations, ['title', currentConversationId]) ||
+          find(conversations, ['title', WELCOME_CONVERSATION_TITLE]);
+
+        if (nextConversation && nextConversation.id === '') {
+          (async () => {
+            const conversation = await initializeDefaultConversationWithConnector(nextConversation);
+
+            return conversation;
+          })();
+        }
+        if (deepEqual(prev, nextConversation)) return prev;
+        const conversationToReturn =
+          (nextConversation &&
+            conversations[
+              nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
+            ]) ??
+          conversations[WELCOME_CONVERSATION_TITLE] ??
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+
+        // updated selected system prompt
+        setCurrentSystemPromptId(
+          getDefaultSystemPrompt({
+            allSystemPrompts,
+            conversation: conversationToReturn,
+          })?.id
+        );
+        if (
+          prev &&
+          prev.id === conversationToReturn.id &&
+          // if the conversation id has not changed and the previous conversation has more messages
+          // it is because the local conversation has a readable stream running
+          // and it has not yet been persisted to the stored conversation
+          prev.messages.length > conversationToReturn.messages.length
+        ) {
+          return {
+            ...conversationToReturn,
+            messages: prev.messages,
+          };
+        }
+        return conversationToReturn;
+      });
+    }
+  }, [
+    allSystemPrompts,
+    conversations,
+    currentConversationId,
+    getDefaultConversation,
+    initializeDefaultConversationWithConnector,
+    mayUpdateConversations,
+  ]);
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {

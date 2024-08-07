@@ -28,10 +28,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import deepEqual from 'fast-deep-equal';
 
-import { find, isEmpty, uniqBy } from 'lodash';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { isEmpty } from 'lodash';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
 import { useChatRefactor } from './use_chat_refactor';
@@ -44,17 +42,13 @@ import { useAssistantContext, UserAvatar } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
-import { useConversation } from './use_conversation';
-import { CodeBlockDetails, getDefaultSystemPrompt } from './use_conversation/helpers';
+import { CodeBlockDetails } from './use_conversation/helpers';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
-import { CONVERSATIONS_QUERY_KEYS } from './api/conversations/use_fetch_current_user_conversations';
-import { Conversation } from '../assistant_context/types';
-import { getGenAiConfig } from '../connectorland/helpers';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -71,7 +65,6 @@ export interface Props {
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
-  setConversationTitle?: Dispatch<SetStateAction<string>>;
   shouldRefocusPrompt?: boolean;
 }
 
@@ -86,7 +79,6 @@ const AssistantComponent: React.FC<Props> = ({
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
-  setConversationTitle,
   shouldRefocusPrompt = false,
 }) => {
   const {
@@ -100,14 +92,6 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     setLastConversationId,
   } = useAssistantContext();
-
-  const {
-    createConversation,
-    deleteConversation,
-    getConversation,
-    getDefaultConversation,
-    setApiConfig,
-  } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -155,73 +139,76 @@ const AssistantComponent: React.FC<Props> = ({
   } = useCurrentConversation({
     allSystemPrompts,
     conversations,
-    createConversation,
-    deleteConversation,
-    getConversation,
+    defaultConnector,
     refetchCurrentUserConversations,
-    setConversationTitle,
-  });
-
-  useEffect(() => {
-    if (
+    conversationId: getLastConversationId(conversationTitle),
+    mayUpdateConversations:
       areConnectorsFetched &&
       isFetchedCurrentUserConversations &&
-      Object.keys(conversations).length > 0
-    ) {
-      setCurrentConversation((prev) => {
-        const nextConversation =
-          (currentConversationId && conversations[currentConversationId]) ||
-          (isAssistantEnabled &&
-            (conversations[getLastConversationId(conversationTitle)] ||
-              find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
-          find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
+      Object.keys(conversations).length > 0,
+  });
 
-        if (deepEqual(prev, nextConversation)) return prev;
-
-        const conversationToReturn =
-          (nextConversation &&
-            conversations[
-              nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
-            ]) ??
-          conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
-
-        // updated selected system prompt
-        setCurrentSystemPromptId(
-          getDefaultSystemPrompt({
-            allSystemPrompts,
-            conversation: conversationToReturn,
-          })?.id
-        );
-        if (
-          prev &&
-          prev.id === conversationToReturn.id &&
-          // if the conversation id has not changed and the previous conversation has more messages
-          // it is because the local conversation has a readable stream running
-          // and it has not yet been persisted to the stored conversation
-          prev.messages.length > conversationToReturn.messages.length
-        ) {
-          return {
-            ...conversationToReturn,
-            messages: prev.messages,
-          };
-        }
-        return conversationToReturn;
-      });
-    }
-  }, [
-    allSystemPrompts,
-    areConnectorsFetched,
-    conversationTitle,
-    conversations,
-    currentConversationId,
-    getDefaultConversation,
-    getLastConversationId,
-    isAssistantEnabled,
-    isFetchedCurrentUserConversations,
-    setCurrentConversation,
-    setCurrentSystemPromptId,
-  ]);
+  // goal: REMOVE this useEffect
+  // useEffect(() => {
+  //   if (
+  //     areConnectorsFetched &&
+  //     isFetchedCurrentUserConversations &&
+  //     Object.keys(conversations).length > 0
+  //   ) {
+  //     setCurrentConversation((prev) => {
+  //       const nextConversation =
+  //         (currentConversationId && conversations[currentConversationId]) ||
+  //         (isAssistantEnabled &&
+  //           (conversations[getLastConversationId(conversationTitle)] ||
+  //             find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
+  //         find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
+  //       debugger;
+  //       if (deepEqual(prev, nextConversation)) return prev;
+  //
+  //       const conversationToReturn =
+  //         (nextConversation &&
+  //           conversations[
+  //             nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
+  //           ]) ??
+  //         conversations[WELCOME_CONVERSATION_TITLE] ??
+  //         getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
+  //
+  //       // updated selected system prompt
+  //       setCurrentSystemPromptId(
+  //         getDefaultSystemPrompt({
+  //           allSystemPrompts,
+  //           conversation: conversationToReturn,
+  //         })?.id
+  //       );
+  //       if (
+  //         prev &&
+  //         prev.id === conversationToReturn.id &&
+  //         // if the conversation id has not changed and the previous conversation has more messages
+  //         // it is because the local conversation has a readable stream running
+  //         // and it has not yet been persisted to the stored conversation
+  //         prev.messages.length > conversationToReturn.messages.length
+  //       ) {
+  //         return {
+  //           ...conversationToReturn,
+  //           messages: prev.messages,
+  //         };
+  //       }
+  //       return conversationToReturn;
+  //     });
+  //   }
+  // }, [
+  //   allSystemPrompts,
+  //   areConnectorsFetched,
+  //   conversationTitle,
+  //   conversations,
+  //   currentConversationId,
+  //   getDefaultConversation,
+  //   getLastConversationId,
+  //   isAssistantEnabled,
+  //   isFetchedCurrentUserConversations,
+  //   setCurrentConversation,
+  //   setCurrentSystemPromptId,
+  // ]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(
@@ -483,55 +470,6 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [assistantTelemetry, currentConversation?.title]
   );
-
-  const queryClient = useQueryClient();
-
-  const { mutateAsync } = useMutation<Conversation | undefined, unknown, Conversation>(
-    ['SET_DEFAULT_CONNECTOR'],
-    {
-      mutationFn: async (payload) => {
-        const apiConfig = getGenAiConfig(defaultConnector);
-        return setApiConfig({
-          conversation: payload,
-          apiConfig: {
-            ...payload?.apiConfig,
-            connectorId: (defaultConnector?.id as string) ?? '',
-            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
-            provider: apiConfig?.apiProvider,
-            model: apiConfig?.defaultModel,
-            defaultSystemPromptId: allSystemPrompts.find((sp) => sp.isNewConversationDefault)?.id,
-          },
-        });
-      },
-      onSuccess: async (data) => {
-        await queryClient.cancelQueries({ queryKey: CONVERSATIONS_QUERY_KEYS });
-        if (data) {
-          queryClient.setQueryData<{ data: Conversation[] }>(CONVERSATIONS_QUERY_KEYS, (prev) => ({
-            ...(prev ?? {}),
-            data: uniqBy([data, ...(prev?.data ?? [])], 'id'),
-          }));
-        }
-        return data;
-      },
-    }
-  );
-
-  useEffect(() => {
-    (async () => {
-      if (areConnectorsFetched && currentConversation?.id === '' && !isLoadingPrompts) {
-        const conversation = await mutateAsync(currentConversation);
-        if (currentConversation.id === '' && conversation) {
-          setCurrentConversationId(conversation.id);
-        }
-      }
-    })();
-  }, [
-    areConnectorsFetched,
-    currentConversation,
-    isLoadingPrompts,
-    mutateAsync,
-    setCurrentConversationId,
-  ]);
 
   return (
     <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
