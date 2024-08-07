@@ -184,12 +184,12 @@ describe('BurnRateRuleExecutor', () => {
         done: jest.fn(),
         alertLimit: { getValue: jest.fn(), setLimitReached: jest.fn() },
       },
-      searchSourceClient: searchSourceClientMock,
+      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
       uiSettingsClient: uiSettingsClientMock,
       shouldWriteAlerts: jest.fn(),
       shouldStopExecution: jest.fn(),
       share: {} as SharePluginStart,
-      dataViews: dataViewPluginMocks.createStartContract(),
+      getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
     };
   });
 
