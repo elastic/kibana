@@ -130,6 +130,16 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
+     */
+    bootstrapPrebuiltRules() {
+      return supertest
+        .post('/internal/detection_engine/prebuilt_rules/_bootstrap')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
      * Create new detection rules in bulk.
      */
     bulkCreateRules(props: BulkCreateRulesProps) {
