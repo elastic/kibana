@@ -4,33 +4,20 @@
 <titleabbrev>CSV</titleabbrev>
 ++++
 
-The CSV export feature in Kibana makes queries to Elasticsearch and formats the results into CSV.
-This feature offers a solution that attempts to provide the most benefit to the most use cases.
-However, things could go wrong during export.
-Elasticsearch can stop responding, repeated querying can take so long that authentication tokens can time
-out, and the format of exported data can be too complex for spreadsheet applications to handle.
-Such situations are outside of the control of Kibana.
-If the use case becomes complex enough, it's recommended that you create scripts that query Elasticsearch directly, using a scripting language like Python and the public {es} APIs.
-
-For more advice about common problems, refer to <<reporting-troubleshooting>>.
-
 [NOTE]
 ============
-It is recommended that you use CSV reports to export moderate amounts of data only.
-The feature enables analysis of data in external tools, but it's not intended for bulk export or to backup {es} data.
-If you need to export more than 250 MB of CSV, rather than increasing <<reporting-csv-settings,`xpack.reporting.csv.maxSizeBytes`>>, use
-filters to create multiple smaller reports or extract the data you need directly from {es}.
-
-The following deployment configurations may lead to failed report jobs or incomplete reports:
-
-* Any shard needed for search is unavailable.
-* Data is stored on slow storage tiers.
-* Network latency between nodes is high.
-* {ccs-cap} is used.
-
-To export large amounts of data, use {es} APIs directly.
-Check out the {ref}/point-in-time-api.html[Point in time API] or {ref}/sql-rest-format.html#_csv[SQL with CSV response data format].
+include::reporting-csv-limitations.asciidoc[]
 ============
+
+The CSV export feature in Kibana makes queries to Elasticsearch and formats the results into CSV. This feature
+offers a solution that attempts to provide the most benefit to the most use cases. However, things could go
+wrong during export. Elasticsearch can stop responding, repeated querying can take so long that authentication
+tokens can time out, and the format of exported data can be too complex for spreadsheet applications to handle.
+Such situations are outside of the control of Kibana. If the use case becomes complex enough, it's recommended
+that you create scripts that query Elasticsearch directly, using a scripting language like Python and the
+public {es} APIs.
+
+For advice about common problems, refer to <<reporting-troubleshooting>>.
 
 [float]
 [[reporting-troubleshooting-csv-configure-scan-api]]

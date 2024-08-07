@@ -199,7 +199,7 @@
                   {
                     "parentPluginId": "taskManager",
                     "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
-                    "type": "Object",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "usageCollection",
                     "description": [],
