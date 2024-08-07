@@ -27,7 +27,7 @@ export class ConnectorMetricsCollector {
   }
 
   public addRequestBodyBytes(result?: AxiosError | AxiosResponse, body: string | object = '') {
-    const contentLength = result?.request.getHeader('content-length');
+    const contentLength = result?.request?.getHeader('content-length');
     let bytes = 0;
 
     if (!isUndefined(contentLength)) {
