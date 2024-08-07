@@ -12,9 +12,7 @@ import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
-export const indexPatternTypes = Object.values(dataTypes)
-  // we don't want to add traces-* as a new global data view
-  .filter((dataType) => dataType === dataTypes.Traces);
+export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics]
 
 export function getIndexPatternSavedObjects() {
   return indexPatternTypes.map((indexPatternType) => ({
