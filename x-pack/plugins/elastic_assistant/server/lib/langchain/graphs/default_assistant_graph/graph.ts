@@ -131,6 +131,7 @@ export const getDefaultAssistantGraph = ({
     const generateChatTitleNode = (state: AgentState) =>
       generateChatTitle({
         ...nodeParams,
+        llmType,
         state,
         responseLanguage,
       });
