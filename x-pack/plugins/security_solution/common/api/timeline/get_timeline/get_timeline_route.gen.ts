@@ -34,6 +34,6 @@ export type GetTimelineRequestQueryInput = z.input<typeof GetTimelineRequestQuer
 export type GetTimelineResponse = z.infer<typeof GetTimelineResponse>;
 export const GetTimelineResponse = z.object({
   data: z.object({
-    getOneTimeline: z.union([TimelineResponse, z.object({})]),
+    getOneTimeline: z.union([TimelineResponse, z.object({}).strict()]),
   }),
 });
