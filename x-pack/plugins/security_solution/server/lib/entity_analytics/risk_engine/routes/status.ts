@@ -49,7 +49,7 @@ export const riskEngineStatusRoute = (
             risk_engine_status: riskEngineStatus,
             legacy_risk_engine_status: legacyRiskEngineStatus,
             is_max_amount_of_risk_engines_reached: isMaxAmountOfRiskEnginesReached,
-            risk_engine_task_status: taskStatus, // TODO FIX IT
+            risk_engine_task_status: taskStatus,
           };
 
           return response.ok({ body });

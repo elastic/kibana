@@ -21,8 +21,26 @@ export const RiskEngineStatus = z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED'])
 export type RiskEngineStatusEnum = typeof RiskEngineStatus.enum;
 export const RiskEngineStatusEnum = RiskEngineStatus.enum;
 
+export type RiskEngineTaskStatusValues = z.infer<typeof RiskEngineTaskStatusValues>;
+export const RiskEngineTaskStatusValues = z.enum([
+  'idle',
+  'claiming',
+  'running',
+  'failed',
+  'should_delete',
+  'unrecognized',
+  'dead_letter',
+]);
+export type RiskEngineTaskStatusValuesEnum = typeof RiskEngineTaskStatusValues.enum;
+export const RiskEngineTaskStatusValuesEnum = RiskEngineTaskStatusValues.enum;
+
 export type RiskEngineTaskStatus = z.infer<typeof RiskEngineTaskStatus>;
-export const RiskEngineTaskStatus = z.object({});
+export const RiskEngineTaskStatus = z.object({
+  status: RiskEngineTaskStatusValues,
+  interval: z.string(),
+  runAt: z.string(),
+  startedAt: z.string().optional(),
+});
 
 export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;
 export const RiskEngineStatusResponse = z.object({
@@ -32,7 +50,7 @@ export const RiskEngineStatusResponse = z.object({
    * Indicates whether the maximum amount of risk engines has been reached
    */
   is_max_amount_of_risk_engines_reached: z.boolean(),
-  task: RiskEngineTaskStatus.optional(),
+  risk_engine_task_status: RiskEngineTaskStatus.optional(),
 });
 
 export type GetRiskEngineStatusResponse = z.infer<typeof GetRiskEngineStatusResponse>;

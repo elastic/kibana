@@ -18,6 +18,7 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-internal: true
+      operationId: ScheduleRiskEngineNow
       summary: Schedule the risk engine to run as soon as possible
       requestBody:
         content:
