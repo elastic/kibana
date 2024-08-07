@@ -11,7 +11,9 @@ import { dataTypes } from '../definitions/types';
 import { ESQLRealField } from '../validation/types';
 
 export const fields: ESQLRealField[] = [
-  ...dataTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+  ...dataTypes
+    .filter((type) => type !== 'unsupported')
+    .map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },

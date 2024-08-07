@@ -11,7 +11,11 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { FunctionDefinition, SupportedDataType, dataTypes } from '../definitions/types';
+import {
+  FunctionDefinition,
+  SupportedDataType,
+  dataTypes as _dataTypes,
+} from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
@@ -29,6 +33,8 @@ import {
 } from '../__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
 import { Setup, setup } from './__tests__/helpers';
+
+const dataTypes = _dataTypes.filter((type) => type !== 'unsupported');
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)

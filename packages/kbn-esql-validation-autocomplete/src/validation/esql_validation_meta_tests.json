@@ -81,6 +81,18 @@
       "type": "version"
     },
     {
+      "name": "nullField",
+      "type": "null"
+    },
+    {
+      "name": "timeDurationField",
+      "type": "time_duration"
+    },
+    {
+      "name": "timeLiteralField",
+      "type": "time_literal"
+    },
+    {
       "name": "any#Char$Field",
       "type": "double"
     },
@@ -4441,6 +4453,126 @@
       "warning": []
     },
     {
+      "query": "from a_index | where nullField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where nullField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeDurationField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where timeLiteralField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where textField == \"a\" or null",
       "error": [],
       "warning": []
@@ -5198,6 +5330,111 @@
     },
     {
       "query": "from a_index | eval versionField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval nullField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeDurationField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval timeLiteralField IS not NULL",
       "error": [],
       "warning": []
     },
