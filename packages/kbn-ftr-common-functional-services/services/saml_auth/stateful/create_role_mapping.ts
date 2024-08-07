@@ -26,7 +26,7 @@ export interface CreateRoleMappingProps {
 
 export async function createRole(props: CreateRoleProps) {
   const { roleName, roleMapping, kibanaServer, log } = props;
-  log.debug(`Adding a SAML role: ${roleName}`);
+  log.debug(`Adding a role: ${roleName}`);
   const { status, statusText } = await kibanaServer.request({
     path: `/api/security/role/${roleName}`,
     method: 'PUT',
