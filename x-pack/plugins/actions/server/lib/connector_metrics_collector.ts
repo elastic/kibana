@@ -31,7 +31,7 @@ export class ConnectorMetricsCollector {
     let bytes = 0;
 
     if (!isUndefined(contentLength)) {
-      bytes = contentLength;
+      bytes = parseInt(contentLength, 10);
     } else {
       try {
         const sBody = typeof body === 'string' ? body : JSON.stringify(body);
