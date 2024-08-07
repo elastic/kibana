@@ -54,7 +54,7 @@ interface FiltersCriteria {
   integrations: string[];
   namespaces: string[];
   qualities: QualityIndicators[];
-  types: DataStreamType[];
+  types: string[];
   query?: string;
 }
 
