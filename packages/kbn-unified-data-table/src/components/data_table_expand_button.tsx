@@ -10,39 +10,27 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
-import { DataTableRowControl } from './data_table_row_control';
+import { DataTableRowControl, Size } from './data_table_row_control';
+import { useControlColumn } from '../hooks/use_control_column';
 
 /**
  * Button to expand a given row
  */
-export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
+  const { record, rowIndex } = useControlColumn(props);
+
   const toolTipRef = useRef<EuiToolTip>(null);
   const [pressed, setPressed] = useState<boolean>(false);
-  const { expanded, setExpanded, rows, isDarkMode, componentsTourSteps } =
-    useContext(UnifiedDataTableContext);
-  const current = rows[rowIndex];
+  const { expanded, setExpanded, componentsTourSteps } = useContext(UnifiedDataTableContext);
 
   const tourStep = componentsTourSteps ? componentsTourSteps.expandButton : undefined;
-  useEffect(() => {
-    if (current.isAnchor) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--highlight',
-      });
-    } else if (expanded && current && expanded.id === current.id) {
-      setCellProps({
-        className: 'unifiedDataTable__cell--expanded',
-      });
-    } else {
-      setCellProps({ className: '' });
-    }
-  }, [expanded, current, setCellProps, isDarkMode]);
 
-  const isCurrentRowExpanded = current === expanded;
+  const isCurrentRowExpanded = record === expanded;
   const buttonLabel = i18n.translate('unifiedDataTable.grid.viewDoc', {
     defaultMessage: 'Toggle dialog with details',
   });
 
-  const testSubj = current.isAnchor
+  const testSubj = record.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
 
@@ -60,7 +48,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   }
 
   return (
-    <DataTableRowControl>
+    <DataTableRowControl size={Size.normal}>
       <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
         <EuiButtonIcon
           id={rowIndex === 0 ? tourStep : undefined}
@@ -69,7 +57,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
           aria-label={buttonLabel}
           data-test-subj={testSubj}
           onClick={() => {
-            const nextHit = isCurrentRowExpanded ? undefined : current;
+            const nextHit = isCurrentRowExpanded ? undefined : record;
             toolTipRef.current?.hideToolTip();
             setPressed(Boolean(nextHit));
             setExpanded?.(nextHit);

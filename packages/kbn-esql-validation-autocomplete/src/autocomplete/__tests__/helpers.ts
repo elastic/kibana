@@ -41,6 +41,7 @@ export const triggerCharacters = [',', '(', '=', ' '];
 export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...[
     'string',
+    'keyword',
     'double',
     'date',
     'boolean',
