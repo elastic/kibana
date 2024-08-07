@@ -42,7 +42,7 @@ const DetectionResponseRoutes = () => (
 );
 
 const LandingRoutes = () => (
-  <PluginTemplateWrapper>
+  <PluginTemplateWrapper paddingSize="none">
     <TrackApplicationView viewId={SecurityPageName.landing}>
       <LandingPage />
     </TrackApplicationView>

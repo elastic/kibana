@@ -10,13 +10,13 @@ import { css } from '@emotion/css';
 import { useMemo } from 'react';
 import { CONTENT_WIDTH, IMG_HEADER_WIDTH } from '../helpers';
 import rocket from '../images/rocket.png';
-import rocketDark from '../images/rocket_dark.png';
+import darkRocket from '../images/dark_rocket.png';
 
 export const useDataIngestionHubHeaderStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
 
   const headerBackgroundImage = useMemo(
-    () => (colorMode === COLOR_MODES_STANDARD.dark ? rocketDark : rocket),
+    () => (colorMode === COLOR_MODES_STANDARD.dark ? darkRocket : rocket),
     [colorMode]
   );
 
