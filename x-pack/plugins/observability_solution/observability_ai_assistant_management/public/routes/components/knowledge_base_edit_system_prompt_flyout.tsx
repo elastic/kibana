@@ -60,7 +60,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
         <EuiTitle>
           <h2>
             {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.editEntryLabel',
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h2.editEntryLabel',
               { defaultMessage: 'Edit system prompt' }
             )}
           </h2>
@@ -71,7 +71,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
         <EuiTitle size="xs">
           <h5>
             {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h5.editEntryLabel',
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h5.editEntryLabel',
               { defaultMessage: 'Personal system prompt' }
             )}
           </h5>
