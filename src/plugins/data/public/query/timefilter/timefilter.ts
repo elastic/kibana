@@ -154,10 +154,6 @@ export class Timefilter {
     return this._minRefreshInterval;
   };
 
-  public setMinRefreshInterval = (t: number) => {
-    this._minRefreshInterval = Math.max(t, 0);
-  };
-
   /**
    * Set timefilter refresh interval.
    * @param {Object} refreshInterval
