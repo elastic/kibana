@@ -15,6 +15,7 @@ export const investigation: SavedObjectsType = {
   name: SO_INVESTIGATION_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
+  switchToModelVersionAt: '8.10.0',
   mappings: {
     dynamic: false,
     properties: {
