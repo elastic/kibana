@@ -21,7 +21,7 @@ import {
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
   AllTimelinesResponse,
   ResolvedTimelineWithOutcomeSavedObject,
@@ -455,7 +455,7 @@ describe('saved_object', () => {
     });
 
     test('should get draft filtered by current user', async () => {
-      await getDraftTimeline(mockRequest, TimelineType.default);
+      await getDraftTimeline(mockRequest, TimelineTypeEnum.default);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
           'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: "username" and siem-ui-timeline.attributes.createdBy: "username"',
