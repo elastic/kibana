@@ -6,10 +6,10 @@
  */
 import datemath from '@elastic/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import type { InvestigateWidget, InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
+import type { InvestigateWidgetCreate } from '@kbn/investigate-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { keyBy, noop } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useDateRange } from '../../hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
@@ -40,24 +40,12 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
     to: range.end.toISOString(),
   });
 
-  const [_editingItem, setEditingItem] = useState<InvestigateWidget | undefined>(undefined);
-
   const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
     return addItem(widgetCreate);
   };
 
   const createWidgetRef = useRef(createWidget);
   createWidgetRef.current = createWidget;
-
-  useEffect(() => {
-    const itemIds = renderableInvestigation?.items.map((item) => item.id) ?? [];
-    setEditingItem((prevEditingItem) => {
-      if (prevEditingItem && !itemIds.includes(prevEditingItem.id)) {
-        return undefined;
-      }
-      return prevEditingItem;
-    });
-  }, [renderableInvestigation]);
 
   useEffect(() => {
     if (
@@ -139,11 +127,6 @@ function InvestigateViewWithUser({ user }: { user: AuthenticatedUser }) {
                 }}
                 onItemDelete={async (deletedItem) => {
                   return deleteItem(deletedItem.id);
-                }}
-                onItemEditClick={(itemToEdit) => {
-                  setEditingItem(
-                    renderableInvestigation.items.find((item) => item.id === itemToEdit.id)
-                  );
                 }}
               />
             </EuiFlexItem>

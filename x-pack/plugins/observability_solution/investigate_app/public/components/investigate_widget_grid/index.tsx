@@ -52,7 +52,6 @@ interface InvestigateWidgetGridProps {
   onItemsChange: (items: InvestigateWidgetGridItem[]) => Promise<void>;
   onItemCopy: (item: InvestigateWidgetGridItem) => Promise<void>;
   onItemDelete: (item: InvestigateWidgetGridItem) => Promise<void>;
-  onItemEditClick: (item: InvestigateWidgetGridItem) => void;
 }
 
 const ROW_HEIGHT = 32;
@@ -116,7 +115,6 @@ function GridSectionRenderer({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemEditClick,
 }: InvestigateWidgetGridProps) {
   const WithFixedWidth = useMemo(() => WidthProvider(Responsive), []);
 
@@ -126,11 +124,9 @@ function GridSectionRenderer({
     onItemsChange,
     onItemCopy,
     onItemDelete,
-    onItemEditClick,
   };
 
   const itemCallbacksRef = useRef(callbacks);
-
   itemCallbacksRef.current = callbacks;
 
   const { currentBreakpoint } = useBreakpoints();
@@ -151,9 +147,6 @@ function GridSectionRenderer({
           }}
           onDelete={() => {
             return itemCallbacksRef.current.onItemDelete(item);
-          }}
-          onEditClick={() => {
-            return itemCallbacksRef.current.onItemEditClick(item);
           }}
           loading={item.loading}
         >
@@ -240,7 +233,6 @@ export function InvestigateWidgetGrid({
   onItemsChange,
   onItemDelete,
   onItemCopy,
-  onItemEditClick,
 }: InvestigateWidgetGridProps) {
   const sections = useMemo<Section[]>(() => {
     let currentGrid: GridSection = { items: [] };
@@ -293,9 +285,6 @@ export function InvestigateWidgetGrid({
 
                   return onItemsChange(nextItems);
                 }}
-                onItemEditClick={(item) => {
-                  return onItemEditClick(item);
-                }}
               />
             </EuiFlexItem>
           );
@@ -315,9 +304,6 @@ export function InvestigateWidgetGrid({
                 }}
                 onDelete={() => {
                   return onItemDelete(section.item);
-                }}
-                onEditClick={() => {
-                  return onItemEditClick(section.item);
                 }}
               >
                 {section.item.element}

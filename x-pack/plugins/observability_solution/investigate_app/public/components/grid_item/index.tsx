@@ -20,7 +20,6 @@ interface GridItemProps {
   onCopy: () => void;
   onDelete: () => void;
   loading: boolean;
-  onEditClick: () => void;
 }
 
 const editTitleButtonClassName = `investigateGridItemTitleEditButton`;
@@ -66,7 +65,6 @@ export function GridItem({
   onDelete,
   onCopy,
   loading,
-  onEditClick,
 }: GridItemProps) {
   const theme = useTheme();
 
@@ -121,15 +119,6 @@ export function GridItem({
                   iconType="trash"
                   onClick={() => {
                     onDelete();
-                  }}
-                  disabled={loading}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InvestigateTextButton
-                  iconType="pencil"
-                  onClick={() => {
-                    onEditClick();
                   }}
                   disabled={loading}
                 />
