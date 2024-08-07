@@ -401,7 +401,7 @@ finalize it.
      */
     findAssetCriticalityRecords(props: FindAssetCriticalityRecordsProps) {
       return supertest
-        .post('/api/asset_criticality/list')
+        .get('/api/asset_criticality/list')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
