@@ -48,7 +48,6 @@ const parseLogsContent = (
     }
   }
 
-
   if (!Array.isArray(parsedContent)) {
     return { error: i18n.LOGS_SAMPLE_ERROR.NOT_ARRAY };
   }
