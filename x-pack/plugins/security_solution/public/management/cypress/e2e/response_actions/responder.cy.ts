@@ -54,7 +54,7 @@ describe(
 
       const openCaseAlertDetails = () => {
         cy.getByTestSubj(`comment-action-show-alert-${caseAlertActions.comments[alertId]}`).click();
-        return cy.getByTestSubj('take-action-dropdown-btn').click();
+        return cy.getByTestSubj('securitySolutionFlyoutFooterDropdownButton').click();
       };
 
       before(() => {
