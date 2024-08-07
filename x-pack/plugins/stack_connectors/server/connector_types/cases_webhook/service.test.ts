@@ -252,6 +252,7 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "connectorId": "test-connector-id",
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],
@@ -542,6 +543,7 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "connectorId": "test-connector-id",
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction] {
@@ -838,6 +840,7 @@ describe('Cases webhook service', () => {
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "connectorId": "test-connector-id",
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],
@@ -1080,10 +1083,11 @@ describe('Cases webhook service', () => {
 
       // irrelevant snapshot content
       delete requestMock.mock.calls[0][0].configurationUtilities;
-      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(requestMock.mock.calls[0][0]).toMatchSnapshot(`
         Object {
           "axios": [Function],
           "connectorMetricsCollector": ConnectorMetricsCollector {
+            "connectorId": "test-connector-id",
             "logger": Object {
               "context": Array [],
               "debug": [MockFunction],

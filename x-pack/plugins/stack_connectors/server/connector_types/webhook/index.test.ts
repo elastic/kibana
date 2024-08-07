@@ -395,6 +395,7 @@ describe('execute()', () => {
       Object {
         "axios": undefined,
         "connectorMetricsCollector": ConnectorMetricsCollector {
+          "connectorId": "test-connector-id",
           "logger": Object {
             "context": Array [],
             "debug": [MockFunction] {
@@ -643,6 +644,7 @@ describe('execute()', () => {
       Object {
         "axios": undefined,
         "connectorMetricsCollector": ConnectorMetricsCollector {
+          "connectorId": "test-connector-id",
           "logger": Object {
             "context": Array [],
             "debug": [MockFunction] {
