@@ -102,7 +102,7 @@ export const ContextMenu = ({
       notifications.toasts.addError(error, {
         title: i18n.translate('console.consoleMenu.copyAsCurlFailedMessage', {
           defaultMessage:
-            '{requestsCount, plural, one {Request} other {Requests}} could not be copied',
+            '{requestsCount, plural, one {Request} other {Requests}} could not be copied to clipboard',
           values: { requestsCount: requests.length },
         }),
       });
@@ -114,7 +114,7 @@ export const ContextMenu = ({
       if (aggregatedData !== '' && hasErrors) {
         notifications.toasts.addWarning({
           title: i18n.translate('console.consoleMenu.copyAsCurlSuccessWithWarning', {
-            defaultMessage: 'Some requests could not be copied',
+            defaultMessage: 'Some requests could not be copied to clipboard',
           }),
         });
         // Otherwise we can just copy the data to clipboard
@@ -122,7 +122,7 @@ export const ContextMenu = ({
         notifications.toasts.add({
           title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
             defaultMessage:
-              '{requestsCount, plural, one {Request} other {Requests}} copied as {language}',
+              '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
             values: { language: withLanguage, requestsCount: requests.length },
           }),
         });
