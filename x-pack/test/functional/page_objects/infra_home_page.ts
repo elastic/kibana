@@ -279,8 +279,12 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('createSavedViewButton');
     },
 
-    async getNoMetricsIndicesPrompt() {
-      return testSubjects.find('noDataPage');
+    async noDataPromptExists() {
+      return testSubjects.existOrFail('noDataPage');
+    },
+
+    async noDataPromptAddDataClick() {
+      return testSubjects.click('noDataDefaultFooterAction');
     },
 
     async getNoMetricsDataPrompt() {
