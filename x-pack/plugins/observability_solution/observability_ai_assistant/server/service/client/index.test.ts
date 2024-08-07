@@ -112,7 +112,7 @@ describe('Observability AI Assistant client', () => {
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
     recall: jest.fn(),
-    getUserInstructions: jest.fn(), // TODO: change
+    getUserInstructions: jest.fn(),
   } as any;
 
   let loggerMock: DeeplyMockedKeys<Logger> = {} as any;

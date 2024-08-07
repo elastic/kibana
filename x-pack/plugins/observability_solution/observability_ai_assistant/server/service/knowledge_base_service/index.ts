@@ -20,9 +20,9 @@ import {
   resourceNames,
 } from '..';
 import {
+  Instruction,
   KnowledgeBaseEntry,
   KnowledgeBaseEntryRole,
-  Instruction,
   KnowledgeBaseType,
 } from '../../../common/types';
 import { getAccessQuery } from '../util/get_access_query';

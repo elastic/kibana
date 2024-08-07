@@ -7,9 +7,9 @@
 
 import { compact, partition, uniqBy } from 'lodash';
 import { v4 } from 'uuid';
-import { Instruction, InstructionOrPlainText } from '../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { RegisteredInstruction } from '../types';
+import { InstructionOrCallback } from '../types';
 
 export const USER_INSTRUCTIONS_HEADER = `## User instructions
           
@@ -19,18 +19,23 @@ as long as they don't conflict with anything you've been told so far:
 `;
 
 export function getSystemMessageFromInstructions({
-  registeredInstructions,
-  kbUserInstructions,
-  requestInstructions,
+  // application instructions registered by the functions. These will be displayed first
+  applicationInstructions,
+
+  // instructions provided by the user. These will be displayed after the application instructions and only if they fit within the token budget
+  userInstructions: kbUserInstructions,
+
+  // ad-hoc instruction. Can be either user or application instruction
+  adHocInstructions,
   availableFunctionNames,
 }: {
-  registeredInstructions: RegisteredInstruction[];
-  kbUserInstructions: Instruction[];
-  requestInstructions: InstructionOrPlainText[];
+  applicationInstructions: InstructionOrCallback[];
+  userInstructions: Instruction[];
+  adHocInstructions: AdHocInstruction[];
   availableFunctionNames: string[];
 }): string {
-  const allRegisteredInstructions = compact(
-    registeredInstructions.flatMap((instruction) => {
+  const allApplicationInstructions = compact(
+    applicationInstructions.flatMap((instruction) => {
       if (typeof instruction === 'function') {
         return instruction({ availableFunctionNames });
       }
@@ -38,28 +43,22 @@ export function getSystemMessageFromInstructions({
     })
   );
 
-  const requestInstructionsWithId = requestInstructions.map((instruction) =>
-    typeof instruction === 'string'
-      ? { doc_id: v4(), text: instruction, user_instruction: true }
-      : instruction
-  );
-
-  // split request instructions into user instructions and registered instructions
-  const [requestUserInstructions, requestRegisteredInstructions] = partition(
-    requestInstructionsWithId,
-    (instruction) => instruction.user_instruction !== false
+  // split ad hoc instructions into user instructions and application instructions
+  const [adHocUserInstructions, adHocApplicationInstructions] = partition(
+    adHocInstructions,
+    (instruction) => instruction.instruction_type === 'user_instruction'
   );
 
   // all request instructions and KB instructions.
-  // request instructions will be prioritized over KB instructions if the doc_id is the same
+  // request instructions will be prioritized over Knowledge Base instructions if the doc_id is the same
   const allUserInstructions = withTokenBudget(
-    uniqBy([...requestUserInstructions, ...kbUserInstructions], (i) => i.doc_id),
+    uniqBy([...adHocUserInstructions, ...kbUserInstructions], (i) => i.doc_id),
     1000
   );
 
   return [
-    // registered instructions
-    ...allRegisteredInstructions.concat(requestRegisteredInstructions),
+    // application instructions
+    ...allApplicationInstructions.concat(adHocApplicationInstructions),
 
     // user instructions
     ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),
@@ -68,4 +67,12 @@ export function getSystemMessageFromInstructions({
       return typeof instruction === 'string' ? instruction : instruction.text;
     })
     .join('\n\n');
+}
+
+export function buildUserInstruction(text: string): AdHocInstruction {
+  return { doc_id: v4(), text, instruction_type: 'user_instruction' };
+}
+
+export function buildApplicationInstruction(text: string): AdHocInstruction {
+  return { doc_id: v4(), text, instruction_type: 'application_instruction' };
 }

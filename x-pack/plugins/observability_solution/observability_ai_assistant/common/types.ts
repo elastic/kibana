@@ -96,7 +96,10 @@ export interface KnowledgeBaseEntry {
 export interface Instruction {
   doc_id: string;
   text: string;
-  user_instruction?: boolean;
+}
+
+export interface AdHocInstruction extends Instruction {
+  instruction_type: 'user_instruction' | 'application_instruction';
 }
 
 export type InstructionOrPlainText = string | Instruction;

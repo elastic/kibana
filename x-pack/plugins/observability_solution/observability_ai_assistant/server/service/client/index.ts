@@ -46,12 +46,12 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  InstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
+  type AdHocInstruction,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -62,7 +62,10 @@ import {
   RecalledEntry,
 } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
-import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
+import {
+  buildApplicationInstruction,
+  getSystemMessageFromInstructions,
+} from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
 import { withAssistantSpan } from '../util/with_assistant_span';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
@@ -163,7 +166,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling,
-    instructions: requestInstructions = [],
+    instructions: adHocInstructions = [],
     messages: initialMessages,
     signal,
     responseLanguage = 'English',
@@ -184,7 +187,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: InstructionOrPlainText[];
+    instructions?: AdHocInstruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -196,8 +199,10 @@ export class ObservabilityAIAssistantClient {
       'complete',
       ({ tracer: completeTracer }) => {
         if (responseLanguage) {
-          requestInstructions.push(
-            `You MUST respond in the users preferred language which is: ${responseLanguage}.`
+          adHocInstructions.push(
+            buildApplicationInstruction(
+              `You MUST respond in the users preferred language which is: ${responseLanguage}.`
+            )
           );
         }
 
@@ -206,27 +211,27 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          requestInstructions.push(
-            `This conversation will be persisted in Kibana and available at this url: ${
-              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`
+          adHocInstructions.push(
+            buildApplicationInstruction(
+              `This conversation will be persisted in Kibana and available at this url: ${
+                kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+              }.`
+            )
           );
         }
 
-        const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
-          shareReplay()
-        );
+        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
-        const messagesWithUpdatedSystemMessage$ = kbUserInstructions$.pipe(
-          map((kbUserInstructions) => {
+        const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
+          map((userInstructions) => {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
-                registeredInstructions: functionClient.getInstructions(),
-                kbUserInstructions,
-                requestInstructions,
+                applicationInstructions: functionClient.getInstructions(),
+                userInstructions,
+                adHocInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
                   .map((fn) => fn.definition.name),
@@ -272,9 +277,9 @@ export class ObservabilityAIAssistantClient {
         // messages and the knowledge base instructions
         const nextEvents$ = combineLatest([
           messagesWithUpdatedSystemMessage$,
-          kbUserInstructions$,
+          userInstructions$,
         ]).pipe(
-          switchMap(([messagesWithUpdatedSystemMessage, kbUserInstructions]) => {
+          switchMap(([messagesWithUpdatedSystemMessage, userInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
@@ -302,8 +307,8 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                kbUserInstructions,
-                requestInstructions,
+                userInstructions,
+                adHocInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,

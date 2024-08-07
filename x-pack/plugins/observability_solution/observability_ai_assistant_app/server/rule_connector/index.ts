@@ -223,9 +223,9 @@ async function executor(
             role: MessageRole.System,
             content: getSystemMessageFromInstructions({
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
-              registeredInstructions: functionClient.getInstructions(),
-              kbUserInstructions: [],
-              requestInstructions: [],
+              applicationInstructions: functionClient.getInstructions(),
+              userInstructions: [],
+              adHocInstructions: [],
             }),
           },
         },

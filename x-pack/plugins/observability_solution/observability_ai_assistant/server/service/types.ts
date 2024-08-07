@@ -63,7 +63,7 @@ export interface FunctionHandler {
   respond: RespondFunction<any, FunctionResponse>;
 }
 
-export type RegisteredInstruction = InstructionOrPlainText | RegisterInstructionCallback;
+export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
 
 type RegisterInstructionCallback = ({
   availableFunctionNames,
@@ -71,9 +71,7 @@ type RegisterInstructionCallback = ({
   availableFunctionNames: string[];
 }) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
 
-export type RegisterInstruction = (
-  ...instructions: Array<InstructionOrPlainText | RegisterInstructionCallback>
-) => void;
+export type RegisterInstruction = (...instructions: InstructionOrCallback[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,

@@ -13,9 +13,9 @@ describe('getSystemMessageFromInstructions', () => {
   it('handles plain instructions', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: ['first', 'second'],
-        kbUserInstructions: [],
-        requestInstructions: [],
+        applicationInstructions: ['first', 'second'],
+        userInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first\n\nsecond`);
@@ -24,14 +24,14 @@ describe('getSystemMessageFromInstructions', () => {
   it('handles callbacks', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: [
+        applicationInstructions: [
           'first',
           ({ availableFunctionNames }) => {
             return availableFunctionNames[0];
           },
         ],
-        kbUserInstructions: [],
-        requestInstructions: [],
+        userInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: ['myFunction'],
       })
     ).toEqual(`first\n\nmyFunction`);
@@ -40,9 +40,11 @@ describe('getSystemMessageFromInstructions', () => {
   it('overrides kb instructions with request instructions', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: ['first'],
-        kbUserInstructions: [{ doc_id: 'second', text: 'second_kb' }],
-        requestInstructions: [{ doc_id: 'second', text: 'second_request' }],
+        applicationInstructions: ['first'],
+        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        adHocInstructions: [
+          { doc_id: 'second', text: 'second_request', instruction_type: 'application_instruction' },
+        ],
         availableFunctionNames: [],
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_request`);
@@ -51,9 +53,9 @@ describe('getSystemMessageFromInstructions', () => {
   it('includes kb instructions if there is no request instruction', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: ['first'],
-        kbUserInstructions: [{ doc_id: 'second', text: 'second_kb' }],
-        requestInstructions: [],
+        applicationInstructions: ['first'],
+        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        adHocInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
@@ -62,14 +64,14 @@ describe('getSystemMessageFromInstructions', () => {
   it('handles undefined values', () => {
     expect(
       getSystemMessageFromInstructions({
-        registeredInstructions: [
+        applicationInstructions: [
           'first',
           ({ availableFunctionNames }) => {
             return undefined;
           },
         ],
-        kbUserInstructions: [],
-        requestInstructions: [],
+        userInstructions: [],
+        adHocInstructions: [],
         availableFunctionNames: [],
       })
     ).toEqual(`first`);

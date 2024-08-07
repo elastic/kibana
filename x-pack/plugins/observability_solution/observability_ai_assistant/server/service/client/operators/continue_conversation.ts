@@ -28,7 +28,7 @@ import {
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
-import { Instruction } from '../../../../common/types';
+import { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 import { withoutTokenCountEvents } from '../../../../common/utils/without_token_count_events';
@@ -171,8 +171,8 @@ export function continueConversation({
   chat,
   signal,
   functionCallsLeft,
-  requestInstructions,
-  kbUserInstructions,
+  adHocInstructions,
+  userInstructions,
   logger,
   disableFunctions,
   tracer,
@@ -182,8 +182,8 @@ export function continueConversation({
   chat: ChatFunctionWithoutConnector;
   signal: AbortSignal;
   functionCallsLeft: number;
-  requestInstructions: Array<string | Instruction>;
-  kbUserInstructions: Instruction[];
+  adHocInstructions: AdHocInstruction[];
+  userInstructions: Instruction[];
   logger: Logger;
   disableFunctions:
     | boolean
@@ -204,9 +204,9 @@ export function continueConversation({
 
   const messagesWithUpdatedSystemMessage = replaceSystemMessage(
     getSystemMessageFromInstructions({
-      registeredInstructions: functionClient.getInstructions(),
-      kbUserInstructions,
-      requestInstructions,
+      applicationInstructions: functionClient.getInstructions(),
+      userInstructions,
+      adHocInstructions,
       availableFunctionNames: definitions.map((def) => def.name),
     }),
     initialMessages
@@ -324,8 +324,8 @@ export function continueConversation({
               functionCallsLeft: nextFunctionCallsLeft,
               functionClient,
               signal,
-              kbUserInstructions,
-              requestInstructions,
+              userInstructions,
+              adHocInstructions,
               logger,
               disableFunctions,
               tracer,
