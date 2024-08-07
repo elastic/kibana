@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
-import { Investigation } from '../models/investigation';
+import { StoredInvestigation } from '../models/investigation';
 
 export const SO_INVESTIGATION_TYPE = 'investigation';
 
@@ -25,7 +25,7 @@ export const investigation: SavedObjectsType = {
   management: {
     displayName: 'Investigation',
     importableAndExportable: false,
-    getTitle(savedObject: SavedObject<Investigation>) {
+    getTitle(savedObject: SavedObject<StoredInvestigation>) {
       return `Investigation: [${savedObject.attributes.title}]`;
     },
   },

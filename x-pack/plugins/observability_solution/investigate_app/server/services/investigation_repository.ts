@@ -42,10 +42,14 @@ export function investigationRepositoryFactory({
 
   return {
     async save(investigation: Investigation): Promise<void> {
-      await soClient.create(SO_INVESTIGATION_TYPE, toStoredInvestigation(investigation), {
-        id: investigation.id,
-        overwrite: true,
-      });
+      await soClient.create<StoredInvestigation>(
+        SO_INVESTIGATION_TYPE,
+        toStoredInvestigation(investigation),
+        {
+          id: investigation.id,
+          overwrite: true,
+        }
+      );
     },
 
     async findById(id: string): Promise<Investigation> {

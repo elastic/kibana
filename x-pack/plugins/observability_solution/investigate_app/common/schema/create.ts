@@ -10,8 +10,6 @@ const createInvestigationParamsSchema = t.type({
   body: t.type({
     id: t.string,
     title: t.string,
-    createdAt: t.number,
-    createdBy: t.string,
     parameters: t.type({
       timeRange: t.type({ from: t.number, to: t.number }),
     }),

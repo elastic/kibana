@@ -12,7 +12,8 @@ export async function createInvestigation(
   params: CreateInvestigationInput,
   repository: InvestigationRepository
 ): Promise<CreateInvestigationResponse> {
-  await repository.save(params);
+  const investigation = { ...params, createdAt: Date.now(), createdBy: 'elastic' };
+  await repository.save({ ...params, createdAt: Date.now(), createdBy: 'elastic' });
 
-  return params;
+  return investigation;
 }
