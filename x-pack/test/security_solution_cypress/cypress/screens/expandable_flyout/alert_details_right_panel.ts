@@ -55,10 +55,10 @@ export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES = getDataTestSubjectSelect
 /* Footer */
 
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER = getDataTestSubjectSelector(
-  'side-panel-flyout-footer'
+  'securitySolutionFlyoutFooter'
 );
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON = getDataTestSubjectSelector(
-  'take-action-dropdown-btn'
+  'securitySolutionFlyoutFooterDropdownButton'
 );
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN =
   getDataTestSubjectSelector('takeActionPanelMenu');

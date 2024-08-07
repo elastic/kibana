@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { TimelineResult, TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
+import {
+  TimelineResult,
+  TimelineTypeEnum,
+} from '@kbn/security-solution-plugin/common/api/timeline';
 import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
 
 import { createBasicTimeline } from './helpers';
@@ -207,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: savedObjectId,
             templateTimelineId: null,
             templateTimelineVersion: null,
-            timelineType: TimelineType.default,
+            timelineType: TimelineTypeEnum.default,
           });
 
         expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
@@ -216,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
         expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
         expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineType.default
+          TimelineTypeEnum.default
         );
       });
 
@@ -235,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: savedObjectId,
             templateTimelineId: templateTimelineIdFromStore,
             templateTimelineVersion: templateTimelineVersionFromStore,
-            timelineType: TimelineType.template,
+            timelineType: TimelineTypeEnum.template,
           });
         expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
         expect(responseToTest.body.data!.persistFavorite.favorite.length).to.be(1);
@@ -247,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
           templateTimelineVersionFromStore
         );
         expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineType.template
+          TimelineTypeEnum.template
         );
       });
 
@@ -261,7 +264,7 @@ export default function ({ getService }: FtrProviderContext) {
           timelineId: savedObjectId,
           templateTimelineId: null,
           templateTimelineVersion: null,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
         });
 
         const responseToTest = await supertest
@@ -271,7 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: savedObjectId,
             templateTimelineId: null,
             templateTimelineVersion: null,
-            timelineType: TimelineType.default,
+            timelineType: TimelineTypeEnum.default,
           });
 
         expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
@@ -280,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
         expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
         expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineType.default
+          TimelineTypeEnum.default
         );
       });
 
@@ -296,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
           timelineId: savedObjectId,
           templateTimelineId: templateTimelineIdFromStore,
           templateTimelineVersion: templateTimelineVersionFromStore,
-          timelineType: TimelineType.template,
+          timelineType: TimelineTypeEnum.template,
         });
 
         const responseToTest = await supertest
@@ -306,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: savedObjectId,
             templateTimelineId: templateTimelineIdFromStore,
             templateTimelineVersion: templateTimelineVersionFromStore,
-            timelineType: TimelineType.template,
+            timelineType: TimelineTypeEnum.template,
           });
 
         expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
@@ -319,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
           templateTimelineVersionFromStore
         );
         expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineType.template
+          TimelineTypeEnum.template
         );
       });
 
@@ -331,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: null,
             templateTimelineId: null,
             templateTimelineVersion: null,
-            timelineType: TimelineType.default,
+            timelineType: TimelineTypeEnum.default,
           });
 
         expect(response.body.data!.persistFavorite.savedObjectId).to.not.be.empty();
@@ -339,7 +342,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.data!.persistFavorite.version).to.not.be.empty();
         expect(response.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
         expect(response.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(TimelineType.default);
+        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(
+          TimelineTypeEnum.default
+        );
       });
 
       it('to a timeline template without a timelineId', async () => {
@@ -353,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: null,
             templateTimelineId: templateTimelineIdFromStore,
             templateTimelineVersion: templateTimelineVersionFromStore,
-            timelineType: TimelineType.template,
+            timelineType: TimelineTypeEnum.template,
           });
 
         expect(response.body.data!.persistFavorite.savedObjectId).to.not.be.empty();
@@ -365,7 +370,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
           templateTimelineVersionFromStore
         );
-        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(TimelineType.template);
+        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(
+          TimelineTypeEnum.template
+        );
       });
     });
 
