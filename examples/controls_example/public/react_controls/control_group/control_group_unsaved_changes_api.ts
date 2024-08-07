@@ -82,7 +82,10 @@ export function initializeControlGroupUnsavedChanges(
         });
 
         await Promise.all(filtersReadyPromises);
-        applySelections();
+
+        if (!comparators.autoApplySelections[0].value) {
+          applySelections();
+        }
       },
     } as Pick<PublishesUnsavedChanges, 'unsavedChanges'> & {
       asyncResetUnsavedChanges: () => Promise<void>;
