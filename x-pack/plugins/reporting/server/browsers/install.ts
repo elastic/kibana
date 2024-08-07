@@ -35,7 +35,7 @@ export function installBrowser(
   }
 
   const backgroundInstall = async () => {
-    const binaryPath = paths.getBinaryPath(pkg);
+    const binaryPath = paths.getBinaryPath(pkg, path.resolve(__dirname, '../../chromium'));
     const binaryChecksum = await sha256(binaryPath).catch(() => '');
 
     if (binaryChecksum !== pkg.binaryChecksum) {
