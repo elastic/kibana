@@ -61,7 +61,6 @@ export const getControlGroupEmbeddableFactory = (services: {
       setApi,
       lastSavedRuntimeState
     ) => {
-      console.log('initialRuntimeState', initialRuntimeState);
       const {
         initialChildControlState,
         defaultControlGrow,

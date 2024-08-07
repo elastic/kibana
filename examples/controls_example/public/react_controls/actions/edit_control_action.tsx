@@ -38,7 +38,7 @@ const isApiCompatible = (api: unknown | null): api is DataControlApi =>
       apiIsPresentationContainer(api.parentApi)
   );
 
-const ACTION_EDIT_CONTROL = 'editDataControl';
+export const ACTION_EDIT_CONTROL = 'editDataControl';
 
 export class EditControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EDIT_CONTROL;

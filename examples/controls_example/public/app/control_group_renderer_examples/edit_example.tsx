@@ -23,15 +23,12 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ControlInputTransform } from '@kbn/controls-plugin/common/types';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
-import {
-  type ControlGroupInput,
-  ACTION_EDIT_CONTROL,
-  ACTION_DELETE_CONTROL,
-} from '@kbn/controls-plugin/public';
+import { type ControlGroupInput, ACTION_DELETE_CONTROL } from '@kbn/controls-plugin/public';
 import {
   AwaitingControlGroupAPI,
   ControlGroupRenderer,
 } from '../../react_controls/control_group/external_api';
+import { ACTION_EDIT_CONTROL } from '../../react_controls/actions/edit_control_action';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 

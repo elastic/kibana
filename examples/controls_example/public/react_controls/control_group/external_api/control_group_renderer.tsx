@@ -11,9 +11,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } 
 import { v4 as uuidv4 } from 'uuid';
 import { BehaviorSubject } from 'rxjs';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE, getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { ControlStyle } from '@kbn/controls-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { type ViewMode as ViewModeType, useSearchApi } from '@kbn/presentation-publishing';
@@ -25,7 +23,6 @@ import {
   ControlGroupCreationOptions,
   ControlGroupRendererApi,
   ControlGroupRendererState,
-  ControlGroupSettings,
 } from './types';
 
 export interface ControlGroupRendererProps {
@@ -81,9 +78,7 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return apiLoading ? (
-      <EuiLoadingSpinner />
-    ) : (
+    return apiLoading ? null : (
       <ReactEmbeddableRenderer<
         ControlGroupSerializedState,
         ControlGroupRuntimeState,
