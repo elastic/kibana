@@ -10,6 +10,11 @@ import { StateComparators } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
 
+export function getComparatorFunction<StateType extends object = object>(comparators: StateComparators<StateType>, key: keyof StateType) {
+  const customComparator = comparators[key]?.[2]; // 2nd element of the tuple is the custom comparator
+  return customComparator ?? defaultComparator;
+}
+
 export const getInitialValuesFromComparators = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
   comparatorKeys: Array<keyof StateType>
@@ -34,8 +39,7 @@ export const runComparators = <StateType extends object = object>(
   }
   const latestChanges: Partial<StateType> = {};
   for (const key of comparatorKeys) {
-    const customComparator = comparators[key]?.[2]; // 2nd element of the tuple is the custom comparator
-    const comparator = customComparator ?? defaultComparator;
+    const comparator = getComparatorFunction(comparators, key);
     if (!comparator(lastSavedState?.[key], latestState[key], lastSavedState, latestState)) {
       latestChanges[key] = latestState[key];
     }

@@ -16,6 +16,7 @@ import {
   Subscription,
 } from 'rxjs';
 import {
+  getComparatorFunction,
   getInitialValuesFromComparators,
   PublishesUnsavedChanges,
   PublishingSubject,
@@ -96,9 +97,13 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
       unsavedChanges,
       resetUnsavedChanges: () => {
         const lastSaved = lastSavedState$.getValue();
+        const currentState = snapshotRuntimeState();
         for (const key of comparatorKeys) {
-          const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-          setter(lastSaved?.[key] as RuntimeState[typeof key]);
+          const comparator = getComparatorFunction(comparators, key);
+          if (!comparator(lastSaved?.[key], currentState[key], lastSaved, currentState)) {
+            const setter = comparators[key][1]; // setter function is the 1st element of the tuple
+            setter(lastSaved?.[key] as RuntimeState[typeof key]);
+          }
         }
       },
       snapshotRuntimeState,
