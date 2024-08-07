@@ -49,11 +49,8 @@ export const registerSpecDefinitionsRoute = ({ router, lib: { handleEsError } }:
     }
   };
 
-  router.get({
+  router.post({
     path: '/api/console/convert_request_to_language',
-    validate: {
-      body: routeValidationConfig.body,
-      query: routeValidationConfig.query
-    },
+    validate: routeValidationConfig,
   }, handler);
 };

@@ -11,7 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export type Query = TypeOf<typeof routeValidationConfig.query>;
 export type Body = TypeOf<typeof routeValidationConfig.body>;
 
-const acceptedHttpVerb = schema.string({
+export const acceptedHttpVerb = schema.string({
   validate: (method) => {
     return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'].some(
       (verb) => verb.toLowerCase() === method.toLowerCase()
@@ -21,7 +21,7 @@ const acceptedHttpVerb = schema.string({
   },
 });
 
-const nonEmptyString = schema.string({
+export const nonEmptyString = schema.string({
   validate: (s) => (s === '' ? 'Expected non-empty string' : undefined),
 });
 
