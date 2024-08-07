@@ -174,7 +174,7 @@ export const CATEGORIZATION_EXAMPLE_PROCESSORS = `
 If condition that determines if ctx.checkpoint?.operation is not of a specific value:
 {
   "field": "event.category",
-  "value": "network",
+  "value": ["network"],
   "if": "ctx.checkpoint?.operation != 'Log In'"
 }
 
@@ -188,7 +188,7 @@ If condition that determines if ctx.checkpoint?.operation is of a specific value
 Appending multiple values when either the value Accept or Allow is found in ctx.checkpoint?.rule_action:
 {
   "field": "event.type",
-  "value": [ "allowed", "connection"],
+  "value": ["allowed", "connection"],
   "if": "['Accept', 'Allow'].contains(ctx.checkpoint?.rule_action)"
 }
 `;

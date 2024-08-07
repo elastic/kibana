@@ -13,7 +13,7 @@ import { CATEGORIZATION_REVIEW_PROMPT } from './prompts';
 
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { CategorizationState } from '../../types';
-import { combineProcessors, createAppendProcessors } from '../../util/processors';
+import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 
 export async function handleReview(
@@ -33,9 +33,11 @@ export async function handleReview(
     compatibility_matrix: JSON.stringify(ECS_EVENT_TYPES_PER_CATEGORY, null, 2),
   })) as ESProcessorItem[];
 
-  const appendProcessors = createAppendProcessors(currentProcessors, 'categorization');
-
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, appendProcessors);
+  const currentPipeline = combineProcessors(
+    state.initialPipeline as Pipeline,
+    currentProcessors,
+    'categorization'
+  );
 
   return {
     currentPipeline,

@@ -89,7 +89,11 @@ describe('runCategorizationGraph', () => {
     // After the review it should route to modelOutput and finish.
     (handleReview as jest.Mock).mockImplementation(async () => {
       const currentProcessors = await mockInvokeReview();
-      const currentPipeline = combineProcessors(categorizationInitialPipeline, currentProcessors);
+      const currentPipeline = combineProcessors(
+        categorizationInitialPipeline,
+        currentProcessors,
+        'categorization'
+      );
       return {
         currentProcessors,
         currentPipeline,
