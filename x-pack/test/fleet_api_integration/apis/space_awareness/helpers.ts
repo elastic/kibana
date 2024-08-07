@@ -14,6 +14,7 @@ import {
   AGENT_POLICY_INDEX,
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
+import { asyncForEach } from '@kbn/std';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
@@ -32,6 +33,15 @@ export async function cleanFleetIndices(esClient: Client) {
       refresh: true,
     }),
   ]);
+}
+
+export async function cleanFleetAgents(esClient: Client) {
+  await esClient.deleteByQuery({
+    index: AGENTS_INDEX,
+    q: '*',
+    ignore_unavailable: true,
+    refresh: true,
+  });
 }
 
 export async function cleanFleetActionIndices(esClient: Client) {
@@ -62,11 +72,7 @@ export async function cleanFleetActionIndices(esClient: Client) {
   }
 }
 
-export const createFleetAgent = async (
-  esClient: Client,
-  agentPolicyId: string,
-  spaceId?: string
-) => {
+export async function createFleetAgent(esClient: Client, agentPolicyId: string, spaceId?: string) {
   const agentResponse = await esClient.index({
     index: '.fleet-agents',
     refresh: true,
@@ -90,4 +96,19 @@ export const createFleetAgent = async (
   });
 
   return agentResponse._id;
-};
+}
+
+export async function makeAgentsUpgradeable(esClient: Client, agentIds: string[], version: string) {
+  await asyncForEach(agentIds, async (agentId) => {
+    await esClient.update({
+      id: agentId,
+      refresh: 'wait_for',
+      index: AGENTS_INDEX,
+      body: {
+        doc: {
+          local_metadata: { elastic: { agent: { upgradeable: true, version } } },
+        },
+      },
+    });
+  });
+}

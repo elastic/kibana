@@ -10,6 +10,9 @@ import type { Agent } from '../../types';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { agentsKueryNamespaceFilter, isAgentInNamespace } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { openPointInTime } from './crud';
@@ -43,12 +46,16 @@ export async function sendUpgradeAgentAction({
     );
   }
 
+  const currentNameSpace = getCurrentNamespace(soClient);
+  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+
   await createAgentAction(esClient, {
     agents: [agentId],
     created_at: now,
     data,
     ack_data: data,
     type: 'UPGRADE',
+    ...namespaces,
   });
   await updateAgent(esClient, agentId, {
     upgraded_at: null,
@@ -72,6 +79,8 @@ export async function sendUpgradeAgentsActions(
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
+  const currentNameSpace = getCurrentNamespace(soClient);
+
   if ('agents' in options) {
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
@@ -81,18 +90,26 @@ export async function sendUpgradeAgentsActions(
         outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
           `Cannot find agent ${maybeAgent.id}`
         );
+      } else if (!isAgentInNamespace(maybeAgent, currentNameSpace)) {
+        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
+          `Agent ${maybeAgent.id} is not in the current space`
+        );
       } else {
         givenAgents.push(maybeAgent);
       }
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
+    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+
     const res = await getAgentsByKuery(esClient, soClient, {
-      kuery: options.kuery,
+      kuery,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
     });
+
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {

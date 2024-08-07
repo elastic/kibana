@@ -22,6 +22,8 @@ import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../erro
 
 import { appContextService } from '../app_context';
 
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import { ActionRunner } from './action_runner';
 
 import type { GetAgentsOptions } from './crud';
@@ -167,6 +169,8 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
+  const currentNameSpace = getCurrentNamespace(soClient);
+  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -177,6 +181,7 @@ export async function upgradeBatch(
     total,
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
+    ...namespaces,
   });
 
   await createErrorActionResults(

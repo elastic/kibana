@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { NewAgentAction, AgentActionType } from '../../../common/types';
 
@@ -307,16 +307,17 @@ describe('Agent actions', () => {
   });
 
   describe('cancelAgentAction', () => {
-    it('throw if the target action is not found', async () => {
+    it('should throw if the target action is not found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
           hits: [],
         },
       } as any);
-      await expect(() => cancelAgentAction(esClient, 'i-do-not-exists')).rejects.toThrowError(
-        /Action not found/
-      );
+      const soClient = savedObjectsClientMock.create();
+      await expect(() =>
+        cancelAgentAction(esClient, soClient, 'i-do-not-exists')
+      ).rejects.toThrowError(/Action not found/);
     });
 
     it('should create one CANCEL action for each UPGRADE action found', async () => {
@@ -343,7 +344,8 @@ describe('Agent actions', () => {
           ],
         },
       } as any);
-      await cancelAgentAction(esClient, 'action1');
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'action1');
 
       expect(esClient.create).toBeCalledTimes(2);
       expect(esClient.create).toBeCalledWith(
@@ -382,7 +384,8 @@ describe('Agent actions', () => {
           ],
         },
       } as any);
-      await cancelAgentAction(esClient, 'action1');
+      const soClient = savedObjectsClientMock.create();
+      await cancelAgentAction(esClient, soClient, 'action1');
 
       expect(mockedBulkUpdateAgents).toBeCalled();
       expect(mockedBulkUpdateAgents).toBeCalledWith(
