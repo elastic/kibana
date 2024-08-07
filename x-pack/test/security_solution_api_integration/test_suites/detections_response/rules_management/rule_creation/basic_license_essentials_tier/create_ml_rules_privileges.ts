@@ -49,7 +49,8 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('@ess should give a 403 when trying to create a single Machine Learning rule since the license is basic', async () => {
+      it('@ess should give a 403 when trying to create a single Machine Learning rule since the license is basic', async function () {
+        this.tags('skipFIPS');
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
