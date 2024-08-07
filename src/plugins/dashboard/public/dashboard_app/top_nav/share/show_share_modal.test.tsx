@@ -77,6 +77,7 @@ describe('ShowShareModal', () => {
       isDirty: true,
       anchorElement: document.createElement('div'),
       getDashboardState: () => ({} as DashboardContainerInput),
+      hasExpandedPanel: unsavedState?.expandedPanelId ?? undefined,
     };
   };
 
@@ -220,5 +221,11 @@ describe('ShowShareModal', () => {
     expect(shareLocatorParams.panels![0].embeddableConfig.changedKey1).toBe('changed');
     expect(shareLocatorParams.panels![1].embeddableConfig.changedKey2).toBe('definitely changed');
     expect(shareLocatorParams.panels![2].embeddableConfig.changedKey3).toBe('should still exist');
+  });
+  it('generates a shareable URL to the application state with an expanded panel', () => {
+    const showModalProps = getPropsAndShare({ expandedPanelId: 'panel_1' });
+    ShowShareModal(showModalProps);
+    const mockShareableUrl = toggleShareMenuSpy.mock.calls[0][0].shareableUrl;
+    expect(mockShareableUrl).toBe('http://localhost/#?_g=!n&_a=(expandedPanelId:panel_1)');
   });
 });

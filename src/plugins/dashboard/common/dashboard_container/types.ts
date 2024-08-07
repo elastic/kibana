@@ -60,6 +60,7 @@ export interface DashboardContainerInput extends EmbeddableInput {
   description?: string;
   isEmbeddedExternally?: boolean;
   executionContext: KibanaExecutionContext;
+  expandedPanelId?: string;
 
   // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.
   hidePanelTitles: DashboardOptions['hidePanelTitles'];
