@@ -28,6 +28,7 @@ export const entityDefinitionSchema = z.object({
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
   displayNameTemplate: z.string(),
+  lookback: z.optional(z.string()),
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),
   staticFields: z.optional(z.record(z.string(), z.string())),

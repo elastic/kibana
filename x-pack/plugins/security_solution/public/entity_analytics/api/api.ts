@@ -6,6 +6,12 @@
  */
 
 import { useMemo } from 'react';
+import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
+import type {
+  EntityResolutionPostResponse,
+  SearchEntity,
+} from '@kbn/elastic-assistant-common/impl/schemas/entity_resolution';
+import { ENTITY_RESOLUTION } from '@kbn/elastic-assistant-plugin/common/constants';
 import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
@@ -42,6 +48,12 @@ import {
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
+import type { EntityRelationRecord } from '../../../common/api/entity_analytics/entity_store/relations/common.gen';
+import {
+  ENTITY_STORE_GET_ENTITIES_URL,
+  ENTITY_STORE_GET_RELATIONS_URL,
+} from '../../../common/entity_analytics/entity_store/constants';
+import type { EntityRecord } from '../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;

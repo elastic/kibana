@@ -6,8 +6,7 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { getEntityDefinitionQuerySchema } from '@kbn/entities-schema';
+import { schema } from '@kbn/config-schema';
 import { SetupRouteOptions } from '../types';
 import {
   findEntityDefinitions,
