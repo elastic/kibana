@@ -3564,6 +3564,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/check-prod-native-modules-cli@link:packages/kbn-check-prod-native-modules-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
