@@ -17,7 +17,7 @@ const TranslationsLowercase = {
   }),
 
   CPUUsageLegacy: i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageLegacyText', {
-    defaultMessage: 'CPU usage (legacy)',
+    defaultMessage: 'CPU usage (Legacy)',
   }),
 
   MemoryUsage: i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {

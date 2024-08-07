@@ -23,7 +23,6 @@ import { rxV2 } from './rx_v2';
 
 export const snapshot = {
   cpuTotal,
-  cpu,
   diskLatency,
   diskSpaceUsage,
   count,
@@ -35,6 +34,7 @@ export const snapshot = {
   normalizedLoad1m,
   rxV2,
   txV2,
+  cpu,
   rx,
   tx,
 };
