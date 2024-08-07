@@ -217,7 +217,7 @@ export const ContextMenu = ({
     >
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 tagName="span"
