@@ -6,10 +6,10 @@
  */
 
 import { memo, useMemo } from 'react';
+import type { SuspendProcessRequestBody } from '../../../../../common/api/endpoint';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
   SuspendProcessActionOutputContent,
-  SuspendProcessRequestBody,
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
 } from '../../../../../common/endpoint/types';
