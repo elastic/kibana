@@ -15,7 +15,12 @@ import type {
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
-import { type Client, OpenFeature, ServerProviderEvents } from '@openfeature/server-sdk';
+import {
+  type Client,
+  OpenFeature,
+  ServerProviderEvents,
+  NOOP_PROVIDER,
+} from '@openfeature/server-sdk';
 import deepMerge from 'deepmerge';
 import { filter, switchMap, startWith, Subject } from 'rxjs';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
@@ -67,6 +72,9 @@ export class FeatureFlagsService {
     return {
       getOverrides: () => this.overrides,
       setProvider: (provider) => {
+        if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
+          throw new Error('A provider has already been set. This API cannot be called twice.');
+        }
         OpenFeature.setProvider(provider);
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),

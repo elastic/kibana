@@ -49,6 +49,15 @@ describe('FeatureFlagsService Server', () => {
       setProvider(fakeProvider);
       expect(spy).toHaveBeenCalledWith(fakeProvider);
     });
+
+    test('throws an error if called twice', () => {
+      const { setProvider } = featureFlagsService.setup();
+      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
+      setProvider(fakeProvider);
+      expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
+        `"A provider has already been set. This API cannot be called twice."`
+      );
+    });
   });
 
   describe('context handling', () => {

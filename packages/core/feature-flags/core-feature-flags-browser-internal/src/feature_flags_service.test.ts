@@ -50,6 +50,15 @@ describe('FeatureFlagsService Browser', () => {
       expect(spy).toHaveBeenCalledWith(fakeProvider);
     });
 
+    test('throws an error if called twice', () => {
+      const { setProvider } = featureFlagsService.setup({ injectedMetadata });
+      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
+      setProvider(fakeProvider);
+      expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
+        `"A provider has already been set. This API cannot be called twice."`
+      );
+    });
+
     test('awaits initialization in the start context', async () => {
       const { setProvider } = featureFlagsService.setup({ injectedMetadata });
       let externalResolve: Function = () => void 0;
