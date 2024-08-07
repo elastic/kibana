@@ -204,6 +204,7 @@ export const ContextMenu = ({
       id="ConCopyAsCurl"
       disabled={!window.navigator?.clipboard}
       onClick={(e: React.MouseEvent) => {
+        e.preventDefault();
         const target = e.target as HTMLButtonElement;
 
         if (target.dataset.name === 'changeLanguage') {
@@ -234,7 +235,9 @@ export const ContextMenu = ({
           {isRequestConverterLoading ? (
             <EuiLoadingSpinner size="s" />
           ) : (
-            <EuiLink data-name="changeLanguage">Change</EuiLink>
+            // The EuiContextMenuItem renders itself as a button already, so we need to
+            // force the link to not be a button in order to prevent A11Y issues.
+            <EuiLink href="" data-name="changeLanguage">Change</EuiLink>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
