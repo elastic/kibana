@@ -20,10 +20,10 @@ export class StatefulAuthProvider implements AuthProvider {
   getSupportedRoleDescriptors(): any {
     return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
   }
-  getDefaultRole(): string {
+  getDefaultRole() {
     return 'editor';
   }
-  getRolesDefinitionPath(): string {
+  getRolesDefinitionPath() {
     return this.rolesDefinitionPath;
   }
 
