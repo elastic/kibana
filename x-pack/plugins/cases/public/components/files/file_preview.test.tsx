@@ -17,7 +17,7 @@ import { basicFileMock } from '../../containers/mock';
 import { FilePreview } from './file_preview';
 
 // FLAKY: https://github.com/elastic/kibana/issues/182364
-describe.skip('FilePreview', () => {
+describe('FilePreview', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
@@ -39,21 +39,27 @@ describe.skip('FilePreview', () => {
   });
 
   it('pressing escape calls closePreview', async () => {
+    console.time('time');
     const closePreview = jest.fn();
 
     appMockRender.render(<FilePreview closePreview={closePreview} selectedFile={basicFileMock} />);
+    console.timeLog('time', 1);
 
-    await waitFor(() =>
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
+    await waitFor(() => {
+      console.timeLog('time', 2);
+      return expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
         id: basicFileMock.id,
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-      })
-    );
+      });
+    });
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
+    console.timeLog('time', 3);
 
     userEvent.keyboard('{esc}');
+    console.timeLog('time', 4);
 
     await waitFor(() => expect(closePreview).toHaveBeenCalled());
+    console.timeEnd('time');
   });
 });
