@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+// Default language used in the language selector modal
+export const DEFAULT_LANGUAGE = 'cURL';
 
-export const DEFAULT_VARIABLES = [
-  { id: uuidv4(), name: 'exampleVariable1', value: '_search' },
-  { id: uuidv4(), name: 'exampleVariable2', value: 'match_all' },
-];
+export const AVAILABLE_LANGUAGES = ['cURL', 'Javascript', 'Python'];

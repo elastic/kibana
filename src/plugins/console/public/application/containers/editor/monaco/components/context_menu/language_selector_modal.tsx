@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AVAILABLE_LANGUAGES } from '../../../../../../../common/constants';
 
 interface Props {
   closeModal: () => void;
@@ -31,7 +32,6 @@ interface Props {
   changeDefaultLanguage: (lang: string) => void;
 }
 
-const AVAILABLE_LANGUAGES = ['cURL', 'Javascript', 'Python'];
 const DEFAULT_BADGE = (
   <strong>
     <EuiTextColor color="subdued">
