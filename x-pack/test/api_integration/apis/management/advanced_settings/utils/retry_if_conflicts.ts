@@ -23,7 +23,7 @@ export const retryRequestIfConflicts = async (
   sendRequest: () => Promise<any>,
   retries: number = RETRY_ATTEMPTS,
   retryDelay: number = RETRY_DELAY
-) => {
+): Promise<any> => {
   const response = await sendRequest();
   if (response.statusCode !== 409) {
     return response;
