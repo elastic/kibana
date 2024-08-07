@@ -102,7 +102,10 @@ export interface Instruction {
 export type InstructionOrPlainText = string | Instruction;
 
 export enum KnowledgeBaseType {
+  // user instructions are included in the system prompt regardless of the user's input
   UserInstruction = 'user_instruction',
+
+  // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
 }
 
