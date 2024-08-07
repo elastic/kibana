@@ -224,6 +224,7 @@ export const EqlOptionalFields = z.object({
   tiebreaker_field: TiebreakerField.optional(),
   timestamp_field: TimestampField.optional(),
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
