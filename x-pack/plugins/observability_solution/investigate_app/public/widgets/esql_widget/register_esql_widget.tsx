@@ -183,6 +183,7 @@ export function EsqlWidget({
             query={memoizedQueryObject}
             flyoutType="overlay"
             initialColumns={initialColumns}
+            initialRowHeight={1}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
