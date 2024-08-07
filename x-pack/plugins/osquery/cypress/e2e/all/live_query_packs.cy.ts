@@ -18,7 +18,8 @@ import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadPack, cleanupPack, cleanupCase, loadCase } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169888
+describe.skip('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
   let packName: string;
   let packId: string;
   let caseId: string;
