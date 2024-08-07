@@ -237,6 +237,7 @@ export const commandDefinitions: CommandDefinition[] = [
   },
   {
     name: 'inlinestats',
+    hidden: true,
     description: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.definitions.inlineStatsDoc',
       {
