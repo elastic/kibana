@@ -216,7 +216,7 @@ export const ContextMenu = ({
       }}
       icon="copyClipboard"
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
