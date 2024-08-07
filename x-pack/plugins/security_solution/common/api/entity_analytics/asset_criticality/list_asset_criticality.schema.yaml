@@ -4,7 +4,7 @@ info:
   title: Asset Criticality List Schema
 paths:
   /api/asset_criticality/list:
-    post:
+    get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: FindAssetCriticalityRecords
