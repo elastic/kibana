@@ -6,12 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { GetProcessesRequestBody } from '../../../../../common/api/endpoint';
 import { RunningProcessesActionResults } from '../../running_processes_action_results';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import type {
-  GetProcessesActionOutputContent,
-  ProcessesRequestBody,
-} from '../../../../../common/endpoint/types';
+import type { GetProcessesActionOutputContent } from '../../../../../common/endpoint/types';
 import { useSendGetEndpointProcessesRequest } from '../../../hooks/response_actions/use_send_get_endpoint_processes_request';
 import type { ActionRequestComponentProps } from '../types';
 
@@ -32,7 +30,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     }, [endpointId, comment, agentType]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
-      ProcessesRequestBody,
+      GetProcessesRequestBody,
       GetProcessesActionOutputContent
     >({
       ResultComponent,

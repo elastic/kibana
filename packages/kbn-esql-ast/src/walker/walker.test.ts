@@ -81,6 +81,24 @@ describe('structurally can walk all nodes', () => {
       ]);
     });
 
+    test('"visitAny" can capture command nodes', () => {
+      const { ast } = getAstAndSyntaxErrors('FROM index | STATS a = 123 | WHERE 123 | LIMIT 10');
+      const commands: ESQLCommand[] = [];
+
+      walk(ast, {
+        visitAny: (node) => {
+          if (node.type === 'command') commands.push(node);
+        },
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual([
+        'from',
+        'limit',
+        'stats',
+        'where',
+      ]);
+    });
+
     describe('command options', () => {
       test('can visit command options', () => {
         const { ast } = getAstAndSyntaxErrors('FROM index METADATA _index');
@@ -93,19 +111,47 @@ describe('structurally can walk all nodes', () => {
         expect(options.length).toBe(1);
         expect(options[0].name).toBe('metadata');
       });
+
+      test('"visitAny" can capture an options node', () => {
+        const { ast } = getAstAndSyntaxErrors('FROM index METADATA _index');
+        const options: ESQLCommandOption[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'option') options.push(node);
+          },
+        });
+
+        expect(options.length).toBe(1);
+        expect(options[0].name).toBe('metadata');
+      });
     });
 
     describe('command mode', () => {
       test('visits "mode" nodes', () => {
         const { ast } = getAstAndSyntaxErrors('FROM index | ENRICH a:b');
-        const options: ESQLCommandMode[] = [];
+        const modes: ESQLCommandMode[] = [];
 
         walk(ast, {
-          visitCommandMode: (opt) => options.push(opt),
+          visitCommandMode: (opt) => modes.push(opt),
         });
 
-        expect(options.length).toBe(1);
-        expect(options[0].name).toBe('a');
+        expect(modes.length).toBe(1);
+        expect(modes[0].name).toBe('a');
+      });
+
+      test('"visitAny" can capture a mode node', () => {
+        const { ast } = getAstAndSyntaxErrors('FROM index | ENRICH a:b');
+        const modes: ESQLCommandMode[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'mode') modes.push(node);
+          },
+        });
+
+        expect(modes.length).toBe(1);
+        expect(modes[0].name).toBe('a');
       });
     });
 
@@ -117,6 +163,20 @@ describe('structurally can walk all nodes', () => {
 
           walk(ast, {
             visitSource: (opt) => sources.push(opt),
+          });
+
+          expect(sources.length).toBe(1);
+          expect(sources[0].name).toBe('index');
+        });
+
+        test('"visitAny" can capture a source node', () => {
+          const { ast } = getAstAndSyntaxErrors('FROM index');
+          const sources: ESQLSource[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'source') sources.push(node);
+            },
           });
 
           expect(sources.length).toBe(1);
@@ -142,13 +202,32 @@ describe('structurally can walk all nodes', () => {
       });
 
       describe('columns', () => {
-        test('can through a single column', () => {
+        test('can walk through a single column', () => {
           const query = 'ROW x = 1';
           const { ast } = getAstAndSyntaxErrors(query);
           const columns: ESQLColumn[] = [];
 
           walk(ast, {
             visitColumn: (node) => columns.push(node),
+          });
+
+          expect(columns).toMatchObject([
+            {
+              type: 'column',
+              name: 'x',
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture a column', () => {
+          const query = 'ROW x = 1';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const columns: ESQLColumn[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'column') columns.push(node);
+            },
           });
 
           expect(columns).toMatchObject([
@@ -176,6 +255,52 @@ describe('structurally can walk all nodes', () => {
             {
               type: 'column',
               name: 'b',
+            },
+          ]);
+        });
+      });
+
+      describe('functions', () => {
+        test('can walk through functions', () => {
+          const query = 'FROM a | STATS fn(1), agg(true)';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const nodes: ESQLFunction[] = [];
+
+          walk(ast, {
+            visitFunction: (node) => nodes.push(node),
+          });
+
+          expect(nodes).toMatchObject([
+            {
+              type: 'function',
+              name: 'fn',
+            },
+            {
+              type: 'function',
+              name: 'agg',
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture function nodes', () => {
+          const query = 'FROM a | STATS fn(1), agg(true)';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const nodes: ESQLFunction[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'function') nodes.push(node);
+            },
+          });
+
+          expect(nodes).toMatchObject([
+            {
+              type: 'function',
+              name: 'fn',
+            },
+            {
+              type: 'function',
+              name: 'agg',
             },
           ]);
         });
@@ -211,7 +336,7 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'integer',
               name: '123',
             },
             {
@@ -244,7 +369,7 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'integer',
               name: '1',
             },
             {
@@ -264,7 +389,7 @@ describe('structurally can walk all nodes', () => {
             },
             {
               type: 'literal',
-              literalType: 'number',
+              literalType: 'decimal',
               name: '3.14',
             },
           ]);
@@ -288,17 +413,31 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '2',
                   },
                 ],
               },
             ]);
+          });
+
+          test('"visitAny" can capture a list literal', () => {
+            const query = 'ROW x = [1, 2]';
+            const { ast } = getAstAndSyntaxErrors(query);
+            const lists: ESQLList[] = [];
+
+            walk(ast, {
+              visitAny: (node) => {
+                if (node.type === 'list') lists.push(node);
+              },
+            });
+
+            expect(lists.length).toBe(1);
           });
 
           test('can walk plain literals inside list literal', () => {
@@ -318,12 +457,12 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '1',
                   },
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'integer',
                     name: '2',
                   },
                 ],
@@ -333,7 +472,7 @@ describe('structurally can walk all nodes', () => {
                 values: [
                   {
                     type: 'literal',
-                    literalType: 'number',
+                    literalType: 'decimal',
                     name: '3.3',
                   },
                 ],
@@ -342,17 +481,17 @@ describe('structurally can walk all nodes', () => {
             expect(literals).toMatchObject([
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
                 name: '1',
               },
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
                 name: '2',
               },
               {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'decimal',
                 name: '3.3',
               },
             ]);
@@ -492,7 +631,6 @@ describe('structurally can walk all nodes', () => {
         test('can visit time interval nodes', () => {
           const query = 'FROM index | STATS a = 123 BY 1h';
           const { ast } = getAstAndSyntaxErrors(query);
-
           const intervals: ESQLTimeInterval[] = [];
 
           walk(ast, {
@@ -507,11 +645,48 @@ describe('structurally can walk all nodes', () => {
             },
           ]);
         });
+
+        test('"visitAny" can capture time interval expressions', () => {
+          const query = 'FROM index | STATS a = 123 BY 1h';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const intervals: ESQLTimeInterval[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'timeInterval') intervals.push(node);
+            },
+          });
+
+          expect(intervals).toMatchObject([
+            {
+              type: 'timeInterval',
+              quantity: 1,
+              unit: 'h',
+            },
+          ]);
+        });
+
+        test('"visitAny" does not capture time interval node if type-specific callback provided', () => {
+          const query = 'FROM index | STATS a = 123 BY 1h';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const intervals1: ESQLTimeInterval[] = [];
+          const intervals2: ESQLTimeInterval[] = [];
+
+          walk(ast, {
+            visitTimeIntervalLiteral: (node) => intervals1.push(node),
+            visitAny: (node) => {
+              if (node.type === 'timeInterval') intervals2.push(node);
+            },
+          });
+
+          expect(intervals1.length).toBe(1);
+          expect(intervals2.length).toBe(0);
+        });
       });
 
       describe('cast expression', () => {
         test('can visit cast expression', () => {
-          const query = 'FROM index | STATS a = 123::number';
+          const query = 'FROM index | STATS a = 123::integer';
           const { ast } = getAstAndSyntaxErrors(query);
 
           const casts: ESQLInlineCast[] = [];
@@ -523,10 +698,34 @@ describe('structurally can walk all nodes', () => {
           expect(casts).toMatchObject([
             {
               type: 'inlineCast',
-              castType: 'number',
+              castType: 'integer',
               value: {
                 type: 'literal',
-                literalType: 'number',
+                literalType: 'integer',
+                value: 123,
+              },
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture cast expression', () => {
+          const query = 'FROM index | STATS a = 123::integer';
+          const { ast } = getAstAndSyntaxErrors(query);
+          const casts: ESQLInlineCast[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'inlineCast') casts.push(node);
+            },
+          });
+
+          expect(casts).toMatchObject([
+            {
+              type: 'inlineCast',
+              castType: 'integer',
+              value: {
+                type: 'literal',
+                literalType: 'integer',
                 value: 123,
               },
             },
@@ -576,7 +775,7 @@ describe('Walker.commands()', () => {
   });
 });
 
-describe('Walker.params', () => {
+describe('Walker.params()', () => {
   test('can collect all params', () => {
     const query = 'ROW x = ?';
     const { ast } = getAstAndSyntaxErrors(query);
@@ -613,10 +812,195 @@ describe('Walker.params', () => {
   });
 });
 
+describe('Walker.find()', () => {
+  test('can find a bucket() function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.find(
+      getAstAndSyntaxErrors(query).ast!,
+      (node) => node.type === 'function' && node.name === 'bucket'
+    );
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'bucket',
+    });
+  });
+
+  test('finds the first "fn" function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.find(
+      getAstAndSyntaxErrors(query).ast!,
+      (node) => node.type === 'function' && node.name === 'fn'
+    );
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'fn',
+      args: [
+        {
+          type: 'literal',
+          value: 1,
+        },
+      ],
+    });
+  });
+});
+
+describe('Walker.findAll()', () => {
+  test('find all "fn" functions', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.findAll(
+      getAstAndSyntaxErrors(query).ast!,
+      (node) => node.type === 'function' && node.name === 'fn'
+    );
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 1,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 2,
+          },
+        ],
+      },
+    ]);
+  });
+});
+
+describe('Walker.match()', () => {
+  test('can find a bucket() function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.match(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: 'bucket',
+    });
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'bucket',
+    });
+  });
+
+  test('finds the first "fn" function', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const fn = Walker.match(getAstAndSyntaxErrors(query).ast!, { type: 'function', name: 'fn' });
+
+    expect(fn).toMatchObject({
+      type: 'function',
+      name: 'fn',
+      args: [
+        {
+          type: 'literal',
+          value: 1,
+        },
+      ],
+    });
+  });
+});
+
+describe('Walker.matchAll()', () => {
+  test('find all "fn" functions', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.matchAll(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: 'fn',
+    });
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 1,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 2,
+          },
+        ],
+      },
+    ]);
+  });
+
+  test('find all "fn" and "agg" functions', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.matchAll(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: ['fn', 'agg'],
+    });
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 1,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'fn',
+        args: [
+          {
+            type: 'literal',
+            value: 2,
+          },
+        ],
+      },
+      {
+        type: 'function',
+        name: 'agg',
+      },
+    ]);
+  });
+
+  test('find all functions which start with "b" or "a"', () => {
+    const query = 'FROM b | STATS var0 = bucket(bytes, 1 hour), fn(1), fn(2), agg(true)';
+    const list = Walker.matchAll(getAstAndSyntaxErrors(query).ast!, {
+      type: 'function',
+      name: /^a|b/i,
+    });
+
+    expect(list).toMatchObject([
+      {
+        type: 'function',
+        name: 'bucket',
+      },
+      {
+        type: 'function',
+        name: 'agg',
+      },
+    ]);
+  });
+});
+
 describe('Walker.hasFunction()', () => {
   test('can find assignment expression', () => {
-    const query1 = 'METRICS source bucket(bytes, 1 hour)';
-    const query2 = 'METRICS source var0 = bucket(bytes, 1 hour)';
+    const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
+    const query2 = 'FROM b | STATS var0 = bucket(bytes, 1 hour)';
     const has1 = Walker.hasFunction(getAstAndSyntaxErrors(query1).ast!, '=');
     const has2 = Walker.hasFunction(getAstAndSyntaxErrors(query2).ast!, '=');
 

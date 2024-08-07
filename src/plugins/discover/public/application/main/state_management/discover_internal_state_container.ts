@@ -24,6 +24,8 @@ export interface InternalState {
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
+  isESQLToDataViewTransitionModalVisible?: boolean;
+  resetDefaultProfileState: { columns: boolean; rowHeight: boolean };
 }
 
 export interface InternalStateTransitions {
@@ -48,6 +50,12 @@ export interface InternalStateTransitions {
     overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined
   ) => InternalState;
   resetOnSavedSearchChange: (state: InternalState) => () => InternalState;
+  setIsESQLToDataViewTransitionModalVisible: (
+    state: InternalState
+  ) => (isVisible: boolean) => InternalState;
+  setResetDefaultProfileState: (
+    state: InternalState
+  ) => (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -68,6 +76,7 @@ export function getInternalStateContainer() {
       expandedDoc: undefined,
       customFilters: [],
       overriddenVisContextAfterInvalidation: undefined,
+      resetDefaultProfileState: { columns: false, rowHeight: false },
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -80,6 +89,11 @@ export function getInternalStateContainer() {
         ...prevState,
         isDataViewLoading: loading,
       }),
+      setIsESQLToDataViewTransitionModalVisible:
+        (prevState: InternalState) => (isVisible: boolean) => ({
+          ...prevState,
+          isESQLToDataViewTransitionModalVisible: isVisible,
+        }),
       setSavedDataViews: (prevState: InternalState) => (nextDataViewList: DataViewListItem[]) => ({
         ...prevState,
         savedDataViews: nextDataViewList,
@@ -134,6 +148,12 @@ export function getInternalStateContainer() {
         overriddenVisContextAfterInvalidation: undefined,
         expandedDoc: undefined,
       }),
+      setResetDefaultProfileState:
+        (prevState: InternalState) =>
+        (resetDefaultProfileState: InternalState['resetDefaultProfileState']) => ({
+          ...prevState,
+          resetDefaultProfileState,
+        }),
     },
     {},
     { freeze: (state) => state }

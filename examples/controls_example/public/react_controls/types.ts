@@ -75,6 +75,7 @@ export interface ControlFactory<
   ControlApi extends DefaultControlApi = DefaultControlApi
 > {
   type: string;
+  order?: number;
   getIconType: () => string;
   getDisplayName: () => string;
   buildControl: (

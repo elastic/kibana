@@ -22,7 +22,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { convertToBuiltInComparators, getAlertUrl } from '@kbn/observability-plugin/common';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import {
@@ -165,9 +165,13 @@ export const createInventoryMetricThresholdExecutor =
     }
     const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
+
+    const logSourcesService =
+      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
     const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
-      .getClient(savedObjectsClient, esClient)
+      .getClient(savedObjectsClient, esClient, logSourcesService)
       .getResolvedLogView({
         type: 'log-view-reference',
         logViewId: sourceId,
@@ -226,12 +230,13 @@ export const createInventoryMetricThresholdExecutor =
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = results
           .map((result) =>
-            buildReasonWithVerboseMetricName(
+            buildReasonWithVerboseMetricName({
               group,
-              result[group],
-              buildFiredAlertReason,
-              nextState === AlertStates.WARNING
-            )
+              resultItem: result[group],
+              buildReason: buildFiredAlertReason,
+              useWarningThreshold: nextState === AlertStates.WARNING,
+              nodeType,
+            })
           )
           .join('\n');
       }
@@ -240,14 +245,24 @@ export const createInventoryMetricThresholdExecutor =
           reason = results
             .filter((result) => result[group].isNoData)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
+              buildReasonWithVerboseMetricName({
+                group,
+                resultItem: result[group],
+                buildReason: buildNoDataAlertReason,
+                nodeType,
+              })
             )
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = results
             .filter((result) => result[group].isError)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
+              buildReasonWithVerboseMetricName({
+                group,
+                resultItem: result[group],
+                buildReason: buildErrorAlertReason,
+                nodeType,
+              })
             )
             .join('\n');
         }
@@ -384,12 +399,19 @@ const formatThreshold = (metric: SnapshotMetricType, value: number | number[]) =
   return threshold;
 };
 
-const buildReasonWithVerboseMetricName = (
-  group: string,
-  resultItem: ConditionResult,
-  buildReason: (r: any) => string,
-  useWarningThreshold?: boolean
-) => {
+const buildReasonWithVerboseMetricName = ({
+  group,
+  resultItem,
+  buildReason,
+  useWarningThreshold,
+  nodeType,
+}: {
+  group: string;
+  resultItem: ConditionResult;
+  buildReason: (r: any) => string;
+  useWarningThreshold?: boolean;
+  nodeType?: InventoryItemType;
+}) => {
   if (!resultItem) return '';
 
   const thresholdToFormat = useWarningThreshold
@@ -399,7 +421,7 @@ const buildReasonWithVerboseMetricName = (
     ...resultItem,
     group,
     metric:
-      toMetricOpt(resultItem.metric)?.text ||
+      toMetricOpt(resultItem.metric, nodeType)?.text ||
       (resultItem.metric === 'custom' && resultItem.customMetric
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),

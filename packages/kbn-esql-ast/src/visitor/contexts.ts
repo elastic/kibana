@@ -18,11 +18,12 @@ import type {
   ESQLAstNodeWithArgs,
   ESQLColumn,
   ESQLCommandOption,
+  ESQLDecimalLiteral,
   ESQLFunction,
   ESQLInlineCast,
+  ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
-  ESQLNumberLiteral,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -78,6 +79,29 @@ export class VisitorContext<
     for (const arg of singleItems(node.args)) {
       yield this.visitExpression(arg, input as any);
     }
+  }
+
+  public visitArgument(
+    index: number,
+    input: ExpressionVisitorInput<Methods>
+  ): ExpressionVisitorOutput<Methods> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    const node = this.node;
+
+    if (!isNodeWithArgs(node)) {
+      throw new Error('Node does not have arguments');
+    }
+
+    let i = 0;
+    for (const arg of singleItems(node.args)) {
+      if (i === index) {
+        return this.visitExpression(arg, input as any);
+      }
+      i++;
+    }
+
+    throw new Error(`Argument at index ${index} not found`);
   }
 
   public visitExpression(
@@ -260,10 +284,14 @@ export class LimitCommandVisitorContext<
   /**
    * @returns The first numeric literal argument of the command.
    */
-  public numericLiteral(): ESQLNumberLiteral | undefined {
+  public numericLiteral(): ESQLIntegerLiteral | ESQLDecimalLiteral | undefined {
     const arg = firstItem(this.node.args);
 
-    if (arg && arg.type === 'literal' && arg.literalType === 'number') {
+    if (
+      arg &&
+      arg.type === 'literal' &&
+      (arg.literalType === 'integer' || arg.literalType === 'decimal')
+    ) {
       return arg;
     }
   }
@@ -425,14 +453,38 @@ export class ListLiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
   Node extends ESQLList = ESQLList
-> extends ExpressionVisitorContext<Methods, Data, Node> {}
+> extends ExpressionVisitorContext<Methods, Data, Node> {
+  public *visitElements(
+    input: ExpressionVisitorInput<Methods>
+  ): Iterable<ExpressionVisitorOutput<Methods>> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    for (const value of this.node.values) {
+      yield this.visitExpression(value, input as any);
+    }
+  }
+}
 
 export class TimeIntervalLiteralExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
-> extends ExpressionVisitorContext<Methods, Data, ESQLTimeInterval> {}
+> extends ExpressionVisitorContext<Methods, Data, ESQLTimeInterval> {
+  format(): string {
+    const node = this.node;
+
+    return `${node.quantity}${node.unit}`;
+  }
+}
 
 export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
-> extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {}
+> extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {
+  public visitValue(input: ExpressionVisitorInput<Methods>): ExpressionVisitorOutput<Methods> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    const value = firstItem([this.node.value])!;
+
+    return this.visitExpression(value, input as any);
+  }
+}
