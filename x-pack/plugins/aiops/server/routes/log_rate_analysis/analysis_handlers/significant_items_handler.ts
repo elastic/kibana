@@ -53,9 +53,6 @@ export const significantItemsHandlerFactory =
     keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let keywordFieldCandidatesCount = keywordFieldCandidates.length;
-    const textFieldCandidatesCount = textFieldCandidates.length;
-
     // This will store the combined count of detected significant log patterns and keywords
     let fieldValuePairsCount = 0;
 
@@ -83,7 +80,7 @@ export const significantItemsHandlerFactory =
       loadingStepSizePValues =
         LOADED_FIELD_CANDIDATES + PROGRESS_STEP_P_VALUES - requestBody.overrides?.loaded;
     } else {
-      loadingStepSizePValues = LOADED_FIELD_CANDIDATES;
+      loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
     }
 
     if (version === '2') {
@@ -93,7 +90,6 @@ export const significantItemsHandlerFactory =
       if (Array.isArray(overridesRemainingFieldCandidates)) {
         keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
         remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
-        keywordFieldCandidatesCount = keywordFieldCandidates.length;
       } else {
         remainingKeywordFieldCandidates = keywordFieldCandidates;
       }
@@ -107,7 +103,6 @@ export const significantItemsHandlerFactory =
       if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
         keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
         remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
-        keywordFieldCandidatesCount = keywordFieldCandidates.length;
       } else {
         remainingKeywordFieldCandidates = keywordFieldCandidates;
       }
@@ -125,15 +120,17 @@ export const significantItemsHandlerFactory =
 
     logDebugMessage('Fetch p-values.');
 
-    const loadingStep =
-      (1 / (keywordFieldCandidatesCount + textFieldCandidatesCount)) * loadingStepSizePValues;
+    const pValuesQueueChunks = [
+      ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
+      ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+        keywordFieldCandidates: d,
+      })),
+    ];
+    const loadingStepSize = (1 / pValuesQueueChunks.length) * loadingStepSizePValues;
 
     const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
-      let queueItemLoadingStep = 0;
-
       if (isKeywordFieldCandidates(payload)) {
         const { keywordFieldCandidates: fieldNames } = payload;
-        queueItemLoadingStep = loadingStep * fieldNames.length;
         let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
         try {
@@ -169,7 +166,6 @@ export const significantItemsHandlerFactory =
         }
       } else if (isTextFieldCandidates(payload)) {
         const { textFieldCandidates: fieldNames } = payload;
-        queueItemLoadingStep = loadingStep * fieldNames.length;
 
         let significantCategoriesForField: Awaited<ReturnType<typeof fetchSignificantCategories>>;
 
@@ -206,7 +202,7 @@ export const significantItemsHandlerFactory =
         }
       }
 
-      stateHandler.loaded(queueItemLoadingStep, false);
+      stateHandler.loaded(loadingStepSize, false);
 
       responseStream.push(
         updateLoadingState({
@@ -232,26 +228,18 @@ export const significantItemsHandlerFactory =
     // to the async queue for processing. Each chunk will be part of a single
     // query using multiple aggs for each candidate. For many candidates,
     // on top of that the async queue will process multiple queries concurrently.
-    pValuesQueue.push(
-      [
-        ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
-        ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
-          keywordFieldCandidates: d,
-        })),
-      ],
-      (err) => {
-        if (err) {
-          logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
-          responseStream.pushError(`Failed to fetch p-values.`);
-          pValuesQueue.kill();
-          responseStream.end();
-        } else if (stateHandler.shouldStop()) {
-          logDebugMessage('shouldStop fetching p-values.');
-          pValuesQueue.kill();
-          responseStream.end();
-        }
+    pValuesQueue.push(pValuesQueueChunks, (err) => {
+      if (err) {
+        logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
+        responseStream.pushError(`Failed to fetch p-values.`);
+        pValuesQueue.kill();
+        responseStream.end();
+      } else if (stateHandler.shouldStop()) {
+        logDebugMessage('shouldStop fetching p-values.');
+        pValuesQueue.kill();
+        responseStream.end();
       }
-    );
+    });
     await pValuesQueue.drain();
 
     fieldValuePairsCount = significantCategories.length + significantTerms.length;

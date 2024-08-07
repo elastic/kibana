@@ -23,6 +23,7 @@ import {
   packagePolicyRouteService,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { fetchFleetLatestAvailableAgentVersion } from '../utils/fetch_fleet_version';
 import { indexFleetServerAgent } from './index_fleet_agent';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
@@ -47,6 +48,12 @@ export const enableFleetServerIfNecessary = usageTracker.track(
     log: ToolingLog = createToolingLogger(),
     version: string = kibanaPackageJson.version
   ) => {
+    let agentVersion = version;
+
+    if (isServerless) {
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    }
+
     const agentPolicy = await getOrCreateFleetServerAgentPolicy(kbnClient, log);
 
     if (!isServerless && !(await hasFleetServerAgent(esClient, agentPolicy.id))) {
@@ -56,7 +63,7 @@ export const enableFleetServerIfNecessary = usageTracker.track(
 
       const indexedAgent = await indexFleetServerAgent(esClient, log, {
         policy_id: agentPolicy.id,
-        agent: { version },
+        agent: { version: agentVersion },
         last_checkin_status: 'online',
         last_checkin: lastCheckin.toISOString(),
       });

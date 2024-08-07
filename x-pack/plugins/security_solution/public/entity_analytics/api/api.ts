@@ -22,7 +22,7 @@ import type {
 import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
-} from '../../../common/api/entity_analytics/asset_criticality';
+} from '../../../common/api/entity_analytics';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
