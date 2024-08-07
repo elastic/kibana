@@ -126,7 +126,8 @@ Cases::
 Dashboards::
 * Adding a panel to a dashboard now opens a flyout and the list of panels available is now organized more logically ({kibana-pull}183764[#183764]).
 Discover::
-* In ES|QL mode, you can now create WHERE clause filters more intuitively by interacting with the table, sidebar and table row viewer ({kibana-pull}181399[#181399]).
+* In ES|QL mode, you can now create WHERE clause filters more intuitively by interacting with the table, sidebar and table row viewer, including for ordinal charts ({kibana-pull}181399[#181399]) & ({kibana-pull}184420[#184420]).
+* You can now filter an ES|QL chart by brushing a date histogram ({kibana-pull}184012[#184012]).
 Elastic Security::
 * For the Elastic Security 8.15.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
@@ -183,12 +184,10 @@ Dashboards::
 * When switching back from maximized to minimized view on a panel, you return to your original position in the dashboard ({kibana-pull}184696[#184696]).
 * Improves the dashboard background color to match the current color mode wen margins are turned off ({kibana-pull}181450[#181450]).
 * Simplifies the workflow for creating a copy of the dashboard currently open in both view and edit modes ({kibana-pull}180938[#180938]).
-Data Discovery::
-* CSV reports now include custom field labels when they exist ({kibana-pull}181565[#181565]).
 Discover::
-* Adds the ability to creates ES|QL WHERE filters for ordinal charts ({kibana-pull}184420[#184420]).
 * Adds a button to expand the time range on demand when no results are found for a search ({kibana-pull}181723[#181723]).
 * Changes the Discover document viewer flyout to push the rest of the UI instead of hiding it with an overlay ({kibana-pull}166406[#166406]).
+* CSV reports now include custom field labels when they exist ({kibana-pull}181565[#181565]).
 Elastic Security::
 * For the Elastic Security 8.15.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 ES|QL::
@@ -196,7 +195,6 @@ ES|QL::
 * Automatically encapsulate index names with special characters with quotes ({kibana-pull}187899[#187899]).
 * Adds support for integrations ({kibana-pull}184716[#184716]).
 * Adds the ability to comment out the current line with the keyboard using `CMD + /` ({kibana-pull}184637[#184637]).
-* Adds the ability to filter an ES|QL chart by brushing a date histogram ({kibana-pull}184012[#184012]).
 
 Fleet::
 * Use API key for standalone agent onboarding ({kibana-pull}187133[#187133]).
@@ -266,11 +264,10 @@ Dashboards::
 * Adds tooltip support to `PresentationPanel` header badges ({kibana-pull}186102[#186102]).
 * Fixes unsaved changes on new dashboards bug ({kibana-pull}184955[#184955]).
 * Reset `maximizedPanelId` on Dashboard navigation ({kibana-pull}183060[#183060]).
-Data Discovery::
+Discover::
 * Fixes time range filter ({kibana-pull}187010[#187010]).
 * Reset selected fields when modifying the ES|QL query ({kibana-pull}185997[#185997]).
 * Fixes document comparison mode and the field statistics tab when using Smart Fields ({kibana-pull}184172[#184172]).
-Discover::
 * Disables sorting for Document view ({kibana-pull}187553[#187553]).
 * Correctly adds the limit to the field statistics queries ({kibana-pull}186967[#186967]).
 * Fixes overlapping on error messages ({kibana-pull}181416[#181416]).
