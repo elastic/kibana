@@ -19,7 +19,7 @@ import {
 } from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-const SEARCH_TEXT = 'discover:searchText';
+export const SEARCH_TEXT = 'discover:searchText';
 
 const searchPlaceholder = i18n.translate('unifiedDocViewer.docView.table.searchPlaceHolder', {
   defaultMessage: 'Search field names',
