@@ -10,7 +10,10 @@ import { StateComparators } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
 
-export function getComparatorFunction<StateType extends object = object>(comparators: StateComparators<StateType>, key: keyof StateType) {
+export function getComparatorFunction<StateType extends object = object>(
+  comparators: StateComparators<StateType>,
+  key: keyof StateType
+) {
   const customComparator = comparators[key]?.[2]; // 2nd element of the tuple is the custom comparator
   return customComparator ?? defaultComparator;
 }
