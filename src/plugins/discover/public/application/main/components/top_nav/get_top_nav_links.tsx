@@ -82,9 +82,11 @@ export const getTopNavLinks = ({
     fill: false,
     color: 'text',
     tooltip: isEsqlMode
-      ? undefined
+      ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
+          defaultMessage: 'Switch to KQL or Lucene syntax.',
+        })
       : i18n.translate('discover.localMenu.esqlTooltipLabel', {
-          defaultMessage: 'Try our new query language',
+          defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
         }),
     run: () => {
       if (dataView) {
