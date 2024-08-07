@@ -10,11 +10,11 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigType } from '../../../../../../config';
-import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
-  PerformBulkActionRequestBody,
-  PerformBulkActionRequestQuery,
+  PerformRulesBulkActionRequestBody,
+  PerformRulesBulkActionRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -68,13 +68,17 @@ export const performBulkActionRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
-            query: buildRouteValidationWithZod(PerformBulkActionRequestQuery),
+            body: buildRouteValidationWithZod(PerformRulesBulkActionRequestBody),
+            query: buildRouteValidationWithZod(PerformRulesBulkActionRequestQuery),
           },
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PerformRulesBulkActionResponse>> => {
         const { body } = request;
         const siemResponse = buildSiemResponse(response);
 

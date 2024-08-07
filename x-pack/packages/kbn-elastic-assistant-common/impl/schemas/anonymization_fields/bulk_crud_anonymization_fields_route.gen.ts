@@ -124,13 +124,20 @@ export const AnonymizationFieldUpdateProps = z.object({
   anonymized: z.boolean().optional(),
 });
 
-export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
-export const PerformBulkActionRequestBody = z.object({
+export type PerformAnonymizationFieldsBulkActionRequestBody = z.infer<
+  typeof PerformAnonymizationFieldsBulkActionRequestBody
+>;
+export const PerformAnonymizationFieldsBulkActionRequestBody = z.object({
   delete: BulkActionBase.optional(),
   create: z.array(AnonymizationFieldCreateProps).optional(),
   update: z.array(AnonymizationFieldUpdateProps).optional(),
 });
-export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
+export type PerformAnonymizationFieldsBulkActionRequestBodyInput = z.input<
+  typeof PerformAnonymizationFieldsBulkActionRequestBody
+>;
 
-export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse>;
-export const PerformBulkActionResponse = AnonymizationFieldsBulkCrudActionResponse;
+export type PerformAnonymizationFieldsBulkActionResponse = z.infer<
+  typeof PerformAnonymizationFieldsBulkActionResponse
+>;
+export const PerformAnonymizationFieldsBulkActionResponse =
+  AnonymizationFieldsBulkCrudActionResponse;

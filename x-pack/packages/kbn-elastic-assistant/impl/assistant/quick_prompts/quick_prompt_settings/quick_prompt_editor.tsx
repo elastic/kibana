@@ -12,7 +12,7 @@ import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_
 import { css } from '@emotion/react';
 import {
   PromptResponse,
-  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+  PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
