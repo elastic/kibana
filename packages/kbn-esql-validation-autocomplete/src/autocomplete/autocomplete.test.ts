@@ -18,7 +18,12 @@ import {
 } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { FunctionParameter, isSupportedDataType, SupportedDataType } from '../definitions/types';
+import {
+  FunctionParameter,
+  isFieldType,
+  isSupportedDataType,
+  SupportedDataType,
+} from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import {
@@ -820,8 +825,12 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                      ),
+                      ...getFieldNamesByType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                      ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
                         getTypesFromParamDefs(acceptsFieldParamDefs),
@@ -840,8 +849,12 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
-                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getDateLiteralsByFieldType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                      ),
+                      ...getFieldNamesByType(
+                        getTypesFromParamDefs(acceptsFieldParamDefs).filter(isFieldType)
+                      ),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
                         getTypesFromParamDefs(acceptsFieldParamDefs),

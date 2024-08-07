@@ -8,39 +8,66 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
-// Currently, partial of the full list
-// https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
-export const dataTypes = [
-  'double',
-  'unsigned_long',
-  'long',
-  'integer',
-  'counter_integer',
-  'counter_long',
-  'counter_double',
-  'date',
-  'date_period',
-  'text',
-  'keyword',
+/**
+ * All supported field types in ES|QL. This is all the types
+ * that can come back in the table from a query.
+ */
+export const fieldTypes = [
   'boolean',
+  'date',
+  'double',
   'ip',
+  'keyword',
+  'integer',
+  'long',
+  'text',
+  'unsigned_long',
+  'version',
   'cartesian_point',
   'cartesian_shape',
   'geo_point',
   'geo_shape',
-  'version',
-  'null',
-  'time_duration',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
   'unsupported',
-  'time_literal', // TODO what is time_literal in Elasticsearch speak? date_duration?
 ] as const;
+
+export type FieldType = (typeof fieldTypes)[number];
+
+export const isFieldType = (type: string | FunctionParameterType): type is FieldType =>
+  fieldTypes.includes(type as FieldType);
+
+/**
+ * This is the list of all data types that are supported in ES|QL.
+ *
+ * Not all of these can be used as field types. Some can only be literals,
+ * others may be the value of a field, but cannot be used in the index mapping.
+ *
+ * This is a partial list. The full list is here and we may need to expand this type as
+ * the capabilities of the client-side engines grow.
+ * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
+ */
+export const dataTypes = [
+  ...fieldTypes,
+  'null',
+  'time_literal', // @TODO consider merging time_literal with time_duration
+  'time_duration',
+  'date_period',
+] as const;
+
+export type SupportedDataType = (typeof dataTypes)[number];
 
 export const isSupportedDataType = (
   type: string | FunctionParameterType
 ): type is SupportedDataType => dataTypes.includes(type as SupportedDataType);
 
-export type SupportedDataType = (typeof dataTypes)[number];
-
+/**
+ * This is a set of array types. These aren't official ES|QL types, but they are
+ * currently used in the function definitions in a couple of specific scenarios.
+ *
+ * The fate of these is uncertain. They may be removed in the future.
+ */
 type ArrayType =
   | 'double[]'
   | 'unsigned_long[]'
@@ -56,8 +83,14 @@ type ArrayType =
   | 'date[]'
   | 'date_period[]';
 
+/**
+ * This is the type of a parameter in a function definition.
+ */
 export type FunctionParameterType = Omit<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
+/**
+ * This is the return type of a function definition.
+ */
 export type FunctionReturnType = Omit<SupportedDataType, 'unsupported'> | 'any' | 'void';
 
 export interface FunctionDefinition {

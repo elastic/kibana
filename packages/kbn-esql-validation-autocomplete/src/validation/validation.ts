@@ -1076,15 +1076,17 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
   const messages: ESQLMessage[] = [];
   for (const field of fields.values()) {
     if (field.type === 'unsupported') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFieldType',
-          values: {
-            field: field.name,
-          },
-          locations: { min: 1, max: 1 },
-        })
-      );
+      // Removed temporarily to supress all these warnings
+      // Issue to re-enable in a better way: https://github.com/elastic/kibana/issues/189666
+      // messages.push(
+      //   getMessageFromId({
+      //     messageId: 'unsupportedFieldType',
+      //     values: {
+      //       field: field.name,
+      //     },
+      //     locations: { min: 1, max: 1 },
+      //   })
+      // );
     }
   }
   return messages;

@@ -12,7 +12,7 @@ import { getAllFunctions } from '../shared/helpers';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { CodeActionOptions } from './types';
 import { ESQLRealField } from '../validation/types';
-import { SupportedDataType } from '../definitions/types';
+import { FieldType } from '../definitions/types';
 
 function getCallbackMocks() {
   return {
@@ -30,7 +30,7 @@ function getCallbackMocks() {
         return fields;
       }
 
-      const localDataTypes: SupportedDataType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
+      const localDataTypes: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
       const fields: ESQLRealField[] = [
         ...localDataTypes.map((type) => ({
           name: `${type}Field`,

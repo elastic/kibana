@@ -22,6 +22,7 @@ import {
   FunctionDefinition,
   dataTypes,
   isSupportedDataType,
+  fieldTypes,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
 import { getMaxMinNumberOfParams } from '../src/validation/helpers';
@@ -992,7 +993,7 @@ const fieldTypesToConstants: Record<SupportedDataType, string> = {
   unsupported: '',
 };
 
-const supportedTypesAndFieldNames = dataTypes.map((type) => ({
+const supportedTypesAndFieldNames = fieldTypes.map((type) => ({
   name: fieldNameFromType(type),
   type,
 }));

@@ -12,9 +12,11 @@ import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import {
+  FieldType,
   FunctionDefinition,
   SupportedDataType,
-  dataTypes as _dataTypes,
+  dataTypes,
+  fieldTypes as _fieldTypes,
 } from '../definitions/types';
 import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
@@ -34,7 +36,7 @@ import {
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
 import { Setup, setup } from './__tests__/helpers';
 
-const dataTypes = _dataTypes.filter((type) => type !== 'unsupported');
+const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -82,7 +84,7 @@ function getLiteralType(typeString: 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 
-export const fieldNameFromType = (type: SupportedDataType) => `${camelCase(type)}Field`;
+export const fieldNameFromType = (type: FieldType) => `${camelCase(type)}Field`;
 
 function getFieldName(
   typeString: string,
@@ -547,13 +549,6 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
       testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
       testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
-      testErrorsAndWarnings(
-        'from unsupported_index | keep unsupported_field',
-        [],
-        [
-          'Field [unsupported_field] cannot be retrieved, it is unsupported or not indexed; returning null',
-        ]
-      );
 
       testErrorsAndWarnings(
         `FROM index | STATS ROUND(AVG(doubleField * 1.5)), COUNT(*), MIN(doubleField * 10) | KEEP \`MIN(doubleField * 10)\``,
@@ -880,7 +875,7 @@ describe('validation logic', () => {
         []
       );
 
-      for (const field of dataTypes) {
+      for (const field of fieldTypes) {
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
@@ -943,7 +938,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=["a", "b"]', []);
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
-      for (const field of dataTypes) {
+      for (const field of fieldTypes) {
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);
@@ -12116,8 +12111,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats var = max(dateField)', []);
         testErrorsAndWarnings('from a_index | stats max(dateField)', []);
-        testErrorsAndWarnings('from a_index | stats var = max(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats max(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats max(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats var = max(ipField)', []);
@@ -12156,14 +12149,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | where max(dateField) > 0', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField)', [
-          'WHERE does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where max(datePeriodField) > 0', [
           'WHERE does not support function max',
         ]);
 
@@ -12246,23 +12231,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval max(dateField) > 0', [
           'EVAL does not support function max',
         ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField)', [
-          'EVAL does not support function max',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval max(datePeriodField) > 0', [
-          'EVAL does not support function max',
-        ]);
-
         testErrorsAndWarnings('from a_index | eval var = max(booleanField)', [
           'EVAL does not support function max',
         ]);
@@ -12465,8 +12433,6 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | stats var = min(dateField)', []);
         testErrorsAndWarnings('from a_index | stats min(dateField)', []);
-        testErrorsAndWarnings('from a_index | stats var = min(datePeriodField)', []);
-        testErrorsAndWarnings('from a_index | stats min(datePeriodField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats min(booleanField)', []);
         testErrorsAndWarnings('from a_index | stats var = min(ipField)', []);
@@ -12507,15 +12473,6 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | where min(dateField) > 0', [
           'WHERE does not support function min',
         ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField)', [
-          'WHERE does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | where min(datePeriodField) > 0', [
-          'WHERE does not support function min',
-        ]);
-
         testErrorsAndWarnings('from a_index | where min(booleanField)', [
           'WHERE does not support function min',
         ]);
@@ -12593,22 +12550,6 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | eval min(dateField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval var = min(datePeriodField) > 0', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField)', [
-          'EVAL does not support function min',
-        ]);
-
-        testErrorsAndWarnings('from a_index | eval min(datePeriodField) > 0', [
           'EVAL does not support function min',
         ]);
 
@@ -14107,14 +14048,6 @@ describe('validation logic', () => {
           ]
         );
 
-        testErrorsAndWarnings('from a_index | stats by bucket(dateField, datePeriodField)', [
-          'Argument of [bucket] must be a constant, received [datePeriodField]',
-        ]);
-
-        testErrorsAndWarnings('from a_index | stats by bin(dateField, datePeriodField)', [
-          'Argument of [bin] must be a constant, received [datePeriodField]',
-        ]);
-
         testErrorsAndWarnings(
           'from a_index | stats by bucket(dateField, integerField, now(), now())',
           ['Argument of [bucket] must be a constant, received [integerField]']
@@ -14616,18 +14549,6 @@ describe('validation logic', () => {
             'Argument of [bin] must be a constant, received [longField]',
           ]
         );
-
-        testErrorsAndWarnings('from a_index | sort bucket(dateField, datePeriodField)', [
-          'SORT does not support function bucket',
-        ]);
-
-        testErrorsAndWarnings('from a_index | stats bucket("2022", datePeriodField)', [
-          'Argument of [bucket] must be a constant, received [datePeriodField]',
-        ]);
-        testErrorsAndWarnings('from a_index | stats bucket(concat("20", "22"), datePeriodField)', [
-          'Argument of [bucket] must be [date], found value [concat("20","22")] type [keyword]',
-          'Argument of [bucket] must be a constant, received [datePeriodField]',
-        ]);
       });
 
       describe('percentile', () => {

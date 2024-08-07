@@ -15,9 +15,9 @@ import {
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
-import { SupportedDataType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 
-const types: SupportedDataType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
+const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
 const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
   ...types.map((type) => ({

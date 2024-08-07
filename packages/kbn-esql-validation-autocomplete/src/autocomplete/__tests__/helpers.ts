@@ -19,7 +19,13 @@ import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
-import { dataTypes, FunctionParameterType, SupportedDataType } from '../../definitions/types';
+import {
+  FieldType,
+  fieldTypes,
+  FunctionParameterType,
+  FunctionReturnType,
+  SupportedDataType,
+} from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -41,16 +47,10 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 export const triggerCharacters = [',', '(', '=', ' '];
 
 export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
-  ...dataTypes
-    .filter((type) => {
-      // Filter out time_duration because it is impossible to have
-      // a time_duration field ATM.
-      return type !== 'time_duration';
-    })
-    .map((type) => ({
-      name: `${camelCase(type)}Field`,
-      type,
-    })),
+  ...fieldTypes.map((type) => ({
+    name: `${camelCase(type)}Field`,
+    type,
+  })),
   { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
   { name: 'kubernetes.something.something', type: 'double' },
 ];
@@ -122,7 +122,7 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: Readonly<SupportedDataType | 'any' | Array<SupportedDataType | 'any'>>,
+  _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
@@ -225,7 +225,7 @@ export function getFunctionSignaturesByReturnType(
 }
 
 export function getFieldNamesByType(
-  _requestedType: Readonly<SupportedDataType | 'any' | Array<SupportedDataType | 'any'>>
+  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
@@ -242,9 +242,7 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   return [];
 }
 
-export function getDateLiteralsByFieldType(
-  _requestedType: SupportedDataType | SupportedDataType[]
-) {
+export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }
