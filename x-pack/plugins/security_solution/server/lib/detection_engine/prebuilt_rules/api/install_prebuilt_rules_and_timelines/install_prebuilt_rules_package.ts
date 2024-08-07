@@ -6,7 +6,10 @@
  */
 
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
-import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
+import {
+  ENDPOINT_PACKAGE_NAME,
+  PREBUILT_RULES_PACKAGE_NAME,
+} from '../../../../../../common/detection_engine/constants';
 import type { ConfigType } from '../../../../../config';
 
 /**
@@ -19,24 +22,45 @@ export async function installPrebuiltRulesPackage(
   config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
-  // Get package version from the config
+  const pkgVersion = await findLatestPackageVersion(config, context, PREBUILT_RULES_PACKAGE_NAME);
+
+  return context
+    .getInternalFleetServices()
+    .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
+}
+
+export async function installEndpointPackage(
+  config: ConfigType,
+  context: SecuritySolutionApiRequestHandlerContext
+) {
+  const pkgVersion = await findLatestPackageVersion(config, context, ENDPOINT_PACKAGE_NAME);
+
+  return context.getInternalFleetServices().packages.ensureInstalledPackage({
+    pkgName: ENDPOINT_PACKAGE_NAME,
+    pkgVersion,
+  });
+}
+
+async function findLatestPackageVersion(
+  config: ConfigType,
+  context: SecuritySolutionApiRequestHandlerContext,
+  packageName: string
+) {
   let pkgVersion = config.prebuiltRulesPackageVersion;
 
   // Find latest package if the version isn't specified in the config
   if (!pkgVersion) {
+    const securityAppClient = context.getAppClient();
     // Use prerelease versions in dev environment
     const isPrerelease =
-      context.getAppClient().getKibanaVersion().includes('-SNAPSHOT') ||
-      context.getAppClient().getKibanaBranch() === 'main';
+      securityAppClient.getBuildFlavor() === 'traditional' &&
+      (securityAppClient.getKibanaVersion().includes('-SNAPSHOT') ||
+        securityAppClient.getKibanaBranch() === 'main');
 
     const result = await context
       .getInternalFleetServices()
-      .packages.fetchFindLatestPackage(PREBUILT_RULES_PACKAGE_NAME, { prerelease: isPrerelease });
+      .packages.fetchFindLatestPackage(packageName, { prerelease: isPrerelease });
     pkgVersion = result.version;
   }
-
-  // Install the package
-  await context
-    .getInternalFleetServices()
-    .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
+  return pkgVersion;
 }
