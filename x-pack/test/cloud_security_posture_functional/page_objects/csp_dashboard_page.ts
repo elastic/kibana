@@ -105,7 +105,16 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     getFindingsLinks: async (tab: (typeof TAB_TYPES)[keyof typeof TAB_TYPES]) => {
       await dashboard.getDashoard(tab);
       const pageContainer = await testSubjects.find('pageContainer');
-      return await pageContainer.findAllByXpath(`//button[contains(@class, 'euiLink')]`);
+      return [
+        await pageContainer.findByTestSubject('dashboard-summary-passed-findings'),
+        await pageContainer.findByTestSubject('dashboard-summary-failed-findings'),
+        ...(await pageContainer.findAllByTestSubject('grouped-findings-evaluation-link')),
+        ...(await pageContainer.findAllByTestSubject('view-all-failed-findings')),
+        ...(await pageContainer.findAllByTestSubject('benchmark-section-bench-name')),
+        ...(await pageContainer.findAllByTestSubject('benchmark-asset-type')),
+        ...(await pageContainer.findAllByTestSubject('compliance-score-section-passed')),
+        ...(await pageContainer.findAllByTestSubject('compliance-score-section-failed')),
+      ];
     },
 
     getFindingsLinkAtIndex: async (
@@ -113,12 +122,12 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       linkIndex = 0
     ) => {
       const allLinks = await dashboard.getFindingsLinks(tab);
-      return await allLinks[linkIndex];
+      return allLinks[linkIndex];
     },
 
     getFindingsLinksCount: async (tab: (typeof TAB_TYPES)[keyof typeof TAB_TYPES]) => {
       const allLinks = await dashboard.getFindingsLinks(tab);
-      return await allLinks.length;
+      return allLinks.length;
     },
 
     getIntegrationDashboardContainer: () => testSubjects.find('dashboard-container'),
