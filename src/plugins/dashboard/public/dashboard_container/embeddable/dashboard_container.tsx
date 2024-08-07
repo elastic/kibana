@@ -16,6 +16,8 @@ import {
   apiPublishesUnsavedChanges,
   getPanelTitle,
   PublishesViewMode,
+  PublishesDataLoading,
+  apiPublishesDataLoading,
 } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -40,6 +42,7 @@ import {
   HasSerializedChildState,
   TrackContentfulRender,
   TracksQueryPerformance,
+  combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -149,7 +152,7 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
-  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined> = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -171,7 +174,6 @@ export class DashboardContainer
   public creationStartTime?: number;
   public creationEndTime?: number;
   public firstLoad: boolean = true;
-  private _controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   private hadContentfulRender = false;
   private scrollPosition?: number;
 
@@ -316,12 +318,23 @@ export class DashboardContainer
 
     this.executionContext = initialInput.executionContext;
 
-    // expose controlGroupApi$ as publishing subject
-    this.controlGroupApi$ = this._controlGroupApi$;
+    this.dataLoading = new BehaviorSubject<boolean | undefined>(false);
+    this.publishingSubscription.add(combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+      this,
+      'dataLoading',
+      apiPublishesDataLoading,
+      undefined,
+      // flatten method
+      (values) => {
+        return values.some((isLoading) => isLoading);
+      }
+    ).subscribe((isAtLeastOneChildLoading) => {
+      (this.dataLoading as BehaviorSubject<boolean | undefined>).next(isAtLeastOneChildLoading);
+    }));
   }
 
   public setControlGroupApi = (controlGroupApi: ControlGroupApi) => {
-    this._controlGroupApi$.next(controlGroupApi);
+    (this.controlGroupApi$ as BehaviorSubject<ControlGroupApi | undefined>).next(controlGroupApi);
     startSyncingDashboardControlGroup(this, controlGroupApi);
   }
 
