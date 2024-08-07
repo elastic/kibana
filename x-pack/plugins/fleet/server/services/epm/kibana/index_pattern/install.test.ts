@@ -40,7 +40,7 @@ describe('Fleet index patterns', () => {
         );
       }
 
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(2);
     });
 
     it('handles errors from updateObjectsSpaces', async () => {
