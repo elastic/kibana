@@ -185,7 +185,7 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
     <EuiToolTip content={bucket.doc_count}>
       <EuiBadge
         css={css`
-          margin-left: ${euiTheme.size.s}};
+          margin-left: ${euiTheme.size.s};
         `}
         color="hollow"
         data-test-subj={FINDINGS_GROUPING_COUNTER}
@@ -208,7 +208,7 @@ const ComplianceBarComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
       size="l"
       overrideCss={css`
         width: 104px;
-        margin-left: ${euiTheme.size.s}};
+        margin-left: ${euiTheme.size.s};
       `}
       totalFailed={totalFailed}
       totalPassed={totalPassed}
