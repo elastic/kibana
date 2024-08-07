@@ -169,29 +169,29 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const command of ['KEEP', 'DROP', 'EVAL']) {
-        testQuickFixes(`FROM index | ${command} stringField`, [], options);
-        // strongField => stringField
-        testQuickFixes(`FROM index | ${command} strongField`, ['stringField'], options);
+        testQuickFixes(`FROM index | ${command} keywordField`, [], options);
+        // koywordField => keywordField
+        testQuickFixes(`FROM index | ${command} koywordField`, ['keywordField'], options);
         testQuickFixes(
-          `FROM index | ${command} numberField, strongField`,
-          ['stringField'],
+          `FROM index | ${command} numberField, koywordField`,
+          ['keywordField'],
           options
         );
       }
-      testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField'], options);
+      testQuickFixes(`FROM index | EVAL round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | EVAL var0 = round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE round(koywordField) > 0`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE 0 < round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | RENAME koywordField as newField`, ['keywordField'], options);
       // This levarage the knowledge of the enrich policy fields to suggest the right field
       testQuickFixes(
         `FROM index | ENRICH policy | KEEP yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
-      testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField'], options);
+      testQuickFixes(`FROM index | ENRICH policy ON koywordField`, ['keywordField'], options);
       testQuickFixes(
-        `FROM index | ENRICH policy ON stringField WITH yetAnotherField2`,
+        `FROM index | ENRICH policy ON keywordField WITH yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
@@ -216,29 +216,29 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
     ]) {
       for (const command of ['KEEP', 'DROP', 'EVAL']) {
-        testQuickFixes(`FROM index | ${command} stringField`, [], options);
-        // strongField => stringField
-        testQuickFixes(`FROM index | ${command} strongField`, ['stringField'], options);
+        testQuickFixes(`FROM index | ${command} keywordField`, [], options);
+        // koywordField => keywordField
+        testQuickFixes(`FROM index | ${command} koywordField`, ['keywordField'], options);
         testQuickFixes(
-          `FROM index | ${command} numberField, strongField`,
-          ['stringField'],
+          `FROM index | ${command} numberField, koywordField`,
+          ['keywordField'],
           options
         );
       }
-      testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField'], options);
-      testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField'], options);
-      testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField'], options);
+      testQuickFixes(`FROM index | EVAL round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | EVAL var0 = round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE round(koywordField) > 0`, ['keywordField'], options);
+      testQuickFixes(`FROM index | WHERE 0 < round(koywordField)`, ['keywordField'], options);
+      testQuickFixes(`FROM index | RENAME koywordField as newField`, ['keywordField'], options);
       // This levarage the knowledge of the enrich policy fields to suggest the right field
       testQuickFixes(
         `FROM index | ENRICH policy | KEEP yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
-      testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField'], options);
+      testQuickFixes(`FROM index | ENRICH policy ON koywordField`, ['keywordField'], options);
       testQuickFixes(
-        `FROM index | ENRICH policy ON stringField WITH yetAnotherField2`,
+        `FROM index | ENRICH policy ON keywordField WITH yetAnotherField2`,
         ['yetAnotherField'],
         options
       );
@@ -336,8 +336,8 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
       { relaxOnMissingCallbacks: false },
     ]) {
-      testQuickFixes(`FROM index | WHERE stringField like 'asda'`, ['"asda"'], options);
-      testQuickFixes(`FROM index | WHERE stringField not like 'asda'`, ['"asda"'], options);
+      testQuickFixes(`FROM index | WHERE keywordField like 'asda'`, ['"asda"'], options);
+      testQuickFixes(`FROM index | WHERE keywordField not like 'asda'`, ['"asda"'], options);
     }
   });
 
@@ -414,7 +414,7 @@ describe('quick fixes logic', () => {
   describe('callbacks', () => {
     it('should not crash if specific callback functions are not passed', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
@@ -434,7 +434,7 @@ describe('quick fixes logic', () => {
 
     it('should not crash if specific callback functions are not passed with relaxed option', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
@@ -460,7 +460,7 @@ describe('quick fixes logic', () => {
 
     it('should not crash no callbacks are passed', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
@@ -476,7 +476,7 @@ describe('quick fixes logic', () => {
 
     it('should not crash no callbacks are passed with relaxed option', async () => {
       const callbackMocks = getCallbackMocks();
-      const statement = `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`;
+      const statement = `from a | eval b  = a | enrich policy | dissect keywordField "%{firstWord}"`;
       const { errors } = await validateQuery(
         statement,
         getAstAndSyntaxErrors,
