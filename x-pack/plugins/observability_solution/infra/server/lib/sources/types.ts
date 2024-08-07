@@ -61,9 +61,14 @@ export const logIndexNameSavedObjectReferenceRT = rt.type({
   indexName: rt.string,
 });
 
+export const kibanaAdvancedSettingSavedObjectReferenceRT = rt.type({
+  type: rt.literal('kibana_advanced_setting'),
+});
+
 export const logIndexSavedObjectReferenceRT = rt.union([
   logIndexPatternSavedObjectReferenceRT,
   logIndexNameSavedObjectReferenceRT,
+  kibanaAdvancedSettingSavedObjectReferenceRT,
 ]);
 
 export const SourceConfigurationSavedObjectAttributesRT = rt.type({
