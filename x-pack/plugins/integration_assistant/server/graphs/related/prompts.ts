@@ -56,10 +56,10 @@ Here is some context that you can reference for your task, read it carefully as 
 <context>
 <current_processors>
 {current_processors}
+</current_processors>
 <common_errors>
 {common_errors}
 </common_errors>
-</current_processors>
 </context>`,
   ],
   [
