@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-export {
-  ENTITY_BASE_PREFIX,
-  ENTITY_HISTORY,
-  ENTITY_LATEST,
-  SO_ENTITY_DEFINITION_TYPE,
-} from './constants';
-
-export { EntityDefinitionsNotFoundForType } from './errors';
-
-export type { SchemaVersionString, DatasetString } from './constants';
+export class EntityDefinitionsNotFoundForType extends Error {
+  constructor(type: string | string[]) {
+    super(`No Entity definitions found for type: ${type}`);
+  }
+}

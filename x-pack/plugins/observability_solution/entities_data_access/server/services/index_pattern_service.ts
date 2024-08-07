@@ -8,11 +8,12 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
+  DatasetString,
   ENTITY_BASE_PREFIX,
   ENTITY_HISTORY,
   ENTITY_LATEST,
+  EntityDefinitionsNotFoundForType,
   SO_ENTITY_DEFINITION_TYPE,
-  DatasetString,
   SchemaVersionString,
 } from '../../common';
 
@@ -133,7 +134,7 @@ async function indexPatternByType(
   const definitionIds = await findAllDefinitionsByType(type, options.soClient);
 
   if (definitionIds.length === 0) {
-    throw new Error(`No entity definitions found for type ${type}`);
+    throw new EntityDefinitionsNotFoundForType(type);
   }
 
   return indexPatternByDefinitionId(definitionIds, options);

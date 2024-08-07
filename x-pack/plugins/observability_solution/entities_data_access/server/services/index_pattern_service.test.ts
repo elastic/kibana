@@ -7,6 +7,7 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { createIndexPatternService } from './index_pattern_service';
+import { EntityDefinitionsNotFoundForType } from '../../common';
 
 describe('index_pattern_service', () => {
   const indexPatternService = createIndexPatternService();
@@ -284,6 +285,26 @@ describe('index_pattern_service', () => {
         latestIndexPattern:
           '.entities.*.latest.my_definition_id,.entities.*.latest.my_definition_id_2',
       });
+    });
+
+    it('throws an error if no entity definitions are found for the given type', async () => {
+      const soClient = savedObjectsClientMock.create();
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+      });
+
+      const shouldThrow = async () => {
+        await indexPatternService.indexPatternByType('service', {
+          soClient,
+        });
+      };
+
+      await expect(shouldThrow).rejects.toThrowError(
+        new EntityDefinitionsNotFoundForType('service')
+      );
     });
   });
 });
