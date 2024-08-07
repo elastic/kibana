@@ -10,6 +10,11 @@ import * as t from 'io-ts';
 export const investigationSchema = t.type({
   id: t.string,
   title: t.string,
+  createdAt: t.number,
+  createdBy: t.string,
+  parameters: t.type({
+    timeRange: t.type({ from: t.number, to: t.number }),
+  }),
 });
 
 export type Investigation = t.TypeOf<typeof investigationSchema>;

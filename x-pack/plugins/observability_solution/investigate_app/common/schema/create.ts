@@ -10,11 +10,22 @@ const createInvestigationParamsSchema = t.type({
   body: t.type({
     id: t.string,
     title: t.string,
+    createdAt: t.number,
+    createdBy: t.string,
+    parameters: t.type({
+      timeRange: t.type({ from: t.number, to: t.number }),
+    }),
   }),
 });
 
 const createInvestigationResponseSchema = t.type({
   id: t.string,
+  title: t.string,
+  createdAt: t.number,
+  createdBy: t.string,
+  parameters: t.type({
+    timeRange: t.type({ from: t.number, to: t.number }),
+  }),
 });
 
 type CreateInvestigationInput = t.OutputOf<typeof createInvestigationParamsSchema.props.body>; // Raw payload sent by the frontend
