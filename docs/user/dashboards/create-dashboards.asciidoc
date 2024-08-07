@@ -21,10 +21,10 @@ TIP: If you don't have data at hand and still want to explore dashboards, you ca
 +
 When you create a dashboard, you are automatically in edit mode and can make changes to the dashboard. 
 
-. Add content to the dashboard. You can:
+. Add content to the dashboard. You have several options covered in more details in the <<panels-editors,Visualizations section>>:
 ** **Create visualization**. This option is a shortcut to create a chart using **Lens**, the default visualization editor in {kib}.
-** **Add panel**. <<panels-editors,Several editors>> let you add and configure different types of content to your dashboard.
-** **Add from library**. Selecting existing content that has been saved to the **Visualize Library**.
+** **Add panel**. Choose one of the available editors to add and configure content to your dashboard.
+** **Add from library**. Select existing content that has already been configured and saved to the **Visualize Library**.
 ** **Controls**. Add controls to help filter the content of your dashboard.
 
 . Organize the content of your dashboard.

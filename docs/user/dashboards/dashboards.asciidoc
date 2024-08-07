@@ -30,3 +30,5 @@ include::create-visualizations.asciidoc[leveloffset=+1]
 include::manage-dashboards.asciidoc[leveloffset=+1]
 
 include::share-dashboards.asciidoc[leveloffset=+1]
+
+include::tutorials.asciidoc[leveloffset=+1]
