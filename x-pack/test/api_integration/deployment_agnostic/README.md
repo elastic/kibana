@@ -3,7 +3,7 @@
 ## Definition
 A deployment-agnostic API integration test is a test suite that fulfills the following criteria:
 
-**Functionality**: It tests Kibana APIs that are logically identical in both stateful and serverless environments for the same SAML roles.
+**Functionality**: It tests Kibana APIs that are logically identical in both stateful and serverless environments for the same roles.
 
 **Design**: The test design is clean and does not require additional logic to execute in either stateful or serverless environments.
 
