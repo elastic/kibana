@@ -27205,28 +27205,56 @@ components:
           type: boolean
         type:
           type: string
+    Security_Solution_Timeline_API_DataProviderQueryMatch:
+      type: object
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+        excluded:
+          nullable: true
+          type: boolean
+        id:
+          nullable: true
+          type: string
+        kqlQuery:
+          nullable: true
+          type: string
+        name:
+          nullable: true
+          type: string
+        queryMatch:
+          $ref: '#/components/schemas/Security_Solution_Timeline_API_QueryMatchResult'
     Security_Solution_Timeline_API_DataProviderResult:
       type: object
       properties:
         and:
           items:
             $ref: >-
-              #/components/schemas/Security_Solution_Timeline_API_DataProviderResult
+              #/components/schemas/Security_Solution_Timeline_API_DataProviderQueryMatch
+          nullable: true
           type: array
         enabled:
+          nullable: true
           type: boolean
         excluded:
+          nullable: true
           type: boolean
         id:
+          nullable: true
           type: string
         kqlQuery:
+          nullable: true
           type: string
         name:
+          nullable: true
           type: string
         queryMatch:
           $ref: '#/components/schemas/Security_Solution_Timeline_API_QueryMatchResult'
+          nullable: true
         type:
           $ref: '#/components/schemas/Security_Solution_Timeline_API_DataProviderType'
+          nullable: true
     Security_Solution_Timeline_API_DataProviderType:
       description: >-
         The type of data provider to create. Valid values are `default` and
@@ -27414,14 +27442,19 @@ components:
       type: object
       properties:
         displayField:
+          nullable: true
           type: string
         displayValue:
+          nullable: true
           type: string
         field:
+          nullable: true
           type: string
         operator:
+          nullable: true
           type: string
         value:
+          nullable: true
           type: string
     Security_Solution_Timeline_API_Readable:
       type: object
@@ -27474,9 +27507,11 @@ components:
       type: object
       properties:
         columns:
-          $ref: >-
-            #/components/schemas/Security_Solution_Timeline_API_ColumnHeaderResult
+          items:
+            $ref: >-
+              #/components/schemas/Security_Solution_Timeline_API_ColumnHeaderResult
           nullable: true
+          type: array
         created:
           nullable: true
           type: number
@@ -27512,10 +27547,22 @@ components:
           type: object
           properties:
             eventCategoryField:
+              nullable: true
               type: string
+            query:
+              nullable: true
+              type: string
+            size:
+              oneOf:
+                - nullable: true
+                  type: string
+                - nullable: true
+                  type: number
             tiebreakerField:
+              nullable: true
               type: string
             timestampField:
+              nullable: true
               type: string
         eventType:
           nullable: true
@@ -27587,18 +27634,37 @@ components:
       type: object
       properties:
         filterQuery:
+          nullable: true
           type: object
           properties:
             kuery:
+              nullable: true
               type: object
               properties:
                 expression:
+                  nullable: true
                   type: string
                 kind:
+                  nullable: true
                   type: string
             serializedQuery:
+              nullable: true
               type: string
     Security_Solution_Timeline_API_Sort:
+      oneOf:
+        - $ref: '#/components/schemas/Security_Solution_Timeline_API_SortObject'
+        - items:
+            $ref: '#/components/schemas/Security_Solution_Timeline_API_SortObject'
+          type: array
+    Security_Solution_Timeline_API_SortFieldTimeline:
+      description: The field to sort the timelines by.
+      enum:
+        - title
+        - description
+        - updated
+        - created
+      type: string
+    Security_Solution_Timeline_API_SortObject:
       type: object
       properties:
         columnId:
@@ -27610,14 +27676,6 @@ components:
         sortDirection:
           nullable: true
           type: string
-    Security_Solution_Timeline_API_SortFieldTimeline:
-      description: The field to sort the timelines by.
-      enum:
-        - title
-        - description
-        - updated
-        - created
-      type: string
     Security_Solution_Timeline_API_TimelineResponse:
       allOf:
         - $ref: '#/components/schemas/Security_Solution_Timeline_API_SavedTimeline'
