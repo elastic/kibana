@@ -12,7 +12,7 @@ import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
 import type { TimelineModel } from '../model';
 import { saveTimeline, updateTimeline } from '../actions';
-import { TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 
 /**
@@ -51,7 +51,7 @@ export async function ensureTimelineIsSaved({
       id: localTimelineId,
       timeline: {
         ...timeline,
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
       },
     })
   );
