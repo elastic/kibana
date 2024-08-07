@@ -16,6 +16,7 @@ import type { RouteSpyState } from '../../../utils/route/types';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 
