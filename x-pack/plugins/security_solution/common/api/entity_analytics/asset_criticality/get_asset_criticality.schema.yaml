@@ -9,6 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAssetCriticalityRecord
       summary: Get Criticality Record
+      description: Get the criticality record for a specific asset.
       parameters:
         - name: id_value
           in: query

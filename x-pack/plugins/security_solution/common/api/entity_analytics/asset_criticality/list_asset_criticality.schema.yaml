@@ -8,7 +8,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: FindAssetCriticalityRecords
-      summary: List asset criticality data, filtering and sorting as needed
+      summary: List Asset Criticality Records
+      description: List asset criticality records, paging, sorting and filtering as needed.
       parameters:
         - name: sort_field
           in: query

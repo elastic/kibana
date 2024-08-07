@@ -8,7 +8,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: BulkUpsertAssetCriticalityRecords
-      summary: Bulk upsert asset criticality data, creating or updating records as needed
+      summary: Bulk Upsert Asset Criticality Records
+      description: Bulk upsert up to 1000 asset criticality records, creating or updating them as needed.
       requestBody:
         content:
           application/json:

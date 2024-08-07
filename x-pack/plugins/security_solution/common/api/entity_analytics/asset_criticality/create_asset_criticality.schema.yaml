@@ -8,7 +8,8 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: CreateAssetCriticalityRecord
-      summary: Create Criticality Record
+      summary: Upsert Criticality Record
+      description: Create or update a criticality record for a specific asset.
       requestBody:
         required: true
         content:
