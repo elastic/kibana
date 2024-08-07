@@ -13,7 +13,7 @@ import { checkProdNativeModules } from './check_prod_native_modules';
 run(
   async ({ log }) => {
     const foundProdNativeModules = await checkProdNativeModules(log);
-    if (!foundProdNativeModules) {
+    if (foundProdNativeModules) {
       throw createFailError('see above errors');
     }
   },
