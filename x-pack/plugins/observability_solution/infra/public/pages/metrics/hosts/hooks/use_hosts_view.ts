@@ -26,7 +26,7 @@ import {
 import { StringDateRange } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
-  { type: 'cpu' },
+  { type: 'cpuTotal' },
   { type: 'diskSpaceUsage' },
   { type: 'memory' },
   { type: 'memoryFree' },
