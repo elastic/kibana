@@ -12,11 +12,9 @@ import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
-import { parseEsqlQuery } from '../../rule_creation/logic/esql_validator';
+import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
-jest.mock('../../rule_creation/logic/esql_validator', () => ({
-  parseEsqlQuery: jest.fn(),
-}));
+jest.mock('@kbn/securitysolution-utils', () => ({ computeIsESQLQueryAggregating: jest.fn() }));
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -25,7 +23,7 @@ jest.mock('@kbn/esql-utils', () => {
   };
 });
 
-const parseEsqlQueryMock = parseEsqlQuery as jest.Mock;
+const computeIsESQLQueryAggregatingMock = computeIsESQLQueryAggregating as jest.Mock;
 const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
 
 const { wrapper } = createQueryWrapperMock();
@@ -61,7 +59,7 @@ describe.skip('useAllEsqlRuleFields', () => {
           : mockEsqlDatatable.columns
       )
     );
-    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
+    computeIsESQLQueryAggregatingMock.mockReturnValue(false);
   });
 
   it('should return loading true when esql fields still loading', () => {
@@ -104,7 +102,7 @@ describe.skip('useAllEsqlRuleFields', () => {
   });
 
   it('should return index pattern fields concatenated with ES|QL fields when ES|QL query is non-aggregating', async () => {
-    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
+    computeIsESQLQueryAggregatingMock.mockReturnValue(false);
 
     const { result, waitFor } = renderHook(
       () =>
@@ -127,7 +125,7 @@ describe.skip('useAllEsqlRuleFields', () => {
   });
 
   it('should return only ES|QL fields when ES|QL query is aggregating', async () => {
-    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: true });
+    computeIsESQLQueryAggregatingMock.mockReturnValue(true);
 
     const { result, waitFor } = renderHook(
       () =>
@@ -149,7 +147,7 @@ describe.skip('useAllEsqlRuleFields', () => {
 
   it('should deduplicate index pattern fields and ES|QL fields when fields have same name', async () => {
     //  getESQLQueryColumnsMock.mockClear();
-    parseEsqlQueryMock.mockReturnValue({ isEsqlQueryAggregating: false });
+    computeIsESQLQueryAggregatingMock.mockReturnValue(false);
 
     const { result, waitFor } = renderHook(
       () =>
