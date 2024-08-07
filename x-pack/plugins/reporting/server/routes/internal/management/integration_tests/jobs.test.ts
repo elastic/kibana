@@ -110,6 +110,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
     reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
 
     usageCounter = {
+      domainId: 'abc123',
       incrementCounter: jest.fn(),
     };
     jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);

@@ -4435,6 +4435,10 @@
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/connectors.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/plugins/ingest_pipelines/server/routes/api/get.ts"
               },
@@ -7027,6 +7031,10 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
+              },
+              {
+                "plugin": "inference",
+                "path": "x-pack/plugins/inference/server/routes/chat_complete.ts"
               },
               {
                 "plugin": "ingestPipelines",

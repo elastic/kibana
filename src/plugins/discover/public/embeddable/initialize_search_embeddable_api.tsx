@@ -12,7 +12,6 @@ import { BehaviorSubject, combineLatest, map, Observable, skip } from 'rxjs';
 
 import { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ROW_HEIGHT_OPTION, SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   PublishesDataViews,
@@ -24,9 +23,9 @@ import { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { getDefaultRowsPerPage } from '../../common/constants';
 import { DiscoverServices } from '../build_services';
-import { DEFAULT_HEADER_ROW_HEIGHT_LINES, EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import {
   PublishesSavedSearch,
   SearchEmbeddableRuntimeState,
@@ -85,14 +84,16 @@ export const initializeSearchEmbeddableApi = async (
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
 
+  const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
+
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
   const grid$ = new BehaviorSubject<DiscoverGridSettings | undefined>(initialState.grid);
+  const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
   const rowHeight$ = new BehaviorSubject<number | undefined>(initialState.rowHeight);
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
-  const headerRowHeight$ = new BehaviorSubject<number | undefined>(initialState.headerRowHeight);
-  const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
+  const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
   /**
@@ -111,10 +112,6 @@ export const initializeSearchEmbeddableApi = async (
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
-
-  const defaultRowHeight = discoverServices.uiSettings.get(ROW_HEIGHT_OPTION);
-  const defaultRowsPerPage = getDefaultRowsPerPage(discoverServices.uiSettings);
-  const defaultSampleSize = discoverServices.uiSettings.get(SAMPLE_SIZE_SETTING);
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -175,22 +172,22 @@ export const initializeSearchEmbeddableApi = async (
       sampleSize: [
         sampleSize$,
         (value) => sampleSize$.next(value),
-        (a, b) => (a ?? defaultSampleSize) === (b ?? defaultSampleSize),
+        (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
       ],
       rowsPerPage: [
         rowsPerPage$,
         (value) => rowsPerPage$.next(value),
-        (a, b) => (a ?? defaultRowsPerPage) === (b ?? defaultRowsPerPage),
+        (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
       ],
       rowHeight: [
         rowHeight$,
         (value) => rowHeight$.next(value),
-        (a, b) => (a ?? defaultRowHeight) === (b ?? defaultRowHeight),
+        (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
       ],
       headerRowHeight: [
         headerRowHeight$,
         (value) => headerRowHeight$.next(value),
-        (a, b) => (a ?? DEFAULT_HEADER_ROW_HEIGHT_LINES) === (b ?? DEFAULT_HEADER_ROW_HEIGHT_LINES),
+        (a, b) => (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
       ],
 
       /** The following can't currently be changed from the dashboard */
