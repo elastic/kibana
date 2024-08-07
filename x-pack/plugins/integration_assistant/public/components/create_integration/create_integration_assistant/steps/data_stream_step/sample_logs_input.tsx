@@ -19,8 +19,7 @@ const MaxLogsSampleRows = 10;
  * Parse the logs sample file content (json or ndjson) and return the parsed logs sample
  */
 const parseLogsContent = (
-  fileContent: string | undefined,
-  fileType: string
+  fileContent: string | undefined
 ): { error?: string; isTruncated?: boolean; logsSampleParsed?: string[] } => {
   if (fileContent == null) {
     return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
@@ -46,7 +45,7 @@ const parseLogsContent = (
     try {
       parsedContent = JSON.parse(fileContent);
     } catch (parseJSONError) {
-      return { error: i18n.LOGS_SAMPLE_ERROR.FORMAT(fileType) };
+      return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
     }
   }
 
@@ -92,10 +91,7 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
       const reader = new FileReader();
       reader.onload = function (e) {
         const fileContent = e.target?.result as string | undefined; // We can safely cast to string since we call `readAsText` to load the file.
-        const { error, isTruncated, logsSampleParsed } = parseLogsContent(
-          fileContent,
-          logsSampleFile.type
-        );
+        const { error, isTruncated, logsSampleParsed } = parseLogsContent(fileContent);
         setIsParsing(false);
         setSampleFileError(error);
         if (error) {
