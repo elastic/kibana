@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
@@ -35,7 +35,7 @@ const toggleShowNotesMock = jest.fn();
 
 const renderTestComponent = (props: Partial<ComponentProps<typeof AddEventNoteAction>> = {}) => {
   const localProps: ComponentProps<typeof AddEventNoteAction> = {
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
     eventId: 'event-1',
     ariaLabel: 'Add Note',
     toggleShowNotes: toggleShowNotesMock,
@@ -79,7 +79,7 @@ describe('AddEventNoteAction', () => {
           ariaLabel: 'Add Note',
           'data-test-subj': 'add-note',
           isDisabled: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           toggleShowNotes: expect.any(Function),
           toolTip: '2 Notes available. Click to view them & add more.',
           eventId: 'event-1',
@@ -101,7 +101,7 @@ describe('AddEventNoteAction', () => {
           ariaLabel: 'Add Note',
           'data-test-subj': 'add-note',
           isDisabled: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           toggleShowNotes: expect.any(Function),
           toolTip: '1 Note available. Click to view it & add more.',
           eventId: 'event-2',
@@ -123,7 +123,7 @@ describe('AddEventNoteAction', () => {
           ariaLabel: 'Add Note',
           'data-test-subj': 'add-note',
           isDisabled: false,
-          timelineType: TimelineType.default,
+          timelineType: TimelineTypeEnum.default,
           toggleShowNotes: expect.any(Function),
           toolTip: 'Add Note',
           eventId: 'event-3',

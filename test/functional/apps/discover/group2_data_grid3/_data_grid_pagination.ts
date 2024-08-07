@@ -145,5 +145,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);
     });
+
+    it('should not split ES|QL results into pages', async () => {
+      const rowsPerPage = 5;
+      const savedSearchESQL = 'testESQLPagination';
+      await kibanaServer.uiSettings.update({
+        ...defaultSettings,
+        'discover:sampleRowsPerPage': rowsPerPage,
+        hideAnnouncements: true,
+      });
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // expect pagination to be present for data view mode
+      expect((await dataGrid.getDocTableRows()).length).to.be(rowsPerPage);
+      await dataGrid.checkCurrentRowsPerPageToBe(rowsPerPage);
+      await testSubjects.existOrFail('pagination-button-0');
+
+      await PageObjects.discover.selectTextBaseLang();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // expect no pagination for ES|QL mode
+      expect((await dataGrid.getDocTableRows()).length).to.above(rowsPerPage);
+      await testSubjects.missingOrFail('pagination-button-0');
+
+      await PageObjects.discover.saveSearch(savedSearchESQL);
+
+      await PageObjects.common.navigateToApp('dashboard');
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.addSavedSearch(savedSearchESQL);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // expect no pagination for ES|QL mode on Dashboard
+      expect((await dataGrid.getDocTableRows()).length).to.above(rowsPerPage);
+      await testSubjects.missingOrFail('pagination-button-0');
+    });
   });
 }
