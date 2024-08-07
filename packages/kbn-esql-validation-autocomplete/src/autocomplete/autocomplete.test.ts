@@ -43,7 +43,7 @@ const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
 const ESQL_COMMON_NUMERIC_TYPES =
   UNCASTED_ESQL_COMMON_NUMERIC_TYPES as unknown as FunctionReturnType[];
 
-const commandDefinitions = unmodifiedCommandDefinitions.filter((r) => r.name !== 'inlinestats');
+const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 describe('autocomplete', () => {
   type TestArgs = [
     string,
