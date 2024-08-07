@@ -105,7 +105,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression = {
-  metric: 'cpu' as SnapshotMetricType,
+  metric: 'cpuTotal' as SnapshotMetricType,
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [],
   timeSize: 1,
