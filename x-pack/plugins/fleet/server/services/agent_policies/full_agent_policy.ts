@@ -204,8 +204,13 @@ export async function getFullAgentPolicy(
     {}
   );
   (agentPolicy.package_policies || []).forEach((packagePolicy) => {
-    if (packagePolicy.output_id) {
-      packagePoliciesByOutputId[packagePolicy.output_id].push(packagePolicy);
+    const packagePolicyDataOutput = packagePolicy.output_id
+      ? outputs.find((output) => output.id === packagePolicy.output_id)
+      : undefined;
+    if (packagePolicyDataOutput) {
+      packagePoliciesByOutputId[getOutputIdForAgentPolicy(packagePolicyDataOutput)].push(
+        packagePolicy
+      );
     } else {
       packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
     }
