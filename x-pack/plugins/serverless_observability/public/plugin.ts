@@ -65,7 +65,7 @@ export class ServerlessObservabilityPlugin
               'xpack.serverlessObservability.aiAssistantManagementDescription',
               {
                 defaultMessage:
-                  'Manage knowledge base and control assistant behavior, such as response language.',
+                  'Manage knowledge base and control assistant behavior, including response language.',
               }
             ),
             icon: 'sparkles',
