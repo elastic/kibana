@@ -55,6 +55,8 @@ export {
   TimelineTypeEnum,
 };
 
+export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timelineId'>;
+
 /**
  * Outcome is a property of the saved object resolve api
  * will tell us info about the rule after 8.0 migrations
