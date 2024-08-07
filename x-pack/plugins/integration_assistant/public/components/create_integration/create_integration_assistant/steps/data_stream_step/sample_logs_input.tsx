@@ -45,7 +45,7 @@ const parseLogsContent = (
     try {
       parsedContent = JSON.parse(fileContent);
     } catch (parseJSONError) {
-      return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_READ };
+      return { error: i18n.LOGS_SAMPLE_ERROR.CAN_NOT_PARSE };
     }
   }
 
