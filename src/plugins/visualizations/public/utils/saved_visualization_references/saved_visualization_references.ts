@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
 import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import {
   extractSearchSourceReferences,
@@ -15,6 +14,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { isObject } from 'lodash';
+import { Reference } from '../../../common/content_management';
 import { VisualizeSavedVisInputState } from '../../react_embeddable/types';
 import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';

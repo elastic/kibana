@@ -31,3 +31,4 @@ export type {
 } from './latest';
 
 export * as VisualizationV1 from './v1';
+export { Reference } from './v1';

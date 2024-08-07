@@ -17,8 +17,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { Reference } from '@kbn/content-management-utils';
-import { VisualizationSavedObject } from '../../common/content_management';
+import { VisualizationSavedObject, Reference } from '../../common/content_management';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {

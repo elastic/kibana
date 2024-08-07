@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { SerializedTitles } from '@kbn/presentation-publishing';
 import { cloneDeep, omit } from 'lodash';
+import { Reference } from '../../common/content_management';
 import { VisualizationSavedObject } from '../../common';
 import {
   getAnalytics,

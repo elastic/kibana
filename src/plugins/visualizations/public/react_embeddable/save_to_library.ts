@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
+import { Reference } from '../../common/content_management';
 import { PersistedState } from '../persisted_state';
 import { getAnalytics, getI18n, getOverlays, getTheme } from '../services';
 import { saveVisualization } from '../utils/saved_visualize_utils';

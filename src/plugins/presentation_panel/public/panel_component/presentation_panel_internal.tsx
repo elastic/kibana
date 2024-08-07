@@ -88,8 +88,6 @@ export const PresentationPanelInternal = <
     return attrs;
   }, [dataLoading, blockingError]);
 
-  if (blockingError) console.log('BLOCKING ERROR', blockingError);
-
   return (
     <EuiPanel
       role="figure"
