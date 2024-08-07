@@ -10,12 +10,15 @@ import * as rt from 'io-ts';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
+  cpuTotal: null,
   normalizedLoad1m: null,
   diskSpaceUsage: null,
   memory: null,
   memoryFree: null,
   rx: null,
   tx: null,
+  rxV2: null,
+  txV2: null,
 });
 
 export const RangeRT = rt.type({
