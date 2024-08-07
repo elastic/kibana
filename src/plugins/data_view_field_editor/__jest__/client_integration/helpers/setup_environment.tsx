@@ -18,7 +18,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
@@ -32,7 +32,8 @@ const { search } = dataStart;
 
 export const spySearchQuery = jest.fn();
 export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
-export const spyIndexPatternGetAllFields = jest.fn().mockImplementation(() => []);
+export const spyIndexPatternGetByName = jest.fn().mockImplementation(() => {});
+export const spyGetFieldsForWildcard = jest.fn().mockResolvedValue({ fields: [] });
 
 let searchResponseDelay = 0;
 
@@ -91,7 +92,8 @@ export const indexPatternNameForTest = 'testIndexPattern';
 export const WithFieldEditorDependencies =
   <T extends object = { [key: string]: unknown }>(
     Comp: FunctionComponent<T>,
-    overridingDependencies?: Partial<Context>
+    overridingDependencies?: Partial<Context>,
+    getByNameOverride?: () => any
   ) =>
   (props: T) => {
     // Setup mocks
@@ -119,20 +121,25 @@ export const WithFieldEditorDependencies =
       return new MockDefaultFieldFormat();
     });
 
-    const dataView = createStubDataView({
+    const dataView = createStubDataViewLazy({
       spec: {
         title: indexPatternNameForTest,
       },
+      deps: {
+        apiClient: {
+          getFieldsForWildcard: spyGetFieldsForWildcard,
+        },
+      },
     });
 
-    jest.spyOn(dataView.fields, 'getAll').mockImplementation(spyIndexPatternGetAllFields);
+    jest
+      .spyOn(dataView, 'getFieldByName')
+      .mockImplementation(getByNameOverride || spyIndexPatternGetByName);
 
     const dependencies: Context = {
       dataView,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       fieldTypeToProcess: 'runtime',
-      existingConcreteFields: [],
-      namesNotAllowed: { fields: [], runtimeComposites: [] },
       links: {
         runtimePainless: 'https://elastic.co',
       },
@@ -162,6 +169,7 @@ export const WithFieldEditorDependencies =
         notifications: notificationServiceMock.createStartContract(),
       },
       dataView,
+      dataViewToUpdate: dataView,
       onSave: jest.fn(),
       fieldTypeToProcess: 'runtime',
     });
