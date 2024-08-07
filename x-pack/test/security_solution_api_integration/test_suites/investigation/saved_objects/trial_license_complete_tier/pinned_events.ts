@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Unpinned an event', () => {
-      it('return null', async () => {
+      it('returns {code: 200}', async () => {
         const response = await supertest
           .patch('/api/pinned_event')
           .set('elastic-api-version', '2023-10-31')
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             eventId,
             timelineId,
           });
-        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.be(null);
+        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.be({ code: 200 });
       });
     });
   });
