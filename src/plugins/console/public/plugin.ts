@@ -26,6 +26,7 @@ import {
   EmbeddableConsoleInfo,
   createStorage,
   setStorage,
+  httpService,
 } from './services';
 
 export class ConsoleUIPlugin
@@ -52,6 +53,7 @@ export class ConsoleUIPlugin
       dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
+    httpService.setup(http);
     this.autocompleteInfo.setup(http);
     setAutocompleteInfo(this.autocompleteInfo);
 
