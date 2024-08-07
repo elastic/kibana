@@ -355,8 +355,8 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const inputIntegrationName = async (text: string) => {
-    const flyout = await testSubjects.find('createPackagePolicy_page');
-    const nameField = await flyout.findAllByCssSelector('input[id="name"]');
+    const page = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await page.findAllByCssSelector('input[id="name"]');
     await nameField[0].clearValueWithKeyboard();
     await nameField[0].type(text);
   };
