@@ -35,6 +35,7 @@ export interface ChatRefactor {
   isLoadingAnonymizationFields: boolean;
   isLoadingCurrentUserConversations: boolean;
   isLoadingPrompts: boolean;
+  isFetchedPrompts: boolean;
   refetchPrompts: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;
@@ -78,6 +79,7 @@ export const useChatRefactor = ({
     data: { data: allPrompts },
     refetch: refetchPrompts,
     isLoading: isLoadingPrompts,
+    isFetched: isFetchedPrompts,
   } = useFetchPrompts();
   const allSystemPrompts = useMemo(() => {
     if (!isLoadingPrompts) {
@@ -96,6 +98,7 @@ export const useChatRefactor = ({
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
     isLoadingPrompts,
+    isFetchedPrompts,
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,

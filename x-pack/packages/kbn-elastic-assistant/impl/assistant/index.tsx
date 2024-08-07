@@ -110,23 +110,22 @@ const AssistantComponent: React.FC<Props> = ({
     isErrorAnonymizationFields,
     isFetchedAnonymizationFields,
     isFetchedCurrentUserConversations,
+    isFetchedPrompts,
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
-    isLoadingPrompts,
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
   } = useChatRefactor({ http, baseConversations, isAssistantEnabled });
 
   // Connector details
-  const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
+  const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
   const {
     currentConversation,
-    currentConversationId,
     currentSystemPromptId,
     handleCreateConversation,
     handleOnConversationDeleted,
@@ -134,7 +133,6 @@ const AssistantComponent: React.FC<Props> = ({
     handleOnSystemPromptSelectionChange,
     refetchCurrentConversation,
     setCurrentConversation,
-    setCurrentConversationId,
     setCurrentSystemPromptId,
   } = useCurrentConversation({
     allSystemPrompts,
@@ -143,72 +141,11 @@ const AssistantComponent: React.FC<Props> = ({
     refetchCurrentUserConversations,
     conversationId: getLastConversationId(conversationTitle),
     mayUpdateConversations:
-      areConnectorsFetched &&
+      isFetchedConnectors &&
       isFetchedCurrentUserConversations &&
+      isFetchedPrompts &&
       Object.keys(conversations).length > 0,
   });
-
-  // goal: REMOVE this useEffect
-  // useEffect(() => {
-  //   if (
-  //     areConnectorsFetched &&
-  //     isFetchedCurrentUserConversations &&
-  //     Object.keys(conversations).length > 0
-  //   ) {
-  //     setCurrentConversation((prev) => {
-  //       const nextConversation =
-  //         (currentConversationId && conversations[currentConversationId]) ||
-  //         (isAssistantEnabled &&
-  //           (conversations[getLastConversationId(conversationTitle)] ||
-  //             find(conversations, ['title', getLastConversationId(conversationTitle)]))) ||
-  //         find(conversations, ['title', getLastConversationId(WELCOME_CONVERSATION_TITLE)]);
-  //       debugger;
-  //       if (deepEqual(prev, nextConversation)) return prev;
-  //
-  //       const conversationToReturn =
-  //         (nextConversation &&
-  //           conversations[
-  //             nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
-  //           ]) ??
-  //         conversations[WELCOME_CONVERSATION_TITLE] ??
-  //         getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
-  //
-  //       // updated selected system prompt
-  //       setCurrentSystemPromptId(
-  //         getDefaultSystemPrompt({
-  //           allSystemPrompts,
-  //           conversation: conversationToReturn,
-  //         })?.id
-  //       );
-  //       if (
-  //         prev &&
-  //         prev.id === conversationToReturn.id &&
-  //         // if the conversation id has not changed and the previous conversation has more messages
-  //         // it is because the local conversation has a readable stream running
-  //         // and it has not yet been persisted to the stored conversation
-  //         prev.messages.length > conversationToReturn.messages.length
-  //       ) {
-  //         return {
-  //           ...conversationToReturn,
-  //           messages: prev.messages,
-  //         };
-  //       }
-  //       return conversationToReturn;
-  //     });
-  //   }
-  // }, [
-  //   allSystemPrompts,
-  //   areConnectorsFetched,
-  //   conversationTitle,
-  //   conversations,
-  //   currentConversationId,
-  //   getDefaultConversation,
-  //   getLastConversationId,
-  //   isAssistantEnabled,
-  //   isFetchedCurrentUserConversations,
-  //   setCurrentConversation,
-  //   setCurrentSystemPromptId,
-  // ]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(
@@ -231,7 +168,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Remember last selection for reuse after keyboard shortcut is pressed.
   // Clear it if there is no connectors
   useEffect(() => {
-    if (areConnectorsFetched && !connectors?.length) {
+    if (isFetchedConnectors && !connectors?.length) {
       return setLastConversationId(WELCOME_CONVERSATION_TITLE);
     }
 
@@ -241,7 +178,7 @@ const AssistantComponent: React.FC<Props> = ({
       );
     }
   }, [
-    areConnectorsFetched,
+    isFetchedConnectors,
     connectors?.length,
     conversations,
     currentConversation,
@@ -270,7 +207,7 @@ const AssistantComponent: React.FC<Props> = ({
   const showMissingConnectorCallout = useMemo(() => {
     if (
       !isLoadingCurrentUserConversations &&
-      areConnectorsFetched &&
+      isFetchedConnectors &&
       currentConversation?.id !== ''
     ) {
       if (!currentConversation?.apiConfig?.connectorId) {
@@ -284,7 +221,7 @@ const AssistantComponent: React.FC<Props> = ({
 
     return false;
   }, [
-    areConnectorsFetched,
+    isFetchedConnectors,
     connectors,
     currentConversation?.apiConfig?.connectorId,
     currentConversation?.id,
@@ -556,7 +493,7 @@ const AssistantComponent: React.FC<Props> = ({
                 banner={
                   !isDisabled &&
                   showMissingConnectorCallout &&
-                  areConnectorsFetched && (
+                  isFetchedConnectors && (
                     <ConnectorMissingCallout
                       isConnectorConfigured={(connectors?.length ?? 0) > 0}
                       isSettingsModalVisible={isSettingsModalVisible}

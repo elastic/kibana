@@ -36,7 +36,6 @@ export const useCurrentConversation = ({
   mayUpdateConversations,
 }: Props): {
   currentConversation: Conversation | undefined;
-  currentConversationId: string | undefined;
   currentSystemPromptId: string | undefined;
   handleCreateConversation: () => Promise<void>;
   handleOnConversationDeleted: (cTitle: string) => Promise<void>;
@@ -48,7 +47,6 @@ export const useCurrentConversation = ({
     isStreamRefetch?: boolean;
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
-  setCurrentConversationId: Dispatch<SetStateAction<string>>;
   setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
 } => {
   const {
@@ -276,7 +274,6 @@ export const useCurrentConversation = ({
 
   return {
     currentConversation,
-    currentConversationId,
     currentSystemPromptId,
     handleCreateConversation,
     handleOnConversationDeleted,
@@ -284,7 +281,6 @@ export const useCurrentConversation = ({
     handleOnSystemPromptSelectionChange,
     refetchCurrentConversation,
     setCurrentConversation,
-    setCurrentConversationId,
     setCurrentSystemPromptId,
   };
 };
