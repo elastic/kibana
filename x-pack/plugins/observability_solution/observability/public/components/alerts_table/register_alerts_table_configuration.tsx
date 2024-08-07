@@ -14,6 +14,7 @@ import { ObservabilityRuleTypeRegistry } from '../..';
 import { getAlertsPageTableConfiguration } from './alerts/get_alerts_page_table_configuration';
 import { getRuleDetailsTableConfiguration } from './rule_details/get_rule_details_table_configuration';
 import { getSloAlertsTableConfiguration } from './slo/get_slo_alerts_table_configuration';
+import { getObservabilityTableConfiguration } from './observability/get_alerts_page_table_configuration';
 
 export const registerAlertsTableConfiguration = (
   alertTableConfigRegistry: AlertTableConfigRegistry,
@@ -23,7 +24,14 @@ export const registerAlertsTableConfiguration = (
   http: HttpSetup,
   notifications: NotificationsStart
 ) => {
-  // Alert page
+  // Observability table
+  const observabilityAlertsTableConfig = getObservabilityTableConfiguration(
+    observabilityRuleTypeRegistry,
+    config
+  );
+  alertTableConfigRegistry.register(observabilityAlertsTableConfig);
+
+  // Alerts page
   const alertsPageAlertsTableConfig = getAlertsPageTableConfiguration(
     observabilityRuleTypeRegistry,
     config,
