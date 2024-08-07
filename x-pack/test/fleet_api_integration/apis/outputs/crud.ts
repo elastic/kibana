@@ -49,13 +49,13 @@ export default function (providerContext: FtrProviderContext) {
 
   const enableOutputSecrets = async () => {
     try {
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: true,
         },
-        overwrite: false,
+        overwrite: true,
       });
     } catch (e) {
       throw e;
@@ -64,13 +64,13 @@ export default function (providerContext: FtrProviderContext) {
 
   const disableOutputSecrets = async () => {
     try {
-      await kibanaServer.savedObjects.update({
+      await kibanaServer.savedObjects.create({
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: false,
         },
-        overwrite: false,
+        overwrite: true,
       });
     } catch (e) {
       throw e;
