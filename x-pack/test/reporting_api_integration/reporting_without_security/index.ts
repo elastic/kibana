@@ -15,6 +15,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       await reportingAPI.logTaskManagerHealth();
     });
 
-    loadTestFile(require.resolve('./job_apis_csv'));
+    loadTestFile(require.resolve('./csv/job_apis_csv'));
   });
 }
