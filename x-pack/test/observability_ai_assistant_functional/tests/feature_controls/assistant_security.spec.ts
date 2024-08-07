@@ -21,8 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
 
-  describe('ai assistant security', () => {
-    describe('ai assistant all privileges', () => {
+  describe('ai assistant privileges', () => {
+    describe('all privileges', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
@@ -53,7 +53,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('ai_assistant_role'),
@@ -116,7 +115,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-    describe('ai assistant no actions privileges', () => {
+    describe('no actions privileges', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
@@ -152,7 +151,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(ui.pages.conversations.connectorsErrorMsg);
       });
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('ai_assistant_role'),
@@ -160,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
     });
-    describe('ai assistant no privileges', () => {
+    describe('no privileges', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
@@ -194,7 +192,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await testSubjects.missingOrFail(ui.pages.links.solutionMenuLink);
       });
-      it('shows no AI Assistant buttin in global nav', async () => {
+      it('shows no AI Assistant button in global nav', async () => {
         await testSubjects.missingOrFail(ui.pages.links.globalHeaderButton);
       });
       it('shows no AI Assistant conversations link in global search', async () => {
@@ -211,7 +209,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail(ui.pages.conversations.conversationsPage);
       });
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('ai_assistant_role'),

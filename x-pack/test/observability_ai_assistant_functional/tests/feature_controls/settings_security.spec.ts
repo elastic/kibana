@@ -18,8 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  describe('ai assistant management security', () => {
-    describe('ai assistant management all necessary privileges', () => {
+  describe('ai assistant management privileges', () => {
+    describe('all privileges', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-    describe('ai assistant management with advanced settings read privilege', () => {
+    describe('with advancedSettings read privilege', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
@@ -195,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await logsIndexPatternInput.getAttribute('disabled')).to.be('true');
       });
     });
-    describe('ai assistant with no ai assistant management privilege', () => {
+    describe('observabilityAIAssistant privilege with no aiAssistantManagementSelection privilege', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
@@ -257,7 +257,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail(ui.pages.settings.settingsPage);
       });
     });
-    describe('ai assistant management privilege with no ai assistant privilege', () => {
+    describe('aiAssistantManagementSelection privilege with no observabilityAIAssistant privilege', () => {
       before(async () => {
         await security.role.create('ai_assistant_role', {
           kibana: [
