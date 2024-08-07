@@ -30,7 +30,7 @@ export const entityMetadataSchema: z.ZodType<Metadata> = z.lazy(() =>
   z.union([literalSchema, z.array(entityMetadataSchema), z.record(entityMetadataSchema)])
 );
 
-export const entitySummarySchema = z
+export const entityLatestSchema = z
   .object({
     entity: entityBaseSchema.merge(
       z.object({

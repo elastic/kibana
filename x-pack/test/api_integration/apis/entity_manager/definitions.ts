@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { EntityDefinition, entitySummarySchema } from '@kbn/entities-schema';
+import { EntityDefinition, entityLatestSchema } from '@kbn/entities-schema';
 import {
   entityDefinition as mockDefinition,
   entityDefinitionWithBackfill as mockBackfillDefinition,
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
           retryService,
           logger,
         });
-        const parsedSample = entitySummarySchema.safeParse(sample.hits.hits[0]._source);
+        const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);
         expect(parsedSample.success).to.be(true);
       });
     });

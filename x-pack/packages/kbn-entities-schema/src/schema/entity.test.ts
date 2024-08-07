@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { entitySummarySchema, entityMetadataSchema } from './entity';
+import { entityLatestSchema, entityMetadataSchema } from './entity';
 
 const entity = {
   entity: {
@@ -69,7 +69,7 @@ describe('Entity Schemas', () => {
         ...metadata,
       };
 
-      const result = entitySummarySchema.safeParse(doc);
+      const result = entityLatestSchema.safeParse(doc);
       expect(result).toHaveProperty('success', true);
     });
   });
