@@ -33,7 +33,7 @@ const getDefaultServerlessRole = (projectType: string) => {
 
 export class ServerlessAuthProvider implements AuthProvider {
   private readonly projectType: string;
-  private readonly rolesDefinitonPath: string;
+  private readonly rolesDefinitionPath: string;
 
   constructor(config: Config) {
     const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
@@ -46,17 +46,17 @@ export class ServerlessAuthProvider implements AuthProvider {
       throw new Error(`Unsupported serverless projectType: ${this.projectType}`);
     }
 
-    this.rolesDefinitonPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
+    this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
   getSupportedRoleDescriptors(): any {
-    return readRolesDescriptorsFromResource(this.rolesDefinitonPath);
+    return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
   }
   getDefaultRole(): string {
     return getDefaultServerlessRole(this.projectType);
   }
   getRolesDefinitionPath(): string {
-    return this.rolesDefinitonPath;
+    return this.rolesDefinitionPath;
   }
   getCommonRequestHeader() {
     return COMMON_REQUEST_HEADERS;
