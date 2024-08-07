@@ -985,7 +985,10 @@ const fieldTypesToConstants: Record<SupportedDataType, string> = {
   cartesian_point: 'to_cartesianpoint("POINT (30 10)")',
   cartesian_shape: 'to_cartesianshape("POINT (30 10)")',
   null: 'NULL',
-  time_duration: 'to_timeduration("3 hours")',
+  time_duration: '1 day',
+  // the following are never supplied
+  // by the ES function definitions. Just making types happy
+  time_literal: '1 day',
   unsupported: '',
 };
 
