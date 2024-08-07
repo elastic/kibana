@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { getAuthRoleProvider } from './get_auth_provider';
+import { getAuthProvider } from './get_auth_provider';
 import { InternalRequestHeader } from './default_request_headers';
 
 export interface RoleCredentials {
@@ -27,7 +27,7 @@ export async function SamlAuthProvider({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
 
-  const authRoleProvider = await getAuthRoleProvider({ config, kibanaServer, log });
+  const authRoleProvider = await getAuthProvider({ config, kibanaServer, log });
   const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 

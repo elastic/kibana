@@ -25,7 +25,7 @@ export const ES_CONFIG = 'config/elasticsearch.yml';
 
 export const ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');
 
-export const STATEFUL_ROLES_ROOT_PATH = resolve(__dirname, './stateful_resources/saml');
+export const STATEFUL_ROLES_ROOT_PATH = resolve(__dirname, './stateful_resources');
 
 export const SERVERLESS_OPERATOR_USERS_PATH = resolve(
   __dirname,

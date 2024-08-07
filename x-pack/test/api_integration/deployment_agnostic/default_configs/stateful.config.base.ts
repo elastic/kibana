@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Fs from 'fs';
 import {
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ENTITY_ID,
@@ -19,7 +18,6 @@ import {
   systemIndicesSuperuser,
   FtrConfigProviderContext,
 } from '@kbn/test';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { services } from '../services';
 
 interface CreateTestConfigOptions {
@@ -43,16 +41,10 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
       kibana: {
         ...kbnTestConfig.getUrlParts(systemIndicesSuperuser),
         protocol: process.env.TEST_CLOUD ? 'https' : 'http',
-        certificateAuthorities: process.env.TEST_CLOUD
-          ? undefined
-          : [Fs.readFileSync(CA_CERT_PATH)],
       },
       elasticsearch: {
         ...esTestConfig.getUrlParts(),
         protocol: process.env.TEST_CLOUD ? 'https' : 'http',
-        certificateAuthorities: process.env.TEST_CLOUD
-          ? undefined
-          : [Fs.readFileSync(CA_CERT_PATH)],
       },
     };
 

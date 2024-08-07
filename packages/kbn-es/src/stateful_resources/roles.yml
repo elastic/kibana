@@ -1,5 +1,6 @@
 # -----
 # This file is for information purpose only. 'viewer' and 'editor' roles are defined in stateful Elasticsearch by default
+# Source: https://github.com/elastic/elasticsearch/blob/4272164530807787d4d8b991e3095a6e79176dbf/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/store/ReservedRolesStore.java#L861-L952
 # Note: inconsistency between these roles definition and the same roles of serverless project may break FTR deployment-agnostic tests
 # -----
 viewer:
@@ -94,7 +95,9 @@ editor:
   run_as: []
 
 # Admin role without 'remote_indices' access definition
+# There is no such built-in role in stateful, and it's a role "similar" to the built-in 'admin' role in serverless
 admin:
+  # TODO: 'all' should be replaced with explicit list both here and serverless for deployment-agnostic tests with 'admin' role to be compatible
   cluster: ['all']
   indices:
     - names: ['*']

@@ -17,7 +17,8 @@
     "@kbn/test",
     "@kbn/expect",
     "@kbn/repo-info",
-    "@kbn/es"
+    "@kbn/es",
+    "@kbn/mock-idp-utils"
   ],
   "exclude": [
     "target/**/*",

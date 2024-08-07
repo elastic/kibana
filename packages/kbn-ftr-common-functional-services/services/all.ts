@@ -19,5 +19,5 @@ export const services = {
   esArchiver: EsArchiverProvider,
   retry: RetryService,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
-  samlAuthProvider: SamlAuthProvider,
+  samlAuth: SamlAuthProvider,
 };

@@ -19,7 +19,7 @@ export type {
 export const services = {
   ...deploymentAgnosticServices,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
-  samlAuth: commonFunctionalServices.samlAuthProvider,
+  samlAuth: commonFunctionalServices.samlAuth,
   dataViewApi: DataViewApiProvider,
   sloApi: SloApiProvider,
   // create a new deployment-agnostic service and load here

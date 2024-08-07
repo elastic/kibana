@@ -15,6 +15,6 @@ export const svlServices = {
   ...essServices,
   supertest: SecuritySolutionServerlessSuperTest,
   securitySolutionUtils: SecuritySolutionServerlessUtils,
-  svlUserManager: commonFunctionalServices.samlAuthProvider,
+  svlUserManager: commonFunctionalServices.samlAuth,
   svlCommonApi: SvlCommonApiServiceProvider,
 };

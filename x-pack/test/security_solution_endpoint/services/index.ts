@@ -43,7 +43,7 @@ export const svlServices = {
   supertestWithoutAuth: KibanaSupertestWithCertWithoutAuthProvider,
 
   svlCommonApi: SvlCommonApiServiceProvider,
-  svlUserManager: commonFunctionalServices.samlAuthProvider,
+  svlUserManager: commonFunctionalServices.samlAuth,
 };
 
 export type Services = typeof services | typeof svlServices;

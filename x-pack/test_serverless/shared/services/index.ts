@@ -24,6 +24,6 @@ export const services = {
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
-  svlUserManager: commonFunctionalServices.samlAuthProvider,
+  svlUserManager: commonFunctionalServices.samlAuth,
   dataViewApi: DataViewApiProvider,
 };

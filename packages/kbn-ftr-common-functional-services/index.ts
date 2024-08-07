@@ -23,8 +23,6 @@ export type Es = ProvidedType<typeof EsProvider>;
 import { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
 export type SupertestWithoutAuthProviderType = ProvidedType<typeof SupertestWithoutAuthProvider>;
 
-import { SamlAuthProvider } from './services/saml_auth';
-export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;
 export type { InternalRequestHeader, RoleCredentials } from './services/saml_auth';
 
 export type { FtrProviderContext } from './services/ftr_provider_context';
