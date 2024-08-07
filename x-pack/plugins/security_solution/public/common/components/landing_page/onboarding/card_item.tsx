@@ -12,7 +12,7 @@ import React, { useMemo, useCallback } from 'react';
 import classnames from 'classnames';
 import type {
   CardId,
-  ExpandedCardSteps,
+  ExpandedSteps,
   ToggleTaskCompleteStatus,
   OnStepClicked,
   SectionId,
@@ -27,7 +27,7 @@ export const SHADOW_ANIMATION_DURATION = 350;
 const CardItemComponent: React.FC<{
   activeStepIds: StepId[] | undefined;
   cardId: CardId;
-  expandedCardSteps: ExpandedCardSteps;
+  expandedSteps: ExpandedSteps;
   finishedSteps: Set<StepId>;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
   onStepClicked: OnStepClicked;
@@ -35,18 +35,18 @@ const CardItemComponent: React.FC<{
 }> = ({
   activeStepIds,
   cardId,
-  expandedCardSteps,
+  expandedSteps,
   finishedSteps,
   toggleTaskCompleteStatus,
   onStepClicked,
   sectionId,
 }) => {
-  const isExpandedCard = expandedCardSteps[cardId].isExpanded;
+  const isExpandedCard = expandedSteps[cardId].isExpanded;
 
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
   const expandedSteps = useMemo(
-    () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
-    [cardId, expandedCardSteps]
+    () => new Set(expandedSteps[cardId]?.expandedSteps ?? []),
+    [cardId, expandedSteps]
   );
   const cardItemPanelStyle = useCardItemStyles();
 

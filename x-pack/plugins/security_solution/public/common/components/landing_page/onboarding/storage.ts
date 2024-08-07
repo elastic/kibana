@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import type { CardId, StepId } from './types';
+import type { CardId } from './types';
 
-import {
-  QuickStartSectionCardsId,
-  AddAndValidateYourDataCardsId,
-  GetStartedWithAlertsCardsId,
-} from './types';
-
-import { DEFAULT_FINISHED_STEPS, isDefaultFinishedCardStep } from './helpers';
-import { getSections } from './sections';
+import { DEFAULT_FINISHED_CARDS, isDefaultFinishedCard } from './helpers';
 import { storage } from '../../../lib/local_storage';
-import type { ProductLine } from './configs';
 
-export const ACTIVE_PRODUCTS_STORAGE_KEY = 'securitySolution.getStarted.activeProducts';
-export const FINISHED_STEPS_STORAGE_KEY = 'securitySolution.getStarted.finishedSteps';
-export const EXPANDED_CARDS_STORAGE_KEY = 'securitySolution.getStarted.expandedCards';
+export const FINISHED_CARDS_STORAGE_KEY = 'securitySolution.onboarding.finishedCards';
+export const EXPANDED_CARDS_STORAGE_KEY = 'securitySolution.onboarding.expandedCards';
 
 export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null | undefined) => {
   if (spaceId == null) {
@@ -29,111 +20,54 @@ export const getStorageKeyBySpace = (storageKey: string, spaceId: string | null 
   return `${storageKey}.${spaceId}`;
 };
 
-export const defaultExpandedCards = {
-  [QuickStartSectionCardsId.watchTheOverviewVideo]: { isExpanded: false, expandedSteps: [] },
-  [QuickStartSectionCardsId.createFirstProject]: { isExpanded: false, expandedSteps: [] },
-  [AddAndValidateYourDataCardsId.addIntegrations]: { isExpanded: false, expandedSteps: [] },
-  [AddAndValidateYourDataCardsId.viewDashboards]: { isExpanded: false, expandedSteps: [] },
-  [GetStartedWithAlertsCardsId.enablePrebuiltRules]: { isExpanded: false, expandedSteps: [] },
-  [GetStartedWithAlertsCardsId.viewAlerts]: { isExpanded: false, expandedSteps: [] },
-};
+export const defaultExpandedCards = [];
 
 export class OnboardingStorage {
-  private finishedStepsStorageKey: string;
-  private activeProductsStorageKey: string;
+  private finishedCardsStorageKey: string;
   private expandedCardsStorageKey: string;
 
   constructor(spaceId: string | undefined) {
-    this.finishedStepsStorageKey = getStorageKeyBySpace(FINISHED_STEPS_STORAGE_KEY, spaceId);
-    this.activeProductsStorageKey = getStorageKeyBySpace(ACTIVE_PRODUCTS_STORAGE_KEY, spaceId);
+    this.finishedCardsStorageKey = getStorageKeyBySpace(FINISHED_CARDS_STORAGE_KEY, spaceId);
     this.expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
   }
-  setDefaultFinishedSteps = (cardId: CardId) => {
-    const finishedStepsStorageKey = this.finishedStepsStorageKey;
+  setDefaultFinishedCards = () => {
+    const finishedCardsStorageKey = this.finishedCardsStorageKey;
 
-    const allFinishedSteps: Record<CardId, StepId[]> = storage.get(finishedStepsStorageKey);
+    storage.set(finishedCardsStorageKey, DEFAULT_FINISHED_CARDS);
+  };
 
-    const defaultFinishedStepsByCardId = DEFAULT_FINISHED_STEPS[cardId];
+  public getAllFinishedCardsFromStorage = () => {
+    const finishedCardsStorageKey = this.finishedCardsStorageKey;
+    const allFinishedCards: CardId[] = storage.get(finishedCardsStorageKey);
 
-    const hasDefaultFinishedSteps = defaultFinishedStepsByCardId != null;
-    if (!hasDefaultFinishedSteps) {
+    if (allFinishedCards == null) {
+      storage.set(finishedCardsStorageKey, DEFAULT_FINISHED_CARDS);
+    }
+    return storage.get(finishedCardsStorageKey);
+  };
+
+  public addFinishedCardToStorage = (cardId: CardId) => {
+    const finishedCardsStorageKey = this.finishedCardsStorageKey;
+    const finishedCards = this.getAllFinishedCardsFromStorage() ?? [];
+    if (finishedCards.indexOf(cardId) < 0) {
+      finishedCards.push(cardId);
+      storage.set(finishedCardsStorageKey, finishedCards);
+    }
+  };
+  public removeFinishedCardFromStorage = (cardId: CardId, onboardingSteps: CardId[]) => {
+    if (isDefaultFinishedCard(cardId, onboardingSteps)) {
       return;
     }
+    const finishedCardsStorageKey = this.finishedCardsStorageKey;
 
-    storage.set(finishedStepsStorageKey, {
-      ...allFinishedSteps,
-      [cardId]: Array.from(
-        // dedupe card steps
-        new Set([...(defaultFinishedStepsByCardId ?? []), ...(allFinishedSteps[cardId] ?? [])])
-      ),
-    });
-  };
-  public getActiveProductsFromStorage = () => {
-    const activeProductsStorageKey = this.activeProductsStorageKey;
-    const activeProducts: ProductLine[] = storage.get(activeProductsStorageKey);
-    return activeProducts ?? [];
-  };
-  public toggleActiveProductsInStorage = (productId: ProductLine) => {
-    const activeProductsStorageKey = this.activeProductsStorageKey;
-    const activeProducts: ProductLine[] = storage.get(activeProductsStorageKey) ?? [];
-    const index = activeProducts.indexOf(productId);
-    if (index < 0) {
-      activeProducts.push(productId);
-    } else {
-      activeProducts.splice(index, 1);
-    }
-    storage.set(activeProductsStorageKey, activeProducts);
-    return activeProducts;
-  };
-  getFinishedStepsFromStorageByCardId = (cardId: CardId) => {
-    const finishedSteps = this.getAllFinishedStepsFromStorage();
-    const steps: StepId[] = finishedSteps[cardId] ?? [];
-    return steps;
-  };
-  public getAllFinishedStepsFromStorage = () => {
-    const finishedStepsStorageKey = this.finishedStepsStorageKey;
-    const allFinishedSteps: Record<CardId, StepId[]> = storage.get(finishedStepsStorageKey);
-
-    if (allFinishedSteps == null) {
-      storage.set(finishedStepsStorageKey, DEFAULT_FINISHED_STEPS);
-    } else {
-      getSections().forEach((section) => {
-        section.cards?.forEach((card) => {
-          this.setDefaultFinishedSteps(card.id);
-        });
-      });
-    }
-    return storage.get(finishedStepsStorageKey);
-  };
-
-  public addFinishedStepToStorage = (cardId: CardId, stepId: StepId) => {
-    const finishedStepsStorageKey = this.finishedStepsStorageKey;
-    const finishedSteps = this.getAllFinishedStepsFromStorage();
-    const card: StepId[] = finishedSteps[cardId] ?? [];
-    if (card.indexOf(stepId) < 0) {
-      card.push(stepId);
-      storage.set(finishedStepsStorageKey, { ...finishedSteps, [cardId]: card });
-    }
-  };
-  public removeFinishedStepFromStorage = (
-    cardId: CardId,
-    stepId: StepId,
-    onboardingSteps: StepId[]
-  ) => {
-    if (isDefaultFinishedCardStep(cardId, stepId, onboardingSteps)) {
-      return;
-    }
-    const finishedStepsStorageKey = this.finishedStepsStorageKey;
-
-    const finishedSteps = this.getAllFinishedStepsFromStorage();
-    const steps: StepId[] = finishedSteps[cardId] ?? [];
-    const index = steps.indexOf(stepId);
+    const cardIds: CardId[] = this.getAllFinishedCardsFromStorage() ?? [];
+    const index = cardIds.indexOf(cardId);
     if (index >= 0) {
-      steps.splice(index, 1);
+      cardIds.splice(index, 1);
     }
-    storage.set(finishedStepsStorageKey, { ...finishedSteps, [cardId]: steps });
+    storage.set(finishedCardsStorageKey, cardIds);
   };
-  public getAllExpandedCardStepsFromStorage = () => {
+  public getAllExpandedCardsFromStorage = () => {
     const expandedCardsStorageKey = this.expandedCardsStorageKey;
     const storageData = storage.get(expandedCardsStorageKey);
 
@@ -141,54 +75,27 @@ export class OnboardingStorage {
       ? defaultExpandedCards
       : storageData;
   };
-  public resetAllExpandedCardStepsToStorage = () => {
-    const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
-      this.getAllExpandedCardStepsFromStorage();
+  public resetAllExpandedCardsToStorage = () => {
     const expandedCardsStorageKey = this.expandedCardsStorageKey;
 
-    storage.set(
-      expandedCardsStorageKey,
-      Object.entries(activeCards).reduce((acc, [cardId, card]) => {
-        acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
-        return acc;
-      }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
-    );
+    storage.set(expandedCardsStorageKey, defaultExpandedCards);
   };
-  public addExpandedCardStepToStorage = (cardId: CardId, stepId: StepId) => {
-    const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
-      this.getAllExpandedCardStepsFromStorage();
+  public addExpandedCardStepToStorage = (cardId: CardId) => {
+    const expandedCards: string[] = this.getAllExpandedCardsFromStorage();
     const expandedCardsStorageKey = this.expandedCardsStorageKey;
 
-    const card = activeCards[cardId]
-      ? {
-          expandedSteps: [stepId],
-          isExpanded: true,
-        }
-      : {
-          isExpanded: false,
-          expandedSteps: [],
-        };
+    const cards = expandedCards.indexOf(cardId) < 0 ? [...expandedCards, cardId] : expandedCards;
 
-    storage.set(expandedCardsStorageKey, { ...activeCards, [cardId]: card });
+    storage.set(expandedCardsStorageKey, cards);
   };
-  public removeExpandedCardStepFromStorage = (cardId: CardId, stepId?: StepId) => {
+  public removeExpandedCardFromStorage = (cardId: CardId) => {
     const expandedCardsStorageKey = this.expandedCardsStorageKey;
 
-    const activeCards: Record<
-      CardId,
-      { isExpanded: boolean; expandedSteps: StepId[] } | undefined
-    > = storage.get(expandedCardsStorageKey) ?? {};
-    const card = activeCards[cardId];
-    if (card && !stepId) {
-      card.isExpanded = false;
+    const activeCards: CardId[] = storage.get(expandedCardsStorageKey) ?? [];
+    const index = activeCards.indexOf(cardId);
+    if (index >= 0) {
+      activeCards.splice(index, 1);
     }
-    if (card && stepId) {
-      const index = card.expandedSteps.indexOf(stepId);
-      if (index >= 0) {
-        card.expandedSteps.splice(index, 1);
-        card.isExpanded = false;
-      }
-    }
-    storage.set(expandedCardsStorageKey, { ...activeCards, [cardId]: card });
+    storage.set(expandedCardsStorageKey, activeCards);
   };
 }

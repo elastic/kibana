@@ -12,70 +12,47 @@ import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { SecurityPageName } from '../../../../../../common';
 
 import { OnboardingStorage } from '../storage';
-import {
-  getActiveSectionsInitialStates,
-  getActiveProductsInitialStates,
-  getFinishedStepsInitialStates,
-  reducer,
-} from '../reducer';
+import { getActiveSectionsInitialStates, reducer } from '../reducer';
 import type {
   Card,
-  ExpandedCardSteps,
+  ExpandedCards,
   ToggleTaskCompleteStatus,
-  OnStepClicked,
-  Step,
-  Switch,
-  StepId,
+  CardId,
+  OnCardClicked,
 } from '../types';
 import { OnboardingActions } from '../types';
-import { findCardSectionByStepId } from '../helpers';
+import { findCardSectionByCardId } from '../helpers';
 import type { SecurityProductTypes } from '../configs';
-import { ALL_PRODUCT_LINES, ProductLine } from '../configs';
 import { useKibana } from '../../../../lib/kibana';
 
 const syncExpandedCardStepsToStorageFromURL = (
   onboardingStorage: OnboardingStorage,
   maybeStepId: string
 ) => {
-  const { matchedCard, matchedStep } = findCardSectionByStepId(maybeStepId);
-  const hasStepContent = matchedStep && matchedStep.description;
+  const { matchedCard } = findCardSectionByCardId(maybeStepId);
 
-  if (matchedCard && matchedStep && hasStepContent) {
-    onboardingStorage.resetAllExpandedCardStepsToStorage();
-    onboardingStorage.addExpandedCardStepToStorage(matchedCard.id, matchedStep.id);
+  if (matchedCard) {
+    onboardingStorage.resetAllExpandedCardsToStorage();
+    onboardingStorage.addExpandedCardStepToStorage(matchedCard.id);
   }
 };
 
 const syncExpandedCardStepsFromStorageToURL = (
-  expandedCardSteps: ExpandedCardSteps,
-  callback: ({
-    matchedCard,
-    matchedStep,
-  }: {
-    matchedCard: Card | null;
-    matchedStep: Step | null;
-  }) => void
+  expandedCards: ExpandedCards,
+  callback: ({ matchedCard }: { matchedCard: Card | null }) => void
 ) => {
-  const expandedCardStep = Object.values(expandedCardSteps).find(
-    (expandedCard) => expandedCard.expandedSteps.length > 0
-  );
+  if (expandedCards) {
+    const { matchedCard } = findCardSectionByCardId([...expandedCards][0]);
 
-  if (expandedCardStep?.expandedSteps[0]) {
-    const { matchedCard, matchedStep } = findCardSectionByStepId(
-      expandedCardStep?.expandedSteps[0]
-    );
-
-    callback?.({ matchedCard, matchedStep });
+    callback?.({ matchedCard });
   }
 };
 
 export const useTogglePanel = ({
-  productTypes,
   onboardingSteps,
   spaceId,
 }: {
-  productTypes?: SecurityProductTypes;
-  onboardingSteps: StepId[];
+  onboardingSteps: CardId[];
   spaceId: string | undefined;
 }) => {
   const { telemetry } = useKibana().services;
@@ -86,116 +63,86 @@ export const useTogglePanel = ({
 
   const onboardingStorage = useMemo(() => new OnboardingStorage(spaceId), [spaceId]);
   const {
-    getAllFinishedStepsFromStorage,
-    getActiveProductsFromStorage,
-    toggleActiveProductsInStorage,
+    getAllFinishedCardsFromStorage,
     addExpandedCardStepToStorage,
-    addFinishedStepToStorage,
-    removeFinishedStepFromStorage,
-    removeExpandedCardStepFromStorage,
-    resetAllExpandedCardStepsToStorage,
-    getAllExpandedCardStepsFromStorage,
+    addFinishedCardToStorage,
+    removeFinishedCardFromStorage,
+    removeExpandedCardFromStorage,
+    resetAllExpandedCardsToStorage,
+    getAllExpandedCardsFromStorage,
   } = onboardingStorage;
 
-  const finishedStepsInitialStates = useMemo(
-    () =>
-      getFinishedStepsInitialStates({
-        finishedSteps: getAllFinishedStepsFromStorage(),
-      }),
-    [getAllFinishedStepsFromStorage]
+  const finishedCardsInitialStates: Set<CardId> = useMemo(
+    () => new Set(getAllFinishedCardsFromStorage()),
+    [getAllFinishedCardsFromStorage]
   );
 
-  const activeProductsInitialStates = useMemo(() => {
-    const activeProductsFromStorage = getActiveProductsInitialStates({
-      activeProducts: getActiveProductsFromStorage(),
-    });
-    return activeProductsFromStorage.size > 0
-      ? activeProductsFromStorage
-      : productTypes && productTypes.length > 0
-      ? new Set(productTypes.map(({ product_line: productLine }) => ProductLine[productLine]))
-      : new Set(ALL_PRODUCT_LINES);
-  }, [getActiveProductsFromStorage, productTypes]);
-
-  const {
-    activeSections: activeSectionsInitialStates,
-    totalActiveSteps: totalActiveStepsInitialStates,
-    totalStepsLeft: totalStepsLeftInitialStates,
-  } = useMemo(
+  const activeSectionsInitialStates = useMemo(
     () =>
       getActiveSectionsInitialStates({
-        activeProducts: activeProductsInitialStates,
-        finishedSteps: finishedStepsInitialStates,
+        finishedCards: finishedCardsInitialStates,
         onboardingSteps,
       }),
-    [activeProductsInitialStates, finishedStepsInitialStates, onboardingSteps]
+    [finishedCardsInitialStates, onboardingSteps]
   );
 
-  const expandedCardsInitialStates: ExpandedCardSteps = useMemo(() => {
+  const expandedCardsInitialStates: ExpandedCards = useMemo(() => {
     if (stepIdFromHash) {
       syncExpandedCardStepsToStorageFromURL(onboardingStorage, stepIdFromHash);
     }
 
-    return getAllExpandedCardStepsFromStorage();
-  }, [onboardingStorage, getAllExpandedCardStepsFromStorage, stepIdFromHash]);
+    const expandedCards = getAllExpandedCardsFromStorage();
+    return new Set(expandedCards);
+  }, [stepIdFromHash, getAllExpandedCardsFromStorage, onboardingStorage]);
 
   const [state, dispatch] = useReducer(reducer, {
-    activeProducts: activeProductsInitialStates,
     activeSections: activeSectionsInitialStates,
-    expandedCardSteps: expandedCardsInitialStates,
-    finishedSteps: finishedStepsInitialStates,
-    totalActiveSteps: totalActiveStepsInitialStates,
-    totalStepsLeft: totalStepsLeftInitialStates,
+    expandedCards: expandedCardsInitialStates,
+    finishedCards: finishedCardsInitialStates,
     onboardingSteps,
   });
 
-  const onStepClicked: OnStepClicked = useCallback(
-    ({ stepId, cardId, isExpanded, trigger }) => {
+  const onCardClicked: OnCardClicked = useCallback(
+    ({ cardId, isExpanded, trigger }) => {
       dispatch({
-        type: OnboardingActions.ToggleExpandedStep,
-        payload: { stepId, cardId, isStepExpanded: isExpanded },
+        type: OnboardingActions.ToggleExpandedCard,
+        payload: { cardId, isCardExpanded: isExpanded },
       });
+
       if (isExpanded) {
         // It allows Only One step open at a time
-        resetAllExpandedCardStepsToStorage();
-        addExpandedCardStepToStorage(cardId, stepId);
+        resetAllExpandedCardsToStorage();
+        addExpandedCardStepToStorage(cardId);
         telemetry.reportOnboardingHubStepOpen({
-          stepId,
+          cardId,
           trigger,
         });
       } else {
-        removeExpandedCardStepFromStorage(cardId, stepId);
+        removeExpandedCardFromStorage(cardId);
       }
     },
     [
       addExpandedCardStepToStorage,
-      removeExpandedCardStepFromStorage,
-      resetAllExpandedCardStepsToStorage,
+      removeExpandedCardFromStorage,
+      resetAllExpandedCardsToStorage,
       telemetry,
     ]
   );
 
   const toggleTaskCompleteStatus: ToggleTaskCompleteStatus = useCallback(
-    ({ stepId, stepLinkId, cardId, sectionId, undo, trigger }) => {
+    ({ stepLinkId, cardId, sectionId, undo, trigger }) => {
       dispatch({
-        type: undo ? OnboardingActions.RemoveFinishedStep : OnboardingActions.AddFinishedStep,
-        payload: { stepId, cardId, sectionId },
+        type: undo ? OnboardingActions.RemoveFinishedCard : OnboardingActions.AddFinishedCard,
+        payload: { cardId, sectionId },
       });
       if (undo) {
-        removeFinishedStepFromStorage(cardId, stepId, state.onboardingSteps);
+        removeFinishedCardFromStorage(cardId, state.onboardingSteps);
       } else {
-        addFinishedStepToStorage(cardId, stepId);
-        telemetry.reportOnboardingHubStepFinished({ stepId, stepLinkId, trigger });
+        addFinishedCardToStorage(cardId);
+        telemetry.reportOnboardingHubStepFinished({ cardId, stepLinkId, trigger });
       }
     },
-    [addFinishedStepToStorage, removeFinishedStepFromStorage, state.onboardingSteps, telemetry]
-  );
-
-  const onProductSwitchChanged = useCallback(
-    (section: Switch) => {
-      dispatch({ type: OnboardingActions.ToggleProduct, payload: { section: section.id } });
-      toggleActiveProductsInStorage(section.id);
-    },
-    [toggleActiveProductsInStorage]
+    [addFinishedCardToStorage, removeFinishedCardFromStorage, state.onboardingSteps, telemetry]
   );
 
   useEffect(() => {
@@ -206,46 +153,38 @@ export const useTogglePanel = ({
      **/
     if (!stepIdFromHash) {
       // If all steps are collapsed, do nothing
-      if (Object.values(state.expandedCardSteps).every((c) => !c.isExpanded)) {
+      if (Object.values(state.expandedCards).every((c) => !c.isExpanded)) {
         return;
       }
 
       syncExpandedCardStepsFromStorageToURL(
         expandedCardsInitialStates,
-        ({ matchedStep }: { matchedStep: Step | null }) => {
-          if (!matchedStep) return;
+        ({ matchedCard }: { matchedCard: Card | null }) => {
+          if (!matchedCard) return;
           navigateTo({
             deepLinkId: SecurityPageName.landing,
-            path: `#${matchedStep.id}`,
+            path: `#${matchedCard.id}`,
           });
         }
       );
     }
-  }, [
-    expandedCardsInitialStates,
-    getAllExpandedCardStepsFromStorage,
-    navigateTo,
-    state.expandedCardSteps,
-    stepIdFromHash,
-  ]);
+  }, [expandedCardsInitialStates, navigateTo, state.expandedCards, stepIdFromHash]);
 
   useEffect(() => {
     /** Handle hash change and expand the target step.
      ** e.g.: https://localhost:5601/app/security/get_started#create_your_first_project
      **/
     if (stepIdFromHash) {
-      const { matchedCard, matchedStep, matchedSection } = findCardSectionByStepId(stepIdFromHash);
-      const hasStepContent = matchedStep && matchedStep.description;
-      if (hasStepContent && matchedCard && matchedStep && matchedSection) {
+      const { matchedCard, matchedSection } = findCardSectionByCardId(stepIdFromHash);
+      if (matchedCard && matchedSection) {
         // If the step is already expanded, do nothing
-        if (state.expandedCardSteps[matchedCard.id]?.expandedSteps.includes(matchedStep.id)) {
+        if (state.expandedCards.has(matchedCard.id)) {
           return;
         }
 
         // The step is opened by navigation instead of clicking directly on the step. e.g.: clicking a stepLink
         // Toggle step and sync the expanded card step to storage & reducer
-        onStepClicked({
-          stepId: matchedStep.id,
+        onCardClicked({
           cardId: matchedCard.id,
           sectionId: matchedSection.id,
           isExpanded: true,
@@ -254,16 +193,15 @@ export const useTogglePanel = ({
 
         navigateTo({
           deepLinkId: SecurityPageName.landing,
-          path: `#${matchedStep.id}`,
+          path: `#${matchedCard.id}`,
         });
       }
     }
-  }, [navigateTo, onStepClicked, state.expandedCardSteps, stepIdFromHash]);
+  }, [navigateTo, onCardClicked, state.expandedCards, stepIdFromHash]);
 
   return {
     state,
-    onStepClicked,
+    onCardClicked,
     toggleTaskCompleteStatus,
-    onProductSwitchChanged,
   };
 };

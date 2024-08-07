@@ -11,7 +11,7 @@ import type { TelemetryEventTypes } from '../../constants';
 export type OnboardingHubStepOpenTrigger = 'navigation' | 'click';
 
 export interface OnboardingHubStepOpenParams {
-  stepId: string;
+  cardId: string;
   trigger: OnboardingHubStepOpenTrigger;
 }
 
@@ -33,7 +33,7 @@ export interface OnboardingHubStepLinkClicked {
 export type OnboardingHubStepFinishedTrigger = 'auto_check' | 'click';
 
 export interface OnboardingHubStepFinishedParams {
-  stepId: string;
+  cardId: string;
   stepLinkId?: StepLinkId;
   trigger: OnboardingHubStepFinishedTrigger;
 }

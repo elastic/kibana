@@ -235,7 +235,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
         expandedSteps: [CreateProjectSteps.createFirstProject],
       },
     });
-    const result = onboardingStorage.getAllExpandedCardStepsFromStorage();
+    const result = onboardingStorage.getAllExpandedStepsFromStorage();
     expect(mockStorage.get).toHaveBeenCalledWith(expandedCardsStorageKey);
     expect(result).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: {
@@ -249,7 +249,7 @@ describe.each([['test'], [undefined]])('useStorage - spaceId: %s', (spaceId) => 
     const expandedCardsStorageKey = getStorageKeyBySpace(EXPANDED_CARDS_STORAGE_KEY, spaceId);
 
     (mockStorage.get as jest.Mock).mockReturnValueOnce(null);
-    const result = onboardingStorage.getAllExpandedCardStepsFromStorage();
+    const result = onboardingStorage.getAllExpandedStepsFromStorage();
     expect(mockStorage.get).toHaveBeenCalledWith(expandedCardsStorageKey);
     expect(result).toEqual(defaultExpandedCards);
   });

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpSections } from './use_setup_sections';
-import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from '../types';
+import type { ActiveSections, CardId, ExpandedSteps, StepId } from '../types';
 import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
 
 const mockEuiTheme: EuiThemeComputed = {
@@ -43,7 +43,7 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      expandedCardSteps: {} as ExpandedCardSteps,
+      expandedSteps: {} as ExpandedSteps,
       onStepClicked,
       toggleTaskCompleteStatus,
       finishedSteps,
@@ -59,7 +59,7 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      expandedCardSteps: {} as ExpandedCardSteps,
+      expandedSteps: {} as ExpandedSteps,
       onStepClicked,
       toggleTaskCompleteStatus,
       finishedSteps,

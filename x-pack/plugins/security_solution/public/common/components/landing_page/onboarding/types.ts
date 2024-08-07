@@ -27,19 +27,12 @@ export interface Badge {
   id: string;
 }
 
-export type StepId =
-  | CreateProjectSteps
-  | OverviewSteps
-  | AddIntegrationsSteps
-  | ViewDashboardSteps
-  | EnablePrebuiltRulesSteps
-  | ViewAlertsSteps;
-
 type AutoCheckAddIntegrationsSteps = ({
   indicesExist,
 }: {
   indicesExist: boolean;
 }) => Promise<boolean>;
+
 type AutoCheckEnablePrebuiltRulesSteps = ({
   abortSignal,
   kibanaServicesHttp,
@@ -50,36 +43,28 @@ type AutoCheckEnablePrebuiltRulesSteps = ({
   onError?: (error: Error) => void;
 }) => Promise<boolean>;
 
-export type CheckIfStepCompleted<T = StepId> =
-  T extends EnablePrebuiltRulesSteps.enablePrebuiltRules
-    ? AutoCheckEnablePrebuiltRulesSteps
-    : T extends AddIntegrationsSteps.connectToDataSources
-    ? AutoCheckAddIntegrationsSteps
-    : undefined;
+export type CheckIfStepCompleted<T = CardId> = T extends CardId.enablePrebuiltRules
+  ? AutoCheckEnablePrebuiltRulesSteps
+  : T extends CardId.addIntegrations
+  ? AutoCheckAddIntegrationsSteps
+  : undefined;
 
-export interface Step<T = StepId> {
+export interface Card {
+  id: CardId;
+  hideSteps?: boolean;
   autoCheckIfStepCompleted?: CheckIfStepCompleted<T>;
   description?: Array<React.ReactNode | string>;
-  id: StepId;
-  productLineRequired?: ProductLine[];
   splitPanel?: React.ReactNode;
   title?: string;
   icon?: EuiIconProps;
   timeInMinutes?: number;
+  isExpanded?: boolean;
+  isCompleted?: boolean;
 }
 
-export type CardId =
-  | QuickStartSectionCardsId
-  | AddAndValidateYourDataCardsId
-  | GetStartedWithAlertsCardsId;
+export type ExpandedCards = Set<CardId>;
 
-export interface Card {
-  id: CardId;
-  steps?: Step[];
-  hideSteps?: boolean;
-}
-
-export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;
+export type ActiveSections = Record<SectionId, Record<CardId, Card>>;
 
 export enum SectionId {
   quickStart = 'quick_start',
@@ -87,98 +72,38 @@ export enum SectionId {
   getStartedWithAlerts = 'get_started_with_alerts',
 }
 
-export enum QuickStartSectionCardsId {
+export enum CardId {
   createFirstProject = 'create_first_project',
   watchTheOverviewVideo = 'watch_the_overview_video',
-}
-
-export enum AddAndValidateYourDataCardsId {
   addIntegrations = 'add_integrations',
   viewDashboards = 'view_dashboards',
-}
-
-export enum GetStartedWithAlertsCardsId {
   enablePrebuiltRules = 'enable_prebuilt_rules',
   viewAlerts = 'view_alerts',
 }
 
-export enum BadgeId {
-  analytics = 'analytics',
-  cloud = 'cloud',
-  edr = 'edr',
-}
-
-export enum CreateProjectSteps {
-  createFirstProject = 'create_your_first_project',
-}
-
-export enum OverviewSteps {
-  getToKnowElasticSecurity = 'watch_the_overview_video',
-}
-
-export enum AddIntegrationsSteps {
-  connectToDataSources = 'add_integrations',
-}
-
-export enum ViewDashboardSteps {
-  analyzeData = 'view_and_analyze_your_data',
-}
-
-export enum EnablePrebuiltRulesSteps {
-  enablePrebuiltRules = 'enable_prebuilt_rules',
-}
-
-export enum ViewAlertsSteps {
-  viewAlerts = 'view_alerts',
-}
-
-export interface ActiveCard {
-  id: CardId;
-  timeInMins: number;
-  stepsLeft: number;
-  activeStepIds: StepId[] | undefined;
-}
-
-export interface ExpandedCardStep {
-  isExpanded: boolean;
-  expandedSteps: StepId[];
-}
-export type ExpandedCardSteps = Record<CardId, ExpandedCardStep>;
 export interface TogglePanelReducer {
-  activeProducts: Set<ProductLine>;
   activeSections: ActiveSections | null;
-  expandedCardSteps: ExpandedCardSteps;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  totalActiveSteps: number | null;
-  totalStepsLeft: number | null;
-  onboardingSteps: StepId[];
+  expandedCards: Set<CardId>;
+  finishedCards: Set<CardId>;
+  onboardingSteps: CardId[];
 }
 
-export interface ToggleProductAction {
-  type: OnboardingActions.ToggleProduct;
-  payload: { section: ProductLine };
+export interface AddFinishedCardAction {
+  type: OnboardingActions.AddFinishedCard;
+  payload: { cardId: CardId; sectionId: SectionId };
 }
 
-export interface AddFinishedStepAction {
-  type: OnboardingActions.AddFinishedStep;
-  payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
+export interface RemoveFinishedCardAction {
+  type: OnboardingActions.RemoveFinishedCard;
+  payload: { cardId: CardId; sectionId: SectionId };
 }
 
-export interface RemoveFinishedStepAction {
-  type: OnboardingActions.RemoveFinishedStep;
-  payload: { stepId: StepId; cardId: CardId; sectionId: SectionId };
+export interface ToggleCardAction {
+  type: OnboardingActions.ToggleExpandedCard;
+  payload: { cardId: CardId; isCardExpanded?: boolean };
 }
 
-export interface ToggleStepAction {
-  type: OnboardingActions.ToggleExpandedStep;
-  payload: { stepId: StepId; cardId: CardId; isStepExpanded?: boolean };
-}
-
-export type ReducerActions =
-  | ToggleProductAction
-  | AddFinishedStepAction
-  | RemoveFinishedStepAction
-  | ToggleStepAction;
+export type ReducerActions = AddFinishedCardAction | RemoveFinishedCardAction | ToggleCardAction;
 
 export interface Switch {
   id: ProductLine;
@@ -186,43 +111,38 @@ export interface Switch {
 }
 
 export enum OnboardingActions {
-  AddFinishedStep = 'addFinishedStep',
-  RemoveFinishedStep = 'removeFinishedStep',
-  ToggleProduct = 'toggleProduct',
-  ToggleExpandedStep = 'toggleExpandedStep',
+  AddFinishedCard = 'addFinishedStep',
+  RemoveFinishedCard = 'removeFinishedStep',
+  ToggleExpandedCard = 'toggleExpandedStep',
 }
 
-export type OnStepClicked = ({
-  stepId,
+export type OnCardClicked = ({
   cardId,
   sectionId,
   isExpanded,
   trigger,
 }: {
-  stepId: StepId;
   cardId: CardId;
   sectionId: SectionId;
   isExpanded: boolean;
   trigger: OnboardingHubStepOpenTrigger;
 }) => void;
 
-export type HandleStepClicked = ({
-  stepId,
+export type HandleCardClicked = ({
+  cardId,
   isExpandedStep,
 }: {
-  stepId: StepId;
+  cardId: CardId;
   isExpandedStep: boolean;
 }) => void;
 
 export type ToggleTaskCompleteStatus = ({
-  stepId,
   stepLinkId,
   cardId,
   sectionId,
   undo,
   trigger,
 }: {
-  stepId: StepId;
   stepLinkId?: StepLinkId;
   cardId: CardId;
   sectionId: SectionId;

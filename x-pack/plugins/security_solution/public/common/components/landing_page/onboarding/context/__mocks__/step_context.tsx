@@ -16,7 +16,7 @@ export const StepContextProvider = ({ children }: { children: React.ReactElement
 );
 
 export const useStepContext = jest.fn(() => ({
-  expandedCardSteps: defaultExpandedCards,
+  expandedSteps: defaultExpandedCards,
   finishedSteps: {
     [QuickStartSectionCardsId.createFirstProject]: new Set([CreateProjectSteps.createFirstProject]),
   },

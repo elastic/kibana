@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CardItem } from './card_item';
-import type { ExpandedCardSteps, StepId } from './types';
+import type { ExpandedSteps, StepId } from './types';
 
 import { QuickStartSectionCardsId, SectionId, OverviewSteps } from './types';
 jest.mock('./card_step');
@@ -16,19 +16,19 @@ describe('CardItemComponent', () => {
   const finishedSteps = new Set([]) as Set<StepId>;
   const onStepClicked = jest.fn();
   const toggleTaskCompleteStatus = jest.fn();
-  const expandedCardSteps = {
+  const expandedSteps = {
     [QuickStartSectionCardsId.watchTheOverviewVideo]: {
       isExpanded: false,
       expandedSteps: [] as StepId[],
     },
-  } as ExpandedCardSteps;
+  } as ExpandedSteps;
 
   it('should render card', () => {
     const { getByTestId } = render(
       <CardItem
         activeStepIds={[OverviewSteps.getToKnowElasticSecurity]}
         cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
-        expandedCardSteps={expandedCardSteps}
+        expandedSteps={expandedSteps}
         finishedSteps={finishedSteps}
         toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
@@ -45,7 +45,7 @@ describe('CardItemComponent', () => {
       <CardItem
         activeStepIds={[]}
         cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
-        expandedCardSteps={expandedCardSteps}
+        expandedSteps={expandedSteps}
         finishedSteps={new Set([])}
         toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}

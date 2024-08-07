@@ -5,132 +5,62 @@
  * 2.0.
  */
 
-import type { ProductLine } from './configs';
 import { setupActiveSections, updateActiveSections } from './helpers';
-import type { ExpandedCardSteps, ReducerActions } from './types';
-import { type CardId, type StepId, type TogglePanelReducer, OnboardingActions } from './types';
+import type { ReducerActions } from './types';
+import { type CardId, type TogglePanelReducer, OnboardingActions } from './types';
 
 export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
-  if (action.type === OnboardingActions.ToggleProduct) {
-    const activeProducts = new Set([...state.activeProducts]);
+  if (action.type === OnboardingActions.AddFinishedCard) {
+    const finishedCards = new Set(...state.finishedCards);
 
-    if (activeProducts.has(action.payload.section)) {
-      activeProducts.delete(action.payload.section);
-    } else {
-      activeProducts.add(action.payload.section);
-    }
+    finishedCards.add(action.payload.cardId);
 
-    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
-      state.finishedSteps,
-      activeProducts,
-      state.onboardingSteps
-    );
+    const activeSections = setupActiveSections(finishedCards, state.onboardingSteps);
 
     return {
       ...state,
-      activeProducts,
       activeSections,
-      totalStepsLeft,
-      totalActiveSteps,
     };
   }
 
-  if (action.type === OnboardingActions.AddFinishedStep) {
-    const finishedSteps = {
-      ...state.finishedSteps,
-      [action.payload.cardId]: state.finishedSteps[action.payload.cardId]
-        ? new Set([...state.finishedSteps[action.payload.cardId]])
-        : new Set(),
-    };
+  if (action.type === OnboardingActions.RemoveFinishedCard) {
+    const finishedCards = new Set(...state.finishedCards);
 
-    finishedSteps[action.payload.cardId].add(action.payload.stepId);
+    finishedCards.delete(action.payload.cardId);
 
-    const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
-      activeProducts: state.activeProducts,
-      activeSections: state.activeSections,
-      cardId: action.payload.cardId,
-      finishedSteps,
-      sectionId: action.payload.sectionId,
+    const activeSections = updateActiveSections({
+      finishedCards,
       onboardingSteps: state.onboardingSteps,
     });
 
     return {
       ...state,
-      finishedSteps,
+      finishedCards,
       activeSections,
-      totalStepsLeft,
-      totalActiveSteps,
-    };
-  }
-
-  if (action.type === OnboardingActions.RemoveFinishedStep) {
-    const finishedSteps = {
-      ...state.finishedSteps,
-      [action.payload.cardId]: state.finishedSteps[action.payload.cardId]
-        ? new Set([...state.finishedSteps[action.payload.cardId]])
-        : new Set(),
-    };
-
-    finishedSteps[action.payload.cardId].delete(action.payload.stepId);
-
-    const { activeSections, totalStepsLeft, totalActiveSteps } = updateActiveSections({
-      activeProducts: state.activeProducts,
-      activeSections: state.activeSections,
-      cardId: action.payload.cardId,
-      finishedSteps,
-      sectionId: action.payload.sectionId,
-      onboardingSteps: state.onboardingSteps,
-    });
-
-    return {
-      ...state,
-      finishedSteps,
-      activeSections,
-      totalStepsLeft,
-      totalActiveSteps,
     };
   }
 
   if (
-    action.type === OnboardingActions.ToggleExpandedStep &&
-    action.payload.isStepExpanded != null
+    action.type === OnboardingActions.ToggleExpandedCard &&
+    action.payload.isCardExpanded != null
   ) {
     // It allows Only One step open at a time
-    const expandedSteps = new Set<StepId>();
-    if (action.payload.isStepExpanded === true && action.payload.stepId != null) {
+    if (action.payload.isCardExpanded === true && action.payload.cardId != null) {
+      const expandedCards = new Set<CardId>();
+
+      expandedCards.add(action.payload.cardId);
       return {
         ...state,
-        expandedCardSteps: Object.entries(state.expandedCardSteps).reduce((acc, [cardId, card]) => {
-          if (cardId === action.payload.cardId) {
-            expandedSteps.add(action.payload.stepId);
-
-            acc[action.payload.cardId] = {
-              expandedSteps: [...expandedSteps],
-              isExpanded: true,
-            };
-          } else {
-            // Remove all other expanded steps in other cards
-            acc[cardId as CardId] = {
-              expandedSteps: [],
-              isExpanded: false,
-            };
-          }
-          return acc;
-        }, {} as ExpandedCardSteps),
+        expandedCards,
       };
     }
 
-    if (action.payload.isStepExpanded === false) {
-      expandedSteps.delete(action.payload.stepId);
+    if (action.payload.isCardExpanded === false) {
+      const expandedCards = new Set(...state.expandedCards);
+      expandedCards.delete(action.payload.cardId);
       return {
         ...state,
-        expandedCardSteps: {
-          ...state.expandedCardSteps,
-          [action.payload.cardId]: {
-            expandedSteps: [],
-            isExpanded: false,
-          },
-        },
+        expandedCards,
       };
     }
   }
@@ -138,33 +68,10 @@ export const reducer = (state: TogglePanelReducer, action: ReducerActions): Togg
   return state;
 };
 
-export const getFinishedStepsInitialStates = ({
-  finishedSteps,
-}: {
-  finishedSteps: Record<CardId, StepId[]>;
-}): Record<CardId, Set<StepId>> => {
-  const initialStates = Object.entries(finishedSteps).reduce((acc, [cardId, stepIdsByCard]) => {
-    if (stepIdsByCard) {
-      acc[cardId] = new Set(stepIdsByCard);
-    }
-    return acc;
-  }, {} as Record<string, Set<StepId>>);
-
-  return initialStates;
-};
-
-export const getActiveProductsInitialStates = ({
-  activeProducts,
-}: {
-  activeProducts: ProductLine[];
-}) => new Set(activeProducts);
-
 export const getActiveSectionsInitialStates = ({
-  activeProducts,
-  finishedSteps,
+  finishedCards,
   onboardingSteps,
 }: {
-  activeProducts: Set<ProductLine>;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  onboardingSteps: StepId[];
-}) => setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
+  finishedCards: Set<CardId>;
+  onboardingSteps: CardId[];
+}) => setupActiveSections(finishedCards, onboardingSteps);

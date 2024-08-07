@@ -16,7 +16,7 @@ import {
 import type {
   AddFinishedStepAction,
   CardId,
-  ExpandedCardSteps,
+  ExpandedSteps,
   StepId,
   ToggleProductAction,
 } from './types';
@@ -61,7 +61,7 @@ describe('reducer', () => {
       activeSections,
       totalStepsLeft,
       totalActiveSteps,
-      expandedCardSteps: {} as ExpandedCardSteps,
+      expandedSteps: {} as ExpandedSteps,
       onboardingSteps,
     };
 
@@ -94,7 +94,7 @@ describe('reducer', () => {
       activeSections,
       totalStepsLeft,
       totalActiveSteps,
-      expandedCardSteps: {} as ExpandedCardSteps,
+      expandedSteps: {} as ExpandedSteps,
       onboardingSteps,
     };
 

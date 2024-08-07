@@ -81,7 +81,7 @@ describe('useTogglePanel', () => {
       removeFinishedStepFromStorage: mockStorage.mockRemoveFinishedStepFromStorage,
       addExpandedCardStepToStorage: mockStorage.mockAddExpandedCardStepToStorage,
       removeExpandedCardStepFromStorage: mockStorage.mockRemoveExpandedCardStepFromStorage,
-      getAllExpandedCardStepsFromStorage: mockStorage.mockGetAllExpandedCardStepsFromStorage,
+      getAllExpandedStepsFromStorage: mockStorage.mockGetAllExpandedCardStepsFromStorage,
     }));
 
     (mockStorage.mockGetAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({

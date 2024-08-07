@@ -12,26 +12,25 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TogglePanel } from './toggle_panel';
 
 import { useTogglePanel } from './hooks/use_toggle_panel';
-import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
-import { DataIngestionHubHeader } from './data_ingestion_hub_header';
+import { DataIngestionHubHeader } from './data_ingestion_hub/header';
 import { Footer } from './footer';
 import { useScrollToHash } from './hooks/use_scroll';
 import type { SecurityProductTypes } from './configs';
 import { ProductLine } from './configs';
 
-import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import type { CardId } from './types';
 
 interface OnboardingProps {
   indicesExist?: boolean;
   productTypes: SecurityProductTypes | undefined;
-  onboardingSteps: StepId[];
+  onboardingSteps: CardId[];
   spaceId: string;
 }
 
@@ -42,17 +41,10 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   spaceId,
 }) => {
   const {
-    onStepClicked,
+    onCardClicked,
     toggleTaskCompleteStatus,
-    state: {
-      activeProducts,
-      activeSections,
-      finishedSteps,
-      totalActiveSteps,
-      totalStepsLeft,
-      expandedCardSteps,
-    },
-  } = useTogglePanel({ productTypes, onboardingSteps, spaceId });
+    state: { activeSections, finishedCards, expandedCards },
+  } = useTogglePanel({ onboardingSteps, spaceId });
   const productTier = useMemo(
     () =>
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
@@ -100,17 +92,6 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
         {renderDataIngestionHubHeader}
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section
-        restrictWidth={CONTENT_WIDTH}
-        paddingSize="none"
-        className={progressSectionStyles}
-      >
-        <Progress
-          totalActiveSteps={totalActiveSteps}
-          totalStepsLeft={totalStepsLeft}
-          productTier={productTier}
-        />
-      </KibanaPageTemplate.Section>
-      <KibanaPageTemplate.Section
         bottomBorder="extended"
         grow={true}
         restrictWidth={CONTENT_WIDTH}
@@ -118,14 +99,14 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
         className={stepsSectionStyles}
       >
         <StepContextProvider
-          expandedCardSteps={expandedCardSteps}
-          finishedSteps={finishedSteps}
+          expandedCards={expandedCards}
+          finishedCards={finishedCards}
           indicesExist={!!indicesExist}
-          onStepClicked={onStepClicked}
+          onCardClicked={onCardClicked}
           onStepLinkClicked={onStepLinkClicked}
           toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         >
-          <TogglePanel activeProducts={activeProducts} activeSections={activeSections} />
+          <TogglePanel activeSections={activeSections} />
         </StepContextProvider>
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section grow={true} restrictWidth={CONTENT_WIDTH} paddingSize="none">

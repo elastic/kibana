@@ -65,7 +65,7 @@ describe('Video Component', () => {
 
   it('renders video if step is completed', () => {
     (useStepContext as jest.Mock).mockReturnValue({
-      expandedCardSteps: defaultExpandedCards,
+      expandedSteps: defaultExpandedCards,
       finishedSteps: {
         [QuickStartSectionCardsId.watchTheOverviewVideo]: new Set([
           OverviewSteps.getToKnowElasticSecurity,

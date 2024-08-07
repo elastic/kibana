@@ -8,19 +8,13 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import type { OnboardingHubStepLinkClickedParams } from '../../../../lib/telemetry/events/onboarding/types';
-import type {
-  ToggleTaskCompleteStatus,
-  CardId,
-  StepId,
-  ExpandedCardSteps,
-  OnStepClicked,
-} from '../types';
+import type { ToggleTaskCompleteStatus, CardId, ExpandedCards, OnCardClicked } from '../types';
 
 export interface StepContextType {
-  expandedCardSteps: ExpandedCardSteps;
-  finishedSteps: Record<CardId, Set<StepId>>;
+  expandedCards: ExpandedCards;
+  finishedCards: Set<CardId>;
   indicesExist: boolean;
-  onStepClicked: OnStepClicked;
+  onCardClicked: OnCardClicked;
   onStepLinkClicked: (params: OnboardingHubStepLinkClickedParams) => void;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
