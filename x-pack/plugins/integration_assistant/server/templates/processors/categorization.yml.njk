@@ -1,9 +1,9 @@
 {% for processor in processors %}
   - append:
       field: {{ processor.field }}
-      value: {{ processor.value }}
+      value: {{ processor.value | dump }}
       {% if processor.if %}
-      if: {{ processor.if }}
+      if: {{ processor.if | dump }}
       {% endif %}
       allow_duplicates: false
 {% endfor %}

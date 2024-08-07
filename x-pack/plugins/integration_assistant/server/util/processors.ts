@@ -13,7 +13,8 @@ import type { ESProcessorItem, Pipeline } from '../../common';
 
 export function combineProcessors(
   initialPipeline: Pipeline,
-  processors: ESProcessorItem[]
+  processors: object[],
+  graphType: string
 ): Pipeline {
   // Create a deep copy of the initialPipeline to avoid modifying the original input
   const currentPipeline = deepCopy(initialPipeline);
@@ -21,9 +22,10 @@ export function combineProcessors(
   // Add the new processors right before the last 2 remove processor in the initial pipeline.
   // This is so all the processors if conditions are not accessing possibly removed fields.
   const currentProcessors = currentPipeline.processors;
+  const appendProcessors = createAppendProcessors(processors, graphType);
   const combinedProcessors = [
     ...currentProcessors.slice(0, -2),
-    ...processors,
+    ...appendProcessors,
     ...currentProcessors.slice(-2),
   ];
   currentPipeline.processors = combinedProcessors;
@@ -32,7 +34,7 @@ export function combineProcessors(
 
 // The related and categorization graphs returns a simplified array of append processors.
 // This function converts the simplified array to the full ESProcessorItem array.
-export function createAppendProcessors(processors: object[], graphType: string): ESProcessorItem[] {
+function createAppendProcessors(processors: object[], graphType: string): ESProcessorItem[] {
   const templatesPath = joinPath(__dirname, '../templates/processors');
   const env = new Environment(new FileSystemLoader(templatesPath), {
     autoescape: false,
