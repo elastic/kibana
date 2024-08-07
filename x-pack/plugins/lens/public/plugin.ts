@@ -697,7 +697,7 @@ export class LensPlugin {
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
       if (!this.editorFrameService) {
-        await this.initDependenciesForApi();
+        await this.initEditorFrameService();
       }
 
       return this.editorFrameService!;

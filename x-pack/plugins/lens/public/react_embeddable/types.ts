@@ -49,6 +49,7 @@ import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plu
 import { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { LensDocument } from '../persistence';
 import { LensInspector } from '../lens_inspector_service';
 import { LensAttributesService } from '../lens_attribute_service';
@@ -167,6 +168,9 @@ export interface LensCallbacks {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  /**
+   * Let the consumer overwrite embeddable user messages
+   */
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
@@ -178,6 +182,7 @@ interface ViewInDiscoverCallbacks {
 interface IntegrationCallbacks {
   isTextBasedLanguage: () => boolean | undefined;
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
+  getFullAttributes: () => LensDocument | undefined;
 }
 
 export type LensApiCallbacks = Simplify<
@@ -286,3 +291,27 @@ export interface ExpressionWrapperProps {
 }
 
 export type GetStateType = () => LensRuntimeState;
+
+/**
+ * Custom props exposed on the Lens exported component
+ */
+export interface LensCustomCallbacks {
+  /**
+   * When enabled the Lens component will render as a dashboard panel
+   */
+  withDefaultActions?: boolean;
+  /**
+   * Allow custom actions to be rendered in the panel
+   */
+  extraActions?: Action[];
+  /**
+   * Toggles the inspector
+   */
+  showInspector?: boolean;
+  /**
+   * Custom abort controller to be used for the ES client
+   */
+  abortController?: AbortController;
+}
+
+export type LensRendererProps = Simplify<LensSerializedState & LensCustomCallbacks & LensApi>;

@@ -16,7 +16,6 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { LensAppLocatorParams } from '../../common/locator/locator';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { LensByReferenceInput } from '../embeddable';
 import { AddUserMessages, EditorFrameInstance, UserMessagesGetter } from '../types';
 import { LensDocument } from '../persistence/saved_object_store';
 
@@ -138,7 +137,17 @@ export function App({
   );
   const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
-  const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
+  const savedObjectId = initialInput?.savedObjectId;
+
+  const isFromLegacyEditorEmbeddable =
+    initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+  const legacyEditorAppName =
+    initialContext && 'originatingApp' in initialContext && initialContext.originatingApp;
+  const legacyEditorAppUrl =
+    initialContext &&
+    'vizEditorOriginatingAppUrl' in initialContext &&
+    initialContext.vizEditorOriginatingAppUrl;
+  const initialContextIsEmbedded = Boolean(legacyEditorAppName);
 
   useEffect(() => {
     if (currentDoc) {
@@ -235,11 +244,9 @@ export function App({
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const isByValueMode = getIsByValueMode();
-    const comesFromVizEditorDashboard =
-      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp;
     const breadcrumbs: EuiBreadcrumb[] = [];
     if (
-      (isLinkedToOriginatingApp || comesFromVizEditorDashboard) &&
+      (isLinkedToOriginatingApp || legacyEditorAppName) &&
       getOriginatingAppName() &&
       redirectToOrigin
     ) {
@@ -270,12 +277,7 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
-    if (
-      !persistedDoc?.title &&
-      initialContext &&
-      'isEmbeddable' in initialContext &&
-      initialContext.isEmbeddable
-    ) {
+    if (!persistedDoc?.title && isFromLegacyEditorEmbeddable) {
       currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
         defaultMessage: 'Converting {title} visualization',
         values: {
@@ -303,8 +305,10 @@ export function App({
     chrome,
     isLinkedToOriginatingApp,
     persistedDoc,
-    initialContext,
+    isFromLegacyEditorEmbeddable,
+    legacyEditorAppName,
     serverless,
+    initialContext,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -388,11 +392,7 @@ export function App({
 
   // if users comes to Lens from the Viz editor, they should have the option to navigate back
   const goBackToOriginatingApp = useCallback(() => {
-    if (
-      initialContext &&
-      'vizEditorOriginatingAppUrl' in initialContext &&
-      initialContext.vizEditorOriginatingAppUrl
-    ) {
+    if (legacyEditorAppUrl) {
       const [initialDocFromContextUnchanged, currentDocHasBeenSavedInLens] = [
         initialDocFromContext,
         persistedDoc,
@@ -410,7 +410,9 @@ export function App({
         onAppLeave((actions) => {
           return actions.default();
         });
-        application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+        application.navigateToApp(legacyEditorAppName || 'visualize', {
+          path: legacyEditorAppUrl,
+        });
       } else {
         setIsGoBackToVizEditorModalVisible(true);
       }
@@ -420,7 +422,8 @@ export function App({
     application,
     data.query.filterManager.inject,
     datasourceMap,
-    initialContext,
+    legacyEditorAppName,
+    legacyEditorAppUrl,
     initialDocFromContext,
     lastKnownDoc,
     onAppLeave,
@@ -430,23 +433,13 @@ export function App({
 
   const navigateToVizEditor = useCallback(() => {
     setIsGoBackToVizEditorModalVisible(false);
-    if (
-      initialContext &&
-      'vizEditorOriginatingAppUrl' in initialContext &&
-      initialContext.vizEditorOriginatingAppUrl
-    ) {
+    if (legacyEditorAppUrl) {
       onAppLeave((actions) => {
         return actions.default();
       });
-      application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+      application.navigateToApp(legacyEditorAppName || 'visualize', { path: legacyEditorAppUrl });
     }
-  }, [application, initialContext, onAppLeave]);
-
-  const initialContextIsEmbedded = useMemo(() => {
-    return Boolean(
-      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp
-    );
-  }, [initialContext]);
+  }, [application, legacyEditorAppName, legacyEditorAppUrl, onAppLeave]);
 
   const indexPatternService = useMemo(
     () =>
@@ -504,10 +497,7 @@ export function App({
   const isManaged = useLensSelector(selectIsManaged);
 
   const returnToOriginSwitchLabelForContext =
-    initialContext &&
-    'isEmbeddable' in initialContext &&
-    initialContext.isEmbeddable &&
-    !persistedDoc
+    isFromLegacyEditorEmbeddable && !persistedDoc
       ? i18n.translate('xpack.lens.app.replacePanel', {
           defaultMessage: 'Replace panel on {originatingApp}',
           values: {

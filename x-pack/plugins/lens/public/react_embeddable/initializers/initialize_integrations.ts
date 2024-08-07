@@ -22,6 +22,8 @@ export function initializeIntegrations(getState: GetStateType) {
   };
   return {
     api: {
+      // TODO: workout why we have this duplicated
+      getFullAttributes: () => getState().attributes,
       getSavedVis: () => getState().attributes,
       isTextBasedLanguage,
       getTextBasedLanguage: () => {

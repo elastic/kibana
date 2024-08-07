@@ -10,16 +10,14 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import React from 'react';
 import { useMemo, useRef } from 'react';
-import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { LensApi, LensRuntimeState, LensSerializedState } from './types';
+import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export interface Props {
   title?: string;
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
-
-  onApiAvailable?: (api: LensApi) => void;
 }
 
 export function LensRenderer(props: Props) {
@@ -48,15 +46,11 @@ export function LensRenderer(props: Props) {
   const searchApi = useSearchApi(props);
 
   return (
-    <ReactEmbeddableRenderer<LensSerializedState, LensApi, LensRuntimeState>
+    <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       getParentApi={() => ({ ...searchApi, getSerializedStateForChild: () => initialState })}
       onApiAvailable={(api) => {
         apiRef.current = api;
-
-        if (props.onApiAvailable) {
-          props.onApiAvailable(api);
-        }
       }}
       hidePanelChrome={true}
     />

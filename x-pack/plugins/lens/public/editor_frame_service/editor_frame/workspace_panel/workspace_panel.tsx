@@ -266,7 +266,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
 
         if (requestWarnings.length) {
-          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings).cleanup;
+          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings);
         } else if (removeSearchWarningMessagesRef.current) {
           removeSearchWarningMessagesRef.current();
           removeSearchWarningMessagesRef.current = undefined;
@@ -354,7 +354,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               </>
             ),
           },
-        ]).cleanup;
+        ]);
       }
     }
   }, [

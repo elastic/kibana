@@ -37,7 +37,6 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
@@ -529,11 +528,9 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 

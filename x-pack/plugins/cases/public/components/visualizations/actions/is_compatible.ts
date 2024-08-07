@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { isLensApi } from '@kbn/lens-plugin/public';
-import { hasBlockingError } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, hasBlockingError } from '@kbn/presentation-publishing';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 
@@ -20,7 +20,11 @@ export function isCompatible(
   if (!embeddable.getFullAttributes()) {
     return false;
   }
-  const timeRange = embeddable.timeRange$?.value ?? embeddable.parentApi?.timeRange$?.value;
+  const timeRange =
+    embeddable.timeRange$?.value ??
+    (embeddable.parentApi && apiPublishesTimeRange(embeddable.parentApi)
+      ? embeddable.parentApi?.timeRange$?.value
+      : undefined);
   if (!timeRange) {
     return false;
   }

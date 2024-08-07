@@ -53,7 +53,8 @@ export function loadEmbeddableData(
 
   const { getUserMessages, addUserMessages, resetRuntimeMessages } = buildUserMessagesHelper(
     getVisualizationContext,
-    services
+    services,
+    api.onBeforeBadgesRender
   );
 
   const unifiedSearch$ = new BehaviorSubject<
