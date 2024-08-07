@@ -25,10 +25,8 @@ export * from './actions/response_actions/execute';
 export * from './actions/response_actions/upload';
 export * from './actions/response_actions/scan';
 
-export * from './metadata/list_metadata_route';
-export * from './metadata/get_metadata_route';
+export * from './metadata';
 
-export * from './policy/policy_response';
-export * from './policy/deprecated_agent_policy_summary';
+export * from './policy';
 
-export * from './suggestions/get_suggestions_route';
+export * from './suggestions';
