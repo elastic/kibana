@@ -22,7 +22,7 @@ export const LOG_RATE_ANALYSIS_SETTINGS = {
   /**
    * The number of terms by field to fetch for the zero docs fallback analysis.
    */
-  TOP_TERMS_FALLBACK_SIZE: 10,
+  TOP_TERMS_FALLBACK_SIZE: 100,
 } as const;
 
 /**
