@@ -6,22 +6,34 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/painless_lab';
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const samlAuth = getService('samlAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalHeaders: InternalRequestHeader;
 
-  describe('Painless Lab', function () {
+  describe('Painless Lab Routes', function () {
+    before(async () => {
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalHeaders = samlAuth.getInternalRequestHeader();
+    });
+    after(async () => {
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     describe('Execute', () => {
       it('should execute a valid painless script', async () => {
         const script =
           '"{\\n  \\"script\\": {\\n    \\"source\\": \\"return true;\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/execute`)
-          .set('kbn-xsrf', 'xxx')
+          .set(internalHeaders)
+          .set(roleAuthc.apiKeyHeader)
           .set('Content-Type', 'application/json;charset=UTF-8')
           .send(script)
           .expect(200);
@@ -35,10 +47,11 @@ export default function ({ getService }: FtrProviderContext) {
         const invalidScript =
           '"{\\n  \\"script\\": {\\n    \\"source\\": \\"foobar\\",\\n    \\"params\\": {\\n  \\"string_parameter\\": \\"string value\\",\\n  \\"number_parameter\\": 1.5,\\n  \\"boolean_parameter\\": true\\n}\\n  }\\n}"';
 
-        const { body } = await supertest
+        const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/execute`)
-          .set('kbn-xsrf', 'xxx')
+          .set(internalHeaders)
           .set('Content-Type', 'application/json;charset=UTF-8')
+          .set(roleAuthc.apiKeyHeader)
           .send(invalidScript)
           .expect(200);
 
