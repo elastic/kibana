@@ -19,7 +19,7 @@ import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
-import { dataTypes } from '../../definitions/types';
+import { dataTypes, SupportedDataType } from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -116,7 +116,7 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: string | string[],
+  _expectedReturnType: Readonly<SupportedDataType | 'any' | Array<SupportedDataType | 'any'>>,
   {
     agg,
     grouping,
@@ -218,14 +218,16 @@ export function getFunctionSignaturesByReturnType(
     });
 }
 
-export function getFieldNamesByType(_requestedType: string | string[]) {
+export function getFieldNamesByType(
+  _requestedType: Readonly<SupportedDataType | 'any' | Array<SupportedDataType | 'any'>>
+) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: string | string[]) {
+export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
@@ -234,7 +236,9 @@ export function getLiteralsByType(_type: string | string[]) {
   return [];
 }
 
-export function getDateLiteralsByFieldType(_requestedType: string | string[]) {
+export function getDateLiteralsByFieldType(
+  _requestedType: SupportedDataType | SupportedDataType[]
+) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
 }

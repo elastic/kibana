@@ -18,7 +18,7 @@ import {
 } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { FunctionParameter, FunctionReturnType } from '../definitions/types';
+import { FunctionParameter, isSupportedDataType, SupportedDataType } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import {
@@ -34,14 +34,7 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-import {
-  ESQL_COMMON_NUMERIC_TYPES as UNCASTED_ESQL_COMMON_NUMERIC_TYPES,
-  ESQL_NUMBER_TYPES,
-} from '../shared/esql_types';
-
-const ESQL_NUMERIC_TYPES = ESQL_NUMBER_TYPES as unknown as string[];
-const ESQL_COMMON_NUMERIC_TYPES =
-  UNCASTED_ESQL_COMMON_NUMERIC_TYPES as unknown as FunctionReturnType[];
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../shared/esql_types';
 
 describe('autocomplete', () => {
   type TestArgs = [
@@ -181,25 +174,9 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('where', ['any'], { scalar: true }),
     ]);
-    // Skip these tests until the insensitive case equality gets restored back
-    testSuggestions.skip('from a | where stringField =~ ', [
-      ...getFieldNamesByType('string'),
-      ...getFunctionSignaturesByReturnType('where', 'string', { scalar: true }),
-    ]);
     testSuggestions('from a | where textField >= textField', [
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
-    ]);
-    testSuggestions.skip('from a | where stringField =~ stringField ', [
-      '| ',
-      ...getFunctionSignaturesByReturnType(
-        'where',
-        'boolean',
-        {
-          builtin: true,
-        },
-        ['boolean']
-      ),
     ]);
     for (const op of ['and', 'or']) {
       testSuggestions(`from a | where stringField >= stringField ${op} `, [
@@ -210,8 +187,8 @@ describe('autocomplete', () => {
         ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
       ]);
       testSuggestions(`from a | where stringField >= stringField ${op} doubleField == `, [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES as string[], {
+        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+        ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES, {
           scalar: true,
         }),
       ]);
@@ -236,10 +213,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | where log10()',
       [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
         ...getFunctionSignaturesByReturnType(
           'where',
-          ESQL_NUMERIC_TYPES,
+          ESQL_NUMBER_TYPES,
           { scalar: true },
           undefined,
           ['log10']
@@ -254,10 +231,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | WHERE pow(doubleField, )',
       [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
         ...getFunctionSignaturesByReturnType(
           'where',
-          ESQL_NUMERIC_TYPES,
+          ESQL_NUMBER_TYPES,
           { scalar: true },
           undefined,
           ['pow']
@@ -528,10 +505,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round()',
       [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
         ...getFunctionSignaturesByReturnType(
           'eval',
-          ESQL_NUMERIC_TYPES,
+          ESQL_NUMBER_TYPES,
           { scalar: true },
           undefined,
           ['round']
@@ -595,26 +572,26 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
     testSuggestions('from a | eval a=round(doubleField) + ', [
-      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+      ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
         scalar: true,
       }),
     ]);
     testSuggestions('from a | eval a=round(doubleField)+ ', [
-      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+      ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
         scalar: true,
       }),
     ]);
     testSuggestions('from a | eval a=doubleField+ ', [
-      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+      ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
         scalar: true,
       }),
     ]);
     testSuggestions('from a | eval a=`any#Char$Field`+ ', [
-      ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
-      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES as string[], {
+      ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+      ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
         scalar: true,
       }),
     ]);
@@ -675,10 +652,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round(doubleField), b=round()',
       [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
         ...getFunctionSignaturesByReturnType(
           'eval',
-          ESQL_NUMERIC_TYPES,
+          ESQL_NUMBER_TYPES,
           { scalar: true },
           undefined,
           ['round']
@@ -755,10 +732,10 @@ describe('autocomplete', () => {
       testSuggestions(
         `from a | eval a=${Array(nesting).fill('round(').join('')}`,
         [
-          ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+          ...getFieldNamesByType(ESQL_NUMBER_TYPES),
           ...getFunctionSignaturesByReturnType(
             'eval',
-            ESQL_NUMERIC_TYPES,
+            ESQL_NUMBER_TYPES,
             { scalar: true },
             undefined,
             ['round']
@@ -784,10 +761,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval var0 = abs(b) | eval abs(var0)',
       [
-        ...getFieldNamesByType(ESQL_NUMERIC_TYPES),
+        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
         ...getFunctionSignaturesByReturnType(
           'eval',
-          ESQL_NUMERIC_TYPES,
+          ESQL_NUMBER_TYPES,
           { scalar: true },
           undefined,
           ['abs']
@@ -821,8 +798,8 @@ describe('autocomplete', () => {
                 (p) => p.constantOnly || /_literal/.test(p.type as string)
               );
 
-              const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) =>
-                Array.from(new Set(paramDefs.map((p) => p.type)));
+              const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataType[] =>
+                Array.from(new Set(paramDefs.map((p) => p.type))).filter(isSupportedDataType);
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
@@ -839,22 +816,16 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
-                      ),
-                      ...getFieldNamesByType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
-                      ),
+                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[],
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
                         { scalar: true },
                         undefined,
                         [fn.name]
                       ),
-                      ...getLiteralsByType(
-                        getTypesFromParamDefs(constantOnlyParamDefs) as string[]
-                      ),
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
                     ].map(addCommaIfRequired),
                 ' '
               );
@@ -865,22 +836,16 @@ describe('autocomplete', () => {
                 suggestedConstants?.length
                   ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ', ' : ''}`)
                   : [
-                      ...getDateLiteralsByFieldType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
-                      ),
-                      ...getFieldNamesByType(
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[]
-                      ),
+                      ...getDateLiteralsByFieldType(getTypesFromParamDefs(acceptsFieldParamDefs)),
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)),
                       ...getFunctionSignaturesByReturnType(
                         'eval',
-                        getTypesFromParamDefs(acceptsFieldParamDefs) as string[],
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
                         { scalar: true },
                         undefined,
                         [fn.name]
                       ),
-                      ...getLiteralsByType(
-                        getTypesFromParamDefs(constantOnlyParamDefs) as string[]
-                      ),
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)),
                     ].map(addCommaIfRequired),
                 ' '
               );
