@@ -81,6 +81,11 @@ export const getTopNavLinks = ({
     iconType: 'editorRedo',
     fill: false,
     color: 'text',
+    tooltip: isEsqlMode
+      ? undefined
+      : i18n.translate('discover.localMenu.esqlTooltipLabel', {
+          defaultMessage: 'Try our new query language',
+        }),
     run: () => {
       if (dataView) {
         if (isEsqlMode) {
