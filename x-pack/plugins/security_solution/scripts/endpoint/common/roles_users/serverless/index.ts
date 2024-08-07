@@ -7,6 +7,7 @@
 
 import { resolve, join } from 'path';
 import { readFileSync } from 'fs';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const ES_RESOURCES_DIR = resolve(__dirname, 'es_serverless_resources');
 
@@ -15,6 +16,8 @@ export const ES_RESOURCES = Object.freeze({
   users: join(ES_RESOURCES_DIR, 'users'),
   users_roles: join(ES_RESOURCES_DIR, 'users_roles'),
 });
+
+export const resolveCloudUsersFilePath = (filename: string) => resolve(REPO_ROOT, '.ftr', filename);
 
 export const ES_LOADED_USERS = readFileSync(ES_RESOURCES.users)
   .toString()
