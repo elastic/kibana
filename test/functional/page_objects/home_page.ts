@@ -62,7 +62,9 @@ export class HomePageObject extends FtrService {
     // hence we setup a delay so the interstitial has enough time to fade in
     const animSpeedExtraSlow = 500;
     await new Promise((resolve) => setTimeout(resolve, animSpeedExtraSlow));
-    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow * 5);
+    return this.retry.try(async () => {
+      return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow * 4);
+    });
   }
 
   async isGuidedOnboardingLandingDisplayed() {
