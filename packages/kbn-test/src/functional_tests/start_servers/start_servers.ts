@@ -32,6 +32,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
         vars.esTestCluster.license = 'trial';
         vars.suiteTags.exclude = ['skipFIPS'];
         vars.esTestCluster.serverArgs = ['xpack.security.enabled=true'];
+        vars.security.defaultRoles = ['superuser', 'kibana_admin'];
       }
 
       return vars;
