@@ -194,13 +194,11 @@ export const EsqlQueryExpression: React.FC<
             setParam('esqlQuery', q);
             refreshTimeFields(q);
           }}
-          expandCodeEditor={() => true}
-          isCodeEditorExpanded={true}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
-          hideMinimizeButton={true}
           hideRunQueryText={true}
           isLoading={isLoading}
+          hasOutline
         />
       </EuiFormRow>
       <EuiSpacer />

@@ -147,7 +147,7 @@ identify and investigate suspicious activity:
 [[data-sources]]
 === APM transaction data sources
 
-By default, {elastic-sec} monitors {apm-app-ref}/apm-getting-started.html[APM]
+By default, {elastic-sec} monitors {observability-guide}/apm.html[APM]
 `apm-*-transaction*` indices. To add additional APM indices, update the
 index patterns in the `securitySolution:defaultIndex` setting ({kib} -> Stack Management -> Advanced Settings -> `securitySolution:defaultIndex`).
 

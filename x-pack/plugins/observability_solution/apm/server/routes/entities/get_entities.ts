@@ -17,6 +17,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getServiceEntitiesHistoryMetrics } from './get_service_entities_history_metrics';
 import { EntitiesRaw, EntityType, ServiceEntities } from './types';
+import { isFiniteNumber } from '../../../common/utils/is_finite_number';
 
 export function entitiesRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
   return [
@@ -44,14 +45,16 @@ export async function getEntities({
   environment,
   kuery,
   size,
+  serviceName,
 }: {
   entitiesESClient: EntitiesESClient;
   start: number;
   end: number;
   environment: string;
-  kuery: string;
+  kuery?: string;
   size: number;
-}) {
+  serviceName?: string;
+}): Promise<ServiceEntities[]> {
   const entities = (
     await entitiesESClient.searchLatest(`get_entities`, {
       body: {
@@ -65,6 +68,7 @@ export async function getEntities({
               ...environmentQuery(environment, SERVICE_ENVIRONMENT),
               ...entitiesRangeQuery(start, end),
               ...termQuery(ENTITY_TYPE, EntityType.SERVICE),
+              ...termQuery(SERVICE_NAME, serviceName),
             ],
           },
         },
@@ -78,10 +82,12 @@ export async function getEntities({
         end,
         entitiesESClient,
         entityIds: entities.map((entity) => entity.entity.id),
+        size,
       })
     : undefined;
 
-  return entities.map((entity): ServiceEntities => {
+  return entities.map((entity) => {
+    const historyLogRate = serviceEntitiesHistoryMetricsMap?.[entity.entity.id]?.logRate;
     return {
       serviceName: entity.service.name,
       environment: Array.isArray(entity.service?.environment) // TODO fix this in the EEM
@@ -91,6 +97,7 @@ export async function getEntities({
       signalTypes: entity.data_stream.type,
       entity: {
         ...entity.entity,
+        hasLogMetrics: isFiniteNumber(historyLogRate) ? historyLogRate > 0 : false,
         // History metrics undefined means that for the selected time range there was no ingestion happening.
         metrics: serviceEntitiesHistoryMetricsMap?.[entity.entity.id] || {
           latency: null,
