@@ -31,7 +31,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/packages/kbn-elastic-assistant-common/docs/openapi/ess/*.schema.yaml`,
       `${REPO_ROOT}/x-pack/plugins/osquery/docs/openapi/ess/*.schema.yaml`,
     ],
-    outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.merged.yaml`,
+    outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.yaml`,
     options: {
       prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.yaml`,
     },
