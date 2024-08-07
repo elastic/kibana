@@ -12,7 +12,7 @@ import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import {
-  GetPrebuiltRulesAndTimelinesStatusResponse,
+  ReadPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
@@ -74,7 +74,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
             checkTimelineStatusRt
           );
 
-          const responseBody: GetPrebuiltRulesAndTimelinesStatusResponse = {
+          const responseBody: ReadPrebuiltRulesAndTimelinesStatusResponse = {
             rules_custom_installed: customRules.total,
             rules_installed: installedPrebuiltRules.size,
             rules_not_installed: rulesToInstall.length,
@@ -86,7 +86,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
           };
 
           return response.ok({
-            body: GetPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
+            body: ReadPrebuiltRulesAndTimelinesStatusResponse.parse(responseBody),
           });
         } catch (err) {
           const error = transformError(err);

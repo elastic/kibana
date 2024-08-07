@@ -123,6 +123,86 @@ export const ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT: EventType
     },
   };
 
+export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
+  suppressionAlertsCreated: number;
+  suppressionAlertsSuppressed: number;
+  suppressionRuleName: string;
+  suppressionDuration: number;
+  suppressionGroupByFieldsNumber: number;
+  suppressionGroupByFields: string[];
+  suppressionRuleType: string;
+  suppressionMissingFields: boolean;
+  suppressionRuleId: string;
+}> = {
+  eventType: 'alert_suppression_on_rule_execution',
+  schema: {
+    suppressionAlertsCreated: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of alerts created during rule execution with configured alert suppression',
+      },
+    },
+    suppressionAlertsSuppressed: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of alerts suppressed during rule execution with configured alert suppression',
+      },
+    },
+    suppressionRuleName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of rule',
+      },
+    },
+    suppressionDuration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration in seconds of suppression period. -1 for per rule execution config',
+      },
+    },
+    suppressionGroupByFieldsNumber: {
+      type: 'long',
+      _meta: {
+        description: 'Number of Suppress by fields',
+      },
+    },
+    suppressionGroupByFields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Tag attached to the element...',
+          optional: false,
+        },
+      },
+      _meta: {
+        description: 'List of tags attached to the element...',
+        optional: false,
+      },
+    },
+    suppressionRuleType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Rule type',
+      },
+    },
+    suppressionMissingFields: {
+      type: 'boolean',
+      _meta: {
+        description: 'Suppression of missing fields enabled',
+      },
+    },
+    suppressionRuleId: {
+      type: 'keyword',
+      _meta: {
+        description: 'ruleId',
+      },
+    },
+  },
+};
+
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
@@ -175,4 +255,5 @@ export const events = [
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
+  ALERT_SUPPRESSION_EVENT,
 ];

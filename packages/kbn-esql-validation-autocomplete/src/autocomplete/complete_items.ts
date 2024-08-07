@@ -98,13 +98,16 @@ function buildCharCompleteItem(
     sortText,
   };
 }
-export const pipeCompleteItem = buildCharCompleteItem(
-  '|',
-  i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
+export const pipeCompleteItem: SuggestionRawDefinition = {
+  label: '|',
+  text: '| ',
+  kind: 'Keyword',
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
   }),
-  { sortText: 'C', quoted: false }
-);
+  sortText: 'C',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
 
 export const commaCompleteItem = buildCharCompleteItem(
   ',',
