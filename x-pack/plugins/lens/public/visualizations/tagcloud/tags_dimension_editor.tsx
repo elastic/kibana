@@ -94,7 +94,7 @@ export function TagsDimensionEditor({
         title={
           useNewColorMapping
             ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                defaultMessage: 'Edit colors by term mapping',
+                defaultMessage: 'Assign colors to terms',
               })
             : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
                 defaultMessage: 'Edit colors',
