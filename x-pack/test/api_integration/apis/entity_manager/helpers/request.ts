@@ -30,9 +30,9 @@ export const installDefinition = async (supertest: Agent, definition: EntityDefi
     .expect(200);
 };
 
-export const uninstallDefinition = (supertest: Agent, id: string) => {
+export const uninstallDefinition = (supertest: Agent, id: string, deleteData = false) => {
   return supertest
-    .delete(`/internal/entities/definition/${id}`)
+    .delete(`/internal/entities/definition/${id}${deleteData ? '?deleteData=true' : ''}`)
     .set('kbn-xsrf', 'xxx')
     .send()
     .expect(200);

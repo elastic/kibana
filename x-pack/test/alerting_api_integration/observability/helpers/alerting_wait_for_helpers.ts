@@ -75,6 +75,7 @@ export async function waitForDocumentInIndex<T>({
         ignore_unavailable: true,
       });
       if (!response.hits.total || (response.hits.total as number) < docCountTarget) {
+        logger.debug(`Document count is ${response.hits.total}, should be ${docCountTarget}`);
         throw new Error(
           `Number of hits does not match expectation (total: ${response.hits.total}, target: ${docCountTarget})`
         );
