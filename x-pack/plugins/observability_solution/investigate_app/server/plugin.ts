@@ -17,6 +17,7 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
+import { investigation } from './saved_objects/investigation';
 
 export class InvestigateAppPlugin
   implements
@@ -46,6 +47,9 @@ export class InvestigateAppPlugin
           }),
       };
     }) as InvestigateAppRouteHandlerResources['plugins'];
+
+    // TODO: add condition based on feature flag
+    coreSetup.savedObjects.registerType(investigation);
 
     registerServerRoutes({
       core: coreSetup,
