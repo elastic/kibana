@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             eventId,
             timelineId,
           });
-        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.be({ code: 200 });
+        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.equal({ code: 200 });
       });
     });
   });
