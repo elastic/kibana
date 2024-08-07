@@ -19,7 +19,7 @@ import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS } from '../factories';
 import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
-import { dataTypes, SupportedDataType } from '../../definitions/types';
+import { dataTypes, FunctionParameterType, SupportedDataType } from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -41,10 +41,16 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 export const triggerCharacters = [',', '(', '=', ' '];
 
 export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
-  ...dataTypes.map((type) => ({
-    name: `${camelCase(type)}Field`,
-    type,
-  })),
+  ...dataTypes
+    .filter((type) => {
+      // Filter out time_duration because it is impossible to have
+      // a time_duration field ATM.
+      return type !== 'time_duration';
+    })
+    .map((type) => ({
+      name: `${camelCase(type)}Field`,
+      type,
+    })),
   { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
   { name: 'kubernetes.something.something', type: 'double' },
 ];
@@ -132,7 +138,7 @@ export function getFunctionSignaturesByReturnType(
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: string[],
+  paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string
 ): PartialSuggestionWithText[] {
