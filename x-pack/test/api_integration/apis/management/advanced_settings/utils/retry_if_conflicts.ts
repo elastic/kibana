@@ -20,13 +20,13 @@ const RETRY_DELAY = 200;
 export const retryRequestIfConflicts = async (
   logger: ToolingLog,
   name: string,
-  operation: () => Promise<any>,
+  sendRequest: () => Promise<any>,
   retries: number = RETRY_ATTEMPTS,
   retryDelay: number = RETRY_DELAY
 ) => {
-  const operationResult = await operation();
-  if (operationResult.statusCode !== 409) {
-    return operationResult;
+  const response = await sendRequest();
+  if (response.statusCode !== 409) {
+    return response;
   }
 
   // If no retries left, throw it
@@ -38,7 +38,7 @@ export const retryRequestIfConflicts = async (
   // Otherwise, delay a bit before retrying
   logger.debug(`${name} conflict, retrying ...`);
   await waitBeforeNextRetry(retryDelay);
-  return await retryRequestIfConflicts(logger, name, operation, retries - 1);
+  return await retryRequestIfConflicts(logger, name, sendRequest, retries - 1);
 };
 
 async function waitBeforeNextRetry(retryDelay: number): Promise<void> {
