@@ -60,6 +60,12 @@ export interface ConsolePluginStart {
    */
   openEmbeddedConsole?: (content?: string) => void;
   /**
+   * openEmbeddedConsoleAlternateView is available if the embedded console can be rendered.
+   * Calling this function will open the embedded console to the alternative view. If there is no alternative view registered
+   * this will open the embedded console.
+   */
+  openEmbeddedConsoleAlternateView?: () => void;
+  /**
    * EmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana
    */
   EmbeddableConsole?: FC<{}>;

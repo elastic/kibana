@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inference-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "inference",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "inference"],
+    "requiredPlugins": [
+      "actions"
+    ],
+    "requiredBundles": [
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}
