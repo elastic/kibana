@@ -210,5 +210,6 @@
     "@kbn/avc-banner",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
+    "@kbn/config",
   ]
 }
