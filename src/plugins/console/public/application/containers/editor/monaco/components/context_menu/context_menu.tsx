@@ -84,9 +84,12 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
       const error = new Error(`Failed to convert request to ${withLanguage}`);
       notifications.toasts.addError(error, {
         title: i18n.translate('console.consoleMenu.copyAsCurlFailedMessage', {
-          defaultMessage: 'Request could not be copied',
+          defaultMessage: '{requestsCount, plural, one {Request} other {Requests}} could not be copied',
+          values: { requestsCount: requests.length },
         }),
       });
+
+      return Promise.reject(error);
     } else {
       // If we have data and errors, we should show a warning toast saying that
       // some requests could not be converted and copy the rest to clipboard
@@ -100,8 +103,8 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
       } else {
         notifications.toasts.add({
           title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
-            defaultMessage: 'Request copied as {language}',
-            values: { language: withLanguage },
+            defaultMessage: '{requestsCount, plural, one {Request} other {Requests}} copied as {language}',
+            values: { language: withLanguage, requestsCount: requests.length },
           }),
         });
       }
@@ -110,22 +113,20 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
       // data to clipboard
       await copyText(aggregatedData);
     }
-  };
 
-  const copyAsCurl = async () => {
-    return copyAs();
+    return Promise.resolve();
   };
 
   const onCopyAsSubmit = async (language?: string) => {
     const withLanguage = language || currentLanguage;
 
-    console.log('copy with language: ', withLanguage);
-    console.log('clicked on CTA from language selector modal..');
-
     // Close language selector modal
     setLanguageSelectorVisibility(false);
-    // Close context menu popover
-    setIsPopoverOpen(false);
+
+    // When copying as worked as expected, close the context menu popover
+    copyAs(withLanguage).then(() => {
+      setIsPopoverOpen(false);
+    });
   };
 
   const changeDefaultLanguage = (language: string) => {
@@ -135,10 +136,6 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
     }
 
     setCurrentLanguage(language);
-  };
-
-  const onButtonClick = () => {
-    setIsPopoverOpen((prev) => !prev);
   };
 
   const closePopover = () => {
@@ -161,7 +158,7 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
 
   const button = (
     <EuiLink
-      onClick={onButtonClick}
+      onClick={() => setIsPopoverOpen((prev) => !prev)}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
         defaultMessage: 'Request options',
@@ -185,8 +182,7 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
           return;
         }
 
-        closePopover();
-        copyAsCurl();
+        onCopyAsSubmit();
       }}
       icon="copyClipboard"
     >
