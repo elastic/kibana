@@ -149,7 +149,7 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
-  public controlGroupApi?: ControlGroupApi;
+  public controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -314,10 +314,6 @@ export class DashboardContainer
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
     this.executionContext = initialInput.executionContext;
-  }
-
-  public setControlGroupApi(controlGroupApi: ControlGroupApi) {
-    this.controlGroupApi = controlGroupApi;
   }
 
   public getAppContext() {

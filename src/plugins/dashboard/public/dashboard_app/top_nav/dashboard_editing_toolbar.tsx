@@ -19,6 +19,7 @@ import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
@@ -91,9 +92,11 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       isDisabled={isDisabled}
     />,
   ];
-  if (dashboard.controlGroup) {
+
+  const controlGroupApi = useStateFromPublishingSubject(dashboard.controlGroupApi$);
+  if (controlGroupApi) {
     extraButtons.push(
-      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
+      <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />
     );
   }
 

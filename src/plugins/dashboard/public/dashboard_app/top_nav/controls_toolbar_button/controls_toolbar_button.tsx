@@ -10,18 +10,18 @@ import React from 'react';
 
 import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
+import { ControlGroupApi } from '@kbn/controls-example-plugin/public';
 
 export function ControlsToolbarButton({
-  controlGroup,
+  controlGroupApi,
   isDisabled,
 }: {
-  controlGroup: ControlGroupContainer;
+  controlGroupApi: ControlGroupApi;
   isDisabled?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -41,21 +41,21 @@ export function ControlsToolbarButton({
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
           items={[
-            <AddDataControlButton
+            /*<AddDataControlButton
               key="addControl"
-              controlGroup={controlGroup}
+              controlGroupApi={controlGroupApi}
               closePopover={closePopover}
-            />,
+            />,*/
             <AddTimeSliderControlButton
               key="addTimeSliderControl"
-              controlGroup={controlGroup}
+              controlGroupApi={controlGroupApi}
               closePopover={closePopover}
             />,
-            <EditControlGroupButton
+            /*<EditControlGroupButton
               key="manageControls"
-              controlGroup={controlGroup}
+              controlGroupApi={controlGroupApi}
               closePopover={closePopover}
-            />,
+            />,*/
           ]}
         />
       )}

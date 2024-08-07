@@ -506,7 +506,7 @@ export const initializeDashboard = async ({
       query,
     };
 
-    if (controlGroup) {
+    /*if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
       const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
@@ -518,7 +518,7 @@ export const initializeDashboard = async ({
         throw new Error('Error in control group startup');
       }
       controlGroup = newControlGroup;
-    }
+    }*/
 
     untilDashboardReady().then((dashboardContainer) => {
       dashboardContainer.controlGroup = controlGroup;
