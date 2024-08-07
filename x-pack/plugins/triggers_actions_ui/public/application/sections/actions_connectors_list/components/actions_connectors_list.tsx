@@ -77,7 +77,11 @@ const ConnectorIconTipWithSpacing: React.FC = () => {
   );
 };
 
-const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList = ({
+  setHeaderActions,
+}: {
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
+}) => {
   const {
     http,
     notifications: { toasts },
@@ -87,6 +91,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     chrome,
     docLinks,
   } = useKibana().services;
+
   const { connectorId } = useParams<{ connectorId?: string }>();
   const history = useHistory();
   const location = useLocation();
@@ -102,11 +107,41 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
+  const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
   useEffect(() => {
     loadActions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [showWarningText, setShowWarningText] = useState<boolean>(false);
+
+  useEffect(() => {
+    setHeaderActions?.([
+      <EuiButton
+        data-test-subj="createConnectorButton"
+        fill
+        iconType="plusInCircle"
+        iconSide="left"
+        onClick={() => setAddFlyoutVisibility(true)}
+        isLoading={false}
+      >
+        {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
+          defaultMessage: 'Create connector',
+        })}
+      </EuiButton>,
+      <EuiButtonEmpty
+        data-test-subj="documentationButton"
+        key="documentation-button"
+        target="_blank"
+        href={docLinks.links.alerting.actionTypes}
+        iconType="help"
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
+          defaultMessage="Documentation"
+        />
+      </EuiButtonEmpty>,
+    ]);
+  }, [docLinks.links.alerting.actionTypes, setHeaderActions]);
 
   // Set breadcrumb and page title
   useEffect(() => {

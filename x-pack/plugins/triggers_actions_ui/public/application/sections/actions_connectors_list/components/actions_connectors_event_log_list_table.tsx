@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
+  EuiButtonEmpty,
   EuiFieldSearch,
   EuiFlexItem,
   EuiFlexGroup,
@@ -20,6 +21,7 @@ import {
   EuiSwitch,
   EuiDataGridColumn,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { IExecutionLog } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -98,6 +100,7 @@ export type ConnectorEventLogListCommonProps = {
   initialPageSize?: number;
   hasConnectorNames?: boolean;
   hasAllSpaceSwitch?: boolean;
+  setHeaderActions: (components: React.ReactNode[]) => void;
 } & Pick<ConnectorApis, 'loadGlobalConnectorExecutionLogAggregations'>;
 
 export type ConnectorEventLogListTableProps<T extends ConnectorEventLogListOptions = 'default'> =
@@ -117,9 +120,27 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     initialPageSize = 10,
     hasConnectorNames = false,
     hasAllSpaceSwitch = false,
+    setHeaderActions,
   } = props;
 
-  const { uiSettings, notifications } = useKibana().services;
+  const { uiSettings, notifications, docLinks } = useKibana().services;
+
+  useEffect(() => {
+    setHeaderActions([
+      <EuiButtonEmpty
+        data-test-subj="documentationButton"
+        key="documentation-button"
+        target="_blank"
+        href={docLinks.links.alerting.actionTypes}
+        iconType="help"
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
+          defaultMessage="Documentation"
+        />
+      </EuiButtonEmpty>,
+    ]);
+  }, [docLinks.links.alerting.actionTypes, setHeaderActions]);
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
