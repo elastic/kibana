@@ -1274,6 +1274,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
 /x-pack/test_serverless/**/services/ @elastic/appex-qa
+/packages/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
 
 # Core
 /config/ @elastic/kibana-core
