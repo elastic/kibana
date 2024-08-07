@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cpuTotal } from './cpu_total';
+import { cpuV2 } from './cpu_V2';
 import { cpu } from './cpu';
 import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
@@ -22,7 +22,7 @@ import { txV2 } from './tx_v2';
 import { rxV2 } from './rx_v2';
 
 export const snapshot = {
-  cpuTotal,
+  cpuV2,
   diskLatency,
   diskSpaceUsage,
   count,

@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'cpu',
       },
       {
-        type: 'cpuTotal',
+        type: 'cpuV2',
       },
       {
         type: 'diskSpaceUsage',
@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             metrics: [
               { name: 'cpu', value: 0.44708333333333333 },
-              { name: 'cpuTotal', value: 0 },
+              { name: 'cpuV2', value: 0 },
               { name: 'diskSpaceUsage', value: 0 },
               { name: 'memory', value: 0.4563333333333333 },
               { name: 'memoryFree', value: 8573890560 },
@@ -159,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...basePayload,
           metrics: [
             {
-              type: 'cpuTotal',
+              type: 'cpuV2',
             },
           ],
           query: { bool: { filter: [{ term: { 'host.os.name': 'CentOS Linux' } }] } },
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...basePayload,
           metrics: [
             {
-              type: 'cpuTotal',
+              type: 'cpuV2',
             },
           ],
           query: { bool: { filter: [{ term: { 'host.os.name': 'Ubuntu' } }] } },
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...basePayload,
         metrics: [
           {
-            type: 'cpuTotal',
+            type: 'cpuV2',
           },
         ],
         query: {
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await makeRequest({ invalidBody, expectedHTTPCode: 400 });
 
         expect(normalizeNewLine(response.body.message)).to.be(
-          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "cpuTotal" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
+          '[request body]: Failed to validate: in metrics/0/type: "any" does not match expected type "cpu" | "cpuV2" | "normalizedLoad1m" | "diskSpaceUsage" | "memory" | "memoryFree" | "rx" | "tx" | "rxV2" | "txV2"'
         );
       });
 

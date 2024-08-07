@@ -56,12 +56,12 @@ interface Props {
     | 'rightDown';
 }
 
-type V2MetricType = 'txV2' | 'rxV2' | 'cpuTotal';
+type V2MetricType = 'txV2' | 'rxV2' | 'cpuV2';
 
 const V2ToLegacyMapping: Record<V2MetricType, string> = {
   txV2: 'tx',
   rxV2: 'rx',
-  cpuTotal: 'cpu',
+  cpuV2: 'cpu',
 };
 
 const AGGREGATION_LABELS = {
@@ -173,16 +173,10 @@ export const MetricExpression = ({
   );
 
   const metricsToRemove: string[] = metrics
-    .reduce(
-      (metricToRemove, currentMetric) => {
-        if (Object.keys(V2ToLegacyMapping).includes(currentMetric.value)) {
-          metricToRemove.push(V2ToLegacyMapping[currentMetric.value as V2MetricType]);
-        }
-        return metricToRemove;
-      },
-      ['']
-    )
-    .filter(Boolean);
+    .map((currentMetric) => {
+      return V2ToLegacyMapping[currentMetric.value as V2MetricType];
+    })
+    .filter((m): m is string => !!m);
 
   const availableFieldsOptions = useMemo(
     () =>
@@ -194,7 +188,7 @@ export const MetricExpression = ({
         )
         .map((m) => {
           return { label: m.text, value: m.value };
-        }, []),
+        }),
     [metric?.value, metrics, metricsToRemove]
   );
 
