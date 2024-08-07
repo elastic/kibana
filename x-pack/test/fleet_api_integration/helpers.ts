@@ -149,7 +149,7 @@ export async function enableSecrets(providerContext: FtrProviderContext) {
     attributes: {
       secret_storage_requirements_met: true,
     },
-    overwrite: false,
+    overwrite: true,
   });
 }
 

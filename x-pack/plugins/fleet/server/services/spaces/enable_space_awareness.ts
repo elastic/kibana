@@ -15,7 +15,7 @@ import {
 
 import { appContextService } from '..';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
-import { getSettings, saveSettings } from '../settings';
+import { getSettingsOrUndefined, saveSettings } from '../settings';
 import { FleetError } from '../../errors';
 
 const PENDING_TIMEOUT = 60 * 60 * 1000;
@@ -24,11 +24,7 @@ export async function enableSpaceAwarenessMigration() {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const logger = appContextService.getLogger();
   try {
-    const existingSettings = await getSettings(soClient).catch((error) => {
-      if (!error.isBoom && error.output.statusCode !== 404) {
-        throw error;
-      }
-    });
+    const existingSettings = await getSettingsOrUndefined(soClient);
     if (existingSettings?.use_space_awareness_migration_status === 'success') {
       return;
     }

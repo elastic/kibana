@@ -6,7 +6,7 @@
  */
 
 import { appContextService } from '../app_context';
-import { getSettings } from '../settings';
+import { getSettingsOrUndefined } from '../settings';
 
 /**
  * Return true if user optin for the space awareness feature.
@@ -16,11 +16,7 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
     return false;
   }
 
-  const settings = await getSettings(appContextService.getInternalUserSOClient()).catch((error) => {
-    if (!error.isBoom && error.output.statusCode !== 404) {
-      throw error;
-    }
-  });
+  const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
   return settings?.use_space_awareness_migration_status === 'success' ?? false;
 }
@@ -33,11 +29,7 @@ export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
     return false;
   }
 
-  const settings = await getSettings(appContextService.getInternalUserSOClient()).catch((error) => {
-    if (!error.isBoom && error.output.statusCode !== 404) {
-      throw error;
-    }
-  });
+  const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
   if (
     settings?.use_space_awareness_migration_status === 'pending' &&

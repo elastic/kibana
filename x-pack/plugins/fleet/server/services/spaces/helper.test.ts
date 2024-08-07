@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
-import { getSettings } from '../settings';
+import { getSettingsOrUndefined } from '../settings';
 
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './helpers';
 
@@ -24,16 +24,16 @@ function mockFeatureFlag(val: boolean) {
 
 function mockGetSettings(settings?: Partial<Settings>) {
   if (settings) {
-    jest.mocked(getSettings).mockResolvedValue(settings as any);
+    jest.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
   } else {
-    jest.mocked(getSettings).mockRejectedValue(Boom.notFound());
+    jest.mocked(getSettingsOrUndefined).mockRejectedValue(Boom.notFound());
   }
 }
 
 describe('isSpaceAwarenessEnabled', () => {
   beforeEach(() => {
     jest.mocked(appContextService.getExperimentalFeatures).mockReset();
-    jest.mocked(getSettings).mockReset();
+    jest.mocked(getSettingsOrUndefined).mockReset();
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);
@@ -74,7 +74,7 @@ describe('isSpaceAwarenessEnabled', () => {
 describe('isSpaceAwarenessMigrationPending', () => {
   beforeEach(() => {
     jest.mocked(appContextService.getExperimentalFeatures).mockReset();
-    jest.mocked(getSettings).mockReset();
+    jest.mocked(getSettingsOrUndefined).mockReset();
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);

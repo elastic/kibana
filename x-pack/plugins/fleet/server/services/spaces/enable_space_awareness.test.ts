@@ -11,7 +11,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 
 import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
-import { getSettings, saveSettings } from '../settings';
+import { getSettingsOrUndefined, saveSettings } from '../settings';
 
 import { enableSpaceAwarenessMigration } from './enable_space_awareness';
 
@@ -20,9 +20,9 @@ jest.mock('../settings');
 
 function mockGetSettings(settings?: Partial<Settings>) {
   if (settings) {
-    jest.mocked(getSettings).mockResolvedValue(settings as any);
+    jest.mocked(getSettingsOrUndefined).mockResolvedValue(settings as any);
   } else {
-    jest.mocked(getSettings).mockRejectedValue(Boom.notFound());
+    jest.mocked(getSettingsOrUndefined).mockRejectedValue(Boom.notFound());
   }
 }
 
@@ -37,7 +37,7 @@ describe('enableSpaceAwarenessMigration', () => {
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
       .mockReturnValue(soClient);
-    jest.mocked(getSettings).mockReset();
+    jest.mocked(getSettingsOrUndefined).mockReset();
     jest.mocked(saveSettings).mockReset();
   });
   it('should do nothing if migration is already done', async () => {
