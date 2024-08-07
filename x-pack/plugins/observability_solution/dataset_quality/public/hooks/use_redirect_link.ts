@@ -59,7 +59,8 @@ export const useRedirectLink = <T extends BasicDataStream>({
     navigate: () => void;
     isLogsExplorerAvailable: boolean;
   }>(() => {
-    const config = logsExplorerLocator
+    const isLogsExplorerAvailable = !!logsExplorerLocator && dataStreamStat.type === 'logs';
+    const config = isLogsExplorerAvailable
       ? buildLogsExplorerConfig({
           locator: logsExplorerLocator,
           dataStreamStat,
@@ -95,7 +96,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
         onClick: onClickWithTelemetry,
       },
       navigate: navigateWithTelemetry,
-      isLogsExplorerAvailable: !!logsExplorerLocator,
+      isLogsExplorerAvailable,
     };
   }, [
     breakdownField,
@@ -193,7 +194,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
     dataViewId,
     dataViewSpec: {
       id: dataViewId,
-      title: dataViewTitle,
+      title: dataViewId,
     },
     query,
     breakdownField,

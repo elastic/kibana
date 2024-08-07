@@ -48,15 +48,15 @@ export function Header({
 
   return (
     <EuiFlyoutHeader hasBorder>
-      {loading ? (
-        <EuiSkeletonTitle
-          size="s"
-          data-test-subj="datasetQualityFlyoutIntegrationLoading"
-          className="datasetQualityFlyoutIntegrationLoading"
-        />
-      ) : (
-        <EuiFlexGroup justifyContent="flexStart">
-          <EuiFlexItem grow>
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem grow>
+          {loading ? (
+            <EuiSkeletonTitle
+              size="s"
+              data-test-subj="datasetQualityFlyoutIntegrationLoading"
+              className="datasetQualityFlyoutIntegrationLoading"
+            />
+          ) : (
             <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
               <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
                 <h3>{title}</h3>
@@ -71,32 +71,32 @@ export function Header({
                 <IntegrationIcon integration={integration} />
               </div>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              css={css`
-                margin-right: ${euiTheme.size.l};
-              `}
-              gutterSize="s"
-              justifyContent="flexEnd"
-              alignItems="center"
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            css={css`
+              margin-right: ${euiTheme.size.l};
+            `}
+            gutterSize="s"
+            justifyContent="flexEnd"
+            alignItems="center"
+          >
+            <EuiButton
+              data-test-subj="datasetQualityHeaderButton"
+              size="s"
+              {...redirectLinkProps.linkProps}
+              iconType={
+                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
+              }
             >
-              <EuiButton
-                data-test-subj="datasetQualityHeaderButton"
-                size="s"
-                {...redirectLinkProps.linkProps}
-                iconType={
-                  redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
-                }
-              >
-                {redirectLinkProps.isLogsExplorerAvailable
-                  ? flyoutOpenInLogsExplorerText
-                  : flyoutOpenInDiscoverText}
-              </EuiButton>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+              {redirectLinkProps.isLogsExplorerAvailable
+                ? flyoutOpenInLogsExplorerText
+                : flyoutOpenInDiscoverText}
+            </EuiButton>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutHeader>
   );
 }
