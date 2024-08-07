@@ -424,6 +424,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 <EuiEmptyPrompt
                   iconType="error"
                   color="danger"
+                  data-test-subj="embeddableError"
                   title={
                     <h2>
                       {i18n.translate('visualizations.embeddable.errorTitle', {
