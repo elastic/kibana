@@ -50,6 +50,7 @@ function fuzzyMatch(searchValue: string, text: string) {
 
 const pinnedFieldsSelector = (s: PreviewState) => s.pinnedFields;
 const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
+const fieldMapSelector = (s: PreviewState) => s.fieldMap;
 
 interface RowProps {
   index: number;
@@ -74,13 +75,13 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   const { controller } = useFieldPreviewContext();
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
+  const fieldMap = useStateSelector(controller.state$, fieldMapSelector);
 
   const [showAllFields, setShowAllFields] = useState(false);
 
   const fieldList: DocumentField[] = useMemo(
     () =>
-      dataView.fields
-        .getAll()
+      Object.values(fieldMap)
         .map((field) => {
           const { name, displayName } = field;
           const formatter = dataView.getFormatterForField(field);
@@ -95,7 +96,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           };
         })
         .filter(({ value }) => value !== undefined),
-    [dataView, currentDocument?.fields]
+    [dataView, fieldMap, currentDocument?.fields]
   );
 
   const fieldListWithPinnedFields: DocumentField[] = useMemo(() => {

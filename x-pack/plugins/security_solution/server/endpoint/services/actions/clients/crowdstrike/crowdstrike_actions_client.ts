@@ -27,7 +27,10 @@ import type {
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
 } from '../../../../../../common/endpoint/types';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
+import type {
+  IsolationRouteRequestBody,
+  UnisolationRouteRequestBody,
+} from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
@@ -238,7 +241,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {

@@ -43,7 +43,7 @@ export interface PluginStart {
    * Method to open the data view field delete fly-out
    * @param options Configuration options for the fly-out
    */
-  openDeleteModal(options: OpenFieldDeleteModalOptions): CloseEditor;
+  openDeleteModal(options: OpenFieldDeleteModalOptions): Promise<CloseEditor>;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   /**
    * Convenience method for user permissions checks
