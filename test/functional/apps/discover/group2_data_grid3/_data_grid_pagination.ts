@@ -14,7 +14,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'settings',
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'dashboard',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:rowHeightOption': 0, // single line
@@ -22,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const security = getService('security');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('discover data grid pagination', function describeIndexTests() {
     before(async () => {
@@ -118,6 +127,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
       await dataGrid.checkCurrentRowsPerPageToBe(10);
+
+      // should use "rowsPerPage" form the saved search on dashboard
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.addSavedSearch(savedSearchTitle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
+      await dataGrid.checkCurrentRowsPerPageToBe(10);
+
+      // should use "rowsPerPage" form settings by default on dashboard
+      await dashboardPanelActions.removePanelByTitle(savedSearchTitle);
+      await dashboardAddPanel.addSavedSearch('A Saved Search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
+      await dataGrid.checkCurrentRowsPerPageToBe(6);
+    });
+
+    it('should not split ES|QL results into pages', async () => {
+      const rowsPerPage = 5;
+      const savedSearchESQL = 'testESQLPagination';
+      await kibanaServer.uiSettings.update({
+        ...defaultSettings,
+        'discover:sampleRowsPerPage': rowsPerPage,
+        hideAnnouncements: true,
+      });
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // expect pagination to be present for data view mode
+      expect((await dataGrid.getDocTableRows()).length).to.be(rowsPerPage);
+      await dataGrid.checkCurrentRowsPerPageToBe(rowsPerPage);
+      await testSubjects.existOrFail('pagination-button-0');
+
+      await PageObjects.discover.selectTextBaseLang();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // expect no pagination for ES|QL mode
+      expect((await dataGrid.getDocTableRows()).length).to.above(rowsPerPage);
+      await testSubjects.missingOrFail('pagination-button-0');
+
+      await PageObjects.discover.saveSearch(savedSearchESQL);
+
+      await PageObjects.common.navigateToApp('dashboard');
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.addSavedSearch(savedSearchESQL);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // expect no pagination for ES|QL mode on Dashboard
+      expect((await dataGrid.getDocTableRows()).length).to.above(rowsPerPage);
+      await testSubjects.missingOrFail('pagination-button-0');
     });
   });
 }

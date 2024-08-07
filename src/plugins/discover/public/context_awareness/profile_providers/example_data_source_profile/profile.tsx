@@ -8,6 +8,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/unified-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -70,6 +71,31 @@ export const exampleDataSourceProfileProvider: DataSourceProfileProvider = {
           return prevValue.docViewsRegistry(registry);
         },
       };
+    },
+    getRowAdditionalLeadingControls: (prev) => (params) => {
+      const additionalControls = prev(params) || [];
+
+      return [
+        ...additionalControls,
+        ...['visBarVerticalStacked', 'heart', 'inspect'].map(
+          (iconType, index): RowControlColumn => ({
+            id: `exampleControl_${iconType}`,
+            headerAriaLabel: `Example Row Control ${iconType}`,
+            renderControl: (Control, rowProps) => {
+              return (
+                <Control
+                  data-test-subj={`exampleLogsControl_${iconType}`}
+                  label={`Example ${iconType}`}
+                  iconType={iconType}
+                  onClick={() => {
+                    alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+                  }}
+                />
+              );
+            },
+          })
+        ),
+      ];
     },
     getDefaultAppState: () => () => ({
       columns: [
