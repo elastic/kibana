@@ -34,7 +34,10 @@ describe('CrowdstrikeConnector', () => {
     CrowdstrikeConnector.token = null;
     // @ts-expect-error
     mockedRequest = connector.request = jest.fn() as jest.Mock;
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();

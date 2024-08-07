@@ -57,7 +57,10 @@ describe('Executor', () => {
     logger = loggingSystemMock.createLogger();
     services = actionsMock.createServices();
     mockedActionsConfig = actionsConfigMock.create();
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   it('should execute correctly', async () => {

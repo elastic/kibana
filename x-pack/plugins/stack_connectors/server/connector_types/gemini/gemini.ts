@@ -294,21 +294,20 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return { message: res.completion, usageMetadata: res.usageMetadata };
   }
 
-  public async invokeAIRaw({
-    messages,
-    model,
-    temperature = 0,
-    signal,
-    timeout,
-    tools,
-  }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
-    const res = await this.runApi({
-      body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),
-      model,
-      signal,
-      timeout,
-      raw: true,
-    });
+  public async invokeAIRaw(
+    { messages, model, temperature = 0, signal, timeout, tools }: InvokeAIRawActionParams,
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ): Promise<InvokeAIRawActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),
+        model,
+        signal,
+        timeout,
+        raw: true,
+      },
+      connectorMetricsCollector
+    );
 
     return res;
   }
@@ -321,15 +320,18 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({
-    messages,
-    model,
-    stopSequences,
-    temperature = 0,
-    signal,
-    timeout,
-    tools,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
+  public async invokeStream(
+    {
+      messages,
+      model,
+      stopSequences,
+      temperature = 0,
+      signal,
+      timeout,
+      tools,
+    }: InvokeAIActionParams,
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ): Promise<IncomingMessage> {
     return (await this.streamAPI(
       {
         body: JSON.stringify({ ...formatGeminiPayload(messages, temperature), tools }),

@@ -110,7 +110,10 @@ describe('IBM Resilient connector', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.setSystemTime(TIMESTAMP);
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('getIncident', () => {

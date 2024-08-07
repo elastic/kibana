@@ -73,7 +73,10 @@ describe('SubActionConnector', () => {
       services,
     });
 
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('Sub actions', () => {

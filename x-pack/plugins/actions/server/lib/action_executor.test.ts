@@ -152,7 +152,11 @@ const connectorSavedObject = {
   references: [],
 };
 
-const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
+interface ActionMetrics {
+  request_body_bytes: number;
+}
+
+const getBaseExecuteStartEventLogDoc = (unsecured: boolean, actionMetrics?: ActionMetrics) => {
   return {
     event: {
       action: 'execute-start',
@@ -162,6 +166,7 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
       action: {
         execution: {
           uuid: ACTION_EXECUTION_ID,
+          ...(actionMetrics ? { metrics: actionMetrics } : {}),
         },
         id: CONNECTOR_ID,
         name: '1',
@@ -193,8 +198,8 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
   };
 };
 
-const getBaseExecuteEventLogDoc = (unsecured: boolean) => {
-  const base = getBaseExecuteStartEventLogDoc(unsecured);
+const getBaseExecuteEventLogDoc = (unsecured: boolean, actionMetrics?: ActionMetrics) => {
+  const base = getBaseExecuteStartEventLogDoc(unsecured, actionMetrics);
   return {
     ...base,
     event: {
@@ -294,8 +299,8 @@ describe('Action Executor', () => {
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
-      const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
-      addConnectorMetrics(execDoc, 0);
+      const execDoc = getBaseExecuteEventLogDoc(executeUnsecure, { request_body_bytes: 300 });
+      addConnectorMetrics(execDoc, 300);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, execStartDoc);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, execDoc);
     });

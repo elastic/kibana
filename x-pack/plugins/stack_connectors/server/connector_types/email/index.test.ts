@@ -515,7 +515,10 @@ describe('execute()', () => {
       text: 'Go to Elastic',
     },
   };
-  const connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
+  const connectorMetricsCollector = new ConnectorMetricsCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 
   const actionId = 'some-id';
   const executorOptions: EmailConnectorTypeExecutorOptions = {

@@ -23,7 +23,10 @@ describe('SentinelOne Connector', () => {
 
   beforeEach(() => {
     connectorInstance = sentinelOneConnectorMocks.create();
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('#fetchAgentFiles()', () => {
@@ -130,7 +133,10 @@ describe('SentinelOne Connector', () => {
 
   describe('#downloadRemoteScriptResults()', () => {
     it('should call SentinelOne api to retrieve task results', async () => {
-      await connectorInstance.downloadRemoteScriptResults({ taskId: 'task-123' });
+      await connectorInstance.downloadRemoteScriptResults(
+        { taskId: 'task-123' },
+        connectorMetricsCollector
+      );
 
       expect(connectorInstance.requestSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -144,13 +150,19 @@ describe('SentinelOne Connector', () => {
       connectorInstance.mockResponses.getRemoteScriptResults.data.download_links = [];
 
       await expect(
-        connectorInstance.downloadRemoteScriptResults({ taskId: 'task-123' })
+        connectorInstance.downloadRemoteScriptResults(
+          { taskId: 'task-123' },
+          connectorMetricsCollector
+        )
       ).rejects.toThrow('Download URL for script results of task id [task-123] not found');
     });
 
     it('should return a Stream for downloading the file', async () => {
       await expect(
-        connectorInstance.downloadRemoteScriptResults({ taskId: 'task-123' })
+        connectorInstance.downloadRemoteScriptResults(
+          { taskId: 'task-123' },
+          connectorMetricsCollector
+        )
       ).resolves.toEqual(connectorInstance.mockResponses.downloadRemoteScriptResults);
     });
   });

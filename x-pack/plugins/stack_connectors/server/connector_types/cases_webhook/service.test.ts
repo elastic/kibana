@@ -76,7 +76,10 @@ describe('Cases webhook service', () => {
   let sslService: ExternalService;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     service = createExternalService(
       actionId,
       {

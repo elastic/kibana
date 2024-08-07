@@ -46,7 +46,10 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
+  connectorMetricsCollector = new ConnectorMetricsCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('connectorType', () => {
@@ -345,72 +348,23 @@ describe('execute()', () => {
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "axios": undefined,
-        "connectorMetricsCollector": ConnectorMetricsCollector {
-          "logger": Object {
-            "context": Array [],
-            "debug": [MockFunction] {
-              "calls": Array [
-                Array [
-                  "response from webhook action \\"some-id\\": [HTTP 200] ",
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": undefined,
-                },
-              ],
-            },
-            "error": [MockFunction],
-            "fatal": [MockFunction],
-            "get": [MockFunction],
-            "info": [MockFunction],
-            "isLevelEnabled": [MockFunction],
-            "log": [MockFunction],
-            "trace": [MockFunction],
-            "warn": [MockFunction],
-          },
-          "metrics": Object {
-            "requestBodyBytes": 0,
-          },
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: undefined,
+      connectorMetricsCollector: {
+        metrics: {
+          requestBodyBytes: 0,
         },
-        "data": "some data",
-        "headers": Object {
-          "Authorization": "Basic YWJjOjEyMw==",
-          "aheader": "a value",
-        },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from webhook action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "isLevelEnabled": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "post",
-        "sslOverrides": Object {},
-        "url": "https://abc.def/my-webhook",
-      }
-    `);
+      },
+      data: 'some data',
+      headers: {
+        Authorization: 'Basic YWJjOjEyMw==',
+        aheader: 'a value',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      sslOverrides: {},
+      url: 'https://abc.def/my-webhook',
+    });
   });
 
   test('execute with ssl adds ssl settings to sslOverrides', async () => {

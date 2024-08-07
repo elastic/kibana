@@ -42,7 +42,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
-  connectorMetricsCollector?: ConnectorMetricsCollector; // TODO make optional
+  connectorMetricsCollector?: ConnectorMetricsCollector;
 } & AxiosRequestConfig): Promise<AxiosResponse> => {
   if (!isEmpty(axios?.defaults?.baseURL ?? '')) {
     throw new Error(

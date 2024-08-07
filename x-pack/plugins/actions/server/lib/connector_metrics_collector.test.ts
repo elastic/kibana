@@ -13,7 +13,10 @@ describe('ConnectorMetricsCollector', () => {
   const logger = loggingSystemMock.createLogger();
 
   test('it collects requestBodyBytes from response.request.headers', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    const connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     const data = { test: 'foo' };
     const contentLength = Buffer.byteLength(JSON.stringify(data), 'utf8');
 
@@ -25,6 +28,7 @@ describe('ConnectorMetricsCollector', () => {
       config: { headers: new AxiosHeaders() },
       request: {
         headers: { 'Content-Length': contentLength },
+        getHeader: () => contentLength,
       },
     };
 
@@ -36,8 +40,11 @@ describe('ConnectorMetricsCollector', () => {
 
     expect(connectorMetricsCollector.getRequestBodyByte()).toBe(contentLength + contentLength);
   });
-  test('it collects requestBodyBytes from data when response.request.headers is missing', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+  test('it collects requestBodyBytes from data when header is is missing', async () => {
+    const connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     const data = { test: 'foo' };
     const contentLength = Buffer.byteLength(JSON.stringify(data), 'utf8');
 
@@ -47,6 +54,9 @@ describe('ConnectorMetricsCollector', () => {
       statusText: 'OK',
       headers: {},
       config: { headers: new AxiosHeaders() },
+      request: {
+        getHeader: () => undefined,
+      },
     };
 
     connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);
@@ -59,7 +69,10 @@ describe('ConnectorMetricsCollector', () => {
   });
 
   test('it logs an error when the body cannot be stringified ', async () => {
-    const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    const connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
 
     const data = {
       name: 'arun',
@@ -74,6 +87,9 @@ describe('ConnectorMetricsCollector', () => {
       statusText: 'OK',
       headers: {},
       config: { headers: new AxiosHeaders() },
+      request: {
+        getHeader: () => undefined,
+      },
     };
 
     connectorMetricsCollector.addRequestBodyBytes(axiosResponse, data);

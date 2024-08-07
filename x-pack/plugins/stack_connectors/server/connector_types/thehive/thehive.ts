@@ -8,6 +8,7 @@
 import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { Type } from '@kbn/config-schema';
+import { ConnectorMetricsCollector } from '@kbn/actions-plugin/server/lib';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import {
   TheHiveIncidentResponseSchema,
@@ -68,14 +69,20 @@ export class TheHiveConnector extends CaseConnector<
     return `API Error: ${error.response?.data?.type} - ${error.response?.data?.message}`;
   }
 
-  public async createIncident(incident: Incident): Promise<ExternalServiceIncidentResponse> {
-    const res = await this.request({
-      method: 'post',
-      url: `${this.url}/api/${API_VERSION}/case`,
-      data: incident,
-      headers: this.getAuthHeaders(),
-      responseSchema: TheHiveIncidentResponseSchema,
-    });
+  public async createIncident(
+    incident: Incident,
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ): Promise<ExternalServiceIncidentResponse> {
+    const res = await this.request(
+      {
+        method: 'post',
+        url: `${this.url}/api/${API_VERSION}/case`,
+        data: incident,
+        headers: this.getAuthHeaders(),
+        responseSchema: TheHiveIncidentResponseSchema,
+      },
+      connectorMetricsCollector
+    );
 
     return {
       id: res.data._id,
@@ -85,30 +92,42 @@ export class TheHiveConnector extends CaseConnector<
     };
   }
 
-  public async addComment({ incidentId, comment }: { incidentId: string; comment: string }) {
-    await this.request({
-      method: 'post',
-      url: `${this.url}/api/${API_VERSION}/case/${incidentId}/comment`,
-      data: { message: comment },
-      headers: this.getAuthHeaders(),
-      responseSchema: TheHiveAddCommentResponseSchema,
-    });
+  public async addComment(
+    { incidentId, comment }: { incidentId: string; comment: string },
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ) {
+    await this.request(
+      {
+        method: 'post',
+        url: `${this.url}/api/${API_VERSION}/case/${incidentId}/comment`,
+        data: { message: comment },
+        headers: this.getAuthHeaders(),
+        responseSchema: TheHiveAddCommentResponseSchema,
+      },
+      connectorMetricsCollector
+    );
   }
 
-  public async updateIncident({
-    incidentId,
-    incident,
-  }: {
-    incidentId: string;
-    incident: Incident;
-  }): Promise<ExternalServiceIncidentResponse> {
-    await this.request({
-      method: 'patch',
-      url: `${this.url}/api/${API_VERSION}/case/${incidentId}`,
-      data: incident,
-      headers: this.getAuthHeaders(),
-      responseSchema: TheHiveUpdateIncidentResponseSchema,
-    });
+  public async updateIncident(
+    {
+      incidentId,
+      incident,
+    }: {
+      incidentId: string;
+      incident: Incident;
+    },
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ): Promise<ExternalServiceIncidentResponse> {
+    await this.request(
+      {
+        method: 'patch',
+        url: `${this.url}/api/${API_VERSION}/case/${incidentId}`,
+        data: incident,
+        headers: this.getAuthHeaders(),
+        responseSchema: TheHiveUpdateIncidentResponseSchema,
+      },
+      connectorMetricsCollector
+    );
 
     return {
       id: incidentId,
@@ -118,23 +137,35 @@ export class TheHiveConnector extends CaseConnector<
     };
   }
 
-  public async getIncident({ id }: { id: string }): Promise<GetIncidentResponse> {
-    const res = await this.request({
-      url: `${this.url}/api/${API_VERSION}/case/${id}`,
-      headers: this.getAuthHeaders(),
-      responseSchema: TheHiveIncidentResponseSchema,
-    });
+  public async getIncident(
+    { id }: { id: string },
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ): Promise<GetIncidentResponse> {
+    const res = await this.request(
+      {
+        url: `${this.url}/api/${API_VERSION}/case/${id}`,
+        headers: this.getAuthHeaders(),
+        responseSchema: TheHiveIncidentResponseSchema,
+      },
+      connectorMetricsCollector
+    );
 
     return res.data;
   }
 
-  public async createAlert(alert: ExecutorSubActionCreateAlertParams) {
-    await this.request({
-      method: 'post',
-      url: `${this.url}/api/${API_VERSION}/alert`,
-      data: alert,
-      headers: this.getAuthHeaders(),
-      responseSchema: TheHiveCreateAlertResponseSchema,
-    });
+  public async createAlert(
+    alert: ExecutorSubActionCreateAlertParams,
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ) {
+    await this.request(
+      {
+        method: 'post',
+        url: `${this.url}/api/${API_VERSION}/alert`,
+        data: alert,
+        headers: this.getAuthHeaders(),
+        responseSchema: TheHiveCreateAlertResponseSchema,
+      },
+      connectorMetricsCollector
+    );
   }
 }

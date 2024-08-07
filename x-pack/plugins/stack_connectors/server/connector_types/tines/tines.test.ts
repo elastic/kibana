@@ -111,7 +111,10 @@ describe('TinesConnector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   describe('getStories', () => {

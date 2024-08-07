@@ -47,7 +47,10 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 beforeAll(() => {
   actionType = getActionType();
   configurationUtilities = actionsConfigMock.create();
-  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
+  connectorMetricsCollector = new ConnectorMetricsCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('actionType', () => {
@@ -182,74 +185,25 @@ describe('execute Torq action', () => {
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;
-    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Object {
-        "axios": [MockFunction],
-        "connectorMetricsCollector": ConnectorMetricsCollector {
-          "logger": Object {
-            "context": Array [],
-            "debug": [MockFunction] {
-              "calls": Array [
-                Array [
-                  "response from Torq action \\"some-id\\": [HTTP 200] ",
-                ],
-              ],
-              "results": Array [
-                Object {
-                  "type": "return",
-                  "value": undefined,
-                },
-              ],
-            },
-            "error": [MockFunction],
-            "fatal": [MockFunction],
-            "get": [MockFunction],
-            "info": [MockFunction],
-            "isLevelEnabled": [MockFunction],
-            "log": [MockFunction],
-            "trace": [MockFunction],
-            "warn": [MockFunction],
-          },
-          "metrics": Object {
-            "requestBodyBytes": 0,
-          },
+    expect(requestMock.mock.calls[0][0]).toMatchSnapshot({
+      axios: expect.any(Function),
+      connectorMetricsCollector: {
+        metrics: {
+          requestBodyBytes: 0,
         },
-        "data": Object {
-          "msg": "some data",
-        },
-        "headers": Object {
-          "Content-Type": "application/json",
-          "X-Torq-Token": "1234",
-        },
-        "logger": Object {
-          "context": Array [],
-          "debug": [MockFunction] {
-            "calls": Array [
-              Array [
-                "response from Torq action \\"some-id\\": [HTTP 200] ",
-              ],
-            ],
-            "results": Array [
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-            ],
-          },
-          "error": [MockFunction],
-          "fatal": [MockFunction],
-          "get": [MockFunction],
-          "info": [MockFunction],
-          "isLevelEnabled": [MockFunction],
-          "log": [MockFunction],
-          "trace": [MockFunction],
-          "warn": [MockFunction],
-        },
-        "method": "post",
-        "url": "https://hooks.torq.io/v1/test",
-        "validateStatus": [Function],
-      }
-    `);
+      },
+      data: {
+        msg: 'some data',
+      },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Torq-Token': '1234',
+      },
+      logger: expect.any(Object),
+      method: 'post',
+      url: 'https://hooks.torq.io/v1/test',
+      validateStatus: expect.any(Function),
+    });
   });
 
   test('renders parameter templates as expected', async () => {

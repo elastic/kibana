@@ -364,7 +364,10 @@ export class SentinelOneConnector extends SubActionConnector<
     { taskId }: SentinelOneDownloadRemoteScriptResultsParams,
     connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<Stream> {
-    const scriptResultsInfo = await this.getRemoteScriptResults({ taskIds: [taskId] });
+    const scriptResultsInfo = await this.getRemoteScriptResults(
+      { taskIds: [taskId] },
+      connectorMetricsCollector
+    );
 
     this.logger.debug(
       () => `script results for taskId [${taskId}]:\n${JSON.stringify(scriptResultsInfo)}`

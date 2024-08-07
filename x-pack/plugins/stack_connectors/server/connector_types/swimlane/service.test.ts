@@ -60,7 +60,10 @@ describe('Swimlane Service', () => {
   let connectorMetricsCollector: ConnectorMetricsCollector;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     service = createExternalService(
       {
         // The trailing slash at the end of the url is intended.

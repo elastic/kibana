@@ -25,7 +25,10 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 describe('createServiceWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   test('creates axios instance with apiUrl', () => {

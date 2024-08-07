@@ -399,7 +399,10 @@ export class ActionExecutor {
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
 
-        const connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+        const connectorMetricsCollector = new ConnectorMetricsCollector({
+          logger,
+          connectorId: actionId,
+        });
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;

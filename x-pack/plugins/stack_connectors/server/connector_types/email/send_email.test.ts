@@ -55,7 +55,10 @@ describe('send_email module', () => {
       };
     });
 
-    connectorMetricsCollector = new ConnectorMetricsCollector(mockLogger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger: mockedLogger,
+      connectorId: 'test-connector-id',
+    });
   });
 
   test('handles authenticated email using service', async () => {

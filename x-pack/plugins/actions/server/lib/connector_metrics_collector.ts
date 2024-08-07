@@ -7,34 +7,39 @@
 
 import { AxiosError, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
+import { isUndefined } from 'lodash';
 
 interface ConnectorMetrics {
   requestBodyBytes: number;
 }
 
 export class ConnectorMetricsCollector {
+  private connectorId: string;
   private metrics: ConnectorMetrics = {
     requestBodyBytes: 0,
   };
 
   private logger: Logger;
 
-  constructor(logger: Logger) {
+  constructor({ logger, connectorId }: { logger: Logger; connectorId: string }) {
     this.logger = logger;
+    this.connectorId = connectorId;
   }
 
   public addRequestBodyBytes(result?: AxiosError | AxiosResponse, body: string | object = '') {
-    const contentLength = result?.request?.headers?.['Content-Length'];
+    const contentLength = result?.request.getHeader('content-length');
     let bytes = 0;
 
-    if (!!contentLength) {
+    if (!isUndefined(contentLength)) {
       bytes = contentLength;
     } else {
       try {
         const sBody = typeof body === 'string' ? body : JSON.stringify(body);
         bytes = Buffer.byteLength(sBody, 'utf8');
       } catch (e) {
-        this.logger.error(`Request body bytes couldn't be calculated, Error: ${e.message}`);
+        this.logger.error(
+          `Request body bytes couldn't be calculated, Error: ${e.message}, connectorId:${this.connectorId}`
+        );
       }
     }
 

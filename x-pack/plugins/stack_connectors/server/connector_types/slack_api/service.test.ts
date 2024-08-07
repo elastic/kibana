@@ -119,7 +119,10 @@ describe('Slack API service', () => {
   let service: SlackApiService;
 
   beforeAll(() => {
-    connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+    connectorMetricsCollector = new ConnectorMetricsCollector({
+      logger,
+      connectorId: 'test-connector-id',
+    });
     service = createExternalService(
       {
         secrets: { token: 'token' },

@@ -276,7 +276,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
       });
 
       describe('execution', () => {
-        describe('successful response simulator x', () => {
+        describe('successful response simulator', () => {
           const simulator = new OpenAISimulator({
             proxy: {
               config: configService.get('kbnTestServer.serverArgs'),

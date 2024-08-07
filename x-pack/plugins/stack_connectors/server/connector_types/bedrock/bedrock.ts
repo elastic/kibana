@@ -198,7 +198,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     params: SubActionRequestParams<RunActionResponse | InvokeAIRawActionResponse>,
     connectorMetricsCollector: ConnectorMetricsCollector
   ): Promise<RunActionResponse | InvokeAIRawActionResponse> {
-    const response = await this.request(params);
+    const response = await this.request(params, connectorMetricsCollector);
     return response.data;
   }
 
@@ -240,7 +240,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     };
 
     if (raw) {
-      return this.runApiRaw({ ...requestArgs, responseSchema: InvokeAIRawActionResponseSchema });
+      return this.runApiRaw(
+        { ...requestArgs, responseSchema: InvokeAIRawActionResponseSchema },
+        connectorMetricsCollector
+      );
     }
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
     if (usesDeprecatedArguments(body)) {
@@ -358,33 +361,39 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     return { message: res.completion.trim() };
   }
 
-  public async invokeAIRaw({
-    messages,
-    model,
-    stopSequences,
-    system,
-    temperature,
-    maxTokens = DEFAULT_TOKEN_LIMIT,
-    signal,
-    timeout,
-    tools,
-    anthropicVersion,
-  }: InvokeAIRawActionParams): Promise<InvokeAIRawActionResponse> {
-    const res = await this.runApi({
-      body: JSON.stringify({
-        messages,
-        stop_sequences: stopSequences,
-        system,
-        temperature,
-        max_tokens: maxTokens,
-        tools,
-        anthropic_version: anthropicVersion,
-      }),
+  public async invokeAIRaw(
+    {
+      messages,
       model,
+      stopSequences,
+      system,
+      temperature,
+      maxTokens = DEFAULT_TOKEN_LIMIT,
       signal,
       timeout,
-      raw: true,
-    });
+      tools,
+      anthropicVersion,
+    }: InvokeAIRawActionParams,
+    connectorMetricsCollector: ConnectorMetricsCollector
+  ): Promise<InvokeAIRawActionResponse> {
+    const res = await this.runApi(
+      {
+        body: JSON.stringify({
+          messages,
+          stop_sequences: stopSequences,
+          system,
+          temperature,
+          max_tokens: maxTokens,
+          tools,
+          anthropic_version: anthropicVersion,
+        }),
+        model,
+        signal,
+        timeout,
+        raw: true,
+      },
+      connectorMetricsCollector
+    );
     return res;
   }
 }

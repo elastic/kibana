@@ -39,7 +39,10 @@ let connectorMetricsCollector: ConnectorMetricsCollector;
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
   connectorType = getConnectorType();
-  connectorMetricsCollector = new ConnectorMetricsCollector(mockedLogger);
+  connectorMetricsCollector = new ConnectorMetricsCollector({
+    logger: mockedLogger,
+    connectorId: 'test-connector-id',
+  });
 });
 
 describe('connector registration', () => {

@@ -95,7 +95,10 @@ describe('GeminiConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
-      connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+      connectorMetricsCollector = new ConnectorMetricsCollector({
+        logger,
+        connectorId: 'test-connector-id',
+      });
     });
 
     describe('runApi', () => {
@@ -187,7 +190,10 @@ describe('GeminiConnector', () => {
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
         const timeout = 60000;
-        await connector.invokeAI({ ...aiAssistantBody, timeout, signal });
+        await connector.invokeAI(
+          { ...aiAssistantBody, timeout, signal },
+          connectorMetricsCollector
+        );
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
@@ -276,7 +282,10 @@ describe('GeminiConnector', () => {
       it('signal and timeout is properly passed to streamApi', async () => {
         const signal = jest.fn();
         const timeout = 60000;
-        await connector.invokeStream({ ...aiAssistantBody, timeout, signal });
+        await connector.invokeStream(
+          { ...aiAssistantBody, timeout, signal },
+          connectorMetricsCollector
+        );
         expect(mockRequest).toHaveBeenCalledWith(
           {
             url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,

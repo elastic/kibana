@@ -46,7 +46,10 @@ describe('D3SecurityConnector', () => {
       // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
-      connectorMetricsCollector = new ConnectorMetricsCollector(logger);
+      connectorMetricsCollector = new ConnectorMetricsCollector({
+        logger,
+        connectorId: 'test-connector-id',
+      });
     });
     it('the D3 Security API call is successful with correct parameters', async () => {
       const response = await connector.runApi({ body: sampleBody }, connectorMetricsCollector);
