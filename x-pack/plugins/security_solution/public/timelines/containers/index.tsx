@@ -96,6 +96,7 @@ export interface UseTimelineEventsProps {
   sort?: TimelineRequestSortField[];
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
+  fetchNotes?: boolean;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -482,6 +483,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  fetchNotes = true,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
@@ -503,9 +505,9 @@ export const useTimelineEvents = ({
 
   const onTimelineSearchComplete: OnNextResponseHandler = useCallback(
     (response) => {
-      onLoad(response.events);
+      if (fetchNotes) onLoad(response.events);
     },
-    [onLoad]
+    [fetchNotes, onLoad]
   );
 
   useEffect(() => {
