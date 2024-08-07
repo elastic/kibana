@@ -10,6 +10,7 @@ import { HttpStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { lastValueFrom } from 'rxjs';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
 import { getLogViewUrl } from '../../../common/http_api/log_views';
 import {
@@ -31,6 +32,7 @@ import { ILogViewsClient } from './types';
 export class LogViewsClient implements ILogViewsClient {
   constructor(
     private readonly dataViews: DataViewsContract,
+    private readonly logSourcesService: LogSourcesService,
     private readonly http: HttpStart,
     private readonly search: ISearchGeneric,
     private readonly config: LogViewsStaticConfig
@@ -152,7 +154,13 @@ export class LogViewsClient implements ILogViewsClient {
     logViewId: string,
     logViewAttributes: LogViewAttributes
   ): Promise<ResolvedLogView> {
-    return await resolveLogView(logViewId, logViewAttributes, this.dataViews, this.config);
+    return await resolveLogView(
+      logViewId,
+      logViewAttributes,
+      this.dataViews,
+      this.logSourcesService,
+      this.config
+    );
   }
 }
 
