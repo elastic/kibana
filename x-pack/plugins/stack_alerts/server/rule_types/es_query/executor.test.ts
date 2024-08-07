@@ -101,11 +101,12 @@ describe('es_query executor', () => {
       savedObjectsClient: {
         get: () => ({ attributes: { consumer: 'alerts' } }),
       },
-      searchSourceClient: searchSourceClientMock,
+      getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceClientMock),
       alertsClient: mockAlertClient,
       alertWithLifecycle: jest.fn(),
       logger,
       shouldWriteAlerts: () => true,
+      getDataViews: jest.fn(),
     };
     const coreMock = {
       http: { basePath: { publicBaseUrl: 'https://localhost:5601' } },

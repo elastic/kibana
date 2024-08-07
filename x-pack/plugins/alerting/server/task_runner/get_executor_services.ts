@@ -35,12 +35,7 @@ interface GetExecutorServicesOpts {
   logger: Logger;
   ruleMonitoringService: RuleMonitoringService;
   ruleResultService: RuleResultService;
-  ruleData: {
-    name: string;
-    alertTypeId: string;
-    id: string;
-    spaceId: string;
-  };
+  ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
   ruleTaskTimeout?: string;
 }
 
