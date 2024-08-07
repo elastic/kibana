@@ -11,11 +11,7 @@ import type { Settings } from '../../types';
 import { appContextService } from '../app_context';
 import { getSettings } from '../settings';
 
-import {
-  isSpaceAwarenessEnabled,
-  _clearSpaceAwarenessCache,
-  isSpaceAwarenessMigrationPending,
-} from './helpers';
+import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './helpers';
 
 jest.mock('../app_context');
 jest.mock('../settings');
@@ -38,7 +34,6 @@ describe('isSpaceAwarenessEnabled', () => {
   beforeEach(() => {
     jest.mocked(appContextService.getExperimentalFeatures).mockReset();
     jest.mocked(getSettings).mockReset();
-    _clearSpaceAwarenessCache();
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);
@@ -74,23 +69,12 @@ describe('isSpaceAwarenessEnabled', () => {
 
     expect(res).toBe(true);
   });
-
-  it('should use cache if called multiple time and feature flag is enabled and user optin', async () => {
-    mockFeatureFlag(true);
-    mockGetSettings({
-      use_space_awareness_migration_status: 'success',
-    });
-    await isSpaceAwarenessEnabled();
-    await isSpaceAwarenessEnabled();
-    expect(getSettings).toBeCalledTimes(1);
-  });
 });
 
 describe('isSpaceAwarenessMigrationPending', () => {
   beforeEach(() => {
     jest.mocked(appContextService.getExperimentalFeatures).mockReset();
     jest.mocked(getSettings).mockReset();
-    _clearSpaceAwarenessCache();
   });
   it('should return false if feature flag is disabled', async () => {
     mockFeatureFlag(false);
@@ -147,16 +131,5 @@ describe('isSpaceAwarenessMigrationPending', () => {
     const res = await isSpaceAwarenessMigrationPending();
 
     expect(res).toBe(false);
-  });
-
-  it('should use cache if called multiple time and feature flag is enabled and user optin', async () => {
-    mockFeatureFlag(true);
-    mockGetSettings({
-      use_space_awareness_migration_status: 'success',
-    });
-    await isSpaceAwarenessEnabled();
-    const res = await isSpaceAwarenessMigrationPending();
-    expect(res).toBe(false);
-    expect(getSettings).toBeCalledTimes(1);
   });
 });

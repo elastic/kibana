@@ -118,6 +118,7 @@ const STANDARD_LIST_TYPES = [
   'infrastructure-monitoring-log-view',
   'apm-indices',
   // Fleet saved object types
+  'ingest_manager_settings',
   'ingest-outputs',
   'ingest-download-sources',
   'ingest-agent-policies',

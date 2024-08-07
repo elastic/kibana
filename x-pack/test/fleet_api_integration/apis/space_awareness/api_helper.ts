@@ -15,6 +15,7 @@ import {
   GetAgentsResponse,
   GetOneAgentPolicyResponse,
   GetOneAgentResponse,
+  GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   GetEnrollmentAPIKeysResponse,
@@ -76,6 +77,14 @@ export class SpaceTestApiClient {
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
+      .expect(200);
+
+    return res;
+  }
+
+  async getPackagePolicies(spaceId?: string): Promise<GetPackagePoliciesResponse> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies`)
       .expect(200);
 
     return res;

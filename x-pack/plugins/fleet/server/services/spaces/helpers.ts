@@ -8,8 +8,6 @@
 import { appContextService } from '../app_context';
 import { getSettings } from '../settings';
 
-let CACHE_SPACE_AWARENESS = false;
-
 /**
  * Return true if user optin for the space awareness feature.
  */
@@ -18,19 +16,13 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
     return false;
   }
 
-  if (CACHE_SPACE_AWARENESS) {
-    return true;
-  }
-
   const settings = await getSettings(appContextService.getInternalUserSOClient()).catch((error) => {
     if (!error.isBoom && error.output.statusCode !== 404) {
       throw error;
     }
   });
 
-  CACHE_SPACE_AWARENESS = settings?.use_space_awareness_migration_status === 'success' ?? false;
-
-  return CACHE_SPACE_AWARENESS;
+  return settings?.use_space_awareness_migration_status === 'success' ?? false;
 }
 
 /**
@@ -38,10 +30,6 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
  */
 export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
   if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    return false;
-  }
-
-  if (CACHE_SPACE_AWARENESS) {
     return false;
   }
 
@@ -60,11 +48,4 @@ export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
     return true;
   }
   return false;
-}
-
-/**
- * Clear space awareness cache (for testing purpose only)
- */
-export function _clearSpaceAwarenessCache() {
-  CACHE_SPACE_AWARENESS = false;
 }

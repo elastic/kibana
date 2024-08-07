@@ -24,14 +24,18 @@ export async function enableSpaceAwarenessMigration() {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const logger = appContextService.getLogger();
   try {
-    const existingSettings = await getSettings(soClient);
-    if (existingSettings.use_space_awareness_migration_status === 'success') {
+    const existingSettings = await getSettings(soClient).catch((error) => {
+      if (!error.isBoom && error.output.statusCode !== 404) {
+        throw error;
+      }
+    });
+    if (existingSettings?.use_space_awareness_migration_status === 'success') {
       return;
     }
 
     if (
-      existingSettings.use_space_awareness_migration_started_at &&
-      new Date(existingSettings.use_space_awareness_migration_started_at).getTime() >
+      existingSettings?.use_space_awareness_migration_started_at &&
+      new Date(existingSettings?.use_space_awareness_migration_started_at).getTime() >
         Date.now() - PENDING_TIMEOUT
     ) {
       throw new FleetError('Migration is pending.');
@@ -46,7 +50,7 @@ export async function enableSpaceAwarenessMigration() {
         use_space_awareness_migration_started_at: new Date().toISOString(),
       },
       {
-        version: existingSettings.version,
+        version: existingSettings?.version,
       }
     );
 
