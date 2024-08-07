@@ -45,7 +45,6 @@ const defaultProps: Story = {
           onDelete={() => {}}
           title="My visualization"
           description="A long description"
-          onEditClick={() => {}}
           {...props}
         />
       </div>
