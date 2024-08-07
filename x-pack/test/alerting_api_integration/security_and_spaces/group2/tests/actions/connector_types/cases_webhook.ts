@@ -416,7 +416,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           });
 
           const executeEvent = events[1];
-          expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(125);
+          expect(executeEvent?.kibana?.action?.execution?.metrics?.request_body_bytes).to.be(1250);
 
           expect(body).to.eql({
             status: 'ok',
