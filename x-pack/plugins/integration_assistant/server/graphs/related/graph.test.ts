@@ -72,7 +72,11 @@ describe('runRelatedGraph', () => {
     // After the review it should route to modelOutput and finish.
     (handleReview as jest.Mock).mockImplementation(async () => {
       const currentProcessors = await mockInvokeReview();
-      const currentPipeline = combineProcessors(relatedInitialPipeline, currentProcessors);
+      const currentPipeline = combineProcessors(
+        relatedInitialPipeline,
+        currentProcessors,
+        'related'
+      );
       return {
         currentProcessors,
         currentPipeline,

@@ -11,7 +11,7 @@ import type {
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { RelatedState } from '../../types';
-import { combineProcessors, createAppendProcessors } from '../../util/processors';
+import { combineProcessors } from '../../util/processors';
 import { RELATED_ERROR_PROMPT } from './prompts';
 import { COMMON_ERRORS } from './constants';
 
@@ -32,9 +32,12 @@ export async function handleErrors(
     data_stream_name: state.dataStreamName,
   })) as ESProcessorItem[];
 
-  const appendProcessors = createAppendProcessors(currentProcessors, 'related');
+  const currentPipeline = combineProcessors(
+    state.initialPipeline as Pipeline,
+    currentProcessors,
+    'related'
+  );
 
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, appendProcessors);
   return {
     currentPipeline,
     currentProcessors,

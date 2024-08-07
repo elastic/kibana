@@ -11,7 +11,7 @@ import type {
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { Pipeline } from '../../../common';
 import type { RelatedState } from '../../types';
-import { combineProcessors, createAppendProcessors } from '../../util/processors';
+import { combineProcessors } from '../../util/processors';
 import { RELATED_MAIN_PROMPT } from './prompts';
 
 export async function handleRelated(
@@ -28,9 +28,11 @@ export async function handleRelated(
     ecs: state.ecs,
   })) as object[];
 
-  const appendProcessors = createAppendProcessors(currentProcessors, 'related');
-
-  const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, appendProcessors);
+  const currentPipeline = combineProcessors(
+    state.initialPipeline as Pipeline,
+    currentProcessors,
+    'related'
+  );
 
   return {
     currentPipeline,
