@@ -32,7 +32,9 @@ const parseLogsContent = (
       .filter((line) => line.trim() !== '')
       .map((line) => JSON.parse(line));
 
-    // Special case for files that can be parsed as both JSON and NDJSON.
+    // Special case for files that can be parsed as both JSON and NDJSON:
+    //   one-line array [] -> extract its contents
+    //   one-line object {} -> do nothing
     if (
       Array.isArray(parsedContent) &&
       parsedContent.length === 1 &&
