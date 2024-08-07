@@ -58,7 +58,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   } = useMlKibana();
   const ml = useMlApiContext();
   const mlJobService = useMlJobService();
-  console.log('PAGE', mlJobService);
   const newJobCapsService = useNewJobCapsService();
 
   const chartInterval = useTimeBuckets(uiSettings);
@@ -110,7 +109,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       firstWizardStep = WIZARD_STEPS.PICK_FIELDS;
     }
 
-    console.log('RESET????');
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
     mlJobService.tempJobCloningObjects.datafeed = undefined;
@@ -232,7 +230,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const jobCreatorTitle = getJobCreatorTitle(jobCreator);
 
-  console.log('jobCreator', jobCreator);
   return (
     <Fragment>
       <MlPageHeader>

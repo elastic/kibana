@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
@@ -226,8 +225,16 @@ export class NewJobCapsServiceAnalytics extends NewJobCapabilitiesServiceBase {
   }
 }
 
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let newJobCapsServiceAnalytics: NewJobCapsServiceAnalytics;
+export const mlJobCapsServiceAnalyticsFactory = (mlApiServices: MlApiServices) => {
+  if (newJobCapsServiceAnalytics) return newJobCapsServiceAnalytics;
+
+  newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics(mlApiServices);
+  return newJobCapsServiceAnalytics;
+};
+
 export const useNewJobCapsServiceAnalytics = () => {
-  const mlApiService = useMlApiContext();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => new NewJobCapsServiceAnalytics(mlApiService), []);
+  const mlApiServices = useMlApiContext();
+  return mlJobCapsServiceAnalyticsFactory(mlApiServices);
 };

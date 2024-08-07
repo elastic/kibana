@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -188,8 +187,16 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
   fields.splice(0, 0, eventRateField);
 }
 
+// This is to retain the singleton behavior of the previous direct instantiation and export.
+let newJobCapsService: NewJobCapsService;
+export const mlJobCapsServiceFactory = (mlApiServices: MlApiServices) => {
+  if (newJobCapsService) return newJobCapsService;
+
+  newJobCapsService = new NewJobCapsService(mlApiServices);
+  return newJobCapsService;
+};
+
 export const useNewJobCapsService = () => {
-  const mlApiService = useMlApiContext();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => new NewJobCapsService(mlApiService), []);
+  const mlApiServices = useMlApiContext();
+  return mlJobCapsServiceFactory(mlApiServices);
 };

@@ -17,7 +17,6 @@ export async function preConfiguredJobRedirect(
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']
 ) {
-  console.log('preConfiguredJobRedirect', mlJobService.tempJobCloningObjects);
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
 
   if (job && datafeed) {

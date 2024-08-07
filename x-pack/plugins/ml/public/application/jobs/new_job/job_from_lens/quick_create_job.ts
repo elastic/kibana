@@ -123,13 +123,11 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
         start,
         end,
       } as JobCreatorType;
-      console.log('jobCreator', jobCreator);
 
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
       this.mlJobService.stashJobForCloning(jobCreator, true, includeTimeRange, !includeTimeRange);
-      console.log('this.mlJobService', this.mlJobService);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);

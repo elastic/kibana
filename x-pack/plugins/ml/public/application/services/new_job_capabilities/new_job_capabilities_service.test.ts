@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewJobCapsService } from './new_job_capabilities_service';
+import { mlJobCapsServiceFactory } from './new_job_capabilities_service';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { MlApiServices } from '../ml_api_service';
@@ -28,7 +28,7 @@ const dataView = {
 describe('new_job_capabilities_service', () => {
   describe('cloudwatch newJobCaps()', () => {
     it('can construct job caps objects from endpoint json', async () => {
-      const newJobCapsService = new NewJobCapsService(mlApiServicesMock);
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
       await newJobCapsService.initializeFromDataVIew(dataView);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
@@ -48,7 +48,7 @@ describe('new_job_capabilities_service', () => {
     });
 
     it('job caps including text fields', async () => {
-      const newJobCapsService = new NewJobCapsService(mlApiServicesMock);
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
       await newJobCapsService.initializeFromDataVIew(dataView, true, false);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 
@@ -57,7 +57,7 @@ describe('new_job_capabilities_service', () => {
     });
 
     it('job caps excluding event rate', async () => {
-      const newJobCapsService = new NewJobCapsService(mlApiServicesMock);
+      const newJobCapsService = mlJobCapsServiceFactory(mlApiServicesMock);
       await newJobCapsService.initializeFromDataVIew(dataView, false, true);
       const { fields, aggs } = await newJobCapsService.newJobCaps;
 

@@ -11,7 +11,7 @@ import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-util
 import type { EsSorting, UseDataGridReturnType } from '@kbn/ml-data-grid';
 import { getProcessedFields, INDEX_STATUS } from '@kbn/ml-data-grid';
 
-import { NewJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
+import { mlJobCapsServiceAnalyticsFactory } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import type { MlApiServices } from '../../services/ml_api_service';
 
 export const getIndexData = async (
@@ -22,7 +22,7 @@ export const getIndexData = async (
   options: { didCancel: boolean }
 ) => {
   if (jobConfig !== undefined) {
-    const newJobCapsServiceAnalytics = new NewJobCapsServiceAnalytics(mlApiServices);
+    const newJobCapsServiceAnalytics = mlJobCapsServiceAnalyticsFactory(mlApiServices);
 
     const {
       pagination,
