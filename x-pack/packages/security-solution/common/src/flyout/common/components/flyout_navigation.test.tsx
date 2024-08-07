@@ -14,38 +14,19 @@ import {
   EXPAND_DETAILS_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from '../test_ids';
-import {
-  ExpandableFlyoutProvider,
-  ExpandableFlyoutState,
-  useExpandableFlyoutApi,
-  type ExpandableFlyoutApi,
-  useExpandableFlyoutState,
-} from '@kbn/expandable-flyout';
+import { ExpandableFlyoutState, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { I18nProvider } from '@kbn/i18n-react';
+
+jest.mock('@kbn/expandable-flyout');
 
 const expandDetails = jest.fn();
 
 const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
-  return (
-    <I18nProvider>
-      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-    </I18nProvider>
-  );
+  return <I18nProvider>{children}</I18nProvider>;
 };
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  useExpandableFlyoutState: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
-
-const flyoutContextValue = {
-  closeLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutApi;
 
 describe('<FlyoutNavigation />', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
   });
 

@@ -48,10 +48,7 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: [],
 } as unknown as DocumentDetailsContext;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const renderThreatIntelligenceOverview = (contextValue: DocumentDetailsContext) => (
   <TestProviders>

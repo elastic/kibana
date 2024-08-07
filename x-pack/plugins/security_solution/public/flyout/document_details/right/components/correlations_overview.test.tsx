@@ -92,10 +92,7 @@ const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
   useTimelineDataFilters: jest.fn(),

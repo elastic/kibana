@@ -38,10 +38,7 @@ const flyoutContextValue = {
   openLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
 
 const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockContextValue) =>
   render(

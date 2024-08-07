@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps, FunctionComponent, PropsWithChildren } from 'react';
+import type { ComponentProps, FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
@@ -35,6 +35,8 @@ import { defaultColumnHeaderType } from '../../body/column_headers/default_heade
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -87,15 +89,7 @@ jest.mock(`@elastic/ebt/client`);
 
 const mockOpenFlyout = jest.fn();
 const mockCloseFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => {
-  return {
-    useExpandableFlyoutApi: () => ({
-      openFlyout: mockOpenFlyout,
-      closeFlyout: mockCloseFlyout,
-    }),
-    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
-  };
-});
+jest.mock('@kbn/expandable-flyout');
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -162,6 +156,13 @@ let useTimelineEventsMock = jest.fn();
 describe('query tab with unified timeline', () => {
   beforeAll(() => {
     // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+
+    jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
+      ...createExpandableFlyoutApiMock(),
+      openFlyout: mockOpenFlyout,
+      closeFlyout: mockCloseFlyout,
+    }));
+
     Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
       get() {
         return true;

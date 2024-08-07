@@ -21,7 +21,7 @@ export const createExpandableFlyoutApiMock = () => ({
 
 export const createExpandableFlyoutMock = () => {
   return {
-    useExpandableFlyoutApi: jest.fn().mockReturnValue(createExpandableFlyoutMock()),
+    useExpandableFlyoutApi: jest.fn().mockReturnValue(createExpandableFlyoutApiMock()),
     useExpandableFlyoutState: jest.fn(),
     ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
     withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {

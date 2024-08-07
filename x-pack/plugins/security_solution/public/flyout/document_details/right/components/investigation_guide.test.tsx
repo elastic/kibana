@@ -23,7 +23,7 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInvestigationTab } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
-jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
+jest.mock('@kbn/expandable-flyout');
 
 const mockFlyoutContextValue = { openLeftPanel: jest.fn() };
 
