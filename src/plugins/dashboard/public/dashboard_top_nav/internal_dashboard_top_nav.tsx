@@ -8,6 +8,7 @@
 
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
   withSuspense,
@@ -17,8 +18,17 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps, createBadge } from '@kbn/navigation-plugin/public';
-import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
-import { EuiBreadcrumb } from '@elastic/eui';
+import {
+  EuiBreadcrumb,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTipProps,
+  EuiWrappingPopover,
+} from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
@@ -27,6 +37,8 @@ import {
   getDashboardBreadcrumb,
   unsavedChangesBadgeStrings,
   dashboardManagedBadge,
+  buttonText,
+  text,
 } from '../dashboard_app/_dashboard_app_strings';
 import { UI_SETTINGS } from '../../common';
 import { useDashboardAPI } from '../dashboard_app/dashboard_app';
@@ -38,7 +50,6 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
-import { ManagedPopover } from '../dashboard_app/top_nav/managed_popover';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -64,6 +75,7 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
+  const managedBadgeRef = useRef<HTMLButtonElement>(null);
 
   /**
    * Unpack dashboard services
@@ -107,6 +119,8 @@ export function InternalDashboardTopNav({
 
   // store data views in state & subscribe to dashboard data view changes.
   const [allDataViews, setAllDataViews] = useState<DataView[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     setAllDataViews(dashboard.getAllDataViews());
     const subscription = dashboard.onDataViewsUpdate$.subscribe((dataViews) =>
@@ -313,19 +327,66 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      const managedBadge = createBadge(
-        getManagedContentBadge(dashboardManagedBadge.getText()),
-        3
-      ) as unknown as HTMLElement;
-
-      const renderCustomBadge = () => (
-        <ManagedPopover
-          key="managedDashboardDuplicatePopover"
-          dashboard={dashboard}
-          redirectTo={redirectTo}
-          anchor={managedBadge}
-        />
+      const managedBadge = (
+        <button
+          ref={managedBadgeRef}
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+          css={css`
+            :hover {
+              cursor: pointer;
+            }
+          `}
+        >
+          {createBadge(getManagedContentBadge(dashboardManagedBadge.getText()), 3)}
+        </button>
       );
+
+      const renderCustomBadge = () => {
+        return (
+          <>
+            {managedBadge}
+            {managedBadgeRef.current && (
+              <EuiWrappingPopover
+                button={managedBadgeRef.current}
+                isOpen={isPopoverOpen}
+                closePopover={() => setIsPopoverOpen(false)}
+                className="eui-hideFor--s eui-hideFor--xs"
+                data-test-subj="managedContentPopover"
+              >
+                <EuiFlexItem>
+                  <EuiText
+                    size="s"
+                    aria-label={text}
+                    css={css`
+                      max-width: 300px;
+                    `}
+                  >
+                    {text}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    disabled={isLoading}
+                    aria-label={buttonText}
+                    onClick={() => {
+                      setIsLoading(true);
+                      dashboard.duplicate(redirectTo);
+                      setIsLoading(false);
+                    }}
+                    data-test-subj="managedContentPopoverDuplicateButton"
+                  >
+                    {isLoading && <EuiLoadingSpinner size="m" />}
+                    <EuiText size="s">{buttonText}</EuiText>
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiWrappingPopover>
+            )}
+          </>
+        );
+      };
       allBadges.push({
         renderCustomBadge,
         badgeText: dashboardManagedBadge.getText(),
@@ -338,6 +399,8 @@ export function InternalDashboardTopNav({
     hasRunMigrations,
     showWriteControls,
     managed,
+    isPopoverOpen,
+    isLoading,
     dashboard,
     redirectTo,
   ]);
