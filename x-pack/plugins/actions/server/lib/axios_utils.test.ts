@@ -88,6 +88,7 @@ describe('request', () => {
       data: { incidentId: '123' },
       request: {
         headers: { 'Content-Length': contentLength },
+        getHeader: () => contentLength,
       },
     }));
     const connectorMetricsCollector = new ConnectorMetricsCollector({

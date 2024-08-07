@@ -31,8 +31,6 @@ import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
-import { Event } from './create_action_event_log_record_object';
-import { set } from '@kbn/safer-lodash-set';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -156,7 +154,7 @@ interface ActionMetrics {
   request_body_bytes: number;
 }
 
-const getBaseExecuteStartEventLogDoc = (unsecured: boolean, actionMetrics?: ActionMetrics) => {
+const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
   return {
     event: {
       action: 'execute-start',
@@ -166,7 +164,6 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean, actionMetrics?: Acti
       action: {
         execution: {
           uuid: ACTION_EXECUTION_ID,
-          ...(actionMetrics ? { metrics: actionMetrics } : {}),
         },
         id: CONNECTOR_ID,
         name: '1',
@@ -198,10 +195,23 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean, actionMetrics?: Acti
   };
 };
 
-const getBaseExecuteEventLogDoc = (unsecured: boolean, actionMetrics?: ActionMetrics) => {
-  const base = getBaseExecuteStartEventLogDoc(unsecured, actionMetrics);
+const getBaseExecuteEventLogDoc = (
+  unsecured: boolean,
+  actionMetrics: ActionMetrics = { request_body_bytes: 0 }
+) => {
+  const base = getBaseExecuteStartEventLogDoc(unsecured);
   return {
     ...base,
+    kibana: {
+      ...base.kibana,
+      action: {
+        ...base.kibana.action,
+        execution: {
+          ...base.kibana.action.execution,
+          metrics: actionMetrics,
+        },
+      },
+    },
     event: {
       ...base.event,
       action: 'execute',
@@ -217,10 +227,6 @@ const getBaseExecuteEventLogDoc = (unsecured: boolean, actionMetrics?: ActionMet
           }),
     },
   };
-};
-
-const addConnectorMetrics = (event: Event, value: number) => {
-  set(event, 'kibana.action.execution.metrics.request_body_bytes', value);
 };
 
 beforeEach(() => {
@@ -244,11 +250,17 @@ beforeEach(() => {
   getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
 
+const mockGetRequestBodyByte = jest.spyOn(
+  ConnectorMetricsCollector.prototype,
+  'getRequestBodyByte'
+);
+
 describe('Action Executor', () => {
   for (const executeUnsecure of [false, true]) {
     const label = executeUnsecure ? 'executes unsecured' : 'executes';
 
     test(`successfully ${label}`, async () => {
+      mockGetRequestBodyByte.mockReturnValue(300);
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
       );
@@ -300,7 +312,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure, { request_body_bytes: 300 });
-      addConnectorMetrics(execDoc, 300);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, execStartDoc);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, execDoc);
     });
@@ -375,7 +387,7 @@ describe('Action Executor', () => {
 
         const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
         const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
-        addConnectorMetrics(execDoc, 0);
+
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
           ...execStartDoc,
           kibana: {
@@ -455,7 +467,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
-      addConnectorMetrics(execDoc, 0);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -551,7 +563,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
-      addConnectorMetrics(execDoc, 0);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -1021,7 +1033,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
-      addConnectorMetrics(execDoc, 0);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
@@ -1116,7 +1128,7 @@ describe('Action Executor', () => {
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
       const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
-      addConnectorMetrics(execDoc, 0);
+
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
         ...execStartDoc,
         kibana: {
