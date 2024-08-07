@@ -57,7 +57,7 @@ describe('Title', () => {
         <Title isLoading={true} />
       </MockHookWrapperComponent>
     );
-    expect(await screen.findByTestId('caseTitleField')).toBeDisabled();
+    expect(await screen.findByTestId('input')).toBeDisabled();
   });
 
   it('it changes the title', async () => {
@@ -67,7 +67,7 @@ describe('Title', () => {
       </MockHookWrapperComponent>
     );
 
-    userEvent.paste(await screen.findByTestId('caseTitleField'), ' is updated');
+    userEvent.paste(await screen.findByTestId('input'), ' is updated');
 
     expect(globalForm.getFormData()).toEqual({ title: 'My title is updated' });
   });

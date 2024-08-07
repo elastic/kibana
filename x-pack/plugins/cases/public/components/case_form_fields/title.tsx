@@ -25,7 +25,6 @@ const TitleComponent: React.FC<Props> = ({ isLoading, autoFocus = false }) => (
         autoFocus,
         fullWidth: true,
         disabled: isLoading,
-        'data-test-subj': 'caseTitleField',
       },
     }}
   />
