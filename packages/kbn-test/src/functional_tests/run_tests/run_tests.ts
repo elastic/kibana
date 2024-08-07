@@ -72,7 +72,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           vars.esTestCluster.license = 'trial';
           vars.suiteTags.exclude = ['skipFIPS'];
           vars.esTestCluster.serverArgs = ['xpack.security.enabled=true'];
-          vars.security.defaultRoles = ['superuser', 'kibana_admin'];
+          vars.security = {
+            ...vars.security,
+            defaultRoles: ['superuser', 'kibana_admin', 'system_indices_superuser'],
+          };
         }
 
         return vars;
