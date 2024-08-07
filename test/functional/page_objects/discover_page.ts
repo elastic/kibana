@@ -449,17 +449,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openFilterByFieldTypeInDocViewer() {
-    await this.testSubjects.click('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterToggle');
-    await this.testSubjects.existOrFail('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterOptions');
+    await this.testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('unifiedDocViewerFieldsTableFieldTypeFilterOptions');
   }
 
   public async closeFilterByFieldTypeInDocViewer() {
-    await this.testSubjects.click('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterToggle');
+    await this.testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
 
     await this.retry.waitFor('doc viewer filter closed', async () => {
-      return !(await this.testSubjects.exists(
-        'unifiedDocViewerFieldsFilterByTypeFieldTypeFilterOptions'
-      ));
+      return !(await this.testSubjects.exists('unifiedDocViewerFieldsTableFieldTypeFilterOptions'));
     });
   }
 

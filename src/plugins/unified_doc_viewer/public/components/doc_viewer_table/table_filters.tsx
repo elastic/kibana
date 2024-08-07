@@ -68,7 +68,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
       append={
         allFields && selectedFieldTypes && onChangeFieldTypes ? (
           <FieldTypeFilter
-            data-test-subj="unifiedDocViewerFieldsFilterByType"
+            data-test-subj="unifiedDocViewerFieldsTable"
             docLinks={core.docLinks}
             selectedFieldTypes={selectedFieldTypes}
             allFields={allFields}

@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 7;
         });
 
-        await testSubjects.click('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterClearAll');
+        await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
 
         await retry.waitFor('reset', async () => {
           return (
