@@ -6,10 +6,7 @@
     "id": "slo",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "slo"
-    ],
+    "configPath": ["xpack", "slo"],
     "requiredPlugins": [
       "aiops",
       "alerting",
@@ -36,15 +33,10 @@
       "licensing",
       "usageCollection"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "spaces",
-      "serverless",
-      "discover",
-      "observabilityAIAssistant"
-    ],
+    "optionalPlugins": ["cloud", "spaces", "serverless", "discover", "observabilityAIAssistant"],
     "requiredBundles": [
-      "controls",
+      // "controls",
+      "controlsExample",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

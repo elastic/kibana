@@ -3,15 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "../../../typings/**/*"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -53,7 +46,7 @@
     "@kbn/unified-search-plugin",
     "@kbn/std",
     "@kbn/core-lifecycle-browser",
-    "@kbn/controls-plugin",
+    "@kbn/controls-example-plugin",
     "@kbn/cloud-plugin",
     "@kbn/spaces-plugin",
     "@kbn/data-view-editor-plugin",

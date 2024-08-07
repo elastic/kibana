@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import deepEqual from 'fast-deep-equal';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
@@ -88,10 +89,12 @@ export function useUrlSearchState(): {
   const onStateChange = useCallback(
     (newState: Partial<SearchState>) => {
       const updatedState = { ...state, page: 0, ...newState };
-      setState((stateN) => updatedState);
-      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
-        replace: true,
-      });
+      if (!deepEqual(updatedState, state)) {
+        setState((stateN) => updatedState);
+        urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
+          replace: true,
+        });
+      }
     },
     [state]
   );

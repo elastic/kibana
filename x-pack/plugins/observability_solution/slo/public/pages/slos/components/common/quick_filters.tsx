@@ -7,11 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
+import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-example-plugin/public';
 import { isEmpty } from 'lodash';
 import { SearchState } from '../../hooks/use_url_search_state';
 
@@ -33,7 +32,7 @@ export function QuickFilters({
     if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
       if (newFilters.length === 0) {
         onStateChange({ tagsFilter: undefined, statusFilter: undefined });
       } else {
@@ -55,9 +54,8 @@ export function QuickFilters({
   return (
     <Container>
       <ControlGroupRenderer
-        viewMode={ViewMode.VIEW}
         getCreationOptions={async (initialInput, builder) => {
-          await builder.addOptionsListControl(initialInput, {
+          builder.addOptionsListControl(initialInput, {
             dataViewId: dataView.id!,
             fieldName: 'status',
             width: 'small',
@@ -69,7 +67,7 @@ export function QuickFilters({
             existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
             placeholder: ALL_LABEL,
           });
-          await builder.addOptionsListControl(initialInput, {
+          builder.addOptionsListControl(initialInput, {
             dataViewId: dataView.id!,
             title: TAGS_LABEL,
             fieldName: 'slo.tags',
