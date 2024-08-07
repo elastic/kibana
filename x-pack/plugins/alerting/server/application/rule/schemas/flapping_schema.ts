@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './rule_schemas';
-export * from './action_schemas';
-export * from './notify_when_schema';
-export * from './flapping_schema';
+import { schema } from '@kbn/config-schema';
+
+export const flappingSchema = schema.object({
+  lookBackWindow: schema.number(),
+  statusChangeThreshold: schema.number(),
+});

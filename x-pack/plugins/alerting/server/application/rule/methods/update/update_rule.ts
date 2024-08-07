@@ -48,6 +48,7 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   data: UpdateRuleData<Params>;
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
+  isFlappingEnabled?: boolean;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -70,6 +71,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     data: initialData,
     allowMissingConnectorSecrets,
     id,
+    isFlappingEnabled = false,
     shouldIncrementRevision = () => true,
   } = updateParams;
 
@@ -114,8 +116,22 @@ async function updateWithOCC<Params extends RuleParams = never>(
     systemActions: genSystemActions,
   };
 
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRuleSavedObject.attributes;
+  const {
+    alertTypeId,
+    consumer,
+    enabled,
+    schedule,
+    name,
+    apiKey,
+    apiKeyCreatedByUser,
+    flapping: originalFlapping,
+  } = originalRuleSavedObject.attributes;
+
+  if (!isFlappingEnabled && !isEqual(originalFlapping, initialData.flapping)) {
+    throw Boom.badRequest(
+      `Error updating rule: can not update rule flapping if global flapping is disabled`
+    );
+  }
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {

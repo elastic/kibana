@@ -88,6 +88,17 @@ export const transformRuleActions = (
   ];
 };
 
+export const transformFlapping = (flapping: Rule['flapping']) => {
+  if (!flapping) {
+    return flapping;
+  }
+
+  return {
+    look_back_window: flapping.lookBackWindow,
+    status_change_threshold: flapping.statusChangeThreshold,
+  };
+};
+
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   rule: Rule<Params>
 ): RuleResponseV1<RuleParamsV1> => ({
@@ -144,4 +155,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
+  ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
 });

@@ -12,6 +12,7 @@ import {
   alertDelaySchema,
   actionRequestSchema,
   systemActionRequestSchema,
+  flappingSchema,
 } from '../../../schemas';
 
 export const updateRuleDataSchema = schema.object(
@@ -27,6 +28,7 @@ export const updateRuleDataSchema = schema.object(
     systemActions: schema.maybe(schema.arrayOf(systemActionRequestSchema, { defaultValue: [] })),
     notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
     alertDelay: schema.maybe(alertDelaySchema),
+    flapping: schema.maybe(schema.nullable(flappingSchema)),
   },
   { unknowns: 'allow' }
 );

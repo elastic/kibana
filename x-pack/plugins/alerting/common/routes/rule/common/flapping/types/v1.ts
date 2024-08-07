@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './rule_schemas';
-export * from './action_schemas';
-export * from './notify_when_schema';
-export * from './flapping_schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { flappingSchemaV1 } from '../..';
+
+export type Flapping = TypeOf<typeof flappingSchemaV1>;

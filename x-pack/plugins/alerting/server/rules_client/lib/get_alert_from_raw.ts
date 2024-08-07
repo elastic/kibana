@@ -97,7 +97,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     actions,
     snoozeSchedule,
     lastRun,
-    isSnoozedUntil: DoNotUseIsSNoozedUntil,
+    isSnoozedUntil: DoNotUseIsSnoozedUntil,
     ...partialRawRule
   }: Partial<RawRule>,
   references: SavedObjectReference[] | undefined,

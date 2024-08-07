@@ -203,6 +203,11 @@ export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
   alertsFilter?: SanitizedAlertsFilter;
 };
 
+export interface Flapping extends SavedObjectAttributes {
+  lookBackWindow: number;
+  statusChangeThreshold: number;
+}
+
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -238,6 +243,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
+  flapping?: Flapping | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

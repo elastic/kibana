@@ -23,7 +23,7 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
-export type { AlertingFrameworkHealth } from '@kbn/alerting-types';
+export type { AlertingFrameworkHealth, Flapping } from '@kbn/alerting-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';
@@ -39,6 +39,13 @@ export * from './saved_objects/rules/mappings';
 export * from './rule_circuit_breaker_error_message';
 export * from './maintenance_window_scoped_query_error_message';
 export * from './action_ref_prefix';
+
+export {
+  MIN_LOOK_BACK_WINDOW,
+  MAX_LOOK_BACK_WINDOW,
+  MIN_STATUS_CHANGE_THRESHOLD,
+  MAX_STATUS_CHANGE_THRESHOLD,
+} from './routes/rule/common';
 
 export type {
   MaintenanceWindowModificationMetadata,

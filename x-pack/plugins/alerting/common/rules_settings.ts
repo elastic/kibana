@@ -37,10 +37,6 @@ export interface RulesSettings {
   queryDelay?: RulesSettingsQueryDelay;
 }
 
-export const MIN_LOOK_BACK_WINDOW = 2;
-export const MAX_LOOK_BACK_WINDOW = 20;
-export const MIN_STATUS_CHANGE_THRESHOLD = 2;
-export const MAX_STATUS_CHANGE_THRESHOLD = 20;
 export const MIN_QUERY_DELAY = 0;
 export const MAX_QUERY_DELAY = 60;
 
