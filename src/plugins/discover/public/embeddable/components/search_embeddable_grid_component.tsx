@@ -12,8 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  isLegacyTableEnabled,
   SEARCH_FIELDS_FROM_SOURCE,
+  isLegacyTableEnabled,
 } from '@kbn/discover-utils';
 import { Filter } from '@kbn/es-query';
 import {
@@ -33,6 +33,7 @@ import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & { fetchWarnings$: BehaviorSubject<SearchResponseIncompleteWarning[]> };
@@ -144,13 +145,15 @@ export function SearchEmbeddableGridComponent({
     return getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings);
   }, [savedSearch.sampleSize, discoverServices]);
 
+  const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
+
   const sharedProps = {
     columns: savedSearch.columns ?? [],
     dataView,
     interceptedWarnings,
     onFilter: onAddFilter,
     rows,
-    rowsPerPageState: savedSearch.rowsPerPage,
+    rowsPerPageState: savedSearch.rowsPerPage ?? defaults.rowsPerPage,
     sampleSizeState: fetchedSampleSize,
     searchDescription: panelDescription || savedSearchDescription,
     sort,
@@ -179,12 +182,14 @@ export function SearchEmbeddableGridComponent({
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID}
       columnsMeta={columnsMeta}
+      configHeaderRowHeight={defaults.headerRowHeight}
+      configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}
+      rowHeightState={savedSearch.rowHeight}
       isPlainRecord={isEsql}
       loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearch.searchSource.getField('query')}
-      rowHeightState={savedSearch.rowHeight}
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}

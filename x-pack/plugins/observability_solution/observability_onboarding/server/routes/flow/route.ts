@@ -383,7 +383,8 @@ async function ensureInstalledIntegrations(
       const { pkgName, installSource } = integration;
 
       if (installSource === 'registry') {
-        const pkg = await packageClient.ensureInstalledPackage({ pkgName });
+        const installation = await packageClient.ensureInstalledPackage({ pkgName });
+        const pkg = installation.package;
         const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
