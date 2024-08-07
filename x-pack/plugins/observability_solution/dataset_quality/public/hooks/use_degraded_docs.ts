@@ -44,7 +44,7 @@ export const useDegradedDocs = () => {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
-  const { service, dataStream, datasetDetails, timeRange, breakdownField } =
+  const { service, dataStream, datasetDetails, timeRange, breakdownField, integrationDetails } =
     useDatasetQualityDetailsState();
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
@@ -77,15 +77,24 @@ export const useDegradedDocs = () => {
 
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+    const datasetTitle =
+      integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? datasetDetails.name;
 
     const lensAttributes = getLensAttributes({
       color: euiTheme.colors.danger,
       dataStream: dataStreamName,
-      datasetTitle: dataStreamName,
+      datasetTitle,
       breakdownFieldName: breakdownDataViewField?.name,
     });
     setAttributes(lensAttributes);
-  }, [breakdownDataViewField?.name, euiTheme.colors.danger, setAttributes, dataStream]);
+  }, [
+    breakdownDataViewField?.name,
+    euiTheme.colors.danger,
+    setAttributes,
+    dataStream,
+    integrationDetails?.integration?.datasets,
+    datasetDetails.name,
+  ]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
