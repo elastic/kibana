@@ -346,7 +346,7 @@
   "paths": {
     "/api/alerting/rule/{id}": {
       "delete": {
-        "operationId": "/api/alerting/rule/{id}#2",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#2",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -391,7 +391,7 @@
         ]
       },
       "get": {
-        "operationId": "/api/alerting/rule/{id}#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -1497,7 +1497,7 @@
         ]
       },
       "post": {
-        "operationId": "/api/alerting/rule/{id?}#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%3F%7D#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -2905,7 +2905,7 @@
         ]
       },
       "put": {
-        "operationId": "/api/alerting/rule/{id}#1",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D#1",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4298,7 +4298,7 @@
     },
     "/api/alerting/rule/{id}/_disable": {
       "post": {
-        "operationId": "/api/alerting/rule/{id}/_disable#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_disable#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4371,7 +4371,7 @@
     },
     "/api/alerting/rule/{id}/_enable": {
       "post": {
-        "operationId": "/api/alerting/rule/{id}/_enable#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_enable#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4418,7 +4418,7 @@
     },
     "/api/alerting/rule/{id}/_mute_all": {
       "post": {
-        "operationId": "/api/alerting/rule/{id}/_mute_all#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_mute_all#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4460,7 +4460,7 @@
     },
     "/api/alerting/rule/{id}/_unmute_all": {
       "post": {
-        "operationId": "/api/alerting/rule/{id}/_unmute_all#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_unmute_all#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4502,7 +4502,7 @@
     },
     "/api/alerting/rule/{id}/_update_api_key": {
       "post": {
-        "operationId": "/api/alerting/rule/{id}/_update_api_key#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Bid%7D%2F_update_api_key#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4549,7 +4549,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
-        "operationId": "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_mute#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4605,7 +4605,7 @@
     },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute": {
       "post": {
-        "operationId": "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute#0",
+        "operationId": "%2Fapi%2Falerting%2Frule%2F%7Brule_id%7D%2Falert%2F%7Balert_id%7D%2F_unmute#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -4661,7 +4661,7 @@
     },
     "/api/alerting/rules/_find": {
       "get": {
-        "operationId": "/api/alerting/rules/_find#0",
+        "operationId": "%2Fapi%2Falerting%2Frules%2F_find#0",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -5909,7 +5909,7 @@
     },
     "/api/status": {
       "get": {
-        "operationId": "/api/status#0",
+        "operationId": "%2Fapi%2Fstatus#0",
         "parameters": [
           {
             "description": "The version of the API to use",
