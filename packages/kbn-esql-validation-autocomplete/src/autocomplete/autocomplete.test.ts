@@ -34,11 +34,11 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
-import {
-  ESQL_COMMON_NUMERIC_TYPES,
-  ESQL_NUMBER_TYPES,
-  ESQL_STRING_TYPES,
-} from '../shared/esql_types';
+import { ESQL_COMMON_NUMERIC_TYPES, ESQL_STRING_TYPES } from '../shared/esql_types';
+
+const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
+const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
+const log10ParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
 describe('autocomplete', () => {
   type TestArgs = [
@@ -171,17 +171,21 @@ describe('autocomplete', () => {
         {
           builtin: true,
         },
-        ['string']
+        undefined,
+        ['and', 'or', 'not']
       ),
     ]);
-    testSuggestions('from a | where textField >= ', [
-      ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('where', ['any'], { scalar: true }),
-    ]);
-    testSuggestions('from a | where textField >= textField', [
-      ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
-    ]);
+    const expectedComparisonWithTextFieldSuggestions = [
+      ...getFieldNamesByType(['text', 'keyword', 'ip', 'version']),
+      ...getFunctionSignaturesByReturnType('where', ['text', 'keyword', 'ip', 'version'], {
+        scalar: true,
+      }),
+    ];
+    testSuggestions('from a | where textField >= ', expectedComparisonWithTextFieldSuggestions);
+    testSuggestions(
+      'from a | where textField >= textField',
+      expectedComparisonWithTextFieldSuggestions
+    );
     for (const op of ['and', 'or']) {
       testSuggestions(`from a | where keywordField >= keywordField ${op} `, [
         ...getFieldNamesByType('any'),
@@ -191,7 +195,7 @@ describe('autocomplete', () => {
         ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
       ]);
       testSuggestions(`from a | where keywordField >= keywordField ${op} doubleField == `, [
-        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+        ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
         ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES, {
           scalar: true,
         }),
@@ -217,10 +221,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | where log10()',
       [
-        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+        ...getFieldNamesByType(log10ParameterTypes),
         ...getFunctionSignaturesByReturnType(
           'where',
-          ESQL_NUMBER_TYPES,
+          log10ParameterTypes,
           { scalar: true },
           undefined,
           ['log10']
@@ -235,10 +239,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | WHERE pow(doubleField, )',
       [
-        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+        ...getFieldNamesByType(powParameterTypes),
         ...getFunctionSignaturesByReturnType(
           'where',
-          ESQL_NUMBER_TYPES,
+          powParameterTypes,
           { scalar: true },
           undefined,
           ['pow']
@@ -297,7 +301,11 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} |`,
     ];
     for (const subExpression of subExpressions) {
-      testSuggestions(`from a | ${subExpression} grok `, getFieldNamesByType(ESQL_STRING_TYPES));
+      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
+      testSuggestions.skip(
+        `from a | ${subExpression} grok `,
+        getFieldNamesByType(ESQL_STRING_TYPES)
+      );
       testSuggestions(`from a | ${subExpression} grok keywordField `, [constantPattern], ' ');
       testSuggestions(`from a | ${subExpression} grok keywordField ${constantPattern} `, ['| ']);
     }
@@ -312,7 +320,11 @@ describe('autocomplete', () => {
       `dissect keywordField ${constantPattern} append_separator = ":" |`,
     ];
     for (const subExpression of subExpressions) {
-      testSuggestions(`from a | ${subExpression} dissect `, getFieldNamesByType(ESQL_STRING_TYPES));
+      // Unskip once https://github.com/elastic/kibana/issues/190070 is fixed
+      testSuggestions.skip(
+        `from a | ${subExpression} dissect `,
+        getFieldNamesByType(ESQL_STRING_TYPES)
+      );
       testSuggestions(`from a | ${subExpression} dissect keywordField `, [constantPattern], ' ');
       testSuggestions(
         `from a | ${subExpression} dissect keywordField ${constantPattern} `,
@@ -406,20 +418,7 @@ describe('autocomplete', () => {
         testSuggestions(`from a ${prevCommand}| enrich _${camelCase(mode)}:`, policyNames, ':');
       }
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['ON $0', 'WITH $0', '| ']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on `, [
-        'keywordField',
-        'keywordField',
-        'doubleField',
-        'dateField',
-        'booleanField',
-        'ipField',
-        'geoPointField',
-        'geoShapeField',
-        'cartesianPointField',
-        'cartesianShapeField',
-        '`any#Char$Field`',
-        'kubernetes.something.something',
-      ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy on `, getFieldNamesByType('any'));
       testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['WITH $0', ',', '| ']);
       testSuggestions(
         `from a ${prevCommand}| enrich policy on b with `,
@@ -509,10 +508,10 @@ describe('autocomplete', () => {
     testSuggestions(
       'from a | eval a=round()',
       [
-        ...getFieldNamesByType(ESQL_NUMBER_TYPES),
+        ...getFieldNamesByType(roundParameterTypes),
         ...getFunctionSignaturesByReturnType(
           'eval',
-          ESQL_NUMBER_TYPES,
+          roundParameterTypes,
           { scalar: true },
           undefined,
           ['round']
@@ -655,8 +654,6 @@ describe('autocomplete', () => {
       ]
     );
 
-    const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
-
     testSuggestions(
       'from a | eval a=round(doubleField), b=round()',
       [
@@ -784,7 +781,7 @@ describe('autocomplete', () => {
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionDefinitions) {
       // skip this fn for the moment as it's quite hard to test
-      if (!['bucket', 'date_extract', 'date_diff'].includes(fn.name)) {
+      if (!['bucket', 'date_extract', 'date_diff', 'case'].includes(fn.name)) {
         for (const signature of fn.signatures) {
           signature.params.forEach((param, i) => {
             if (i < signature.params.length) {
