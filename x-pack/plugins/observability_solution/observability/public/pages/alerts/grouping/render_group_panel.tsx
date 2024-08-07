@@ -72,7 +72,7 @@ const InstanceIdGroupContent = React.memo<{
                   content={
                     <FormattedMessage
                       id="xpack.observability.alert.grouping.ungrouped.info"
-                      defaultMessage='There is no "group by" field selected in rule definition.'
+                      defaultMessage='There is no "group by" field selected in the rule definition.'
                     />
                   }
                 />
