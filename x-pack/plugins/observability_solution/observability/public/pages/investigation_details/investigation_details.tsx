@@ -57,8 +57,9 @@ interface AlertDetailsPathParams {
 interface DetectedEvent {
   timestamp: Date;
   message: string;
-  deviation: number;
-  unit: string;
+  deviation?: number;
+  unit?: string;
+  version?: string;
 }
 
 export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
@@ -289,14 +290,17 @@ export function InvestigationDetails() {
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiFlexGroup justifyContent="flexEnd">
-                        <EuiText
-                          size="s"
-                          style={{ color: `${e.message.includes('increase') ? 'red' : 'green'}` }}
-                        >
-                          {e.message.includes('increase') ? '+' : '-'}
-                          {e.deviation}
-                          {e.unit}
-                        </EuiText>
+                        {(e.message.includes('increase') || e.message.includes('decrease')) && (
+                          <EuiText
+                            size="s"
+                            style={{ color: `${e.message.includes('increase') ? 'red' : 'green'}` }}
+                          >
+                            {e.message.includes('increase') ? '+' : '-'}
+                            {e.deviation}
+                            {e.unit}
+                          </EuiText>
+                        )}
+                        {e.message.includes('version') && <EuiText size="s">{e.version}</EuiText>}
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
