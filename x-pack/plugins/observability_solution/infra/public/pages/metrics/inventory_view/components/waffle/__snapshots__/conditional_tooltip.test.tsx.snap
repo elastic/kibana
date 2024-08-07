@@ -3,7 +3,7 @@
 exports[`ConditionalToolTip renders correctly 1`] = `
 <div
   data-test-subj="conditionalTooltipContent-host-01"
-  style="min-width: 200px;"
+  style="min-width: 220px;"
 >
   <div
     style="border-bottom: 1px solid #D3DAE6; border-bottom-color: #98A2B3; padding-bottom: 4px; margin-bottom: 4px;"
