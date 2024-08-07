@@ -16,6 +16,7 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
 import { ContentStream, getContentStream } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
+import { STATUS_CODES } from './constants';
 import { getDocumentPayloadFactory } from './get_document_payload';
 import { jobsQueryFactory } from './jobs_query';
 
@@ -68,7 +69,7 @@ describe('getDocumentPayload', () => {
           headers: expect.objectContaining({
             'Content-Length': '1024',
           }),
-          statusCode: 200,
+          statusCode: STATUS_CODES.COMPLETED,
         })
       );
     });
@@ -98,7 +99,7 @@ describe('getDocumentPayload', () => {
             'kbn-csv-contains-formulas': true,
             'kbn-max-size-reached': true,
           }),
-          statusCode: 200,
+          statusCode: STATUS_CODES.COMPLETED,
         })
       );
     });
@@ -127,7 +128,7 @@ describe('getDocumentPayload', () => {
               message: expect.stringContaining('Some error'),
             },
             headers: {},
-            statusCode: 500,
+            statusCode: STATUS_CODES.FAILED.PUBLIC,
           })
         );
       });
@@ -151,7 +152,7 @@ describe('getDocumentPayload', () => {
             headers: {
               'retry-after': '30',
             },
-            statusCode: 503,
+            statusCode: STATUS_CODES.PENDING.PUBLIC,
           })
         );
       });
@@ -181,7 +182,7 @@ describe('getDocumentPayload', () => {
               message: expect.stringContaining('Some error'),
             },
             headers: {},
-            statusCode: 200,
+            statusCode: STATUS_CODES.FAILED.INTERNAL,
           })
         );
       });
@@ -203,7 +204,7 @@ describe('getDocumentPayload', () => {
             contentType: 'text/plain',
             content: 'pending',
             headers: { 'retry-after': '30' },
-            statusCode: 200,
+            statusCode: STATUS_CODES.PENDING.INTERNAL,
           })
         );
       });

@@ -8,13 +8,14 @@
 import { Stream } from 'stream';
 
 import { ResponseHeaders } from '@kbn/core-http-server';
+import { JOB_STATUS } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-export-types-csv-common';
-import { JOB_STATUS } from '@kbn/reporting-common';
 import { ExportType } from '@kbn/reporting-server';
 
 import { ReportingCore } from '../../..';
 import { getContentStream } from '../../../lib';
+import { STATUS_CODES } from './constants';
 import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
@@ -78,7 +79,7 @@ export function getDocumentPayloadFactory(
     return {
       filename,
       content,
-      statusCode: 200,
+      statusCode: STATUS_CODES.COMPLETED,
       contentType,
       headers: {
         ...headers,
@@ -92,7 +93,7 @@ export function getDocumentPayloadFactory(
     const error = await jobsQuery.getError(id);
 
     // For download requested over public API, status code for failed job must be 500 to integrate with Watcher
-    const statusCode = isInternal ? 200 : 500;
+    const statusCode = isInternal ? STATUS_CODES.FAILED.INTERNAL : STATUS_CODES.FAILED.PUBLIC;
     logger.debug(`Report job ${id} has failed. Sending statusCode: ${statusCode}`);
 
     return {
@@ -105,7 +106,7 @@ export function getDocumentPayloadFactory(
 
   function getIncomplete({ id, status }: ReportApiJSON): Payload {
     // For download requested over public API, status code for processing/pending job must be 503 to integrate with Watcher
-    const statusCode = isInternal ? 200 : 503;
+    const statusCode = isInternal ? STATUS_CODES.PENDING.INTERNAL : STATUS_CODES.PENDING.PUBLIC;
     logger.debug(`Report job ${id} is processing. Sending statusCode: ${statusCode}`);
 
     return {
