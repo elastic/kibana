@@ -27,16 +27,16 @@ const parseLogsContent = (
   }
   let parsedContent;
   try {
-    if (fileType === 'application/json') {
+    parsedContent = fileContent
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+      .map((line) => JSON.parse(line));
+  } catch (parseNDJSONError) {
+    try {
       parsedContent = JSON.parse(fileContent);
-    } else if (fileType === 'application/x-ndjson') {
-      parsedContent = fileContent
-        .split('\n')
-        .filter((line) => line.trim() !== '')
-        .map((line) => JSON.parse(line));
+    } catch (parseJSONError) {
+      return { error: i18n.LOGS_SAMPLE_ERROR.FORMAT(fileType) };
     }
-  } catch (_) {
-    return { error: i18n.LOGS_SAMPLE_ERROR.FORMAT(fileType) };
   }
 
   if (!Array.isArray(parsedContent)) {
@@ -137,7 +137,6 @@ export const SampleLogsInput = React.memo<SampleLogsInputProps>(({ integrationSe
           onChange={onChangeLogsSample}
           display="large"
           aria-label="Upload logs sample file"
-          accept="application/json,application/x-ndjson"
           isLoading={isParsing}
           data-test-subj="logsSampleFilePicker"
           data-loading={isParsing}
