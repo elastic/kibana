@@ -53,7 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('add filter', async () => {
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({
-          field: 'Resource Name',
+          field: 'resource.name',
           operation: 'is',
           value: resourceName1,
         });
@@ -90,14 +90,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await latestVulnerabilitiesTable.getRowsCount()).to.be(
           vulnerabilitiesLatestMock.length
         );
-      });
-    });
-
-    describe('DataTable features', () => {
-      it('Edit data view field option is Enabled', async () => {
-        await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
-        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
-        await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
       });
     });
 

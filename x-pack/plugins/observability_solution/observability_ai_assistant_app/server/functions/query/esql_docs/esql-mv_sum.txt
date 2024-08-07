@@ -1,12 +1,29 @@
-MV_SUM
+## MV_SUM
 
-Syntax
-Parameters
-number
-Multivalue expression.
-DescriptionConverts a multivalued field into a single valued field containing the sum of all of the values.Supported types
-Example
+The `MV_SUM` function in ES|QL is used to convert a multivalued field into a single valued field containing the sum of all the values.
+
+### Syntax
+
+`MV_SUM(number)`
+
+#### Parameters
+
+- `number`: A multivalued expression.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_SUM` function in ES|QL:
+
 ```esql
 ROW a=[3, 5, 6]
 | EVAL sum_a = MV_SUM(a)
 ```
+
+In this example, the `MV_SUM` function is used to calculate the sum of the values in the multivalued field `a`.
+
+```esql
+ROW b=[10, 20, 30, 40]
+| EVAL sum_b = MV_SUM(b)
+```
+
+In this second example, the `MV_SUM` function is used to calculate the sum of the values in the multivalued field `b`.

@@ -125,7 +125,11 @@ export const nextActionMap = (
         knownTypes: state.knownTypes,
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
-      Actions.setWriteBlock({ client, index: state.sourceIndex.value }),
+      Actions.safeWriteBlock({
+        client,
+        sourceIndex: state.sourceIndex.value,
+        targetIndex: state.targetIndex,
+      }),
     CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
       Actions.calculateExcludeFilters({
         client,

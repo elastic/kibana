@@ -109,7 +109,7 @@ export interface EcsSecurityExtension {
   };
   // I believe these parameters are all snake cased to correspond with how they are sent "over the wire" as request / response
   // Not representative of the parsed types that are camel cased.
-  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string };
+  'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string; type?: string };
   'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Memory_protection?: MemoryProtection;

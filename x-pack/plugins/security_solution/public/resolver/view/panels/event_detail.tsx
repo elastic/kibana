@@ -209,9 +209,6 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
       ),
       width: 'fit-content(8em)',
       sortable: true,
-      render(fieldName: string) {
-        return <GeneratedText>{fieldName}</GeneratedText>;
-      },
     },
     {
       name: (

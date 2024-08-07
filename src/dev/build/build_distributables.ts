@@ -106,7 +106,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   if (options.createPlatformFolders) {
     await run(Tasks.CreateArchivesSources);
-    await run(Tasks.PatchNativeModules);
     await run(Tasks.InstallChromium);
     await run(Tasks.CleanExtraBinScripts);
     await run(Tasks.CleanNodeBuilds);

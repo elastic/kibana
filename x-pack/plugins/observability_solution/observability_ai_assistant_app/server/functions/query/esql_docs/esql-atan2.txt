@@ -1,14 +1,30 @@
-ATAN2
+## ATAN2
 
-Syntax
-Parameters
-y_coordinate
-y coordinate. If null, the function returns null.
-x_coordinate
-x coordinate. If null, the function returns null.
-DescriptionThe angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane, expressed in radians.Supported types
-Example
+ATAN2 is a function in ES|QL that calculates the angle between the positive x-axis and the ray from the origin to the point (x , y) in the Cartesian plane, expressed in radians.
+
+### Syntax
+
+`ATAN2(y_coordinate, x_coordinate)`
+
+#### Parameters
+
+- `y_coordinate`: The y coordinate. If null, the function returns null.
+- `x_coordinate`: The x coordinate. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `ATAN2` function in ES|QL queries:
+
 ```esql
 ROW y=12.9, x=.6
-| EVAL atan2=ATAN2(y, x)
+| EVAL atan2 = ATAN2(y, x)
 ```
+
+In this example, the `ATAN2` function is used to calculate the angle between the positive x-axis and the ray from the origin to the point (0.6 , 12.9) in the Cartesian plane.
+
+```esql
+ROW y=5, x=3
+| EVAL atan2 = ATAN2(y, x)
+```
+
+In this second example, the `ATAN2` function is used to calculate the angle between the positive x-axis and the ray from the origin to the point (3 , 5) in the Cartesian plane.

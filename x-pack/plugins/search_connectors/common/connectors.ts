@@ -708,7 +708,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       }
     ),
     iconPath: 'custom.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: false,
     keywords: ['custom', 'connector', 'code'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.customConnector.name', {

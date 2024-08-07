@@ -403,7 +403,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.setValue('Resource');
 
         // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
+        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
 
         const grouping = await findings.findingsGrouping();

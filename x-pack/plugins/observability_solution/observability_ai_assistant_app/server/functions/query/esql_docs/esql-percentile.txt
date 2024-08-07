@@ -1,50 +1,34 @@
-PERCENTILE
+## PERCENTILE
 
-Syntax
-PERCENTILE(expression, percentile)
-Parameters
-expression
-Expression from which to return a percentile.
-percentile
-A constant numeric expression.
-DescriptionReturns the value at which a certain percentage of observed values occur. For
-example, the 95th percentile is the value which is greater than 95% of the
-observed values and the 50th percentile is the MEDIAN.Example
+The `PERCENTILE` function in ES|QL returns the value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the median.
+
+### Syntax
+
+`PERCENTILE(expression, percentile)`
+
+#### Parameters
+
+- `expression`: Expression from which to return a percentile.
+- `percentile`: A constant numeric expression.
+
+### Examples
+
+Here are a couple of examples of how to use the `PERCENTILE` function in ES|QL:
+
 ```esql
 FROM employees
-| STATS p0 = PERCENTILE(salary,  0)
-     , p50 = PERCENTILE(salary, 50)
-     , p99 = PERCENTILE(salary, 99)
+| STATS p0 = PERCENTILE(salary,  0), p50 = PERCENTILE(salary, 50), p99 = PERCENTILE(salary, 99)
 ```
 
-The expression can use inline functions. For example, to calculate a percentile
-of the maximum values of a multivalued column, first use MV_MAX to get the
-maximum value per row, and use the result with the PERCENTILE function:
+In this example, the `PERCENTILE` function is used to calculate the 0th, 50th, and 99th percentiles of the `salary` field in the `employees` index.
+
 ```esql
 FROM employees
 | STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
 ```
 
-PERCENTILE is (usually) approximateeditThere are many different algorithms to calculate percentiles. The naive
-implementation simply stores all the values in a sorted array. To find the 50th
-percentile, you simply find the value that is at my_array[count(my_array) * 0.5].Clearly, the naive implementation does not scale — the sorted array grows
-linearly with the number of values in your dataset. To calculate percentiles
-across potentially billions of values in an Elasticsearch cluster, approximate
-percentiles are calculated.The algorithm used by the percentile metric is called TDigest (introduced by
-Ted Dunning in
-Computing Accurate Quantiles using T-Digests).When using this metric, there are a few guidelines to keep in mind:
-Accuracy is proportional to q(1-q). This means that extreme percentiles (e.g. 99%)
-are more accurate than less extreme percentiles, such as the median
-For small sets of values, percentiles are highly accurate (and potentially
-100% accurate if the data is small enough).
-As the quantity of values in a bucket grows, the algorithm begins to approximate
-the percentiles. It is effectively trading accuracy for memory savings. The
-exact level of inaccuracy is difficult to generalize, since it depends on your
-data distribution and volume of data being aggregated
-The following chart shows the relative error on a uniform distribution depending
-on the number of collected values and the requested percentile:It shows how precision is better for extreme percentiles. The reason why error diminishes
-for large number of values is that the law of large numbers makes the distribution of
-values more and more uniform and the t-digest tree can do a better job at summarizing
-it. It would not be the case on more skewed distributions.
-PERCENTILE is also non-deterministic.
-This means you can get slightly different results using the same data.
+In this example, the `PERCENTILE` function is used in conjunction with the `MV_MAX` function to calculate the 80th percentile of the maximum values of the `salary_change` field in the `employees` index.
+
+### Note
+
+The `PERCENTILE` function is usually approximate. There are many different algorithms to calculate percentiles and the naive implementation does not scale. To calculate percentiles across potentially billions of values in an Elasticsearch cluster, approximate percentiles are calculated using the TDigest algorithm. This means you can get slightly different results using the same data.

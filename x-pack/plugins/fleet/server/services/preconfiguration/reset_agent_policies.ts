@@ -34,7 +34,6 @@ export async function resetPreconfiguredAgentPolicies(
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
   await _deleteGhostPackagePolicies(soClient, esClient, logger);
   await _deletePreconfigurationDeleteRecord(soClient, logger, agentPolicyId);
-
   await setupFleet(soClient, esClient);
 }
 

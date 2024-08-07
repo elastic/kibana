@@ -154,6 +154,13 @@ export interface ISearchOptions {
   isRestore?: boolean;
 
   /**
+   * By default, when polling, we don't retrieve the results of the search request (until it is complete). (For async
+   * search, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to
+   * `true` will request the search results, regardless of whether or not the search is complete.
+   */
+  retrieveResults?: boolean;
+
+  /**
    * Represents a meta-information about a Kibana entity intitating a saerch request.
    */
   executionContext?: KibanaExecutionContext;
@@ -182,5 +189,6 @@ export type ISearchOptionsSerializable = Pick<
   | 'isStored'
   | 'isSearchStored'
   | 'isRestore'
+  | 'retrieveResults'
   | 'executionContext'
 >;

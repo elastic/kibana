@@ -13,7 +13,7 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../common/api/use_data_view';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
@@ -28,7 +28,7 @@ import { TestProvider } from '../../test/test_provider';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 
-jest.mock('../../common/api/use_latest_findings_data_view');
+jest.mock('../../common/api/use_data_view');
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
@@ -54,7 +54,7 @@ beforeEach(() => {
     })
   );
 
-  (useLatestFindingsDataView as jest.Mock).mockReturnValue({
+  (useDataView as jest.Mock).mockReturnValue({
     status: 'success',
     data: createStubDataView({
       spec: {

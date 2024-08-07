@@ -1645,6 +1645,15 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('SET_SOURCE_WRITE_BLOCK -> REFRESH_TARGET if source index matches target index', () => {
+        const index = `.kibana_${setWriteBlockState.kibanaVersion}_001`;
+        const res: ResponseType<'SET_SOURCE_WRITE_BLOCK'> = Either.left({
+          type: 'source_equals_target' as const,
+          index,
+        });
+        const newState = model(setWriteBlockState, res);
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
+      });
     });
 
     describe('CALCULATE_EXCLUDE_FILTERS', () => {

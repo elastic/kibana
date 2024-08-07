@@ -1,19 +1,28 @@
-MAX
+## MAX
 
-Syntax
-MAX(expression)
-Parameters
-expression
-Expression from which to return the maximum value.
-DescriptionReturns the maximum value of a numeric expression.Example
+The `MAX` function in ES|QL is used to return the maximum value of a numeric expression.
+
+### Syntax
+
+`MAX(expression)`
+
+#### Parameters
+
+`expression`: The expression from which to return the maximum value.
+
+### Examples
+
+Here are a couple of examples of how the `MAX` function can be used in ES|QL queries:
+
+1. To find the maximum value in the `languages` field from the `employees` index, you can use the following query:
+
 ```esql
 FROM employees
 | STATS MAX(languages)
 ```
 
-The expression can use inline functions. For example, to calculate the maximum
-over an average of a multivalued column, use MV_AVG to first average the
-multiple values per row, and use the result with the MAX function:
+2. The `MAX` function can also be used with inline functions. For instance, to calculate the maximum over an average of a multivalued column, you can first use the `MV_AVG` function to average the multiple values per row, and then use the result with the `MAX` function:
+
 ```esql
 FROM employees
 | STATS max_avg_salary_change = MAX(MV_AVG(salary_change))

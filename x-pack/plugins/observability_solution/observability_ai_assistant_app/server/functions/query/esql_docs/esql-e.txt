@@ -1,8 +1,19 @@
-E
+## E
 
-Syntax
-ParametersDescriptionReturns Euler’s number.Supported types
-Example
+The `E` function in ES|QL returns Euler's number.
+
+### Examples
+
+Here are a couple of examples of how you can use the `E` function in ES|QL queries:
+
 ```esql
 ROW E()
 ```
+
+This query simply returns the Euler's number.
+
+```esql
+ROW a = E()
+```
+
+This query assigns the Euler's number to a variable `a`.

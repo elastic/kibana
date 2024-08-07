@@ -8,6 +8,16 @@
 export const fieldCapsPgBenchMock = {
   indices: ['.ds-filebeat-8.2.0-2022.06.07-000082'],
   fields: {
+    // The next two fields are not in the original field caps response,
+    // but are added here to test the logic to ignore fields that are not
+    // in the white list. It's based on a real world example where the mapping
+    // included a double mapping of text+integer.
+    ignore_this_text_field: {
+      text: { type: 'text', metadata_field: false, searchable: true, aggregatable: false },
+    },
+    'ignore_this_text_field.int': {
+      integer: { type: 'integer', metadata_field: false, searchable: true, aggregatable: true },
+    },
     'kubernetes.node.uid': {
       keyword: { type: 'keyword', metadata_field: false, searchable: true, aggregatable: true },
     },

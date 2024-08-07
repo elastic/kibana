@@ -426,10 +426,15 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return null;
   }, [maybeRule]);
 
+  const ruleType = enrichedAlert?.['kibana.alert.rule.parameters']?.type;
+  const isAlertWithoutIndex = ruleType === 'esql' || ruleType === 'machine_learning';
+  const isWaitingForIndexOrDataView =
+    !isAlertWithoutIndex && memoRuleIndices == null && memoDataViewId == null;
+
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    (memoRuleIndices == null && memoDataViewId == null);
+    isWaitingForIndexOrDataView;
 
   if (isLoading || isRuleLoading) return null;
 

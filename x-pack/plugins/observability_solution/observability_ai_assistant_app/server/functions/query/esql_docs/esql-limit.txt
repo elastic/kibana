@@ -1,26 +1,42 @@
-LIMIT
+## LIMIT
 
-Syntax
-LIMIT max_number_of_rows
-Parameters
-max_number_of_rows
-The maximum number of rows to return.
-DescriptionThe LIMIT processing command enables you to limit the number of rows that are
-returned.
-Queries do not return more than 10,000 rows, regardless of the LIMIT command’s
-value.This limit only applies to the number of rows that are retrieved by the query.
-Queries and aggregations run on the full data set.To overcome this limitation:
-Reduce the result set size by modifying the query to only return relevant
-data. Use WHERE to select a smaller subset of the data.
-Shift any post-query processing to the query itself. You can use the ES|QL
-STATS ... BY command to aggregate data in the query.
-The default and maximum limits can be changed using these dynamic cluster
-settings:
-esql.query.result_truncation_default_size
-esql.query.result_truncation_max_size
-Example
-```esql
+The `LIMIT` command in ES|QL is a processing command that allows you to limit the number of rows that are returned in a query. This can be particularly useful in scenarios where you only need a specific number of rows from a larger dataset.
+
+However, it's important to note that queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value. This limit only applies to the number of rows that are retrieved by the query. Queries and aggregations run on the full data set.
+
+To overcome this limitation, you can:
+
+- Reduce the result set size by modifying the query to only return relevant data. Use `WHERE` to select a smaller subset of the data.
+- Shift any post-query processing to the query itself. You can use the ES|QL `STATS ... BY` command to aggregate data in the query.
+
+The default and maximum limits can be changed using these dynamic cluster settings:
+
+- `esql.query.result_truncation_default_size`
+- `esql.query.result_truncation_max_size`
+
+### Examples
+
+Here are some examples of how you can use the `LIMIT` command in ES|QL:
+
+1. Limit the number of rows returned to 5, sorted by employee number in ascending order:
+
+    ```esql
 FROM employees
 | SORT emp_no ASC
 | LIMIT 5
+```
+
+2. Retrieve only the top 10 employees with the highest salary:
+
+    ```esql
+FROM employees
+| SORT salary DESC
+| LIMIT 10
+```
+
+3. Get the first 100 rows from a logs data stream:
+
+    ```esql
+FROM logs-*
+| LIMIT 100
 ```

@@ -8,7 +8,6 @@
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import * as fastGlob from 'fast-glob';
-import inquirer from 'inquirer';
 import yargs from 'yargs';
 import chalk from 'chalk';
 import { castArray, omit } from 'lodash';
@@ -18,7 +17,6 @@ import Path from 'path';
 import * as table from 'table';
 import { TableUserConfig } from 'table';
 import { format, parse } from 'url';
-import { ToolingLog } from '@kbn/tooling-log';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
@@ -26,40 +24,7 @@ import { KibanaClient } from './kibana_client';
 import { initServices } from './services';
 import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
-
-async function selectConnector({
-  connectors,
-  preferredId,
-  log,
-  message = 'Select a connector',
-}: {
-  connectors: Awaited<ReturnType<KibanaClient['getConnectors']>>;
-  preferredId?: string;
-  log: ToolingLog;
-  message?: string;
-}) {
-  let connector = connectors.find((item) => item.id === preferredId);
-
-  if (!connector && preferredId) {
-    log.warning(`Could not find connector ${preferredId}`);
-  }
-
-  if (!connector && connectors.length === 1) {
-    connector = connectors[0];
-    log.debug('Using the only connector found');
-  } else if (!connector) {
-    const connectorChoice = await inquirer.prompt({
-      type: 'list',
-      name: 'connector',
-      message,
-      choices: connectors.map((item) => ({ name: `${item.name} (${item.id})`, value: item.id })),
-    });
-
-    connector = connectors.find((item) => item.id === connectorChoice.connector)!;
-  }
-
-  return connector;
-}
+import { selectConnector } from './select_connector';
 
 function runEvaluations() {
   yargs(process.argv.slice(2))
@@ -76,6 +41,8 @@ function runEvaluations() {
           const esClient = new Client({
             node: serviceUrls.esUrl,
           });
+
+          await kibanaClient.createSpaceIfNeeded();
 
           const connectors = await kibanaClient.getConnectors();
 

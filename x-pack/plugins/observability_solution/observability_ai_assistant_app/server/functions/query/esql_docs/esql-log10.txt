@@ -1,12 +1,21 @@
-LOG10
+## LOG10
 
-Syntax
-Parameters
-number
-Numeric expression. If null, the function returns null.
-DescriptionReturns the logarithm of a value to base 10. The input can be any numeric value, the return value is always a double.  Logs of 0 and negative numbers return null as well as a warning.Supported types
-Example
+The `LOG10` function in ES|QL is used to calculate the logarithm of a value to the base 10. The input can be any numeric value and the return value is always a double. If the input is 0 or a negative number, the function returns null and a warning.
+
+### Examples
+
+Here are a couple of examples of how you can use the `LOG10` function in ES|QL queries:
+
 ```esql
 ROW d = 1000.0
 | EVAL s = LOG10(d)
 ```
+
+In this example, the `LOG10` function is used to calculate the base 10 logarithm of the value 1000. The result is stored in the variable `s`.
+
+```esql
+ROW d = 100.0
+| EVAL s = LOG10(d)
+```
+
+In this example, the `LOG10` function is used to calculate the base 10 logarithm of the value 100. The result is stored in the variable `s`.
