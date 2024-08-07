@@ -41,8 +41,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
     await setFarequoteTimerange();
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   async function createJobInWizard(

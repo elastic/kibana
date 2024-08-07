@@ -45,9 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
-    await dashboardPanelActions.openContextMenu();
-    await dashboardPanelActions.clickContextMenuMoreItem();
-    await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
     await dashboardDrilldownPanelActions.clickCreateDrilldown();
     await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
     await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
@@ -277,8 +274,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('delete dashboard to dashboard drilldown', async () => {
           // delete drilldown
           await PageObjects.dashboard.switchToEditMode();
-          await dashboardPanelActions.openContextMenu();
-          await dashboardPanelActions.clickContextMenuMoreItem();
           await dashboardDrilldownPanelActions.expectExistsManageDrilldownsAction();
           await dashboardDrilldownPanelActions.clickManageDrilldowns();
           await dashboardDrilldownsManage.expectsManageDrilldownsFlyoutOpen();

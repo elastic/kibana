@@ -32,8 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     await setFarequoteTimerange();
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   describe('create jobs from lens', function () {
