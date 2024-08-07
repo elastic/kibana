@@ -18,7 +18,7 @@ To achieve this, services cannot use `supertest`, which employs an operator user
 ### How It Works
 Most existing stateful tests use basic authentication for API testing. In contrast, serverless tests use SAML authentication with project-specific role mapping.
 
-Since stateful deployments also support SAML, *deployment-agnostic tests configure Elasticsearch and Kibana with SAML authentication in both cases*. For roles, stateful deployments define 'viewer', 'editor', and 'admin' roles with serverless-alike permissions.
+Since both Elastic Cloud (ESS) and Serverless rely on SAML authentication by default, and stateful deployments also support SAML, *deployment-agnostic tests configure Elasticsearch and Kibana with SAML authentication to use the same authentication approach in all cases*. For roles, stateful deployments define 'viewer', 'editor', and 'admin' roles with serverless-alike permissions.
 
 ### When to Create Separate Tests
 While the deployment-agnostic testing approach is beneficial, it should not compromise the quality and simplicity of the tests. Here are some scenarios where separate test files are recommended:
