@@ -12,7 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
-import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
@@ -189,18 +189,20 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
+  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sort, onTableChange } = useEuiTablePersist({
     tableId: 'indexTemplates',
-    initialPageSize: 25,
+    initialPageSize: 20,
     initialSort: {
       field: 'name',
       direction: 'asc',
     },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
 
   const pagination = {
     pageSize,
-    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 
   const selectionConfig = {

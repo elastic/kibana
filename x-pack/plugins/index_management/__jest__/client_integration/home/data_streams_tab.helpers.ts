@@ -114,6 +114,14 @@ export const setup = async (
     component.update();
   };
 
+  const sortTableOnName = () => {
+    const { find, component } = testBed;
+    act(() => {
+      find('tableHeaderCell_name_0.tableHeaderSortButton').simulate('click');
+    });
+    component.update();
+  };
+
   const clickReloadButton = () => {
     const { find } = testBed;
     find('reloadButton').simulate('click');
@@ -235,6 +243,7 @@ export const setup = async (
       clickIncludeStatsSwitch,
       toggleViewFilterAt,
       sortTableOnStorageSize,
+      sortTableOnName,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,

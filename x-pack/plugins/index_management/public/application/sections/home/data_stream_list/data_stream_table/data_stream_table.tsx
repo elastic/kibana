@@ -18,7 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
-import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
@@ -271,18 +271,20 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sort, onTableChange } = useEuiTablePersist({
     tableId: 'dataStreams',
-    initialPageSize: 25,
+    initialPageSize: 20,
     initialSort: {
       field: 'name',
       direction: 'asc',
     },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
 
   const pagination = {
     pageSize,
-    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 
   return (

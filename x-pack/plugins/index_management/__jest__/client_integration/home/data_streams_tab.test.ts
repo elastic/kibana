@@ -301,6 +301,9 @@ describe('Data Streams tab', () => {
           'Delete',
         ],
       ]);
+
+      // Revert sorting back on Name column to not impact the rest of the tests
+      actions.sortTableOnName();
     });
 
     test('hides stats toggle if enableDataStreamStats===false', async () => {

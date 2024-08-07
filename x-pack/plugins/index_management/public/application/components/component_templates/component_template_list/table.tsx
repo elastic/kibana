@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
-import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -89,10 +89,12 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
+  const PAGE_SIZE_OPTIONS = [10, 20, 50];
   const { pageSize, sort, onTableChange } = useEuiTablePersist({
     tableId: 'componentTemplates',
-    initialPageSize: 25,
+    initialPageSize: 10,
     initialSort: { field: 'name', direction: 'asc' },
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
 
   const filteredComponentTemplates = useMemo(() => {
@@ -233,7 +235,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
     },
     pagination: {
       initialPageSize: pageSize,
-      pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     },
     onTableChange,
     columns: [

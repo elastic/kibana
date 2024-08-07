@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiTablePagination } from '@elastic/eui';
-import { DEFAULT_PAGE_SIZE_OPTIONS, useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 interface IndexTablePaginationProps {
   pager: any;
@@ -16,6 +16,8 @@ interface IndexTablePaginationProps {
   readURLParams: any;
   setURLParam: any;
 }
+
+const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 export const IndexTablePagination = ({
   pager,
@@ -30,6 +32,7 @@ export const IndexTablePagination = ({
       setURLParam('pageSize', page?.size);
       pageSizeChanged(page?.size);
     },
+    initialPageSize: pager.itemsPerPage,
   });
 
   if (pager.itemsPerPage !== pageSize) {
@@ -41,7 +44,7 @@ export const IndexTablePagination = ({
   if (
     urlParamPageSize !== undefined &&
     urlParamPageSize !== pageSize &&
-    DEFAULT_PAGE_SIZE_OPTIONS.includes(urlParamPageSize)
+    PAGE_SIZE_OPTIONS.includes(urlParamPageSize)
   ) {
     pageSizeChanged(urlParamPageSize);
     onTableChange({ page: { size: urlParamPageSize, index: pager.getCurrentPageIndex() } });
@@ -51,7 +54,7 @@ export const IndexTablePagination = ({
     <EuiTablePagination
       activePage={pager.getCurrentPageIndex()}
       itemsPerPage={pageSize}
-      itemsPerPageOptions={DEFAULT_PAGE_SIZE_OPTIONS}
+      itemsPerPageOptions={PAGE_SIZE_OPTIONS}
       pageCount={pager.getTotalPages()}
       onChangeItemsPerPage={(size) =>
         onTableChange({ page: { size, index: pager.getCurrentPageIndex() } })
