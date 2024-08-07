@@ -8,9 +8,10 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { interceptRequest } from '../../common/intercept_request';
+import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
@@ -21,43 +22,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('ai assistant management privileges', () => {
     describe('all privileges', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                // we need all these privileges to view and modify Obs AI Assistant settings view
-                observabilityAIAssistant: ['all'],
-                // aiAssistantManagementSelection determines link visibility in stack management and navigating to the page
-                // but not whether you can read/write the settings
-                aiAssistantManagementSelection: ['all'],
-                // advancedSettings determines whether user can read/write the settings
-                advancedSettings: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          // we need all these privileges to view and modify Obs AI Assistant settings view
+          observabilityAIAssistant: ['all'],
+          // aiAssistantManagementSelection determines link visibility in stack management and navigating to the page
+          // but not whether you can read/write the settings
+          aiAssistantManagementSelection: ['all'],
+          // advancedSettings determines whether user can read/write the settings
+          advancedSettings: ['all'],
         });
       });
 
       after(async () => {
-        // logout
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
 
       it('shows AI Assistant settings link in solution nav', async () => {
@@ -97,6 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const logsIndexPatternInputValue = await logsIndexPatternInput.getAttribute('value');
         expect(logsIndexPatternInputValue).to.be(testLogsIndexPattern);
         // reset the value
+        await logsIndexPatternInput.clearValue();
         await logsIndexPatternInput.type('logs-*');
         await saveButton.click();
       });
@@ -104,6 +82,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const logsIndexPatternInput = await testSubjects.find(
           ui.pages.settings.logsIndexPatternInput
         );
+        // Wait until the input has the default value 'logs-*' to prevent flakiness
+        await retry.waitFor('input field to have default value', async () => {
+          const value = await logsIndexPatternInput.getAttribute('value');
+          return value === 'logs-*';
+        });
         await logsIndexPatternInput.clearValue();
         await logsIndexPatternInput.type('test');
 
@@ -114,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             return responseFactory.fail();
           },
           async () => {
-            await testSubjects.clickWhenNotDisabled(ui.pages.settings.saveButton);
+            await testSubjects.click(ui.pages.settings.saveButton);
           }
         );
 
@@ -126,41 +109,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('with advancedSettings read privilege', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                observabilityAIAssistant: ['all'],
-                // there is no difference between aiAssistantManagementSelection "read" and "all" because its controlled by advancedSettings
-                aiAssistantManagementSelection: ['all'],
-                // advancedSettings determines whether user can read/write the settings
-                advancedSettings: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          observabilityAIAssistant: ['all'],
+          aiAssistantManagementSelection: ['all'],
+          advancedSettings: ['read'],
         });
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
 
       it('shows AI Assistant settings link in solution nav', async () => {
@@ -197,38 +154,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('observabilityAIAssistant privilege with no aiAssistantManagementSelection privilege', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                // we need at least one feature available to login
-                observabilityAIAssistant: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          // we need at least one feature available to login
+          observabilityAIAssistant: ['all'],
         });
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
 
       it('does not show AI Assistant settings link in solution nav', async () => {
@@ -259,38 +192,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('aiAssistantManagementSelection privilege with no observabilityAIAssistant privilege', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                aiAssistantManagementSelection: ['all'],
-                advancedSettings: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          aiAssistantManagementSelection: ['all'],
+          advancedSettings: ['all'],
         });
       });
 
       after(async () => {
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
 
       it('shows AI Assistant settings link in solution nav', async () => {

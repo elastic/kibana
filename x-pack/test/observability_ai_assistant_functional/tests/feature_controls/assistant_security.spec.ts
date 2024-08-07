@@ -12,11 +12,11 @@ import {
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createConnector, deleteConnectors } from '../../common/connectors';
+import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
-  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
@@ -24,40 +24,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('ai assistant privileges', () => {
     describe('all privileges', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                // need some obs app or obs menu wont show where we can click on AI Assistant
-                infrastructure: ['all'],
-                observabilityAIAssistant: ['all'],
-                // requires connectors to chat
-                actions: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          // need some obs app or obs menu wont show where we can click on AI Assistant
+          infrastructure: ['all'],
+          observabilityAIAssistant: ['all'],
+          // requires connectors to chat
+          actions: ['read'],
         });
       });
 
       after(async () => {
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
 
       it('shows AI Assistant link in solution nav', async () => {
@@ -117,29 +94,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('no actions privileges', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                // need some obs app or obs menu wont show where we can click on AI Assistant
-                infrastructure: ['all'],
-                observabilityAIAssistant: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          // need some obs app or obs menu wont show where we can click on AI Assistant
+          infrastructure: ['all'],
+          observabilityAIAssistant: ['all'],
         });
       });
       it('loads conversations UI with connector error message', async () => {
@@ -151,37 +109,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail(ui.pages.conversations.connectorsErrorMsg);
       });
       after(async () => {
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
     });
     describe('no privileges', () => {
       before(async () => {
-        await security.role.create('ai_assistant_role', {
-          kibana: [
-            {
-              feature: {
-                // need some obs app or obs menu wont show where we can click on AI Assistant
-                infrastructure: ['all'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-
-        await security.user.create('ai_assistant_user', {
-          password: 'ai_assistant_user-password',
-          roles: ['ai_assistant_role'],
-          full_name: 'test user',
-        });
-
-        await PageObjects.security.forceLogout();
-
-        await PageObjects.security.login('ai_assistant_user', 'ai_assistant_user-password', {
-          expectSpaceSelector: false,
+        await createAndLoginUserWithCustomRole(getPageObjects, getService, {
+          // need some obs app or obs menu wont show where we can click on AI Assistant
+          infrastructure: ['all'],
         });
       });
       it('shows no AI Assistant link in solution nav', async () => {
@@ -209,11 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail(ui.pages.conversations.conversationsPage);
       });
       after(async () => {
-        await PageObjects.security.forceLogout();
-        await Promise.all([
-          security.role.delete('ai_assistant_role'),
-          security.user.delete('ai_assistant_user'),
-        ]);
+        await deleteAndLogoutUser(getService, getPageObjects);
       });
     });
   });
