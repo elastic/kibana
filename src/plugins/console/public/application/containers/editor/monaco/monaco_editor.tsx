@@ -55,9 +55,10 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const setInputEditor = useSetInputEditor();
-  const getCurlCallback = useCallback(async (): Promise<string> => {
-    const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
-    return curl ?? '';
+
+  const getRequestsCallback = useCallback(async (): Promise<any> => {
+    const requests = await actionsProvider.current?.getRequests();
+    return requests ?? [];
   }, [esHostService]);
 
   const getDocumenationLink = useCallback(async () => {
@@ -157,7 +158,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <ContextMenu
-            getCurl={getCurlCallback}
+            getRequests={getRequestsCallback}
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}

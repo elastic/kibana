@@ -198,7 +198,7 @@ export class MonacoEditorActionsProvider {
     return selectedRequests;
   }
 
-  private async getRequests() {
+  public async getRequests() {
     const parsedRequests = await this.getSelectedParsedRequests();
     const stringifiedRequests = parsedRequests.map((parsedRequest) =>
       stringifyRequest(parsedRequest)

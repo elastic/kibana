@@ -26,12 +26,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   closeModal: () => void;
-  hidePopover: () => void;
+  onSubmit: (language: string) => void;
   currentLanguage: string;
   changeDefaultLanguage: (lang: string) => void;
 }
 
-const AVAILABLE_LANGUAGES = ['cURL', 'Javascript', 'Ruby', 'Python'];
+const AVAILABLE_LANGUAGES = ['cURL', 'Javascript', 'Python'];
 const DEFAULT_BADGE = (
   <strong>
     <EuiTextColor color="subdued">
@@ -44,7 +44,7 @@ const DEFAULT_BADGE = (
 
 export const LanguageSelectorModal = ({
   closeModal,
-  hidePopover,
+  onSubmit,
   currentLanguage,
   changeDefaultLanguage,
 }: Props) => {
@@ -82,8 +82,7 @@ export const LanguageSelectorModal = ({
       changeDefaultLanguage(selectedLanguage);
     }
 
-    closeModal();
-    hidePopover();
+    onSubmit(language);
   };
 
   return (

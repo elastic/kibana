@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   EuiIcon,
   EuiContextMenuPanel,
@@ -20,19 +20,20 @@ import { NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LanguageSelectorModal } from './language_selector_modal';
+import { convertRequestToLanguage } from '../../../../../../services';
 
 import { useServicesContext } from '../../../../../contexts';
 import { StorageKeys } from '../../../../../../services';
 import { DEFAULT_LANGUAGE } from '../../../../../../../common/constants';
 
 interface Props {
-  getCurl: () => Promise<string>;
+  getRequests: () => Promise<any>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: NotificationsSetup;
 }
 
-export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notifications }: Props) => {
+export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notifications }: Props) => {
   // Get default language from local storage
   const {
     services: { storage },
@@ -42,25 +43,8 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
-  const [curlCode, setCurlCode] = useState('');
-  const [curlError, setCurlError] = useState(null);
-
-  const mouseEnter = useCallback(() => {
-    if (isPopoverOpen) return;
-    getCurl()
-      .then((text) => {
-        setCurlCode(text);
-        setCurlError(null);
-      })
-      .catch((e) => {
-        setCurlError(e);
-      });
-  }, [isPopoverOpen, getCurl]);
 
   const copyText = async (text: string) => {
-    if (curlError) {
-      throw curlError;
-    }
     if (window.navigator?.clipboard) {
       await window.navigator.clipboard.writeText(text);
       return;
@@ -68,24 +52,88 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
     throw new Error('Could not copy to clipboard!');
   };
 
-  const copyAsCurl = async () => {
-    try {
-      await copyText(curlCode);
-      notifications.toasts.add({
-        title: i18n.translate('console.consoleMenu.copyAsCurlMessage', {
-          defaultMessage: 'Request copied as cURL',
-        }),
-      });
-    } catch (e) {
-      notifications.toasts.addError(e, {
+  // This is the main function that is called when the user clicks on the "Copy as" button
+  const copyAs = async (language?: string) => {
+    // Get the language we want to convert the requests to
+    const withLanguage = (language || currentLanguage).toLowerCase();
+    // Get all the selected requests
+    const requests = await getRequests();
+
+    // Convert each request using convertRequestToLanguage and handle all promises
+    const results = await Promise.allSettled(
+      requests.map((request: any) =>
+        convertRequestToLanguage(request.method, request.url, withLanguage, request.data)
+      )
+    );
+
+    // Aggregate data and log errors
+    let aggregatedData = '';
+    let hasErrors = false;
+
+    results.forEach(result => {
+      if (result.status === 'fulfilled' && !result.value.error) {
+        aggregatedData += result.value.data + '\n';
+      } else {
+        hasErrors = true;
+      }
+    });
+
+    // If we dont have data and have errors, we should show an error toast saying
+    // that no requests could be converted
+    if (aggregatedData === '' && hasErrors) {
+      const error = new Error(`Failed to convert request to ${withLanguage}`);
+      notifications.toasts.addError(error, {
         title: i18n.translate('console.consoleMenu.copyAsCurlFailedMessage', {
-          defaultMessage: 'Could not copy request as cURL',
+          defaultMessage: 'Request could not be copied',
         }),
       });
+    } else {
+      // If we have data and errors, we should show a warning toast saying that
+      // some requests could not be converted and copy the rest to clipboard
+      if (aggregatedData !== '' && hasErrors) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('console.consoleMenu.copyAsCurlSuccessWithWarning', {
+            defaultMessage: 'Some requests could not be copied',
+          }),
+        });
+      // Otherwise we can just copy the data to clipboard
+      } else {
+        notifications.toasts.add({
+          title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
+            defaultMessage: 'Request copied as {language}',
+            values: { language: withLanguage },
+          }),
+        });
+      }
+
+      // Regardless of whether there was a warniing or not, we should copy the
+      // data to clipboard
+      await copyText(aggregatedData);
     }
   };
 
+  const copyAsCurl = async () => {
+    return copyAs();
+  };
+
+  const onCopyAsSubmit = async (language?: string) => {
+    const withLanguage = language || currentLanguage;
+
+    console.log('copy with language: ', withLanguage);
+    console.log('clicked on CTA from language selector modal..');
+
+    // Close language selector modal
+    setLanguageSelectorVisibility(false);
+    // Close context menu popover
+    setIsPopoverOpen(false);
+  };
+
   const changeDefaultLanguage = (language: string) => {
+    // If default language has changed, update local storage
+    if (currentLanguage !== language) {
+      storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
+    }
+
     setCurrentLanguage(language);
   };
 
@@ -188,24 +236,22 @@ export const ContextMenu = ({ getCurl, getDocumentation, autoIndent, notificatio
 
   return (
     <>
-      <span onMouseEnter={mouseEnter}>
-        <EuiPopover
-          id="contextMenu"
-          button={button}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
-        </EuiPopover>
-      </span>
+      <EuiPopover
+        id="contextMenu"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
+      </EuiPopover>
       {isLanguageSelectorVisible && (
         <LanguageSelectorModal
           currentLanguage={currentLanguage}
           changeDefaultLanguage={changeDefaultLanguage}
           closeModal={() => setLanguageSelectorVisibility(false)}
-          hidePopover={() => setIsPopoverOpen(false)}
+          onSubmit={onCopyAsSubmit}
         />
       )}
     </>
