@@ -78,6 +78,7 @@ export async function getEntities({
         end,
         entitiesESClient,
         entityIds: entities.map((entity) => entity.entity.id),
+        size,
       })
     : undefined;
 

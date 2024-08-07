@@ -2827,7 +2827,15 @@
                 "section": "def-common.DataViewLazy",
                 "text": "DataViewLazy"
               },
-              ">; createDataViewLazy: (spec: ",
+              ">; getDataViewLazyFromCache: (id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>; createDataViewLazy: (spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4746,7 +4754,15 @@
                 "section": "def-common.DataViewLazy",
                 "text": "DataViewLazy"
               },
-              ">; createDataViewLazy: (spec: ",
+              ">; getDataViewLazyFromCache: (id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>; createDataViewLazy: (spec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
