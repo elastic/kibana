@@ -10,6 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
+export const MGET_DEFAULT_POLL_INTERVAL = 500;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
@@ -127,10 +128,18 @@ export const configSchema = schema.object(
       default: taskExecutionFailureThresholdSchema,
     }),
     /* How often, in milliseconds, the task manager will look for more work. */
-    poll_interval: schema.number({
-      defaultValue: DEFAULT_POLL_INTERVAL,
-      min: 100,
-    }),
+    poll_interval: schema.conditional(
+      schema.siblingRef('claim_strategy'),
+      CLAIM_STRATEGY_MGET,
+      schema.number({
+        defaultValue: MGET_DEFAULT_POLL_INTERVAL,
+        min: 100,
+      }),
+      schema.number({
+        defaultValue: DEFAULT_POLL_INTERVAL,
+        min: 100,
+      })
+    ),
     /* How many requests can Task Manager buffer before it rejects new requests. */
     request_capacity: schema.number({
       // a nice round contrived number, feel free to change as we learn how it behaves

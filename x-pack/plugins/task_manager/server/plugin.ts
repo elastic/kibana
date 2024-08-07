@@ -109,6 +109,7 @@ export class TaskManagerPlugin
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+    console.log('*** POLL INTERVAL', this.config.poll_interval);
   }
 
   isNodeBackgroundTasksOnly() {
