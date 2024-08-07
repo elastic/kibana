@@ -7,17 +7,12 @@
  */
 import {
   ControlGroupInput,
-  CONTROL_GROUP_TYPE,
-  getDefaultControlGroupInput,
-  getDefaultControlGroupPersistableInput,
 } from '@kbn/controls-plugin/common';
 import {
-  ControlGroupContainerFactory,
-  ControlGroupOutput,
   type ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   AggregateQuery,
   compareFilters,
@@ -28,7 +23,7 @@ import {
 } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, identity, omit, pickBy } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -62,7 +57,6 @@ import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import {
   combineDashboardFiltersWithControlGroupFilters,
-  startSyncingDashboardControlGroup,
 } from './controls/dashboard_control_group_integration';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
@@ -171,7 +165,6 @@ export const initializeDashboard = async ({
 }) => {
   const {
     dashboardBackup,
-    embeddable: { getEmbeddableFactory },
     dashboardCapabilities: { showWriteControls },
     embeddable: { reactEmbeddableRegistryHasKey },
     data: {
@@ -190,7 +183,6 @@ export const initializeDashboard = async ({
     searchSessionSettings,
     unifiedSearchSettings,
     validateLoadedSavedObject,
-    useControlGroupIntegration,
     useUnifiedSearchIntegration,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
@@ -479,52 +471,6 @@ export const initializeDashboard = async ({
       dashboardContainer.setRuntimeStateForChild(idWithRuntimeState, restoredRuntimeStateForChild);
     }
   });
-
-  // --------------------------------------------------------------------------------------
-  // Start the control group integration.
-  // --------------------------------------------------------------------------------------
-  if (useControlGroupIntegration) {
-    const controlsGroupFactory = getEmbeddableFactory<
-      ControlGroupInput,
-      ControlGroupOutput,
-      ControlGroupContainer
-    >(CONTROL_GROUP_TYPE) as EmbeddableFactory<
-      ControlGroupInput,
-      ControlGroupOutput,
-      ControlGroupContainer
-    > & {
-      create: ControlGroupContainerFactory['create'];
-    };
-    const { filters, query, timeRange, viewMode, id } = initialDashboardInput;
-    const fullControlGroupInput = {
-      id: `control_group_${id ?? 'new_dashboard'}`,
-      ...getDefaultControlGroupInput(),
-      ...pickBy(initialControlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
-      timeRange,
-      viewMode,
-      filters,
-      query,
-    };
-
-    /*if (controlGroup) {
-      controlGroup.updateInputAndReinitialize(fullControlGroupInput);
-    } else {
-      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
-        lastSavedInput:
-          loadDashboardReturn?.dashboardInput?.controlGroupInput ??
-          getDefaultControlGroupPersistableInput(),
-      });
-      if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
-        throw new Error('Error in control group startup');
-      }
-      controlGroup = newControlGroup;
-    }*/
-
-    untilDashboardReady().then((dashboardContainer) => {
-      dashboardContainer.controlGroup = controlGroup;
-      startSyncingDashboardControlGroup.bind(dashboardContainer)();
-    });
-  }
 
   // --------------------------------------------------------------------------------------
   // Start the data views integration.

@@ -101,7 +101,7 @@ export const DashboardViewportComponent = () => {
                 },
               };
             }}
-            onApiAvailable={(api) => dashboard.controlGroupApi$.next(api)}
+            onApiAvailable={(api) => dashboard.setControlGroupApi(api)}
           />
         </div>
       ) : null}

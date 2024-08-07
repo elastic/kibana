@@ -188,6 +188,8 @@ export const getTimesliderControlFactory = (
 
       const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
 
+console.log(controlGroupApi.parentApi);
+
       const dashboardDataLoading$ =
         apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
           ? controlGroupApi.parentApi.dataLoading

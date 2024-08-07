@@ -8,16 +8,16 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
 import { useDashboardAPI } from '../../dashboard_app';
+import { ControlGroupApi } from '@kbn/controls-example-plugin/public';
 
 interface Props {
   closePopover: () => void;
-  controlGroup: ControlGroupContainer;
+  controlGroupApi: ControlGroupApi;
 }
 
-export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
+export const AddDataControlButton = ({ closePopover, controlGroupApi, ...rest }: Props) => {
   const dashboard = useDashboardAPI();
   const onSave = () => {
     dashboard.scrollToTop();

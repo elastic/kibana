@@ -84,7 +84,7 @@ import {
   showSettings,
 } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
-import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
+import { combineDashboardFiltersWithControlGroupFilters, startSyncingDashboardControlGroup } from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
   DashboardCreationOptions,
@@ -149,7 +149,7 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
-  public controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+  public controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   public settings: Record<string, PublishingSubject<boolean | undefined>>;
 
   public searchSessionId?: string;
@@ -171,6 +171,7 @@ export class DashboardContainer
   public creationStartTime?: number;
   public creationEndTime?: number;
   public firstLoad: boolean = true;
+  private _controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   private hadContentfulRender = false;
   private scrollPosition?: number;
 
@@ -314,6 +315,14 @@ export class DashboardContainer
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
     this.executionContext = initialInput.executionContext;
+
+    // expose controlGroupApi$ as publishing subject
+    this.controlGroupApi$ = this._controlGroupApi$;
+  }
+
+  public setControlGroupApi = (controlGroupApi: ControlGroupApi) => {
+    this._controlGroupApi$.next(controlGroupApi);
+    startSyncingDashboardControlGroup(this, controlGroupApi);
   }
 
   public getAppContext() {
