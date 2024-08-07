@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +34,8 @@ interface Props {
   notifications: NotificationsSetup;
 }
 
+const DELAY_FOR_HIDING_SPINNER = 500;
+
 export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notifications }: Props) => {
   // Get default language from local storage
   const {
@@ -41,6 +44,7 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
   const defaultLanguage = storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
 
@@ -52,7 +56,9 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
     throw new Error('Could not copy to clipboard!');
   };
 
-  // This is the main function that is called when the user clicks on the "Copy as" button
+  // This function will convert all the selected requests to the language by
+  // calling convertRequestToLanguage for each request and then copy the data
+  // to clipboard.
   const copyAs = async (language?: string) => {
     // Get the language we want to convert the requests to
     const withLanguage = (language || currentLanguage).toLowerCase();
@@ -122,10 +128,18 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
 
     // Close language selector modal
     setLanguageSelectorVisibility(false);
+    // Show loading spinner
+    setRequestConverterLoading(true);
 
     // When copying as worked as expected, close the context menu popover
     copyAs(withLanguage).then(() => {
       setIsPopoverOpen(false);
+    }).finally(() => {
+      // Delay hiding the spinner to avoid flickering between the spinner and
+      // the change language button
+      setTimeout(() => {
+        setRequestConverterLoading(false);
+      }, DELAY_FOR_HIDING_SPINNER);
     });
   };
 
@@ -202,7 +216,10 @@ export const ContextMenu = ({ getRequests, getDocumentation, autoIndent, notific
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink data-name="changeLanguage">Change</EuiLink>
+          {isRequestConverterLoading
+            ? <EuiLoadingSpinner size="s" />
+            : <EuiLink data-name="changeLanguage">Change</EuiLink>
+          }
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiContextMenuItem>,
