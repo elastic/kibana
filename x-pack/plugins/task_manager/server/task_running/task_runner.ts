@@ -63,6 +63,7 @@ export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
 export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
+export const CONSISTENT_SCHEDULING_GAP_THRESHOLD = 10000;
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -630,11 +631,23 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.ShouldDelete });
           }
 
-          const { startedAt, schedule } = this.instance.task;
+          const { runAt: originalRunAt, startedAt, schedule } = this.instance.task;
+          const nextRunAt =
+            runAt ||
+            new Date(
+              Math.max(
+                intervalFromDate(
+                  Date.now() - originalRunAt.getTime() < CONSISTENT_SCHEDULING_GAP_THRESHOLD
+                    ? originalRunAt
+                    : startedAt!,
+                  reschedule?.interval ?? schedule?.interval
+                )!.getTime(),
+                Date.now()
+              )
+            );
 
           return asOk({
-            runAt:
-              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+            runAt: nextRunAt,
             state,
             schedule: reschedule ?? schedule,
             attempts,
