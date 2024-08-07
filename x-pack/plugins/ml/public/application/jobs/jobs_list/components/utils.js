@@ -221,6 +221,7 @@ export async function cloneJob(
   mlJobService,
   jobId
 ) {
+  console.log('CLONE JOB');
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
       loadJobForCloning(mlApiServices, jobId),
@@ -458,6 +459,7 @@ function jobTagFilter(jobs, value) {
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
 export function checkForAutoStartDatafeed(mlJobService) {
+  console.log('checkForAutoStartDatafeed', checkForAutoStartDatafeed);
   const job = mlJobService.tempJobCloningObjects.job;
   const datafeed = mlJobService.tempJobCloningObjects.datafeed;
   if (job !== undefined) {

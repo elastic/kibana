@@ -236,31 +236,6 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
-export function stashJobForCloning(
-  mlJobService: MlJobService,
-  jobCreator: JobCreatorType,
-  skipTimeRangeStep: boolean = false,
-  includeTimeRange: boolean = false,
-  autoSetTimeRange: boolean = false
-) {
-  mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
-  mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
-  mlJobService.tempJobCloningObjects.createdBy = jobCreator.createdBy ?? undefined;
-
-  // skip over the time picker step of the wizard
-  mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
-
-  if (includeTimeRange === true && autoSetTimeRange === false) {
-    // auto select the start and end dates of the time picker
-    mlJobService.tempJobCloningObjects.start = jobCreator.start;
-    mlJobService.tempJobCloningObjects.end = jobCreator.end;
-  } else if (autoSetTimeRange === true) {
-    mlJobService.tempJobCloningObjects.autoSetTimeRange = true;
-  }
-
-  mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
-}
-
 export function convertToMultiMetricJob(
   mlJobService: MlJobService,
   jobCreator: JobCreatorType,
@@ -268,7 +243,7 @@ export function convertToMultiMetricJob(
 ) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
-  stashJobForCloning(mlJobService, jobCreator, true, true);
+  mlJobService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
 }
 
@@ -278,7 +253,7 @@ export function convertToAdvancedJob(
   navigateToPath: NavigateToPath
 ) {
   jobCreator.createdBy = null;
-  stashJobForCloning(mlJobService, jobCreator, true, true);
+  mlJobService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
 }
 
@@ -288,7 +263,7 @@ export function resetAdvancedJob(
   navigateToPath: NavigateToPath
 ) {
   jobCreator.createdBy = null;
-  stashJobForCloning(mlJobService, jobCreator, true, false);
+  mlJobService.stashJobForCloning(jobCreator, true, false);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
@@ -298,7 +273,7 @@ export function resetJob(
   navigateToPath: NavigateToPath
 ) {
   jobCreator.jobId = '';
-  stashJobForCloning(mlJobService, jobCreator, true, true);
+  mlJobService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
@@ -308,7 +283,7 @@ export function advancedStartDatafeed(
   navigateToPath: NavigateToPath
 ) {
   if (jobCreator !== null) {
-    stashJobForCloning(mlJobService, jobCreator, false, false);
+    mlJobService.stashJobForCloning(jobCreator, false, false);
   }
   navigateToPath('/jobs');
 }

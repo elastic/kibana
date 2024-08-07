@@ -19,7 +19,6 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
-import { stashJobForCloning } from '../common/job_creator/util/general';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import type { MlJobService } from '../../../services/job_service';
 import {
@@ -114,25 +113,23 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
           layerIndex
         );
 
+      const jobCreator = {
+        jobConfig,
+        datafeedConfig,
+        createdBy:
+          jobType === JOB_TYPE.SINGLE_METRIC
+            ? CREATED_BY_LABEL.SINGLE_METRIC
+            : CREATED_BY_LABEL.MULTI_METRIC,
+        start,
+        end,
+      } as JobCreatorType;
+      console.log('jobCreator', jobCreator);
+
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      stashJobForCloning(
-        this.mlJobService,
-        {
-          jobConfig,
-          datafeedConfig,
-          createdBy:
-            jobType === JOB_TYPE.SINGLE_METRIC
-              ? CREATED_BY_LABEL.SINGLE_METRIC
-              : CREATED_BY_LABEL.MULTI_METRIC,
-          start,
-          end,
-        } as JobCreatorType,
-        true,
-        includeTimeRange,
-        !includeTimeRange
-      );
+      this.mlJobService.stashJobForCloning(jobCreator, true, includeTimeRange, !includeTimeRange);
+      console.log('this.mlJobService', this.mlJobService);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);

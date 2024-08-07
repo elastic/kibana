@@ -22,6 +22,7 @@ let datafeedIds = {};
 
 class JobService {
   constructor(toastNotificationService, ml) {
+    console.log('CONSTRUCTOR!!');
     this.toastNotificationService = toastNotificationService;
     this.ml = ml;
 
@@ -422,6 +423,28 @@ class JobService {
       };
     }
   }
+
+  stashJobForCloning(jobCreator, skipTimeRangeStep, includeTimeRange, autoSetTimeRange) {
+    console.log('STASH START', jobCreator);
+    const tempJobCloningObjects = {
+      job: jobCreator.jobConfig,
+      datafeed: jobCreator.datafeedConfig,
+      createdBy: jobCreator.createdBy ?? undefined,
+      // skip over the time picker step of the wizard
+      skipTimeRangeStep,
+      calendars: jobCreator.calendars,
+      ...(includeTimeRange === true && autoSetTimeRange === false
+        ? // auto select the start and end dates of the time picker
+          {
+            start: jobCreator.start,
+            end: jobCreator.end,
+          }
+        : { autoSetTimeRange: true }),
+    };
+
+    console.log('STASH!!!', tempJobCloningObjects);
+    this.tempJobCloningObjects = tempJobCloningObjects;
+  }
 }
 
 // private function used to check the job saving response
@@ -579,6 +602,7 @@ let mlJobService;
 export const mlJobServiceFactory = (toastNotificationService, mlApiServices) => {
   if (mlJobService) return mlJobService;
 
+  console.log('NEW INSTANCE!!');
   mlJobService = new JobService(toastNotificationService, mlApiServices);
   return mlJobService;
 };

@@ -10,6 +10,7 @@ import type { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_d
 import type { Calendar } from '../../../common/types/calendars';
 import type { ToastNotificationService } from './toast_notification_service';
 import type { MlApiServices } from './ml_api_service';
+import type { JobCreatorType } from '../jobs/new_job/common/job_creator';
 
 export interface ExistingJobsAndGroups {
   jobIds: string[];
@@ -46,6 +47,12 @@ export declare interface MlJobService {
   loadJobsWrapper(): Promise<CombinedJob[]>;
   customUrlsByJob: Record<string, any[]>;
   detectorsByJob: Record<string, any>;
+  stashJobForCloning(
+    jobCreator: JobCreatorType,
+    skipTimeRangeStep: boolean = false,
+    includeTimeRange: boolean = false,
+    autoSetTimeRange: boolean = false
+  ): void;
 }
 
 export const mlJobServiceFactory: (
