@@ -7,18 +7,20 @@
 
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecuritySolutionUtils } from './types';
+import { FtrProviderContextWithSpaces } from '../../ftr_provider_context_with_spaces';
+import { SecuritySolutionESSUtilsInterface } from './types';
 
 export function SecuritySolutionESSUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionUtils {
+}: FtrProviderContextWithSpaces): SecuritySolutionESSUtilsInterface {
   const config = getService('config');
+  const bsearch = getService('bsearch');
   const supertestWithoutAuth = getService('supertest');
 
   return {
     getUsername: (_role?: string) =>
       Promise.resolve(config.get('servers.kibana.username') as string),
+    createBsearch: (_role?: string) => Promise.resolve(bsearch),
     createSuperTest: async (role?: string, password: string = 'changeme') => {
       if (!role) {
         return supertestWithoutAuth;

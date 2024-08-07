@@ -40,18 +40,11 @@ const defaultProps: Story = {
     return (
       <div style={{ width: 800, height: 600 }}>
         <Component
-          faded={false}
-          locked={false}
           loading={false}
           onCopy={() => {}}
           onDelete={() => {}}
-          onLockToggle={() => {}}
-          onOverrideRemove={async () => {}}
-          onTitleChange={() => {}}
-          overrides={[]}
           title="My visualization"
           description="A long description"
-          onEditClick={() => {}}
           {...props}
         />
       </div>

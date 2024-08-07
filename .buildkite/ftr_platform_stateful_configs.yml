@@ -1,4 +1,6 @@
 disabled:
+  # Stateful base config for deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
   - test/functional/firefox/config.base.ts
@@ -155,7 +157,6 @@ enabled:
   - x-pack/test/api_integration/apis/monitoring/config.ts
   - x-pack/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/test/api_integration/apis/osquery/config.ts
-  - x-pack/test/api_integration/apis/painless_lab/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
@@ -359,3 +360,5 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
+  # stateful config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/stateful.config.ts
