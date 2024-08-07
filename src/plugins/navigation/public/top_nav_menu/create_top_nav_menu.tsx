@@ -10,16 +10,13 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
-  data: DataPublicPluginStart,
   unifiedSearch: UnifiedSearchPublicPluginStart,
   extraConfig: RegisteredTopNavMenuData[]
 ) {
-  const minRefreshInterval = data.query.timefilter.timefilter.getMinRefreshInterval();
   return <QT extends AggregateQuery | Query = Query>(props: TopNavMenuProps<QT>) => {
     const relevantConfig = extraConfig.filter(
       (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
@@ -28,12 +25,7 @@ export function createTopNav(
 
     return (
       <I18nProvider>
-        <TopNavMenu
-          {...props}
-          unifiedSearch={unifiedSearch}
-          config={config}
-          minRefreshInterval={minRefreshInterval}
-        />
+        <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
       </I18nProvider>
     );
   };

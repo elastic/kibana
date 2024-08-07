@@ -15,7 +15,6 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/pu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
@@ -53,7 +52,6 @@ export interface NavigationPublicSetupDependencies {
 
 export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  data: DataPublicPluginStart;
   cloud?: CloudStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   spaces?: SpacesPluginStart;
