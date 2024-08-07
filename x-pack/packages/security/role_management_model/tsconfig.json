@@ -7,10 +7,9 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
     "@kbn/features-plugin",
-    "@kbn/security-plugin-types-common"
+    "@kbn/security-plugin-types-common",
+    "@kbn/security-authorization-core",
+    "@kbn/security-role-management-model-mocks"
   ]
 }
