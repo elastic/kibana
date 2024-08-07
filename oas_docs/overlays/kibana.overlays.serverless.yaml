@@ -4,6 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+  # Clean up server definitions
   - target: '$.servers.*'
     description: Remove all servers so we can add our own.
     remove: true
@@ -14,6 +15,11 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
+  # Remove operation-level security definitions
+  - target: "$.paths['/api/status']['get'].security"
+    description: Remove system security definitions
+    remove: true
+  # Add a document-level security definition
   - target: '$.components.securitySchemes'
     description: Add an API key security scheme
     update:
@@ -27,4 +33,41 @@ actions:
     update:
       security:
         - apiKeyAuth: []
-
+  # Mark all operations as beta
+  - target: '$.paths[*][*]'
+    description: Add x-beta
+    update:
+      x-beta: true
+  # Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+        Alerting rules can use connectors to run actions when rule conditions are met.
+      externalDocs:
+        description: Connector documentation
+        url: https://www.elastic.co/docs/current/serverless/action-connectors
+      x-displayName: "Connectors"
+  - target: '$.tags[?(@.name=="data views")]'
+    description: Change displayName
+    update:
+      x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="ml")]'
+    description: Change displayName
+    update:
+      x-displayName: "Machine learning"
+  - target: '$.tags[?(@.name=="saved objects")]'
+    description: Change displayName
+    update:
+      x-displayName: "Saved objects"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="system")]'
+    description: Change displayName
+    update:
+      x-displayName: "System"
+      description: >
+        Get information about the system status, resource usage, and installed plugins.

@@ -73,7 +73,10 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
-  .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
+  .udtTimeline
+    .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn:not(
+      [data-gridcell-column-id='select']
+    ) {
     padding: 0;
     position: relative;
   }
