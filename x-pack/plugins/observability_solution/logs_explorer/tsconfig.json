@@ -13,7 +13,7 @@
   "kbn_references": [
     "@kbn/charts-plugin",
     "@kbn/config-schema",
-    "@kbn/controls-plugin",
+    "@kbn/controls-example-plugin",
     "@kbn/core-application-browser",
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
@@ -46,9 +46,7 @@
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/discover-shared-plugin",
+    "@kbn/discover-shared-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

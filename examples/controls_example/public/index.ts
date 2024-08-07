@@ -9,10 +9,14 @@
 import { ControlsExamplePlugin } from './plugin';
 export type {
   ControlGroupInput,
-  ControlGroupInputBuilder,
   AwaitingControlGroupAPI,
+  ControlGroupAPI,
+  ControlGroupState,
 } from './react_controls/control_group/external_api';
-export { ControlGroupRenderer } from './react_controls/control_group/external_api';
+export {
+  ControlGroupRenderer,
+  controlGroupInputBuilder,
+} from './react_controls/control_group/external_api';
 
 export function plugin() {
   return new ControlsExamplePlugin();

@@ -61,12 +61,13 @@ export const ControlGroupRenderer = forwardRef<AwaitingControlGroupApi, ControlG
           (await getCreationOptions?.(getDefaultControlGroupInput(), controlGroupInputBuilder)) ??
           {};
         if (!cancelled) {
-          setSerializedState({
+          const state = {
             ...omit(initialInput, ['panels', 'ignoreParentSettings']),
             settings,
             panelsJSON: JSON.stringify(initialInput?.panels ?? {}),
             ignoreParentSettingsJSON: JSON.stringify(initialInput?.ignoreParentSettings ?? {}),
-          } as ControlGroupSerializedState);
+          } as ControlGroupSerializedState;
+          setSerializedState(state);
           if (initialInput?.viewMode) viewMode$.next(initialInput.viewMode);
           setApiLoading(false);
         }

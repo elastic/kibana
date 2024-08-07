@@ -12,6 +12,8 @@ export { ControlGroupRenderer } from './control_group_renderer';
 export type {
   AwaitingControlGroupApi as AwaitingControlGroupAPI,
   ControlGroupRendererState as ControlGroupInput,
+  ControlGroupRendererApi as ControlGroupAPI,
+  ControlGroupRendererState as ControlGroupState,
 } from './types';
 
 export { controlGroupInputBuilder } from './control_group_input_builder';

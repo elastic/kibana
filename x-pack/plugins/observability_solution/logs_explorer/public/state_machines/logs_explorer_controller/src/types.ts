@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { ControlGroupAPI } from '@kbn/controls-example-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type {
   DiscoverAppState,

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
-import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Query, TimeRange } from '@kbn/es-query';
+import { TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
+import type { ControlGroupAPI, ControlGroupState } from '@kbn/controls-example-plugin/public';
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
@@ -28,19 +27,16 @@ export const useControlPanels = (
   });
 
   const getInitialInput = useCallback(
-    async (initialInput: Partial<ControlGroupInput>) => {
-      const input: Partial<ControlGroupInput> = {
+    async (initialInput: Partial<ControlGroupState>) => {
+      const input: Partial<ControlGroupState> = {
         ...initialInput,
         viewMode: ViewMode.VIEW,
         panels: controlPanels ?? initialInput.panels,
-        filters: filters ?? [],
-        query: query as Query,
-        timeRange: { from: fromDate!, to: toDate! },
       };
 
       return { initialInput: input };
     },
-    [controlPanels, filters, fromDate, query, toDate]
+    [controlPanels]
   );
 
   const setControlGroupAPI = useCallback(
