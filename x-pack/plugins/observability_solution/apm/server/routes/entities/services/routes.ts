@@ -29,13 +29,8 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<ServiceEntities> {
-    const { context, params, request } = resources;
-    const coreContext = await context.core;
-
-    const entitiesESClient = await createEntitiesESClient({
-      request,
-      esClient: coreContext.elasticsearch.client.asCurrentUser,
-    });
+    const { params } = resources;
+    const entitiesESClient = await createEntitiesESClient(resources);
 
     const { serviceName } = params.path;
     const { start, end, environment } = params.query;
@@ -58,7 +53,6 @@ const servicesEntitiesRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<EntityServicesResponse> {
     const { params } = resources;
-
     const entitiesESClient = await createEntitiesESClient(resources);
 
     const { start, end, kuery, environment } = params.query;
