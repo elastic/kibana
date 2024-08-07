@@ -448,6 +448,21 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.type(name);
   }
 
+  public async openFilterByFieldTypeInDocViewer() {
+    await this.testSubjects.click('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterOptions');
+  }
+
+  public async closeFilterByFieldTypeInDocViewer() {
+    await this.testSubjects.click('unifiedDocViewerFieldsFilterByTypeFieldTypeFilterToggle');
+
+    await this.retry.waitFor('doc viewer filter closed', async () => {
+      return !(await this.testSubjects.exists(
+        'unifiedDocViewerFieldsFilterByTypeFieldTypeFilterOptions'
+      ));
+    });
+  }
+
   public async getMarks() {
     const table = await this.docTable.getTable();
     const marks = await table.findAllByTagName('mark');
