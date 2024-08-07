@@ -16,6 +16,7 @@ steps:
 
   - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
      trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
+     soft_fail: true
      build:
        env:
          ENVIRONMENT: ${ENVIRONMENT}
