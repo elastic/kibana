@@ -509,7 +509,7 @@ export class LensVisService {
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | inlinestats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | INLINESTATS results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
