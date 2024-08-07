@@ -16,11 +16,7 @@ import {
 } from '../default_request_headers';
 
 export class StatefulAuthProvider implements AuthProvider {
-  private rolesDefinitionPath: string;
-
-  constructor() {
-    this.rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
-  }
+  private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
   getSupportedRoleDescriptors(): any {
     return readRolesDescriptorsFromResource(this.rolesDefinitionPath);
   }
