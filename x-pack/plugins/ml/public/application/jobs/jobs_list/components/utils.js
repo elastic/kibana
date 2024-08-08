@@ -221,7 +221,6 @@ export async function cloneJob(
   mlJobService,
   jobId
 ) {
-  console.log('CLONE JOB');
   try {
     const [{ job: cloneableJob, datafeed }, originalJob] = await Promise.all([
       loadJobForCloning(mlApiServices, jobId),
