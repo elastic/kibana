@@ -12,11 +12,9 @@ import {
   combineLatestWith,
   debounceTime,
   map,
-  skip,
   Subscription,
 } from 'rxjs';
 import {
-  getInitialValuesFromComparators,
   PublishesUnsavedChanges,
   PublishingSubject,
   runComparators,
@@ -62,14 +60,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     comparatorKeys.push(key);
   }
 
-  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
-    runComparators(
-      comparators,
-      comparatorKeys,
-      lastSavedState$.getValue() as RuntimeState,
-      getInitialValuesFromComparators(comparators, comparatorKeys)
-    )
-  );
+  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(undefined);
   subscriptions.push(
     combineLatest(comparatorSubjects)
       .pipe(

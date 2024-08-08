@@ -10,18 +10,6 @@ import { StateComparators } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
 
-export const getInitialValuesFromComparators = <StateType extends object = object>(
-  comparators: StateComparators<StateType>,
-  comparatorKeys: Array<keyof StateType>
-) => {
-  const initialValues: Partial<StateType> = {};
-  for (const key of comparatorKeys) {
-    const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
-    initialValues[key] = comparatorSubject?.value;
-  }
-  return initialValues;
-};
-
 export const runComparators = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
   comparatorKeys: Array<keyof StateType>,
