@@ -55,3 +55,8 @@ export {
   PatchTimelineRequestBody,
   PatchTimelineResponse,
 } from './patch_timelines/patch_timeline_route.gen';
+
+export {
+  ImportTimelinesRequestBody,
+  ImportTimelinesResponse,
+} from './import_timelines/import_timelines_route.gen';

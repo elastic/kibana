@@ -28,7 +28,13 @@ paths:
           application/json:
             schema:
               type: object
+              required: [file]
               properties:
+                isImmutable:
+                  type: string
+                  enum:
+                    - 'true'
+                    - 'false'
                 file:
                   allOf:
                     - $ref: '../model/components.schema.yaml#/components/schemas/Readable'
@@ -43,11 +49,6 @@ paths:
                               type: string
                             headers:
                               type: object
-                            isImmutable:
-                              type: string
-                              enum:
-                                - 'true'
-                                - 'false'
       responses:
         '200':
           description: Indicates the import of timelines was successful.
