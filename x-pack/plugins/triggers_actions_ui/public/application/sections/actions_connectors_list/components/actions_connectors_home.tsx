@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiPageTemplate, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -19,6 +19,11 @@ import { HealthContextProvider } from '../../../context/health_context';
 import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
+import { ActionConnector, EditConnectorTabs } from '../../../../types';
+import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
+import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { EditConnectorProps } from './types';
+import { loadAllActions } from '../../../lib/action_connector_api';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -32,8 +37,48 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, setBreadcrumbs } = useKibana().services;
-  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
+  const {
+    chrome,
+    setBreadcrumbs,
+    docLinks,
+    actionTypeRegistry,
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
+  const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+  const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
+  const [actions, setActions] = useState<ActionConnector[]>([]);
+  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
+
+  const editItem = (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => {
+    // can I use EditConnectorProps instead of these arguments?
+    setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
+  };
+
+  const loadActions = useCallback(async () => {
+    setIsLoadingActions(true);
+    try {
+      const actionsResponse = await loadAllActions({ http });
+      setActions(actionsResponse);
+    } catch (e) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionsMessage',
+          {
+            defaultMessage: 'Unable to load connectors',
+          }
+        ),
+      });
+    } finally {
+      setIsLoadingActions(false);
+    }
+  }, [http, toasts]);
+
+  useEffect(() => {
+    loadActions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tabs: Array<{
     id: Section;
@@ -79,7 +124,6 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           initialPageSize: 50,
           hasConnectorNames: true,
           hasAllSpaceSwitch: true,
-          setHeaderActions,
         })}
       </EuiPageTemplate.Section>
     );
@@ -90,9 +134,14 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       ConnectorsList,
       'xl'
     )({
-      setHeaderActions,
+      setAddFlyoutVisibility,
+      editItem,
+      isLoadingActions,
+      actions,
+      loadActions,
+      setActions,
     });
-  }, []);
+  }, [actions, isLoadingActions, loadActions]);
 
   return (
     <>
@@ -105,7 +154,32 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
         description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
           defaultMessage: 'Connect third-party software with your alerting data.',
         })}
-        rightSideItems={headerActions}
+        rightSideItems={[
+          <EuiButton
+            data-test-subj="createConnectorButton"
+            fill
+            iconType="plusInCircle"
+            iconSide="left"
+            onClick={() => setAddFlyoutVisibility(true)}
+            isLoading={false}
+          >
+            {i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
+              defaultMessage: 'Create connector',
+            })}
+          </EuiButton>,
+          <EuiButtonEmpty
+            data-test-subj="documentationButton"
+            key="documentation-button"
+            target="_blank"
+            href={docLinks.links.alerting.actionTypes}
+            iconType="help"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.connectors.home.documentationButtonLabel"
+              defaultMessage="Documentation"
+            />
+          </EuiButtonEmpty>,
+        ]}
         tabs={tabs.map((tab) => ({
           label: tab.name,
           onClick: () => onSectionChange(tab.id),
@@ -117,6 +191,37 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
       <EuiSpacer size="l" />
 
+      {addFlyoutVisible ? (
+        <CreateConnectorFlyout
+          onClose={() => {
+            setAddFlyoutVisibility(false);
+          }}
+          onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+          onConnectorCreated={loadActions}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      ) : null}
+      {editConnectorProps.initialConnector ? (
+        <EditConnectorFlyout
+          key={`${editConnectorProps.initialConnector.id}${
+            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+          }`}
+          connector={editConnectorProps.initialConnector}
+          tab={editConnectorProps.tab}
+          onClose={() => {
+            setEditConnectorProps({
+              tab: editConnectorProps?.tab,
+              isFix: editConnectorProps?.isFix,
+            });
+          }}
+          onConnectorUpdated={(connector) => {
+            setEditConnectorProps({ ...editConnectorProps, initialConnector: connector });
+            loadActions();
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      ) : null}
+
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Routes>
@@ -124,7 +229,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
             <Route
               exact
               path={[routeToConnectors, routeToConnectorEdit]}
-              component={renderConnectorsList}
+              render={renderConnectorsList}
             />
           </Routes>
         </HealthCheck>
