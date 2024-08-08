@@ -56,7 +56,7 @@ describe('PushButton ', () => {
     appMockRender.render(<PushButton {...defaultProps} />);
 
     userEvent.click(await screen.findByTestId('push-to-external-service'));
-    
+
     await waitFor(() => {
       expect(pushToService).toHaveBeenCalled();
     });
