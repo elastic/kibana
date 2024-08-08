@@ -8,7 +8,7 @@
 import React from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { CspFinding } from '@kbn/cloud-security-posture';
 
 const offsetTopHeight = 120;
 const offsetBottomHeight = 72;

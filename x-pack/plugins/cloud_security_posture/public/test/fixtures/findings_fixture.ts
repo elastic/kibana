@@ -7,7 +7,7 @@
 
 import { EcsEvent } from '@elastic/ecs';
 import Chance from 'chance';
-import { CspFinding } from '../../../common/schemas/csp_finding';
+import { CspFinding } from '@kbn/cloud-security-posture';
 
 const chance = new Chance();
 

@@ -28,7 +28,7 @@ import {
   useKibana,
   CspFinding,
 } from '@kbn/cloud-security-posture';
-// import { CspFinding } from '../../../../common/schemas/csp_finding';
+// import { CspFinding } from '../../../../common/schemas/csp_finding'; HERE
 // import { useKibana } from '../../../common/hooks/use_kibana'; DONE
 // import type { FindingsBaseEsQuery } from '../../../common/types'; DONE
 // import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils'; DONE
@@ -39,7 +39,7 @@ import {
 // import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants'; DONE
 // import { showErrorToast } from '../../../common/utils/show_error_toast'; DONE
 // import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api'; //DONE
-// import { CspBenchmarkRulesStates } from '../../../../common/types/latest'; HERE
+// import { CspBenchmarkRulesStates } from '../../../../common/types/latest'; DONE
 // import { buildMutedRulesFilter } from '../../../../common/utils/rules_states'; DONE
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {

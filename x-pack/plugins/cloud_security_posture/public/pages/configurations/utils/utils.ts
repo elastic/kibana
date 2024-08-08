@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeComputed } from '@elastic/eui';
-import type { CspFinding } from '../../../../common/schemas/csp_finding';
+import { CspFinding } from '@kbn/cloud-security-posture';
 export { getFilters } from './get_filters';
 
 export const getFindingsPageSizeInfo = ({

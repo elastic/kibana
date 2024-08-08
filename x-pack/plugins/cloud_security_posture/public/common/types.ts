@@ -6,7 +6,7 @@
  */
 import type { Criteria } from '@elastic/eui';
 import type { Filter, Query, EsQueryConfig } from '@kbn/es-query';
-import { CspFinding } from '../../common/schemas/csp_finding';
+import { CspFinding } from '@kbn/cloud-security-posture';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 

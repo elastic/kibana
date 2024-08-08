@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { CspFinding } from '@kbn/cloud-security-posture';
 
 const CSP_RULE_TAG = 'Cloud Security';
 const CNVM_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';

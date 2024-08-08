@@ -6,6 +6,7 @@
  */
 import { type TypeOf } from '@kbn/config-schema';
 import { CspFinding } from './schemas/csp_finding';
+// import { CspFinding } from '@kbn/cloud-security-posture';TODO
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';

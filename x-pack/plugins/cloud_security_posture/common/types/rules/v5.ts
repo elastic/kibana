@@ -20,12 +20,11 @@ export type {
   CspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesBulkActionResponse,
   RuleStateAttributes,
-  CspBenchmarkRulesStates,
   cspSettingsSchema,
   CspSettings,
   BulkActionBenchmarkRulesResponse,
 } from './v4';
-
+export type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common';
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
