@@ -7,9 +7,6 @@
 
 import { CoreSetup } from '@kbn/core-lifecycle-browser';
 
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src';
-import { createMonitorsOverviewPanelAction } from './ui_actions/create_monitors_overview_panel_action';
-import { createStatusOverviewPanelAction } from './ui_actions/create_stats_overview_panel_action';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from './constants';
 
@@ -37,12 +34,6 @@ export const registerSyntheticsEmbeddables = (
     }
   );
 
-  const { uiActions, cloud, serverless } = pluginsSetup;
-
-  // Initialize actions
-  const addStatsOverviewPanelAction = createStatusOverviewPanelAction(core.getStartServices);
-  const addMonitorsOverviewPanelAction = createMonitorsOverviewPanelAction(core.getStartServices);
-
   core.getStartServices().then(([_, pluginsStart]) => {
     pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
       SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
@@ -58,10 +49,12 @@ export const registerSyntheticsEmbeddables = (
     );
   });
 
-  // Assign triggers
-  // Only register these actions in stateful kibana, and the serverless observability project
-  if (Boolean((serverless && cloud?.serverless.projectType === 'observability') || !serverless)) {
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addStatsOverviewPanelAction);
-    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addMonitorsOverviewPanelAction);
-  }
+  const registerAsyncUiActions = async () => {
+    if (pluginsSetup.uiActions) {
+      const { registerSyntheticsUiActions } = await import('./ui_actions/register_ui_actions');
+      registerSyntheticsUiActions(core, pluginsSetup);
+    }
+  };
+  // can be done async
+  registerAsyncUiActions();
 };
