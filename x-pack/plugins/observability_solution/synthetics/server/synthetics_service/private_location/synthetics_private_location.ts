@@ -447,9 +447,6 @@ export class SyntheticsPrivateLocation {
     if (configNameSpace && configNameSpace !== DEFAULT_NAMESPACE_STRING) {
       return configNameSpace;
     }
-    if (privateLocation.namespace) {
-      return privateLocation.namespace;
-    }
     return undefined;
   }
 }

@@ -108,16 +108,6 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result).toEqual(configNamespace);
     });
 
-    it('returns private location namespace when config namespace is default', async () => {
-      const privateLocationNamespace = 'privateLocationNamespace';
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const result = await syntheticsPrivateLocation.getPolicyNamespace('default', {
-        ...mockPrivateLocation,
-        namespace: privateLocationNamespace,
-      });
-      expect(result).toEqual(privateLocationNamespace);
-    });
-
     it('falls back to undefined when config namespace and private location namespace are not defined', async () => {
       const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
