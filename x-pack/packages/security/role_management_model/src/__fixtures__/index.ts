@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createFeature, kibanaFeatures } from './src/kibana_features';
-export { createKibanaPrivileges, createRawKibanaPrivileges } from './src/kibana_privileges';
+export { createFeature, kibanaFeatures } from './kibana_features';
+export { createKibanaPrivileges, createRawKibanaPrivileges } from './kibana_privileges';

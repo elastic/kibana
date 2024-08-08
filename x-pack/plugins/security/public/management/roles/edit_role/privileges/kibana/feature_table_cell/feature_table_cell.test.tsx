@@ -9,7 +9,7 @@ import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
 import { SecuredFeature } from '@kbn/security-role-management-model';
-import { createFeature } from '@kbn/security-role-management-model-mocks';
+import { createFeature } from '@kbn/security-role-management-model/src/__fixtures__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableCell } from './feature_table_cell';

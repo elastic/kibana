@@ -12,7 +12,7 @@ import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
-} from '@kbn/security-role-management-model-mocks';
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 

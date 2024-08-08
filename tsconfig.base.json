@@ -1504,8 +1504,6 @@
       "@kbn/security-plugin-types-server/*": ["x-pack/packages/security/plugin_types_server/*"],
       "@kbn/security-role-management-model": ["x-pack/packages/security/role_management_model"],
       "@kbn/security-role-management-model/*": ["x-pack/packages/security/role_management_model/*"],
-      "@kbn/security-role-management-model-mocks": ["x-pack/packages/security/role_management_model_mocks"],
-      "@kbn/security-role-management-model-mocks/*": ["x-pack/packages/security/role_management_model_mocks/*"],
       "@kbn/security-solution-distribution-bar": ["x-pack/packages/security-solution/distribution_bar"],
       "@kbn/security-solution-distribution-bar/*": ["x-pack/packages/security-solution/distribution_bar/*"],
       "@kbn/security-solution-ess": ["x-pack/plugins/security_solution_ess"],

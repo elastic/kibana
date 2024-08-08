@@ -10,7 +10,10 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
-import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';

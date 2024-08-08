@@ -6,7 +6,10 @@
  */
 
 import type { Role } from '@kbn/security-plugin-types-common';
-import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 
 import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 

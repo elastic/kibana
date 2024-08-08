@@ -13,9 +13,8 @@ import {
 } from '@kbn/features-plugin/server/feature_privilege_iterator';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
-import { KibanaPrivileges } from '@kbn/security-role-management-model';
-
 import { Actions, privilegesFactory } from '@kbn/security-authorization-core';
+import { KibanaPrivileges } from '../kibana_privileges';
 
 const featuresPluginService = (): jest.Mocked<FeaturesPluginSetup> => {
   return {

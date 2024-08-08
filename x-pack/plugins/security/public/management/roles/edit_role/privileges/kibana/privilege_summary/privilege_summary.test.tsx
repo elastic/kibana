@@ -9,7 +9,10 @@ import { act } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';

@@ -12,7 +12,10 @@ import React from 'react';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { SecuredSubFeature } from '@kbn/security-role-management-model';
-import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SubFeatureForm } from './sub_feature_form';

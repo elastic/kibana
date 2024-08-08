@@ -13,7 +13,7 @@ import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
-} from '@kbn/security-role-management-model-mocks';
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';

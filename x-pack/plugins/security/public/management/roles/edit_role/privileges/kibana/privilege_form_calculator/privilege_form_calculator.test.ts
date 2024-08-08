@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 
 import { PrivilegeFormCalculator } from './privilege_form_calculator';
 import type { Role } from '../../../../../../../common';

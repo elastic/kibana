@@ -755,7 +755,6 @@ x-pack/packages/security/plugin_types_common @elastic/kibana-security
 x-pack/packages/security/plugin_types_public @elastic/kibana-security
 x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
-x-pack/packages/security/role_management_model_mocks @elastic/kibana-security
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore

@@ -8,7 +8,10 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { createKibanaPrivileges, kibanaFeatures } from '@kbn/security-role-management-model-mocks';
+import {
+  createKibanaPrivileges,
+  kibanaFeatures,
+} from '@kbn/security-role-management-model/src/__fixtures__';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
