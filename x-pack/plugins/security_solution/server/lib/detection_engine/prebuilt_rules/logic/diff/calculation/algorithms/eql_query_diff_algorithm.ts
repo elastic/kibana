@@ -8,7 +8,7 @@
 import { merge } from 'node-diff3';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
-  RuleKqlQuery,
+  RuleEqlQuery,
   ThreeVersionsOf,
   ThreeWayDiff,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -19,16 +19,15 @@ import {
   MissingVersion,
   ThreeWayDiffConflict,
   determineDiffOutcome,
-  KqlQueryType,
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { determineIfAllVersionsAreEqual } from './helpers';
 
 /**
- * Diff algorithm for all kql query types (`inline_query` and `saved_query`)
+ * Diff algorithm for eql query types
  */
-export const kqlQueryDiffAlgorithm = <T extends RuleKqlQuery>(
-  versions: ThreeVersionsOf<T>
-): ThreeWayDiff<T> => {
+export const eqlQueryDiffAlgorithm = (
+  versions: ThreeVersionsOf<RuleEqlQuery>
+): ThreeWayDiff<RuleEqlQuery> => {
   const {
     base_version: baseVersion,
     current_version: currentVersion,
@@ -62,25 +61,25 @@ export const kqlQueryDiffAlgorithm = <T extends RuleKqlQuery>(
   };
 };
 
-interface MergeResult<T extends RuleKqlQuery> {
+interface MergeResult {
   mergeOutcome: ThreeWayMergeOutcome;
-  mergedVersion: T;
+  mergedVersion: RuleEqlQuery;
   conflict: ThreeWayDiffConflict;
 }
 
-interface MergeArgs<T extends RuleKqlQuery> {
-  baseVersion: T | undefined;
-  currentVersion: T;
-  targetVersion: T;
+interface MergeArgs {
+  baseVersion: RuleEqlQuery | undefined;
+  currentVersion: RuleEqlQuery;
+  targetVersion: RuleEqlQuery;
   diffOutcome: ThreeWayDiffOutcome;
 }
 
-const mergeVersions = <T extends RuleKqlQuery>({
+const mergeVersions = ({
   baseVersion,
   currentVersion,
   targetVersion,
   diffOutcome,
-}: MergeArgs<T>): MergeResult<T> => {
+}: MergeArgs): MergeResult => {
   switch (diffOutcome) {
     // Scenario -AA is treated as scenario AAA:
     // https://github.com/elastic/kibana/pull/184889#discussion_r1636421293
@@ -102,38 +101,19 @@ const mergeVersions = <T extends RuleKqlQuery>({
       };
 
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      if (
-        baseVersion &&
-        baseVersion.type === KqlQueryType.inline_query &&
-        currentVersion.type === KqlQueryType.inline_query &&
-        targetVersion.type === KqlQueryType.inline_query
-      ) {
+      if (baseVersion) {
         // TS does not realize that in ABC scenario, baseVersion cannot be missing
         // Missing baseVersion scenarios were handled as -AA and -AB.
         const mergedVersion = merge(currentVersion.query, baseVersion.query, targetVersion.query, {
           stringSeparator: /(\S+|\s+)/g, // Retains all whitespace, which we keep to preserve formatting
         });
 
-        const baseNonMergeableFields = {
-          filters: baseVersion.filters,
-          language: baseVersion.language,
-        };
-
-        const currentNonMergeableFields = {
-          filters: currentVersion.filters,
-          language: currentVersion.language,
-        };
-
-        const targetNonMergeableFields = {
-          filters: targetVersion.filters,
-          language: targetVersion.language,
-        };
-
         // Determines if all non-mergeable fields are equal to one another
+        // filters are the only other variable field in the `RuleEqlQuery` type
         const nonMergeableFieldsEqual = determineIfAllVersionsAreEqual(
-          baseNonMergeableFields,
-          currentNonMergeableFields,
-          targetNonMergeableFields
+          baseVersion.filters,
+          currentVersion.filters,
+          targetVersion.filters
         );
 
         if (nonMergeableFieldsEqual && mergedVersion.conflict === false) {

@@ -316,7 +316,7 @@ describe('kqlQueryDiffAlgorithm', () => {
     });
 
     describe('if all versions are inline query type', () => {
-      it('returns a computated merged version without a conflict if 3 way merge is possible', () => {
+      it('returns a computated merged version with a solvable conflict if 3-way query field merge is possible', () => {
         const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
           base_version: {
             type: KqlQueryType.inline_query,
@@ -357,7 +357,7 @@ describe('kqlQueryDiffAlgorithm', () => {
         );
       });
 
-      it('returns the current_version with a conflict if 3 way merge is not possible', () => {
+      it('returns the current_version with a non-solvable conflict if 3-way query field merge is not possible', () => {
         const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
           base_version: {
             type: KqlQueryType.inline_query,
@@ -390,10 +390,44 @@ describe('kqlQueryDiffAlgorithm', () => {
           })
         );
       });
+
+      it('returns the current_version with a non-solvable conflict if non-mergeable fields are not equal', () => {
+        const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
+          base_version: {
+            type: KqlQueryType.inline_query,
+            query: 'query string = false',
+            language: KqlQueryLanguageEnum.lucene,
+            filters: [],
+          },
+          current_version: {
+            type: KqlQueryType.inline_query,
+            query: 'query string = false',
+            language: KqlQueryLanguageEnum.kuery,
+            filters: [],
+          },
+          target_version: {
+            type: KqlQueryType.inline_query,
+            query: 'query string = false',
+            language: KqlQueryLanguageEnum.kuery,
+            filters: [{ field: 'some query' }],
+          },
+        };
+
+        const result = kqlQueryDiffAlgorithm(mockVersions);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            merged_version: mockVersions.current_version,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+          })
+        );
+      });
     });
 
     describe('if versions are different types', () => {
-      it('returns the current_version with a conflict', () => {
+      it('returns the current_version with a non-solvable conflict', () => {
         const mockVersions: ThreeVersionsOf<RuleKqlQuery> = {
           base_version: {
             type: KqlQueryType.inline_query,

@@ -12,3 +12,4 @@ export { simpleDiffAlgorithm } from './simple_diff_algorithm';
 export { multiLineStringDiffAlgorithm } from './multi_line_string_diff_algorithm';
 export { dataSourceDiffAlgorithm } from './data_source_diff_algorithm';
 export { kqlQueryDiffAlgorithm } from './kql_query_diff_algorithm';
+export { eqlQueryDiffAlgorithm } from './eql_query_diff_algorithm';
