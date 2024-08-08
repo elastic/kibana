@@ -7,6 +7,6 @@
  */
 
 export const DEFAULT_PAGE_SIZE_OPTIONS = [25, 50, 100];
-export const INITIAL_DEFAULT_PAGE_SIZE = 50;
+export const DEFAULT_INITIAL_PAGE_SIZE = 50;
 
 export const LOCAL_STORAGE_PREFIX = 'tablePersist';

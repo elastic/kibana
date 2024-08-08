@@ -8,8 +8,10 @@
 
 export interface PersistData {
   pageSize?: number;
-  sort?: {
-    field: string | number | symbol;
-    direction: 'asc' | 'desc';
-  };
+  sort?: SortCriteria;
 }
+
+export interface SortCriteria {
+  field: string | number | symbol;
+  direction: 'asc' | 'desc';
+};
