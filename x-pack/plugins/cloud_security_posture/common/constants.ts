@@ -85,8 +85,6 @@ export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
 
-export const DATA_VIEW_INDEX_PATTERN = 'logs-*';
-
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
 export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
@@ -157,9 +155,6 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
   [POSTURE_TYPE_ALL]: POSTURE_TYPE_ALL,
 };
 
-export const VULNERABILITIES = 'vulnerabilities';
-export const CONFIGURATIONS = 'configurations';
-
 export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   LOW: 'LOW',
   MEDIUM: 'MEDIUM',
@@ -167,8 +162,6 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   CRITICAL: 'CRITICAL',
   UNKNOWN: 'UNKNOWN',
 };
-
-export const VULNERABILITIES_ENUMERATION = 'CVE';
 
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
   assume_role: ['role_arn'],
@@ -209,7 +202,6 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   manual: [],
 };
 
-export const CLOUD_FORMATION_STACK_NAME = 'Elastic-Cloud-Security-Posture-Management';
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 
 export const ORGANIZATION_ACCOUNT = 'organization-account';
