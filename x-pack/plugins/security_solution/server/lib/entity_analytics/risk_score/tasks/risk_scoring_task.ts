@@ -137,30 +137,25 @@ export const registerRiskScoringTask = ({
 
 export interface RiskScoringTaskStatus {
   status: TaskStatus;
-  interval: string;
-  runAt: Date; // next schedule run
-  startedAt: Date | null; // only available if task is running
+  runAt: string; // next schedule run
+  startedAt: string | undefined; // only available if task is running
 }
 
 export const getRiskScoringTaskStatus = async ({
   namespace,
-  riskEngineDataClient,
   taskManager,
 }: {
   namespace: string;
-  riskEngineDataClient: RiskEngineDataClient;
   taskManager: TaskManagerStartContract;
 }): Promise<RiskScoringTaskStatus> => {
   const taskId = getTaskId(namespace);
-  const interval = (await riskEngineDataClient.getConfiguration())?.interval ?? INTERVAL;
 
   const task = await taskManager.get(taskId);
 
   return {
     status: task.status,
-    interval,
-    runAt: task.runAt,
-    startedAt: task.startedAt,
+    runAt: task.runAt.toISOString(),
+    startedAt: task.startedAt?.toISOString(),
   };
 };
 

@@ -37,9 +37,8 @@ export const RiskEngineTaskStatusValuesEnum = RiskEngineTaskStatusValues.enum;
 export type RiskEngineTaskStatus = z.infer<typeof RiskEngineTaskStatus>;
 export const RiskEngineTaskStatus = z.object({
   status: RiskEngineTaskStatusValues,
-  interval: z.string(),
-  runAt: z.string(),
-  startedAt: z.string().optional(),
+  runAt: z.string().datetime(),
+  startedAt: z.string().datetime().optional(),
 });
 
 export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;

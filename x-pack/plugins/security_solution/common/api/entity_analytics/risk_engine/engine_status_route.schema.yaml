@@ -43,17 +43,16 @@ components:
       type: object
       required:
         - status
-        - interval
         - runAt
       properties:
         status:
           $ref: '#/components/schemas/RiskEngineTaskStatusValues'
-        interval:
-          type: string
         runAt:
           type: string
+          format: date-time
         startedAt:
           type: string
+          format: date-time
 
     RiskEngineStatusResponse:
       type: object

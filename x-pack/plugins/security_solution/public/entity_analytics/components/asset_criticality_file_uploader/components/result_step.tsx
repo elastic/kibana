@@ -20,6 +20,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
+import { i18n } from '@kbn/i18n';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildAnnotationsFromError, formatScheduledRunTime } from '../helpers';
 import { useScheduleNowRiskEngineMutation } from '../../../api/hooks/use_schedule_now_risk_engine_mutation';
@@ -37,10 +39,6 @@ export const AssetCriticalityResultStep: React.FC<{
   onReturn: () => void;
 }> = React.memo(({ result, validLinesAsText, errorMessage, onReturn }) => {
   const { euiTheme } = useEuiTheme();
-
-  //   onSuccess: () => {
-  //     addSuccess(i18n.RISK_SCORE_MODULE_TURNED_OFF, toastOptions);
-  //   },
 
   if (errorMessage !== undefined) {
     return (
@@ -164,6 +162,7 @@ const RiskEngineCallout = () => {
   const [nextScheduleRun, setNextScheduleRun] = useState<string | undefined>();
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
+  const { addSuccess } = useAppToasts();
 
   const isRunning = useMemo(
     () => status === 'running' || (!!runAt && new Date(runAt) < new Date()),
@@ -194,7 +193,16 @@ const RiskEngineCallout = () => {
 
   const scheduleRiskEngine = useCallback(() => {
     scheduleNowMutation.mutate();
-  }, [scheduleNowMutation]);
+
+    addSuccess(
+      i18n.translate(
+        'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.successMessage',
+        {
+          defaultMessage: 'Risk engine run scheduled',
+        }
+      )
+    );
+  }, [addSuccess, scheduleNowMutation]);
 
   if (!riskEngineStatus?.isNewRiskScoreModuleInstalled) {
     return null;
@@ -205,7 +213,7 @@ const RiskEngineCallout = () => {
       title={
         <FormattedMessage
           defaultMessage="Risk score"
-          id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngineCalloutTitle"
+          id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.calloutTitle"
         />
       }
       color="primary"
@@ -213,7 +221,7 @@ const RiskEngineCallout = () => {
     >
       <FormattedMessage
         defaultMessage="The assigned criticalities will influence the calculated risk score on the next engine run."
-        id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngineCalloutText"
+        id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.calloutText"
       />
       <EuiHorizontalRule />
       <EuiFlexGroup direction="row">
@@ -221,7 +229,7 @@ const RiskEngineCallout = () => {
           <EuiText size="xs">
             <FormattedMessage
               defaultMessage="Next engine is schedule to run in:"
-              id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngineScheduleText"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.scheduleText"
             />
             <b>{` ${nextScheduleRun}`}</b>
           </EuiText>
@@ -235,7 +243,7 @@ const RiskEngineCallout = () => {
           >
             <FormattedMessage
               defaultMessage="Run engine now"
-              id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngineRunNow"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.runNowButton"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

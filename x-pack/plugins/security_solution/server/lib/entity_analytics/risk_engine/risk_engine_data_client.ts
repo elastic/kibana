@@ -123,7 +123,7 @@ export class RiskEngineDataClient {
 
     const taskStatus =
       riskEngineStatus === 'ENABLED' && taskManager
-        ? await getRiskScoringTaskStatus({ namespace, riskEngineDataClient: this, taskManager })
+        ? await getRiskScoringTaskStatus({ namespace, taskManager })
         : undefined;
 
     this.options.auditLogger?.log({
@@ -225,22 +225,21 @@ export class RiskEngineDataClient {
       );
     }
 
+    this.options.auditLogger?.log({
+      message: 'User scheduled a risk engine run',
+      event: {
+        action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.ACCESS,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+
     return scheduleNow({
       taskManager,
       namespace: this.options.namespace,
       logger: this.options.logger,
     });
-
-    // TODO auditing
-    // this.options.auditLogger?.log({
-    //   message: 'User removed risk scoring task',
-    //   event: {
-    //     action: RiskEngineAuditActions.RISK_ENGINE_REMOVE_TASK,
-    //     category: AUDIT_CATEGORY.DATABASE,
-    //     type: AUDIT_TYPE.CHANGE,
-    //     outcome: AUDIT_OUTCOME.SUCCESS,
-    //   },
-    // });
   }
 
   /**
