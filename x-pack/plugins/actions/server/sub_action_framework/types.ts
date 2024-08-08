@@ -11,6 +11,7 @@ import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -76,6 +77,21 @@ export type Validators<Config, Secrets> = Array<
   ConfigValidator<Config> | SecretsValidator<Secrets>
 >;
 
+export interface PreSaveConnectorEventHandlerParams<Config, Secrets> {
+  config?: Config;
+  secrets?: Secrets;
+  logger: Logger;
+  scopedClusterClient?: IScopedClusterClient;
+  isUpdate?: boolean;
+}
+
+export interface PostDeleteConnectorEventHandlerParams<Config, Secrets> {
+  config?: Config;
+  secrets?: Secrets;
+  logger: Logger;
+  scopedClusterClient?: IScopedClusterClient;
+}
+
 export interface SubActionConnectorType<Config, Secrets> {
   id: string;
   name: string;
@@ -92,6 +108,12 @@ export interface SubActionConnectorType<Config, Secrets> {
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };
   }) => string[];
+  preSaveEventHandler?: (
+    params: PreSaveConnectorEventHandlerParams<Config, Secrets>
+  ) => Promise<void>;
+  postDeleteEventHandler?: (
+    params: PreSaveConnectorEventHandlerParams<Config, Secrets>
+  ) => Promise<void>;
 }
 
 export interface ExecutorParams extends ActionTypeParams {

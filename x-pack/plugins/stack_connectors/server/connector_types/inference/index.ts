@@ -41,6 +41,32 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
+  preSaveEventHandler: async ({ config, secrets, logger, scopedClusterClient, isUpdate }) => {
+    // Check if model is used by an inference service
+    /* const { models } = await esClient.transport.request<{
+      models: InferenceAPIConfigResponse[];
+    }>({
+      method: 'GET',
+      path: `/_inference/_all`,
+    }); */
+
+    const esClient = scopedClusterClient?.asCurrentUser;
+    const res = await esClient?.transport.request({
+      path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
+      method: 'PUT',
+      body: {
+        ...config?.providerConfig,
+        ...secrets?.providerSecrets,
+      },
+    });
+  },
+  postDeleteEventHandler: async ({ config, logger, scopedClusterClient }) => {
+    const esClient = scopedClusterClient?.asCurrentUser;
+    const res = await esClient?.transport.request({
+      path: `/_inference/${config?.taskType}/${config?.inferenceId}`,
+      method: 'DELETE',
+    });
+  },
 });
 
 export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {

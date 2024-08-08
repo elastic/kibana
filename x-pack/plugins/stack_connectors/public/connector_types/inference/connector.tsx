@@ -95,6 +95,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'config.taskType',
+      'config.inferenceId',
       'config.provider',
       'config.providerSchema',
       'config.providerConfig',

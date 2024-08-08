@@ -263,6 +263,26 @@ export class ActionsClient {
       })
     );
 
+    if (actionType.preSaveEventHandler) {
+      try {
+        await actionType.preSaveEventHandler({
+          config,
+          secrets,
+          logger: this.context.logger,
+          scopedClusterClient: this.context.scopedClusterClient,
+        });
+      } catch (error) {
+        this.context.auditLogger?.log(
+          connectorAuditEvent({
+            action: ConnectorAuditAction.CREATE,
+            savedObject: { type: 'action', id },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+
     const result = await this.context.unsecuredSavedObjectsClient.create(
       'action',
       {
@@ -355,6 +375,27 @@ export class ActionsClient {
         outcome: 'unknown',
       })
     );
+
+    if (actionType.preSaveEventHandler) {
+      try {
+        await actionType.preSaveEventHandler({
+          config,
+          secrets,
+          logger: this.context.logger,
+          scopedClusterClient: this.context.scopedClusterClient,
+          isUpdate: true,
+        });
+      } catch (error) {
+        this.context.auditLogger?.log(
+          connectorAuditEvent({
+            action: ConnectorAuditAction.UPDATE,
+            savedObject: { type: 'action', id },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
 
     const result = await this.context.unsecuredSavedObjectsClient.create<RawAction>(
       'action',
@@ -667,7 +708,33 @@ export class ActionsClient {
       );
     }
 
-    return await this.context.unsecuredSavedObjectsClient.delete('action', id);
+    const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+      'action',
+      id
+    );
+    const { actionTypeId, config } = attributes;
+    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
+
+    if (actionType.postDeleteEventHandler) {
+      try {
+        await actionType.postDeleteEventHandler({
+          config,
+          logger: this.context.logger,
+          scopedClusterClient: this.context.scopedClusterClient,
+        });
+      } catch (error) {
+        this.context.auditLogger?.log(
+          connectorAuditEvent({
+            action: ConnectorAuditAction.UPDATE,
+            savedObject: { type: 'action', id },
+            error,
+          })
+        );
+        throw error;
+      }
+    }
+    return result;
   }
 
   private getSystemActionKibanaPrivileges(connectorId: string, params?: ExecuteOptions['params']) {

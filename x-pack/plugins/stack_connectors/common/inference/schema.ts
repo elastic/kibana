@@ -11,6 +11,7 @@ import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from './constants';
 export const ConfigSchema = schema.object({
   provider: schema.string({ defaultValue: DEFAULT_PROVIDER }),
   taskType: schema.string({ defaultValue: DEFAULT_TASK_TYPE }),
+  inferenceId: schema.string(),
   providerSchema: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { defaultValue: [] }),
   providerConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
 });
@@ -33,4 +34,4 @@ export const ChatCompleteResponseSchema = schema.object({
   }),
 });
 
-export const StreamingResponseSchema = schema.any();
+export const StreamingResponseSchema = schema.stream();

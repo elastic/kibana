@@ -45,6 +45,7 @@ interface Payload {
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   private provider;
+  private inferenceId;
   private taskType;
   private providerSchema;
   private connectorTokenClient: ConnectorTokenClientContract;
@@ -54,6 +55,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
 
     this.provider = this.config.provider;
     this.taskType = this.config.taskType;
+    this.inferenceId = this.config.inferenceId;
     this.providerSchema = this.config.providerSchema;
     this.logger = this.logger;
     this.connectorID = this.connector.id;
