@@ -237,7 +237,12 @@ describe('TaskScheduling', () => {
     });
 
     test('should enable task if it is already enabled but does not have runAt set', async () => {
-      const task = taskManagerMock.createTask({ id, enabled: true, schedule: { interval: '3h' }, runAt: undefined });
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: true,
+        schedule: { interval: '3h' },
+        runAt: undefined,
+      });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
 
@@ -252,7 +257,7 @@ describe('TaskScheduling', () => {
           enabled: true,
           runAt: new Date('1970-01-01T00:00:00.000Z'),
           scheduledAt: new Date('1970-01-01T00:00:00.000Z'),
-        }
+        },
       ]);
     });
 
