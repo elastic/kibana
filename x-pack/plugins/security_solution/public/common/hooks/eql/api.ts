@@ -21,9 +21,9 @@ import {
 } from '../../../../common/search_strategy/eql';
 
 export enum EQL_ERROR_CODES {
-  FAILED_REQUEST = 'ERR_FAILED_REQUEST',
-  INVALID_EQL = 'ERR_INVALID_EQL',
-  INVALID_SYNTAX = 'ERR_INVALID_SYNTAX',
+  FAILED_REQUEST = 'EQL_ERR_FAILED_REQUEST',
+  INVALID_EQL = 'EQL_ERR_INVALID_EQL',
+  INVALID_SYNTAX = 'EQL_ERR_INVALID_SYNTAX',
 }
 
 interface Params {
