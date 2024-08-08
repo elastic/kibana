@@ -75,6 +75,7 @@ export interface ControlFactory<
   ControlApi extends DefaultControlApi = DefaultControlApi
 > {
   type: string;
+  order?: number;
   getIconType: () => string;
   getDisplayName: () => string;
   buildControl: (
@@ -85,7 +86,7 @@ export interface ControlFactory<
     ) => ControlApi,
     uuid: string,
     parentApi: ControlGroupApi
-  ) => { api: ControlApi; Component: React.FC<{ className: string }> };
+  ) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
 
 export type ControlStateManager<State extends object = object> = {

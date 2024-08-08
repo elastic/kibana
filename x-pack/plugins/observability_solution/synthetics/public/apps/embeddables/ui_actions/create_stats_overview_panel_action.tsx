@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
@@ -26,13 +25,15 @@ export function createStatusOverviewPanelAction(
     order: 30,
     getIconType: () => 'online',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      const { compatibilityCheck } = await import('./compatibility_check');
+      return compatibilityCheck(embeddable);
     },
     execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const [coreStart, pluginStart] = await getStartServices();
+      const { compatibilityCheck } = await import('./compatibility_check');
+      if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
       try {
         const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
+        const [coreStart, pluginStart] = await getStartServices();
 
         const initialState = await openMonitorConfiguration({
           coreStart,
