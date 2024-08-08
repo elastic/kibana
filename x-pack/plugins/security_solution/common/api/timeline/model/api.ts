@@ -25,6 +25,7 @@ import {
   PinnedEvent,
   RowRendererId,
   RowRendererIdEnum,
+  SavedTimeline,
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
@@ -45,6 +46,7 @@ export {
   PinnedEvent,
   RowRendererId,
   RowRendererIdEnum,
+  SavedTimeline,
   SortFieldTimeline,
   SortFieldTimelineEnum,
   TemplateTimelineType,
@@ -314,8 +316,6 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   savedSearchId: unionWithNullType(runtimeTypes.string),
 });
 
-export type SavedTimeline = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeType>;
-
 export type SavedTimelineWithSavedObjectId = SavedTimeline & {
   savedObjectId?: string | null;
 };
@@ -505,7 +505,7 @@ export interface ColumnHeaderResult {
   category?: Maybe<string>;
   columnHeaderType?: Maybe<string>;
   description?: Maybe<string>;
-  example?: Maybe<string | number>;
+  example?: Maybe<string>;
   indexes?: Maybe<string[]>;
   id?: Maybe<string>;
   name?: Maybe<string>;

@@ -40,3 +40,8 @@ export {
   GetNotesResponse,
   GetNotesResult,
 } from './get_notes/get_notes_route.gen';
+
+export {
+  CopyTimelineRequestBody,
+  CopyTimelineResponse,
+} from './copy_timeline/copy_timeline_route.gen';

@@ -6,9 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigType } from '../../../../..';
-import { copyTimelineSchema } from '../../../../../../common/api/timeline';
+import {
+  CopyTimelineRequestBody,
+  type CopyTimelineResponse,
+} from '../../../../../../common/api/timeline';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
@@ -29,7 +32,7 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: Confi
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidationWithExcess(copyTimelineSchema) },
+          request: { body: buildRouteValidationWithZod(CopyTimelineRequestBody) },
         },
       },
       async (context, request, response) => {
@@ -39,9 +42,9 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: Confi
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timeline, timelineIdToCopy } = request.body;
           const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
-
+          const body: CopyTimelineResponse = { data: { persistTimeline: copiedTimeline } };
           return response.ok({
-            body: { data: { persistTimeline: copiedTimeline } },
+            body,
           });
         } catch (err) {
           const error = transformError(err);

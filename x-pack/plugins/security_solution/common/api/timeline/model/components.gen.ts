@@ -42,24 +42,24 @@ export const TemplateTimelineTypeEnum = TemplateTimelineType.enum;
 
 export type ColumnHeaderResult = z.infer<typeof ColumnHeaderResult>;
 export const ColumnHeaderResult = z.object({
-  aggregatable: z.boolean().optional(),
-  category: z.string().optional(),
-  columnHeaderType: z.string().optional(),
-  description: z.string().optional(),
-  example: z.union([z.string(), z.number()]).optional(),
-  indexes: z.array(z.string()).optional(),
-  id: z.string().optional(),
-  name: z.string().optional(),
-  placeholder: z.string().optional(),
-  searchable: z.boolean().optional(),
-  type: z.string().optional(),
+  aggregatable: z.boolean().nullable().optional(),
+  category: z.string().nullable().optional(),
+  columnHeaderType: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  example: z.string().nullable().optional(),
+  indexes: z.array(z.string()).nullable().optional(),
+  id: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  placeholder: z.string().nullable().optional(),
+  searchable: z.boolean().nullable().optional(),
+  type: z.string().nullable().optional(),
 });
 
 export type QueryMatchResult = z.infer<typeof QueryMatchResult>;
 export const QueryMatchResult = z.object({
   field: z.string().nullable().optional(),
   displayField: z.string().nullable().optional(),
-  value: z.string().nullable().optional(),
+  value: z.union([z.string().nullable(), z.array(z.string()).nullable()]).optional(),
   displayValue: z.string().nullable().optional(),
   operator: z.string().nullable().optional(),
 });
@@ -71,7 +71,7 @@ export const DataProviderQueryMatch = z.object({
   id: z.string().nullable().optional(),
   kqlQuery: z.string().nullable().optional(),
   name: z.string().nullable().optional(),
-  queryMatch: QueryMatchResult.optional(),
+  queryMatch: QueryMatchResult.nullable().optional(),
 });
 
 export type DataProviderResult = z.infer<typeof DataProviderResult>;
@@ -119,27 +119,28 @@ export const FavoriteTimelineResult = z.object({
 
 export type FilterTimelineResult = z.infer<typeof FilterTimelineResult>;
 export const FilterTimelineResult = z.object({
-  exists: z.boolean().optional(),
+  exists: z.string().nullable().optional(),
   meta: z
     .object({
-      alias: z.string().optional(),
-      controlledBy: z.string().optional(),
-      disabled: z.boolean().optional(),
-      field: z.string().optional(),
-      formattedValue: z.string().optional(),
-      index: z.string().optional(),
-      key: z.string().optional(),
-      negate: z.boolean().optional(),
-      params: z.string().optional(),
-      type: z.string().optional(),
-      value: z.string().optional(),
+      alias: z.string().nullable().optional(),
+      controlledBy: z.string().nullable().optional(),
+      disabled: z.boolean().nullable().optional(),
+      field: z.string().nullable().optional(),
+      formattedValue: z.string().nullable().optional(),
+      index: z.string().nullable().optional(),
+      key: z.string().nullable().optional(),
+      negate: z.boolean().nullable().optional(),
+      params: z.string().nullable().optional(),
+      type: z.string().nullable().optional(),
+      value: z.string().nullable().optional(),
     })
+    .nullable()
     .optional(),
-  match_all: z.string().optional(),
-  missing: z.string().optional(),
-  query: z.string().optional(),
-  range: z.string().optional(),
-  script: z.string().optional(),
+  match_all: z.string().nullable().optional(),
+  missing: z.string().nullable().optional(),
+  query: z.string().nullable().optional(),
+  range: z.string().nullable().optional(),
+  script: z.string().nullable().optional(),
 });
 
 export type SerializedFilterQueryResult = z.infer<typeof SerializedFilterQueryResult>;
@@ -178,8 +179,8 @@ export const SavedTimeline = z.object({
   dataViewId: z.string().nullable().optional(),
   dateRange: z
     .object({
-      end: z.union([z.string(), z.number()]).optional(),
-      start: z.union([z.string(), z.number()]).optional(),
+      end: z.union([z.string().nullable(), z.number().nullable()]).optional(),
+      start: z.union([z.string().nullable(), z.number().nullable()]).optional(),
     })
     .nullable()
     .optional(),
@@ -253,11 +254,11 @@ export const PinnedEvent = BarePinnedEvent.merge(
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
 export const TimelineResponse = SavedTimeline.merge(
   z.object({
-    eventIdToNoteIds: z.array(Note).optional(),
-    notes: z.array(Note).optional(),
-    noteIds: z.array(z.string()).optional(),
-    pinnedEventIds: z.array(z.string()).optional(),
-    pinnedEventsSaveObject: z.array(PinnedEvent).optional(),
+    eventIdToNoteIds: z.array(Note).nullable().optional(),
+    notes: z.array(Note).nullable().optional(),
+    noteIds: z.array(z.string()).nullable().optional(),
+    pinnedEventIds: z.array(z.string()).nullable().optional(),
+    pinnedEventsSaveObject: z.array(PinnedEvent).nullable().optional(),
     savedObjectId: z.string(),
     version: z.string(),
   })

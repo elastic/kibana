@@ -16,4 +16,3 @@ export * from './import_timelines/import_timelines_route';
 export * from './patch_timelines/patch_timelines_schema';
 export * from './pinned_events/pinned_events_route';
 export * from './install_prepackaged_timelines/install_prepackaged_timelines';
-export * from './copy_timeline/copy_timeline_route';

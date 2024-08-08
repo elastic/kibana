@@ -56,11 +56,15 @@ components:
             end:
               oneOf:
                 - type: string
+                  nullable: true
                 - type: number
+                  nullable: true
             start:
               oneOf:
                 - type: string
+                  nullable: true
                 - type: number
+                  nullable: true
         description:
           type: string
           nullable: true
@@ -159,22 +163,27 @@ components:
           properties:
             eventIdToNoteIds:
               type: array
+              nullable: true
               items:
                 $ref: '#/components/schemas/Note'
             notes:
               type: array
+              nullable: true
               items:
                 $ref: '#/components/schemas/Note'
             noteIds:
               type: array
+              nullable: true
               items:
                 type: string
             pinnedEventIds:
               type: array
+              nullable: true
               items:
                 type: string
             pinnedEventsSaveObject:
               type: array
+              nullable: true
               items:
                 $ref: '#/components/schemas/PinnedEvent'
             savedObjectId:
@@ -214,30 +223,39 @@ components:
       properties:
         aggregatable:
           type: boolean
+          nullable: true
         category:
           type: string
+          nullable: true
         columnHeaderType:
           type: string
+          nullable: true
         description:
           type: string
+          nullable: true
         example:
-          oneOf:
-            - type: string
-            - type: number
+          type: string
+          nullable: true
         indexes:
           type: array
+          nullable: true
           items:
             type: string
         id:
           type: string
+          nullable: true
         name:
           type: string
+          nullable: true
         placeholder:
           type: string
+          nullable: true
         searchable:
           type: boolean
+          nullable: true
         type:
           type: string
+          nullable: true
     QueryMatchResult:
       type: object
       properties:
@@ -248,8 +266,13 @@ components:
           type: string
           nullable: true
         value:
-          type: string
-          nullable: true
+          oneOf:
+            - type: string
+              nullable: true
+            - type: array
+              nullable: true
+              items:
+                type: string
         displayValue:
           type: string
           nullable: true
@@ -305,6 +328,7 @@ components:
           nullable: true
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
     BareNoteWithoutExternalRefs:
       type: object
       properties:
@@ -419,42 +443,60 @@ components:
       type: object
       properties:
         exists:
-          type: boolean
+          type: string
+          nullable: true
         meta:
           type: object
+          nullable: true
           properties:
             alias:
               type: string
+              nullable: true
             controlledBy:
               type: string
+              nullable: true
             disabled:
               type: boolean
+              nullable: true
             field:
               type: string
+              nullable: true
             formattedValue:
               type: string
+              nullable: true
             index:
               type: string
+              nullable: true
             key:
               type: string
+              nullable: true
             negate:
               type: boolean
+              nullable: true
             params:
               type: string
+              nullable: true
             type:
               type: string
+              nullable: true
             value:
               type: string
+              nullable: true
         match_all:
           type: string
+          nullable: true
         missing:
           type: string
+          nullable: true
         query:
           type: string
+          nullable: true
         range:
           type: string
+          nullable: true
         script:
           type: string
+          nullable: true
     SerializedFilterQueryResult:
       type: object
       properties:
