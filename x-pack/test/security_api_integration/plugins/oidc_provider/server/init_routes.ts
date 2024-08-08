@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { createTokens } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 
-export function initRoutes(router: IRouter) {
+export function initRoutes(router: IRouter, logger: Logger) {
   let nonce = '';
   router.get(
     {
@@ -24,6 +24,10 @@ export function initRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       nonce = request.query.nonce;
+
+      logger.debug(
+        `Authorize endpoint called with state: ${request.query.state}, redirect_uri: ${request.query.redirect_uri}`
+      );
 
       return response.redirected({
         headers: {
@@ -42,6 +46,9 @@ export function initRoutes(router: IRouter) {
       options: { authRequired: false },
     },
     async (context, request, response) => {
+      logger.debug(
+        `End session endpoint called with post_logout_redirect_uri: ${request.query.post_logout_redirect_uri}`
+      );
       return response.redirected({
         headers: { location: request.query.post_logout_redirect_uri || '/' },
       });
@@ -70,7 +77,13 @@ export function initRoutes(router: IRouter) {
     },
     (context, request, response) => {
       const userId = request.body.code.substring(4);
+
+      logger.debug(`Token endpoint called with userId: ${userId}`);
+
       const { accessToken, idToken } = createTokens(userId, nonce);
+
+      logger.debug(`Generated access token: ${accessToken}, id token: ${idToken}`);
+
       return response.ok({
         body: {
           access_token: accessToken,
@@ -91,6 +104,9 @@ export function initRoutes(router: IRouter) {
     },
     (context, request, response) => {
       const accessToken = (request.headers.authorization as string).substring(7);
+
+      logger.debug(`UserInfo endpoint called with access token: ${accessToken}`);
+
       if (accessToken === 'valid-access-token1') {
         return response.ok({
           body: {
