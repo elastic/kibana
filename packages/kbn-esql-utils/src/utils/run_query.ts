@@ -26,10 +26,10 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
     };
     const namedParams = [];
     if (timeParams?.start) {
-      namedParams.push({ start: timeParams.start });
+      namedParams.push({ t_start: timeParams.start });
     }
     if (timeParams?.end) {
-      namedParams.push({ end: timeParams.end });
+      namedParams.push({ t_end: timeParams.end });
     }
     return namedParams;
   }
