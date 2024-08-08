@@ -14,7 +14,7 @@ import { deleteAllDocuments } from './elasticsearch';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 import { getSpaceUrl } from '../space';
 
-export const API_AUTH = Object.freeze({
+export const ESS_API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),
   pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
@@ -22,23 +22,47 @@ export const API_AUTH = Object.freeze({
 export const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
-  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION].join(','), // Convertir array a string
 });
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
+type AuthMethod = 'basic' | 'cookie';
+
+interface RootRequestOptions extends Partial<Cypress.RequestOptions> {
+  authMethod?: AuthMethod;
+}
+
 export const rootRequest = <T = unknown>({
   headers: optionHeaders,
+  authMethod = 'cookie',
   ...restOptions
-}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
-  cy.request<T>({
-    auth: API_AUTH,
-    headers: {
-      ...API_HEADERS,
-      ...(optionHeaders || {}),
-    },
-    ...restOptions,
-  });
+}: RootRequestOptions): Cypress.Chainable<Cypress.Response<T>> => {
+  const headers: Record<string, string> = {
+    ...API_HEADERS,
+    ...(optionHeaders || {}),
+  };
+
+  if (authMethod === 'cookie') {
+    return cy.task('getApiCredentialsForRole', 'admin').then((response) => {
+      if (response && typeof response === 'object' && 'Cookie' in response) {
+        // headers["Cookie"] = (response as { Cookie: string }).Cookie;
+      } else {
+        throw new Error('Unexpected response format from cy.task');
+      }
+      return cy.request<T>({
+        headers,
+        ...restOptions,
+      });
+    });
+  } else {
+    return cy.request<T>({
+      auth: ESS_API_AUTH,
+      headers,
+      ...restOptions,
+    });
+  }
+};
 
 export const deleteAlertsAndRules = () => {
   cy.log('Delete all alerts and rules');

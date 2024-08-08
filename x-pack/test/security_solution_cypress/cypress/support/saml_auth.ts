@@ -45,6 +45,17 @@ export const samlAuthentication = async (
       });
       return sessionManager.getInteractiveUserSessionCookieWithRoleScope(role);
     },
+    getApiCredentialsForRole: async (
+      role: string | SecurityRoleName
+    ): Promise<{ Cookie: string }> => {
+      const sessionManager = new SamlSessionManager({
+        hostOptions,
+        log,
+        isCloud: config.env.CLOUD_SERVERLESS,
+        cloudUsersFilePath,
+      });
+      return sessionManager.getApiCredentialsForRole(role);
+    },
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
