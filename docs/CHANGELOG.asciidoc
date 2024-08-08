@@ -103,7 +103,17 @@ Before you upgrade to 8.15.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-184036]]
-* Adds rate limiting to install by upload endpoint ({kibana-pull}184036[#184036]).
+.Adds rate limiting to install by upload endpoint.
+[%collapsible]
+====
+*Details* +
+Rate limiting was added to the upload `api/fleet/epm/packages` endpoint. For more information, refer to {kibana-pull}184036[#184036].
+
+*Impact* +
+If you do two or more requests in less than 10 seconds, the subsequent requests fail with `429 Too Many Requests`.
+Wait 10 seconds before uploading again.
+This change could potentially break automations for users that rely on frequent package uploads.
+====
       
 [float]
 [[features-8.15.0]]
