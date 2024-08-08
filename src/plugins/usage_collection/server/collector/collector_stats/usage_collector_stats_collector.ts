@@ -8,7 +8,7 @@
 
 import { sumBy } from 'lodash';
 import { collectorsStatsSchema } from './schema';
-import type { CollectorSet } from '../collector_set';
+import type { ICollectorSet } from '../types';
 
 export interface CollectorsStats {
   not_ready: { count: number; names: string[] };
@@ -35,7 +35,7 @@ export interface CollectorsStatsCollectorParams {
 }
 
 export const usageCollectorsStatsCollector = (
-  usageCollection: Pick<CollectorSet, 'makeUsageCollector'>,
+  usageCollection: Pick<ICollectorSet, 'makeUsageCollector'>,
   {
     nonReadyCollectorTypes,
     timedOutCollectorsTypes,
