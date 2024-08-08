@@ -87,7 +87,7 @@ export class SLOClient {
       this.basePath
     );
 
-    return await createSLO.execute(params.right.body);
+    return await createSLO.execute(params.right.body, false);
   }
 
   async updateSLO({

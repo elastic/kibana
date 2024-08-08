@@ -40,13 +40,18 @@ export class CreateSLO {
     private basePath: IBasePath
   ) {}
 
-  public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
+  public async execute(
+    params: CreateSLOParams,
+    throwOnConflict = true
+  ): Promise<{ slo: CreateSLOResponse; sloSavedObjectId: string }> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
     const rollbackOperations = [];
 
-    await this.repository.save(slo, { throwOnConflict: true });
+    const { sloSavedObjectId } = await this.repository.save(slo, {
+      throwOnConflict,
+    });
     rollbackOperations.push(() => this.repository.deleteById(slo.id));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
@@ -119,7 +124,7 @@ export class CreateSLO {
       throw err;
     }
 
-    return this.toResponse(slo);
+    return { slo: this.toResponse(slo), sloSavedObjectId };
   }
 
   public async inspect(params: CreateSLOParams): Promise<{

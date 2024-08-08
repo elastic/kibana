@@ -25,6 +25,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { CreateSLOParams } from '@kbn/slo-schema';
 
+import { appContextService } from '../../..';
+
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { AssetReference, Installation, PackageSpecTags } from '../../../../types';
@@ -292,16 +294,22 @@ export async function installSLOAssets({
   }
 
   const installedSLOs = [];
+  try {
+    for (const asset of sloAssets) {
+      const attr = asset.attributes as CreateSLOParams;
+      const { sloSavedObjectId } = await sloClient.createSLO({
+        soClient,
+        esClient,
+        params: { ...attr, id: asset.id },
+        spaceId,
+      });
 
-  for (const asset of sloAssets) {
-    const attr = asset.attributes as CreateSLOParams;
-    const slo = await sloClient.createSLO({
-      soClient,
-      esClient,
-      params: { ...attr, id: asset.id },
-      spaceId,
-    });
-    installedSLOs.push({ id: slo.id, type: 'slo', meta: {} });
+      installedSLOs.push({ id: sloSavedObjectId, type: 'slo', meta: {} });
+    }
+  } catch (err) {
+    // If we fail to install an SLO, we should not fail the whole package install
+    // but we should log the error
+    appContextService.getLogger().error(err);
   }
 
   return installedSLOs;

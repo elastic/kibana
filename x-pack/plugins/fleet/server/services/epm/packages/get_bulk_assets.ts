@@ -49,8 +49,9 @@ export async function getBulkAssets(
   assetIds: AssetSOObject[]
 ) {
   const { resolved_objects: resolvedObjects } = await soClient.bulkResolve<SimpleSOAssetAttributes>(
-    assetIds
+    assetIds.filter((asset) => asset.type !== 'slo')
   );
+
   const types: Record<string, SavedObjectsType | undefined> = {};
 
   const res: SimpleSOAssetType[] = resolvedObjects

@@ -114,7 +114,7 @@ const createSLORoute = createSloServerRoute({
 
     const response = await createSLO.execute(params.body);
 
-    return response;
+    return response.slo;
   },
 });
 
