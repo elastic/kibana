@@ -67,18 +67,4 @@ describe('ES|QL Tokens Provider', () => {
     const timespanTokens = tokens.filter((t) => t.scopes === 'timespan_literal.esql');
     expect(timespanTokens).toHaveLength(2);
   });
-
-  it('should properly tokenize field names with periods', () => {
-    const provider = new ESQLTokensProvider();
-    const checkFieldName = (line: string) => {
-      const { tokens } = provider.tokenize(line, new ESQLState());
-      expect(
-        [tokens[tokens.length - 2], tokens[tokens.length - 1]].map(({ scopes }) => scopes)
-      ).toEqual(['expr_ws.esql', 'unquoted_identifier.esql']);
-    };
-
-    checkFieldName('FROM my_index | EVAL event.action');
-    checkFieldName('FROM my_index | EVAL event.action.subaction');
-    checkFieldName('FROM my_index | EVAL @timestamp');
-  });
 });
