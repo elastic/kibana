@@ -944,6 +944,18 @@
       },
       {
         "parentPluginId": "@kbn/es",
+        "id": "def-common.STATEFUL_ROLES_ROOT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "STATEFUL_ROLES_ROOT_PATH",
+        "description": [],
+        "path": "packages/kbn-es/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
         "id": "def-common.SYSTEM_INDICES_SUPERUSER",
         "type": "string",
         "tags": [],

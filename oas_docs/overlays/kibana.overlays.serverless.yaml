@@ -38,3 +38,36 @@ actions:
     description: Add x-beta
     update:
       x-beta: true
+  # Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
+        Alerting rules can use connectors to run actions when rule conditions are met.
+      externalDocs:
+        description: Connector documentation
+        url: https://www.elastic.co/docs/current/serverless/action-connectors
+      x-displayName: "Connectors"
+  - target: '$.tags[?(@.name=="data views")]'
+    description: Change displayName
+    update:
+      x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="ml")]'
+    description: Change displayName
+    update:
+      x-displayName: "Machine learning"
+  - target: '$.tags[?(@.name=="saved objects")]'
+    description: Change displayName
+    update:
+      x-displayName: "Saved objects"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="system")]'
+    description: Change displayName
+    update:
+      x-displayName: "System"
+      description: >
+        Get information about the system status, resource usage, and installed plugins.
