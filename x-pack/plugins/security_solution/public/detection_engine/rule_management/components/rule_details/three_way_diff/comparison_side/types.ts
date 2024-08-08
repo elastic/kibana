@@ -10,3 +10,5 @@ export interface SubfieldChange {
   readonly oldSubfieldValue: string;
   readonly newSubfieldValue: string;
 }
+
+export type SubfieldChanges = Readonly<SubfieldChange[]>;

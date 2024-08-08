@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { SubfieldChange } from './types';
+import type { SubfieldChanges } from './types';
 import { Subfield } from './subfield';
 import type { DiffableAllFields } from '../../../../../../../common/api/detection_engine';
 import { NoChanges } from './no_changes';
 
 interface SubfieldChangesProps {
   fieldName: keyof DiffableAllFields;
-  subfieldChanges: SubfieldChange[];
+  subfieldChanges: SubfieldChanges;
 }
 
 export function SubfieldChanges({ fieldName, subfieldChanges }: SubfieldChangesProps) {

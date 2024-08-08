@@ -18,7 +18,7 @@ import { getSubfieldChangesForTimestampOverride } from './timestamp_override';
 import { getSubfieldChangesForTimelineTemplate } from './timeline_template';
 import { getSubfieldChangesForBuildingBlock } from './building_block';
 import { getSubfieldChangesForThreshold } from './threshold';
-import type { SubfieldChange } from '../types';
+import type { SubfieldChanges } from '../types';
 
 /**
  * Splits a field into subfields and returns the changes between the old and new subfield values.
@@ -32,9 +32,13 @@ export const getSubfieldChanges = <FieldName extends keyof DiffableAllFields>(
   fieldName: FieldName,
   oldFieldValue?: DiffableAllFields[FieldName],
   newFieldValue?: DiffableAllFields[FieldName]
-): SubfieldChange[] => {
+): SubfieldChanges => {
   switch (fieldName) {
-    /* Typecasting here because narrowing a union type (`DiffableAllFields[FieldName]`) is not supported by TS */
+    /*
+      Typecasting `oldFieldValue` and `newFieldValue` to corresponding field
+      type `DiffableAllFields[*]` is required here since `oldFieldValue` and
+      `newFieldValue` concrete types depend on `fieldName` but TS doesn't track that.
+    */
     case 'data_source':
       return getSubfieldChangesForDataSource(
         oldFieldValue as DiffableAllFields['data_source'],
