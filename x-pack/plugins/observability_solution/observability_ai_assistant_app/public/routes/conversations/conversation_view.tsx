@@ -135,7 +135,12 @@ export function ConversationView() {
   `;
 
   return (
-    <EuiFlexGroup direction="row" className={containerClassName} gutterSize="none">
+    <EuiFlexGroup
+      direction="row"
+      className={containerClassName}
+      gutterSize="none"
+      data-test-subj="observabilityAiAssistantConversationsPage"
+    >
       <EuiFlexItem grow={false} className={conversationListContainerName}>
         <ConversationList
           selectedConversationId={conversationId}

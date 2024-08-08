@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { SamlSessionManager } from '@kbn/test';
-import { readRolesDescriptorsFromResource } from '@kbn/es';
-import { resolve } from 'path';
-import { Role } from '@kbn/test/src/auth/types';
-import { isServerlessProjectType } from '@kbn/es/src/utils';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { resolve } from 'path';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { getAuthProvider } from './get_auth_provider';
+import { InternalRequestHeader } from './default_request_headers';
 
 export interface RoleCredentials {
   apiKey: { id: string; name: string };
@@ -20,63 +20,41 @@ export interface RoleCredentials {
   cookieHeader: { Cookie: string };
 }
 
-export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
+export async function SamlAuthProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
-  const svlCommonApi = getService('svlCommonApi');
+  const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const isCloud = !!process.env.TEST_CLOUD;
-  const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
-  const projectType = kbnServerArgs
-    .filter((arg) => arg.startsWith('--serverless'))
-    .reduce((acc, arg) => {
-      const match = arg.match(/--serverless[=\s](\w+)/);
-      return acc + (match ? match[1] : '');
-    }, '') as ServerlessProjectType;
 
-  if (!isServerlessProjectType(projectType)) {
-    throw new Error(`Unsupported serverless projectType: ${projectType}`);
-  }
-
-  const supportedRoleDescriptors = readRolesDescriptorsFromResource(
-    resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml')
-  );
-
+  const authRoleProvider = await getAuthProvider({ config, kibanaServer, log });
+  const supportedRoleDescriptors = authRoleProvider.getSupportedRoleDescriptors();
   const supportedRoles = Object.keys(supportedRoleDescriptors);
 
-  const defaultRolesToMap = new Map<string, Role>([
-    ['es', 'developer'],
-    ['security', 'editor'],
-    ['oblt', 'editor'],
-  ]);
-
-  const getDefaultRole = () => {
-    if (defaultRolesToMap.has(projectType)) {
-      return defaultRolesToMap.get(projectType)!;
-    } else {
-      throw new Error(`Default role is not defined for ${projectType} project`);
-    }
-  };
-
   const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
-  // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
-  const sessionManager = new SamlSessionManager(
-    {
-      hostOptions: {
-        protocol: config.get('servers.kibana.protocol'),
-        hostname: config.get('servers.kibana.hostname'),
-        port: isCloud ? undefined : config.get('servers.kibana.port'),
-        username: config.get('servers.kibana.username'),
-        password: config.get('servers.kibana.password'),
-      },
-      log,
-      isCloud,
-      supportedRoles,
-    },
-    customRolesFileName
-  );
+  const cloudUsersFilePath = resolve(REPO_ROOT, '.ftr', customRolesFileName ?? 'role_users.json');
 
-  const DEFAULT_ROLE = getDefaultRole();
+  // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
+  const sessionManager = new SamlSessionManager({
+    hostOptions: {
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: isCloud ? undefined : config.get('servers.kibana.port'),
+      username: config.get('servers.kibana.username'),
+      password: config.get('servers.kibana.password'),
+    },
+    log,
+    isCloud,
+    supportedRoles: {
+      roles: supportedRoles,
+      sourcePath: authRoleProvider.getRolesDefinitionPath(),
+    },
+    cloudUsersFilePath,
+  });
+
+  const DEFAULT_ROLE = authRoleProvider.getDefaultRole();
+  const COMMON_REQUEST_HEADERS = authRoleProvider.getCommonRequestHeader();
+  const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
 
   return {
     async getInteractiveUserSessionCookieWithRoleScope(role: string) {
@@ -119,7 +97,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
 
       const { body, status } = await supertestWithoutAuth
         .post('/internal/security/api_key')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
         .send({
           name: 'myTestApiKey',
@@ -147,11 +125,18 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
 
       const { status } = await supertestWithoutAuth
         .post('/internal/security/api_key/invalidate')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(INTERNAL_REQUEST_HEADERS)
         .set(roleCredentials.cookieHeader)
         .send(requestBody);
 
       expect(status).to.be(200);
+    },
+    getCommonRequestHeader() {
+      return COMMON_REQUEST_HEADERS;
+    },
+
+    getInternalRequestHeader(): InternalRequestHeader {
+      return INTERNAL_REQUEST_HEADERS;
     },
     DEFAULT_ROLE,
   };
