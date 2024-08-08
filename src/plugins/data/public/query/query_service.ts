@@ -7,7 +7,7 @@
  */
 
 import { share } from 'rxjs';
-import { HttpStart, IUiSettingsClient, PluginInitializerContext } from '@kbn/core/public';
+import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { buildEsQuery, TimeRange } from '@kbn/es-query';
@@ -34,12 +34,12 @@ import {
   migrateToLatest,
   telemetry,
 } from '../../common/query/persistable_state';
-import { ConfigSchema } from '../../config';
 
 interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;
   uiSettings: IUiSettingsClient;
   nowProvider: NowProviderInternalContract;
+  minRefreshInterval?: number;
 }
 
 interface QueryServiceStartDependencies {
@@ -82,16 +82,21 @@ export class QueryService implements PersistableStateService<QueryState> {
 
   state$!: QueryState$;
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private minRefreshInterval: number = 5000) {}
 
-  public setup({ storage, uiSettings, nowProvider }: QueryServiceSetupDependencies): QuerySetup {
+  public setup({
+    storage,
+    uiSettings,
+    nowProvider,
+    minRefreshInterval = this.minRefreshInterval,
+  }: QueryServiceSetupDependencies): QuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService(nowProvider);
     this.timefilter = timefilterService.setup({
       uiSettings,
       storage,
-      minRefreshInterval: this.initializerContext.config.get().query.timefilter.minRefreshInterval,
+      minRefreshInterval,
     });
 
     this.queryStringManager = new QueryStringManager(storage, uiSettings);

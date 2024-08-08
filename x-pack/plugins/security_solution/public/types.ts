@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -103,6 +103,7 @@ export interface SetupPlugins {
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
   cases?: CasesPublicSetup;
+  data: DataPublicPluginSetup;
 }
 
 /**
