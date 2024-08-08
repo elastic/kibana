@@ -24,8 +24,12 @@ import {
 export const parseLine = (line: string, parseUrlIntoTokens: boolean = true): ParsedLineTokens => {
   line = line.trim();
   const firstWhitespaceIndex = line.indexOf(' ');
+  if (firstWhitespaceIndex < 0) {
+    // there is no url, only method
+    return { method: line, url: '', urlPathTokens: [], urlParamsTokens: [] };
+  }
   // 1st part is the method
-  const method = line.slice(0, firstWhitespaceIndex).trim();
+  const method = line.slice(0, firstWhitespaceIndex).trim().toUpperCase();
   // 2nd part is the url
   const url = removeTrailingWhitespaces(line.slice(firstWhitespaceIndex).trim());
   if (parseUrlIntoTokens) {

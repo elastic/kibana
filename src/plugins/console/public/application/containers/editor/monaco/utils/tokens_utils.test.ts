@@ -56,6 +56,27 @@ describe('tokens_utils', () => {
       expect(urlPathTokens).toEqual(['_search']);
       expect(urlParamsTokens[0]).toEqual(['query', '"test1     test2    test3"']);
     });
+    it('normalizes the method to upper case', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine('Get _');
+      expect(method).toBe('GET');
+      expect(url).toBe('_');
+      expect(urlPathTokens).toEqual(['_']);
+      expect(urlParamsTokens).toEqual([]);
+    });
+    it('correctly parses the line when the url is empty, no whitespace', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine('GET');
+      expect(method).toBe('GET');
+      expect(url).toBe('');
+      expect(urlPathTokens).toEqual([]);
+      expect(urlParamsTokens).toEqual([]);
+    });
+    it('correctly parses the line when the url is empty, with whitespace', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine('GET ');
+      expect(method).toBe('GET');
+      expect(url).toBe('');
+      expect(urlPathTokens).toEqual([]);
+      expect(urlParamsTokens).toEqual([]);
+    });
   });
 
   describe('parseBody', () => {
