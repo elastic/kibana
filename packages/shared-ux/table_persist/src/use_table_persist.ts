@@ -7,6 +7,7 @@
  */
 
 import { Criteria } from '@elastic/eui';
+import { PropertySort } from '@elastic/eui/src/services/sort/property_sort';
 import {
   DEFAULT_INITIAL_PAGE_SIZE,
   LOCAL_STORAGE_PREFIX,
@@ -14,21 +15,21 @@ import {
 } from './constants';
 import { createStorage } from './storage';
 import { validatePersistData } from './validate_persist_data';
-import { PersistData, SortCriteria } from './types';
+import { PersistData } from './types';
 
-interface EuiTablePersistProps {
+interface EuiTablePersistProps<T> {
   /** A unique id that will be included in the local storage variable for this table. */
   tableId: string;
   /** (Optional) Specifies a custom onTableChange handler. */
-  customOnTableChange?: (change: Criteria<any>) => void;
+  customOnTableChange?: (change: Criteria<T>) => void;
   /** (Optional) Specifies a custom initial table sorting. */
-  initialSort?: SortCriteria;
+  initialSort?: PropertySort;
   /** (Optional) Specifies a custom initial page size for the table.
    * Defaults to {@link DEFAULT_INITIAL_PAGE_SIZE} */
-  initialPageSize: number;
+  initialPageSize?: number;
   /** (Optional) Specifies custom page size options for the table.
    * Defaults to {@link DEFAULT_PAGE_SIZE_OPTIONS} */
-  pageSizeOptions: number[];
+  pageSizeOptions?: number[];
 }
 
 /**
@@ -36,13 +37,13 @@ interface EuiTablePersistProps {
  * Returns the persisting page size and sort and the onTableChange handler that should be passed
  * as props to an Eui table component.
  */
-export const useEuiTablePersist = ({
+export const useEuiTablePersist = <T extends object>({
   tableId,
   customOnTableChange,
   initialSort,
-  initialPageSize = DEFAULT_INITIAL_PAGE_SIZE,
-  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
-}: EuiTablePersistProps) => {
+  initialPageSize,
+  pageSizeOptions,
+}: EuiTablePersistProps<T>) => {
   const storage = createStorage({
     engine: window.localStorage,
     prefix: LOCAL_STORAGE_PREFIX,
@@ -50,20 +51,22 @@ export const useEuiTablePersist = ({
 
   const storedPersistData = storage.get(tableId, undefined);
 
-  const { pageSize: storagePageSize, sort: storageSort }: PersistData = validatePersistData(
+  const { pageSize: storagePageSize, sort: storageSort }: PersistData<T> = validatePersistData(
     storedPersistData,
-    pageSizeOptions
+    pageSizeOptions ?? DEFAULT_PAGE_SIZE_OPTIONS
   );
 
-  const pageSize = storagePageSize ?? initialPageSize;
+  const pageSize = storagePageSize ?? initialPageSize ?? DEFAULT_INITIAL_PAGE_SIZE;
   const sort = storageSort ?? initialSort;
+  const sorting = sort && { sort };
 
-  const onTableChange = ({ page, sort: newSort }: Criteria<any>) => {
+  const onTableChange = (nextValues: Criteria<T>) => {
     if (customOnTableChange) {
-      customOnTableChange({ page, sort: newSort });
+      customOnTableChange(nextValues);
     }
-    const newPersistData: PersistData = {};
-    newPersistData.pageSize = page?.size ?? storagePageSize;
+    const newPersistData: PersistData<T> = {};
+    newPersistData.pageSize = nextValues.page?.size ?? storagePageSize;
+    const newSort = nextValues?.sort;
     newPersistData.sort = newSort?.field
       ? newSort
       : newSort?.direction
@@ -74,5 +77,5 @@ export const useEuiTablePersist = ({
     }
   };
 
-  return { pageSize, sort, onTableChange };
+  return { pageSize, sorting, onTableChange };
 };

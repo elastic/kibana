@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PersistData } from './types';
-
 /**
  * A utility function used to validate a table persist data.
  * If any of the properties is not valid, it is returned with undefined value.
@@ -15,7 +13,7 @@ import { PersistData } from './types';
  * @param data The data to be validated
  * @param pageSizeOptions The table page size options that are available
  */
-export const validatePersistData = (data: any, pageSizeOptions: number[]): PersistData => {
+export const validatePersistData = (data: any, pageSizeOptions: number[]) => {
   const pageSize = data?.pageSize;
   const sort = data?.sort;
 
@@ -31,10 +29,7 @@ export const validatePersistData = (data: any, pageSizeOptions: number[]): Persi
   if (sort) {
     const field = sort.field;
     const direction = sort.direction;
-    if (
-      !(typeof field === 'string' || typeof field === 'number' || typeof field === 'symbol') ||
-      !(direction === 'asc' || direction === 'desc')
-    ) {
+    if (!(typeof field === 'string') || !(direction === 'asc' || direction === 'desc')) {
       validatedSort = undefined;
     }
   }

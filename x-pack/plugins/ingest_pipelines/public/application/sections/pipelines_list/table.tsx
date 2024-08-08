@@ -117,7 +117,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const PAGE_SIZE_OPTIONS = [10, 20, 50];
-  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<Pipeline>({
     tableId: 'ingestPipelines',
     initialPageSize: 10,
     initialSort: { field: 'name', direction: 'asc' },
@@ -220,7 +220,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     'data-test-subj': 'pipelinesTable',
-    sorting: { sort },
+    sorting,
     selection: {
       onSelectionChange: setSelection,
     },

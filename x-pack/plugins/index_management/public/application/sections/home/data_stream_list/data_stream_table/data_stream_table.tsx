@@ -272,7 +272,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   };
 
   const PAGE_SIZE_OPTIONS = [10, 20, 50];
-  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<TableDataStream>({
     tableId: 'dataStreams',
     initialPageSize: 20,
     initialSort: {
@@ -306,7 +306,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         itemId="name"
         columns={columns}
         search={searchConfig}
-        sorting={{ sort }}
+        sorting={sorting}
         selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({

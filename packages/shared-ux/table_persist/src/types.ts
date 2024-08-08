@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-export interface PersistData {
+export interface PersistData<T> {
   pageSize?: number;
-  sort?: SortCriteria;
+  sort?: {
+    field: keyof T;
+    direction: 'asc' | 'desc';
+  };
 }
-
-export interface SortCriteria {
-  field: string | number | symbol;
-  direction: 'asc' | 'desc';
-};

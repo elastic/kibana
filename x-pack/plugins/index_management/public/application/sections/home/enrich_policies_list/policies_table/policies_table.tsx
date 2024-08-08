@@ -156,7 +156,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
   ];
 
-  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<SerializedEnrichPolicy>({
     tableId: 'enrichPolicies',
     initialPageSize: 50,
     initialSort: {
@@ -178,7 +178,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       columns={columns}
       search={search}
       pagination={pagination}
-      sorting={{ sort }}
+      sorting={sorting}
       onTableChange={onTableChange}
     />
   );

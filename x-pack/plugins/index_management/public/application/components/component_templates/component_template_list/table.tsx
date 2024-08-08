@@ -90,7 +90,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
   const PAGE_SIZE_OPTIONS = [10, 20, 50];
-  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<ComponentTemplateListItem>({
     tableId: 'componentTemplates',
     initialPageSize: 10,
     initialSort: { field: 'name', direction: 'asc' },
@@ -141,7 +141,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
     tableLayout: 'auto',
     itemId: 'name',
     'data-test-subj': 'componentTemplatesTable',
-    sorting: { sort },
+    sorting,
     selection: {
       onSelectionChange: setSelection,
       selectable: ({ usedBy }) => usedBy.length === 0,

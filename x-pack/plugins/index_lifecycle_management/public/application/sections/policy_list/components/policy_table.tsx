@@ -105,7 +105,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   const { setListAction } = usePolicyListContext();
 
   const PAGE_SIZE_OPTIONS = [10, 25, 50];
-  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<PolicyFromES>({
     tableId: 'ilmPolicies',
     initialPageSize: 25,
     initialSort: {
@@ -330,7 +330,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         pageSizeOptions: PAGE_SIZE_OPTIONS,
       }}
       onTableChange={onTableChange}
-      sorting={{ sort }}
+      sorting={sorting}
       search={searchOptions as EuiInMemoryTableProps<PolicyFromES>['search']}
       tableLayout="auto"
       items={filteredPolicies}
