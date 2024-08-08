@@ -9,7 +9,7 @@ import {
   createDiscoveryServiceMock,
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
-import { TaskPartitioner } from './task_partitioner';
+import { CACHE_INTERVAL, TaskPartitioner } from './task_partitioner';
 
 const POD_NAME = 'test-pod';
 
@@ -47,24 +47,61 @@ describe('getPodName()', () => {
 describe('getPartitions()', () => {
   const lastSeen = '2024-08-10T10:00:00.000Z';
   const discoveryServiceMock = createDiscoveryServiceMock(POD_NAME);
-  discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
-    createFindSO(POD_NAME, lastSeen),
-    createFindSO('test-pod-2', lastSeen),
-    createFindSO('test-pod-3', lastSeen),
-  ]);
+  const expectedPartitions = [
+    0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22, 24, 25, 27, 28, 30, 31, 33, 34, 36, 37,
+    39, 40, 42, 43, 45, 46, 48, 49, 51, 52, 54, 55, 57, 58, 60, 61, 63, 64, 66, 67, 69, 70, 72, 73,
+    75, 76, 78, 79, 81, 82, 84, 85, 87, 88, 90, 91, 93, 94, 96, 97, 99, 100, 102, 103, 105, 106,
+    108, 109, 111, 112, 114, 115, 117, 118, 120, 121, 123, 124, 126, 127, 129, 130, 132, 133, 135,
+    136, 138, 139, 141, 142, 144, 145, 147, 148, 150, 151, 153, 154, 156, 157, 159, 160, 162, 163,
+    165, 166, 168, 169, 171, 172, 174, 175, 177, 178, 180, 181, 183, 184, 186, 187, 189, 190, 192,
+    193, 195, 196, 198, 199, 201, 202, 204, 205, 207, 208, 210, 211, 213, 214, 216, 217, 219, 220,
+    222, 223, 225, 226, 228, 229, 231, 232, 234, 235, 237, 238, 240, 241, 243, 244, 246, 247, 249,
+    250, 252, 253, 255,
+  ];
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    discoveryServiceMock.getActiveKibanaNodes.mockResolvedValue([
+      createFindSO(POD_NAME, lastSeen),
+      createFindSO('test-pod-2', lastSeen),
+      createFindSO('test-pod-3', lastSeen),
+    ]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+  });
 
   test('correctly gets the partitons for this pod', async () => {
     const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
-    expect(await taskPartitioner.getPartitions()).toEqual([
-      0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 22, 24, 25, 27, 28, 30, 31, 33, 34, 36,
-      37, 39, 40, 42, 43, 45, 46, 48, 49, 51, 52, 54, 55, 57, 58, 60, 61, 63, 64, 66, 67, 69, 70,
-      72, 73, 75, 76, 78, 79, 81, 82, 84, 85, 87, 88, 90, 91, 93, 94, 96, 97, 99, 100, 102, 103,
-      105, 106, 108, 109, 111, 112, 114, 115, 117, 118, 120, 121, 123, 124, 126, 127, 129, 130, 132,
-      133, 135, 136, 138, 139, 141, 142, 144, 145, 147, 148, 150, 151, 153, 154, 156, 157, 159, 160,
-      162, 163, 165, 166, 168, 169, 171, 172, 174, 175, 177, 178, 180, 181, 183, 184, 186, 187, 189,
-      190, 192, 193, 195, 196, 198, 199, 201, 202, 204, 205, 207, 208, 210, 211, 213, 214, 216, 217,
-      219, 220, 222, 223, 225, 226, 228, 229, 231, 232, 234, 235, 237, 238, 240, 241, 243, 244, 246,
-      247, 249, 250, 252, 253, 255,
-    ]);
+    expect(await taskPartitioner.getPartitions()).toEqual(expectedPartitions);
+  });
+
+  test('correctly caches the partitions on 10 second interval', async () => {
+    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+    const shorterInterval = CACHE_INTERVAL / 2;
+
+    await taskPartitioner.getPartitions();
+
+    jest.advanceTimersByTime(shorterInterval);
+    await taskPartitioner.getPartitions();
+
+    jest.advanceTimersByTime(shorterInterval);
+    await taskPartitioner.getPartitions();
+
+    expect(discoveryServiceMock.getActiveKibanaNodes).toHaveBeenCalledTimes(2);
+  });
+
+  test('correctly catches the error from the discovery service and returns the cached value', async () => {
+    const taskPartitioner = new TaskPartitioner(POD_NAME, discoveryServiceMock);
+
+    await taskPartitioner.getPartitions();
+    expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
+
+    discoveryServiceMock.getActiveKibanaNodes.mockRejectedValueOnce([]);
+    jest.advanceTimersByTime(CACHE_INTERVAL);
+    await taskPartitioner.getPartitions();
+    expect(taskPartitioner.getPodPartitions()).toEqual(expectedPartitions);
   });
 });

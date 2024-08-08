@@ -50,7 +50,7 @@ export class WorkerCapacity implements ICapacity {
    */
   public getUsedCapacityByType(tasksInPool: TaskRunner[], type: string) {
     return tasksInPool.reduce(
-      (count, runningTask) => (runningTask.definition.type === type ? ++count : count),
+      (count, runningTask) => (runningTask.definition?.type === type ? ++count : count),
       0
     );
   }

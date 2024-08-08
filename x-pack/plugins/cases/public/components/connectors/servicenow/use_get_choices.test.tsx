@@ -47,7 +47,7 @@ describe('useGetChoices', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getChoices');
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetChoices({
           http,
@@ -57,7 +57,9 @@ describe('useGetChoices', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
 
     expect(spy).toHaveBeenCalledWith({
       http,
@@ -90,7 +92,7 @@ describe('useGetChoices', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetChoices({
           http,
@@ -100,8 +102,9 @@ describe('useGetChoices', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getChoices api returns successfully but contains an error', async () => {
@@ -115,7 +118,7 @@ describe('useGetChoices', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitForNextUpdate } = renderHook(
+    const { waitFor } = renderHook(
       () =>
         useGetChoices({
           http,
@@ -125,7 +128,8 @@ describe('useGetChoices', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });
