@@ -16,8 +16,10 @@ import { PLUGIN_ID } from './constants';
 import img from './control_group_image.png';
 import { EditControlAction } from '../../../src/plugins/controls/public/react_controls/actions/edit_control_action';
 import { SEARCH_CONTROL_TYPE } from './search_control/types';
+import { ControlsPluginSetup } from '@kbn/controls-plugin/public/types';
 
 interface SetupDeps {
+  controls: ControlsPluginSetup;
   developerExamples: DeveloperExamplesSetup;
   embeddable: EmbeddableSetup;
 }
@@ -33,10 +35,10 @@ export class ControlsExamplePlugin
 {
   public setup(
     core: CoreSetup<ControlsExampleStartDeps>,
-    { developerExamples, embeddable }: SetupDeps
+    { controls, developerExamples, embeddable }: SetupDeps
   ) {
     
-    /*registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
+    controls.registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
       const [{ getSearchControlFactory: getSearchEmbeddableFactory }, [coreStart, depsStart]] =
         await Promise.all([
           import('./search_control/get_search_control_factory'),
@@ -48,7 +50,7 @@ export class ControlsExamplePlugin
         data: depsStart.data,
         dataViews: depsStart.data.dataViews,
       });
-    });*/
+    });
 
     core.application.register({
       id: PLUGIN_ID,

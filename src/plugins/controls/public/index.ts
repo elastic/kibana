@@ -9,6 +9,13 @@
 import { ControlsPlugin } from './plugin';
 
 export type { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './react_controls/control_group/types';
+export type {
+  DataControlApi,
+  DefaultDataControlState,
+  DataControlFactory,
+  DataControlServices,
+} from './react_controls/controls/data_controls/types';
+export { initializeDataControl } from './react_controls/controls/data_controls/initialize_data_control';
 
 /**
  * TODO: remove all exports below this when control group embeddable is removed

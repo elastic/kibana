@@ -16,11 +16,11 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { Filter } from '@kbn/es-query';
-import { initializeDataControl } from '../../../../src/plugins/controls/public/react_controls/controls/data_controls/initialize_data_control';
+import { initializeDataControl } from '@kbn/controls-plugin/public';
 import type {
   DataControlFactory,
   DataControlServices,
-} from '../../../../src/plugins/controls/public/react_controls/controls/data_controls/types';
+} from '@kbn/controls-plugin/public';
 import {
   SearchControlApi,
   SearchControlState,
