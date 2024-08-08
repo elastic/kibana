@@ -31,7 +31,7 @@ import {
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardRedirect, DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
+import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
@@ -332,99 +332,5 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
         reject(error);
       }
     })();
-  });
-}
-
-export async function duplicate(this: DashboardContainer, redirectTo: DashboardRedirect) {
-  const {
-    dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
-  } = pluginServices.getServices();
-
-  const { explicitInput: currentState } = this.getState();
-
-  return new Promise<SaveDashboardReturn | undefined>(async (resolve, reject) => {
-    try {
-      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
-
-      let copyCount = baseCount + 1;
-      let newTitle = `${baseTitle} (${copyCount})`;
-
-      while (
-        !(await checkForDuplicateDashboardTitle({
-          title: newTitle,
-          lastSavedTitle: currentState.title,
-          copyOnSave: true,
-          isTitleDuplicateConfirmed: false,
-        }))
-      ) {
-        copyCount++;
-        newTitle = `${baseTitle} (${copyCount})`;
-      }
-
-      let stateToSave: DashboardContainerInput & {
-        controlGroupInput?: PersistableControlGroupInput;
-      } = currentState;
-
-      if (this.controlGroup) {
-        stateToSave = {
-          ...stateToSave,
-          controlGroupInput: this.controlGroup.getPersistableInput(),
-        };
-      }
-
-      const isManaged = this.getState().componentState.managed;
-      const newPanels = await (async () => {
-        if (!isManaged) return currentState.panels;
-
-        const unlinkedPanels: DashboardPanelMap = {};
-
-        for (const [panelId, panel] of Object.entries(currentState.panels)) {
-          const child = this.getChild(panelId);
-          if (
-            child &&
-            isReferenceOrValueEmbeddable(child) &&
-            child.inputIsRefType(child.getInput() as EmbeddableInput)
-          ) {
-            const valueTypeInput = await child.getInputAsValueType();
-            unlinkedPanels[panelId] = {
-              ...panel,
-              explicitInput: valueTypeInput,
-            };
-            continue;
-          }
-          unlinkedPanels[panelId] = panel;
-        }
-        return unlinkedPanels;
-      })();
-
-      const saveResult = await saveDashboardState({
-        saveOptions: {
-          saveAsCopy: true,
-        },
-        currentState: {
-          ...stateToSave,
-          panels: newPanels,
-          title: newTitle,
-        },
-      });
-
-      this.savedObjectReferences = saveResult.references ?? [];
-      this.saveNotification$.next();
-      this.savedObjectReferences = saveResult.references ?? [];
-      this.dispatch.setLastSavedInput(stateToSave);
-
-      resolve(saveResult);
-      redirectTo({
-        id: saveResult.id,
-        editMode: true,
-        useReplace: true,
-        destination: 'dashboard',
-      });
-
-      return saveResult;
-    } catch (error) {
-      reject(error);
-      return error;
-    }
   });
 }

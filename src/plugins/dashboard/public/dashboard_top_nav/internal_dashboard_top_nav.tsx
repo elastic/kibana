@@ -373,7 +373,7 @@ export function InternalDashboardTopNav({
                     aria-label={buttonText}
                     onClick={() => {
                       setIsLoading(true);
-                      dashboard.duplicate(redirectTo);
+                      dashboard.runInteractiveSave(viewMode);
                       setIsLoading(false);
                     }}
                     data-test-subj="managedContentPopoverDuplicateButton"
@@ -402,7 +402,6 @@ export function InternalDashboardTopNav({
     isPopoverOpen,
     isLoading,
     dashboard,
-    redirectTo,
   ]);
 
   return (
