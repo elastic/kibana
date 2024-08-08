@@ -51,6 +51,7 @@ describe('ES|QL Tokens Provider', () => {
       {
         scopes: 'nulls_order.esql',
         startIndex: 69,
+        stopIndex: 78,
       },
     ]);
     // Ensure that the NULLS FIRST and NULLS LAST tokens are not present

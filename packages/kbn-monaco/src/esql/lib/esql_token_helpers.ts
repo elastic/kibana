@@ -42,31 +42,36 @@ const mergeRules = [
 
 export function mergeTokens(tokens: ESQLToken[]): monaco.languages.IToken[] {
   for (const [scopes, newScope] of mergeRules) {
-    for (let i = 0; i < tokens.length; i++) {
-      if (tokens[i].scopes === scopes[0] + ESQL_TOKEN_POSTFIX) {
-        // first matched so look ahead if there's room
-        if (i + scopes.length > tokens.length) {
-          continue;
-        }
+    let foundAnyMatches = false;
+    do {
+      foundAnyMatches = false;
+      for (let i = 0; i < tokens.length; i++) {
+        if (tokens[i].scopes === scopes[0] + ESQL_TOKEN_POSTFIX) {
+          // first matched so look ahead if there's room
+          if (i + scopes.length > tokens.length) {
+            continue;
+          }
 
-        let match = true;
-        for (let j = 1; j < scopes.length; j++) {
-          if (tokens[i + j].scopes !== scopes[j] + ESQL_TOKEN_POSTFIX) {
-            match = false;
-            break;
+          let match = true;
+          for (let j = 1; j < scopes.length; j++) {
+            if (tokens[i + j].scopes !== scopes[j] + ESQL_TOKEN_POSTFIX) {
+              match = false;
+              break;
+            }
+          }
+
+          if (match) {
+            foundAnyMatches = true;
+            const mergedToken = new ESQLToken(
+              newScope,
+              tokens[i].startIndex,
+              tokens[i + scopes.length - 1].stopIndex
+            );
+            tokens.splice(i, scopes.length, mergedToken);
           }
         }
-
-        if (match) {
-          const mergedToken = new ESQLToken(
-            newScope,
-            tokens[i].startIndex,
-            tokens[i + scopes.length - 1].stopIndex
-          );
-          tokens.splice(i, scopes.length, mergedToken);
-        }
       }
-    }
+    } while (foundAnyMatches);
   }
 
   return tokens;
