@@ -11,6 +11,7 @@ import { createOverviewPanelAction } from './create_overview_panel_action';
 import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
 import { createAddAlertsPanelAction } from './create_alerts_panel_action';
 import { SloPublicPluginsStart, SloPublicStart, SloPublicPluginsSetup } from '..';
+import { createBurnRatePanelAction } from './create_burn_rate_panel_action';
 
 export function registerSloUiActions(
   core: CoreSetup<SloPublicPluginsStart, SloPublicStart>,
@@ -24,6 +25,7 @@ export function registerSloUiActions(
   const addOverviewPanelAction = createOverviewPanelAction(core.getStartServices);
   const addErrorBudgetPanelAction = createAddErrorBudgetPanelAction(core.getStartServices);
   const addAlertsPanelAction = createAddAlertsPanelAction(core.getStartServices);
+  const addBurnRatePanelAction = createBurnRatePanelAction(core.getStartServices);
 
   // Assign triggers
   // Only register these actions in stateful kibana, and the serverless observability project
@@ -31,5 +33,6 @@ export function registerSloUiActions(
     uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addOverviewPanelAction);
     uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addErrorBudgetPanelAction);
     uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAlertsPanelAction);
+    uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addBurnRatePanelAction);
   }
 }

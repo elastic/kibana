@@ -8,6 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
+import type { Dispatch } from 'redux';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
@@ -20,7 +21,7 @@ import type { Sort } from '../../body/sort';
 import { mockDataProviders } from '../../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { TimelineStatus } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -110,10 +111,10 @@ describe('Timeline', () => {
     );
 
     props = {
+      dispatch: {} as Dispatch,
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
       isLive: false,
@@ -122,14 +123,12 @@ describe('Timeline', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: ' ',
       kqlQueryLanguage: 'kuery',
-      onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
       showCallOutUnauthorizedMsg: false,
-      showExpandedDetails: false,
       sort,
       start: startDate,
-      status: TimelineStatus.active,
+      status: TimelineStatusEnum.active,
       timerangeKind: 'absolute',
       activeTab: TimelineTabs.query,
       show: true,

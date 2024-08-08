@@ -91,7 +91,7 @@ describe('kibanaContextFn', () => {
         } as unknown as SavedSearch['searchSource'],
         {} as SavedSearch['sharingSavedObjectProps'],
         false
-      )
+      ) as SavedSearch
     );
     const args = {
       ...emptyArgs,

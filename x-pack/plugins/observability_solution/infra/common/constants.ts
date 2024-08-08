@@ -24,6 +24,11 @@ export const HOST_NAME_FIELD = 'host.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
 export const SYSTEM_PROCESS_CMDLINE_FIELD = 'system.process.cmdline';
+export const EVENT_MODULE = 'event.module';
+export const METRICSET_MODULE = 'metricset.module';
+
+// integrations
+export const SYSTEM_INTEGRATION = 'system';
 
 // logs
 export const MESSAGE_FIELD = 'message';

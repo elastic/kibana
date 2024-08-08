@@ -36,7 +36,7 @@ check_for_changed_files() {
   GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
-    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
@@ -56,7 +56,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!.bazelrc' ':!config/node.options' ':!config/kibana.yml'
+      git add -A -- . ':!.bazelrc' ':!WORKSPACE.bazel' ':!config/node.options' ':!config/kibana.yml'
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push

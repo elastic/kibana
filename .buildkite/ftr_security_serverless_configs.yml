@@ -1,5 +1,7 @@
 disabled:
   # Base config files, only necessary to inform config finding script
+  - x-pack/test_serverless/functional/test_suites/security/cypress/security_config.base.ts
+  - x-pack/test_serverless/functional/test_suites/security/cypress/cypress.config.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
@@ -95,3 +97,5 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
+  # serverless config files that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/security.serverless.config.ts
