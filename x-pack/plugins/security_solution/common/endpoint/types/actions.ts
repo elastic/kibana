@@ -9,13 +9,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
-  KillProcessRouteRequestSchema,
-  ResponseActionBodySchema,
-  SuspendProcessRouteRequestSchema,
   UploadActionApiRequestBody,
+  ActionStatusRequestSchema,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../api/endpoint';
-import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
-import type { NoParametersRequestSchema } from '../../api/endpoint/actions/common/base';
+
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -358,22 +357,12 @@ export interface ActivityLog {
   data: ActivityLogEntry[];
 }
 
-export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
-
-export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
-
-export type KillProcessRequestBody = TypeOf<typeof KillProcessRouteRequestSchema.body>;
-
-export type SuspendProcessRequestBody = TypeOf<typeof SuspendProcessRouteRequestSchema.body>;
-
 /** Note: this type should almost never be used. Use instead the response action specific types above */
 export type KillOrSuspendProcessRequestBody = KillProcessRequestBody & SuspendProcessRequestBody;
 
 export interface HostIsolationResponse {
   action: string;
 }
-
-export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 
 export interface ResponseActionApiResponse<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput

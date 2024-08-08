@@ -10,11 +10,7 @@ import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import type { InfraAssetMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
 import type { GetHostParameters } from '../types';
-import {
-  getFilterByIntegration,
-  getInventoryModelAggregations,
-  getValidDocumentsFilter,
-} from '../helpers/query';
+import { getFilterByIntegration, getInventoryModelAggregations } from '../helpers/query';
 import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
 export const getAllHosts = async ({
@@ -41,7 +37,6 @@ export const getAllHosts = async ({
       query: {
         bool: {
           filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-          should: [...getValidDocumentsFilter()],
         },
       },
       aggs: {

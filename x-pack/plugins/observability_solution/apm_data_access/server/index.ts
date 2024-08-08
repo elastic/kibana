@@ -91,6 +91,8 @@ export type {
   APMEventESSearchRequest,
   APMLogEventESSearchRequest,
   DocumentSourcesRequest,
+  ApmDataAccessPrivilegesCheck,
+  HostNamesRequest,
 } from './types';
 
 export { APMEventClient } from './lib/helpers';

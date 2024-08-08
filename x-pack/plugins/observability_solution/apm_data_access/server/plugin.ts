@@ -25,7 +25,7 @@ import {
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
 import { getServices } from './services/get_services';
-import { createHasPrivilege } from './lib/check_privileges';
+import { ApmDataAccessPrivilegesCheck, checkPrivileges } from './lib/check_privileges';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -68,12 +68,16 @@ export class ApmDataAccessPlugin
       return this.getApmIndices(soClient);
     };
 
-    return {
-      hasPrivileges: createHasPrivilege({
-        security: plugins.security,
-        getApmIndices: getApmIndicesWithInternalUserFn,
-      }),
+    const startServices = {
+      hasPrivileges: ({ request }: Pick<ApmDataAccessPrivilegesCheck, 'request'>) =>
+        checkPrivileges({
+          request,
+          getApmIndices: getApmIndicesWithInternalUserFn,
+          security: plugins.security,
+        }),
     };
+
+    return { ...startServices };
   }
 
   public stop() {}

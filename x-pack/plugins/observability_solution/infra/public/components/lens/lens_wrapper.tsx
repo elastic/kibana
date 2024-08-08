@@ -56,7 +56,7 @@ export const LensWrapper = ({
   }, [ref]);
 
   useEffect(() => {
-    if (intersectionObserverEntry?.isIntersecting && !loading) {
+    if (intersectionObserverEntry?.isIntersecting) {
       setState({
         attributes,
         dateRange,
@@ -70,19 +70,18 @@ export const LensWrapper = ({
     dateRange,
     filters,
     intersectionObserverEntry?.isIntersecting,
-    loading,
     query,
     searchSessionId,
   ]);
 
   const handleOnLoad = useCallback(
-    (loaded: boolean) => {
+    (isLoading: boolean) => {
       if (!embeddableLoaded) {
         setEmbeddableLoaded(true);
       }
 
       if (onLoad) {
-        onLoad(loaded);
+        onLoad(isLoading);
       }
     },
     [embeddableLoaded, onLoad]
@@ -96,7 +95,6 @@ export const LensWrapper = ({
         position: relative;
         overflow: hidden;
         height: 100%;
-        display: flex;
         .echMetric {
           border-radius: ${euiTheme.border.radius.medium};
           pointer-events: none;

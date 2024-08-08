@@ -10,33 +10,33 @@ import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { mapValues } from 'lodash';
 import { APMIndices } from '..';
 
-export interface ApmDataAccessPermission {
+export interface ApmDataAccessPrivilegesCheck {
   request: KibanaRequest;
-}
-
-export function createHasPrivilege({
-  security,
-  getApmIndices,
-}: {
   security?: SecurityPluginStart;
   getApmIndices: () => Promise<APMIndices>;
-}) {
-  return async ({ request }: ApmDataAccessPermission) => {
-    const authorization = security?.authz;
-    if (!authorization) {
-      return true;
-    }
+}
 
-    const apmIndices = await getApmIndices();
-    const checkPrivileges = await authorization?.checkPrivilegesDynamicallyWithRequest(request);
-    const { hasAllRequested } = await checkPrivileges({
-      kibana: [authorization.actions.api.get('apm-read')],
-      elasticsearch: {
-        cluster: [],
-        index: mapValues(apmIndices, () => ['read']),
-      },
-    });
+export async function checkPrivileges({
+  request,
+  getApmIndices,
+  security,
+}: ApmDataAccessPrivilegesCheck) {
+  const authorization = security?.authz;
+  if (!authorization) {
+    return true;
+  }
 
-    return hasAllRequested;
-  };
+  const [apmIndices, checkPrivilegesFn] = await Promise.all([
+    getApmIndices(),
+    authorization.checkPrivilegesDynamicallyWithRequest(request),
+  ]);
+
+  const { hasAllRequested } = await checkPrivilegesFn({
+    elasticsearch: {
+      cluster: [],
+      index: mapValues(apmIndices, () => ['read']),
+    },
+  });
+
+  return hasAllRequested;
 }

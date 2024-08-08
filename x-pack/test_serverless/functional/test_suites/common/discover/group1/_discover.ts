@@ -216,7 +216,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('time zone switch', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/189943
+    // FLAKY: https://github.com/elastic/kibana/issues/190058
+    describe.skip('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');

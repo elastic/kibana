@@ -93,11 +93,11 @@ export default function ({ getService }: FtrProviderContext) {
               metrics: [
                 {
                   name: 'rxV2',
-                  value: 133425.6,
+                  value: 17886.18845261874,
                 },
                 {
                   name: 'txV2',
-                  value: 135892.3,
+                  value: 18216.85858680644,
                 },
                 {
                   name: 'memory',
@@ -105,11 +105,11 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 {
                   name: 'cpuTotal',
-                  value: 1.021,
+                  value: 0.124,
                 },
                 {
                   name: 'diskSpaceUsage',
-                  value: 0,
+                  value: null,
                 },
                 {
                   name: 'memoryFree',

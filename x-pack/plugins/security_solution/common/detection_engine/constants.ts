@@ -29,6 +29,7 @@ export enum RULE_PREVIEW_FROM {
 }
 
 export const PREBUILT_RULES_PACKAGE_NAME = 'security_detection_engine';
+export const ENDPOINT_PACKAGE_NAME = 'endpoint';
 
 /**
  * Rule signature id (`rule.rule_id`) of the prebuilt "Endpoint Security" rule.

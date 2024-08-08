@@ -9,7 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { APMIndices } from '.';
 import { getServices } from './services/get_services';
-import type { ApmDataAccessPermission } from './lib/check_privileges';
+import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
 
 export interface ApmDataAccessPluginSetup {
   apmIndicesFromConfigFile: APMIndices;
@@ -22,13 +22,13 @@ export interface ApmDataAccessServerDependencies {
 }
 
 export interface ApmDataAccessPluginStart {
-  hasPrivileges: (params: ApmDataAccessPermission) => Promise<boolean>;
+  hasPrivileges: (params: Pick<ApmDataAccessPrivilegesCheck, 'request'>) => Promise<boolean>;
 }
 export interface ApmDataAccessServerDependencies {
   security?: SecurityPluginStart;
 }
 
-export type ApmDataAccessServices = typeof getServices;
+export type ApmDataAccessServices = ReturnType<typeof getServices>;
 export type { ApmDataAccessServicesParams } from './services/get_services';
 export type { DocumentSourcesRequest } from './services/get_document_sources';
 export type { HostNamesRequest } from './services/get_host_names';
@@ -37,3 +37,4 @@ export type {
   APMEventESSearchRequest,
   APMLogEventESSearchRequest,
 } from './lib/helpers';
+export type { ApmDataAccessPrivilegesCheck };

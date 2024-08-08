@@ -12,10 +12,9 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { ControlStateManager } from '../../../types';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { OptionsListControlContext } from '../options_list_context_provider';
-import { OptionsListComponentApi, OptionsListComponentState } from '../types';
+import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 describe('Options list sorting button', () => {
@@ -33,7 +32,7 @@ describe('Options list sorting button', () => {
         value={{
           api: api as unknown as OptionsListComponentApi,
           displaySettings,
-          stateManager: stateManager as unknown as ControlStateManager<OptionsListComponentState>,
+          stateManager: stateManager as unknown as ContextStateManager,
         }}
       >
         <OptionsListPopoverSortingButton showOnlySelected={false} />
