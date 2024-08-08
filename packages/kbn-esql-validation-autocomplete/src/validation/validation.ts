@@ -76,6 +76,7 @@ import {
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
+import { isStringType } from '../shared/esql_types';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -110,7 +111,7 @@ function validateFunctionLiteralArg(
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
+            argType: argDef.type as string,
             value: typeof actualArg.value === 'number' ? actualArg.value : String(actualArg.value),
             givenType: actualArg.literalType,
           },
@@ -138,7 +139,7 @@ function validateFunctionLiteralArg(
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type,
+              argType: argDef.type as string,
               value: actualArg.name,
               givenType: 'duration',
             },
@@ -168,7 +169,7 @@ function validateInlineCastArg(
         messageId: 'wrongArgumentType',
         values: {
           name: astFunction.name,
-          argType: parameterDefinition.type,
+          argType: parameterDefinition.type as string,
           value: arg.text,
           givenType: arg.castType,
         },
@@ -205,7 +206,7 @@ function validateNestedFunctionArg(
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
-          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType as string },
           locations: actualArg.location,
         })
       );
@@ -218,9 +219,9 @@ function validateNestedFunctionArg(
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: parameterDefinition.type,
+            argType: parameterDefinition.type as string,
             value: actualArg.text,
-            givenType: argFn.signatures[0].returnType,
+            givenType: argFn.signatures[0].returnType as string,
           },
           locations: actualArg.location,
         })
@@ -300,7 +301,7 @@ function validateFunctionColumnArg(
         messageId: 'wrongArgumentType',
         values: {
           name: astFunction.name,
-          argType: parameterDefinition.type,
+          argType: parameterDefinition.type as string,
           value: actualArg.name,
           givenType: columnHit!.type,
         },
@@ -463,7 +464,7 @@ function validateFunction(
           allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          parentCommand === 'stats' || parentCommand === 'metrics'
+          ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
             ? isNested || !isAssignment(astFunction)
             : false
         );
@@ -533,14 +534,14 @@ function validateFunction(
         });
       });
 
-      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
               outerArg,
               astFunction.name,
-              argDef.type,
+              argDef.type as string,
               parentCommand,
               references
             )
@@ -879,6 +880,7 @@ function validateColumnForCommand(
 
       if (columnParamsWithInnerTypes.length) {
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
+          if (innerType === 'string' && isStringType(columnRef.type)) return false;
           return innerType !== 'any' && innerType !== columnRef.type;
         });
         if (hasSomeWrongInnerTypes) {
@@ -1008,7 +1010,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             );
           }
           if (isColumnItem(arg)) {
-            if (command.name === 'stats') {
+            if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
@@ -1074,15 +1076,17 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>) {
   const messages: ESQLMessage[] = [];
   for (const field of fields.values()) {
     if (field.type === 'unsupported') {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFieldType',
-          values: {
-            field: field.name,
-          },
-          locations: { min: 1, max: 1 },
-        })
-      );
+      // Removed temporarily to supress all these warnings
+      // Issue to re-enable in a better way: https://github.com/elastic/kibana/issues/189666
+      // messages.push(
+      //   getMessageFromId({
+      //     messageId: 'unsupportedFieldType',
+      //     values: {
+      //       field: field.name,
+      //     },
+      //     locations: { min: 1, max: 1 },
+      //   })
+      // );
     }
   }
   return messages;

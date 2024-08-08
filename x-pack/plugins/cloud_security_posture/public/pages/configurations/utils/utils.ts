@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
-import { CspFinding } from '@kbn/cloud-security-posture';
+import type { estypes } from '@elastic/elasticsearch';
 export { getFilters } from './get_filters';
 
-export const getFindingsPageSizeInfo = ({
-  currentPageSize,
-  pageIndex,
-  pageSize,
-}: Record<'pageIndex' | 'pageSize' | 'currentPageSize', number>) => ({
-  pageStart: pageIndex * pageSize + 1,
-  pageEnd: pageIndex * pageSize + currentPageSize,
+export const getFindingsCountAggQuery = () => ({
+  count: { terms: { field: 'result.evaluation' } },
 });
 
-const isSelectedRow = (row: CspFinding, selected?: CspFinding) =>
-  row.resource.id === selected?.resource.id && row.rule.id === selected?.rule.id;
+export const getAggregationCount = (
+  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
+) => {
+  const passed = buckets.find((bucket) => bucket?.key === 'passed');
+  const failed = buckets.find((bucket) => bucket?.key === 'failed');
 
-export const getSelectedRowStyle = (
-  theme: EuiThemeComputed,
-  row: CspFinding,
-  selected?: CspFinding
-): React.CSSProperties => ({
-  background: isSelectedRow(row, selected) ? theme.colors.highlight : undefined,
-});
+  return {
+    passed: passed?.doc_count || 0,
+    failed: failed?.doc_count || 0,
+  };
+};

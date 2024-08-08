@@ -42,10 +42,6 @@ import {
   createFindSO,
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
 
-jest.mock('../lib/assign_pod_partitions', () => ({
-  assignPodPartitions: jest.fn().mockReturnValue([1, 3]),
-}));
-
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
     'limitedToZero',
@@ -114,6 +110,7 @@ describe('TaskClaiming', () => {
       .spyOn(apm, 'startTransaction')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);
+    jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 3]);
   });
 
   describe('claimAvailableTasks', () => {

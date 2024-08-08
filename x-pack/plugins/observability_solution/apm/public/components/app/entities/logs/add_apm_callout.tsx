@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   useEuiTheme,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { apmLight } from '@kbn/shared-svg';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +24,11 @@ import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { AddApmData } from '../../../shared/add_data_buttons/buttons';
 
-export function AddAPMCallOut() {
+interface Props {
+  onClose: () => void;
+}
+
+export function AddAPMCallOut({ onClose }: Props) {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
 
@@ -35,41 +40,56 @@ export function AddAPMCallOut() {
 
   return (
     <EuiPanel color="subdued" hasShadow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart">
-        <EuiFlexItem grow={0}>
-          <EuiImage
-            css={{
-              background: euiTheme.colors.emptyShade,
-            }}
-            width="160"
-            height="100"
-            size="m"
-            src={apmLight}
-            alt="apm-logo"
-          />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart">
+            <EuiFlexItem grow={0}>
+              <EuiImage
+                css={{
+                  background: euiTheme.colors.emptyShade,
+                }}
+                width="160"
+                height="100"
+                size="m"
+                src={apmLight}
+                alt="apm-logo"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={4}>
+              <EuiTitle size="xs">
+                <h1>
+                  <FormattedMessage
+                    id="xpack.apm.addAPMCallOut.title"
+                    defaultMessage="Detect and resolve issues faster with deep visibility into your application"
+                  />
+                </h1>
+              </EuiTitle>
+
+              <EuiSpacer size="m" />
+
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.apm.addAPMCallOut.description"
+                    defaultMessage="Understanding your application performance, relationships and dependencies by
+                instrumenting with APM."
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={4}>
-          <EuiTitle size="xs">
-            <h1>
-              <FormattedMessage
-                id="xpack.apm.addAPMCallOut.title"
-                defaultMessage="Detect and resolve issues faster with deep visibility into your application"
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="apmAddAPMCallOutButton"
+                iconType="cross"
+                onClick={onClose}
               />
-            </h1>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.apm.addAPMCallOut.description"
-                defaultMessage="Understanding your application performance, relationships and dependencies by
-    instrumenting with APM."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
@@ -83,6 +103,7 @@ export function AddAPMCallOut() {
             data-test-subj="apmAddApmCallOutLearnMoreButton"
             iconType="popout"
             iconSide="right"
+            target="_blank"
             href="https://www.elastic.co/observability/application-performance-monitoring"
           >
             {i18n.translate('xpack.apm.addAPMCallOut.linkToElasticcoButtonEmptyLabel', {

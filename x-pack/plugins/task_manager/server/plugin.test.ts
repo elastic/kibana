@@ -11,7 +11,6 @@ import { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
 import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
-import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
@@ -150,7 +149,6 @@ describe('TaskManagerPlugin', () => {
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
-        serverless: serverlessPluginMock.createStartContract(),
         cloud: cloudMock.createStart(),
       });
 
@@ -168,7 +166,6 @@ describe('TaskManagerPlugin', () => {
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
-        serverless: serverlessPluginMock.createStartContract(),
         cloud: cloudMock.createStart(),
       });
 

@@ -20,9 +20,17 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
     outputFilePath: 'docs/openapi/serverless/osquery_api_{version}.bundled.schema.yaml',
     options: {
       includeLabels: ['serverless'],
-      specInfo: {
-        title: 'Security Solution Osquery API (Elastic Cloud Serverless)',
-        description: 'Run live queries, manage packs and saved queries.',
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Osquery API (Elastic Cloud Serverless)',
+          description: 'Run live queries, manage packs and saved queries.',
+        },
+        tags: [
+          {
+            name: 'Security Solution Osquery API',
+            description: 'Run live queries, manage packs and saved queries.',
+          },
+        ],
       },
     },
   });
@@ -33,9 +41,17 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
     outputFilePath: 'docs/openapi/ess/osquery_api_{version}.bundled.schema.yaml',
     options: {
       includeLabels: ['ess'],
-      specInfo: {
-        title: 'Security Solution Osquery API (Elastic Cloud and self-hosted)',
-        description: 'Run live queries, manage packs and saved queries.',
+      prototypeDocument: {
+        info: {
+          title: 'Security Solution Osquery API (Elastic Cloud and self-hosted)',
+          description: 'Run live queries, manage packs and saved queries.',
+        },
+        tags: [
+          {
+            name: 'Security Solution Osquery API',
+            description: 'Run live queries, manage packs and saved queries.',
+          },
+        ],
       },
     },
   });

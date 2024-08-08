@@ -7,18 +7,22 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
+import { IEsSearchResponse } from '@kbn/search-types';
 import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecuritySolutionUtils } from './types';
+import type { SendOptions } from '@kbn/test-suites-src/common/services/bsearch';
+import type { SendOptions as SecureBsearchSendOptions } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { SecuritySolutionUtilsInterface } from './types';
 
 export function SecuritySolutionServerlessUtils({
   getService,
-}: FtrProviderContext): SecuritySolutionUtils {
+}: FtrProviderContext): SecuritySolutionUtilsInterface {
   const svlUserManager = getService('svlUserManager');
   const lifecycle = getService('lifecycle');
   const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
   const log = getService('log');
+  const SecureBsearch = getService('secureBsearch');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
   const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
@@ -26,9 +30,10 @@ export function SecuritySolutionServerlessUtils({
     ...config.get('servers.kibana'),
     auth: false,
   });
-  const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
 
   async function invalidateApiKey(credentials: RoleCredentials) {
+    // load service to call it outside mocha context
+    await svlUserManager.init();
     await svlUserManager.invalidateM2mApiKeyWithRoleScope(credentials);
   }
 
@@ -48,8 +53,21 @@ export function SecuritySolutionServerlessUtils({
     });
   });
 
+  const createSuperTest = async (role = 'admin') => {
+    cleanCredentials(role);
+    // load service to call it outside mocha context
+    await svlUserManager.init();
+    const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
+    rolesCredentials.set(role, credentials);
+
+    const agentWithCommonHeaders = supertest.agent(kbnUrl).set(commonRequestHeader);
+    return agentWithCommonHeaders.set(credentials.apiKeyHeader);
+  };
+
   return {
     getUsername: async (role = 'admin') => {
+      // load service to call it outside mocha context
+      await svlUserManager.init();
       const { username } = await svlUserManager.getUserData(role);
 
       return username;
@@ -57,12 +75,32 @@ export function SecuritySolutionServerlessUtils({
     /**
      * Only one API key for each role can be active at a time.
      */
-    createSuperTest: async (role = 'admin') => {
-      cleanCredentials(role);
-      const credentials = await svlUserManager.createM2mApiKeyWithRoleScope(role);
-      rolesCredentials.set(role, credentials);
+    createSuperTest,
 
-      return agentWithCommonHeaders.set(credentials.apiKeyHeader);
+    createBsearch: async (role = 'admin') => {
+      const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader;
+
+      if (!apiKeyHeader) {
+        log.error(`API key for role [${role}] is not available, SecureBsearch cannot be created`);
+      }
+
+      const send = <T extends IEsSearchResponse>(sendOptions: SendOptions): Promise<T> => {
+        const { supertest: _, ...rest } = sendOptions;
+        const serverlessSendOptions: SecureBsearchSendOptions = {
+          ...rest,
+          // We need super test WITHOUT auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
+          supertestWithoutAuth: supertest.agent(kbnUrl),
+          apiKeyHeader: apiKeyHeader ?? { Authorization: '' },
+          internalOrigin: 'Kibana',
+        };
+
+        log.debug(
+          `Sending request to SecureBsearch with options: ${JSON.stringify(serverlessSendOptions)}`
+        );
+        return SecureBsearch.send(serverlessSendOptions);
+      };
+
+      return { ...SecureBsearch, send };
     },
   };
 }

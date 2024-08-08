@@ -11,7 +11,11 @@ import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  HasSaveNotification,
+  HasSerializedChildState,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -51,13 +55,16 @@ export type ControlGroupApi = PresentationContainer &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesDataLoading &
-  PublishesUnsavedChanges &
+  Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
-  Partial<HasParentApi<PublishesUnifiedSearch>> & {
+  Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
+    asyncResetUnsavedChanges: () => Promise<void>;
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    getLastSavedControlState: (controlUuid: string) => object;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+    allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
   };
 
@@ -83,16 +90,8 @@ export type ControlGroupEditorState = Pick<
   'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
-export type ControlGroupSerializedState = Omit<
-  ControlGroupRuntimeState,
-  | 'labelPosition'
-  | 'ignoreParentSettings'
-  | 'defaultControlGrow'
-  | 'defaultControlWidth'
-  | 'anyChildHasUnsavedChanges'
-  | 'initialChildControlState'
-  | 'autoApplySelections'
-> & {
+export interface ControlGroupSerializedState {
+  chainingSystem: ControlGroupChainingSystem;
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
   // In runtime state, we refer to this property as `labelPosition`;
@@ -101,4 +100,4 @@ export type ControlGroupSerializedState = Omit<
   // In runtime state, we refer to the inverse of this property as `autoApplySelections`
   // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
   showApplySelections: boolean | undefined;
-};
+}

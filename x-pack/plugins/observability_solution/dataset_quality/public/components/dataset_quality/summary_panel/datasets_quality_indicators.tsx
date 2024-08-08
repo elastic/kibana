@@ -33,13 +33,24 @@ import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
-  const { datasetsQuality, isDatasetsQualityLoading, datasetsActivity } = useSummaryPanelContext();
+  const {
+    datasetsQuality,
+    isDatasetsQualityLoading,
+    datasetsActivity,
+    numberOfDatasets,
+    numberOfDocuments,
+  } = useSummaryPanelContext();
   const qualityCounts = mapPercentagesToQualityCounts(datasetsQuality.percentages);
   const datasetsWithoutIgnoredField =
     datasetsActivity.total > 0 ? datasetsActivity.total - datasetsQuality.percentages.length : 0;
 
-  if (!isDatasetsQualityLoading) {
-    onPageReady();
+  if (!isDatasetsQualityLoading && (numberOfDatasets || numberOfDocuments)) {
+    onPageReady({
+      key1: 'datasets',
+      value1: numberOfDatasets,
+      key2: 'documents',
+      value2: numberOfDocuments,
+    });
   }
 
   return (

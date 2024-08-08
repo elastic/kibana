@@ -210,5 +210,8 @@
     "@kbn/avc-banner",
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/config",
   ]
 }

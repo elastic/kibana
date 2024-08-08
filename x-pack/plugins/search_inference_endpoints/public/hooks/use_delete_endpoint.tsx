@@ -17,7 +17,7 @@ interface MutationArgs {
   id: string;
 }
 
-export const useDeleteEndpoint = () => {
+export const useDeleteEndpoint = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
@@ -32,6 +32,9 @@ export const useDeleteEndpoint = () => {
         toasts?.addSuccess({
           title: i18n.DELETE_SUCCESS,
         });
+        if (onSuccess) {
+          onSuccess();
+        }
       },
       onError: (error: { body: KibanaServerError }) => {
         toasts?.addError(new Error(error.body.message), {

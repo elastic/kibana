@@ -20,7 +20,6 @@ export type RulesQuery = Pick<
   FindCspBenchmarkRuleRequest,
   'section' | 'search' | 'page' | 'perPage' | 'ruleNumber' | 'sortField' | 'sortOrder'
 >;
-export type RulesQueryResult = ReturnType<typeof useFindCspBenchmarkRule>;
 
 export const useFindCspBenchmarkRule = (
   { search, page, perPage, section, ruleNumber, sortField, sortOrder }: RulesQuery,

@@ -6,7 +6,6 @@
  */
 import type { Criteria } from '@elastic/eui';
 import type { Filter, Query, EsQueryConfig } from '@kbn/es-query';
-import { CspFinding } from '@kbn/cloud-security-posture';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
@@ -32,11 +31,6 @@ export interface FindingsBaseESQueryConfig {
 //     bool: BoolQuery;
 //   };
 // }
-
-export interface CspFindingsQueryData {
-  page: CspFinding[];
-  total: number;
-}
 
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;
 

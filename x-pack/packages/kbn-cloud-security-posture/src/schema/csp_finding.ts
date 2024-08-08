@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EcsEvent } from '@elastic/ecs';
+import type { EcsDataStream, EcsEvent } from '@elastic/ecs';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 
@@ -46,6 +46,7 @@ export interface CspFinding {
   rule: CspBenchmarkRuleMetadata;
   host: CspFindingHost;
   event: EcsEvent;
+  data_stream: EcsDataStream;
   agent: CspFindingAgent;
   ecs: {
     version: string;

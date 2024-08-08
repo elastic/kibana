@@ -6,27 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
-import { DataControlFactory } from '../types';
+import { DataControlFactory, DataControlServices } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { RangeSliderStrings } from './range_slider_strings';
-import {
-  RangesliderControlApi,
-  RangesliderControlState,
-  RangeValue,
-  RANGE_SLIDER_CONTROL_TYPE,
-  Services,
-} from './types';
+import { RangesliderControlApi, RangesliderControlState, RANGE_SLIDER_CONTROL_TYPE } from './types';
+import { initializeRangeControlSelections } from './range_control_selections';
 
 export const getRangesliderControlFactory = (
-  services: Services
+  services: DataControlServices
 ): DataControlFactory<RangesliderControlState, RangesliderControlApi> => {
   return {
     type: RANGE_SLIDER_CONTROL_TYPE,
@@ -35,8 +30,9 @@ export const getRangesliderControlFactory = (
     isFieldCompatible: (field) => {
       return field.aggregatable && field.type === 'number';
     },
-    CustomOptionsComponent: ({ currentState, updateState, setControlEditorValid }) => {
-      const step = currentState.step ?? 1;
+    CustomOptionsComponent: ({ initialState, updateState, setControlEditorValid }) => {
+      const [step, setStep] = useState(initialState.step ?? 1);
+
       return (
         <>
           <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
@@ -44,6 +40,7 @@ export const getRangesliderControlFactory = (
               value={step}
               onChange={(event) => {
                 const newStep = event.target.valueAsNumber;
+                setStep(newStep);
                 updateState({ step: newStep });
                 setControlEditorValid(newStep > 0);
               }}
@@ -61,21 +58,21 @@ export const getRangesliderControlFactory = (
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
       const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
-      const value$ = new BehaviorSubject<RangeValue | undefined>(initialState.value);
-      function setValue(nextValue: RangeValue | undefined) {
-        value$.next(nextValue);
-      }
 
-      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step' | 'value'>>(
+      const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
         RANGE_SLIDER_CONTROL_TYPE,
         initialState,
         {
           step: step$,
-          value: value$,
         },
         controlGroupApi,
         services
+      );
+
+      const selections = initializeRangeControlSelections(
+        initialState,
+        dataControl.setters.onSelectionChange
       );
 
       const api = buildApi(
@@ -89,19 +86,23 @@ export const getRangesliderControlFactory = (
               rawState: {
                 ...dataControlState,
                 step: step$.getValue(),
-                value: value$.getValue(),
+                value: selections.value$.getValue(),
               },
               references, // does not have any references other than those provided by the data control serializer
             };
           },
           clearSelections: () => {
-            value$.next(undefined);
+            selections.setValue(undefined);
           },
         },
         {
           ...dataControl.comparators,
-          step: [step$, (nextStep: number | undefined) => step$.next(nextStep)],
-          value: [value$, setValue],
+          ...selections.comparators,
+          step: [
+            step$,
+            (nextStep: number | undefined) => step$.next(nextStep),
+            (a, b) => (a ?? 1) === (b ?? 1),
+          ],
         }
       );
 
@@ -125,7 +126,7 @@ export const getRangesliderControlFactory = (
         .pipe(skip(1))
         .subscribe(() => {
           step$.next(1);
-          value$.next(undefined);
+          selections.setValue(undefined);
         });
 
       const max$ = new BehaviorSubject<number | undefined>(undefined);
@@ -163,28 +164,30 @@ export const getRangesliderControlFactory = (
       const outputFilterSubscription = combineLatest([
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
-        value$,
-      ]).subscribe(([dataViews, fieldName, value]) => {
-        const dataView = dataViews?.[0];
-        const dataViewField =
-          dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
-        const gte = parseFloat(value?.[0] ?? '');
-        const lte = parseFloat(value?.[1] ?? '');
+        selections.value$,
+      ])
+        .pipe(debounceTime(0))
+        .subscribe(([dataViews, fieldName, value]) => {
+          const dataView = dataViews?.[0];
+          const dataViewField =
+            dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+          const gte = parseFloat(value?.[0] ?? '');
+          const lte = parseFloat(value?.[1] ?? '');
 
-        let rangeFilter: Filter | undefined;
-        if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
-          const params = {
-            gte,
-            lte,
-          } as RangeFilterParams;
+          let rangeFilter: Filter | undefined;
+          if (value && dataView && dataViewField && !isNaN(gte) && !isNaN(lte)) {
+            const params = {
+              gte,
+              lte,
+            } as RangeFilterParams;
 
-          rangeFilter = buildRangeFilter(dataViewField, params, dataView);
-          rangeFilter.meta.key = fieldName;
-          rangeFilter.meta.type = 'range';
-          rangeFilter.meta.params = params;
-        }
-        api.setOutputFilter(rangeFilter);
-      });
+            rangeFilter = buildRangeFilter(dataViewField, params, dataView);
+            rangeFilter.meta.key = fieldName;
+            rangeFilter.meta.type = 'range';
+            rangeFilter.meta.params = params;
+          }
+          dataControl.setters.setOutputFilter(rangeFilter);
+        });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
@@ -200,23 +203,22 @@ export const getRangesliderControlFactory = (
         selectionHasNoResults$.next(hasNoResults);
       });
 
-      if (initialState.value !== undefined) {
-        await dataControl.untilFiltersInitialized();
+      if (selections.hasInitialSelections) {
+        await dataControl.api.untilFiltersReady();
       }
 
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, dataViews, fieldName, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
-              dataControl.api.dataViews,
-              dataControl.stateManager.fieldName,
+              dataControl.api.fieldFormatter,
               max$,
               min$,
               selectionHasNoResults$,
               step$,
-              value$
+              selections.value$
             );
 
           useEffect(() => {
@@ -229,17 +231,6 @@ export const getRangesliderControlFactory = (
             };
           }, []);
 
-          const fieldFormatter = useMemo(() => {
-            const dataView = dataViews?.[0];
-            if (!dataView) {
-              return undefined;
-            }
-            const fieldSpec = dataView.getFieldByName(fieldName);
-            return fieldSpec
-              ? dataView.getFormatterForField(fieldSpec).getConverterFor('text')
-              : undefined;
-          }, [dataViews, fieldName]);
-
           return (
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
@@ -248,8 +239,8 @@ export const getRangesliderControlFactory = (
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}
-              onChange={setValue}
-              step={step}
+              onChange={selections.setValue}
+              step={step ?? 1}
               value={value}
               uuid={uuid}
             />
