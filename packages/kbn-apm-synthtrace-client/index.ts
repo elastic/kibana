@@ -35,3 +35,4 @@ export { appendHash, hashKeysOf } from './src/lib/utils/hash';
 export type { ESDocumentWithOperation, SynthtraceESAction, SynthtraceGenerator } from './src/types';
 export { log, type LogDocument } from './src/lib/logs';
 export { type AssetDocument } from './src/lib/assets';
+export { entity } from './src/lib/entities';

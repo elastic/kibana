@@ -18,6 +18,7 @@ import {
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import { EntitySynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/entity/entity_syntrace_es_client';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
@@ -86,6 +87,9 @@ export interface CreateTest {
     ) => Promise<ApmSynthtraceKibanaClient>;
     apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
+    entitySynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<EntitySynthtraceEsClient>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -128,6 +132,12 @@ export function createTestConfig(
           }),
         assetsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
           new AssetsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
+        entitySynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new EntitySynthtraceEsClient({
             client: context.getService('es'),
             logger: createLogger(LogLevel.info),
             refreshAfterIndex: true,
