@@ -19,11 +19,11 @@ import { Manager } from './resource_manager';
 import { generateRandomString } from './utils';
 
 export class AgentManager extends Manager {
-  private log: ToolingLog;
-  private policyEnrollmentKey: string;
-  private fleetServerPort: string;
+  private readonly log: ToolingLog;
+  private readonly policyEnrollmentKey: string;
+  private readonly fleetServerPort: string;
+  private readonly kbnClient: KbnClient;
   private agentContainerId?: string;
-  private kbnClient: KbnClient;
 
   constructor(
     policyEnrollmentKey: string,
