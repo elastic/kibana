@@ -209,5 +209,6 @@
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
     "@kbn/config",
+    "@kbn/cbor",
   ]
 }
