@@ -61,7 +61,10 @@ export class Timefilter {
   ) {
     this._history = timeHistory;
     this.timeDefaults = config.timeDefaults;
-    this.refreshIntervalDefaults = config.refreshIntervalDefaults;
+    this.refreshIntervalDefaults = {
+      ...config.refreshIntervalDefaults,
+      value: Math.max(config.refreshIntervalDefaults.value, config.minRefreshIntervalDefault),
+    };
     this._minRefreshInterval = config.minRefreshIntervalDefault;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
