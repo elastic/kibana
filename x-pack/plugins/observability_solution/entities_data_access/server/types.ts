@@ -6,4 +6,7 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AssetsPluginStartDeps {}
+export interface EntitiesPluginSetupDeps {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntitiesPluginStartDeps {}
