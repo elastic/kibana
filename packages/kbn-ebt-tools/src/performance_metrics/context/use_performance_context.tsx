@@ -7,9 +7,14 @@
  */
 
 import { createContext, useContext } from 'react';
+import { CustomMetrics } from './performance_context';
 
 export interface PerformanceApi {
-  onPageReady(): void;
+  /**
+   * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
+   * @param customMetrics - Custom metrics to be included in the performance measure.
+   */
+  onPageReady(customMetrics?: CustomMetrics): void;
 }
 
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);
