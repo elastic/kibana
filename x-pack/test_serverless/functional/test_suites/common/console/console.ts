@@ -6,33 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-const DEFAULT_REQUEST = `
-# Welcome to the Dev Tools Console!
-#
-# You can use Console to explore the Elasticsearch API. See the \n  Elasticsearch API reference to learn more:
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/rest\n  -apis.html
-#
-# Here are a few examples to get you started.
-
-
-# Create an index
-PUT /my-index
-
-
-# Add a document to my-index
-POST /my-index/_doc
-{
-    "id": "park_rocky-mountain",
-    "title": "Rocky Mountain",
-    "description": "Bisected north to south by the Continental Divide, \n      this portion of the Rockies has ecosystems varying from over 150 \n      riparian lakes to montane and subalpine forests to treeless \n      alpine tundra."
-}
-
-
-# Perform a search in my-index
-GET /my-index/_search?q="rocky mountain"
-`.trim();
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -56,18 +31,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the default request', async () => {
       await retry.try(async () => {
-        const actualRequest = await PageObjects.console.getRequest();
+        const actualRequest = await PageObjects.console.monaco.getEditorText();
         log.debug(actualRequest);
-        expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
+        expect(actualRequest.replace(/\s/g, '')).to.eql(DEFAULT_INPUT_VALUE.replace(/\s/g, ''));
       });
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
-      await PageObjects.console.selectAllRequests();
+      await PageObjects.console.monaco.selectAllRequests();
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
-        const actualResponse = await PageObjects.console.getResponse();
+        const actualResponse = await PageObjects.console.monaco.getOutputText();
         log.debug(actualResponse);
         expect(actualResponse).to.contain(expectedResponseContains);
       });
