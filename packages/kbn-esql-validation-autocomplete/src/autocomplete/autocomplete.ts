@@ -94,6 +94,7 @@ import {
   removeQuoteForSuggestedSources,
 } from './helper';
 import { FunctionParameter } from '../definitions/types';
+import { getSortPos } from './commands/sort/helper';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -248,7 +249,7 @@ export async function suggest(
 
   if (astContext.type === 'expression') {
     if (astContext.command.name === 'sort') {
-      return (await getFieldsByType('any')) as SuggestionRawDefinition[];
+      return await suggestForSortCmd(innerText, getFieldsByType);
     }
 
     // suggest next possible argument, or option
@@ -1693,3 +1694,63 @@ async function getOptionArgsSuggestions(
   }
   return suggestions;
 }
+
+const sortModifierSuggestions = {
+  ASC: {
+    label: 'ASC',
+    text: 'ASC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-ASC',
+  } as SuggestionRawDefinition,
+  DESC: {
+    label: 'DESC',
+    text: 'DESC',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '1-DESC',
+  } as SuggestionRawDefinition,
+  NULLS_FIRST: {
+    label: 'NULLS FIRST',
+    text: 'NULLS FIRST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS FIRST',
+  } as SuggestionRawDefinition,
+  NULLS_LAST: {
+    label: 'NULLS LAST',
+    text: 'NULLS LAST',
+    detail: '',
+    kind: 'Keyword',
+    sortText: '2-NULLS LAST',
+  } as SuggestionRawDefinition,
+};
+
+export const suggestForSortCmd = async (innerText: string, getFieldsByType: GetFieldsByTypeFn) => {
+  const { pos, order, nulls } = getSortPos(innerText);
+
+  switch (pos) {
+    case 'space2': {
+      return [
+        sortModifierSuggestions.ASC,
+        sortModifierSuggestions.DESC,
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        ...getFinalSuggestions({
+          comma: true,
+        }),
+      ];
+    }
+    case 'space3': {
+      return [
+        sortModifierSuggestions.NULLS_FIRST,
+        sortModifierSuggestions.NULLS_LAST,
+        ...getFinalSuggestions({
+          comma: true,
+        }),
+      ];
+    }
+  }
+
+  return (await getFieldsByType('any')) as SuggestionRawDefinition[];
+};

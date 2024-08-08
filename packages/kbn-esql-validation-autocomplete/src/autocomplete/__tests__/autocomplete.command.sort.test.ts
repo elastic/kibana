@@ -8,17 +8,6 @@
 
 import { setup, getFieldNamesByType } from './helpers';
 
-// describe('sort', () => {
-//   testSuggestions('from a | sort ', [
-//     ...getFieldNamesByType('any'),
-//     ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-//   ]);
-//   testSuggestions('from a | sort stringField ', ['ASC', 'DESC', ',', '|']);
-//   testSuggestions('from a | sort stringField desc ', ['NULLS FIRST', 'NULLS LAST', ',', '|']);
-//   // @TODO: improve here
-//   // testSuggestions('from a | sort stringField desc ', ['first', 'last']);
-// });
-
 describe('autocomplete.suggest', () => {
   describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIST / NULLS LAST ] )+', () => {
     describe('SORT <column> ...', () => {
@@ -31,10 +20,30 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... [ ASC / DESC ] ...', () => {
-      test.only('suggests command on first character', async () => {
+      test('suggests command on first character', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | sort stringField /', ['ASC', 'DESC', ',', '|']);
+        await assertSuggestions('from a | sort stringField /', [
+          'ASC',
+          'DESC',
+          'NULLS FIRST',
+          'NULLS LAST',
+          ',',
+          '|',
+        ]);
+      });
+    });
+
+    describe('... [ NULLS FIST / NULLS LAST ]', () => {
+      test('suggests command on first character', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField ASC /', [
+          'NULLS FIRST',
+          'NULLS LAST',
+          ',',
+          '|',
+        ]);
       });
     });
   });

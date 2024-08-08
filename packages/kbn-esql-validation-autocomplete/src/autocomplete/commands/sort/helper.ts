@@ -11,6 +11,23 @@ const regex =
   /.+\|\s*sort(.+,)?((?<space1>\s+)(?<column>[^\s]+)(?<space2>\s*)(?<order>(AS?C?)|(DE?S?C?))?(?<space3>\s*)(?<nulls>NU?L?L?S? ?(FI?R?S?T?|LA?S?T?)?)?(?<space4>\s*))?/i;
 
 export interface SortCaretPosition {
+  /**
+   * Position of the caret in the sort command:
+   *
+   * ```
+   * SORT <column> [ASC/DESC] [NULLS FIRST/NULLS LAST]
+   * |  | |       |   |      |      |                 |
+   * |  | |       |   |      |      |                 space4
+   * |  | |       |   |      |      nulls
+   * |  | |       |   |      space3
+   * |  | |       |   order
+   * |  | |       space 2
+   * |  | |
+   * |  | column
+   * |  start
+   * pre-start
+   * ```
+   */
   pos:
     | 'none'
     | 'pre-start'
