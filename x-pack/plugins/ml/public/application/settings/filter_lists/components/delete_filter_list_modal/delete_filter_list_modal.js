@@ -49,7 +49,11 @@ export class DeleteFilterListModal extends Component {
 
   async doDelete() {
     const { selectedFilterLists, refreshFilterLists } = this.props;
-    await deleteFilterLists(this.context.services.notifications.toasts, selectedFilterLists);
+    await deleteFilterLists(
+      this.context.services.notifications.toasts,
+      this.context.services.mlServices.mlApiServices,
+      selectedFilterLists
+    );
 
     refreshFilterLists();
     this.closeModal();
