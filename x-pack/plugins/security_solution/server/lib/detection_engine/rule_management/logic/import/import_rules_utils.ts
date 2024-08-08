@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { SavedObject } from '@kbn/core/server';
 import type {
   ImportExceptionsListSchema,
@@ -46,6 +47,7 @@ export const importRules = async ({
   detectionRulesClient,
   existingLists,
   allowMissingConnectorSecrets,
+  allowPrebuiltRules,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
@@ -53,6 +55,7 @@ export const importRules = async ({
   detectionRulesClient: IDetectionRulesClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
+  allowPrebuiltRules?: boolean;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -77,6 +80,24 @@ export const importRules = async ({
                   message: parsedRule.message,
                 })
               );
+              return null;
+            }
+
+            if (!allowPrebuiltRules && parsedRule.immutable) {
+              resolve(
+                createBulkErrorObject({
+                  statusCode: 400,
+                  message: i18n.translate(
+                    'xpack.securitySolution.detectionEngine.rules.importPrebuiltRulesUnsupported',
+                    {
+                      defaultMessage:
+                        'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+                    }
+                  ),
+                  ruleId: parsedRule.rule_id,
+                })
+              );
+
               return null;
             }
 

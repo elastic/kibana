@@ -1516,7 +1516,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('supporting prebuilt rule customization', () => {
       describe('compatibility with prebuilt rule fields', () => {
-        it('allows rules with "immutable: true"', async () => {
+        it('rejects rules with "immutable: true" when the feature flag is disabled', async () => {
           const rule = getCustomQueryRuleParams({
             rule_id: 'rule-immutable',
             // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
@@ -1532,7 +1532,51 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(200);
 
           expect(body).toMatchObject({
-            success: true,
+            success: false,
+            errors: [
+              {
+                rule_id: 'rule-immutable',
+                error: {
+                  status_code: 400,
+                  message:
+                    'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+                },
+              },
+            ],
+          });
+        });
+
+        it('imports custom rules alongside prebuilt rules when feature flag is disabled', async () => {
+          const ndjson = combineToNdJson(
+            getCustomQueryRuleParams({
+              rule_id: 'rule-immutable',
+              // @ts-expect-error the API supports the 'immutable' param, but we only need it in {@link RuleToImport}
+              immutable: true,
+            }),
+            // @ts-expect-error the API supports the 'immutable' param, but we only need it in {@link RuleToImport}
+            getCustomQueryRuleParams({ rule_id: 'custom-rule', immutable: false })
+          );
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: false,
+            success_count: 1,
+            errors: [
+              {
+                rule_id: 'rule-immutable',
+                error: {
+                  status_code: 400,
+                  message:
+                    'Importing prebuilt rules is not supported. To import this rule as a custom rule, remove its "immutable" property try again.',
+                },
+              },
+            ],
           });
         });
 

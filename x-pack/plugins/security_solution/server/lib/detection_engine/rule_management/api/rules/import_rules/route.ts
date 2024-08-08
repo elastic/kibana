@@ -158,6 +158,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             detectionRulesClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
+            allowPrebuiltRules: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
           });
 
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
