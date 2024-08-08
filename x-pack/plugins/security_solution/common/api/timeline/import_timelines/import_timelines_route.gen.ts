@@ -33,4 +33,6 @@ export const ImportTimelinesRequestBody = z.object({
 export type ImportTimelinesRequestBodyInput = z.input<typeof ImportTimelinesRequestBody>;
 
 export type ImportTimelinesResponse = z.infer<typeof ImportTimelinesResponse>;
-export const ImportTimelinesResponse = ImportTimelineResult;
+export const ImportTimelinesResponse = z.object({
+  data: ImportTimelineResult,
+});
