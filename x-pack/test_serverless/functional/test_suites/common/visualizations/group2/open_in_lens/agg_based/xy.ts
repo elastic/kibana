@@ -53,13 +53,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting if several split series are defined', async () => {
-      expect(await panelActions.canConvertToLensByTitle('XY - Multiple Split Series')).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('XY - Multiple Split Series')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting if sibling pipeline agg and split series are defined', async () => {
-        'XY - Sibling pipeline agg w/ split'
-      );
-      expect(await panelActions.canConvertToLensByTitle(s()).to.eql(false);
+      expect(
+        await panelActions.canConvertToLensByTitle('XY - Sibling pipeline agg w/ split')
+      ).to.eql(false);
     });
 
     it('should not allow converting of unsupported aggregation', async () => {

@@ -62,7 +62,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should not allow converting of unsupported metric', async () => {
-      expect(await panelActions.canConvertToLensByTitle('Gauge - Unsupported metric')).to.eql(false);
+      expect(await panelActions.canConvertToLensByTitle('Gauge - Unsupported metric')).to.eql(
+        false
+      );
     });
 
     it('should not allow converting of invalid panel', async () => {
@@ -100,19 +102,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should bring the ignore global filters configured at series level over', async () => {
-      const visPanel = await panelActions.getPanelHoverAction
-        'Gauge - Ignore global filters series'
-      );
-      await panelActions.convertToLensByTitle(s();
+      await panelActions.convertToLensByTitle('Gauge - Ignore global filters series');
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
-      const visPanel = await panelActions.getPanelHoverAction
-        'Gauge - Ignore global filters panel'
-      );
-      await panelActions.convertToLensByTitle(s();
+      await panelActions.convertToLensByTitle('Gauge - Ignore global filters panel');
       await lens.waitForVisualization('mtrVis');
       expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
