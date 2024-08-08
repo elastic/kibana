@@ -342,7 +342,7 @@ export class ProjectMonitorFormatter {
             namespace: monitor.namespaces?.[0],
           }
         ),
-      { concurrency: 500 }
+      { concurrency: 100 }
     );
   };
 
