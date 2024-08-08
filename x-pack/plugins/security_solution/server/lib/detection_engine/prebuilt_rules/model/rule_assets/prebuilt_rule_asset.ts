@@ -86,10 +86,10 @@ export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PR
 
 /**
  * Creates a Map of the fields that are upgradable during the Upgrade workflow, by type.
- * This function creates the map dynamically, so that we don't need to manually
- * add rule types if they are added, or manually add or remove any fields if they are
- * added or removed to a specific rule type, or if we decide that they should not be part
- * of the upgradable fields, since it's based on BaseCreateProps and TypeSpecificFields.
+ * Creating this Map dynamically, based on BaseCreateProps and TypeSpecificFields, ensures that we don't need to:
+ *  - manually add rule types to this Map if they are created
+ *  - manually add or remove any fields if they are added or removed to a specific rule type
+ *  - manually add or remove any fields if we decide that they should not be part of the upgradable fields.
  */
 function createUpgradableRuleFieldsByTypeMap() {
   const baseFields = Object.keys(
