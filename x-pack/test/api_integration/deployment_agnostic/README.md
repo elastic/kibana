@@ -167,8 +167,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 }
 ```
 
-Deployment-agnostic test should be loaded in stateful config and at least 1 serverless config files.
-
 oblt.serverless.config.ts
 ```ts
 import { createServerlessTestConfig } from './../../api_integration/deployment_agnostic/default_configs/serverless.config.base';
