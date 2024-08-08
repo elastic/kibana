@@ -34,7 +34,6 @@ const defaultStory: Story = {
         username: 'johndoe',
         full_name: 'John Doe',
       },
-      filters: [],
       timeRange: {
         from: moment().subtract(15, 'minutes').toISOString(),
         to: moment().toISOString(),

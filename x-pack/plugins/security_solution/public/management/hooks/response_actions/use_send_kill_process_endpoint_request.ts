@@ -8,10 +8,8 @@
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type {
-  ResponseActionApiResponse,
-  KillProcessRequestBody,
-} from '../../../../common/endpoint/types';
+import type { KillProcessRequestBody } from '../../../../common/api/endpoint';
+import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import { killProcess } from '../../../common/lib/process_actions';
 
 /**
