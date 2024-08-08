@@ -11,6 +11,7 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 import 'monaco-editor/esm/vs/base/common/worker/simpleWorker';
 import 'monaco-editor/esm/vs/base/browser/defaultWorkerFactory';
+import 'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess';
 
 import 'monaco-editor/esm/vs/editor/browser/coreCommands.js';
 import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
