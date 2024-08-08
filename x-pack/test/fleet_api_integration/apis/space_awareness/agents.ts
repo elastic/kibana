@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('agents TMPDEBUGME', async function () {
+  describe('agents', async function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
