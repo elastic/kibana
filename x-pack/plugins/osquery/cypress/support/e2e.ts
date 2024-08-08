@@ -57,7 +57,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      login(role: ServerlessRoleName, force: boolean): void;
+      login(role: ServerlessRoleName, force?: boolean): void;
 
       waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
