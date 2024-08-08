@@ -1260,7 +1260,8 @@ components:
         - allOf:
             - $ref: '#/components/schemas/PinnedEvent'
             - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
-        - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
+        - nullable: true
+          type: object
     PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/BarePinnedEvent'
