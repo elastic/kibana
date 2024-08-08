@@ -15,7 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlStateManager } from '../types';
+import { ControlStateManager } from '../controls/types';
 import { ControlGroupEditor } from './control_group_editor';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 

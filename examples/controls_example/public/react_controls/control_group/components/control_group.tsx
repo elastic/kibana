@@ -36,9 +36,9 @@ import { ControlStyle } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlsInOrder } from '../init_controls_manager';
 import { ControlGroupApi } from '../types';
-import { ControlRenderer } from '../../control_renderer';
-import { ControlClone } from '../../components/control_clone';
-import { DefaultControlApi } from '../../types';
+import { ControlRenderer } from './control_renderer';
+import { ControlClone } from './control_clone';
+import { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
 
 interface Props {

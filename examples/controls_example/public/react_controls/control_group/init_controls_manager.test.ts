@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DefaultControlApi } from '../types';
+import { DefaultControlApi } from '../controls/types';
 import { initControlsManager } from './init_controls_manager';
 
 jest.mock('uuid', () => ({

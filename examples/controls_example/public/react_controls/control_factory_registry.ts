@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ControlFactory, DefaultControlApi } from './types';
+import { ControlFactory, DefaultControlApi } from './controls/types';
 
 const registry: { [key: string]: ControlFactory<any, any> } = {};
 

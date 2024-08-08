@@ -19,7 +19,7 @@ import { PublishingSubject, StateComparators } from '@kbn/presentation-publishin
 import { omit } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { ControlPanelsState, ControlPanelState } from './types';
-import { DefaultControlApi, DefaultControlState } from '../types';
+import { DefaultControlApi, DefaultControlState } from '../controls/types';
 import { ControlGroupComparatorState } from './control_group_unsaved_changes_api';
 
 export type ControlsInOrder = Array<{ id: string; type: string }>;

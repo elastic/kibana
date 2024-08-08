@@ -20,7 +20,7 @@ import {
 import { combineLatest, map } from 'rxjs';
 import { ControlsInOrder, getControlsInOrder } from './init_controls_manager';
 import { ControlGroupRuntimeState, ControlPanelsState } from './types';
-import { apiPublishesAsyncFilters } from '../data_controls/publishes_async_filters';
+import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 
 export type ControlGroupComparatorState = Pick<
   ControlGroupRuntimeState,

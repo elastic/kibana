@@ -29,7 +29,7 @@ import { css } from '@emotion/react';
 import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { ControlStateManager } from '../types';
+import { ControlStateManager } from '../controls/types';
 import { ControlGroupStrings } from './control_group_strings';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 

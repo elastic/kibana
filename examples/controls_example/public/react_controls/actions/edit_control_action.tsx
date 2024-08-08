@@ -25,7 +25,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { DataControlApi } from '../data_controls/types';
+import { DataControlApi } from '../controls/data_controls/types';
 
 const isApiCompatible = (api: unknown | null): api is DataControlApi =>
   Boolean(

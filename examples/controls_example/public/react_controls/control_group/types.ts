@@ -28,7 +28,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { Observable } from 'rxjs';
-import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
+import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /** The control display settings published by the control group are the "default" */
