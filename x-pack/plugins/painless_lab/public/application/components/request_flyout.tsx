@@ -39,7 +39,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
         <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
           <EuiFlexItem>
             {/* We need an extra div to get out of flex grow */}
-            <div>
+            <div data-test-subj="flyoutDefaultHeader">
               <EuiTitle size="m">
                 <h2>
                   {i18n.translate('xpack.painlessLab.flyoutTitle', {
