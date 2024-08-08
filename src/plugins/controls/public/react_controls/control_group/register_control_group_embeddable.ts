@@ -11,7 +11,10 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ControlsPluginStartDeps } from '../../types';
 import { CONTROL_GROUP_TYPE } from '../../../common';
 
-export function registerControlGroupEmbeddable(coreSetup: CoreSetup<ControlsPluginStartDeps>, embeddableSetup: EmbeddableSetup) {
+export function registerControlGroupEmbeddable(
+  coreSetup: CoreSetup<ControlsPluginStartDeps>,
+  embeddableSetup: EmbeddableSetup
+) {
   embeddableSetup.registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
     const [{ getControlGroupEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
       import('./get_control_group_factory'),

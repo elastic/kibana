@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem } from '../../../../common';
 import { Filter, TimeRange } from '@kbn/es-query';
 import {
   apiPublishesFilters,
@@ -22,6 +21,7 @@ import {
   skipWhile,
   switchMap,
 } from 'rxjs';
+import { ControlGroupChainingSystem } from '../../../../common';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;

@@ -9,7 +9,6 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE } from '../../../common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
@@ -24,6 +23,7 @@ import {
   hasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { CONTROL_GROUP_TYPE } from '../../../common';
 
 import { DataControlApi } from '../controls/data_controls/types';
 

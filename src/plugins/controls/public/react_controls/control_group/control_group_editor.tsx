@@ -26,8 +26,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { ControlStyle, ParentIgnoreSettings } from '../..';
 
 import { ControlStateManager } from '../controls/types';
 import { ControlGroupStrings } from './control_group_strings';

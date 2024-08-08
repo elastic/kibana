@@ -19,7 +19,6 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { DEFAULT_CONTROL_WIDTH } from '../../../../common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,6 +27,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { DEFAULT_CONTROL_WIDTH } from '../../../../common';
 
 import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';

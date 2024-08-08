@@ -32,8 +32,8 @@ import {
   EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
-import { ControlStyle } from '../../..';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { ControlStyle } from '../../..';
 import { ControlsInOrder } from '../init_controls_manager';
 import { ControlGroupApi } from '../types';
 import { ControlRenderer } from './control_renderer';

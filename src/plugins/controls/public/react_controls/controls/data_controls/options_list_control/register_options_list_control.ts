@@ -14,7 +14,7 @@ import { OPTIONS_LIST_CONTROL_TYPE } from './constants';
 export function registerOptionsListControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
   registerControlFactory(OPTIONS_LIST_CONTROL_TYPE, async () => {
     const [{ getOptionsListControlFactory }, [coreStart, depsStart]] = await Promise.all([
-      import( './get_options_list_control_factory' ),
+      import('./get_options_list_control_factory'),
       coreSetup.getStartServices(),
     ]);
     return getOptionsListControlFactory({

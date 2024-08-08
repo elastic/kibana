@@ -8,9 +8,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlWidth } from '../../../common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
+import { ControlWidth } from '../../../common';
 
 import {
   ControlApiInitialization,

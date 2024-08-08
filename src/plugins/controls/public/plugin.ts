@@ -139,8 +139,12 @@ export class ControlsPlugin
       /**
        * TODO: Remove edit legacy control embeddable action when embeddable controls are removed
        */
-      const { EditLegacyEmbeddableControlAction } = await import('./control_group/actions/edit_control_action');
-      const editLegacyEmbeddableControlAction = new EditLegacyEmbeddableControlAction(deleteControlAction);
+      const { EditLegacyEmbeddableControlAction } = await import(
+        './control_group/actions/edit_control_action'
+      );
+      const editLegacyEmbeddableControlAction = new EditLegacyEmbeddableControlAction(
+        deleteControlAction
+      );
       uiActions.registerAction(editLegacyEmbeddableControlAction);
       uiActions.attachAction(PANEL_HOVER_TRIGGER, editLegacyEmbeddableControlAction.id);
 

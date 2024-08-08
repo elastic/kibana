@@ -8,7 +8,11 @@
 
 import { ControlsPlugin } from './plugin';
 
-export type { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './react_controls/control_group/types';
+export type {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from './react_controls/control_group/types';
 export type {
   DataControlApi,
   DefaultDataControlState,

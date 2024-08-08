@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RANGE_SLIDER_CONTROL } from '../../../../common';
 import { i18n } from '@kbn/i18n';
+import { RANGE_SLIDER_CONTROL } from '../../../../common';
 
 export const DataControlEditorStrings = {
   manageControl: {

@@ -14,7 +14,7 @@ import { RANGE_SLIDER_CONTROL_TYPE } from './types';
 export function registerRangeSliderControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
   registerControlFactory(RANGE_SLIDER_CONTROL_TYPE, async () => {
     const [{ getRangesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
-      import( './get_range_slider_control_factory'),
+      import('./get_range_slider_control_factory'),
       coreSetup.getStartServices(),
     ]);
 

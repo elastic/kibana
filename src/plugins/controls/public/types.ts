@@ -100,7 +100,6 @@ export interface ControlsPluginSetup {
    */
   registerControlFactory: typeof registerControlFactory;
   registerControlType: ControlsServiceType['registerControlType'];
-  
 }
 
 export interface ControlsPluginStart {

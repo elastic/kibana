@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
 export const deserializeControlGroup = (

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ParentIgnoreSettings } from '../../..';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap } from 'rxjs';
+import { ParentIgnoreSettings } from '../../..';
 
 export interface ControlGroupFetchContext {
   unifiedSearchFilters?: Filter[] | undefined;

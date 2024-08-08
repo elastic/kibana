@@ -9,15 +9,6 @@
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import {
-  ControlGroupChainingSystem,
-  ControlWidth,
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_STYLE,
-  DEFAULT_CONTROL_WIDTH,
-} from '../../../common';
-import { ControlStyle, ParentIgnoreSettings } from '../..';
 import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -32,6 +23,15 @@ import {
   PublishesDataViews,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { ControlStyle, ParentIgnoreSettings } from '../..';
+import {
+  ControlGroupChainingSystem,
+  ControlWidth,
+  CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_WIDTH,
+} from '../../../common';
 import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
@@ -40,7 +40,6 @@ import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState 
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
-import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -164,7 +163,7 @@ export const getControlGroupEmbeddableFactory = (services: {
             defaultMessage: 'Controls',
           }),
         openAddDataControlFlyout: () => {
-          /*openDataControlEditor({
+          /* openDataControlEditor({
             initialState: {
               grow: DEFAULT_CONTROL_GROW,
               width: DEFAULT_CONTROL_WIDTH,

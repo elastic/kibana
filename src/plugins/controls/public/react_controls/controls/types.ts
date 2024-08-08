@@ -8,7 +8,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CanClearSelections, ControlWidth } from '../../../public/types';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
@@ -23,6 +22,7 @@ import {
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
+import { CanClearSelections, ControlWidth } from '../../types';
 
 import { ControlGroupApi } from '../control_group/types';
 
