@@ -37,7 +37,6 @@ export function addFunctionTokens(tokens: monaco.languages.IToken[]): monaco.lan
 const mergeRules = [
   [['nulls', 'expr_ws', 'first'], 'nulls_order'],
   [['nulls', 'expr_ws', 'last'], 'nulls_order'],
-  [['unquoted_identifier', 'dot', 'unquoted_identifier'], 'unquoted_identifier'],
   [['integer', 'unquoted_identifier'], 'timespan_literal'],
   [['integer_literal', 'expr_ws', 'unquoted_identifier'], 'timespan_literal'],
 ] as const;
@@ -78,18 +77,3 @@ export function mergeTokens(tokens: ESQLToken[]): monaco.languages.IToken[] {
 
   return tokens;
 }
-
-// export function addNullsOrder(tokens: monaco.languages.IToken[]): void {
-//   const nullsIndex = tokens.findIndex((token) => token.scopes === 'nulls' + ESQL_TOKEN_POSTFIX);
-//   if (
-//     // did we find a "nulls"?
-//     nullsIndex > -1 &&
-//     // is the next non-whitespace token an order?
-//     ['first' + ESQL_TOKEN_POSTFIX, 'last' + ESQL_TOKEN_POSTFIX].includes(
-//       tokens[nullsIndex + 2]?.scopes
-//     )
-//   ) {
-//     tokens[nullsIndex].scopes = 'nulls_order' + ESQL_TOKEN_POSTFIX;
-//     tokens.splice(nullsIndex + 1, 2);
-//   }
-// }
