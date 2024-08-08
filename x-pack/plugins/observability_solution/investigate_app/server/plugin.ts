@@ -17,6 +17,8 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
+import { investigation } from './saved_objects/investigation';
+import { InvestigateAppConfig } from './config';
 
 export class InvestigateAppPlugin
   implements
@@ -28,9 +30,11 @@ export class InvestigateAppPlugin
     >
 {
   logger: Logger;
+  config: InvestigateAppConfig;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.config = context.config.get<InvestigateAppConfig>();
   }
   setup(
     coreSetup: CoreSetup<InvestigateAppStartDependencies, InvestigateAppServerStart>,
@@ -47,13 +51,17 @@ export class InvestigateAppPlugin
       };
     }) as InvestigateAppRouteHandlerResources['plugins'];
 
-    registerServerRoutes({
-      core: coreSetup,
-      logger: this.logger,
-      dependencies: {
-        plugins: routeHandlerPlugins,
-      },
-    });
+    if (this.config.enabled === true) {
+      coreSetup.savedObjects.registerType(investigation);
+
+      registerServerRoutes({
+        core: coreSetup,
+        logger: this.logger,
+        dependencies: {
+          plugins: routeHandlerPlugins,
+        },
+      });
+    }
 
     return {};
   }
