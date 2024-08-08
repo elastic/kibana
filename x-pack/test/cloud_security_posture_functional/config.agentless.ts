@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { pageObjects } from './page_objects';

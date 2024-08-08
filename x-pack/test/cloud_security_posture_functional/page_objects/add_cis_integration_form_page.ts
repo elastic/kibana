@@ -366,6 +366,22 @@ export function AddCisIntegrationFormPageProvider({
     return secretComponentReplaceButton;
   };
 
+  const getFirstCspmIntegrationPageIntegration = async () => {
+    const integration = await testSubjects.find('integrationNameLink');
+    return await integration.getVisibleText();
+  };
+
+  const getFirstCspmIntegrationPageAgent = async () => {
+    const agent = await testSubjects.find('agentPolicyNameLink');
+    // this is assuming that the agent was just created therefor should be the first element
+    return await agent.getVisibleText();
+  };
+
+  const getAgentBasedPolicyValue = async () => {
+    const agentName = await testSubjects.find('createAgentPolicyNameField');
+    return await agentName.getAttribute('value');
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -405,5 +421,8 @@ export function AddCisIntegrationFormPageProvider({
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
     inputIntegrationName,
+    getFirstCspmIntegrationPageIntegration,
+    getFirstCspmIntegrationPageAgent,
+    getAgentBasedPolicyValue,
   };
 }
