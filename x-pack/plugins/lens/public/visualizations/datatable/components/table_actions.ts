@@ -19,11 +19,7 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
-import type {
-  DatatableColumnConfig,
-  DatatableColumnConfigArgs,
-  LensGridDirection,
-} from '../../../../common/expressions';
+import type { DatatableColumnConfig, LensGridDirection } from '../../../../common/expressions';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';
@@ -194,11 +190,7 @@ function getColumnType({
 
 export const buildSchemaDetectors = (
   columns: EuiDataGridColumn[],
-  columnConfig: {
-    columns: DatatableColumnConfigArgs[];
-    sortingColumnId: string | undefined;
-    sortingDirection: 'none' | 'asc' | 'desc';
-  },
+  columnConfig: DatatableColumnConfig,
   table: Datatable,
   formatters: Record<string, ReturnType<FormatFactory>>
 ): EuiDataGridSchemaDetector[] => {

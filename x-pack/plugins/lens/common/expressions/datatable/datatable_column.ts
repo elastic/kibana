@@ -17,12 +17,12 @@ const LENS_DATATABLE_COLUMN = 'lens_datatable_column';
 export type LensGridDirection = 'none' | Direction;
 
 export interface DatatableColumnConfig {
-  columns: DatatableColumnConfigArgs[];
+  columns: DatatableColumnResult[];
   sortingColumnId: string | undefined;
   sortingDirection: LensGridDirection;
 }
 
-export type DatatableColumnConfigArgs = Omit<ColumnState, 'palette' | 'colorMapping'> & {
+export type DatatableColumnArgs = Omit<ColumnState, 'palette' | 'colorMapping'> & {
   palette?: PaletteOutput<CustomPaletteState>;
   colorMapping?: string;
   summaryRowValue?: unknown;
@@ -51,13 +51,14 @@ export interface ColumnState {
   isMetric?: boolean;
 }
 
-export type DatatableColumnResult = DatatableColumnConfigArgs & {
+export type DatatableColumnResult = DatatableColumnArgs & {
   type: typeof LENS_DATATABLE_COLUMN;
 };
+
 export type DatatableColumnFn = ExpressionFunctionDefinition<
   typeof LENS_DATATABLE_COLUMN,
   null,
-  DatatableColumnConfigArgs,
+  DatatableColumnArgs,
   DatatableColumnResult
 >;
 
