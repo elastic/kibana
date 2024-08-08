@@ -56,10 +56,10 @@ export class InvestigateAppPlugin
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
       title: i18n.translate('xpack.investigateApp.appTitle', {
-        defaultMessage: 'Observability Investigate',
+        defaultMessage: 'Observability Investigations',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/investigate',
+      appRoute: '/app/investigations',
       category: DEFAULT_APP_CATEGORIES.observability,
       status: this.config.enabled ? AppStatus.accessible : AppStatus.inaccessible,
       visibleIn: [],
