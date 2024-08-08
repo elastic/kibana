@@ -64,7 +64,9 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/search-types",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/cloud-security-posture"
   ],
   "exclude": ["target/**/*"]
 }
