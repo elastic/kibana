@@ -31,7 +31,7 @@ const actionNames: {
     completedText: 'force unenrolled',
     cancelledText: 'force unenrollment',
   },
-  AUTOMATICAL_FORCE_UNENROLL: {
+  AUTOMATIC_FORCE_UNENROLL: {
     inProgressText: 'Automatic unenrolling',
     completedText: 'automatically unenrolled',
     cancelledText: 'automatic unenrollment',
