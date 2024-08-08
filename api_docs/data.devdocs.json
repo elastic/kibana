@@ -8998,7 +8998,39 @@
           "\nAggsStart represents the actual external contract as AggsCommonStart\nis only used internally. The difference is that AggsStart includes the\ntypings for the registry with initialized agg types.\n"
         ],
         "signature": [
-          "{ calculateAutoTimeExpression: (range: ",
+          "{ types: { get: (name: string) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any> | ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any> | undefined; getAll: () => { buckets: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<any>[]; metrics: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.MetricAggType",
+            "text": "MetricAggType"
+          },
+          "<any>[]; }; }; calculateAutoTimeExpression: (range: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9038,39 +9070,7 @@
             "section": "def-common.AggConfigs",
             "text": "AggConfigs"
           },
-          "; types: { get: (name: string) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BucketAggType",
-            "text": "BucketAggType"
-          },
-          "<any> | ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.MetricAggType",
-            "text": "MetricAggType"
-          },
-          "<any> | undefined; getAll: () => { buckets: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BucketAggType",
-            "text": "BucketAggType"
-          },
-          "<any>[]; metrics: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.MetricAggType",
-            "text": "MetricAggType"
-          },
-          "<any>[]; }; }; }"
+          "; }"
         ],
         "path": "src/plugins/data/common/search/aggs/types.ts",
         "deprecated": false,
@@ -14363,6 +14363,46 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.DataViewsService.getDataViewLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getDataViewLazyFromCache",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazyFromCache",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.getDataViewLazyFromCache.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -21789,6 +21829,46 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getDataViewLazyFromCache",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazyFromCache",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.getDataViewLazyFromCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.get",
             "type": "Function",
             "tags": [],
@@ -25293,7 +25373,15 @@
             "section": "def-common.DataViewLazy",
             "text": "DataViewLazy"
           },
-          ">; createDataViewLazy: (spec: ",
+          ">; getDataViewLazyFromCache: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          " | undefined>; createDataViewLazy: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

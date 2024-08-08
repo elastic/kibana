@@ -66,16 +66,17 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  KillProcessRequestBody,
-  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
+  KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
   ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
@@ -716,7 +717,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');

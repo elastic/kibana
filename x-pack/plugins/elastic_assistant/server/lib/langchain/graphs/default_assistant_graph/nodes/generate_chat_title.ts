@@ -7,6 +7,7 @@
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AgentState, NodeParamsBase } from '../types';
 
 export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string) =>
@@ -25,6 +26,7 @@ export const GENERATE_CHAT_TITLE_PROMPT = (responseLanguage: string) =>
 export interface GenerateChatTitleParams extends NodeParamsBase {
   responseLanguage: string;
   state: AgentState;
+  model: BaseChatModel;
 }
 
 export const GENERATE_CHAT_TITLE_NODE = 'generateChatTitle';
@@ -46,7 +48,6 @@ export const generateChatTitle = async ({
   logger.debug(`chatTitle: ${chatTitle}`);
 
   return {
-    ...state,
     chatTitle,
   };
 };

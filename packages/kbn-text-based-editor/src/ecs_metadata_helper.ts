@@ -7,7 +7,6 @@
  */
 
 import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { chunk } from 'lodash';
 
@@ -45,11 +44,7 @@ export async function getColumnsWithMetadata(
           const metadata = fields.fields[removeKeywordSuffix(c.name)];
 
           // Need to convert metadata's type (e.g. keyword) to ES|QL type (e.g. string) to check if they are the same
-          if (
-            !metadata ||
-            (metadata?.type && esFieldTypeToKibanaFieldType(metadata.type) !== c.type)
-          )
-            return c;
+          if (!metadata || (metadata?.type && metadata.type !== c.type)) return c;
           return {
             ...c,
             metadata: { description: metadata.description },

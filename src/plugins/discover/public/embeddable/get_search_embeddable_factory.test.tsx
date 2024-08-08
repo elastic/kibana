@@ -123,12 +123,14 @@ describe('saved search embeddable', () => {
   describe('search embeddable component', () => {
     it('should render empty grid when empty data is returned', async () => {
       const { search, resolveSearch } = createSearchFnMock(0);
+      const initialRuntimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable(
-        getInitialRuntimeState({ searchMock: search }),
+        initialRuntimeState,
         buildApiMock,
         uuid,
         mockedDashboardApi,
-        jest.fn().mockImplementation((newApi) => newApi)
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
       );
       await waitOneTick(); // wait for build to complete
       const discoverComponent = render(<Component />);
@@ -148,15 +150,17 @@ describe('saved search embeddable', () => {
     it('should render field stats table in AGGREGATED_LEVEL view mode', async () => {
       const { search, resolveSearch } = createSearchFnMock(0);
 
+      const initialRuntimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
+      });
       const { Component, api } = await factory.buildEmbeddable(
-        getInitialRuntimeState({
-          searchMock: search,
-          partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
-        }),
+        initialRuntimeState,
         buildApiMock,
         uuid,
         mockedDashboardApi,
-        jest.fn().mockImplementation((newApi) => newApi)
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
       );
       await waitOneTick(); // wait for build to complete
 
@@ -178,15 +182,17 @@ describe('saved search embeddable', () => {
   describe('search embeddable api', () => {
     it('should not fetch data if only a new input title is set', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
+      const initialRuntimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
+      });
       const { api } = await factory.buildEmbeddable(
-        getInitialRuntimeState({
-          searchMock: search,
-          partialState: { viewMode: VIEW_MODE.AGGREGATED_LEVEL },
-        }),
+        initialRuntimeState,
         buildApiMock,
         uuid,
         mockedDashboardApi,
-        jest.fn().mockImplementation((newApi) => newApi)
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
       );
       await waitOneTick(); // wait for build to complete
 
@@ -219,12 +225,14 @@ describe('saved search embeddable', () => {
         discoverServiceMock.profilesManager,
         'resolveRootProfile'
       );
+      const initialRuntimeState = getInitialRuntimeState();
       await factory.buildEmbeddable(
-        getInitialRuntimeState(),
+        initialRuntimeState,
         buildApiMock,
         uuid,
         mockedDashboardApi,
-        jest.fn().mockImplementation((newApi) => newApi)
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
       );
       await waitOneTick(); // wait for build to complete
 
@@ -238,12 +246,14 @@ describe('saved search embeddable', () => {
         discoverServiceMock.profilesManager,
         'resolveDataSourceProfile'
       );
+      const initialRuntimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable(
-        getInitialRuntimeState(),
+        initialRuntimeState,
         buildApiMock,
         uuid,
         mockedDashboardApi,
-        jest.fn().mockImplementation((newApi) => newApi)
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
       );
       await waitOneTick(); // wait for build to complete
 
@@ -263,15 +273,17 @@ describe('saved search embeddable', () => {
 
     it('should pass cell renderers from profile', async () => {
       const { search, resolveSearch } = createSearchFnMock(1);
+      const initialRuntimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { columns: ['rootProfile', 'message', 'extension'] },
+      });
       const { Component, api } = await factory.buildEmbeddable(
-        getInitialRuntimeState({
-          searchMock: search,
-          partialState: { columns: ['rootProfile', 'message', 'extension'] },
-        }),
+        initialRuntimeState,
         buildApiMock,
         uuid,
         mockedDashboardApi,
-        jest.fn().mockImplementation((newApi) => newApi)
+        jest.fn().mockImplementation((newApi) => newApi),
+        initialRuntimeState // initialRuntimeState only contains lastSavedRuntimeState
       );
       await waitOneTick(); // wait for build to complete
 

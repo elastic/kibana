@@ -21,6 +21,8 @@ import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
 
 export const CONTENT_WIDTH = 1150;
 
+export const IMG_HEADER_WIDTH = 128;
+
 export const DEFAULT_FINISHED_STEPS: Partial<Record<CardId, StepId[]>> = {
   [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
 };
