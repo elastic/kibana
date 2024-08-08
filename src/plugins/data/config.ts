@@ -90,7 +90,7 @@ export const queryConfigSchema = schema.object({
    */
   timefilter: schema.object({
     /**
-     * minRefreshInterval (in milliseconds)
+     * Lower limit of refresh interval (in milliseconds)
      */
     minRefreshInterval: offeringBasedSchema<number>({
       serverless: schema.number({ min: 1000, defaultValue: 5000 }),
