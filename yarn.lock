@@ -7075,10 +7075,10 @@
     "@launchdarkly/js-sdk-common" "2.5.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.4.6":
-  version "9.4.6"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.6.tgz#e1a1614e05eab2515090c7862764498a2f9b2b1e"
-  integrity sha512-IcQqiaYrAgmCvh1LsfjEVRa4Wk97PWirHnbVu6fRc97kt8WCKDlVo2O+IbOcC6scJVGDJU4aXVehTkfbhUq1Lg==
+"@launchdarkly/node-server-sdk@^9.5.0":
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.5.0.tgz#171c235a16836611e3c6d8d95945afa24832fc10"
+  integrity sha512-nNH011mToDKEUz5Nrux3bdatgmHj+SQGUCCD1+R5wgzpdvwZxhi7w1W+9Wl6QrqB+LcpBfKp2+vMQH/4KLsDXg==
   dependencies:
     "@launchdarkly/js-server-sdk-common" "2.4.4"
     https-proxy-agent "^5.0.1"
