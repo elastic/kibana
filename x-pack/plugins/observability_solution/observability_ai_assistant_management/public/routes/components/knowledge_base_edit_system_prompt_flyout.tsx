@@ -68,15 +68,6 @@ export function KnowledgeBaseEditSystemPromptFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiTitle size="xs">
-          <h5>
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h5.editEntryLabel',
-              { defaultMessage: 'AI User Profile' }
-            )}
-          </h5>
-        </EuiTitle>
-
         <EuiText>
           {i18n.translate(
             'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPromptFlyout.personalPromptTextLabel',
