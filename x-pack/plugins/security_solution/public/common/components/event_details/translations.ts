@@ -29,24 +29,9 @@ export const RESPONSE_ACTIONS_VIEW = i18n.translate(
   }
 );
 
-export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
-  defaultMessage: 'Field',
-});
-
-export const VALUE = i18n.translate('xpack.securitySolution.eventDetails.value', {
-  defaultMessage: 'Value',
-});
-
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.eventDetails.description', {
   defaultMessage: 'Description',
 });
-
-export const PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.eventDetails.filter.placeholder',
-  {
-    defaultMessage: 'Filter by Field, Value, or Description...',
-  }
-);
 
 export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
   defaultMessage: 'Agent status',

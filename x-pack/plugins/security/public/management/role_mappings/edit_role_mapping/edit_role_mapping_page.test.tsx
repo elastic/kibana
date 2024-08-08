@@ -441,4 +441,43 @@ describe('EditRoleMappingPage', () => {
     expect(rulePanels).toHaveLength(1);
     expect(rulePanels.at(0).props().readOnly).toBeTruthy();
   });
+
+  it('renders a warning when empty any or all rules are present', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
+    roleMappingsAPI.getRoleMapping.mockResolvedValue({
+      name: 'foo',
+      role_templates: [
+        {
+          template: { id: 'foo' },
+        },
+      ],
+      enabled: true,
+      rules: {
+        all: [
+          {
+            field: {
+              username: '*',
+            },
+          },
+          {
+            all: [],
+          },
+        ],
+      },
+    });
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
+      hasCompatibleRealms: true,
+      canUseInlineScripts: true,
+      canUseStoredScripts: true,
+    });
+
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, 'foo');
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'emptyAnyOrAllRulesWarning')).toHaveLength(1);
+  });
 });

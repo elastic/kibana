@@ -90,7 +90,7 @@ export const getDefaultAssistantGraph = ({
         default: () => undefined,
       },
       messages: {
-        value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+        value: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
         default: () => [],
       },
       chatTitle: {
