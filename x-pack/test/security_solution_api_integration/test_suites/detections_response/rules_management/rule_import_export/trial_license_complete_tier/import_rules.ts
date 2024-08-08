@@ -1582,10 +1582,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('allows (but ignores) rules with a value for rule_source', async () => {
           const rule = getCustomQueryRuleParams({
-            rule_id: 'rule-source',
+            rule_id: 'with-rule-source',
             // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
             rule_source: {
-              type: 'internal',
+              type: 'ignored',
             },
           });
           const ndjson = combineToNdJson(rule);
@@ -1599,7 +1599,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body).toMatchObject({
             success: true,
+            success_count: 1,
           });
+
+          const importedRule = await fetchRule(supertest, { ruleId: 'with-rule-source' });
+
+          expect(importedRule.rule_source).toMatchObject({ type: 'internal' });
         });
 
         it('rejects rules without a rule_id', async () => {
