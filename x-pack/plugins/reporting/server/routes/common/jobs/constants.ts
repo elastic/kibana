@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Painless Lab', () => {
-    loadTestFile(require.resolve('./painless_lab'));
-  });
-}
+export const STATUS_CODES = {
+  COMPLETED: 200,
+  PENDING: {
+    INTERNAL: 202,
+    PUBLIC: 503,
+  },
+  FAILED: {
+    INTERNAL: 202,
+    PUBLIC: 500,
+  },
+};
