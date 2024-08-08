@@ -1,6 +1,6 @@
 {
-  "name": "eui_provider_dev_warning",
-  "version": "0.0.0",
+  "name": "@kbn/eui-provider-dev-warning",
+  "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/eui_provider_dev_warning",
   "kibana": {
     "version": "kibana",
