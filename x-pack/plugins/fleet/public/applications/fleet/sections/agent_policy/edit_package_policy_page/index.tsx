@@ -107,7 +107,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessEnabled } = useAgentless();
+  const { isAgentlessPackagePolicy } = useAgentless();
 
   const {
     // data
@@ -449,7 +449,7 @@ export const EditPackagePolicyForm = memo<{
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
-        isAgentlessEnabled={isAgentlessEnabled}
+        isAgentlessEnabled={isAgentlessPackagePolicy(packagePolicy)}
       />
     </ExtensionWrapper>
   );
