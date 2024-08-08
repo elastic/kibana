@@ -69,7 +69,9 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   });
 
   const params = Walker.params(ast);
-  const timeNamedParam = params.find((param) => param.value === 'start' || param.value === 'end');
+  const timeNamedParam = params.find(
+    (param) => param.value === 't_start' || param.value === 't_end'
+  );
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
