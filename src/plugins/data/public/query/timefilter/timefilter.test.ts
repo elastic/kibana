@@ -17,11 +17,13 @@ import { RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
+import { TimefilterConfig } from './types';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
-const timefilterConfig = {
+const timefilterConfig: TimefilterConfig = {
   timeDefaults: { from: 'now-15m', to: 'now' },
   refreshIntervalDefaults: { pause: false, value: 0 },
+  minRefreshIntervalDefault: 1000,
 };
 
 const nowProviderMock = createNowProviderMock();

@@ -164,9 +164,7 @@ export class Timefilter {
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
 
     if (newRefreshInterval.value < this._minRefreshInterval) {
-      // Correct state when already below the min or set to min when provided value is too small
-      this.setRefreshInterval({ value: this._minRefreshInterval });
-      return;
+      newRefreshInterval.value = this._minRefreshInterval;
     }
 
     let shouldUnpauseRefreshLoop =
