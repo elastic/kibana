@@ -10,7 +10,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { agentPolicyService } from '../services';
@@ -21,6 +21,8 @@ import { getAgentsByKuery } from '../services/agents';
 import { appContextService } from '../services';
 
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
+
+import type { AgentPolicy } from '../types';
 
 import { UnenrollInactiveAgentsTask, TYPE, VERSION } from './unenroll_inactive_agents_task';
 
@@ -73,6 +75,11 @@ describe('UnenrollInactiveAgentsTask', () => {
     },
   ];
 
+  const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
+    jest.fn(async function* (soClient: SavedObjectsClientContract) {
+      yield items;
+    });
+
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
@@ -116,15 +123,10 @@ describe('UnenrollInactiveAgentsTask', () => {
     };
 
     beforeEach(() => {
-      mockAgentPolicyService.list.mockResolvedValue({
-        items: [
-          createAgentPolicyMock({ unenroll_timeout: 3000 }),
-          createAgentPolicyMock({ id: 'agent-policy-2', unenroll_timeout: 1000 }),
-        ],
-        total: 1,
-        page: 1,
-        perPage: 1,
-      });
+      mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+        createAgentPolicyMock({ unenroll_timeout: 3000 }),
+        createAgentPolicyMock({ id: 'agent-policy-2', unenroll_timeout: 1000 }),
+      ]);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         agents,

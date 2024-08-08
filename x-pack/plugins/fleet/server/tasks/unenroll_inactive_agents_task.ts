@@ -115,27 +115,24 @@ export class UnenrollInactiveAgentsTask {
     // find all agent policies that are not managed and having unenroll_timeout > 0
     // limit the search to POLICIES_BATCHSIZE at a time and loop until there are no agent policies left
     const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
-    let hasMore = true;
-    let page = 1;
     let agentCounter = 0;
-    while (hasMore) {
-      const agentPolicies = await agentPolicyService.list(soClient, {
-        perPage: POLICIES_BATCHSIZE,
-        page: page++,
-        kuery: policiesKuery,
-      });
+
+    const agentPolicyFetcher = agentPolicyService.fetchAllAgentPolicies(soClient, {
+      kuery: policiesKuery,
+      perPage: POLICIES_BATCHSIZE,
+    });
+    for await (const agentPolicyPageResults of agentPolicyFetcher) {
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Found "${agentPolicies.items.length}" agent policies with unenroll_timeout > 0`
+        `[UnenrollInactiveAgentsTask] Found "${agentPolicyPageResults.length}" agent policies with unenroll_timeout > 0`
       );
-      if (!agentPolicies?.items.length) {
-        hasMore = false;
+      if (!agentPolicyPageResults.length) {
         this.endRun('Found no policies to process');
         return;
       }
 
       // find inactive agents enrolled on above policies
       // limit batch size to UNENROLLMENT_BATCHSIZE to avoid scale issues
-      const kuery = `(${AGENTS_PREFIX}.policy_id:${agentPolicies.items
+      const kuery = `(${AGENTS_PREFIX}.policy_id:${agentPolicyPageResults
         .map((policy) => `"${policy.id}"`)
         .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
       const res = await getAgentsByKuery(esClient, soClient, {
