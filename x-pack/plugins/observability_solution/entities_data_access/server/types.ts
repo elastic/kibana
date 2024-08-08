@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-const path = require('path');
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntitiesPluginSetupDeps {}
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../../..'),
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/assets_data_access'],
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface EntitiesPluginStartDeps {}
