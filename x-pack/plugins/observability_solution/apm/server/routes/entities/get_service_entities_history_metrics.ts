@@ -23,6 +23,7 @@ interface Params {
   start: number;
   end: number;
   entityIds: string[];
+  size: number;
 }
 
 export async function getServiceEntitiesHistoryMetrics({
@@ -30,6 +31,7 @@ export async function getServiceEntitiesHistoryMetrics({
   entityIds,
   start,
   entitiesESClient,
+  size,
 }: Params) {
   const response = await entitiesESClient.searchHistory('get_entities_history', {
     body: {
@@ -42,7 +44,7 @@ export async function getServiceEntitiesHistoryMetrics({
       },
       aggs: {
         entityIds: {
-          terms: { field: ENTITY_ID },
+          terms: { field: ENTITY_ID, size },
           aggs: {
             latency: { avg: { field: ENTITY_METRICS_LATENCY } },
             logErrorRate: { avg: { field: ENTITY_METRICS_LOG_ERROR_RATE } },
