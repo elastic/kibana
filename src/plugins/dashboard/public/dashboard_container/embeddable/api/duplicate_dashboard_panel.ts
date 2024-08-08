@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import {
+  isReferenceOrValueEmbeddable,
+  PanelNotFoundError,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import {
   apiHasInPlaceLibraryTransforms,
@@ -103,16 +107,26 @@ const duplicateReactEmbeddableInput = async (
   };
 };
 
+export async function getByValuePanelState(
+  dashboard: DashboardContainer,
+  idToDuplicate: string,
+  panel: DashboardPanelState<SavedObjectEmbeddableInput>
+) {
+  const {
+    embeddable: { reactEmbeddableRegistryHasKey },
+  } = pluginServices.getServices();
+
+  return reactEmbeddableRegistryHasKey(panel.type)
+    ? await duplicateReactEmbeddableInput(dashboard, panel, idToDuplicate)
+    : await duplicateLegacyInput(dashboard, panel, idToDuplicate);
+}
+
 export async function duplicateDashboardPanel(this: DashboardContainer, idToDuplicate: string) {
   const {
     notifications: { toasts },
-    embeddable: { reactEmbeddableRegistryHasKey },
   } = pluginServices.getServices();
   const panelToClone = await this.getDashboardPanelFromId(idToDuplicate);
-
-  const duplicatedPanelState = reactEmbeddableRegistryHasKey(panelToClone.type)
-    ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)
-    : await duplicateLegacyInput(this, panelToClone, idToDuplicate);
+  const duplicatedPanelState = await getByValuePanelState(this, idToDuplicate, panelToClone);
 
   toasts.addSuccess({
     title: dashboardClonePanelActionStrings.getSuccessMessage(),
