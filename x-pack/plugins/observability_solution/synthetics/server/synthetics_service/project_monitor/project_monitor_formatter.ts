@@ -339,7 +339,6 @@ export class ProjectMonitorFormatter {
         {
           search: monitorFilter,
           type: syntheticsMonitorType,
-          perPage: 500,
         }
       );
 
