@@ -28,6 +28,10 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
+import { registerControlGroupEmbeddable } from './react_controls/control_group/register_control_group_embeddable';
+import { registerOptionsListControl } from './react_controls/controls/data_controls/options_list_control/register_options_list_control';
+import { registerRangeSliderControl } from './react_controls/controls/data_controls/range_slider/register_range_slider_control';
+import { registerTimeSliderControl } from './react_controls/controls/timeslider_control/register_timeslider_control';
 export class ControlsPlugin
   implements
     Plugin<
@@ -62,6 +66,11 @@ export class ControlsPlugin
   ): ControlsPluginSetup {
     const { registerControlType } = controlsService;
     const { embeddable } = _setupPlugins;
+
+    registerControlGroupEmbeddable(_coreSetup, embeddable);
+    registerOptionsListControl(_coreSetup);
+    registerRangeSliderControl(_coreSetup);
+    registerTimeSliderControl(_coreSetup);
 
     // register control group embeddable factory
     _coreSetup.getStartServices().then(([, deps]) => {

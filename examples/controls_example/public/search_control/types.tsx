@@ -9,7 +9,7 @@
 import type {
   DataControlApi,
   DefaultDataControlState,
-} from '../react_controls/controls/data_controls/types';
+} from '../../../../src/plugins/controls/public/react_controls/controls/data_controls/types';
 
 export const SEARCH_CONTROL_TYPE = 'searchControl';
 

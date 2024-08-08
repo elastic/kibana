@@ -22,7 +22,7 @@ import {
   getSelectionAsFieldType,
   OptionsListSelection,
 } from '../../../../../common/options_list/options_list_selections';
-import { isValidSearch } from '../../../../../common/options_list/suggestions_searching';
+import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';

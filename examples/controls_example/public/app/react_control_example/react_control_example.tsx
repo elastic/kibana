@@ -53,8 +53,8 @@ import {
   getControlGroupRuntimeState,
   setControlGroupRuntimeState,
 } from './runtime_control_group_state';
-import { ControlGroupApi } from '../../react_controls/control_group/types';
-import { openDataControlEditor } from '../../react_controls/controls/data_controls/open_data_control_editor';
+import { ControlGroupApi } from '../../../../../src/plugins/controls/public/react_controls/control_group/types';
+import { openDataControlEditor } from '../../../../../src/plugins/controls/public/react_controls/controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
