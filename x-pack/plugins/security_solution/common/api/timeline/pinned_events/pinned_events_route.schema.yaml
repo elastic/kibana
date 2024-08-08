@@ -60,7 +60,8 @@ components:
         - allOf:
             - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
             - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
-        - $ref: '#/components/schemas/PinnedEventBaseResponseBody'
+        - type: object
+          nullable: true
     PinnedEventBaseResponseBody:
       type: object
       required: [code]

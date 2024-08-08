@@ -27,7 +27,7 @@ export const PinnedEventBaseResponseBody = z.object({
 export type PersistPinnedEventResponse = z.infer<typeof PersistPinnedEventResponse>;
 export const PersistPinnedEventResponse = z.union([
   PinnedEvent.merge(PinnedEventBaseResponseBody),
-  PinnedEventBaseResponseBody,
+  z.object({}).nullable(),
 ]);
 
 export type PersistPinnedEventRouteRequestBody = z.infer<typeof PersistPinnedEventRouteRequestBody>;

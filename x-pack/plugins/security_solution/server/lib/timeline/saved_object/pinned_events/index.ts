@@ -81,7 +81,7 @@ export const persistPinnedEventOnTimeline = async (
     if (pinnedEventId != null) {
       // Delete Pinned Event on Timeline
       await deletePinnedEventOnTimeline(request, [pinnedEventId]);
-      return { code: 200 };
+      return null;
     }
 
     const pinnedEvents = await getPinnedEventsInTimelineWithEventId(request, timelineId, eventId);
@@ -102,14 +102,16 @@ export const persistPinnedEventOnTimeline = async (
        * Why we are doing that, because if it is not found for sure that it will be unpinned
        * There is no need to bring back this error since we can assume that it is unpinned
        */
-      return { code: 200 };
+      return null;
     }
     if (getOr(null, 'output.statusCode', err) === 403) {
-      return {
-        code: 403,
-        message: err.message,
-        pinnedEventId: eventId,
-      };
+      return pinnedEventId != null
+        ? {
+            code: 403,
+            message: err.message,
+            pinnedEventId: eventId,
+          }
+        : null;
     }
     throw err;
   }

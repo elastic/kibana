@@ -65,16 +65,16 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
         });
 
         const response = result.data.persistPinnedEventOnTimeline;
-        if (response && response.code === 403) {
+        if (response && 'code' in response && response.code === 403) {
           store.dispatch(showCallOutUnauthorizedMsg());
         }
 
         refreshTimelines(store.getState());
 
         const currentTimeline = selectTimelineById(store.getState(), action.payload.id);
-        // The response does not contain the eventId when we unpinned the event.
+        // The response is null or empty in case we unpinned an event.
         // In that case we want to remove the locally pinned event.
-        if (!('eventId' in response)) {
+        if (!response || !('eventId' in response)) {
           return store.dispatch(
             updateTimeline({
               id: action.payload.id,
