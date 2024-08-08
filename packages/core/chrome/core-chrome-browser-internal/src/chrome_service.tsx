@@ -180,10 +180,17 @@ export class ChromeService {
     if (isDev) {
       setEuiDevProviderWarning((providerError) => {
         const errorObject = new Error(providerError.toString());
-        // show a stack trace in the console
+        // 1. show a stack trace in the console
         // eslint-disable-next-line no-console
         console.error(errorObject);
 
+        // 2. store error in sessionStorage so it can be detected in testing
+        sessionStorage.setItem('dev.euiProviderWarning.message', providerError.toString());
+        sessionStorage.setItem('dev.euiProviderWarning.stack', errorObject.stack ?? 'undefined');
+        sessionStorage.setItem('dev.euiProviderWarning.pageHref', window.location.href);
+        sessionStorage.setItem('dev.euiProviderWarning.pageTitle', document.title);
+
+        // 3. error toast / popup
         notifications.toasts.addDanger({
           title: '`EuiProvider` is missing',
           text: mountReactNode(

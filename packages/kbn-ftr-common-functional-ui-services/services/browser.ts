@@ -591,6 +591,17 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Adds a value in session storage for the focused window/frame.
+   *
+   * @return {Promise<void>}
+   */
+  public async getSessionStorageItem(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(
+      `return window.sessionStorage.getItem("${key}");`
+    );
+  }
+
+  /**
    * Clears session storage for the focused window/frame.
    *
    * @return {Promise<void>}
