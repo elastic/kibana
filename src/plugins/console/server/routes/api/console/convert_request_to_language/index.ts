@@ -20,7 +20,7 @@ const routeValidationConfig = {
     language: schema.string(),
     esHost: schema.string(),
   }),
-  body: schema.arrayOf(schema.string()),
+  body: schema.maybe(schema.arrayOf(schema.string())),
 };
 
 export type Query = TypeOf<typeof routeValidationConfig.query>;
@@ -36,7 +36,10 @@ export const registerConvertRequestRoute = ({
 
     try {
       let request = `${method} ${path} \n`;
-      request += body.join('\n');
+      // Add body if present, we can append all the lines into the request string
+      if (body && body.length > 0) {
+        request += body.join('\n');
+      }
 
       const codeSnippet = await convertRequests(request, language, {
         checkOnly: false,

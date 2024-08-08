@@ -237,7 +237,9 @@ export const ContextMenu = ({
           ) : (
             // The EuiContextMenuItem renders itself as a button already, so we need to
             // force the link to not be a button in order to prevent A11Y issues.
-            <EuiLink href="" data-name="changeLanguage">Change</EuiLink>
+            <EuiLink href="" data-name="changeLanguage">
+              Change
+            </EuiLink>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
