@@ -9,6 +9,7 @@
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { SEARCH_CONTROL_TYPE } from '../../search_control/types';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 
 const SERIALIZED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
@@ -49,7 +50,7 @@ const controlGroupPanels = {
     },
   },
   [rangeSliderControlId]: {
-    type: 'rangeSlider',
+    type: RANGE_SLIDER_CONTROL,
     order: 1,
     grow: true,
     width: 'medium',
@@ -63,7 +64,7 @@ const controlGroupPanels = {
     },
   },
   [timesliderControlId]: {
-    type: 'timesliderControl',
+    type: TIME_SLIDER_CONTROL,
     order: 4,
     grow: true,
     width: 'medium',
@@ -74,7 +75,7 @@ const controlGroupPanels = {
     },
   },
   [optionsListId]: {
-    type: 'optionsListControl',
+    type: OPTIONS_LIST_CONTROL,
     order: 2,
     grow: true,
     width: 'medium',
@@ -105,12 +106,12 @@ const initialSerializedControlGroupState = {
       id: WEB_LOGS_DATA_VIEW_ID,
     },
     {
-      name: `controlGroup_${rangeSliderControlId}:rangeSliderDataView`,
+      name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL}DataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },
     {
-      name: `controlGroup_${optionsListId}:optionsListControlDataView`,
+      name: `controlGroup_${optionsListId}:${OPTIONS_LIST_CONTROL}DataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },

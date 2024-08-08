@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { OPTIONS_LIST_CONTROL } from '../../../../../common';
 import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
 
-export const OPTIONS_LIST_CONTROL_TYPE = OPTIONS_LIST_CONTROL;
 export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
 export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
   by: '_count',

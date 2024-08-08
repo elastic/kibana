@@ -8,8 +8,6 @@
 
 import { DataControlApi, DefaultDataControlState } from '../types';
 
-export const RANGE_SLIDER_CONTROL_TYPE = 'rangeSlider';
-
 export type RangeValue = [string, string];
 
 export interface RangesliderControlState extends DefaultDataControlState {

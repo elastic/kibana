@@ -13,6 +13,7 @@ import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import {
+  OPTIONS_LIST_CONTROL,
   OptionsListSuccessResponse,
   OptionsListSuggestions,
 } from '../../../../../common/options_list/types';
@@ -30,7 +31,6 @@ import { OptionsListEditorOptions } from './components/options_list_editor_optio
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
-  OPTIONS_LIST_CONTROL_TYPE,
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
@@ -43,7 +43,7 @@ export const getOptionsListControlFactory = (
   services: DataControlServices
 ): DataControlFactory<OptionsListControlState, OptionsListControlApi> => {
   return {
-    type: OPTIONS_LIST_CONTROL_TYPE,
+    type: OPTIONS_LIST_CONTROL,
     order: 3, // should always be first, since this is the most popular control
     getIconType: () => 'editorChecklist',
     getDisplayName: OptionsListStrings.control.getDisplayName,
@@ -86,7 +86,7 @@ export const getOptionsListControlFactory = (
         Pick<OptionsListControlState, 'searchTechnique' | 'singleSelect'>
       >(
         uuid,
-        OPTIONS_LIST_CONTROL_TYPE,
+        OPTIONS_LIST_CONTROL,
         initialState,
         { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
         controlGroupApi,

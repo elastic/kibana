@@ -9,10 +9,10 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { ControlsPluginStartDeps } from '../../../types';
 import { registerControlFactory } from '../../control_factory_registry';
-import { TIMESLIDER_CONTROL_TYPE } from './types';
+import { TIME_SLIDER_CONTROL } from '../../../../common';
 
 export function registerTimeSliderControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
-  registerControlFactory(TIMESLIDER_CONTROL_TYPE, async () => {
+  registerControlFactory(TIME_SLIDER_CONTROL, async () => {
     const [{ getTimesliderControlFactory }, [coreStart, depsStart]] = await Promise.all([
       import('./get_timeslider_control_factory'),
       coreSetup.getStartServices(),

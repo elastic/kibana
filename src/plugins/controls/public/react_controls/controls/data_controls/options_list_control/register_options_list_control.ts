@@ -9,10 +9,10 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { ControlsPluginStartDeps } from '../../../../types';
 import { registerControlFactory } from '../../../control_factory_registry';
-import { OPTIONS_LIST_CONTROL_TYPE } from './constants';
+import { OPTIONS_LIST_CONTROL } from '../../../../../common';
 
 export function registerOptionsListControl(coreSetup: CoreSetup<ControlsPluginStartDeps>) {
-  registerControlFactory(OPTIONS_LIST_CONTROL_TYPE, async () => {
+  registerControlFactory(OPTIONS_LIST_CONTROL, async () => {
     const [{ getOptionsListControlFactory }, [coreStart, depsStart]] = await Promise.all([
       import('./get_options_list_control_factory'),
       coreSetup.getStartServices(),

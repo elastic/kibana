@@ -17,14 +17,15 @@ import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
 import { minMax$ } from './min_max';
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangesliderControlApi, RangesliderControlState, RANGE_SLIDER_CONTROL_TYPE } from './types';
+import { RangesliderControlApi, RangesliderControlState } from './types';
 import { initializeRangeControlSelections } from './range_control_selections';
+import { RANGE_SLIDER_CONTROL } from '../../../../../common';
 
 export const getRangesliderControlFactory = (
   services: DataControlServices
 ): DataControlFactory<RangesliderControlState, RangesliderControlApi> => {
   return {
-    type: RANGE_SLIDER_CONTROL_TYPE,
+    type: RANGE_SLIDER_CONTROL,
     getIconType: () => 'controlsHorizontal',
     getDisplayName: RangeSliderStrings.control.getDisplayName,
     isFieldCompatible: (field) => {
@@ -61,7 +62,7 @@ export const getRangesliderControlFactory = (
 
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
-        RANGE_SLIDER_CONTROL_TYPE,
+        RANGE_SLIDER_CONTROL,
         initialState,
         {
           step: step$,

@@ -22,7 +22,6 @@ import { ControlFactory } from '../types';
 import {
   TimesliderControlState,
   TimesliderControlApi,
-  TIMESLIDER_CONTROL_TYPE,
   Services,
   Timeslice,
 } from './types';
@@ -39,12 +38,13 @@ import {
 import { initTimeRangePercentage } from './init_time_range_percentage';
 import './components/index.scss';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
+import { TIME_SLIDER_CONTROL } from '../../../../common';
 
 export const getTimesliderControlFactory = (
   services: Services
 ): ControlFactory<TimesliderControlState, TimesliderControlApi> => {
   return {
-    type: TIMESLIDER_CONTROL_TYPE,
+    type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
     getDisplayName: () =>
       i18n.translate('controlsExamples.timesliderControl.displayName', {

@@ -11,8 +11,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { PublishesTimeslice } from '@kbn/presentation-publishing';
 import type { DefaultControlApi, DefaultControlState } from '../types';
 
-export const TIMESLIDER_CONTROL_TYPE = 'timesliderControl';
-
 export type Timeslice = [number, number];
 
 export interface TimesliderControlState extends DefaultControlState {
