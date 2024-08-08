@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { investigationResponseSchema } from './investigation';
 
 const createInvestigationParamsSchema = t.type({
   body: t.type({
@@ -16,15 +17,7 @@ const createInvestigationParamsSchema = t.type({
   }),
 });
 
-const createInvestigationResponseSchema = t.type({
-  id: t.string,
-  title: t.string,
-  createdAt: t.number,
-  createdBy: t.string,
-  parameters: t.type({
-    timeRange: t.type({ from: t.number, to: t.number }),
-  }),
-});
+const createInvestigationResponseSchema = investigationResponseSchema;
 
 type CreateInvestigationInput = t.OutputOf<typeof createInvestigationParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateInvestigationParams = t.TypeOf<typeof createInvestigationParamsSchema.props.body>; // Parsed payload used by the backend
