@@ -12,10 +12,10 @@ import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/publ
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ControlsPluginSetup } from '@kbn/controls-plugin/public/types';
 import { PLUGIN_ID } from './constants';
 import img from './control_group_image.png';
 import { SEARCH_CONTROL_TYPE } from './search_control/types';
-import { ControlsPluginSetup } from '@kbn/controls-plugin/public/types';
 
 interface SetupDeps {
   controls: ControlsPluginSetup;
@@ -36,7 +36,6 @@ export class ControlsExamplePlugin
     core: CoreSetup<ControlsExampleStartDeps>,
     { controls, developerExamples, embeddable }: SetupDeps
   ) {
-    
     controls.registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
       const [{ getSearchControlFactory: getSearchEmbeddableFactory }, [coreStart, depsStart]] =
         await Promise.all([

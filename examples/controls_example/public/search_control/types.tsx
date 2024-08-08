@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  DataControlApi,
-  DefaultDataControlState,
-} from '@kbn/controls-plugin/public';
+import type { DataControlApi, DefaultDataControlState } from '@kbn/controls-plugin/public';
 
 export const SEARCH_CONTROL_TYPE = 'searchControl';
 

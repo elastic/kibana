@@ -17,10 +17,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { Filter } from '@kbn/es-query';
 import { initializeDataControl } from '@kbn/controls-plugin/public';
-import type {
-  DataControlFactory,
-  DataControlServices,
-} from '@kbn/controls-plugin/public';
+import type { DataControlFactory, DataControlServices } from '@kbn/controls-plugin/public';
 import {
   SearchControlApi,
   SearchControlState,

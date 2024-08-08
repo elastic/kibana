@@ -314,7 +314,7 @@ export const ReactControlExample = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
-                controlGroupApi?.openAddDataControlFlyout()
+                controlGroupApi?.openAddDataControlFlyout();
               }}
               size="s"
             >
