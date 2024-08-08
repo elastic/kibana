@@ -763,6 +763,24 @@
         },
         {
           "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.openEmbeddedConsoleAlternateView",
+          "type": "Function",
+          "tags": [],
+          "label": "openEmbeddedConsoleAlternateView",
+          "description": [
+            "\nopenEmbeddedConsoleAlternateView is available if the embedded console can be rendered.\nCalling this function will open the embedded console to the alternative view. If there is no alternative view registered\nthis will open the embedded console."
+          ],
+          "signature": [
+            "(() => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
           "id": "def-public.ConsolePluginStart.EmbeddableConsole",
           "type": "Function",
           "tags": [],
