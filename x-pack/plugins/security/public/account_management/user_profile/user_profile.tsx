@@ -437,7 +437,18 @@ function UserAvatarEditor({
               )
             }
             onChange={createImageHandler((imageUrl) => {
-              formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+              if (!imageUrl) {
+                formik.setFieldError(
+                  'data.avatar.imageUrl',
+                  i18n.translate(
+                    'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
+                    { defaultMessage: 'Upload an image.' }
+                  )
+                );
+                formik.setFieldTouched('data.avatar.imageUrl', true);
+              } else {
+                formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+              }
             })}
             validate={{
               required: i18n.translate(
