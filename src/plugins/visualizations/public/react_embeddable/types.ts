@@ -48,13 +48,15 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
   vis?: Vis<VisParams> & { colors?: Record<string, string>; legendOpen?: boolean };
 };
 
-export type VisualizeSavedObjectInputState = SerializedTitles & {
-  savedObjectId: string;
-};
+export type VisualizeSavedObjectInputState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> & {
+    savedObjectId: string;
+  };
 
-export type VisualizeSavedVisInputState = SerializedTitles & {
-  savedVis: SerializedVis<VisParams>;
-};
+export type VisualizeSavedVisInputState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> & {
+    savedVis: SerializedVis<VisParams>;
+  };
 
 export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
 export type VisualizeOutputState = VisualizeSavedVisInputState &

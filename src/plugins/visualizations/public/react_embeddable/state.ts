@@ -106,7 +106,10 @@ export const deserializeSavedVisState = (
   };
 };
 
-export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInputState) => {
+export const deserializeSavedObjectState = async ({
+  savedObjectId,
+  enhancements,
+}: VisualizeSavedObjectInputState) => {
   // Load a saved visualization from the library
   const {
     title,
@@ -128,9 +131,8 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
       analytics: getAnalytics(),
       theme: getTheme(),
     },
-    state.savedObjectId
+    savedObjectId
   );
-
   return {
     savedVis: {
       title,
@@ -144,9 +146,10 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
     },
     title,
     description,
-    savedObjectId: state.savedObjectId,
+    savedObjectId,
     savedObjectProperties,
     linkedToLibrary: true,
+    ...(enhancements ? { enhancements } : {}),
   } as VisualizeSavedVisInputState;
 };
 
@@ -175,12 +178,13 @@ export const serializeState: (props: {
   // Serialize ONLY the savedObjectId. This ensures that when this vis is loaded again, it will always fetch the
   // latest revision of the saved object
   if (linkedToLibrary) {
+    console.error('SAVE LINKED');
     return {
       rawState: {
         savedObjectId: id,
+        ...(enhancements ? { enhancements } : {}),
       } as VisualizeSavedObjectInputState,
       references,
-      ...(enhancements ? { enhancements } : {}),
     };
   }
 
