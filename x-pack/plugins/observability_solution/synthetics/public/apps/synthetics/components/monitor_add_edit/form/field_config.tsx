@@ -30,6 +30,7 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import { kibanaService } from '../../../../../utils/kibana_service';
 import {
   PROFILE_OPTIONS,
   ThrottlingConfigFieldProps,
@@ -60,7 +61,6 @@ import {
   TextArea,
   ThrottlingWrapper,
 } from './field_wrappers';
-import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
@@ -1332,7 +1332,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })}
         <EuiLink
           data-test-subj="syntheticsFIELDLearnMoreLink"
-          href={getDocLinks()?.links?.observability?.syntheticsCommandReference}
+          href={kibanaService.coreStart.docLinks?.links?.observability?.syntheticsCommandReference}
           target="_blank"
         >
           {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.learnMore', {
