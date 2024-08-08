@@ -13,13 +13,13 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { useGetFieldsData } from './use_get_fields_data';
 
 jest.mock('../../../../common/hooks/use_space_id');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../common/hooks/use_get_fields_data');
+jest.mock('./use_get_fields_data');
 
 const eventId = 'eventId';
 const indexName = 'indexName';
@@ -35,7 +35,7 @@ describe('useEventDetails', () => {
       indexPattern: {},
     });
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, [], {}, {}, jest.fn()]);
-    jest.mocked(useGetFieldsData).mockReturnValue((field: string) => field);
+    jest.mocked(useGetFieldsData).mockReturnValue({ getFieldsData: (field: string) => field });
 
     hookResult = renderHook(() => useEventDetails({ eventId, indexName }));
 
