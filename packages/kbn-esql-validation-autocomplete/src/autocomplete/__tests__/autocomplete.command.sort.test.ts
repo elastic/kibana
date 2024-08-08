@@ -20,7 +20,7 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... [ ASC / DESC ] ...', () => {
-      test('suggests command on first character', async () => {
+      test('suggests all modifiers on first space', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | sort stringField /', [
@@ -31,6 +31,20 @@ describe('autocomplete.suggest', () => {
           ',',
           '|',
         ]);
+      });
+
+      test('when user starts to type ASC modifier', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField A/', ['SC']);
+      });
+
+      test('when user starts to type DESC modifier', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField d/', ['ESC']);
+        await assertSuggestions('from a | sort stringField des/', ['C']);
+        await assertSuggestions('from a | sort stringField DES/', ['C']);
       });
     });
 
@@ -44,6 +58,29 @@ describe('autocomplete.suggest', () => {
           ',',
           '|',
         ]);
+      });
+
+      test('when user starts to type NULLS modifiers', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField N/', ['ULLS FIRST', 'ULLS LAST']);
+        await assertSuggestions('from a | sort stringField null/', ['S FIRST', 'S LAST']);
+        await assertSuggestions('from a | sort stringField nulls/', [' FIRST', ' LAST']);
+        await assertSuggestions('from a | sort stringField nulls /', ['FIRST', 'LAST']);
+      });
+
+      test('when user types NULLS FIRST', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField NULLS F/', ['IRST']);
+        await assertSuggestions('from a | sort stringField NULLS FI/', ['RST']);
+      });
+
+      test('when user types NULLS LAST', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a | sort stringField NULLS L/', ['AST']);
+        await assertSuggestions('from a | sort stringField NULLS LAS/', ['T']);
       });
     });
   });
