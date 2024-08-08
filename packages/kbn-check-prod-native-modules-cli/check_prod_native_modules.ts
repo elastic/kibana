@@ -69,14 +69,28 @@ const traverseDependencies = (
   return isDevDependency;
 };
 
-// Checks if a given path contains a native module or not
-const isNativeModule = async (modulePath: string) => {
-  try {
-    const files = await fs.readdir(modulePath);
-    return files.some((file) => file === 'binding.gyp' || file.endsWith('.node'));
-  } catch (err) {
-    return false;
+// Checks if a given path contains a native module or not recursively
+const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<boolean> => {
+  const stack = [modulePath];
+
+  while (stack.length > 0) {
+    const currentPath: string = stack.pop() as string;
+    try {
+      const files = await fs.readdir(currentPath);
+      for (const file of files) {
+        const filePath = path.join(currentPath, file);
+        const stat = await fs.lstat(filePath);
+        if (stat.isDirectory()) {
+          stack.push(filePath);
+        } else if (file === 'binding.gyp' || file.endsWith('.node')) {
+          return true;
+        }
+      }
+    } catch (err) {
+      log.error(`Error when reading ${currentPath}: ${err.message}`);
+    }
   }
+  return false;
 };
 
 // Checks if there are native modules in the production dependencies
@@ -98,7 +112,7 @@ const checkProdNativeModules = async (log: ToolingLog) => {
     for (const dep of Object.keys(dependencyGraph)) {
       if (!isDevDependency.has(dep)) {
         const depPath = path.join(nodeModulesDir, dep.replace(/@[^@]+$/, ''));
-        if (await isNativeModule(depPath)) {
+        if (await isNativeModule(depPath, log)) {
           prodNativeModulesFound.push(dep);
         }
       }
@@ -116,6 +130,7 @@ const checkProdNativeModules = async (log: ToolingLog) => {
     });
     throw new Error('Production native modules were detected');
   } catch (err) {
+    log.error(err.message);
     return true;
   }
 };
