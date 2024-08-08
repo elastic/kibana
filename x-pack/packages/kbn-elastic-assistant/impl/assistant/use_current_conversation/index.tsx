@@ -17,25 +17,19 @@ import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
+
 interface Props {
   allSystemPrompts: PromptResponse[];
+  conversationId: string;
   conversations: Record<string, Conversation>;
-
+  defaultConnector?: AIConnector;
+  mayUpdateConversations: boolean;
   refetchCurrentUserConversations: () => Promise<
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
-  conversationId: string;
-  defaultConnector?: AIConnector;
-  mayUpdateConversations: boolean;
 }
-export const useCurrentConversation = ({
-  allSystemPrompts,
-  conversations,
-  conversationId,
-  defaultConnector,
-  refetchCurrentUserConversations,
-  mayUpdateConversations,
-}: Props): {
+
+interface UseCurrentConversation {
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
   handleCreateConversation: () => Promise<void>;
@@ -49,7 +43,16 @@ export const useCurrentConversation = ({
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
   setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
-} => {
+}
+
+export const useCurrentConversation = ({
+  allSystemPrompts,
+  conversationId,
+  conversations,
+  defaultConnector,
+  mayUpdateConversations,
+  refetchCurrentUserConversations,
+}: Props): UseCurrentConversation => {
   const {
     createConversation,
     deleteConversation,
@@ -179,21 +182,22 @@ export const useCurrentConversation = ({
   );
 
   useEffect(() => {
-    if (mayUpdateConversations) {
+    if (!mayUpdateConversations) return;
+
+    const updateConversation = async () => {
+      const nextConversation =
+        (currentConversationId && conversations[currentConversationId]) ||
+        find(conversations, ['title', currentConversationId]) ||
+        find(conversations, ['title', WELCOME_CONVERSATION_TITLE]);
+
+      if (nextConversation && nextConversation.id === '') {
+        const conversation = await initializeDefaultConversationWithConnector(nextConversation);
+        return setCurrentConversation(conversation);
+      }
+
       setCurrentConversation((prev) => {
-        const nextConversation =
-          (currentConversationId && conversations[currentConversationId]) ||
-          find(conversations, ['title', currentConversationId]) ||
-          find(conversations, ['title', WELCOME_CONVERSATION_TITLE]);
-
-        if (nextConversation && nextConversation.id === '') {
-          (async () => {
-            const conversation = await initializeDefaultConversationWithConnector(nextConversation);
-
-            return conversation;
-          })();
-        }
         if (deepEqual(prev, nextConversation)) return prev;
+
         const conversationToReturn =
           (nextConversation &&
             conversations[
@@ -202,13 +206,14 @@ export const useCurrentConversation = ({
           conversations[WELCOME_CONVERSATION_TITLE] ??
           getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
 
-        // updated selected system prompt
+        // Update selected system prompt
         setCurrentSystemPromptId(
           getDefaultSystemPrompt({
             allSystemPrompts,
             conversation: conversationToReturn,
           })?.id
         );
+
         if (
           prev &&
           prev.id === conversationToReturn.id &&
@@ -222,9 +227,12 @@ export const useCurrentConversation = ({
             messages: prev.messages,
           };
         }
+
         return conversationToReturn;
       });
-    }
+    };
+
+    updateConversation();
   }, [
     allSystemPrompts,
     conversations,
