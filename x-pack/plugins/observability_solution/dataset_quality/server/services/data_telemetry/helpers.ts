@@ -144,6 +144,7 @@ export function addNamespace({
 }
 
 export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNamespace[]) {
+  const uniqueNamespaces = new Set<string>();
   const statsByStream = dataStreamsStats.reduce<Map<string, DataStreamStats>>((acc, stats) => {
     if (!stats.patternName) {
       return acc;
@@ -154,16 +155,40 @@ export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNames
         streamName: stats.patternName,
         totalNamespaces: 0,
         totalDocuments: 0,
+        failureStoreDocuments: 0,
+        failureStoreIndices: 0,
         totalSize: 0,
         totalIndices: 0,
+        managedBy: [],
+        packageName: [],
+        beat: [],
       });
     }
 
     const streamStats = acc.get(stats.patternName)!;
-    streamStats.totalNamespaces += stats.namespace ? 1 : 0;
+
+    if (stats.namespace) {
+      uniqueNamespaces.add(stats.namespace);
+    }
+    streamStats.totalNamespaces = uniqueNamespaces.size;
+
     streamStats.totalDocuments += stats.totalDocuments;
-    streamStats.totalSize += stats.totalSize;
     streamStats.totalIndices += stats.totalIndices;
+    streamStats.failureStoreDocuments += stats.failureStoreDocuments;
+    streamStats.failureStoreIndices += stats.failureStoreIndices;
+    streamStats.totalSize += stats.totalSize;
+
+    if (stats.meta?.managed_by) {
+      streamStats.managedBy.push(stats.meta.managed_by);
+    }
+
+    if (stats.meta?.package?.name) {
+      streamStats.packageName.push(stats.meta.package.name);
+    }
+
+    if (stats.meta?.beat) {
+      streamStats.beat.push(stats.meta.beat);
+    }
 
     return acc;
   }, new Map());
@@ -171,7 +196,7 @@ export function groupStatsByPatternName(dataStreamsStats: DataStreamStatsByNames
   return Array.from(statsByStream.values());
 }
 
-export function addIndexBasicStats({
+export function getIndexBasicStats({
   esClient,
   indices,
   breatheDelay,
@@ -187,12 +212,23 @@ export function addIndexBasicStats({
   );
 }
 
+export function indexStatsToTelemetryEvents(stats: DataStreamStats[]): DataTelemetryEvent[] {
+  return stats.map((stat) => ({
+    pattern_name: stat.streamName,
+    doc_count: stat.totalDocuments,
+    index_count: stat.totalIndices,
+    failure_store_doc_count: stat.failureStoreDocuments,
+    failure_store_index_count: stat.failureStoreIndices,
+    namespace_count: stat.totalNamespaces,
+    size_in_bytes: stat.totalSize,
+    managed_by: Array.from(new Set(stat.managedBy)),
+    package_name: Array.from(new Set(stat.packageName)),
+    beat: Array.from(new Set(stat.beat)),
+  }));
+}
+
 /**
  * Retrieves information about data streams matching a given pattern.
- * @param {Object} options - The options for retrieving data stream information.
- * @param {ElasticsearchClient} options.esClient - The Elasticsearch client.
- * @param {string} options.pattern - The pattern to match data streams.
- * @returns {Promise<Array<Object>>} - A promise that resolves to an array of data stream information.
  */
 async function getDataStreamsInfoForPattern({
   esClient,
@@ -208,6 +244,7 @@ async function getDataStreamsInfoForPattern({
 
   return resp.data_streams.map((dataStream) => ({
     patternName: pattern.patternName,
+    isDataStream: true,
     name: dataStream.name,
     latestIndex: dataStream.indices.length
       ? dataStream.indices[dataStream.indices.length - 1].index_name
@@ -230,6 +267,7 @@ async function getIndicesInfoForPattern({
 
   return Object.entries(resp).map(([index, indexInfo]) => ({
     patternName: pattern.patternName,
+    isDataStream: false,
     name: index,
     latestIndex: index,
     mapping: indexInfo.mappings,
@@ -274,6 +312,10 @@ export async function getIndexStats(
     index: info.name,
   });
 
+  const failureStoreStats = info.isDataStream
+    ? await getFailureStoreStats({ esClient, indexName: info.name })
+    : { docCount: 0, indexCount: 0 };
+
   const totalDocs = resp._all.primaries?.docs?.count;
   const totalSize = resp._all.primaries?.store?.size_in_bytes;
   const totalIndices = Object.keys(resp.indices ?? []).length;
@@ -284,15 +326,35 @@ export async function getIndexStats(
     totalDocuments: totalDocs ?? 0,
     totalSize: totalSize ?? 0,
     totalIndices,
+    failureStoreDocuments: failureStoreStats.docCount,
+    failureStoreIndices: failureStoreStats.indexCount,
+    meta: info.meta,
   };
 }
 
-export function indexStatsToTelemetryEvents(stats: DataStreamStats[]): DataTelemetryEvent[] {
-  return stats.map((stat) => ({
-    pattern_name: stat.streamName,
-    number_of_documents: stat.totalDocuments,
-    number_of_indices: stat.totalIndices,
-    number_of_namespaces: stat.totalNamespaces,
-    size_in_bytes: stat.totalSize,
-  }));
+async function getFailureStoreStats({
+  esClient,
+  indexName,
+}: {
+  esClient: ElasticsearchClient;
+  indexName: string;
+}): Promise<{ docCount: number; indexCount: number }> {
+  try {
+    // TODO: Use the failure store API when it is available
+    const resp = await esClient.transport.request<ReturnType<typeof esClient.indices.stats>>({
+      method: 'GET',
+      path: `/${indexName}/_stats`,
+      querystring: {
+        failure_store: 'only',
+      },
+    });
+
+    const docCount = resp._all.primaries?.docs?.count ?? 0;
+    const indexCount = Object.keys(resp.indices ?? []).length;
+
+    return { docCount, indexCount };
+  } catch (e) {
+    // Failure store API may not be available
+    return { docCount: 0, indexCount: 0 };
+  }
 }

@@ -15,6 +15,7 @@ export interface DatasetIndexPattern {
 
 export interface IndexBasicInfo {
   patternName: string;
+  isDataStream: boolean;
   name: string;
   latestIndex?: string;
   meta?: Metadata;
@@ -28,20 +29,32 @@ export interface DataStreamStatsByNamespace {
   totalDocuments: number;
   totalSize: number;
   totalIndices: number;
+  failureStoreDocuments: number;
+  failureStoreIndices: number;
+  meta?: Metadata;
 }
 
 export interface DataStreamStats {
   streamName: string;
   totalNamespaces: number;
   totalDocuments: number;
+  failureStoreDocuments: number;
+  failureStoreIndices: number;
   totalSize: number;
   totalIndices: number;
+  managedBy: string[];
+  packageName: string[];
+  beat: string[];
 }
 
 export interface DataTelemetryEvent {
   pattern_name: string;
-  number_of_documents: number;
-  number_of_indices: number;
-  number_of_namespaces: number;
+  doc_count: number;
+  failure_store_doc_count: number;
+  index_count: number;
+  namespace_count: number;
   size_in_bytes: number;
+  managed_by: string[];
+  package_name: string[];
+  beat: string[];
 }

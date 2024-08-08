@@ -56,24 +56,52 @@ describe('DataTelemetryService', () => {
     mockEsClient = {
       indices: {
         stats: jest.fn().mockImplementation((params) => {
-          return params.index === 'logs-postgresql.log-default'
-            ? MOCK_POSTGRES_DEFAULT_STATS
-            : MOCK_POSTGRES_NON_DEFAULT_STATS;
+          switch (params.index) {
+            case 'logs-postgresql.log-default':
+              return MOCK_POSTGRES_DEFAULT_STATS;
+            case 'logs-postgresql.log-non-default':
+              return MOCK_POSTGRES_NON_DEFAULT_STATS;
+            case 'logs-active-mq.fleet':
+              return MOCK_ACTIVE_MQ_DEFAULT_STATS;
+            default:
+              return { _all: {} };
+          }
         }),
         getDataStream: jest.fn().mockResolvedValue({
-          data_streams: [...MOCK_POSTGRES_DATA_STREAMS, ...MOCK_SYNTH_DATA_STREAMS],
+          data_streams: [
+            ...MOCK_POSTGRES_DATA_STREAMS,
+            ...MOCK_SYNTH_DATA_STREAMS,
+            ...MOCK_ACTIVE_MQ_FLEET_DATA_STREAMS,
+          ],
         }),
         get: jest.fn().mockResolvedValue(MOCK_INDICES),
         getMapping: jest.fn().mockImplementation((params) => {
           const genericMapping = MOCK_APACHE_GENERIC_INDEX_MAPPING;
-          const postgresMapping = params.index.includes('non-default')
-            ? MOCK_POSTGRES_NON_DEFAULT_MAPPINGS
-            : MOCK_POSTGRES_DEFAULT_MAPPINGS;
-
-          return { ...genericMapping, ...postgresMapping };
+          switch (params.index) {
+            case '.ds-logs-postgresql.log-default-2024.08.31-000002':
+              return MOCK_POSTGRES_DEFAULT_MAPPINGS;
+            case '.ds-logs-postgresql.log-non-default-2024.07.31-000001':
+              return MOCK_POSTGRES_NON_DEFAULT_MAPPINGS;
+            case '.ds-logs-active-mq.fleet-2024.07.31-000001':
+              return MOCK_ACTIVE_MQ_DEFAULT_MAPPINGS;
+            default:
+              return genericMapping;
+          }
         }),
       },
       info: jest.fn().mockResolvedValue({}),
+      transport: {
+        request: jest.fn().mockImplementation((params) => {
+          if (
+            params.index === 'logs-active-mq.fleet' &&
+            params?.querystring?.failure_store === 'only'
+          ) {
+            return MOCK_ACTIVE_MQ_FAILURE_STATS;
+          }
+
+          return { _all: {} };
+        }),
+      },
     } as unknown as jest.Mocked<ElasticsearchClient>;
 
     mockLogger = {
@@ -113,13 +141,13 @@ describe('DataTelemetryService', () => {
       expect(collectAndSendSpy).toHaveBeenCalledTimes(1);
 
       await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 25));
-      expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(3);
+      expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(4);
 
       await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
       expect(collectAndSendSpy).toHaveBeenCalledTimes(2);
 
       await new Promise((resolve) => setTimeout(resolve, BREATHE_DELAY_MEDIUM * 25));
-      expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(6);
+      expect(mockEsClient.indices.getMapping).toHaveBeenCalledTimes(8);
 
       // getMapping should not be called for non logs data streams e.g. logs-synth
       MOCK_SYNTH_DATA_STREAMS[0].indices.forEach((index) => {
@@ -208,21 +236,33 @@ describe('DataTelemetryService', () => {
       await new Promise((resolve) => setTimeout(resolve, STARTUP_DELAY));
       await new Promise((resolve) => setTimeout(resolve, TELEMETRY_INTERVAL));
 
-      // expect(mockAnalyticsSetup.getTelemetryUrl).toHaveBeenCalledTimes(1); // TODO: Assert when used
       expect(reportEventsSpy).toHaveBeenCalledTimes(1);
       expect(reportEventsSpy.mock?.lastCall?.[0]).toEqual([
         expect.objectContaining({
-          number_of_documents: 4000 + 500 + 500,
-          number_of_indices: 2 + 1 + 1,
-          number_of_namespaces: 1 + 1,
-          size_in_bytes: 10089898 + 800000 + 800000,
+          doc_count: 4000 + 500 + 200,
+          failure_store_doc_count: 0,
+          index_count: 2 + 1 + 1,
+          failure_store_index_count: 0,
+          namespace_count: 1 + 1,
+          size_in_bytes: 10089898 + 800000 + 500000,
           pattern_name: 'test',
+          managed_by: ['fleet'],
+          package_name: ['activemq'],
+          beat: [],
         }),
       ]);
     },
     TEST_TIMEOUT
   );
 });
+
+const MOCK_INDICES = {
+  'apache-generic-index': {},
+  '.ds-logs-postgresql.log-default-2024.07.31-000001': {},
+  '.ds-logs-postgresql.log-default-2024.08.31-000002': {},
+  '.ds-logs-synth.01-default-2024.07.31-000001': {},
+  '.ds-logs-active-mq.fleet-2024.07.31-000001': {},
+};
 
 const MOCK_POSTGRES_DATA_STREAMS = [
   {
@@ -320,33 +360,12 @@ const MOCK_POSTGRES_DEFAULT_MAPPINGS = {
 };
 
 const MOCK_POSTGRES_NON_DEFAULT_MAPPINGS = {
-  '.ds-logs-postgresql.log-non-default-2024.07.31-000001': {
-    mappings: {
-      properties: {
-        '@timestamp': {
-          type: 'date',
-          ignore_malformed: false,
-        },
-        data_stream: {
-          properties: {
-            dataset: {
-              type: 'constant_keyword',
-              value: 'postgresql.log',
-            },
-            namespace: {
-              type: 'constant_keyword',
-              value: 'non-default',
-            },
-            type: {
-              type: 'constant_keyword',
-              value: 'logs',
-            },
-          },
-        },
-      },
-    },
-  },
+  '.ds-logs-postgresql.log-non-default-2024.07.31-000001':
+    MOCK_POSTGRES_DEFAULT_MAPPINGS['.ds-logs-postgresql.log-default-2024.08.31-000002'],
 };
+MOCK_POSTGRES_NON_DEFAULT_MAPPINGS[
+  '.ds-logs-postgresql.log-non-default-2024.07.31-000001'
+].mappings.properties.data_stream.properties.namespace.value = 'non-default';
 
 const MOCK_SYNTH_DATA_STREAMS = [
   {
@@ -366,13 +385,6 @@ const MOCK_SYNTH_DATA_STREAMS = [
   },
 ];
 
-const MOCK_INDICES = {
-  'apache-generic-index': {},
-  '.ds-logs-postgresql.log-default-2024.07.31-000001': {},
-  '.ds-logs-postgresql.log-default-2024.08.31-000002': {},
-  '.ds-logs-synth.01-default-2024.07.31-000001': {},
-};
-
 const MOCK_APACHE_GENERIC_INDEX_MAPPING = {
   'apache-generic-index': {
     mappings: {
@@ -380,6 +392,89 @@ const MOCK_APACHE_GENERIC_INDEX_MAPPING = {
         '@timestamp': {
           type: 'date',
           ignore_malformed: false,
+        },
+      },
+    },
+  },
+};
+
+const MOCK_ACTIVE_MQ_FLEET_DATA_STREAMS = [
+  {
+    name: 'logs-active-mq.fleet',
+    indices: [
+      {
+        index_name: '.ds-logs-active-mq.fleet-2024.07.31-000001',
+      },
+    ],
+    _meta: {
+      package: {
+        name: 'activemq',
+      },
+      managed_by: 'fleet',
+      managed: true,
+    },
+  },
+];
+
+const MOCK_ACTIVE_MQ_DEFAULT_STATS = {
+  _all: {
+    primaries: {
+      docs: {
+        count: 200,
+        deleted: 0,
+        total_size_in_bytes: 500000,
+      },
+      store: {
+        size_in_bytes: 500000,
+      },
+    },
+  },
+  indices: {
+    '.ds-logs-active-mq.fleet-2024.07.31-000001': {},
+  },
+};
+
+const MOCK_ACTIVE_MQ_FAILURE_STATS = {
+  _all: {
+    primaries: {
+      docs: {
+        count: 300,
+        deleted: 0,
+        total_size_in_bytes: 700000,
+      },
+      store: {
+        size_in_bytes: 700000,
+      },
+    },
+  },
+  indices: {
+    '.fs-logs-active-mq.fleet-2024.07.31-000001': {},
+  },
+};
+
+const MOCK_ACTIVE_MQ_DEFAULT_MAPPINGS = {
+  '.ds-logs-active-mq.fleet-2024.07.31-000001': {
+    mappings: {
+      properties: {
+        '@timestamp': {
+          type: 'date',
+          ignore_malformed: false,
+        },
+        data_stream: {
+          properties: {
+            dataset: {
+              type: 'constant_keyword',
+              value: 'active-mq.fleet',
+            },
+            namespace: {
+              type: 'constant_keyword',
+              value: 'default',
+            },
+            type: {
+              type: 'constant_keyword',
+              value: 'logs',
+            },
+          },
         },
       },
     },

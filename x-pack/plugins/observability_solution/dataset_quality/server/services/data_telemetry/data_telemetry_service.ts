@@ -38,7 +38,7 @@ import {
   addMappingsToIndices,
   addNamespace,
   groupStatsByPatternName,
-  addIndexBasicStats,
+  getIndexBasicStats,
   indexStatsToTelemetryEvents,
 } from './helpers';
 
@@ -134,15 +134,15 @@ export class DataTelemetryService {
         }),
         delay(BREATHE_DELAY_SHORT),
         switchMap((infoWithNamespace) => {
-          return addIndexBasicStats({
+          return getIndexBasicStats({
             esClient: this.esClient!,
             indices: infoWithNamespace,
             breatheDelay: BREATHE_DELAY_MEDIUM,
           });
         }),
         delay(BREATHE_DELAY_SHORT),
-        map((infoWithNamespace) => {
-          return groupStatsByPatternName(infoWithNamespace);
+        map((statsWithNamespace) => {
+          return groupStatsByPatternName(statsWithNamespace);
         }),
         map((statsByPattern) => {
           return indexStatsToTelemetryEvents(statsByPattern);
