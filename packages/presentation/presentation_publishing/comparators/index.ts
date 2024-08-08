@@ -7,5 +7,5 @@
  */
 
 export type { ComparatorFunction, ComparatorDefinition, StateComparators } from './types';
-export { runComparators } from './state_comparators';
+export { getInitialValuesFromComparators, runComparators } from './state_comparators';
 export { getUnchangingComparator } from './fallback_comparator';

@@ -12,9 +12,11 @@ import {
   combineLatestWith,
   debounceTime,
   map,
+  skip,
   Subscription,
 } from 'rxjs';
 import {
+  getInitialValuesFromComparators,
   PublishesUnsavedChanges,
   PublishingSubject,
   runComparators,
@@ -60,20 +62,29 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     comparatorKeys.push(key);
   }
 
-  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(undefined);
+  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
+    runComparators(
+      comparators,
+      comparatorKeys,
+      lastSavedState$.getValue() as RuntimeState,
+      getInitialValuesFromComparators(comparators, comparatorKeys)
+    )
+  );
   subscriptions.push(
     combineLatest(comparatorSubjects)
       .pipe(
         debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE),
-        map((latestStates) => {
-          return comparatorKeys.reduce((acc, key, index) => {
-            acc[key] = latestStates[index] as RuntimeState[typeof key];
+        combineLatestWith(lastSavedState$),
+        skip(1), // unsaved changes was initialized above - ignore the first emit
+        map(([latestState, lastSavedState]) => ({
+          latestState: comparatorKeys.reduce((acc, key, index) => {
+            acc[key] = latestState[index] as RuntimeState[typeof key];
             return acc;
-          }, {} as Partial<RuntimeState>);
-        }),
-        combineLatestWith(lastSavedState$)
+          }, {} as Partial<RuntimeState>),
+          lastSavedState,
+        }))
       )
-      .subscribe(([latestState, lastSavedState]) => {
+      .subscribe(({ latestState, lastSavedState }) => {
         unsavedChanges.next(
           runComparators(comparators, comparatorKeys, lastSavedState, latestState)
         );
