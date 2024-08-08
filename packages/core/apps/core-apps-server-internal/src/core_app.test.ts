@@ -34,6 +34,7 @@ describe('CoreApp', () => {
   let httpResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     coreContext = mockCoreContext.create();
 
     internalCorePreboot = coreInternalLifecycleMock.createInternalPreboot();
@@ -55,37 +56,70 @@ describe('CoreApp', () => {
 
   afterEach(() => {
     registerBundleRoutesMock.mockReset();
+    coreApp.stop();
+    jest.clearAllTimers();
   });
 
-  describe('`/internal/core/_settings` route', () => {
-    it('is not registered by default', async () => {
-      const routerMock = mockRouter.create();
-      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+  describe('Dynamic Config feature', () => {
+    describe('`/internal/core/_settings` route', () => {
+      it('is not registered by default', async () => {
+        const routerMock = mockRouter.create();
+        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
 
-      const localCoreApp = new CoreAppsService(coreContext);
-      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+        const localCoreApp = new CoreAppsService(coreContext);
+        await localCoreApp.setup(internalCoreSetup, emptyPlugins());
 
-      expect(routerMock.versioned.put).not.toHaveBeenCalledWith(
-        expect.objectContaining({
+        expect(routerMock.versioned.put).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            path: '/internal/core/_settings',
+          })
+        );
+
+        // But the Saved Object is still registered
+        expect(internalCoreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'dynamic-config-overrides' })
+        );
+      });
+
+      it('is registered when enabled', async () => {
+        const routerMock = mockRouter.create();
+        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+
+        coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+        const localCoreApp = new CoreAppsService(coreContext);
+        await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+
+        expect(routerMock.versioned.put).toHaveBeenCalledWith({
           path: '/internal/core/_settings',
-        })
-      );
-    });
+          access: 'internal',
+          options: {
+            tags: ['access:updateDynamicConfig'],
+          },
+        });
+      });
 
-    it('is registered when enabled', async () => {
-      const routerMock = mockRouter.create();
-      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+      it('it fetches the persisted document when enabled', async () => {
+        const routerMock = mockRouter.create();
+        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
 
-      coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
-      const localCoreApp = new CoreAppsService(coreContext);
-      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+        coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+        const localCoreApp = new CoreAppsService(coreContext);
+        await localCoreApp.setup(internalCoreSetup, emptyPlugins());
 
-      expect(routerMock.versioned.put).toHaveBeenCalledWith({
-        path: '/internal/core/_settings',
-        access: 'internal',
-        options: {
-          tags: ['access:updateDynamicConfig'],
-        },
+        const internalCoreStart = coreInternalLifecycleMock.createInternalStart();
+        localCoreApp.start(internalCoreStart);
+
+        expect(internalCoreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith([
+          'dynamic-config-overrides',
+        ]);
+
+        const repository =
+          internalCoreStart.savedObjects.createInternalRepository.mock.results[0].value;
+        await jest.advanceTimersByTimeAsync(0); // "Advancing" 0ms is enough, but necessary to trigger the `timer` observable
+        expect(repository.get).toHaveBeenCalledWith(
+          'dynamic-config-overrides',
+          'dynamic-config-overrides'
+        );
       });
     });
   });
