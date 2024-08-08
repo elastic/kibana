@@ -9,8 +9,8 @@ import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
-import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '../../../../common/constants';
+import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
 
 const onPaginate = jest.fn();
 
