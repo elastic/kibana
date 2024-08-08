@@ -325,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/190090
-  describ.skip('Search source Alert', () => {
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 
