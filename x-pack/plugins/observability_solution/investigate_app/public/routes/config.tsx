@@ -7,7 +7,7 @@
 import { createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { InvestigateDetailsPage } from '../pages/details';
+import { InvestigationDetailsPage } from '../pages/details';
 import { InvestigationListPage } from '../pages/list';
 
 /**
@@ -19,10 +19,10 @@ const investigateRoutes = {
     element: <InvestigationListPage />,
   },
   '/new': {
-    element: <InvestigateDetailsPage />,
+    element: <InvestigationDetailsPage />,
   },
   '/{id}': {
-    element: <InvestigateDetailsPage />,
+    element: <InvestigationDetailsPage />,
     params: t.type({
       path: t.type({ id: t.string }),
     }),

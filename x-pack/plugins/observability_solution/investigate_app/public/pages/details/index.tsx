@@ -11,7 +11,7 @@ import React from 'react';
 import { InvestigateView } from '../../components/investigate_view';
 import { useKibana } from '../../hooks/use_kibana';
 
-export function InvestigateDetailsPage() {
+export function InvestigationDetailsPage() {
   const {
     dependencies: {
       start: { observabilityShared },
