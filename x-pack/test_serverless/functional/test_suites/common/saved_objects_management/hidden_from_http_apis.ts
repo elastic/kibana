@@ -117,13 +117,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .then((resp) => {
+              interface MinimalSO {
+                id: string;
+                type: string;
+              }
               expect(
                 resp.body.saved_objects
-                  .map((so: { id: string; type: string }) => ({
+                  .map((so: MinimalSO) => ({
                     id: so.id,
                     type: so.type,
                   }))
-                  .sort((a, b) => (a.id > b.id ? 1 : -1))
+                  .sort((a: MinimalSO, b: MinimalSO) => (a.id > b.id ? 1 : -1))
               ).to.eql([
                 {
                   id: 'hidden-from-http-apis-1',
