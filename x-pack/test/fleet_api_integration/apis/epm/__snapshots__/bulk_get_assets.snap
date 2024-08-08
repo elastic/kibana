@@ -21,7 +21,7 @@ Array [
     "type": "data_stream_ilm_policy",
   },
   Object {
-    "appLink": "",
+    "appLink": "/app/ml/trained_models?_a=(trained_models:(queryText:'model_id:(default)'))",
     "attributes": Object {},
     "id": "default",
     "type": "ml_model",
