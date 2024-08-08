@@ -103,15 +103,7 @@ Before you upgrade to 8.15.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-184036]]
-* Adds rate limiting to install by upload endpoint.
-// [%collapsible]
-// ====
-// *Details* +
-// !!TODO!! For more information, refer to ({kibana-pull}184036[#184036]).
-
-// *Impact* +
-// !!TODO!!
-// ====
+* Adds rate limiting to install by upload endpoint ({kibana-pull}184036[#184036]).
       
 [float]
 [[features-8.15.0]]
