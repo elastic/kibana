@@ -698,7 +698,6 @@ describe('Sourcerer Hooks', () => {
           '-filebeat-*',
           '-packetbeat-*',
         ]);
-        expect(result.current.indexPattern).toHaveProperty('getName');
       });
     });
 
@@ -710,7 +709,7 @@ describe('Sourcerer Hooks', () => {
         }
       );
 
-      expect(result.current.sourcererDataView?.title).toBe(
+      expect(result.current.sourcererDataView.title).toBe(
         'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*'
       );
 
@@ -727,8 +726,8 @@ describe('Sourcerer Hooks', () => {
 
       await rerender();
 
-      expect(result.current.sourcererDataView?.title).toBe(testPatterns.join(','));
-      expect(result.current.sourcererDataView?.name).toBe(testPatterns.join(','));
+      expect(result.current.sourcererDataView.title).toBe(testPatterns.join(','));
+      expect(result.current.sourcererDataView.name).toBe(testPatterns.join(','));
     });
   });
 });

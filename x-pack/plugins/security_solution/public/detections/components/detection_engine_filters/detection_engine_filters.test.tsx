@@ -74,7 +74,7 @@ describe('DetectionEngineFilters', () => {
     onInit: jest.fn(),
     indexPattern: {
       title: 'mock-title',
-      fields: [],
+      fields: {},
     },
   };
 

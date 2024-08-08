@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -104,8 +105,7 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
-    useSourcererDataView();
+  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
 
   const ip = decodeIpv6(detailName);
   const networkDetailsFilter = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
@@ -114,7 +114,7 @@ const NetworkDetailsComponent: React.FC = () => {
     try {
       return [
         buildEsQuery(
-          indexPattern,
+          dataViewSpecToViewBase(sourcererDataView),
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -123,7 +123,7 @@ const NetworkDetailsComponent: React.FC = () => {
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, indexPattern, networkDetailsFilter, query, uiSettings]);
+  }, [globalFilters, networkDetailsFilter, query, sourcererDataView, uiSettings]);
 
   const additionalFilters = useMemo(
     () => (rawFilteredQuery ? [rawFilteredQuery] : []),
@@ -165,6 +165,10 @@ const NetworkDetailsComponent: React.FC = () => {
     }),
     [detailName, flowTarget]
   );
+
+  const indexPattern = useMemo(() => {
+    return dataViewSpecToViewBase(sourcererDataView);
+  }, [sourcererDataView]);
 
   return (
     <div data-test-subj="network-details-page">
