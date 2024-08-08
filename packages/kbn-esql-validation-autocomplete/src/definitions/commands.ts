@@ -390,8 +390,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
-        { name: 'column', type: 'column', innerType: 'string' },
+        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
@@ -408,8 +407,7 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: false,
       params: [
-        // innerType: 'string' is interpreted as keyword and text (see columnParamsWithInnerTypes)
-        { name: 'column', type: 'column', innerType: 'string' },
+        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
@@ -424,7 +422,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'any' }],
+      params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
   },
   {
@@ -442,7 +440,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [ENRICH_MODES],
     signature: {
       multipleParams: false,
-      params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
+      params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
   },
 ];

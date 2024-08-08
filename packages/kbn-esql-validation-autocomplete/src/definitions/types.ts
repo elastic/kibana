@@ -149,13 +149,13 @@ export interface CommandBaseDefinition {
   description: string;
   signature: {
     multipleParams: boolean;
-    // innerType here is useful to drill down the type in case of "column"
+    // innerTypes here is useful to drill down the type in case of "column"
     // i.e. column of type string
     params: Array<{
       name: string;
       type: string;
       optional?: boolean;
-      innerType?: string;
+      innerTypes?: string[];
       values?: string[];
       valueDescriptions?: string[];
       constantOnly?: boolean;
