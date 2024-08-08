@@ -51,7 +51,12 @@ export const LanguageSelectorModal = ({
   const modalTitleId = useGeneratedHtmlId();
   const [selectedLanguage, setSelectedLanguage] = useState<string>(currentLanguage);
   const [options, setOptions] = useState<EuiSelectableOption[]>(
-    AVAILABLE_LANGUAGES.map((lang): EuiSelectableOption => ({ label: lang }))
+    AVAILABLE_LANGUAGES.map(
+      (lang): EuiSelectableOption => ({
+        label: lang,
+        'data-test-subj': `languageOption-${lang.toLowerCase()}`,
+      })
+    )
   );
 
   const noOptionsSelected = options.every((option) => !option.checked);
@@ -64,7 +69,10 @@ export const LanguageSelectorModal = ({
         option.label === selectedLanguage ? (
           DEFAULT_BADGE
         ) : (
-          <EuiLink onClick={() => setSelectedLanguage(option.label)}>
+          <EuiLink
+            onClick={() => setSelectedLanguage(option.label)}
+            data-test-subj={`changeDefaultLanguageTo-${option.label.toLowerCase()}`}
+          >
             {i18n.translate('console.requestPanel.contextMenu.defaultSelectedLanguage', {
               defaultMessage: 'Set as default',
             })}
@@ -112,13 +120,13 @@ export const LanguageSelectorModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>
+        <EuiButtonEmpty onClick={closeModal} data-test-subj="closeCopyAsModal">
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalCancel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
-        <EuiButton onClick={onCopyCode} fill>
+        <EuiButton onClick={onCopyCode} fill data-test-subj="copyAsLanguageSubmit">
           <FormattedMessage
             id="console.requestPanel.contextMenu.languageSelectorModalCopy"
             defaultMessage="Copy code"

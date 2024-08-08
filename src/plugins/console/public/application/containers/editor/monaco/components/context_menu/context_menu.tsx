@@ -199,9 +199,9 @@ export const ContextMenu = ({
 
   const items = [
     <EuiContextMenuItem
-      key="Copy as cURL"
-      data-test-subj="consoleMenuCopyAsCurl"
-      id="ConCopyAsCurl"
+      key="Copy as"
+      data-test-subj="consoleMenuCopyAsButton"
+      id="copyAs"
       disabled={!window.navigator?.clipboard}
       onClick={(e: React.MouseEvent) => {
         e.preventDefault();
@@ -237,7 +237,7 @@ export const ContextMenu = ({
           ) : (
             // The EuiContextMenuItem renders itself as a button already, so we need to
             // force the link to not be a button in order to prevent A11Y issues.
-            <EuiLink href="" data-name="changeLanguage">
+            <EuiLink href="" data-name="changeLanguage" data-test-subj="changeLanguageButton">
               Change
             </EuiLink>
           )}
