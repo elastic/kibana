@@ -45,3 +45,8 @@ export {
   CopyTimelineRequestBody,
   CopyTimelineResponse,
 } from './copy_timeline/copy_timeline_route.gen';
+
+export {
+  CreateTimelinesRequestBody,
+  CreateTimelinesResponse,
+} from './create_timelines/create_timelines_route.gen';

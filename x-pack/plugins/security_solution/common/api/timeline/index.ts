@@ -9,7 +9,6 @@ export * from './model/api';
 export * from './routes';
 
 export * from './get_draft_timelines/get_draft_timelines_route';
-export * from './create_timelines/create_timelines_route';
 export * from './get_timeline/get_timeline_route';
 export * from './get_timelines/get_timelines_route';
 export * from './import_timelines/import_timelines_route';

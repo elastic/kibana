@@ -239,7 +239,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       */
     copyTimeline(props: CopyTimelineProps) {
       return supertest
-        .post('/api/timeline/_copy')
+        .get('/api/timeline/_copy')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

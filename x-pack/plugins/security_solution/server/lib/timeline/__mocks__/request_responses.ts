@@ -18,7 +18,7 @@ import {
 import type {
   SavedTimeline,
   patchTimelineSchema,
-  createTimelineSchema,
+  CreateTimelinesRequestBody,
   GetTimelineQuery,
 } from '../../../../common/api/timeline';
 import {
@@ -135,7 +135,7 @@ export const updateTemplateTimelineWithTimelineId = {
   version: 'WzEyMjUsMV0=',
 };
 
-export const getCreateTimelinesRequest = (mockBody: rt.TypeOf<typeof createTimelineSchema>) =>
+export const getCreateTimelinesRequest = (mockBody: CreateTimelinesRequestBody) =>
   requestMock.create({
     method: 'post',
     path: TIMELINE_URL,

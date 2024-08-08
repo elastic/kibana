@@ -28,9 +28,10 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - timeline
+              required: [timeline]
               properties:
+                timeline:
+                  $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
                 status:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
                   nullable: true
@@ -49,8 +50,6 @@ paths:
                 version:
                   type: string
                   nullable: true
-                timeline:
-                  $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
       responses:
         '200':
           description: Indicates the timeline was successfully created.
@@ -66,6 +65,7 @@ paths:
                     properties:
                       persistTimeline:
                         type: object
+                        required: [timeline]
                         properties:
                           timeline:
                             $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

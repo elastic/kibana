@@ -7,16 +7,15 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../..';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { createTimelineSchema } from '../../../../../../common/api/timeline';
 import {
   buildFrameworkRequest,
   CompareTimelinesStatus,
@@ -24,7 +23,10 @@ import {
 } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelines } from './helpers';
-import type { CreateTimelinesResponse } from '../../../../../../common/api/timeline';
+import {
+  CreateTimelinesRequestBody,
+  type CreateTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 
 export * from './helpers';
 
@@ -42,7 +44,7 @@ export const createTimelinesRoute = (router: SecuritySolutionPluginRouter, _: Co
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidationWithExcess(createTimelineSchema),
+            body: buildRouteValidationWithZod(CreateTimelinesRequestBody),
           },
         },
       },
