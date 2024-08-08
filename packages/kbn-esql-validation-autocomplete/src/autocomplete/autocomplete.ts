@@ -77,6 +77,7 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  TRIGGER_SUGGESTION_COMMAND,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -670,10 +671,14 @@ async function getExpressionSuggestionsByType(
             // const NON_ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
             // const textToUse = lastWord.replace(NON_ALPHANUMERIC_REGEXP, '');
             const textToUse = lastWord;
-            return getFinalSuggestions().map((s) => ({
+            return [
+              { ...pipeCompleteItem, text: ' | ' },
+              { ...commaCompleteItem, text: ', ' },
+            ].map((s) => ({
               ...s,
               filterText: textToUse,
               text: textToUse + s.text,
+              command: TRIGGER_SUGGESTION_COMMAND,
             }));
           }
         }
