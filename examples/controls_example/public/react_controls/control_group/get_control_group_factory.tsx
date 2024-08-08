@@ -167,8 +167,13 @@ export const getControlGroupEmbeddableFactory = (services: {
         autoApplySelections$,
         allowExpensiveQueries$,
         snapshotRuntimeState: () => {
-          // TODO: Remove this if it ends up being unnecessary
-          return {} as unknown as ControlGroupRuntimeState;
+          return {
+            initialChildControlState, // this never changes
+            chainingSystem: chainingSystem$.getValue(),
+            labelPosition: labelPosition$.getValue(),
+            autoApplySelections: autoApplySelections$.getValue(),
+            panels: controlsManager.snapshotControlsRuntimeState(),
+          };
         },
         dataLoading: dataLoading$,
         onEdit: async () => {

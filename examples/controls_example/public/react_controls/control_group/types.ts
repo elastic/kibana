@@ -109,6 +109,7 @@ export interface ControlGroupRuntimeState<State extends DefaultControlState = De
   autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
+  panels?: ControlPanelsState;
   initialChildControlState: ControlPanelsState<State>;
 
   /*

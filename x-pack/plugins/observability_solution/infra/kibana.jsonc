@@ -56,7 +56,7 @@
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls"
+      "controlsExample"
     ]
   }
 }

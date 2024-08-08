@@ -15,7 +15,6 @@ import type {
   ControlGroupSettings,
   ControlInputTransform,
   ControlPanelState,
-  SerializedControlPanelState,
 } from '../types';
 
 export type ControlGroupRendererApi = ControlGroupApi & {
@@ -33,7 +32,7 @@ export type ControlGroupRendererState = Omit<
 > & {
   id: string;
   panels: {
-    [panelId: string]: ControlPanelState<SerializedControlPanelState>;
+    [panelId: string]: ControlPanelState<ControlPanelState>;
   };
   viewMode?: ViewMode;
   ignoreParentSettings?: ParentIgnoreSettings;
