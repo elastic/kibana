@@ -13,7 +13,7 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -248,6 +248,70 @@ export class DataRecognizer {
   }
 
   // called externally by an endpoint
+  public async findIndexMatches(moduleId: string, size: number = 15): Promise<string[]> {
+    const config = await this._findConfig(moduleId);
+    const matchingIndices: string[] = [];
+
+    if (config?.module.query === undefined) {
+      return matchingIndices;
+    }
+
+    try {
+      const listOfIndices = await this._client.asCurrentUser.cat.indices({ format: 'json' });
+      const promises: Array<Promise<estypes.SearchResponse<any>>> = [];
+      // Keep track of which index name is associated with which promise
+      const indicesMap: Record<string, Promise<any>> = {};
+
+      listOfIndices.forEach((indexObj) => {
+        // Don't check internal or hidden indices
+        if (indexObj.index && indexObj.index?.startsWith('.') === false) {
+          const promise = this._client.asCurrentUser.search(
+            {
+              index: indexObj.index,
+              size: 0,
+              body: {
+                query: config?.module.query,
+              },
+            },
+            { maxRetries: 0 }
+          );
+          indicesMap[indexObj.index] = promise;
+          promises.push(promise);
+        }
+      });
+
+      const response = await Promise.all(promises);
+      const responseMap: Record<string, number> = Object.keys(indicesMap).reduce(
+        (acc, indexName, i) => {
+          const totalHits =
+            typeof response[i].hits.total === 'number'
+              ? response[i].hits.total
+              : response[i].hits?.total?.value ?? 0;
+          return Object.assign(acc, { [indexName]: totalHits });
+        },
+        {}
+      );
+
+      for (const indexName in responseMap) {
+        if (Object.prototype.hasOwnProperty.call(responseMap, indexName)) {
+          const indexResponseHitsTotal = responseMap[indexName];
+          if (indexResponseHitsTotal > 0 && matchingIndices.length < size) {
+            matchingIndices.push(indexName);
+          } else if (matchingIndices.length >= size) {
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      mlLog.warn(
+        `Data recognizer error fetching and matching indices for query in ${config.module.id}. ${error}`
+      );
+    }
+
+    return matchingIndices;
+  }
+
+  // called externally by an endpoint
   public async findMatches(
     indexPattern: string,
     moduleTagFilters?: string[]
@@ -418,6 +482,21 @@ export class DataRecognizer {
 
       datafeeds.push(...(await Promise.all(tempDatafeed)).filter(isDefined));
     }
+    // load the logoFile
+    if (module.logoFile !== undefined) {
+      try {
+        const logoFileString = await this._readFile(
+          `${this._modulesDir}/${dirName}/${module.logoFile}`
+        );
+        const logoFileIcon = JSON.parse(logoFileString);
+        module.logo = logoFileIcon?.icon;
+      } catch (error) {
+        mlLog.warn(
+          `Data recognizer error loading logo file ${module.logoFile} for module ${id}. ${error}`
+        );
+      }
+    }
+
     // load all of the kibana saved objects
     if (module.kibana !== undefined) {
       const kKeys = Object.keys(module.kibana) as Array<keyof FileBasedModule['kibana']>;

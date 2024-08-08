@@ -152,6 +152,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab settings',
             highlightNestedRoutes: true,
           },
+          {
+            id: 'preconfigured_jobs',
+            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.preconfiguredJobsLinkText', {
+              defaultMessage: 'Preconfigured jobs',
+            }),
+            disabled: disableLinks,
+            pathId: ML_PAGES.PRECONFIGURED_JOBS_MANAGE,
+            testSubj: 'mlMainTab preconfiguredJobs',
+          },
         ],
       },
       {

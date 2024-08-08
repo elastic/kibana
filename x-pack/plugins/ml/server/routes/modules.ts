@@ -14,6 +14,7 @@ import {
   moduleIdParamSchema,
   moduleFilterSchema,
   optionalModuleIdParamSchema,
+  optionalSizeQuerySchema,
   recognizeModulesSchema,
   setupModuleBodySchema,
   recognizeModulesSchemaResponse,
@@ -91,6 +92,181 @@ export function dataRecognizer(
       )
     );
 
+  /**
+   * @apiGroup Modules
+   *
+   * @api {get} /internal/ml/modules/recognize_by_module/:moduleId Recognize any index pattern for a module
+   * @apiName RecognizeIndicesByModule
+   * @apiDescription By supplying a module id, discover if any of the indices are a match for the module.
+   * @apiSchema (params) moduleIdParamSchema
+   * @apiSuccess {string[]} Array of index names which match the modules, sorted by index id.
+   * @apiSuccessExample {json} Success-Response:
+   * [
+   *  'index1', 'index2'
+   * ]
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/modules/recognize_by_module/{moduleId}`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: moduleIdParamSchema,
+            query: optionalSizeQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            const { moduleId } = request.params;
+            const { size } = request.query;
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewsService = await getDataViewsService();
+
+            const dr = dataRecognizerFactory(
+              client,
+              mlClient,
+              soClient,
+              dataViewsService,
+              mlSavedObjectService,
+              request,
+              compatibleModuleType
+            );
+            const results = await dr.findIndexMatches(moduleId, size);
+
+            return response.ok({ body: results });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  /**
+   * @apiGroup Modules
+   *
+   * @api {get} /internal/ml/modules/get_module/:moduleId Get module
+   * @apiName GetModule
+   * @apiDescription Retrieve a whole ML module, containing jobs, datafeeds and saved objects. If
+   *    no module ID is supplied, returns all modules.
+   * @apiSchema (params) moduleIdParamSchema
+   * @apiSchema (query) moduleFilterSchema
+   * @apiSuccess {object} module When a module ID is specified, returns a module object containing
+   *      all of the jobs, datafeeds and saved objects which will be created when the module is setup.
+   * @apiSuccess {object[]} modules If no module ID is supplied, an array of all modules will be returned.
+   * @apiSuccessExample {json} Success-Response:
+   * {
+   *   "id":"sample_data_ecommerce",
+   *   "title":"Kibana sample data eCommerce",
+   *   "description":"Find anomalies in eCommerce total sales data",
+   *   "type":"Sample Dataset",
+   *   "logoFile":"logo.json",
+   *   "defaultIndexPattern":"kibana_sample_data_ecommerce",
+   *   "query":{
+   *     "bool":{
+   *        "filter":[
+   *           {
+   *              "term":{
+   *                 "_index":"kibana_sample_data_ecommerce"
+   *              }
+   *           }
+   *        ]
+   *     }
+   *   },
+   *   "jobs":[
+   *      {
+   *         "id":"high_sum_total_sales",
+   *         "config":{
+   *            "groups":[
+   *               "kibana_sample_data",
+   *               "kibana_sample_ecommerce"
+   *            ],
+   *            "description":"Find customers spending an unusually high amount in an hour",
+   *            "analysis_config":{
+   *               "bucket_span":"1h",
+   *               "detectors":[
+   *                  {
+   *                     "detector_description":"High total sales",
+   *                     "function":"high_sum",
+   *                     "field_name":"taxful_total_price",
+   *                     "over_field_name":"customer_full_name.keyword"
+   *                  }
+   *               ],
+   *               "influencers":[
+   *                  "customer_full_name.keyword",
+   *                  "category.keyword"
+   *               ]
+   *            },
+   *            "analysis_limits":{
+   *               "model_memory_limit":"10mb"
+   *            },
+   *            "data_description":{
+   *               "time_field":"order_date"
+   *            },
+   *            "model_plot_config":{
+   *               "enabled":true
+   *            },
+   *            "custom_settings":{
+   *               "created_by":"ml-module-sample",
+   *               "custom_urls":[
+   *                 {
+   *                     "url_name":"Raw data",
+   *                     "url_value":"kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a
+   *                     (index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,query:(language:kuery,query:'customer_full_name
+   *                      keyword:\"$customer_full_name.keyword$\"'),sort:!('@timestamp',desc))"
+   *                 },
+   *                 {
+   *                     "url_name":"Data dashboard",
+   *                     "url_value":"kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(filters:!(),time:(from:'$earliest$',
+   *                        mode:absolute,to:'$latest$'))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f
+   *                        index:'INDEX_PATTERN_ID', key:customer_full_name.keyword,negate:!f,params:(query:'$customer_full_name.keyword$')
+   *                        type:phrase,value:'$customer_full_name.keyword$'),query:(match:(customer_full_name.keyword:
+   *                        (query:'$customer_full_name.keyword$',type:phrase))))),query:(language:kuery, query:''))"
+   *                }
+   *              ]
+   *            }
+   *         }
+   *      }
+   *   ],
+   *   "datafeeds":[
+   *     {
+   *         "id":"datafeed-high_sum_total_sales",
+   *         "config":{
+   *            "job_id":"high_sum_total_sales",
+   *            "indexes":[
+   *               "INDEX_PATTERN_NAME"
+   *            ],
+   *            "query":{
+   *               "bool":{
+   *                  "filter":[
+   *                     {
+   *                        "term":{ "_index":"kibana_sample_data_ecommerce" }
+   *                     }
+   *                  ]
+   *               }
+   *            }
+   *         }
+   *      }
+   *   ],
+   *   "kibana":{}
+   * }
+   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/{moduleId?}`,

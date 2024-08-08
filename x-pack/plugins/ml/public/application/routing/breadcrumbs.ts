@@ -50,6 +50,14 @@ export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:modelManagement',
 });
 
+export const PRECONFIGURED_JOBS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.preconfiguredJobsLabel', {
+    defaultMessage: 'Preconfigured Jobs',
+  }),
+  href: '/preconfigured_jobs',
+  deepLinkId: 'ml:preconfiguredJobs',
+});
+
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
     defaultMessage: 'Data Visualizer',
@@ -153,6 +161,7 @@ const breadcrumbs = {
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
+  PRECONFIGURED_JOBS,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 

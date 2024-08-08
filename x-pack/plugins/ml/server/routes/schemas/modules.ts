@@ -107,6 +107,13 @@ export const moduleIdParamSchema = schema.object({
   moduleId: schema.string({ meta: { description: 'ID of the module' } }),
 });
 
+export const optionalSizeQuerySchema = schema.object({
+  /**
+   * How many results to return.
+   */
+  size: schema.maybe(schema.number()),
+});
+
 export const recognizeModulesSchema = schema.object({
   indexPatternTitle: schema.string({
     meta: {
