@@ -93,7 +93,8 @@ describe('DataTelemetryService', () => {
       transport: {
         request: jest.fn().mockImplementation((params) => {
           if (
-            params.index === 'logs-active-mq.fleet' &&
+            params.path?.includes('_stats') &&
+            params.path?.includes('logs-active-mq') &&
             params?.querystring?.failure_store === 'only'
           ) {
             return MOCK_ACTIVE_MQ_FAILURE_STATS;
@@ -240,9 +241,9 @@ describe('DataTelemetryService', () => {
       expect(reportEventsSpy.mock?.lastCall?.[0]).toEqual([
         expect.objectContaining({
           doc_count: 4000 + 500 + 200,
-          failure_store_doc_count: 0,
+          failure_store_doc_count: 300,
           index_count: 2 + 1 + 1,
-          failure_store_index_count: 0,
+          failure_store_index_count: 1,
           namespace_count: 1 + 1,
           size_in_bytes: 10089898 + 800000 + 500000,
           pattern_name: 'test',
