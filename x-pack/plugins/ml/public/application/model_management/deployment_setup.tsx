@@ -111,8 +111,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
   const disableThreadingControls = config.priority === 'low';
 
-  // const adaptiveAllocationsAvailable = cloudInfo.isCloud
-  const adaptiveAllocationsAvailable = true;
+  const adaptiveAllocationsAvailable = cloudInfo.isCloud;
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
