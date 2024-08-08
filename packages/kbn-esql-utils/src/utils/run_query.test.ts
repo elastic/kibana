@@ -20,7 +20,7 @@ describe('getStartEndParams', () => {
     const query = 'FROM foo | where time > ?t_start';
     const params = getStartEndParams(query, time);
     expect(params).toHaveLength(1);
-    expect(params[0]).toHaveProperty('start');
+    expect(params[0]).toHaveProperty('t_start');
   });
 
   it('should return an array with the end param if exists at the query', () => {
@@ -28,7 +28,7 @@ describe('getStartEndParams', () => {
     const query = 'FROM foo | where time < ?t_end';
     const params = getStartEndParams(query, time);
     expect(params).toHaveLength(1);
-    expect(params[0]).toHaveProperty('end');
+    expect(params[0]).toHaveProperty('t_end');
   });
 
   it('should return an array with the end and start params if exist at the query', () => {
@@ -36,7 +36,7 @@ describe('getStartEndParams', () => {
     const query = 'FROM foo | where time < ?t_end amd time > ?t_start';
     const params = getStartEndParams(query, time);
     expect(params).toHaveLength(2);
-    expect(params[0]).toHaveProperty('start');
-    expect(params[1]).toHaveProperty('end');
+    expect(params[0]).toHaveProperty('t_start');
+    expect(params[1]).toHaveProperty('t_end');
   });
 });

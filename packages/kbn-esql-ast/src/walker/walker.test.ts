@@ -801,13 +801,13 @@ describe('Walker.params()', () => {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'start',
+        value: 't_start',
       },
       {
         type: 'literal',
         literalType: 'param',
         paramType: 'named',
-        value: 'end',
+        value: 't_end',
       },
     ]);
   });
