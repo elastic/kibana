@@ -12,14 +12,8 @@ import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { validateEql } from '../../../../common/hooks/eql/api';
+import { validateEql, EQL_ERROR_CODES } from '../../../../common/hooks/eql/api';
 import type { FieldValueQueryBar } from '../query_bar';
-import * as i18n from './translations';
-
-export enum ERROR_CODES {
-  FAILED_REQUEST = 'ERR_FAILED_REQUEST',
-  INVALID_EQL = 'ERR_INVALID_EQL',
-}
 
 /**
  * Unlike lodash's debounce, which resolves intermediate calls with the most
@@ -54,7 +48,7 @@ export const debounceAsync = <Args extends unknown[], Result extends Promise<unk
 
 export const eqlValidator = async (
   ...args: Parameters<ValidationFunc>
-): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
+): Promise<ValidationError<EQL_ERROR_CODES> | void | undefined> => {
   const [{ value, formData }] = args;
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
@@ -66,43 +60,36 @@ export const eqlValidator = async (
     return;
   }
 
-  try {
-    const { data } = KibanaServices.get();
-    let dataViewTitle = index?.join();
-    let runtimeMappings = {};
-    if (
-      dataViewId != null &&
-      dataViewId !== '' &&
-      formData.dataSourceType === DataSourceType.DataView
-    ) {
-      const dataView = await data.dataViews.get(dataViewId);
+  const { data } = KibanaServices.get();
+  let dataViewTitle = index?.join();
+  let runtimeMappings = {};
+  if (
+    dataViewId != null &&
+    dataViewId !== '' &&
+    formData.dataSourceType === DataSourceType.DataView
+  ) {
+    const dataView = await data.dataViews.get(dataViewId);
 
-      dataViewTitle = dataView.title;
-      runtimeMappings = dataView.getRuntimeMappings();
-    }
+    dataViewTitle = dataView.title;
+    runtimeMappings = dataView.getRuntimeMappings();
+  }
 
-    const signal = new AbortController().signal;
-    const response = await validateEql({
-      data,
-      query,
-      signal,
-      dataViewTitle,
-      runtimeMappings,
-      options: eqlOptions,
-    });
+  const signal = new AbortController().signal;
+  const response = await validateEql({
+    data,
+    query,
+    signal,
+    dataViewTitle,
+    runtimeMappings,
+    options: eqlOptions,
+  });
 
-    if (response?.valid === false) {
-      return {
-        code: ERROR_CODES.INVALID_EQL,
-        message: '',
-        messages: response.errors,
-      };
-    }
-  } catch (error) {
+  if (response?.valid === false) {
     return {
-      code: ERROR_CODES.FAILED_REQUEST,
-      message: i18n.EQL_VALIDATION_REQUEST_ERROR,
-      error,
+      code: response.error?.code,
+      message: '',
+      messages: response.error?.messages,
+      error: response.error?.error,
     };
   }
 };
@@ -117,10 +104,10 @@ export const getValidationResults = <T = unknown>(
     const [error] = field.errors;
     const message = error.message;
 
-    if (error.code === ERROR_CODES.INVALID_EQL) {
-      return { isValid, message, messages: error.messages };
-    } else {
+    if (error.code === EQL_ERROR_CODES.FAILED_REQUEST) {
       return { isValid, message, error: error.error };
+    } else {
+      return { isValid, message, messages: error.messages };
     }
   } else {
     return { isValid, message: '' };

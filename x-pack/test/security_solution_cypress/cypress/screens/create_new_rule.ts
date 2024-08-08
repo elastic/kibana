@@ -119,6 +119,9 @@ export const EQL_QUERY_VALIDATION_LABEL = '.euiFormLabel-isInvalid';
 
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
 
+export const EQL_QUERY_VALIDATION_ERROR_CONTENT =
+  '[data-test-subj="eql-validation-errors-popover-content"]';
+
 export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
 
 export const EQL_OPTIONS_TIMESTAMP_INPUT =
