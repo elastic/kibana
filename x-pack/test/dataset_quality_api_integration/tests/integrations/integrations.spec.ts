@@ -56,11 +56,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/integrations',
-      params: {
-        query: {
-          type: 'logs',
-        },
-      },
     });
   }
 
