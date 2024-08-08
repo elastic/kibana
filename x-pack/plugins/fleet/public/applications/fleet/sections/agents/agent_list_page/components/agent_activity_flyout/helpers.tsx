@@ -32,9 +32,9 @@ const actionNames: {
     cancelledText: 'force unenrollment',
   },
   AUTOMATICAL_FORCE_UNENROLL: {
-    inProgressText: 'Automatical unenrolling',
+    inProgressText: 'Automatic unenrolling',
     completedText: 'automatically unenrolled',
-    cancelledText: 'automatical unenrollment',
+    cancelledText: 'automatic unenrollment',
   },
   UPDATE_TAGS: {
     inProgressText: 'Updating tags of',
