@@ -138,7 +138,7 @@ export default function spaceSelectorFunctionalTests({
         await listingTable.searchForItemWithName(dashName);
         await listingTable.clickItemLink('dashboard', dashName);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete(); // throws if all items are not rendered
+        await PageObjects.dashboard.waitForRenderComplete();
       };
 
       before(async () => {
