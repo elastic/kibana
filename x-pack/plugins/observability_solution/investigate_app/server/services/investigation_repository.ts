@@ -9,11 +9,13 @@ import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isLeft } from 'fp-ts/lib/Either';
 import { Investigation, StoredInvestigation, investigationSchema } from '../models/investigation';
 import { SO_INVESTIGATION_TYPE } from '../saved_objects/investigation';
+import { Paginated, Pagination } from '../models/pagination';
 
 export interface InvestigationRepository {
   save(investigation: Investigation): Promise<void>;
   findById(id: string): Promise<Investigation>;
   deleteById(id: string): Promise<void>;
+  search(pagination: Pagination): Promise<Paginated<Investigation>>;
 }
 
 export function investigationRepositoryFactory({
@@ -71,6 +73,7 @@ export function investigationRepositoryFactory({
 
       return investigation;
     },
+
     async deleteById(id: string): Promise<void> {
       const response = await soClient.find<StoredInvestigation>({
         type: SO_INVESTIGATION_TYPE,
@@ -84,6 +87,23 @@ export function investigationRepositoryFactory({
       }
 
       await soClient.delete(SO_INVESTIGATION_TYPE, response.saved_objects[0].id);
+    },
+
+    async search(pagination: Pagination): Promise<Paginated<Investigation>> {
+      const response = await soClient.find<StoredInvestigation>({
+        type: SO_INVESTIGATION_TYPE,
+        page: pagination.page,
+        perPage: pagination.perPage,
+      });
+
+      return {
+        total: response.total,
+        perPage: response.per_page,
+        page: response.page,
+        results: response.saved_objects
+          .map((savedObject) => toInvestigation(savedObject.attributes))
+          .filter((investigation) => investigation !== undefined) as Investigation[],
+      };
     },
   };
 }
