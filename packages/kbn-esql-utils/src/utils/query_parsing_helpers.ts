@@ -56,7 +56,7 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
- * When the ?start and ?end params are used, we want to retrieve the timefield from the query.
+ * When the ?t_start and ?t_end params are used, we want to retrieve the timefield from the query.
  * @param esql:string
  * @returns string
  */
