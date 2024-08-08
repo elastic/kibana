@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataControlApi, DefaultDataControlState } from '../types';
+import type {
+  DataControlApi,
+  DefaultDataControlState,
+} from '../react_controls/controls/data_controls/types';
 
 export const SEARCH_CONTROL_TYPE = 'searchControl';
 

@@ -10,7 +10,7 @@ import { SerializedPanelState } from '@kbn/presentation-containers';
 import { ControlGroupSerializedState } from '../../react_controls/control_group/types';
 import { OPTIONS_LIST_CONTROL_TYPE } from '../../react_controls/controls/data_controls/options_list_control/constants';
 import { RANGE_SLIDER_CONTROL_TYPE } from '../../react_controls/controls/data_controls/range_slider/types';
-import { SEARCH_CONTROL_TYPE } from '../../react_controls/controls/data_controls/search_control/types';
+import { SEARCH_CONTROL_TYPE } from '../../search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../../react_controls/controls/timeslider_control/types';
 
 const SERIALIZED_STATE_SESSION_STORAGE_KEY =

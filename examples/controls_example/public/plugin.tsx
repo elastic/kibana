@@ -19,7 +19,7 @@ import { EditControlAction } from './react_controls/actions/edit_control_action'
 import { registerControlFactory } from './react_controls/control_factory_registry';
 import { OPTIONS_LIST_CONTROL_TYPE } from './react_controls/controls/data_controls/options_list_control/constants';
 import { RANGE_SLIDER_CONTROL_TYPE } from './react_controls/controls/data_controls/range_slider/types';
-import { SEARCH_CONTROL_TYPE } from './react_controls/controls/data_controls/search_control/types';
+import { SEARCH_CONTROL_TYPE } from './search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from './react_controls/controls/timeslider_control/types';
 
 interface SetupDeps {
@@ -68,9 +68,7 @@ export class ControlsExamplePlugin
     registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
       const [{ getSearchControlFactory: getSearchEmbeddableFactory }, [coreStart, depsStart]] =
         await Promise.all([
-          import(
-            './react_controls/controls/data_controls/search_control/get_search_control_factory'
-          ),
+          import('./search_control/get_search_control_factory'),
           core.getStartServices(),
         ]);
 
