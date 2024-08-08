@@ -7,7 +7,6 @@
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  ENTITY_BASE_PREFIX,
   ENTITY_HISTORY,
   EntityDefinition,
   entitiesIndexPattern,
