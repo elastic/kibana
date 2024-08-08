@@ -761,7 +761,6 @@ export class ManifestManager {
       } else {
         await manifestClient.updateManifest(manifestSo, {
           version,
-          //
         });
       }
 
