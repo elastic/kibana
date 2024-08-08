@@ -16,8 +16,8 @@ import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-plugin/common';
-import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
+} from '../../../common';
+import { ControlStyle, ParentIgnoreSettings } from '../..';
 import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';

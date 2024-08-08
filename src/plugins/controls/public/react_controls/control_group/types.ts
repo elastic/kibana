@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
-import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
-import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
+import { ControlGroupChainingSystem } from '../../../common/control_group/types';
+import { ParentIgnoreSettings } from '../..';
+import { ControlStyle, ControlWidth } from '../../types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {

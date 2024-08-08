@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem } from '../../../../common';
 import { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
 import { chaining$ } from './chaining';

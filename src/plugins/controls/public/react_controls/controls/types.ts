@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CanClearSelections, ControlWidth } from '@kbn/controls-plugin/public/types';
+import { CanClearSelections, ControlWidth } from '../../../public/types';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {

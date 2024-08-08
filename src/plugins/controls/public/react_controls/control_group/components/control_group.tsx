@@ -32,7 +32,7 @@ import {
   EuiPanel,
   EuiToolTip,
 } from '@elastic/eui';
-import { ControlStyle } from '@kbn/controls-plugin/public';
+import { ControlStyle } from '../../..';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { ControlsInOrder } from '../init_controls_manager';
 import { ControlGroupApi } from '../types';

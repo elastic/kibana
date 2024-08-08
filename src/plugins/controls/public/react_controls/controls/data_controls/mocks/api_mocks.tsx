@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
+import { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';

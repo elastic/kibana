@@ -8,7 +8,7 @@
 
 import { memoize } from 'lodash';
 
-import { DataControlFieldRegistry } from '@kbn/controls-plugin/public/types';
+import { DataControlFieldRegistry } from '../../../types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import { isDataControlFactory } from './types';

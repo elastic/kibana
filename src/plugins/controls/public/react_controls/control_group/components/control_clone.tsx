@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DEFAULT_CONTROL_GROW } from '@kbn/controls-plugin/common';
+import { DEFAULT_CONTROL_GROW } from '../../../../common';
 
 import { BehaviorSubject } from 'rxjs';
 import { DefaultControlApi } from '../../controls/types';

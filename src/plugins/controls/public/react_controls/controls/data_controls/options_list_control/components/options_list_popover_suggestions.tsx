@@ -10,10 +10,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { OptionsListSuggestions } from '../../../../../../common/options_list/types';
 import { OptionsListSelection } from '../../../../../../common/options_list/options_list_selections';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';

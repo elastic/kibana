@@ -8,11 +8,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
-import { OptionsListSuggestions } from '@kbn/controls-plugin/common/options_list/types';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 
+import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
+import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
+import { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { DataControlApi, DefaultDataControlState } from '../types';
 

@@ -19,7 +19,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
+import { DEFAULT_CONTROL_WIDTH } from '../../../../common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {

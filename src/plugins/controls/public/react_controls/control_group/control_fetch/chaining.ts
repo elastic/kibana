@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem } from '../../../../common';
 import { Filter, TimeRange } from '@kbn/es-query';
 import {
   apiPublishesFilters,

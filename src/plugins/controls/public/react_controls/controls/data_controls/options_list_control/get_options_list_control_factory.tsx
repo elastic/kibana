@@ -9,20 +9,20 @@
 import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, filter, skip } from 'rxjs';
 
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
-import {
-  OptionsListSuccessResponse,
-  OptionsListSuggestions,
-} from '@kbn/controls-plugin/common/options_list/types';
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import {
+  OptionsListSuccessResponse,
+  OptionsListSuggestions,
+} from '../../../../../common/options_list/types';
 import {
   getSelectionAsFieldType,
   OptionsListSelection,
 } from '../../../../../common/options_list/options_list_selections';
 import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
+import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
+import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory, DataControlServices } from '../types';
 import { OptionsListControl } from './components/options_list_control';

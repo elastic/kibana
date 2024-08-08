@@ -34,9 +34,9 @@ import {
   ControlWidth,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-plugin/common';
-import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/public';
-import { DataControlFieldRegistry } from '@kbn/controls-plugin/public/types';
+} from '../../../../common';
+import { CONTROL_WIDTH_OPTIONS } from '../../..';
+import { DataControlFieldRegistry } from '../../../types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';

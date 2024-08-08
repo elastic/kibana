@@ -105,7 +105,7 @@ const initialSerializedControlGroupState = {
       id: WEB_LOGS_DATA_VIEW_ID,
     },
     {
-      name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
+      name: `controlGroup_${rangeSliderControlId}:rangeSliderDataView`,
       type: 'index-pattern',
       id: WEB_LOGS_DATA_VIEW_ID,
     },

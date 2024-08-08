@@ -22,7 +22,7 @@ jest.mock('../../control_factory_registry', () => ({
   getAllControlTypes: jest.fn(),
   getControlFactory: jest.fn(),
 }));
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
 import { DataControlEditorState } from './open_data_control_editor';

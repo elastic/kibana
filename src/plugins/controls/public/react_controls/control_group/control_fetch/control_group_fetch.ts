@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
+import { ParentIgnoreSettings } from '../../..';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';

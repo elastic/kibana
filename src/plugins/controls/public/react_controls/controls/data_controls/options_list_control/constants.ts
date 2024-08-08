@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
-import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
-import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
+import { OPTIONS_LIST_CONTROL } from '../../../../../common';
+import { OptionsListSearchTechnique } from '../../../../../common/options_list/suggestions_searching';
+import { OptionsListSortingType } from '../../../../../common/options_list/suggestions_sorting';
 
 export const OPTIONS_LIST_CONTROL_TYPE = OPTIONS_LIST_CONTROL;
 export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';

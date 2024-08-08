@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlWidth } from '@kbn/controls-plugin/common';
+import { ControlWidth } from '../../../common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 
