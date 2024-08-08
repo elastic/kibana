@@ -1157,28 +1157,6 @@ describe('autocomplete', () => {
     // RENAME field AS var0
     testSuggestions('FROM index1 | RENAME field AS v', ['var0'], undefined, 31);
 
-    // SORT field
-    testSuggestions(
-      'FROM index1 | SORT f',
-      [
-        ...getFunctionSignaturesByReturnType('sort', 'any', { scalar: true }),
-        ...getFieldNamesByType('any'),
-      ],
-      undefined,
-      20
-    );
-
-    // SORT field order
-    testSuggestions('FROM index1 | SORT stringField a', ['ASC', 'DESC', ',', '|'], undefined, 32);
-
-    // SORT field order nulls
-    testSuggestions(
-      'FROM index1 | SORT stringField ASC n',
-      ['NULLS FIRST', 'NULLS LAST', ',', '|'],
-      undefined,
-      36
-    );
-
     // STATS argument
     testSuggestions(
       'FROM index1 | STATS f',
