@@ -158,11 +158,30 @@ const ResultStepFooter = ({ onReturn }: { onReturn: () => void }) => (
 
 const RiskEngineCallout = () => {
   const { data: riskEngineStatus, isLoading: isRiskEngineStatusLoading } = useRiskEngineStatus();
-  const scheduleNowMutation = useScheduleNowRiskEngineMutation();
+  const { addSuccess, addError } = useAppToasts();
+  const scheduleNowMutation = useScheduleNowRiskEngineMutation({
+    onSuccess: () =>
+      addSuccess(
+        i18n.translate(
+          'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.successMessage',
+          {
+            defaultMessage: 'Risk engine run scheduled',
+          }
+        )
+      ),
+    onError: (error) =>
+      addError(error, {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.errorMessage',
+          {
+            defaultMessage: 'Risk engine schedule failed',
+          }
+        ),
+      }),
+  });
   const [nextScheduleRun, setNextScheduleRun] = useState<string | undefined>();
   const invalidateRiskEngineStatusQuery = useInvalidateRiskEngineStatusQuery();
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
-  const { addSuccess } = useAppToasts();
 
   const isRunning = useMemo(
     () => status === 'running' || (!!runAt && new Date(runAt) < new Date()),
@@ -193,16 +212,7 @@ const RiskEngineCallout = () => {
 
   const scheduleRiskEngine = useCallback(() => {
     scheduleNowMutation.mutate();
-
-    addSuccess(
-      i18n.translate(
-        'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.successMessage',
-        {
-          defaultMessage: 'Risk engine run scheduled',
-        }
-      )
-    );
-  }, [addSuccess, scheduleNowMutation]);
+  }, [scheduleNowMutation]);
 
   if (!riskEngineStatus?.isNewRiskScoreModuleInstalled) {
     return null;
