@@ -273,10 +273,11 @@ export class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
+    const mlApiServices = this.props.kibana.services.mlServices.mlApiServices;
     const { toasts } = this.props.kibana.services.notifications;
     const toastNotificationService = toastNotificationServiceProvider(toasts);
 
-    saveJob(this.state.job, newJobData)
+    saveJob(mlApiServices, this.state.job, newJobData)
       .then(() => {
         toasts.addSuccess(
           i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {

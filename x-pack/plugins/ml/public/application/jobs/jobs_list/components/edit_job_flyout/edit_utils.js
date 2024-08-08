@@ -29,7 +29,7 @@ export function saveJob(mlApiServices, job, newJobData, finish) {
     }
 
     const saveDatafeedWrapper = () => {
-      saveDatafeed(datafeedData, job, finish)
+      saveDatafeed(mlApiServices, datafeedData, job, finish)
         .then(() => {
           resolve();
         })
