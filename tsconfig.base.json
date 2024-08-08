@@ -132,6 +132,8 @@
       "@kbn/cases-components/*": ["packages/kbn-cases-components/*"],
       "@kbn/cases-plugin": ["x-pack/plugins/cases"],
       "@kbn/cases-plugin/*": ["x-pack/plugins/cases/*"],
+      "@kbn/cbor": ["packages/kbn-cbor"],
+      "@kbn/cbor/*": ["packages/kbn-cbor/*"],
       "@kbn/cell-actions": ["packages/kbn-cell-actions"],
       "@kbn/cell-actions/*": ["packages/kbn-cell-actions/*"],
       "@kbn/chart-expressions-common": ["src/plugins/chart_expressions/common"],
