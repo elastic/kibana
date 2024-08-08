@@ -129,7 +129,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     );
   }, []);
 
-  const renderConnectorsList = useCallback(() => {
+  const renderConnectorsList = () => {
     return suspendedComponentWithProps(
       ConnectorsList,
       'xl'
@@ -141,7 +141,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       loadActions,
       setActions,
     });
-  }, [actions, isLoadingActions, loadActions]);
+  };
 
   return (
     <>
@@ -191,7 +191,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
       <EuiSpacer size="l" />
 
-      {addFlyoutVisible ? (
+      {addFlyoutVisible && (
         <CreateConnectorFlyout
           onClose={() => {
             setAddFlyoutVisibility(false);
@@ -200,8 +200,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           onConnectorCreated={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
-      ) : null}
-      {editConnectorProps.initialConnector ? (
+      )}
+      {editConnectorProps.initialConnector && (
         <EditConnectorFlyout
           key={`${editConnectorProps.initialConnector.id}${
             editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
@@ -220,7 +220,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           }}
           actionTypeRegistry={actionTypeRegistry}
         />
-      ) : null}
+      )}
 
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
