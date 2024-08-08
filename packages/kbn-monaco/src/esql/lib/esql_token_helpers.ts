@@ -38,6 +38,8 @@ const mergeRules = [
   [['nulls', 'expr_ws', 'first'], 'nulls_order'],
   [['nulls', 'expr_ws', 'last'], 'nulls_order'],
   [['unquoted_identifier', 'dot', 'unquoted_identifier'], 'unquoted_identifier'],
+  [['integer', 'unquoted_identifier'], 'timespan_literal'],
+  [['integer_literal', 'expr_ws', 'unquoted_identifier'], 'timespan_literal'],
 ] as const;
 
 export function mergeTokens(tokens: ESQLToken[]): monaco.languages.IToken[] {
