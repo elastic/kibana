@@ -7,4 +7,4 @@ These tutorials use sample data available in {kib} as a way to get started more 
 
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
 
-//include::lens-advanced.asciidoc[]
+include::lens-advanced.asciidoc[]

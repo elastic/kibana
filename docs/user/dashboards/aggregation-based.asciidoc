@@ -1,4 +1,4 @@
-//[[add-aggregation-based-visualization-panels]]
+[[add-aggregation-based-visualization-panels]]
 === Aggregation-based
 
 Aggregation-based visualizations are the core {kib} panels, and are not optimized for a specific use case.
@@ -19,7 +19,7 @@ Aggregation-based visualizations include the following limitations:
 * Multiple indices is unsupported
 
 [float]
-//[[types-of-visualizations]]
+[[types-of-visualizations]]
 ==== Types of aggregation-based visualizations
 
 {kib} supports the following types of aggregation-based visualizations.
@@ -101,7 +101,7 @@ create visual art for a specific topic.
 |===
 
 [float]
-//[[create-aggregation-based-panel]]
+[[create-aggregation-based-panel]]
 ==== Create an aggregation-based visualization panel
 
 Choose the type of visualization you want to create, then use the editor to configure the options.
@@ -129,7 +129,7 @@ image:images/bar-chart-tutorial-3.png[Option to change the order of aggregations
 image:images/aggregation-based-color-picker.png[Color picker]
 
 [float]
-//[[try-it-aggregation-based-panel]]
+[[try-it-aggregation-based-panel]]
 ==== Try it: Create an aggregation-based bar chart
 
 You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create a dashboard panel of the data, create
@@ -160,7 +160,7 @@ Open the *Aggregation based* editor and change the time range.
 . Make sure the <<set-time-filter, time filter>> is *Last 7 days*.
 
 [float]
-//[[tutorial-configure-the-bar-chart]]
+[[tutorial-configure-the-bar-chart]]
 ===== Create the bar chart
 
 To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then add the terms sub-aggregation to display the top values.
@@ -192,7 +192,7 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 image:images/aggBased_barChartTutorial2_8.4.png[Bar chart with sample logs data]
 
 [float]
-//[[edit-agg-based-visualizations-in-lens]]
+[[edit-agg-based-visualizations-in-lens]]
 ==== Open and edit aggregation-based visualizations in Lens
 
 When you open aggregation-based visualizations in *Lens*, all configuration options appear in the *Lens* visualization editor.
@@ -215,7 +215,7 @@ To get started, click *Edit visualization in Lens* in the toolbar.
 For more information, check out <<lens,Create visualizations with Lens>>.
 
 [float]
-//[[save-the-aggregation-based-panel]]
+[[save-the-aggregation-based-panel]]
 ===== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.

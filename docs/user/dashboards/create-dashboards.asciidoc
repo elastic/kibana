@@ -48,8 +48,10 @@ TIP: When looking for a specific dashboard, you can filter them by tag or by cre
 
 . **Save** the dashboard.
 
+include::dashboard-controls.asciidoc[leveloffset=-1]
 
-[float]
+include::drilldowns.asciidoc[leveloffset=-1]
+
 [[create-panels-with-lens]]
 == Create and add panels
 
@@ -77,10 +79,7 @@ When a panel contains a saved query, both queries are applied.
 +
 When you add search results from *Discover* to dashboards, the results are not aggregated.
 
-//What is this doing here?
-[[tsvb]]
 
-[float]
 [[save-panels]]
 == Save and add panels
 
@@ -150,7 +149,6 @@ To add unsaved dashboard panels to the *Visualize Library*:
 
 . Enter the panel title, then click *Save*.
 
-[float]
 [[arrange-panels]]
 [[moving-containers]]
 [[resizing-containers]]
@@ -166,7 +164,7 @@ In the toolbar, click *Edit*, then use the following options:
 
 * To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
 
-[float]
+
 [[edit-panels]]
 == Edit panels
 
@@ -190,7 +188,7 @@ To make changes without changing the original version, open the panel menu, then
 +
 If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
 
-[float]
+
 [[duplicate-panels]]
 == Duplicate panels
 
@@ -219,9 +217,9 @@ Copy panels from one dashboard to another dashboard.
 
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 
-[float]
+
 [[add-dashboard-settings]]
-== Add the dashboard settings
+== Edit dashboard settings
 
 Add the title, tags, design options, and more to the dashboard.
 
@@ -247,7 +245,7 @@ Add the title, tags, design options, and more to the dashboard.
 
 . Click *Apply*. 
 
-[float]
+
 [[reset-the-dashboard]]
 == Reset the dashboard
 
@@ -257,7 +255,7 @@ To remove any dashboard changes you've made, reset the dashboard to the last sav
 
 . On the *Reset dashboard* window, click *Reset dashboard*.
 
-[float]
+
 [[save-dashboards]]
 == Save dashboards
 

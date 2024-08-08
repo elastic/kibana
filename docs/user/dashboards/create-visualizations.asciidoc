@@ -1,37 +1,161 @@
 = Panels and visualizations
 
+{kib} provides many options to create panels of your data and add content to your dashboards. From advanced charts, maps, and metrics to plain text and images, multiple types of panels with different capabilities are available.
+
+Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
 
 [[panels-editors]]
-[cols="2"]
+[cols="3", options="header"]
 |===
 
-| <<aggregation-reference,Editors>>
-| Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
+| **Content** | **Panel type** | **Description**
+
+.5+| <<aggregation-reference,Visualizations>>
+| Lens
+| The default editor for creating powerful charts in {kib}
+
+| ES\|QL
+|
 
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data.
 
-| <<xpack-ml-anomalies,Anomaly swim lane>>
-| Display the results from machine learning anomaly detection jobs.
+| Field statistics
+|
 
-| <<xpack-ml-anomalies,Anomaly chart>>
-| Display an anomaly chart from the *Anomaly Explorer*.
+| Custom (Vega)
+|
 
-| <<logs-app,Log stream>>
-| Display a table of live streaming logs.
-
-| <<add-controls,Tools>>
-| Add interactive filters with *Controls* panels.
-
+.3+| Annotations and navigation
 | <<add-text,Text>>
 | Add context to your panels with *Text*.
 
 | <<add-image,Image>>
 | Personalize your dashboard with a custom image.
 
+| Links
+| Add links for easy navigation.
+
+.4+| Machine Learning and Analytics
+| <<xpack-ml-anomalies,Anomaly swim lane>>
+| Display the results from machine learning anomaly detection jobs.
+
+| <<xpack-ml-anomalies,Anomaly chart>>
+| Display an anomaly chart from the *Anomaly Explorer*.
+
+| Single metric viewer
+| 
+
+| Change point detection
+| 
+
+.3+| Observability
+| SLO overview
+| 
+
+| SLO Alerts
+| 
+
+| SLO Error Budget
+| 
+
+.3+| Legacy
+| <<logs-app,Log stream>> (deprecated)
+| Display a table of live streaming logs.
+
+| Aggregation based
+| 
+
+| TSVB
+| 
+
+| <<add-controls,Controls>>
+2+| Add interactive filters with *Controls*.
+
 |===
 
+[[manage-panels]]
+== Manage panels
+When creating a panel, you can choose to add it to a dashboard, or to save it to the Visualize Library so it can be added to multiple dashboards later.
+
+There are also some common options that you can configure on the various types of panels to make a dashboard easier to navigate and analyze.
+
 [float]
+[[save-the-markdown-panel]]
+=== Save to the Visualize Library
+
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
+
+To save the panel to the *Visualize Library*:
+
+. Click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+[float]
+=== Save and add to dashboard
+If you are editing the panel just for a specific dashboard, you can save the panel to the dashboard:
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Panel settings* window, select *Show title*.
+
+.. Enter the *Title*, then click *Save*.
+
+[[explore-the-underlying-documents]]
+=== Link to Discover
+
+You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one data view. 
+
+There are three types of *Discover* interactions you can add to dashboard panels:
+
+* *Panel interactions* &mdash; Opens panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
++
+To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
++
+To use panel interactions, open the panel menu, then click *Explore underlying data*.
+
+* *Series data interactions* &mdash; Opens the series data in *Discover*.
++
+To enable series data interactions, configure <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, data series interactions are enabled by default.
++
+To use series data interactions, click a data series in the panel.
+
+* *Saved search interactions* &mdash; Opens <<save-your-search,saved search>> data in *Discover*.
++
+To use saved search interactions, open the panel menu, then click *More > View saved search*.
+
+
+
+include::lens.asciidoc[leveloffset=-1]
+
+[[esql-visualizations]]
+== ES|QL visualizations
+
+//TODO SECTION
+ES|QL is awesome, visualizations are awesome, so ES|QL visualizations are super awesome.
+
+[[maps-visualizations]]
+== Maps
+
+The Maps editor has extensive documentation. For you reading comfort, we have moved it to <<maps,this section>>.
+
+[[field-statistics-dashboard]]
+== Field statistics
+
+//TODO SECTION
+Field statistics are awesome too.
+
+include::vega.asciidoc[leveloffset=-1]
+
 [[add-text]]
 == Text panels
 
@@ -63,36 +187,8 @@ image::images/markdown_example_4.png[Panel with markdown image]
 
 For detailed information about writing on GitHub, click *Help*.
 
-[float]
-[[save-the-markdown-panel]]
-=== Save and add the panel
-
-Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
-
-To save the panel to the *Visualize Library*:
-
-. Click *Save to library*.
-
-. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
-
-. Make sure that *Add to Dashboard after saving* is selected.
-
-. Click *Save and return*.
-
-To save the panel to the dashboard:
-
-. Click *Save and return*.
-
-. Add an optional title to the panel.
-
-.. In the panel header, click *No Title*.
-
-.. On the *Panel settings* window, select *Show title*.
-
-.. Enter the *Title*, then click *Save*.
 
 
-[float]
 [[add-image]]
 == Image panels
 
@@ -112,3 +208,15 @@ To manage your uploaded image files, open the main menu, then click *Stack Manag
 When you export a dashboard, the uploaded image files are not exported. 
 When importing a dashboard with an image panel, and the image file is unavailable, the image panel displays a `not found` warning. Such panels have to be fixed manually by re-uploading the image using the panel's image editor.
 ============================================================================
+
+include::links-panel.asciidoc[leveloffset=-1]
+
+[[legacy-editors]]
+== Legacy editors
+
+include::aggregation-based.asciidoc[]
+
+include::tsvb.asciidoc[]
+
+include::timelion.asciidoc[]
+
