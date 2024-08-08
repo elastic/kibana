@@ -64,14 +64,17 @@ export const bulkEnableDisableRules = async ({
       ? await rulesClient.bulkEnableRules({ ids: ruleIds })
       : await rulesClient.bulkDisableRules({ ids: ruleIds });
 
-  const failedRuleIds = results.errors.map(({ rule: { id } }) => id);
-
   updatedRules.push(
     ...rules.flatMap((rule) => {
-      if (failedRuleIds.includes(rule.id)) {
+      const updatedRule = results.rules.find((resultsRule) => resultsRule.id === rule.id);
+      if (updatedRule) {
+        return {
+          ...rule,
+          enabled: updatedRule.enabled,
+        };
+      } else {
         return [];
       }
-      return rule;
     })
   );
 
