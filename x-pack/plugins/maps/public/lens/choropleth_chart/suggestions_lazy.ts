@@ -28,7 +28,7 @@ export function getSuggestionsLazy(
   suggestionRequest: SuggestionRequest<ChoroplethChartState>
 ): Array<VisualizationSuggestion<ChoroplethChartState>> {
   if (!promise) {
-    promise = new Promise((resolve, reject) => {
+    promise = new Promise((resolve) => {
       Promise.all([import('./suggestions'), import('../../util')])
         .then(async ([{ getSuggestions }, { getEmsFileLayers }]) => {
           getSuggestionsActual = getSuggestions;
@@ -42,7 +42,7 @@ export function getSuggestionsLazy(
           }
           resolve();
         })
-        .catch(reject);
+        .catch(resolve);
     });
     return [];
   }

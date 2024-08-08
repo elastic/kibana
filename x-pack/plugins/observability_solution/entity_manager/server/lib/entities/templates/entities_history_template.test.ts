@@ -10,7 +10,7 @@ import { getEntitiesHistoryIndexTemplateConfig } from './entities_history_templa
 
 describe('getEntitiesHistoryIndexTemplateConfig(definitionId)', () => {
   it('should generate a valid index template', () => {
-    const template = getEntitiesHistoryIndexTemplateConfig(entityDefinition.id);
+    const template = getEntitiesHistoryIndexTemplateConfig(entityDefinition);
     expect(template).toMatchSnapshot();
   });
 });
