@@ -66,10 +66,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'done',
                       actions: ['storeDatasetAggregatableStatus'],
                     },
-                    onError: {
-                      target: 'done',
-                      actions: ['notifyFailedFetchForAggregatableDatasets'],
-                    },
+                    onError: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        cond: 'isIndexNotFoundError',
+                      },
+                      {
+                        target: 'done',
+                        actions: ['notifyFailedFetchForAggregatableDatasets'],
+                      },
+                    ],
                   },
                 },
                 done: {
@@ -92,10 +98,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'done',
                       actions: ['storeDataStreamDetails'],
                     },
-                    onError: {
-                      target: 'done',
-                      actions: ['notifyFetchDataStreamDetailsFailed'],
-                    },
+                    onError: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        cond: 'isIndexNotFoundError',
+                      },
+                      {
+                        target: 'done',
+                        actions: ['notifyFetchDataStreamDetailsFailed'],
+                      },
+                    ],
                   },
                 },
                 done: {
@@ -142,9 +154,15 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'done',
                       actions: ['storeDegradedFields'],
                     },
-                    onError: {
-                      target: 'done',
-                    },
+                    onError: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        cond: 'isIndexNotFoundError',
+                      },
+                      {
+                        target: 'done',
+                      },
+                    ],
                   },
                 },
                 done: {
@@ -171,10 +189,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'initializeIntegrations',
                       actions: ['storeDataStreamSettings'],
                     },
-                    onError: {
-                      target: 'done',
-                      actions: ['notifyFetchDataStreamSettingsFailed'],
-                    },
+                    onError: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        cond: 'isIndexNotFoundError',
+                      },
+                      {
+                        target: 'done',
+                        actions: ['notifyFetchDataStreamSettingsFailed'],
+                      },
+                    ],
                   },
                 },
                 initializeIntegrations: {
@@ -244,6 +268,9 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               },
             },
           },
+        },
+        indexNotFound: {
+          entry: 'handleIndexNotFoundError',
         },
       },
     },
@@ -331,6 +358,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
+        handleIndexNotFoundError: assign(() => {
+          return {
+            isIndexNotFoundError: true,
+          };
+        }),
       },
       guards: {
         checkIfActionForbidden: (context, event) => {
@@ -339,6 +371,17 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             typeof event.data === 'object' &&
             'statusCode' in event.data! &&
             event.data.statusCode === 403
+          );
+        },
+        isIndexNotFoundError: (_, event) => {
+          return (
+            ('data' in event &&
+              typeof event.data === 'object' &&
+              'statusCode' in event.data &&
+              event.data.statusCode === 500 &&
+              'originalMessage' in event.data &&
+              (event.data.originalMessage as string)?.includes('index_not_found_exception')) ??
+            false
           );
         },
       },

@@ -39,6 +39,7 @@ export interface WithDefaultControllerState {
   dataStream: string;
   degradedFields: DegradedFieldsTableConfig;
   timeRange: TimeRangeConfig;
+  isIndexNotFoundError: boolean;
   isBreakdownFieldEcs?: boolean;
   breakdownField?: string;
 }
@@ -74,7 +75,7 @@ export interface WithIntegration {
 
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
-  'degradedFields' | 'timeRange'
+  'degradedFields' | 'timeRange' | 'isIndexNotFoundError'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =

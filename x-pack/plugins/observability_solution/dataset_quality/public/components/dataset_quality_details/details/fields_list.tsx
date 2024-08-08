@@ -45,7 +45,9 @@ export function FieldsList({
                   {fieldValue}
                 </EuiFlexItem>
               </EuiSkeletonRectangle>
-              {actionsMenu && <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>}
+              <EuiFlexItem grow={1}>
+                {actionsMenu && <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>}
+              </EuiFlexItem>
             </EuiFlexGroup>
 
             {index < fields.length - 1 ? <EuiHorizontalRule margin="s" /> : null}

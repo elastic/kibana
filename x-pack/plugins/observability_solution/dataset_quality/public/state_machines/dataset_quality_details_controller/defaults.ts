@@ -24,6 +24,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
       },
     },
   },
+  isIndexNotFoundError: false,
   timeRange: {
     from: 'now-24h',
     to: 'now',

@@ -7,13 +7,18 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { useDatasetQualityDetailsState } from '../../hooks';
+import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 
 const Header = dynamic(() => import('./header'));
 const Overview = dynamic(() => import('./overview'));
 const Details = dynamic(() => import('./details'));
 
 export function DatasetQualityDetails() {
-  return (
+  const { isIndexNotFoundError, dataStream } = useDatasetQualityDetailsState();
+  return isIndexNotFoundError ? (
+    <DataStreamNotFoundPrompt dataStream={dataStream} />
+  ) : (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem grow={false}>
         <Header />

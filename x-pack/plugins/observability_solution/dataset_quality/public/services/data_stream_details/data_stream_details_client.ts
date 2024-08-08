@@ -44,7 +44,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       .catch((error) => {
         throw new GetDataStreamsStatsError(
           `Failed to fetch data stream settings": ${error}`,
-          error.body.statusCode
+          error
         );
       });
 
@@ -66,10 +66,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(
-          `Failed to fetch data stream details": ${error}`,
-          error.body.statusCode
-        );
+        throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`, error);
       });
 
     const dataStreamDetails = decodeOrThrow(
@@ -96,7 +93,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       .catch((error) => {
         throw new GetDataStreamsDetailsError(
           `Failed to fetch data stream degraded fields": ${error}`,
-          error.body.statusCode
+          error
         );
       });
 
@@ -117,7 +114,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
       .catch((error) => {
         throw new GetDataStreamsStatsError(
           `Failed to fetch integration dashboards": ${error}`,
-          error.body.statusCode
+          error
         );
       });
 
@@ -141,10 +138,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         query: { type },
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(
-          `Failed to fetch integrations: ${error}`,
-          error.body.statusCode
-        );
+        throw new GetDataStreamsStatsError(`Failed to fetch integrations: ${error}`, error);
       });
 
     const { integrations } = decodeOrThrow(

@@ -21,7 +21,7 @@ export const useDatasetQualityDetailsState = () => {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
 
-  const { dataStream, degradedFields, timeRange, breakdownField } =
+  const { dataStream, degradedFields, timeRange, breakdownField, isIndexNotFoundError } =
     useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -116,6 +116,7 @@ export const useDatasetQualityDetailsState = () => {
   return {
     service,
     fieldFormats,
+    isIndexNotFoundError,
     dataStream,
     datasetDetails,
     degradedFields,

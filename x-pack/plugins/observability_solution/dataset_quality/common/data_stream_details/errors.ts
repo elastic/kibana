@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { ApiErrorResponse } from '../fetch_options';
+
 export class GetDataStreamsDetailsError extends Error {
   readonly statusCode?: number;
+  readonly originalMessage?: string;
 
-  constructor(message: string, statusCode?: number) {
+  constructor(message: string, originalError?: ApiErrorResponse) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'GetDataStreamsDetailsError';
 
-    this.statusCode = statusCode;
+    if (originalError && originalError.body) {
+      const { statusCode, message: originalMessage } = originalError.body;
+      this.statusCode = statusCode;
+      this.originalMessage = originalMessage;
+    }
   }
 }
