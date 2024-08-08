@@ -118,10 +118,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             .expect(200)
             .then((resp) => {
               expect(
-                resp.body.saved_objects.map((so: { id: string; type: string }) => ({
-                  id: so.id,
-                  type: so.type,
-                }))
+                resp.body.saved_objects
+                  .map((so: { id: string; type: string }) => ({
+                    id: so.id,
+                    type: so.type,
+                  }))
+                  .sort((a, b) => (a.id > b.id ? 1 : -1))
               ).to.eql([
                 {
                   id: 'hidden-from-http-apis-1',
