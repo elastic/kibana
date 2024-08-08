@@ -50,16 +50,12 @@ export const login: CyLoginTask = (
   let password = Cypress.env('KIBANA_PASSWORD');
   const isServerless = Cypress.env('IS_SERVERLESS');
   const isCloudServerless = Cypress.env('CLOUD_SERVERLESS');
-  cy.log(
-    `###### Logging in as ${user}, isServerless: ${isServerless}, isCloudServerless: ${isCloudServerless}`
-  );
 
   if (isServerless && isCloudServerless) {
     // MKI QA Cloud Serverless
     return cy
       .task('getSessionCookie', user)
       .then((result) => {
-        cy.log({ result });
         username = result.username;
         password = result.password;
         // Set cookie asynchronously
