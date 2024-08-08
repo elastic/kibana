@@ -116,7 +116,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
       if (!field) {
         defaultControl.api.setBlockingError(
           new Error(
-            i18n.translate('controlsExamples.errors.fieldNotFound', {
+            i18n.translate('controls.dataControl.fieldNotFound', {
               defaultMessage: 'Could not locate field: {fieldName}',
               values: { fieldName: nextFieldName },
             })

@@ -11,23 +11,23 @@ import { i18n } from '@kbn/i18n';
 export const RangeSliderStrings = {
   control: {
     getDisplayName: () =>
-      i18n.translate('controlsExamples.rangeSliderControl.displayName', {
+      i18n.translate('controls.rangeSliderControl.displayName', {
         defaultMessage: 'Range slider',
       }),
     getInvalidSelectionWarningLabel: () =>
-      i18n.translate('controlsExamples.rangeSlider.control.invalidSelectionWarningLabel', {
+      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {
         defaultMessage: 'Selected range returns no results.',
       }),
   },
   editor: {
     getStepTitle: () =>
-      i18n.translate('controlsExamples.rangeSlider.editor.stepSizeTitle', {
+      i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {
         defaultMessage: 'Step size',
       }),
   },
   popover: {
     getNoAvailableDataHelpText: () =>
-      i18n.translate('controlsExamples.rangeSlider.popover.noAvailableDataHelpText', {
+      i18n.translate('controls.rangeSlider.popover.noAvailableDataHelpText', {
         defaultMessage: 'There is no data to display. Adjust the time range and filters.',
       }),
   },

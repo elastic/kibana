@@ -20,7 +20,7 @@ export const registerControlFactory = async <
 ) => {
   if (registry[type] !== undefined)
     throw new Error(
-      i18n.translate('controlFactoryRegistry.factoryAlreadyExistsError', {
+      i18n.translate('controls.controlFactoryRegistry.factoryAlreadyExistsError', {
         defaultMessage: 'A control factory for type: {key} is already registered.',
         values: { key: type },
       })
@@ -36,7 +36,7 @@ export const getControlFactory = <
 ): ControlFactory<State, ApiType> => {
   if (registry[key] === undefined)
     throw new Error(
-      i18n.translate('controlFactoryRegistry.factoryNotFoundError', {
+      i18n.translate('controls.controlFactoryRegistry.factoryNotFoundError', {
         defaultMessage: 'No control factory found for type: {key}',
         values: { key },
       })

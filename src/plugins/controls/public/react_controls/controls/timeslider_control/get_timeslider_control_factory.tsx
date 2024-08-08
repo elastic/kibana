@@ -42,7 +42,7 @@ export const getTimesliderControlFactory = (
     type: TIME_SLIDER_CONTROL,
     getIconType: () => 'search',
     getDisplayName: () =>
-      i18n.translate('controlsExamples.timesliderControl.displayName', {
+      i18n.translate('controls.timesliderControl.displayName', {
         defaultMessage: 'Time slider',
       }),
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
