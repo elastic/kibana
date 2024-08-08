@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
+import { mockGlobalState, TestProviders, createMockStore, mockDataViewSpec } from '../../mock';
 import type { State } from '../../store';
 
 import type { Props } from './top_n';
@@ -145,7 +145,7 @@ const store = createMockStore(state);
 const testProps = {
   browserFields: mockBrowserFields,
   field,
-  indexPattern: mockIndexPattern,
+  indexPattern: mockDataViewSpec,
   scopeId: TableId.hostsPageEvents,
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),

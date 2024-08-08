@@ -27,6 +27,7 @@ jest.mock('../../../sourcerer/containers', () => ({
     defaultIndex: 'defaultIndex',
     loading: false,
     indicesExist: true,
+    sourcererDataView: {},
   }),
 }));
 jest.mock('../../../common/components/guided_onboarding_tour/tour_step');

@@ -244,6 +244,7 @@ describe('Timeline', () => {
         indexPattern: {},
         selectedPatterns: [],
         missingPatterns: [],
+        sourcererDataView: {},
       });
       const wrapper = await getWrapper(
         <TestProviders>

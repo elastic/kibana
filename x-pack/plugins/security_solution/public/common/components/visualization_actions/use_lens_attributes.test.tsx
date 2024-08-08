@@ -34,6 +34,7 @@ describe('useLensAttributes', () => {
       dataViewId: 'security-solution-default',
       indicesExist: true,
       selectedPatterns: ['auditbeat-*'],
+      sourcererDataView: {},
     });
     (useRouteSpy as jest.Mock).mockReturnValue([
       {
@@ -217,6 +218,7 @@ describe('useLensAttributes', () => {
       dataViewId: 'security-solution-default',
       indicesExist: false,
       selectedPatterns: ['auditbeat-*'],
+      sourcererDataView: {},
     });
     const { result } = renderHook(
       () =>
@@ -235,6 +237,7 @@ describe('useLensAttributes', () => {
       dataViewId: 'security-solution-default',
       indicesExist: false,
       selectedPatterns: ['auditbeat-*'],
+      sourcererDataView: {},
     });
     const { result } = renderHook(
       () =>
@@ -253,6 +256,7 @@ describe('useLensAttributes', () => {
       dataViewId: 'security-solution-default',
       indicesExist: false,
       selectedPatterns: ['auditbeat-*'],
+      sourcererDataView: {},
     });
     const { result } = renderHook(
       () =>
@@ -274,6 +278,7 @@ describe('useLensAttributes', () => {
       dataViewId: 'security-solution-default',
       indicesExist: false,
       selectedPatterns: ['auditbeat-*'],
+      sourcererDataView: {},
     });
     const { result } = renderHook(
       () =>
