@@ -132,6 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         full_name: 'Guest',
       });
       await PageObjects.security.loginSelector.login('anonymous', 'anonymous1');
+
       await security.user.delete('anonymous_user');
 
       // We need to make sure that both path and hash are respected.
