@@ -132,7 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ).to.be(newDirectAccessKeyId);
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
         expect(await cisIntegration.getElementText(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR)).to.be(
-          'Agentless'
+          'Agentless\nBETA'
         );
         expect(
           await cisIntegration.getFieldAttributeValue(

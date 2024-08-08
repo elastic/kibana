@@ -57,10 +57,16 @@ import {
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { gcpField, getInputVarsFields } from './gcp_credentials_form/gcp_credential_form';
+import {
+  GCP_CREDENTIALS_TYPE,
+  GCP_SETUP_ACCESS,
+  gcpField,
+  getInputVarsFields,
+} from './gcp_credentials_form/gcp_credential_form';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -552,10 +558,56 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       input,
       isAgentlessEnabled,
       handleSetupTechnologyChange,
+      isEditPage,
     });
+
     const shouldRenderAgentlessSelector =
-      (!isEditPage && isAgentlessAvailable) ||
-      (isEditPage && setupTechnology === SetupTechnology.AGENTLESS);
+      (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
+
+    const getDefaultCloudCredentialsType = (
+      isAgentless: boolean,
+      inputType: Extract<
+        PostureInput,
+        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+      >
+    ) => {
+      const credentialsTypes: Record<
+        Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
+        {
+          [key: string]: {
+            value: string;
+            type: 'text';
+          };
+        }
+      > = {
+        'cloudbeat/cis_aws': {
+          'aws.credentials.type': {
+            value: isAgentless
+              ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
+              : AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
+            type: 'text',
+          },
+        },
+        'cloudbeat/cis_gcp': {
+          'gcp.credentials.type': {
+            value: isAgentless
+              ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
+              : GCP_SETUP_ACCESS.CLOUD_SHELL,
+            type: 'text',
+          },
+        },
+        'cloudbeat/cis_azure': {
+          'azure.credentials.type': {
+            value: isAgentless
+              ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+              : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
+            type: 'text',
+          },
+        },
+      };
+
+      return credentialsTypes[inputType];
+    };
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -764,7 +816,22 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           <SetupTechnologySelector
             disabled={isEditPage}
             setupTechnology={setupTechnology}
-            onSetupTechnologyChange={updateSetupTechnology}
+            onSetupTechnologyChange={(value) => {
+              updateSetupTechnology(value);
+              updatePolicy(
+                getPosturePolicy(
+                  newPolicy,
+                  input.type,
+                  getDefaultCloudCredentialsType(
+                    value === SetupTechnology.AGENTLESS,
+                    input.type as Extract<
+                      PostureInput,
+                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                    >
+                  )
+                )
+              );
+            }}
           />
         )}
 

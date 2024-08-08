@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { setTimeout as sleep } from 'node:timers/promises';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AddCisIntegrationFormPageProvider({
@@ -27,6 +28,8 @@ export function AddCisIntegrationFormPageProvider({
     AWS_CREDENTIAL_SELECTOR: 'aws-credentials-type-selector',
     SETUP_TECHNOLOGY_SELECTOR: 'setup-technology-selector',
     SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ: 'setup-technology-selector-accordion',
+    SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION: 'setup-technology-agentless-option',
+    DIRECT_ACCESS_KEYS: 'direct_access_keys',
     DIRECT_ACCESS_KEY_ID_TEST_ID: 'awsDirectAccessKeyId',
     DIRECT_ACCESS_SECRET_KEY_TEST_ID: 'passwordInput-secret-access-key',
     PRJ_ID_TEST_ID: 'project_id_test_id',
@@ -313,6 +316,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const fillInTextField = async (selector: string, text: string) => {
     const textField = await testSubjects.find(selector);
+    await textField.clearValueWithKeyboard();
     await textField.type(text);
   };
 
@@ -322,7 +326,6 @@ export function AddCisIntegrationFormPageProvider({
     await credentialTypeBox.click();
     await chosenOption.click();
   };
-
 
   const doesStringExistInCodeBlock = async (str: string) => {
     const flyout = await testSubjects.find('agentEnrollmentFlyout');
@@ -395,8 +398,8 @@ export function AddCisIntegrationFormPageProvider({
     await clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
     await clickAccordianButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
     await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
-    await selectValue(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR, 'agentless');
-    await clickOptionButton(testSubjectIds.AWS_CREDENTIAL_SELECTOR);
+
+    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION);
     await selectValue(testSubjectIds.AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID, directAccessSecretKey);
@@ -408,6 +411,9 @@ export function AddCisIntegrationFormPageProvider({
 
     await clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
     await clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
+    await clickAccordianButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION);
     await fillInTextField(testSubjectIds.PRJ_ID_TEST_ID, projectId);
     await fillInTextField(testSubjectIds.CREDENTIALS_JSON_TEST_ID, credentialJson);
   };
@@ -438,7 +444,6 @@ export function AddCisIntegrationFormPageProvider({
     await clickSaveButton();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
-  
 
   const editAgentlessIntegration = async (testSubjectId: string, value: string) => {
     await navigateToIntegrationCspList();
@@ -457,7 +462,6 @@ export function AddCisIntegrationFormPageProvider({
     // Check if the Direct Access Key is updated package policy api with successful toast
     expect(await testSubjects.exists('policyUpdateSuccessToast')).to.be(true);
 
-    // Navigate back to Edit Page to check if the Direct Access Key is updated
     await navigateToEditIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
