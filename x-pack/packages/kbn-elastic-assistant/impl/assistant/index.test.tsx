@@ -16,7 +16,6 @@ import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
 import { useLocalStorage, useSessionStorage } from 'react-use';
-import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
 import { useFetchCurrentUserConversations } from './api';
@@ -30,7 +29,6 @@ jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
 jest.mock('react-use');
 
-jest.mock('./prompt_editor', () => ({ PromptEditor: jest.fn() }));
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
 
@@ -100,7 +98,6 @@ describe('Assistant', () => {
     persistToSessionStorage = jest.fn();
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
 
-    jest.mocked(PromptEditor).mockReturnValue(null);
     jest.mocked(QuickPrompts).mockReturnValue(null);
     const connectors: unknown[] = [
       {

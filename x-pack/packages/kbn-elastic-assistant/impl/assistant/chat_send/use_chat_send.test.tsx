@@ -11,7 +11,7 @@ import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 import { useChatSend, UseChatSendProps } from './use_chat_send';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
@@ -22,7 +22,6 @@ jest.mock('../../..');
 
 const setCurrentSystemPromptId = jest.fn();
 const setSelectedPromptContexts = jest.fn();
-const setUserPrompt = jest.fn();
 const sendMessage = jest.fn();
 const removeLastMessage = jest.fn();
 const clearConversation = jest.fn();
@@ -43,7 +42,6 @@ export const testProps: UseChatSendProps = {
   currentSystemPromptId: defaultSystemPrompt.id,
   setCurrentSystemPromptId,
   setSelectedPromptContexts,
-  setUserPrompt,
   setCurrentConversation,
   refetchCurrentUserConversations: jest.fn(),
 };
@@ -71,9 +69,11 @@ describe('use chat send', () => {
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleOnChatCleared();
+    await act(async () => {
+      result.current.handleOnChatCleared();
+    });
     expect(clearConversation).toHaveBeenCalled();
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    expect(result.current.userPrompt).toEqual('');
     expect(setSelectedPromptContexts).toHaveBeenCalledWith({});
     await waitFor(() => {
       expect(clearConversation).toHaveBeenCalledWith(testProps.currentConversation);

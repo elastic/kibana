@@ -13,8 +13,6 @@ import {
 import { useCallback } from 'react';
 import { useAssistantContext } from '../../../..';
 
-export const DEFAULT_COLOR = '#D36086';
-
 export const useQuickPromptEditor = ({
   onSelectedQuickPromptChange,
   setUpdatedQuickPromptSettings,
@@ -42,14 +40,14 @@ export const useQuickPromptEditor = ({
 
   // When top level quick prompt selection changes
   const onQuickPromptSelectionChange = useCallback(
-    (quickPrompt?: PromptResponse | string) => {
+    (quickPrompt: PromptResponse | string, color: string) => {
       const isNew = typeof quickPrompt === 'string';
       const newSelectedQuickPrompt: PromptResponse | undefined = isNew
         ? {
             name: quickPrompt,
             id: quickPrompt,
             content: '',
-            color: DEFAULT_COLOR,
+            color,
             categories: [],
             promptType: PromptTypeEnum.quick,
             consumer: currentAppId,

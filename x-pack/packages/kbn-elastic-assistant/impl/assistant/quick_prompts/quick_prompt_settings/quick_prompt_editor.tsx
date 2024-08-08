@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiColorPicker, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiColorPicker, EuiTextArea, euiPaletteColorBlind } from '@elastic/eui';
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
@@ -21,8 +21,6 @@ import { PromptContextSelector } from '../prompt_context_selector/prompt_context
 import { useAssistantContext } from '../../../assistant_context';
 import { useQuickPromptEditor } from './use_quick_prompt_editor';
 
-const DEFAULT_COLOR = '#D36086';
-
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
   quickPromptSettings: PromptResponse[];
@@ -31,6 +29,12 @@ interface Props {
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
   promptsBulkActions: PromptsPerformBulkActionRequestBody;
   setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
+}
+
+const euiVisPalette = euiPaletteColorBlind();
+function getRandomEuiColor() {
+  const randomIndex = Math.floor(Math.random() * euiVisPalette.length);
+  return euiVisPalette[randomIndex];
 }
 
 const QuickPromptSettingsEditorComponent = ({
@@ -112,12 +116,6 @@ const QuickPromptSettingsEditorComponent = ({
     ]
   );
 
-  // Color
-  const selectedColor = useMemo(
-    () => selectedQuickPrompt?.color ?? DEFAULT_COLOR,
-    [selectedQuickPrompt?.color]
-  );
-
   const handleColorChange = useCallback<EuiSetColorMethod>(
     (color, { hex, isValid }) => {
       if (selectedQuickPrompt != null) {
@@ -177,6 +175,17 @@ const QuickPromptSettingsEditorComponent = ({
     ]
   );
 
+  const setDefaultPromptColor = useCallback((): string => {
+    const randomColor = getRandomEuiColor();
+    handleColorChange(randomColor, { hex: randomColor, isValid: true });
+    return randomColor;
+  }, [handleColorChange]);
+
+  // Color
+  const selectedColor = useMemo(
+    () => selectedQuickPrompt?.color ?? setDefaultPromptColor(),
+    [selectedQuickPrompt?.color, setDefaultPromptColor]
+  );
   // Prompt Contexts
   const selectedPromptContexts = useMemo(
     () =>
@@ -263,6 +272,7 @@ const QuickPromptSettingsEditorComponent = ({
           quickPrompts={quickPromptSettings}
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
+          selectedColor={selectedColor}
         />
       </EuiFormRow>
 
