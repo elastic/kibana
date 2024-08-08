@@ -78,6 +78,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/apm-utils",
   ],
   "exclude": [
     "target/**/*",

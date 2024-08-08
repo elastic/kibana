@@ -18,14 +18,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
+
     describe('ES|QL mode', () => {
       it('should render logs overview tab for logs data source', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-logs | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToApp('discover', {
-          hash: `/?_a=${state}`,
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
@@ -40,8 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataSource: { type: 'esql' },
           query: { esql: 'from my-example-metrics | sort @timestamp desc' },
         });
-        await PageObjects.common.navigateToApp('discover', {
-          hash: `/?_a=${state}`,
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
@@ -52,7 +53,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render logs overview tab for logs data source', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
         await dataViews.switchTo('my-example-logs');
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();
@@ -63,7 +66,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not render logs overview tab for non-logs data source', async () => {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
+          ensureCurrentUrl: false,
+        });
         await dataViews.switchTo('my-example-metrics');
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickRowToggle();

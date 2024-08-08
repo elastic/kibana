@@ -53,6 +53,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         type: 'process',
       },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date().toISOString(),
@@ -74,6 +77,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           version: 'v1.0.0',
         },
         type: 'process',
+      },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
       },
     },
     {
@@ -97,6 +103,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         type: 'process',
       },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date().toISOString(),
@@ -118,6 +127,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           version: 'v2.0.0',
         },
         type: 'process',
+      },
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
       },
     },
   ];
