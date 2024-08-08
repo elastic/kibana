@@ -17,7 +17,7 @@ export const METRICS_TOOLTIP = {
 
   cpuUsage: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.cpuUsage', {
     defaultMessage:
-      'Percentage of CPU time spent in states other than Idle and IOWait, normalized by the number of CPU cores. This includes both time spent on user space and kernel space.',
+      'Average of percentage of CPU time spent in states other than Idle and IOWait, normalised by the number of CPU cores. Includes both time spent on user space and kernel space. 100% means all CPUs of the host are busy.',
   }),
   diskUsage: i18n.translate('xpack.infra.hostsViewPage.metrics.tooltip.diskSpaceUsage', {
     defaultMessage: 'Percentage of disk space used.',
