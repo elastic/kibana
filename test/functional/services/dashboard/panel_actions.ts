@@ -117,7 +117,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async navigateToEditorFromFlyout() {
     this.log.debug('navigateToEditorFromFlyout');
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.clickContextMenuItem(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
@@ -128,7 +128,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async clickInlineEdit() {
     this.log.debug('clickInlineEditAction');
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.clickContextMenuItem(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
@@ -139,7 +139,19 @@ export class DashboardPanelActionsService extends FtrService {
    */
   async clickEdit(parent?: WebElementWrapper) {
     this.log.debug('clickEdit');
-    await this.clickContextMenuItem(EDIT_PANEL_DATA_TEST_SUBJ, parent);
+    await this.openContextMenu(parent);
+    const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
+    const isInlineEditingActionVisible = await this.testSubjects.exists(
+      INLINE_EDIT_PANEL_DATA_TEST_SUBJ
+    );
+    if (!isActionVisible && !isInlineEditingActionVisible) await this.clickContextMenuMoreItem();
+    // navigate to the editor
+    if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+      // open the flyout and then navigate to the editor
+    } else {
+      await this.navigateToEditorFromFlyout();
+    }
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
@@ -338,6 +350,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async getPanelHeading(title: string) {
     this.log.debug(`getPanelHeading(${title})`);
+    if (!title) return await this.testSubjects.find('embeddablePanelHeading');
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
   }
 

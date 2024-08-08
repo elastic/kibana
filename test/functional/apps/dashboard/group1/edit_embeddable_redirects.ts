@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
       const newTitle = 'wowee, my title just got cooler again';
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await dashboardPanelActions.clickEditByTitle('wowee, my title just got cooler');
+      await dashboardPanelActions.editPanelByTitle('wowee, my title just got cooler');
       await PageObjects.visualize.linkedToOriginatingApp();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
