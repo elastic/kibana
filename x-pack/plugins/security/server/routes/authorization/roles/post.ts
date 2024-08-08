@@ -6,7 +6,10 @@
  */
 
 import { roleGrantsSubFeaturePrivileges } from './lib';
-import { getPostPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
+import {
+  getBulkCreateOrUpdatePayloadSchema,
+  transformPutPayloadToElasticsearchRole,
+} from './model';
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { validateKibanaPrivileges } from '../../../lib';
@@ -30,7 +33,7 @@ interface ESRolesResponse {
   };
 }
 
-export function definePostRolesRoutes({
+export function defineBulkCreateOrUpdateRolesRoutes({
   router,
   authz,
   getFeatures,
@@ -43,7 +46,7 @@ export function definePostRolesRoutes({
         summary: 'Create or update roles',
       },
       validate: {
-        body: getPostPayloadSchema(() => {
+        body: getBulkCreateOrUpdatePayloadSchema(() => {
           const privileges = authz.privileges.get();
           return {
             global: Object.keys(privileges.global),
@@ -100,7 +103,11 @@ export function definePostRolesRoutes({
           body: { roles: esRolesPayload },
         });
 
-        for (const roleName of [...(esResponse.created ?? []), ...(esResponse.updated ?? [])]) {
+        for (const roleName of [
+          ...(esResponse.created ?? []),
+          ...(esResponse.updated ?? []),
+          ...(esResponse.noop ?? []),
+        ]) {
           if (roleGrantsSubFeaturePrivileges(features, roles[roleName])) {
             getFeatureUsageService().recordSubFeaturePrivilegeUsage();
           }

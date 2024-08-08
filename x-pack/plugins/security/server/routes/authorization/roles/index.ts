@@ -9,7 +9,7 @@ import { defineDeleteRolesRoutes } from './delete';
 import { defineGetRolesRoutes } from './get';
 import { defineGetAllRolesRoutes } from './get_all';
 import { defineGetAllRolesBySpaceRoutes } from './get_all_by_space';
-import { definePostRolesRoutes } from './post';
+import { defineBulkCreateOrUpdateRolesRoutes } from './post';
 import { definePutRolesRoutes } from './put';
 import type { RouteDefinitionParams } from '../..';
 
@@ -19,5 +19,5 @@ export function defineRolesRoutes(params: RouteDefinitionParams) {
   defineDeleteRolesRoutes(params);
   definePutRolesRoutes(params);
   defineGetAllRolesBySpaceRoutes(params);
-  definePostRolesRoutes(params);
+  defineBulkCreateOrUpdateRolesRoutes(params);
 }

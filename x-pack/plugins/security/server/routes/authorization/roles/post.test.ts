@@ -11,8 +11,8 @@ import { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
-import type { RolesPayloadSchemaType } from './model/post_payload';
-import { definePostRolesRoutes } from './post';
+import type { BulkCreateOrUpdateRolesPayloadSchemaType } from './model/bulk_create_or_update_payload';
+import { defineBulkCreateOrUpdateRolesRoutes } from './post';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
@@ -73,7 +73,7 @@ interface TestOptions {
     get: () => unknown;
     post: () => Record<string, unknown>;
   };
-  payload: RolesPayloadSchemaType;
+  payload: BulkCreateOrUpdateRolesPayloadSchemaType;
   asserts: {
     statusCode: number;
     result?: Record<string, any>;
@@ -157,7 +157,7 @@ const postRolesTest = (
       ]
     );
 
-    definePostRolesRoutes(mockRouteDefinitionParams);
+    defineBulkCreateOrUpdateRolesRoutes(mockRouteDefinitionParams);
     const [[{ validate }, handler]] = mockRouteDefinitionParams.router.post.mock.calls;
 
     const headers = { authorization: 'foo' };
@@ -193,7 +193,9 @@ const postRolesTest = (
       expect(
         mockRouteDefinitionParams.getFeatureUsageService().recordSubFeaturePrivilegeUsage
       ).toHaveBeenCalledTimes(
-        response.payload?.created?.length ?? 0 + response.payload?.updated?.length ?? 0
+        (response.payload?.created?.length ?? 0) +
+          (response.payload?.updated?.length ?? 0) +
+          (response.payload?.noop?.length ?? 0)
       );
     } else {
       expect(
@@ -206,7 +208,7 @@ const postRolesTest = (
 describe('POST roles', () => {
   describe('failure', () => {
     postRolesTest('returns result of license checker', {
-      payload: { roles: {} } as RolesPayloadSchemaType,
+      payload: { roles: {} } as BulkCreateOrUpdateRolesPayloadSchemaType,
       licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });

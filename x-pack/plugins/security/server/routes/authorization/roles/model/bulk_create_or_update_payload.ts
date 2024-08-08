@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { getPutPayloadSchema } from './put_payload';
 
-export function getPostPayloadSchema(
+export function getBulkCreateOrUpdatePayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
   return schema.object({
@@ -17,4 +17,6 @@ export function getPostPayloadSchema(
   });
 }
 
-export type RolesPayloadSchemaType = TypeOf<ReturnType<typeof getPostPayloadSchema>>;
+export type BulkCreateOrUpdateRolesPayloadSchemaType = TypeOf<
+  ReturnType<typeof getBulkCreateOrUpdatePayloadSchema>
+>;
