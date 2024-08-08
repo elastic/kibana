@@ -139,6 +139,22 @@ export class DataGridService extends FtrService {
       'euiDataGridCellExpandButton'
     );
     await actionButton.click();
+    await this.retry.waitFor('popover to be opened', async () => {
+      return await this.testSubjects.exists('euiDataGridExpansionPopover');
+    });
+  }
+
+  /**
+   * Clicks grid cell 'expand' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellExpandButtonExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndex: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    await this.clickCellExpandButton(rowIndex, controlsCount + columnIndex);
   }
 
   /**
@@ -467,6 +483,13 @@ export class DataGridService extends FtrService {
       return value !== '';
     });
     return value;
+  }
+
+  public async getCustomRowHeightNumber(scope: 'row' | 'header' = 'row') {
+    const input = await this.testSubjects.find(
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_lineCountNumber`
+    );
+    return Number(await input.getAttribute('value'));
   }
 
   public async changeRowHeightValue(newValue: string) {

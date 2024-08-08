@@ -100,7 +100,6 @@ describe('source/index.tsx', () => {
       const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
       expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
       expect(payload.id).toEqual('neato');
-      expect(payload.indexFields).toHaveLength(mocksSource.indexFields.length);
     });
 
     it('should reuse the result for dataView info when cleanCache not passed', async () => {

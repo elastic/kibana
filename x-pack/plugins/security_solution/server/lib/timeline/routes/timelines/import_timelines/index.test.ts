@@ -13,7 +13,7 @@ import {
   createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
-import { TimelineStatus, TimelineType } from '../../../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
@@ -184,7 +184,7 @@ describe('import timelines', () => {
       await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
         ...mockParsedTimelineObject,
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         templateTimelineId: null,
         templateTimelineVersion: null,
       });
@@ -429,7 +429,7 @@ describe('import timelines', () => {
         [
           {
             ...mockGetTimelineValue,
-            timelineType: TimelineType.template,
+            timelineType: TimelineTypeEnum.template,
           },
         ],
       ]);
@@ -630,7 +630,7 @@ describe('import timeline templates', () => {
       await server.inject(mockRequest, requestContextMock.convertContext(context));
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
         ...mockParsedTemplateTimelineObject,
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
       });
     });
 
@@ -851,7 +851,7 @@ describe('import timeline templates', () => {
         [
           {
             ...mockUniqueParsedTemplateTimelineObjects[0],
-            status: TimelineStatus.immutable,
+            status: TimelineStatusEnum.immutable,
           },
         ],
       ]);

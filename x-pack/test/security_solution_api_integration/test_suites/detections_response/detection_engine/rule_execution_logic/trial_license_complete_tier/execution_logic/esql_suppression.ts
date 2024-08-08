@@ -64,6 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
   const getNonAggRuleQueryWithMetadata = (id: string) =>
     `from ecs_compliant metadata _id, _index, _version ${internalIdPipe(id)}`;
 
+  // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless ES|QL rule type, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');

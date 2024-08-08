@@ -41,6 +41,7 @@ const createStartContract = (): Start => {
     getFieldsForIndexPattern: jest.fn(),
     create: jest.fn().mockReturnValue(Promise.resolve({})),
     toDataView: jest.fn().mockReturnValue(Promise.resolve({})),
+    toDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

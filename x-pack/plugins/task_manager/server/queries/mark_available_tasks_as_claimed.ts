@@ -193,10 +193,7 @@ export function claimSort(
 }
 
 function getPriority(definitions: TaskTypeDictionary, taskType: string): TaskPriority {
-  if (definitions.has(taskType)) {
-    return definitions.get(taskType).priority ?? TaskPriority.Normal;
-  }
-  return TaskPriority.Normal;
+  return definitions.get(taskType)?.priority ?? TaskPriority.Normal;
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {

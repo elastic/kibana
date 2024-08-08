@@ -17,16 +17,21 @@ function range(start: number, end: number) {
 }
 
 export const MAX_PARTITIONS = 256;
+export const CACHE_INTERVAL = 10000;
 
 export class TaskPartitioner {
   private readonly allPartitions: number[];
   private readonly podName: string;
   private kibanaDiscoveryService: KibanaDiscoveryService;
+  private podPartitions: number[];
+  private podPartitionsLastUpdated: number;
 
   constructor(podName: string, kibanaDiscoveryService: KibanaDiscoveryService) {
     this.allPartitions = range(0, MAX_PARTITIONS);
     this.podName = podName;
     this.kibanaDiscoveryService = kibanaDiscoveryService;
+    this.podPartitions = [];
+    this.podPartitionsLastUpdated = Date.now() - CACHE_INTERVAL;
   }
 
   getAllPartitions(): number[] {
@@ -37,10 +42,26 @@ export class TaskPartitioner {
     return this.podName;
   }
 
+  getPodPartitions(): number[] {
+    return this.podPartitions;
+  }
+
   async getPartitions(): Promise<number[]> {
-    const allPodNames = await this.getAllPodNames();
-    const podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
-    return podPartitions;
+    const lastUpdated = new Date(this.podPartitionsLastUpdated).getTime();
+    const now = Date.now();
+
+    // update the pod partitions cache after 10 seconds
+    if (now - lastUpdated >= CACHE_INTERVAL) {
+      try {
+        const allPodNames = await this.getAllPodNames();
+        this.podPartitions = assignPodPartitions(this.podName, allPodNames, this.allPartitions);
+        this.podPartitionsLastUpdated = now;
+      } catch (error) {
+        // return the cached value
+        return this.podPartitions;
+      }
+    }
+    return this.podPartitions;
   }
 
   private async getAllPodNames(): Promise<string[]> {
