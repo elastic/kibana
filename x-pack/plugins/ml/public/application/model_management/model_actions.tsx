@@ -29,6 +29,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
 import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { useCloudCheck } from '../components/node_available_warning/hooks';
 
 export function useModelActions({
   onDfaTestAction,
@@ -60,6 +61,8 @@ export function useModelActions({
       ...startServices
     },
   } = useMlKibana();
+
+  const cloudInfo = useCloudCheck();
 
   const [
     canCreateTrainedModels,
@@ -114,9 +117,10 @@ export function useModelActions({
       getUserInputModelDeploymentParamsProvider(
         overlays,
         startServices,
-        startModelDeploymentDocUrl
+        startModelDeploymentDocUrl,
+        cloudInfo
       ),
-    [overlays, startServices, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl, cloudInfo]
   );
 
   const isBuiltInModel = useCallback(
@@ -213,7 +217,29 @@ export function useModelActions({
           try {
             onLoading(true);
             await trainedModelsApiService.startModelAllocation(item.model_id, {
-              number_of_allocations: modelDeploymentParams.numOfAllocations,
+              ...(modelDeploymentParams.adaptiveAllocations?.enabled
+                ? {
+                    adaptive_allocations: {
+                      enabled: modelDeploymentParams.adaptiveAllocations?.enabled,
+                      ...(Number.isInteger(
+                        modelDeploymentParams.adaptiveAllocations?.minNumberOfAllocations
+                      )
+                        ? {
+                            min_number_of_allocations:
+                              modelDeploymentParams.adaptiveAllocations?.minNumberOfAllocations,
+                          }
+                        : {}),
+                      ...(Number.isInteger(
+                        modelDeploymentParams.adaptiveAllocations?.maxNumberOfAllocations
+                      )
+                        ? {
+                            max_number_of_allocations:
+                              modelDeploymentParams.adaptiveAllocations?.maxNumberOfAllocations,
+                          }
+                        : {}),
+                    },
+                  }
+                : { number_of_allocations: modelDeploymentParams.numOfAllocations! }),
               threads_per_allocation: modelDeploymentParams.threadsPerAllocations!,
               priority: modelDeploymentParams.priority!,
               deployment_id: !!modelDeploymentParams.deploymentId
@@ -280,7 +306,29 @@ export function useModelActions({
               item.model_id,
               deploymentParams.deploymentId!,
               {
-                number_of_allocations: deploymentParams.numOfAllocations,
+                ...(deploymentParams.adaptiveAllocations?.enabled
+                  ? {
+                      adaptive_allocations: {
+                        enabled: true,
+                        ...(Number.isInteger(
+                          deploymentParams.adaptiveAllocations?.minNumberOfAllocations
+                        )
+                          ? {
+                              min_number_of_allocations:
+                                deploymentParams.adaptiveAllocations?.minNumberOfAllocations,
+                            }
+                          : {}),
+                        ...(Number.isInteger(
+                          deploymentParams.adaptiveAllocations?.maxNumberOfAllocations
+                        )
+                          ? {
+                              max_number_of_allocations:
+                                deploymentParams.adaptiveAllocations?.maxNumberOfAllocations,
+                            }
+                          : {}),
+                      },
+                    }
+                  : { number_of_allocations: deploymentParams.numOfAllocations! }),
               }
             );
             displaySuccessToast(

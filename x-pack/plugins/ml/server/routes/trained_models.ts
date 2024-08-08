@@ -578,7 +578,7 @@ export function trainedModelsRoutes(
         validate: {
           request: {
             params: modelIdSchema,
-            query: threadingParamsSchema,
+            body: threadingParamsSchema,
           },
         },
       },
@@ -588,7 +588,7 @@ export function trainedModelsRoutes(
           const body = await mlClient.startTrainedModelDeployment(
             {
               model_id: modelId,
-              ...(request.query ? request.query : {}),
+              ...(request.body ? request.body : {}),
             },
             {
               maxRetries: 0,

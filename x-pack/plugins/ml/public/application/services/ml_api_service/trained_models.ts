@@ -15,6 +15,7 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
+import type { XOR } from '../../../../common/types/common';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import type { HttpService } from '../http_service';
@@ -55,6 +56,23 @@ export interface InferenceStatsResponse {
   count: number;
   trained_model_stats: TrainedModelStat[];
 }
+
+interface CommonDeploymentParams {
+  deployment_id?: string;
+  threads_per_allocation: number;
+  priority: 'low' | 'normal';
+}
+
+type AllocationsParams = XOR<
+  { number_of_allocations: number },
+  {
+    adaptive_allocations: {
+      enabled: boolean;
+      min_number_of_allocations?: number;
+      max_number_of_allocations?: number;
+    };
+  }
+>;
 
 /**
  * Service with APIs calls to perform operations with trained models.
@@ -197,19 +215,11 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(
-      modelId: string,
-      queryParams?: {
-        number_of_allocations: number;
-        threads_per_allocation: number;
-        priority: 'low' | 'normal';
-        deployment_id?: string;
-      }
-    ) {
+    startModelAllocation(modelId: string, bodyParams?: CommonDeploymentParams & AllocationsParams) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
-        query: queryParams,
+        body: JSON.stringify(bodyParams),
         version: '1',
       });
     },
@@ -231,11 +241,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    updateModelDeployment(
-      modelId: string,
-      deploymentId: string,
-      params: { number_of_allocations: number }
-    ) {
+    updateModelDeployment(modelId: string, deploymentId: string, params: AllocationsParams) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',

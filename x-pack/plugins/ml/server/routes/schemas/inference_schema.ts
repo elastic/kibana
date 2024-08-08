@@ -35,6 +35,13 @@ export const threadingParamsSchema = schema.maybe(
     threads_per_allocation: schema.maybe(schema.number()),
     priority: schema.maybe(schema.oneOf([schema.literal('low'), schema.literal('normal')])),
     deployment_id: schema.maybe(schema.string()),
+    adaptive_allocations: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        min_number_of_allocations: schema.maybe(schema.number()),
+        max_number_of_allocations: schema.maybe(schema.number()),
+      })
+    ),
   })
 );
 
