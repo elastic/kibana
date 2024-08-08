@@ -107,7 +107,7 @@ function addVariableFromAssignment(
     const rightHandSideArgType = getAssignRightHandSideType(assignOperation.args[1], fields);
     addToVariableOccurrencies(variables, {
       name: assignOperation.args[0].name,
-      type: rightHandSideArgType || 'double' /* fallback to number */,
+      type: (rightHandSideArgType as string) || 'double' /* fallback to number */,
       location: assignOperation.args[0].location,
     });
   }

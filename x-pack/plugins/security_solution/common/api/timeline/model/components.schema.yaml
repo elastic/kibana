@@ -21,12 +21,20 @@ components:
       # enum default value is temporarily unsupported by the code generator
       # default: default
       description: The type of data provider to create. Valid values are `default` and `template`.
+    TemplateTimelineType:
+      type: string
+      enum:
+        - elastic
+        - custom
+      description: The type of the timeline template.
     SavedTimeline:
       type: object
       properties:
         columns:
-          $ref: '#/components/schemas/ColumnHeaderResult'
+          type: array
           nullable: true
+          items:
+            $ref: '#/components/schemas/ColumnHeaderResult'
         created:
           type: number
           nullable: true
@@ -62,10 +70,22 @@ components:
           properties:
             eventCategoryField:
               type: string
+              nullable: true
+            query:
+              type: string
+              nullable: true
+            size:
+              oneOf:
+                - type: string
+                  nullable: true
+                - type: number
+                  nullable: true
             tiebreakerField:
               type: string
+              nullable: true
             timestampField:
               type: string
+              nullable: true
         eventType:
           type: string
           nullable: true
@@ -223,35 +243,68 @@ components:
       properties:
         field:
           type: string
+          nullable: true
         displayField:
           type: string
+          nullable: true
         value:
           type: string
+          nullable: true
         displayValue:
           type: string
+          nullable: true
         operator:
           type: string
+          nullable: true
     DataProviderResult:
       type: object
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        enabled:
-          type: boolean
-        excluded:
-          type: boolean
-        kqlQuery:
-          type: string
-        queryMatch:
-          $ref: '#/components/schemas/QueryMatchResult'
         and:
           type: array
+          nullable: true
           items:
-            $ref: '#/components/schemas/DataProviderResult'
+            $ref: '#/components/schemas/DataProviderQueryMatch'
+        enabled:
+          type: boolean
+          nullable: true
+        excluded:
+          type: boolean
+          nullable: true
+        id:
+          type: string
+          nullable: true
+        kqlQuery:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
         type:
           $ref: '#/components/schemas/DataProviderType'
+          nullable: true
+    DataProviderQueryMatch:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        excluded:
+          type: boolean
+          nullable: true
+        id:
+          type: string
+          nullable: true
+        kqlQuery:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        queryMatch:
+          $ref: '#/components/schemas/QueryMatchResult'
     BareNote:
       type: object
       required: [timelineId]
@@ -383,16 +436,21 @@ components:
       properties:
         filterQuery:
           type: object
+          nullable: true
           properties:
             kuery:
               type: object
+              nullable: true
               properties:
                 kind:
                   type: string
+                  nullable: true
                 expression:
                   type: string
+                  nullable: true
             serializedQuery:
               type: string
+              nullable: true
     PinnedEvent:
       type: object
       required: [eventId, pinnedEventId, timelineId, version]
@@ -418,6 +476,12 @@ components:
         version:
           type: string
     Sort:
+      oneOf:
+        - $ref: '#/components/schemas/SortObject'
+        - type: array
+          items:
+            $ref: '#/components/schemas/SortObject'
+    SortObject:
       type: object
       properties:
         columnId:
