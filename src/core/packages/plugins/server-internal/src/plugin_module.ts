@@ -50,26 +50,27 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
       .toDynamicValue(({ container }) => container.get(HttpService).createRouter())
       .inSingletonScope()
       .onActivation(({ container }, router) => {
-        const route = container.get(Route);
-        const register = router[route.method] as RouteRegistrar<
-          typeof route.method,
-          RequestHandlerContext
-        >;
+        (container.isCurrentBound(Route) ? container.getAll(Route) : []).forEach((route) => {
+          const register = router[route.method] as RouteRegistrar<
+            typeof route.method,
+            RequestHandlerContext
+          >;
 
-        register(route, async (_context, request, response) => {
-          const injection = container.get(DiService);
-          const scope = injection.fork();
+          register(route, async (_context, request, response) => {
+            const injection = container.get(DiService);
+            const scope = injection.fork();
 
-          scope.bind(RequestToken).toConstantValue(request);
-          scope.bind(ResponseToken).toConstantValue(response);
-          scope.bind(Global).toConstantValue(RequestToken);
-          scope.bind(Global).toConstantValue(ResponseToken);
+            scope.bind(RequestToken).toConstantValue(request);
+            scope.bind(ResponseToken).toConstantValue(response);
+            scope.bind(Global).toConstantValue(RequestToken);
+            scope.bind(Global).toConstantValue(ResponseToken);
 
-          try {
-            return await scope.get<IRouteHandler>(route).handle();
-          } finally {
-            injection.dispose(scope);
-          }
+            try {
+              return await scope.get<IRouteHandler>(route).handle();
+            } finally {
+              injection.dispose(scope);
+            }
+          });
         });
 
         return router;
