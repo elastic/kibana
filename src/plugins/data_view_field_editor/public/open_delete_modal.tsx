@@ -13,6 +13,7 @@ import {
   toMountPoint,
   DataViewsPublicPluginStart,
   DataView,
+  DataViewLazy,
   UsageCollectionStart,
 } from './shared_imports';
 
@@ -29,7 +30,7 @@ export interface OpenFieldDeleteModalOptions {
    * Config for the delete modal
    */
   ctx: {
-    dataView: DataView;
+    dataView: DataView | DataViewLazy;
   };
   /**
    * Callback fired when fields are deleted
@@ -60,9 +61,9 @@ export class DeleteCompositeSubfield extends Error {
 
 export const getFieldDeleteModalOpener =
   ({ core, dataViews, usageCollection }: Dependencies) =>
-  (options: OpenFieldDeleteModalOptions): CloseEditor => {
+  async (options: OpenFieldDeleteModalOptions): Promise<CloseEditor> => {
     if (typeof options.fieldName === 'string') {
-      const fieldToDelete = options.ctx.dataView.getFieldByName(options.fieldName);
+      const fieldToDelete = await options.ctx.dataView.getFieldByName(options.fieldName);
       // we can check for composite type since composite runtime field definitions themselves don't become fields
       const doesBelongToCompositeField = fieldToDelete?.runtimeField?.type === 'composite';
 

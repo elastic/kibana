@@ -30,7 +30,6 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { getDetails } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  expandEsqlQueryBar,
   fillEsqlQueryBar,
   fillOverrideEsqlRuleName,
   goToAboutStepTab,
@@ -52,19 +51,10 @@ const rule = getEsqlRule();
 const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
-// skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
-// alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
 describe(
   'Detection ES|QL rules, edit',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForEsqlRuleEnabled',
-        ])}`,
-      ],
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
@@ -77,7 +67,6 @@ describe(
     });
 
     it('edits ES|QL rule and checks details page', () => {
-      expandEsqlQueryBar();
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
@@ -103,7 +92,6 @@ describe(
     });
 
     it('adds ES|QL override rule name on edit', () => {
-      expandEsqlQueryBar();
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
 

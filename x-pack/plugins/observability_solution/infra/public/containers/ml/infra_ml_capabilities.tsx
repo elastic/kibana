@@ -10,12 +10,12 @@ import { useMemo, useState, useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
+import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { useTrackedPromise } from '../../hooks/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
 } from './api/ml_api_types';
-import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useInfraMLCapabilities = () => {

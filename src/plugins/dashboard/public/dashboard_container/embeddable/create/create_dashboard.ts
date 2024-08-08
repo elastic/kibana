@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import deepEqual from 'fast-deep-equal';
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -28,16 +27,21 @@ import {
   TimeRange,
 } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import deepEqual from 'fast-deep-equal';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-import { map, distinctUntilChanged, startWith } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  startWith,
+  Subject,
+} from 'rxjs';
 import { v4 } from 'uuid';
-import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import {
   DashboardContainerInput,
   DashboardPanelMap,
   DashboardPanelState,
-  prefixReferencesFromPanel,
 } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -56,11 +60,14 @@ import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffin
 import { DashboardPublicState, UnsavedPanelState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  startSyncingDashboardControlGroup,
+} from './controls/dashboard_control_group_integration';
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -277,17 +284,6 @@ export const initializeDashboard = async ({
   };
 
   // --------------------------------------------------------------------------------------
-  // Set restored runtime state for react embeddables.
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) => {
-    for (const idWithRuntimeState of Object.keys(runtimePanelsToRestore)) {
-      const restoredRuntimeStateForChild = runtimePanelsToRestore[idWithRuntimeState];
-      if (!restoredRuntimeStateForChild) continue;
-      dashboardContainer.setRuntimeStateForChild(idWithRuntimeState, restoredRuntimeStateForChild);
-    }
-  });
-
-  // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
   const initialDashboardInput: DashboardContainerInput = omit(
@@ -391,7 +387,7 @@ export const initializeDashboard = async ({
       const sameType = panelToUpdate.type === incomingEmbeddable.type;
 
       panelToUpdate.type = incomingEmbeddable.type;
-      panelToUpdate.explicitInput = {
+      const nextRuntimeState = {
         // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
         ...(sameType ? panelToUpdate.explicitInput : {}),
 
@@ -401,6 +397,13 @@ export const initializeDashboard = async ({
         // maintain hide panel titles setting.
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
+      if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+        panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
+        runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
+      } else {
+        panelToUpdate.explicitInput = nextRuntimeState;
+      }
+
       untilDashboardReady().then((container) =>
         scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
       );
@@ -429,19 +432,27 @@ export const initializeDashboard = async ({
               currentPanels,
             }
           );
-          const newPanelState: DashboardPanelState = {
-            explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
-            type: incomingEmbeddable.type,
-            gridData: {
-              ...newPanelPlacement,
-              i: embeddableId,
-            },
-          };
-          if (incomingEmbeddable.references) {
-            container.savedObjectReferences.push(
-              ...prefixReferencesFromPanel(embeddableId, incomingEmbeddable.references)
-            );
-          }
+          const newPanelState: DashboardPanelState = (() => {
+            if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+              runtimePanelsToRestore[embeddableId] = incomingEmbeddable.input;
+              return {
+                explicitInput: { id: embeddableId },
+                type: incomingEmbeddable.type,
+                gridData: {
+                  ...newPanelPlacement,
+                  i: embeddableId,
+                },
+              };
+            }
+            return {
+              explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
+              type: incomingEmbeddable.type,
+              gridData: {
+                ...newPanelPlacement,
+                i: embeddableId,
+              },
+            };
+          })();
           container.updateInput({
             panels: {
               ...container.getInput().panels,
@@ -457,6 +468,17 @@ export const initializeDashboard = async ({
       });
     }
   }
+
+  // --------------------------------------------------------------------------------------
+  // Set restored runtime state for react embeddables.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    for (const idWithRuntimeState of Object.keys(runtimePanelsToRestore)) {
+      const restoredRuntimeStateForChild = runtimePanelsToRestore[idWithRuntimeState];
+      if (!restoredRuntimeStateForChild) continue;
+      dashboardContainer.setRuntimeStateForChild(idWithRuntimeState, restoredRuntimeStateForChild);
+    }
+  });
 
   // --------------------------------------------------------------------------------------
   // Start the control group integration.

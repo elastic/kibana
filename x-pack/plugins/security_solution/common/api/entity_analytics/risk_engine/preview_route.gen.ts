@@ -83,3 +83,10 @@ export const RiskScoresPreviewResponse = z.object({
     user: z.array(EntityRiskScoreRecord).optional(),
   }),
 });
+
+export type PreviewRiskScoreRequestBody = z.infer<typeof PreviewRiskScoreRequestBody>;
+export const PreviewRiskScoreRequestBody = RiskScoresPreviewRequest;
+export type PreviewRiskScoreRequestBodyInput = z.input<typeof PreviewRiskScoreRequestBody>;
+
+export type PreviewRiskScoreResponse = z.infer<typeof PreviewRiskScoreResponse>;
+export const PreviewRiskScoreResponse = RiskScoresPreviewResponse;

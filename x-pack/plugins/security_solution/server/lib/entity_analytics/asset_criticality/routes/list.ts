@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -15,8 +15,8 @@ import {
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
-import type { AssetCriticalityListResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
-import { ListAssetCriticalityQueryParams } from '../../../../../common/api/entity_analytics/asset_criticality';
+import type { FindAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
+import { FindAssetCriticalityRecordsRequestQuery } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
@@ -39,11 +39,15 @@ export const assetCriticalityPublicListRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(ListAssetCriticalityQueryParams),
+            query: buildRouteValidationWithZod(FindAssetCriticalityRecordsRequestQuery),
           },
         },
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<FindAssetCriticalityRecordsResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
           await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
@@ -81,7 +85,7 @@ export const assetCriticalityPublicListRoute = (
             },
           });
 
-          const body: AssetCriticalityListResponse = {
+          const body = {
             records,
             total,
             page,

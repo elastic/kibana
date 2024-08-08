@@ -6,6 +6,7 @@
  */
 
 import { HttpHandler } from '@kbn/core/public';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
   CategorizerStatus,
   getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT,
@@ -13,7 +14,6 @@ import {
   LogEntryCategoriesDatasetStats,
   LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH,
 } from '../../../../../common/http_api';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export type { LogEntryCategoriesDatasetStats };
 

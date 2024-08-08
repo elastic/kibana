@@ -37,7 +37,7 @@ import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
   currentView?: InventoryView | null;
-  reload: () => Promise<any>;
+  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;

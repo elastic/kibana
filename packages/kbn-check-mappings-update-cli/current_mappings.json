@@ -348,6 +348,17 @@
     "dynamic": false,
     "properties": {}
   },
+  "background-task-node": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "last_seen": {
+        "type": "date"
+      }
+    }
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -963,6 +974,10 @@
         "type": "integer"
       }
     }
+  },
+  "dynamic-config-overrides": {
+    "dynamic": false,
+    "properties": {}
   },
   "endpoint:unified-user-artifact-manifest": {
     "dynamic": false,
@@ -3315,6 +3330,9 @@
       },
       "ownerId": {
         "type": "keyword"
+      },
+      "partition": {
+        "type": "integer"
       },
       "retryAt": {
         "type": "date"

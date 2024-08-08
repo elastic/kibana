@@ -62,6 +62,8 @@ export function createImageHandler(callback: (imageUrl: string | undefined) => v
       const imageUrl = await readFile(file);
       const resizedImageUrl = await resizeImage(imageUrl, MAX_IMAGE_SIZE);
       callback(resizedImageUrl);
+    } else {
+      callback(undefined);
     }
   };
 }

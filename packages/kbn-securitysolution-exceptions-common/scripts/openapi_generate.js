@@ -17,14 +17,14 @@ const ROOT = resolve(__dirname, '..');
   await generate({
     title: 'OpenAPI Exceptions API Schemas',
     rootDir: ROOT,
-    sourceGlob: './**/*.schema.yaml',
+    sourceGlob: './api/**/*.schema.yaml',
     templateName: 'zod_operation_schema',
   });
 
   await generate({
     title: 'Exceptions API client for tests',
     rootDir: ROOT,
-    sourceGlob: './**/*.schema.yaml',
+    sourceGlob: './api/**/*.schema.yaml',
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type { RiskScoresPreviewResponse } from '../../../../../common/api/entity_analytics';
+import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
 import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
@@ -40,7 +41,7 @@ export const riskScorePreviewRoute = (
           request: { body: buildRouteValidationWithZod(RiskScoresPreviewRequest) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<RiskScoresPreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const securityContext = await context.securitySolution;
         const coreContext = await context.core;

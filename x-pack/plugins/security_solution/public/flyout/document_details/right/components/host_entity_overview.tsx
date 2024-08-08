@@ -55,6 +55,7 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const HOST_ICON = 'storage';
 
@@ -79,8 +80,9 @@ export const HOST_PREVIEW_BANNER = {
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const { telemetry } = useKibana().services;
 
-  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
@@ -103,7 +105,11 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         banner: HOST_PREVIEW_BANNER,
       },
     });
-  }, [openPreviewPanel, hostName, scopeId]);
+    telemetry.reportDetailsFlyoutOpened({
+      location: scopeId,
+      panel: 'preview',
+    });
+  }, [openPreviewPanel, hostName, scopeId, telemetry]);
 
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();

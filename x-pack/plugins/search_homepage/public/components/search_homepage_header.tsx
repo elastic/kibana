@@ -17,13 +17,8 @@ export interface SearchHomepageHeaderProps {
 export const SearchHomepageHeader = ({ showEndpointsAPIKeys }: SearchHomepageHeaderProps) => (
   <EuiPageTemplate.Header
     pageTitle={
-      <EuiTitle data-test-subj="search-homepage-header-title">
-        <h2>
-          <FormattedMessage
-            id="xpack.searchHomepage.pageTitle"
-            defaultMessage="Welcome to Search"
-          />
-        </h2>
+      <EuiTitle data-test-subj="search-homepage-header-title" size="l">
+        <FormattedMessage id="xpack.searchHomepage.pageTitle" defaultMessage="Welcome to Search" />
       </EuiTitle>
     }
     data-test-subj="search-homepage-header"

@@ -158,6 +158,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Indices to query"
             />
           }
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.index.length > 0 && index != null && index.length > 0}
           error={errors.index}
           helpText={
@@ -171,6 +172,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             fullWidth
             async
             isLoading={areIndicesLoading}
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.index.length > 0 && index != null && index.length > 0}
             noSuggestions={!indexOptions.length}
             options={indexOptions}
@@ -213,11 +215,13 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
               defaultMessage="Time field"
             />
           }
+          // @ts-expect-error upgrade typescript v5.1.6
           isInvalid={errors.timeField.length > 0 && timeField !== undefined}
           error={errors.timeField}
         >
           <EuiSelect
             options={timeFieldOptions}
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.timeField.length > 0 && timeField !== undefined}
             fullWidth
             name="thresholdTimeField"

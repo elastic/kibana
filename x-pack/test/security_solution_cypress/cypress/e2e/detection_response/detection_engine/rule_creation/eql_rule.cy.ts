@@ -164,27 +164,33 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
     });
 
-    it('Creates and enables a new EQL rule with a sequence', function () {
-      login();
-      visit(CREATE_RULE_URL);
-      selectEqlRuleType();
-      fillDefineEqlRuleAndContinue(rule);
-      fillAboutRuleAndContinue(rule);
-      fillScheduleRuleAndContinue(rule);
-      createAndEnableRule();
-      openRuleManagementPageViaBreadcrumbs();
-      goToRuleDetailsOf(rule.name);
-      waitForAlertsToPopulate();
+    it(
+      'Creates and enables a new EQL rule with a sequence',
+      {
+        tags: ['@skipInServerlessMKI'],
+      },
+      function () {
+        login();
+        visit(CREATE_RULE_URL);
+        selectEqlRuleType();
+        fillDefineEqlRuleAndContinue(rule);
+        fillAboutRuleAndContinue(rule);
+        fillScheduleRuleAndContinue(rule);
+        createAndEnableRule();
+        openRuleManagementPageViaBreadcrumbs();
+        goToRuleDetailsOf(rule.name);
+        waitForAlertsToPopulate();
 
-      cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
-      cy.get(ALERT_DATA_GRID)
-        .invoke('text')
-        .then((text) => {
-          cy.log('ALERT_DATA_GRID', text);
-          expect(text).contains(rule.name);
-          expect(text).contains(rule.severity);
-        });
-    });
+        cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
+        cy.get(ALERT_DATA_GRID)
+          .invoke('text')
+          .then((text) => {
+            cy.log('ALERT_DATA_GRID', text);
+            expect(text).contains(rule.name);
+            expect(text).contains(rule.severity);
+          });
+      }
+    );
   });
 
   describe('with source data requiring EQL overrides', () => {

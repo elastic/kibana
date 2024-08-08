@@ -11,6 +11,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
@@ -81,8 +82,8 @@ export const createLogsExplorerProfileCustomizations =
     customizations.set({
       id: 'data_table',
       logsEnabled: true,
-      customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
-        module.createCustomControlColumnsConfiguration(service)
+      rowAdditionalLeadingControls: await import('./custom_control_column').then((module) =>
+        module.getRowAdditionalControlColumns()
       ),
     });
 
@@ -130,7 +131,23 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
-        registry.enableById('doc_view_logs_overview');
+        const logsAIAssistantFeature = plugins.discoverShared.features.registry.getById(
+          'observability-logs-ai-assistant'
+        );
+
+        registry.add({
+          id: 'doc_view_logs_overview',
+          title: i18n.translate('xpack.logsExplorer.docViews.logsOverview.title', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => (
+            <UnifiedDocViewerLogsOverview
+              {...props}
+              renderAIAssistant={logsAIAssistantFeature?.render}
+            />
+          ),
+        });
 
         return registry;
       },

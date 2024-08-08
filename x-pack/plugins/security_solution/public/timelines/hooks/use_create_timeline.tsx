@@ -12,7 +12,7 @@ import { defaultHeaders } from '../components/timeline/body/column_headers/defau
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
 import { TimelineId } from '../../../common/types/timeline';
-import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
@@ -32,7 +32,7 @@ export interface UseCreateTimelineParams {
   /**
    * Type of the timeline (default, template)
    */
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
   /**
    * Callback to be called when the timeline is created
    */
@@ -86,9 +86,10 @@ export const useCreateTimeline = ({
           show,
           timelineType,
           updated: undefined,
-          excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
-            ? timelineDefaults.excludedRowRendererIds
-            : [],
+          excludedRowRendererIds:
+            !unifiedComponentsInTimelineDisabled && timelineType !== TimelineTypeEnum.template
+              ? timelineDefaults.excludedRowRendererIds
+              : [],
         })
       );
 

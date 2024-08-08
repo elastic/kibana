@@ -20,11 +20,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Search Homepage', function () {
     this.tags('skipMKI');
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       // Enable Homepage Feature Flag
       await uiSettings.setUiSetting(roleAuthc, HOMEPAGE_FF_UI_SETTING, true);
 
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      await pageObjects.svlCommonPage.loginAsViewer();
     });
 
     after(async () => {
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Disable Homepage Feature Flag
       await uiSettings.deleteUISetting(roleAuthc, HOMEPAGE_FF_UI_SETTING);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('has search homepage with Home sidenav', async () => {

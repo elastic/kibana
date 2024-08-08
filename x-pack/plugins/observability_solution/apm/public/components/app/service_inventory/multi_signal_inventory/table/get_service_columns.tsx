@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   asDecimalOrInteger,
   asMillisecondDuration,
@@ -22,16 +24,22 @@ import {
   getTimeSeriesColor,
   ChartType,
 } from '../../../../shared/charts/helper/get_timeseries_color';
+import {
+  getMetricsFormula,
+  ChartMetricType,
+} from '../../../../shared/charts/helper/get_metrics_formulas';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn } from '../../../../shared/managed_table';
-import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_metrics';
+import { NotAvailableApmMetrics } from '../../../../shared/not_available_popover/not_available_apm_metrics';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
-import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { isApmSignal, isLogsSignal } from '../../../../../utils/get_signal_type';
+import { ColumnHeader } from './column_header';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { NotAvailableLogsMetrics } from '../../../../shared/not_available_popover/not_available_log_metrics';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/entities/services/detailed_statistics'>;
@@ -39,13 +47,11 @@ type ServicesDetailedStatisticsAPIResponse =
 export function getServiceColumns({
   query,
   breakpoints,
-  link,
   timeseriesDataLoading,
   timeseriesData,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
-  link: any;
   timeseriesDataLoading: boolean;
   timeseriesData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
@@ -109,7 +115,7 @@ export function getServiceColumns({
         ) : (
           <ListMetric
             isLoading={timeseriesDataLoading}
-            series={timeseriesData?.currentPeriod?.apm[serviceName]?.latency}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.latency}
             color={currentPeriodColor}
             valueLabel={asMillisecondDuration(metrics.latency)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
@@ -135,7 +141,7 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={asTransactionRate(metrics.throughput)}
             isLoading={timeseriesDataLoading}
-            series={timeseriesData?.currentPeriod?.apm[serviceName]?.throughput}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.throughput}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
@@ -159,29 +165,59 @@ export function getServiceColumns({
             color={currentPeriodColor}
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
             isLoading={timeseriesDataLoading}
-            series={timeseriesData?.currentPeriod?.apm[serviceName]?.transactionErrorRate}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.failedTransactionRate}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
       },
     },
     {
-      field: ServiceInventoryFieldName.LogRatePerMinute,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logRatePerMinute', {
-        defaultMessage: 'Log rate (per min.)',
-      }),
+      field: ServiceInventoryFieldName.logRate,
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logRate', {
+            defaultMessage: 'Log rate (per min.)',
+          })}
+          formula={getMetricsFormula(ChartMetricType.LOG_RATE)}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="Rate of logs per minute observed for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logRate.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logRate.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName }) => {
-        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
+      render: (_, { metrics, serviceName, signalTypes, hasLogMetrics }) => {
+        if (isLogsSignal(signalTypes) && !hasLogMetrics) {
+          return <NotAvailableLogsMetrics />;
+        }
 
+        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
         return (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
-            series={timeseriesData?.currentPeriod?.logRate[serviceName] ?? []}
-            valueLabel={asDecimalOrInteger(metrics.logRatePerMinute)}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logRate}
+            valueLabel={asDecimalOrInteger(metrics.logRate)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />
         );
@@ -189,20 +225,51 @@ export function getServiceColumns({
     },
     {
       field: ServiceInventoryFieldName.LogErrorRate,
-      name: i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
-        defaultMessage: 'Log error rate',
-      }),
+      name: (
+        <ColumnHeader
+          label={i18n.translate('xpack.apm.multiSignal.servicesTable.logErrorRate', {
+            defaultMessage: 'Log error %',
+          })}
+          formula={getMetricsFormula(ChartMetricType.LOG_ERROR_RATE)}
+          toolTip={
+            <FormattedMessage
+              defaultMessage="% of logs where error detected for given {serviceName}."
+              id="xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.description"
+              values={{
+                serviceName: (
+                  <code
+                    css={css`
+                      word-break: break-word;
+                    `}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.multiSignal.servicesTable.logErrorRate.tooltip.serviceNameLabel',
+                      {
+                        defaultMessage: 'service.name',
+                      }
+                    )}
+                  </code>
+                ),
+              }}
+            />
+          }
+        />
+      ),
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, serviceName }) => {
+      render: (_, { metrics, serviceName, signalTypes, hasLogMetrics }) => {
+        if (isLogsSignal(signalTypes) && !hasLogMetrics) {
+          return <NotAvailableLogsMetrics />;
+        }
+
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
 
         return (
           <ListMetric
-            isLoading={false}
+            isLoading={timeseriesDataLoading}
             color={currentPeriodColor}
-            series={timeseriesData?.currentPeriod?.logErrorRate[serviceName] ?? []}
+            series={timeseriesData?.currentPeriod?.[serviceName]?.logErrorRate}
             valueLabel={asPercent(metrics.logErrorRate, 1)}
             hideSeries={!showWhenSmallOrGreaterThanLarge}
           />

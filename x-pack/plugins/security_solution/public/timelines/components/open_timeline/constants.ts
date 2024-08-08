@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const DEFAULT_SORT_FIELD = 'updated';
+import { SortFieldTimelineEnum } from '../../../../common/api/timeline';
+
+export const DEFAULT_SORT_FIELD = SortFieldTimelineEnum.updated;
 export const DEFAULT_SORT_DIRECTION = 'desc';

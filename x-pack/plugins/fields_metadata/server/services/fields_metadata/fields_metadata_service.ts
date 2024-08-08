@@ -10,8 +10,10 @@ import { Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
+import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { IntegrationFieldsExtractor } from './repositories/types';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
+import { MetadataFields as metadataFields } from '../../../common/metadata_fields';
 
 export class FieldsMetadataService {
   private integrationFieldsExtractor: IntegrationFieldsExtractor = () => Promise.resolve({});
@@ -30,6 +32,7 @@ export class FieldsMetadataService {
     const { logger, integrationFieldsExtractor } = this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
+    const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
     const integrationFieldsRepository = IntegrationFieldsRepository.create({
       integrationFieldsExtractor,
     });
@@ -39,6 +42,7 @@ export class FieldsMetadataService {
         return FieldsMetadataClient.create({
           logger,
           ecsFieldsRepository,
+          metadataFieldsRepository,
           integrationFieldsRepository,
         });
       },

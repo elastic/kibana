@@ -10,6 +10,8 @@ import { mockLogger } from '../test_utils';
 import { TaskClaiming } from './task_claiming';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { TaskPartitioner } from '../lib/task_partitioner';
+import { KibanaDiscoveryService } from '../kibana_discovery_service';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -23,6 +25,7 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
+const taskPartitioner = new TaskPartitioner('test', {} as KibanaDiscoveryService);
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -77,7 +80,8 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
+      taskPartitioner,
     });
 
     expect(taskManagerLogger.warn).toHaveBeenCalledWith(
@@ -126,7 +130,8 @@ describe('TaskClaiming', () => {
       unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
-      getCapacity: () => 10,
+      getAvailableCapacity: () => 10,
+      taskPartitioner,
     });
 
     expect(taskManagerLogger.info).toHaveBeenCalledTimes(2);
