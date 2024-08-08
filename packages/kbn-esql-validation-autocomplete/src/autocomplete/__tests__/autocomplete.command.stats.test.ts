@@ -45,7 +45,7 @@ describe('autocomplete.suggest', () => {
     describe('... <aggregates> ...', () => {
       test('lists possible aggregations on space after command', async () => {
         const { assertSuggestions } = await setup();
-        const expected = ['var0 =', ...allAggFunctions, ...allEvaFunctions];
+        const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
 
         await assertSuggestions('from a | stats /', expected);
         await assertSuggestions('FROM a | STATS /', expected);
@@ -60,14 +60,14 @@ describe('autocomplete.suggest', () => {
       test('on space after aggregate field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=min(b) /', ['BY $0', ',', '|']);
+        await assertSuggestions('from a | stats a=min(b) /', ['BY $0', ',', '| ']);
       });
 
       test('on space after aggregate field with comma', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | stats a=max(b), /', [
-          'var0 =',
+          'var0 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
         ]);
@@ -78,7 +78,7 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | stats by bucket(/', [
           ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date']).map(
-            (field) => `${field},`
+            (field) => `${field}, `
           ),
           ...getFunctionSignaturesByReturnType('eval', ['date', ...ESQL_COMMON_NUMERIC_TYPES], {
             scalar: true,
@@ -172,21 +172,21 @@ describe('autocomplete.suggest', () => {
       test('when typing right paren', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['BY $0', ',', '|']);
+        await assertSuggestions('from a | stats a = min(b)/ | sort b', ['BY $0', ',', '| ']);
       });
 
       test('increments suggested variable name counter', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
-          'var2 =',
+          'var2 = ',
           ...allAggFunctions,
           'var0',
           'var1',
           ...allEvaFunctions,
         ]);
         await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
-          'var2 =',
+          'var2 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
         ]);
@@ -197,8 +197,8 @@ describe('autocomplete.suggest', () => {
       test('on space after "BY" keyword', async () => {
         const { assertSuggestions } = await setup();
         const expected = [
-          'var0 =',
-          ...getFieldNamesByType('any'),
+          'var0 = ',
+          ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ];
@@ -211,26 +211,27 @@ describe('autocomplete.suggest', () => {
       test('on space after grouping field', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=c by d /', [',', '|']);
+        await assertSuggestions('from a | stats a=c by d /', [',', '| ']);
       });
 
       test('after comma "," in grouping fields', async () => {
         const { assertSuggestions } = await setup();
 
+        const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
-          'var0 =',
-          ...getFieldNamesByType('any'),
+          'var0 = ',
+          ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats a=min(b),/', [
-          'var0 =',
+          'var0 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
-          'var0 =',
-          ...getFieldNamesByType('any'),
+          'var0 = ',
+          ...fields,
           ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
           ...allGroupingFunctions,
         ]);
@@ -251,12 +252,12 @@ describe('autocomplete.suggest', () => {
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
-          ...getFieldNamesByType('any'),
+          ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
-          ...getFieldNamesByType('any'),
+          ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
@@ -265,11 +266,11 @@ describe('autocomplete.suggest', () => {
       test('on space after expression right hand side operand', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '|']);
+        await assertSuggestions('from a | stats avg(b) by doubleField % 2 /', [',', '| ']);
 
         await assertSuggestions(
           'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day)/',
-          [',', '|', '+ $0', '- $0']
+          [',', '| ', '+ $0', '- $0']
         );
       });
     });
