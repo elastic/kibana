@@ -41,6 +41,8 @@ import {
   useGetAgentPolicies,
   useLicense,
   useUIExtension,
+  useLink,
+  useFleetStatus,
 } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
@@ -76,7 +78,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
+  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const { docLinks } = useStartServices();
+  const { spaceId } = useFleetStatus();
+
+  const { getAbsolutePath } = useLink();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
     'endpoint-agent-tamper-protection'
@@ -258,48 +264,64 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {/* TODO feature flag condition */}
-      <EuiDescribedFormGroup
-        fullWidth
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
-              defaultMessage="Space"
-            />
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.spaceDescription"
-            defaultMessage="Select a space for this policy"
-          />
-        }
-      >
-        <EuiFormRow
+      {useSpaceAwareness ? (
+        <EuiDescribedFormGroup
           fullWidth
-          key="space"
-          error={
-            touchedFields.description && validation.description ? validation.description : null
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.spaceFieldLabel"
+                defaultMessage="Space"
+              />
+            </h3>
           }
-          isDisabled={disabled}
-          isInvalid={Boolean(touchedFields.description && validation.description)}
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.spaceDescription"
+              defaultMessage="Select a space for this policy or create a new one. {link}"
+              values={{
+                br: <br />,
+                link: (
+                  <EuiLink
+                    target="_blank"
+                    href={getAbsolutePath('/app/management/kibana/spaces/create')}
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentPolicyForm.createSpaceLink"
+                      defaultMessage="Create space"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
         >
-          <SpaceSelector
-            isDisabled={disabled}
-            value={
-              'space_ids' in agentPolicy && agentPolicy.space_ids
-                ? agentPolicy.space_ids
-                : ['default']
+          <EuiFormRow
+            fullWidth
+            key="space"
+            error={
+              touchedFields.description && validation.description ? validation.description : null
             }
-            onChange={(newValue) => {
-              updateAgentPolicy({
-                space_ids: newValue,
-              });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+            isDisabled={disabled}
+            isInvalid={Boolean(touchedFields.description && validation.description)}
+          >
+            <SpaceSelector
+              isDisabled={disabled}
+              value={
+                'space_ids' in agentPolicy && agentPolicy.space_ids
+                  ? agentPolicy.space_ids
+                  : [spaceId || 'default']
+              }
+              onChange={(newValue) => {
+                updateAgentPolicy({
+                  space_ids: newValue,
+                });
+              }}
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      ) : null}
       <EuiDescribedFormGroup
         fullWidth
         title={

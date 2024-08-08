@@ -8,12 +8,9 @@
 import { type EuiComboBoxOptionOption, EuiHealth } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
 
-import { API_VERSIONS } from '../../../../../../../common';
-
-import { sendRequestForRq } from '../../../../../../hooks';
+import { useAgentPoliciesSpaces } from '../../../../../../hooks';
 
 export interface SpaceSelectorProps {
   value: string[];
@@ -22,14 +19,7 @@ export interface SpaceSelectorProps {
 }
 
 export const SpaceSelector: React.FC<SpaceSelectorProps> = ({ value, onChange, isDisabled }) => {
-  // TODO move to useRequest
-  const res = useQuery(['fleet-get-spaces'], async () => {
-    return sendRequestForRq({
-      method: 'get',
-      path: '/internal/fleet/agent_policies_spaces',
-      version: API_VERSIONS.internal.v1,
-    });
-  });
+  const res = useAgentPoliciesSpaces();
 
   const renderOption = React.useCallback(
     (option: any, searchValue: string, contentClassName: string) => (
@@ -51,7 +41,6 @@ export const SpaceSelector: React.FC<SpaceSelectorProps> = ({ value, onChange, i
   }, [res.data]);
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    // loading
     if (res.isInitialLoading) {
       return [];
     }
