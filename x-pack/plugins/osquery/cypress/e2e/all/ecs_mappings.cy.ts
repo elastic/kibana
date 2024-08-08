@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ServerlessRoleName } from '../../support/roles';
 import { initializeDataViews } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
 import { navigateTo } from '../../tasks/navigation';
@@ -23,9 +24,9 @@ describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
     initializeDataViews();
   });
 
-  // beforeEach(() => {
-  //   cy.login(ServerlessRoleName.SOC_MANAGER);
-  // });
+  beforeEach(() => {
+    cy.login(ServerlessRoleName.SOC_MANAGER);
+  });
 
   it('should properly show static values in form and results', () => {
     navigateTo('/app/osquery');

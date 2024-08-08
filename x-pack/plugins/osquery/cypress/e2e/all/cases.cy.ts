@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ServerlessRoleName } from '../../support/roles';
 import { initializeDataViews } from '../../tasks/login';
 import {
   addLiveQueryToCase,
@@ -37,7 +38,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      // cy.login(ServerlessRoleName.SOC_MANAGER);
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery');
     });
 
@@ -69,7 +70,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      // cy.login(ServerlessRoleName.SOC_MANAGER);
+      cy.login(ServerlessRoleName.SOC_MANAGER);
       navigateTo('/app/osquery');
     });
 

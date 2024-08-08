@@ -9,6 +9,7 @@ import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack/security_solutio
 import { disableNewFeaturesTours } from './navigation';
 import { getAdvancedButton } from '../screens/integrations';
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
+import { ServerlessRoleName } from '../support/roles';
 
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
@@ -117,7 +118,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
-  // cy.login(ServerlessRoleName.SOC_MANAGER);
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/rules', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });

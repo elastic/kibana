@@ -534,9 +534,11 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               if (argv.beforeSpec) {
                 const beforeSpecFilePath = require.resolve(`../../${argv.beforeSpec}`) as string;
-                const { beforeSpec }: { beforeSpec: (config) => Promise<void> } = await import(
-                  beforeSpecFilePath
-                );
+                const {
+                  beforeSpec,
+                }: {
+                  beforeSpec: (config: typeof cyCustomEnv) => Promise<void>;
+                } = await import(beforeSpecFilePath);
                 await beforeSpec(cyCustomEnv);
               }
 
