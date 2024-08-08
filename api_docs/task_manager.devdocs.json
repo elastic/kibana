@@ -199,7 +199,7 @@
                   {
                     "parentPluginId": "taskManager",
                     "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
-                    "type": "Object",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "usageCollection",
                     "description": [],
@@ -230,7 +230,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "server",
@@ -238,6 +238,8 @@
                 "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
+              ", { cloud }: ",
+              "TaskManagerPluginStart",
               ") => ",
               {
                 "pluginId": "taskManager",
@@ -256,7 +258,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
+                "label": "{ savedObjects, elasticsearch, executionContext, docLinks }",
                 "description": [],
                 "signature": [
                   {
@@ -266,6 +268,21 @@
                     "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
+                ],
+                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.TaskManagerPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ cloud }",
+                "description": [],
+                "signature": [
+                  "TaskManagerPluginStart"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -1431,6 +1448,23 @@
                 "section": "def-server.TaskPriority",
                 "text": "TaskPriority"
               },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.cost",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cost",
+            "description": [
+              "\nAn optional definition of the cost associated with running the task."
+            ],
+            "signature": [
+              "TaskCost",
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",

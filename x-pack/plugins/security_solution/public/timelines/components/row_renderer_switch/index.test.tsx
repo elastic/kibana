@@ -11,13 +11,12 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../common
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { RowRendererSwitch } from '.';
 import { TimelineId } from '../../../../common/types';
-import { RowRendererId } from '../../../../common/api/timeline';
+import { RowRendererValues } from '../../../../common/api/timeline';
 
 const localState = structuredClone(mockGlobalState);
 
 // exclude all row renderers by default
-localState.timeline.timelineById[TimelineId.test].excludedRowRendererIds =
-  Object.values(RowRendererId);
+localState.timeline.timelineById[TimelineId.test].excludedRowRendererIds = RowRendererValues;
 
 const renderTestComponent = (props?: ComponentProps<typeof TestProviders>) => {
   const store = props?.store ?? createMockStore(localState);
@@ -69,7 +68,7 @@ describe('Row Renderer Switch', () => {
       expect(getByTestId('row-renderer-switch')).toHaveAttribute('aria-checked', 'false');
       expect(
         localStore.getState().timeline.timelineById[TimelineId.test].excludedRowRendererIds
-      ).toMatchObject(Object.values(RowRendererId));
+      ).toMatchObject(RowRendererValues);
     });
   });
 });

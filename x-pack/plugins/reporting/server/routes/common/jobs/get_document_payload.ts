@@ -8,13 +8,14 @@
 import { Stream } from 'stream';
 
 import { ResponseHeaders } from '@kbn/core-http-server';
+import { JOB_STATUS } from '@kbn/reporting-common';
 import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-export-types-csv-common';
-import { JOB_STATUS } from '@kbn/reporting-common';
 import { ExportType } from '@kbn/reporting-server';
 
 import { ReportingCore } from '../../..';
 import { getContentStream } from '../../../lib';
+import { STATUS_CODES } from './constants';
 import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
@@ -53,7 +54,10 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {
   return metaDataHeaders;
 };
 
-export function getDocumentPayloadFactory(reporting: ReportingCore) {
+export function getDocumentPayloadFactory(
+  reporting: ReportingCore,
+  { isInternal }: { isInternal: boolean }
+) {
   const { logger: _logger } = reporting.getPluginSetupDeps();
   const logger = _logger.get('download-report');
   const exportTypesRegistry = reporting.getExportTypesRegistry();
@@ -75,7 +79,7 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     return {
       filename,
       content,
-      statusCode: 200,
+      statusCode: STATUS_CODES.COMPLETED,
       contentType,
       headers: {
         ...headers,
@@ -84,29 +88,29 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     };
   }
 
-  // @TODO: These should be semantic HTTP codes as 500/503's indicate
-  // error then these are really operating properly.
   async function getFailure({ id }: ReportApiJSON): Promise<Payload> {
-    const jobsQuery = jobsQueryFactory(reporting);
+    const jobsQuery = jobsQueryFactory(reporting, { isInternal });
     const error = await jobsQuery.getError(id);
 
-    logger.debug(`Report job ${id} has failed. Sending statusCode: 500`);
+    // For download requested over public API, status code for failed job must be 500 to integrate with Watcher
+    const statusCode = isInternal ? STATUS_CODES.FAILED.INTERNAL : STATUS_CODES.FAILED.PUBLIC;
+    logger.debug(`Report job ${id} has failed. Sending statusCode: ${statusCode}`);
 
     return {
-      statusCode: 500,
-      content: {
-        message: `Reporting generation failed: ${error}`,
-      },
+      statusCode,
+      content: { message: `Reporting generation failed: ${error}` },
       contentType: 'application/json',
       headers: {},
     };
   }
 
   function getIncomplete({ id, status }: ReportApiJSON): Payload {
-    logger.debug(`Report job ${id} is processing. Sending statusCode: 503`);
+    // For download requested over public API, status code for processing/pending job must be 503 to integrate with Watcher
+    const statusCode = isInternal ? STATUS_CODES.PENDING.INTERNAL : STATUS_CODES.PENDING.PUBLIC;
+    logger.debug(`Report job ${id} is processing. Sending statusCode: ${statusCode}`);
 
     return {
-      statusCode: 503,
+      statusCode,
       content: status,
       contentType: 'text/plain',
       headers: { 'retry-after': '30' },
@@ -124,7 +128,6 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
       }
     }
 
-    // send a 503 indicating that the report isn't completed yet
     return getIncomplete(report);
   };
 }
