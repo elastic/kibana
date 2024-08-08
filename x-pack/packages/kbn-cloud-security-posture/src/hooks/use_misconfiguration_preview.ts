@@ -12,21 +12,18 @@ import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
-import { buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
-import { getAggregationCount, getFindingsCountAggQuery } from '@kbn/cloud-security-posture';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import type { FindingsBaseEsQuery } from '../../../common/types';
-// import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import {
   CSP_LATEST_FINDINGS_DATA_VIEW,
   LATEST_FINDINGS_RETENTION_POLICY,
-} from '../../../../common/constants';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
+  MAX_FINDINGS_TO_LOAD,
+  CspBenchmarkRulesStates,
+} from '@kbn/cloud-security-posture-common';
+import { showErrorToast, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
+import type { FindingsBaseEsQuery } from '../../type';
+import { CspFinding } from '../schema/csp_finding';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { CspBenchmarkRulesStates } from '../../../../common/types/latest';
-// import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
+import { useKibana } from './use_kibana';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
@@ -121,7 +118,7 @@ const getSortField = ({ field, direction }: { field: string; direction: string }
   return { [field]: direction };
 };
 
-export const useLatestFindings = (options: UseFindingsOptions) => {
+export const useMisconfigurationPreview = (options: UseFindingsOptions) => {
   const {
     data,
     notifications: { toasts },

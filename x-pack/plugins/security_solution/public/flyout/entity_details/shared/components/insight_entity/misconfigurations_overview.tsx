@@ -10,7 +10,8 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useLatestFindings } from '@kbn/cloud-security-posture-plugin/public';
+// import { useLatestFindings } from '@kbn/cloud-security-posture-plugin/public';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ExpandablePanel } from '../../../../shared/components/expandable_panel';
 
@@ -30,7 +31,7 @@ export const MisconfigurationsOverview = ({ hostName }: { hostName: string }) =>
       must_not: [],
     },
   };
-  const { data } = useLatestFindings({
+  const { data } = useMisconfigurationPreview({
     query: queryHostName,
     sort: [],
     enabled: true,
