@@ -10,7 +10,7 @@ import { ServerlessRoleName } from '../support/roles';
 
 // Login as a SOC_MANAGER to properly initialize Security Solution App
 export const initializeDataViews = () => {
-  cy.login(ServerlessRoleName.SOC_MANAGER, true);
+  cy.login(ServerlessRoleName.SOC_MANAGER);
   cy.visit('/app/security/alerts', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });

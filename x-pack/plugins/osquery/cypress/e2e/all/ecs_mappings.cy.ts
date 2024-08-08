@@ -25,7 +25,7 @@ describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
+    cy.login(ServerlessRoleName.SOC_MANAGER, false);
   });
 
   it('should properly show static values in form and results', () => {

@@ -78,8 +78,8 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', (role, force = false) => {
-  if (isCloudServerless && !force) {
+Cypress.Commands.add('login', (role, useCookiesForMKI = true) => {
+  if (isCloudServerless && !useCookiesForMKI) {
     return;
   }
 

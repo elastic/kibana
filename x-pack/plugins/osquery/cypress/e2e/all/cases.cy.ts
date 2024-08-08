@@ -38,7 +38,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      cy.login(ServerlessRoleName.SOC_MANAGER, false);
       navigateTo('/app/osquery');
     });
 
@@ -70,7 +70,7 @@ describe('Add to Cases', () => {
         caseId = caseInfo.id;
         caseTitle = caseInfo.title;
       });
-      cy.login(ServerlessRoleName.SOC_MANAGER);
+      cy.login(ServerlessRoleName.SOC_MANAGER, false);
       navigateTo('/app/osquery');
     });
 

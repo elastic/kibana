@@ -118,7 +118,7 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
 };
 
 export const loadRuleAlerts = (ruleName: string) => {
-  cy.login(ServerlessRoleName.SOC_MANAGER);
+  cy.login(ServerlessRoleName.SOC_MANAGER, false);
   cy.visit('/app/security/rules', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
