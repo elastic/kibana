@@ -10,7 +10,7 @@ import type { Agent } from '../../types';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { agentsKueryNamespaceFilter, isAgentInNamespace } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { createAgentAction } from './actions';
@@ -79,7 +79,6 @@ export async function sendUpgradeAgentsActions(
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
-  const currentNameSpace = getCurrentNamespace(soClient);
 
   if ('agents' in options) {
     givenAgents = options.agents;
@@ -90,16 +89,13 @@ export async function sendUpgradeAgentsActions(
         outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
           `Cannot find agent ${maybeAgent.id}`
         );
-      } else if (!isAgentInNamespace(maybeAgent, currentNameSpace)) {
-        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
-          `Agent ${maybeAgent.id} is not in the current space`
-        );
       } else {
         givenAgents.push(maybeAgent);
       }
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const currentNameSpace = getCurrentNamespace(soClient);
     const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
 

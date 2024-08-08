@@ -6,6 +6,8 @@
  */
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+
 import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import {
@@ -16,17 +18,43 @@ import {
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
 import {
   getAgentsById,
   getAgentPolicyForAgent,
   updateAgent,
   getAgentsByKuery,
   openPointInTime,
+  getAgentById,
 } from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
 
 import { ReassignActionRunner, reassignBatch } from './reassign_action_runner';
+
+async function verifyNewAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  newAgentPolicyId: string
+) {
+  let newAgentPolicy;
+  try {
+    newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  } catch (err) {
+    if (err instanceof SavedObjectNotFound) {
+      throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
+    }
+  }
+  if (!newAgentPolicy) {
+    throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
+  }
+  if (newAgentPolicy?.is_managed) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign agents to hosted agent policy ${newAgentPolicy.id}`
+    );
+  }
+}
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -34,12 +62,16 @@ export async function reassignAgent(
   agentId: string,
   newAgentPolicyId: string
 ) {
-  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (!newAgentPolicy) {
-    throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
-  }
+  await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
-  await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
+  await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
+
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  if (agentPolicy?.is_managed) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
+    );
+  }
 
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
@@ -56,29 +88,6 @@ export async function reassignAgent(
   });
 }
 
-export async function reassignAgentIsAllowed(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  agentId: string,
-  newAgentPolicyId: string
-) {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
-  if (agentPolicy?.is_managed) {
-    throw new HostedAgentPolicyRestrictionRelatedError(
-      `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
-    );
-  }
-
-  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (newAgentPolicy?.is_managed) {
-    throw new HostedAgentPolicyRestrictionRelatedError(
-      `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
-    );
-  }
-
-  return true;
-}
-
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -88,15 +97,7 @@ export async function reassignAgents(
   },
   newAgentPolicyId: string
 ): Promise<{ actionId: string }> {
-  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (!newAgentPolicy) {
-    throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
-  }
-  if (newAgentPolicy.is_managed) {
-    throw new HostedAgentPolicyRestrictionRelatedError(
-      `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
-    );
-  }
+  await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
@@ -115,8 +116,11 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+    const currentNameSpace = getCurrentNamespace(soClient);
+    const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
+    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
-      kuery: options.kuery,
+      kuery,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,
