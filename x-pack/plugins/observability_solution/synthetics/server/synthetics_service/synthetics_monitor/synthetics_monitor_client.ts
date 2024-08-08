@@ -6,7 +6,6 @@
  */
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RouteContext } from '../../routes/types';
 import { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { normalizeSecrets } from '../utils';
@@ -24,6 +23,7 @@ import {
   ScheduleUnit,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
+  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import {
   ConfigData,
@@ -48,8 +48,7 @@ export class SyntheticsMonitorClient {
 
   async addMonitors(
     monitors: Array<{ monitor: MonitorFields; id: string }>,
-    savedObjectsClient: SavedObjectsClientContract,
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     const privateConfigs: PrivateConfig[] = [];
@@ -91,8 +90,7 @@ export class SyntheticsMonitorClient {
       id: string;
       decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>,
-    routeContext: RouteContext,
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     const privateConfigs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }> =

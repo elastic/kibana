@@ -6,7 +6,6 @@
  */
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { RouteContext } from '../../types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
@@ -17,6 +16,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
+  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
 import {
   formatTelemetryUpdateEvent,
@@ -59,7 +59,7 @@ async function syncUpdatedMonitors({
   routeContext,
   monitorsToUpdate,
 }: {
-  privateLocations: PrivateLocationAttributes[];
+  privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
   routeContext: RouteContext;
   monitorsToUpdate: MonitorConfigUpdate[];
@@ -78,7 +78,6 @@ async function syncUpdatedMonitors({
       previousMonitor,
       decryptedPreviousMonitor,
     })),
-    routeContext,
     privateLocations,
     spaceId
   );
@@ -92,7 +91,7 @@ export const syncEditedMonitorBulk = async ({
 }: {
   monitorsToUpdate: MonitorConfigUpdate[];
   routeContext: RouteContext;
-  privateLocations: PrivateLocationAttributes[];
+  privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
   const { server } = routeContext;

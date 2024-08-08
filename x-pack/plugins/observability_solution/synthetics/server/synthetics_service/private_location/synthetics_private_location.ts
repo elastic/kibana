@@ -24,7 +24,9 @@ import {
   ConfigKey,
   HeartbeatConfig,
   MonitorFields,
+  PrivateLocation,
   SourceType,
+  type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
@@ -72,7 +74,7 @@ export class SyntheticsPrivateLocation {
 
   async generateNewPolicy(
     config: HeartbeatConfig,
-    privateLocation: PrivateLocationAttributes,
+    privateLocation: PrivateLocation,
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>,
@@ -135,7 +137,7 @@ export class SyntheticsPrivateLocation {
 
   async createPackagePolicies(
     configs: PrivateConfig[],
-    privateLocations: PrivateLocationAttributes[],
+    privateLocations: SyntheticsPrivateLocations,
     spaceId: string,
     testRunId?: string,
     runOnce?: boolean
@@ -256,7 +258,7 @@ export class SyntheticsPrivateLocation {
 
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     if (configs.length === 0) {
@@ -343,7 +345,7 @@ export class SyntheticsPrivateLocation {
 
   async getExistingPolicies(
     configs: HeartbeatConfig[],
-    allPrivateLocations: PrivateLocationAttributes[],
+    allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
@@ -446,7 +448,7 @@ export class SyntheticsPrivateLocation {
     return await getAgentPoliciesAsInternalUser(this.server);
   }
 
-  async getPolicyNameSpace(configNameSpace: string, privateLocation: PrivateLocationAttributes) {
+  async getPolicyNameSpace(configNameSpace: string, privateLocation: PrivateLocation) {
     if (configNameSpace && configNameSpace !== DEFAULT_NAMESPACE_STRING) {
       return configNameSpace;
     }
