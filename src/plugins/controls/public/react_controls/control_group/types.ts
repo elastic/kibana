@@ -66,6 +66,7 @@ export type ControlGroupApi = PresentationContainer &
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
+    openAddDataControlFlyout: () => void;
   };
 
 export interface ControlGroupRuntimeState {

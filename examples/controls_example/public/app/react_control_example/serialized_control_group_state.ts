@@ -7,11 +7,8 @@
  */
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { ControlGroupSerializedState } from '../../../../../src/plugins/controls/public/react_controls/control_group/types';
-import { OPTIONS_LIST_CONTROL_TYPE } from '../../../../../src/plugins/controls/public/react_controls/controls/data_controls/options_list_control/constants';
-import { RANGE_SLIDER_CONTROL_TYPE } from '../../../../../src/plugins/controls/public/react_controls/controls/data_controls/range_slider/types';
+import { ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { SEARCH_CONTROL_TYPE } from '../../search_control/types';
-import { TIMESLIDER_CONTROL_TYPE } from '../../../../../src/plugins/controls/public/react_controls/controls/timeslider_control/types';
 
 const SERIALIZED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
@@ -52,7 +49,7 @@ const controlGroupPanels = {
     },
   },
   [rangeSliderControlId]: {
-    type: RANGE_SLIDER_CONTROL_TYPE,
+    type: 'rangeSlider',
     order: 1,
     grow: true,
     width: 'medium',
@@ -66,7 +63,7 @@ const controlGroupPanels = {
     },
   },
   [timesliderControlId]: {
-    type: TIMESLIDER_CONTROL_TYPE,
+    type: 'timesliderControl',
     order: 4,
     grow: true,
     width: 'medium',
@@ -77,7 +74,7 @@ const controlGroupPanels = {
     },
   },
   [optionsListId]: {
-    type: OPTIONS_LIST_CONTROL_TYPE,
+    type: 'optionsListControl',
     order: 2,
     grow: true,
     width: 'medium',
