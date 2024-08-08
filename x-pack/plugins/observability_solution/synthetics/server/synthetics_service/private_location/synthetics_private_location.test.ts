@@ -90,19 +90,13 @@ describe('SyntheticsPrivateLocation', () => {
     it('prioritizes config namespace', async () => {
       const configNamespace = 'nonDefaultSpace';
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const result = await syntheticsPrivateLocation.getPolicyNamespace(
-        configNamespace,
-        mockPrivateLocation
-      );
+      const result = await syntheticsPrivateLocation.getPolicyNamespace(configNamespace);
       expect(result).toEqual(configNamespace);
     });
 
     it('falls back to undefined when config namespace and private location namespace are not defined', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const result = await syntheticsPrivateLocation.getPolicyNamespace(
-        'default',
-        mockPrivateLocation
-      );
+      const result = await syntheticsPrivateLocation.getPolicyNamespace('default');
       expect(result).toEqual(undefined);
     });
   });

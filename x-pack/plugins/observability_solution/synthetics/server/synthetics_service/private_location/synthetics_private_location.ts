@@ -94,9 +94,9 @@ export class SyntheticsPrivateLocation {
           newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
         }
       }
-      const configNameSpace = config[ConfigKey.NAMESPACE];
+      const configNamespace = config[ConfigKey.NAMESPACE];
 
-      newPolicy.namespace = await this.getPolicyNamespace(configNameSpace, privateLocation);
+      newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
@@ -443,9 +443,9 @@ export class SyntheticsPrivateLocation {
     return await getAgentPoliciesAsInternalUser({ server: this.server });
   }
 
-  async getPolicyNamespace(configNameSpace: string, privateLocation: PrivateLocationAttributes) {
-    if (configNameSpace && configNameSpace !== DEFAULT_NAMESPACE_STRING) {
-      return configNameSpace;
+  async getPolicyNamespace(configNamespace: string) {
+    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
+      return configNamespace;
     }
     return undefined;
   }
