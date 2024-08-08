@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless update_list_items', () => {
+  describe('@ess @serverless @serverlessQA update_list_items', () => {
     let supertest: TestAgent;
 
     before(async () => {

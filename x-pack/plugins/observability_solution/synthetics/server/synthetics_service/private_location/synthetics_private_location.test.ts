@@ -20,7 +20,6 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { SyntheticsServerSetup } from '../../types';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import * as agent from '../../routes/settings/private_locations/get_agent_policies';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -83,18 +82,8 @@ describe('SyntheticsPrivateLocation', () => {
       elasticsearch: elasticsearchServiceMock.createStart(),
     },
   } as unknown as SyntheticsServerSetup;
-  const agentPolicyNamespace = 'agentPolicyNamespace';
-
   beforeEach(() => {
     mockBuildPackagePolicy.mockReturnValue(undefined);
-    jest.spyOn(agent, 'getAgentPolicyAsInternalUser').mockResolvedValue({
-      id: 'policyId',
-      name: 'Test Location',
-      agents: 0,
-      status: 'active',
-      description: 'Test agent policy',
-      namespace: agentPolicyNamespace,
-    });
   });
 
   describe('getPolicyNamespace', () => {
@@ -109,7 +98,6 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('falls back to undefined when config namespace and private location namespace are not defined', async () => {
-      const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const result = await syntheticsPrivateLocation.getPolicyNamespace(
         'default',
