@@ -23,6 +23,9 @@ import {
 } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { getDedupedDataSourceVersion, mergeDedupedArrays } from './helpers';
 
+/**
+ * Takes a type of `RuleDataSource | undefined` because the data source can be index patterns, a data view id, or neither in some cases
+ */
 export const dataSourceDiffAlgorithm = (
   versions: ThreeVersionsOf<RuleDataSource | undefined>
 ): ThreeWayDiff<RuleDataSource | undefined> => {
