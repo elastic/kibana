@@ -11,8 +11,6 @@ import { services } from '../services';
 
 interface CreateTestConfigOptions {
   serverlessProject: ServerlessProjectType;
-  esServerArgs?: string[];
-  kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
@@ -70,7 +68,6 @@ export function createServerlessTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
           ...esServerArgsFromController[options.serverlessProject],
-          ...(options.esServerArgs ?? []),
         ],
       },
       kbnTestServer: {
@@ -79,7 +76,6 @@ export function createServerlessTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          ...(options.kbnServerArgs || []),
         ],
       },
       testFiles: options.testFiles,

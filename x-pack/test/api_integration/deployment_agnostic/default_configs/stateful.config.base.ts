@@ -21,8 +21,6 @@ import {
 import { services } from '../services';
 
 interface CreateTestConfigOptions {
-  esServerArgs?: string[];
-  kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
@@ -62,7 +60,6 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
         ...xPackAPITestsConfig.get('esTestCluster'),
         serverArgs: [
           ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
-          ...(options.esServerArgs ?? []),
           'xpack.security.authc.token.enabled=true',
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${idpPath}`,
@@ -81,7 +78,6 @@ export function createStatefulTestConfig(options: CreateTestConfigOptions) {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-          ...(options.kbnServerArgs || []),
           '--xpack.security.authc.selector.enabled=false',
           `--xpack.security.authc.providers=${JSON.stringify({
             saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },
