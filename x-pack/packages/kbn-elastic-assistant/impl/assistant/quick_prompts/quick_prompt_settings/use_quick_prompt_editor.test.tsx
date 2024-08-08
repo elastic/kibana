@@ -100,7 +100,7 @@ describe('useQuickPromptEditor', () => {
     };
 
     act(() => {
-      result.current.onQuickPromptSelectionChange(expectedPrompt);
+      result.current.onQuickPromptSelectionChange(expectedPrompt, DEFAULT_COLOR);
     });
 
     expect(mockOnSelectedQuickPromptChange).toHaveBeenCalledWith(expectedPrompt);
