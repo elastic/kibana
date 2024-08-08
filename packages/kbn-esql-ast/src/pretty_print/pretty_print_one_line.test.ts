@@ -46,15 +46,13 @@ describe('commands', () => {
       expect(text).toBe('FROM a | SORT b');
     });
 
-    /** @todo Enable once order expressions are supported.  */
-    test.skip('order expression with ASC modifier', () => {
+    test('order expression with ASC modifier', () => {
       const { text } = reprint('FROM a | SORT b ASC');
 
       expect(text).toBe('FROM a | SORT b ASC');
     });
 
-    /** @todo Enable once order expressions are supported.  */
-    test.skip('order expression with ASC and NULLS FIRST modifier', () => {
+    test('order expression with ASC and NULLS FIRST modifier', () => {
       const { text } = reprint('FROM a | SORT b ASC NULLS FIRST');
 
       expect(text).toBe('FROM a | SORT b ASC NULLS FIRST');

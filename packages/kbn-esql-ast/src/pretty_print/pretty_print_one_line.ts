@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ESQLOrderExpression } from '../types';
 import { ESQLAstQueryNode, Visitor } from '../visitor';
 
 export const prettyPrintOneLine = (query: ESQLAstQueryNode) => {
@@ -28,6 +29,12 @@ export const prettyPrintOneLine = (query: ESQLAstQueryNode) => {
           return `${operator} ${ctx.visitArgument(0)}`;
         }
         case 'postfix-unary-expression': {
+          if (node.name === 'order-expression') {
+            const orderExpression = node as ESQLOrderExpression;
+            const order = orderExpression.order ? ' ' + orderExpression.order : '';
+            const nulls = orderExpression.nulls ? ' ' + orderExpression.nulls : '';
+            return `${ctx.visitArgument(0)}${order}${nulls}`;
+          }
           return `${ctx.visitArgument(0)} ${operator}`;
         }
         case 'binary-expression': {
