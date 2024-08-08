@@ -12,7 +12,7 @@ import {
   agentPolicyRouteService,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
-import { useKibana } from '../../common/hooks/use_kibana';
+import { useKibana } from '@kbn/cloud-security-posture';
 import { PageUrlParams } from '../../../common/types/rules/v3';
 
 export const useCspIntegrationInfo = ({ packagePolicyId, policyId }: PageUrlParams) => {

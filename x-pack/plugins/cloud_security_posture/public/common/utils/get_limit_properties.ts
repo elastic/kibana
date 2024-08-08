@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { MAX_FINDINGS_TO_LOAD } from '../constants';
+import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 
 export const getLimitProperties = (
   totalItems: number,

@@ -7,8 +7,8 @@
 import React from 'react';
 import Chance from 'chance';
 import { Vulnerabilities } from './vulnerabilities';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '@kbn/cloud-security-posture-common';
 import {
-  CSP_LATEST_FINDINGS_DATA_VIEW,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';

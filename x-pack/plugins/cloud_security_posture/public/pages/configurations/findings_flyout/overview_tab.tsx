@@ -21,6 +21,7 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { useKibana } from '@kbn/cloud-security-posture';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -29,7 +30,6 @@ import {
   LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { useDataView } from '../../../common/api/use_data_view';
-import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';

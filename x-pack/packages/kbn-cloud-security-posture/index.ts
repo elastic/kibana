@@ -5,5 +5,9 @@
  * 2.0.
  */
 
+export * from './type';
+export * from './src/schema/csp_finding';
 export { useMisconfigurationPreview } from './src/hooks/use_misconfiguration_preview';
+export { useGetCspBenchmarkRulesStatesApi } from './src/hooks/use_get_benchmark_rules_state_api';
+export { useKibana } from './src/hooks/use_kibana';
 export { getAggregationCount, getFindingsCountAggQuery } from './src/utils/utils';

@@ -17,6 +17,7 @@ import moment from 'moment';
 import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { schema } from '@kbn/config-schema';
 import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   STATUS_ROUTE_PATH,
@@ -31,7 +32,6 @@ import {
   VULN_MGMT_POLICY_TEMPLATE,
   POSTURE_TYPE_ALL,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
-  LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,

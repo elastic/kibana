@@ -15,13 +15,17 @@ import {
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture';
+import {
+  LATEST_FINDINGS_RETENTION_POLICY,
+  buildMutedRulesFilter,
+} from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
@@ -36,8 +40,6 @@ import {
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {

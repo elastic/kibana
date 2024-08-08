@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Criteria } from '@elastic/eui';
-import type { BoolQuery, Filter, Query, EsQueryConfig } from '@kbn/es-query';
+import type { Filter, Query, EsQueryConfig } from '@kbn/es-query';
 import { CspFinding } from '../../common/schemas/csp_finding';
 
 export type FindingsGroupByKind = 'default' | 'resource';
@@ -27,11 +27,11 @@ export interface FindingsBaseESQueryConfig {
   config: EsQueryConfig;
 }
 
-export interface FindingsBaseEsQuery {
-  query?: {
-    bool: BoolQuery;
-  };
-}
+// export interface FindingsBaseEsQuery {
+//   query?: {
+//     bool: BoolQuery;
+//   };
+// }
 
 export interface CspFindingsQueryData {
   page: CspFinding[];

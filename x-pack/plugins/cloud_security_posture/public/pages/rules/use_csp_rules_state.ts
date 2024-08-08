@@ -6,9 +6,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { useKibana } from '@kbn/cloud-security-posture';
 import { CspBenchmarkRulesStates } from '../../../common/types/latest';
 import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '../../../common/constants';
-import { useKibana } from '../../common/hooks/use_kibana';
 
 export const CSP_RULES_STATES_QUERY_KEY = ['csp_rules_states_v1'];
 

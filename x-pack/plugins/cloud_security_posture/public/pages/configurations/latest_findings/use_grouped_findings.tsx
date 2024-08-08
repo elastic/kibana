@@ -10,9 +10,8 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import { showErrorToast } from '../../../common/utils/show_error_toast';
+import { useKibana } from '@kbn/cloud-security-posture';
+import { CSP_LATEST_FINDINGS_DATA_VIEW, showErrorToast } from '@kbn/cloud-security-posture-common';
 
 // Elasticsearch returns `null` when a sub-aggregation cannot be computed
 type NumberOrNull = number | null;

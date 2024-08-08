@@ -31,6 +31,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useKibana } from '@kbn/cloud-security-posture';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -45,7 +46,6 @@ import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT, FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST } from '../test_subjects';
-import { useKibana } from '../../../common/hooks/use_kibana';
 import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { CspInlineDescriptionList } from '../../../components/csp_inline_description_list';
 
