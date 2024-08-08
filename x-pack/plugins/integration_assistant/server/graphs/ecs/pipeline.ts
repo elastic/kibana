@@ -44,7 +44,7 @@ function generateProcessor(
       date: {
         field: currentPath,
         target_field: ecsField.target,
-        formats: ecsField.date_formats,
+        formats: convertIfIsoDate(ecsField.date_formats),
         if: currentPath.replace(/\./g, '?.'),
       },
     };
@@ -57,6 +57,19 @@ function generateProcessor(
       ignore_missing: true,
     },
   };
+}
+
+// While some custom date formats might use the 'T' representation of time widely used in ISO8601, this function only appends the 'ISO8601' format to the date processor as a fallback.
+// This is because many vendors tend to use multiple versions representing seconds, milli, nano etc, and the format returned by the LLM usually hits most but not all.
+// Since log samples can be inconclusive we add the ISO8601 format as a fallback to ensure the date processor can handle all of the combinations of values.
+function convertIfIsoDate(date: string[]): string[] {
+  if (date.some((d) => d.includes('T'))) {
+    if (date.some((d) => d === 'ISO8601')) {
+      return date;
+    }
+    return [...date, 'ISO8601'];
+  }
+  return date;
 }
 
 function getSampleValue(key: string, samples: Record<string, any>): unknown {
