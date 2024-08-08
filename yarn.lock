@@ -5260,6 +5260,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-plugin@link:x-pack/plugins/inference":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
   version "0.0.0"
   uid ""
@@ -7200,10 +7204,10 @@
     "@launchdarkly/js-sdk-common" "2.5.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.4.7":
-  version "9.4.7"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.7.tgz#d8f923943b1750efa4c0f80baad079103ac5f700"
-  integrity sha512-9blKdS4c/ZGR0XjB8EqifDTdk08WBX/KZ91lZIc3ND3WA9D3qagysynaVkpBo3FiymHyCYyvwq4ZjiSMOIkrPw==
+"@launchdarkly/node-server-sdk@^9.5.0":
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.5.0.tgz#171c235a16836611e3c6d8d95945afa24832fc10"
+  integrity sha512-nNH011mToDKEUz5Nrux3bdatgmHj+SQGUCCD1+R5wgzpdvwZxhi7w1W+9Wl6QrqB+LcpBfKp2+vMQH/4KLsDXg==
   dependencies:
     "@launchdarkly/js-server-sdk-common" "2.4.4"
     https-proxy-agent "^5.0.1"
