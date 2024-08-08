@@ -13,6 +13,37 @@ import { uninstallBuiltInEntityDefinitions } from '../../lib/entities/uninstall_
 import { canDisableEntityDiscovery } from '../../lib/auth/privileges';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   delete:
+ *     description: Disable managed (built-in) entity discovery
+ *     parameters:
+ *       - in: query
+ *         name: deleteData
+ *         description: If true, delete all entity data in the managed indices
+ *         required: false
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *     responses:
+ *       200:
+ *         description: OK - validate disable result in response body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                  type: boolean
+ *                  example: false
+ *                 reason: 
+ *                  type: string
+ *                  example: user_not_authorized
+ *                 message:
+ *                  type: string
+ *                  example: Current Kibana user does not have the required permissions to disable entity discovery
+ */
 export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,

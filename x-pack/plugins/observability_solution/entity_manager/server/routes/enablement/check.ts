@@ -18,6 +18,26 @@ import { findEntityDefinitions } from '../../lib/entities/find_entity_definition
 import { builtInDefinitions } from '../../lib/entities/built_in';
 import { getClientsFromAPIKey } from '../../lib/utils';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   get:
+ *     description: Check if managed (built-in) entity discovery is enabled
+ *     responses:
+ *       200:
+ *         description: OK - validate check result in response body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 enabled:
+ *                  type: boolean
+ *                  example: false
+ *                 reason: 
+ *                  type: string
+ *                  example: api_key_not_found
+ */
 export function checkEntityDiscoveryEnabledRoute<T extends RequestHandlerContext>({
   router,
   server,

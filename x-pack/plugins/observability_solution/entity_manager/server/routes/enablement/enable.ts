@@ -21,6 +21,29 @@ import { installBuiltInEntityDefinitions } from '../../lib/entities/install_enti
 import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import { EntityDiscoveryApiKeyType } from '../../saved_objects';
 
+/**
+ * @openapi
+ * /internal/entities/managed/enablement:
+ *   put:
+ *     description: Enable managed (built-in) entity discovery
+ *     responses:
+ *       200:
+ *         description: OK - validate enable result in response body
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                  type: boolean
+ *                  example: false
+ *                 reason: 
+ *                  type: string
+ *                  example: api_key_service_disabled
+ *                 message:
+ *                  type: string
+ *                  example: API key service is not enabled; try configuring `xpack.security.authc.api_key.enabled` in your elasticsearch config
+ */
 export function enableEntityDiscoveryRoute<T extends RequestHandlerContext>({
   router,
   server,
