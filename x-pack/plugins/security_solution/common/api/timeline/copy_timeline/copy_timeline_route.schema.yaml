@@ -11,7 +11,7 @@ servers:
         default: '5601'
 paths:
   /api/timeline/_copy:
-    post:
+    get:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: CopyTimeline
