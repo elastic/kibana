@@ -1,6 +1,8 @@
-import { generateOAS } from './generate.js';
-import express from 'express';
-import swaggerUi from 'swagger-ui-express';
+require('../../../../src/setup_node_env');
+
+const { generateOAS } = require('./generate.js');
+const express = require('express');
+const swaggerUi = require('swagger-ui-express');
 
 var app = express();
 app.use('/', swaggerUi.serve, swaggerUi.setup(generateOAS()));

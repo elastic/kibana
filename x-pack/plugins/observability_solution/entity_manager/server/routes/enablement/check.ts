@@ -22,7 +22,9 @@ import { getClientsFromAPIKey } from '../../lib/utils';
  * @openapi
  * /internal/entities/managed/enablement:
  *   get:
- *     description: Check if managed (built-in) entity discovery is enabled
+ *     description: Check if managed (built-in) entity discovery is enabled.
+ *     tags:
+ *       - management
  *     responses:
  *       200:
  *         description: OK - validate check result in response body

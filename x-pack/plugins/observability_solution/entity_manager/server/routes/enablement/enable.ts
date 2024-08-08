@@ -25,7 +25,9 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  * @openapi
  * /internal/entities/managed/enablement:
  *   put:
- *     description: Enable managed (built-in) entity discovery
+ *     description: Enable managed (built-in) entity discovery.
+ *     tags:
+ *       - management
  *     responses:
  *       200:
  *         description: OK - validate enable result in response body

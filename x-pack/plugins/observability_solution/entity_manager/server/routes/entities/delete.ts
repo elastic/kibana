@@ -18,6 +18,40 @@ import { readEntityDefinition } from '../../lib/entities/read_entity_definition'
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 import { uninstallEntityDefinition } from '../../lib/entities/uninstall_entity_definition';
 
+/**
+ * @openapi
+ * /internal/entities/definition:
+ *   delete:
+ *     description: Uninstall an entity definition. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition.
+ *     tags:
+ *       - definitions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: The entity definition ID
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionParamsSchema/properties/id'
+ *         required: true
+ *       - in: query
+ *         name: deleteData
+ *         description: If true, delete all entity data in the indices associated with this entity definition
+ *         schema:
+ *           $ref: '#/components/schemas/deleteEntityDefinitionQuerySchema/properties/deleteData'
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 acknowledged:
+ *                   type: boolean
+ *       400:
+ *         description: The entity definition cannot be removed; see the error for more details
+ *       404:
+ *         description: Entity definition with given ID not found
+ */
 export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
   server,

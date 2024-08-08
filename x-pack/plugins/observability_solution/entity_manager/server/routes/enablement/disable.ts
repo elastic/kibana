@@ -17,7 +17,9 @@ import { EntityDiscoveryApiKeyType } from '../../saved_objects';
  * @openapi
  * /internal/entities/managed/enablement:
  *   delete:
- *     description: Disable managed (built-in) entity discovery
+ *     description: Disable managed (built-in) entity discovery. This stops and deletes the transforms, ingest pipelines, definitions saved objects, and index templates for this entity definition, as well as the stored API key for entity discovery management.
+ *     tags:
+ *       - management
  *     parameters:
  *       - in: query
  *         name: deleteData
