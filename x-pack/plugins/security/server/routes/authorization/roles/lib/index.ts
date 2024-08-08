@@ -4,11 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-const path = require('path');
-
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../../..'),
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/assets_data_access'],
-};
+export { roleGrantsSubFeaturePrivileges } from './role_privileges';

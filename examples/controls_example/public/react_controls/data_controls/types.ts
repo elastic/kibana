@@ -10,17 +10,16 @@ import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
   HasEditCapabilities,
   PublishesDataViews,
-  PublishesFilters,
   PublishesPanelTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { ControlGroupApi } from '../control_group/types';
 import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
+import { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -34,9 +33,7 @@ export type DataControlApi = DefaultControlApi &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesField &
-  PublishesFilters & {
-    setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
-  };
+  PublishesAsyncFilters;
 
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
