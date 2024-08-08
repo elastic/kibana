@@ -27,3 +27,28 @@ test('returns correct position on complete modifier matches', () => {
   expect(getSortPos('from a | sort col DESC NULLS LAST, col2 NULLS LAST').pos).toBe('nulls');
   expect(getSortPos('from a | sort col DESC NULLS LAST, col2 NULLS LAST ').pos).toBe('space4');
 });
+
+test('returns ASC/DESC matched text', () => {
+  expect(getSortPos('from a | sort col ASC').pos).toBe('order');
+  expect(getSortPos('from a | sort col asc').order).toBe('ASC');
+
+  expect(getSortPos('from a | sort col as').pos).toBe('order');
+  expect(getSortPos('from a | sort col as').order).toBe('AS');
+
+  expect(getSortPos('from a | sort col DE').pos).toBe('order');
+  expect(getSortPos('from a | sort col DE').order).toBe('DE');
+});
+
+test('returns NULLS FIRST/NULLS LAST matched text', () => {
+  expect(getSortPos('from a | sort col ASC NULLS FIRST').pos).toBe('nulls');
+  expect(getSortPos('from a | sort col ASC NULLS FIRST').nulls).toBe('NULLS FIRST');
+
+  expect(getSortPos('from a | sort col ASC nulls fi').pos).toBe('nulls');
+  expect(getSortPos('from a | sort col ASC nulls fi').nulls).toBe('NULLS FI');
+
+  expect(getSortPos('from a | sort col nul').pos).toBe('nulls');
+  expect(getSortPos('from a | sort col nul').nulls).toBe('NUL');
+
+  expect(getSortPos('from a | sort col1, col2 NULLS LA').pos).toBe('nulls');
+  expect(getSortPos('from a | sort col1, col2 NULLS LA').nulls).toBe('NULLS LA');
+});
