@@ -24,7 +24,7 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
     .map((item) => JSON.parse(item));
 };
 
-interface SendOptions {
+export interface SendOptions {
   supertestWithoutAuth: SupertestWithoutAuthProviderType;
   apiKeyHeader: { Authorization: string };
   referer?: string;
