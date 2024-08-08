@@ -50,3 +50,8 @@ export {
   CreateTimelinesRequestBody,
   CreateTimelinesResponse,
 } from './create_timelines/create_timelines_route.gen';
+
+export {
+  PatchTimelineRequestBody,
+  PatchTimelineResponse,
+} from './patch_timelines/patch_timeline_route.gen';

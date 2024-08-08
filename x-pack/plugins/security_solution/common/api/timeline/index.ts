@@ -12,6 +12,5 @@ export * from './get_draft_timelines/get_draft_timelines_route';
 export * from './get_timeline/get_timeline_route';
 export * from './get_timelines/get_timelines_route';
 export * from './import_timelines/import_timelines_route';
-export * from './patch_timelines/patch_timelines_schema';
 export * from './pinned_events/pinned_events_route';
 export * from './install_prepackaged_timelines/install_prepackaged_timelines';
