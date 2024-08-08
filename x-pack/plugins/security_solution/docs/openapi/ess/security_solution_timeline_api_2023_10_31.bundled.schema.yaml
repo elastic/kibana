@@ -687,18 +687,16 @@ paths:
                               type: string
                             headers:
                               type: object
+                            isImmutable:
+                              enum:
+                                - 'true'
+                                - 'false'
+                              type: string
                           required:
                             - filename
                             - headers
                       required:
                         - hapi
-                isImmutable:
-                  enum:
-                    - 'true'
-                    - 'false'
-                  type: string
-              required:
-                - file
         description: The timelines to import as a readable stream.
         required: true
       responses:
