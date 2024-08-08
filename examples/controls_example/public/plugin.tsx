@@ -9,12 +9,11 @@
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
 import img from './control_group_image.png';
-import { EditControlAction } from '../../../src/plugins/controls/public/react_controls/actions/edit_control_action';
 import { SEARCH_CONTROL_TYPE } from './search_control/types';
 import { ControlsPluginSetup } from '@kbn/controls-plugin/public/types';
 
@@ -71,11 +70,7 @@ export class ControlsExamplePlugin
     });
   }
 
-  public start(core: CoreStart, deps: ControlsExampleStartDeps) {
-    const editControlAction = new EditControlAction();
-    deps.uiActions.registerAction(editControlAction);
-    deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
-  }
+  public start(core: CoreStart, deps: ControlsExampleStartDeps) {}
 
   public stop() {}
 }
