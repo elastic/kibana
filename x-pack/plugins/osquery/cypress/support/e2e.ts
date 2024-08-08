@@ -57,7 +57,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      login(role: ServerlessRoleName): void;
+      login(role: ServerlessRoleName, force: boolean): void;
 
       waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
@@ -78,7 +78,11 @@ Cypress.Commands.add(
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
 
-Cypress.Commands.add('login', (role) => {
+Cypress.Commands.add('login', (role, force = false) => {
+  if (isCloudServerless && !force) {
+    return;
+  }
+
   if (isServerless && !isCloudServerless) {
     // Do not use login.with in MKI env, default to login which will route to proper login method
     return login.with(role, 'changeme');

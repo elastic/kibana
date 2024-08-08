@@ -21,7 +21,7 @@ import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 describe(
   'Alert Event Details',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let ruleId: string;
