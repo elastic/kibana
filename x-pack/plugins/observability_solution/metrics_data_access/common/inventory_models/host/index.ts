@@ -42,6 +42,7 @@ export const host: InventoryModel<typeof metrics> = {
   metrics,
   requiredMetrics: [
     'hostSystemOverview',
+    'hostCpuUsageTotal',
     'hostCpuUsage',
     'hostLoad',
     'hostMemoryUsage',
@@ -54,5 +55,5 @@ export const host: InventoryModel<typeof metrics> = {
     ...awsRequiredMetrics,
     ...nginxRequireMetrics,
   ],
-  tooltipMetrics: ['cpu', 'memory', 'txV2', 'rxV2'],
+  tooltipMetrics: ['cpuTotal', 'cpu', 'memory', 'txV2', 'rxV2'],
 };
