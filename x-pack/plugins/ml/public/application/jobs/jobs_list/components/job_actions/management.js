@@ -24,6 +24,7 @@ import { isManagedJob } from '../../../jobs_utils';
 export function actionsMenuContent(
   toastNotifications,
   application,
+  mlApiServices,
   mlJobService,
   showEditJobFlyout,
   showDatafeedChartFlyout,
@@ -152,7 +153,7 @@ export function actionsMenuContent(
         return isJobBlocked(item) === false && canCreateJob;
       },
       onClick: (item) => {
-        cloneJob(application, mlJobService, item.id);
+        cloneJob(toastNotifications, application, mlApiServices, mlJobService, item.id);
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloneJob',
