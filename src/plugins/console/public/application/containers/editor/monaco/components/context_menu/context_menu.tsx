@@ -100,7 +100,7 @@ export const ContextMenu = ({
     if (aggregatedData === '' && hasErrors) {
       const error = new Error(`Failed to convert request to ${withLanguage}`);
       notifications.toasts.addError(error, {
-        title: i18n.translate('console.consoleMenu.copyAsCurlFailedMessage', {
+        title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
           defaultMessage:
             '{requestsCount, plural, one {Request} other {Requests}} could not be copied to clipboard',
           values: { requestsCount: requests.length },
@@ -113,7 +113,7 @@ export const ContextMenu = ({
       // some requests could not be converted and copy the rest to clipboard
       if (aggregatedData !== '' && hasErrors) {
         notifications.toasts.addWarning({
-          title: i18n.translate('console.consoleMenu.copyAsCurlSuccessWithWarning', {
+          title: i18n.translate('console.consoleMenu.copyAsSuccessWithWarningMessage', {
             defaultMessage: 'Some requests could not be copied to clipboard because they are invalid',
           }),
         });
@@ -222,7 +222,7 @@ export const ContextMenu = ({
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 tagName="span"
-                id="console.requestOptions.copyAsUrlButtonLabel"
+                id="console.monaco.requestOptions.copyAsUrlButtonLabel"
                 defaultMessage="Copy as"
               />
             </EuiFlexItem>
@@ -251,7 +251,7 @@ export const ContextMenu = ({
       icon="kqlFunction"
     >
       <FormattedMessage
-        id="console.requestOptions.autoIndentButtonLabel"
+        id="console.monaco.requestOptions.autoIndentButtonLabel"
         defaultMessage="Auto indent"
       />
     </EuiContextMenuItem>,
@@ -262,7 +262,7 @@ export const ContextMenu = ({
       icon="documentation"
     >
       <FormattedMessage
-        id="console.requestOptions.openDocumentationButtonLabel"
+        id="console.monaco.requestOptions.openDocumentationButtonLabel"
         defaultMessage="Open API reference"
       />
     </EuiContextMenuItem>,
