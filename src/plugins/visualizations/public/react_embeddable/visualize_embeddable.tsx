@@ -153,6 +153,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
               // serialize the state with just the savedObjectId so that the current revision of the vis is always used
               apiIsOfType(parentApi, VISUALIZE_APP_NAME) ? false : linkedToLibrary$.getValue(),
             ...(savedObjectProperties ? { savedObjectProperties } : {}),
+            ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
           });
         },
         getVis: () => vis$.getValue(),

@@ -156,12 +156,14 @@ export const serializeState: (props: {
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
+  enhancements?: VisualizeRuntimeState['enhancements'];
 }) => Required<SerializedPanelState<VisualizeSerializedState>> = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
   id,
   savedObjectProperties,
   linkedToLibrary,
+  enhancements,
 }) => {
   const titlesWithDefaults = {
     title: '',
@@ -178,6 +180,7 @@ export const serializeState: (props: {
         savedObjectId: id,
       } as VisualizeSavedObjectInputState,
       references,
+      ...(enhancements ? { enhancements } : {}),
     };
   }
 
@@ -189,6 +192,7 @@ export const serializeState: (props: {
     rawState: {
       ...titlesWithDefaults,
       ...savedObjectProperties,
+      ...(enhancements ? { enhancements } : {}),
       savedVis: {
         ...serializedVis,
         id,
