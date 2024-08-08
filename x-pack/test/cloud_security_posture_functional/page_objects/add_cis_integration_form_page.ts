@@ -368,11 +368,19 @@ export function AddCisIntegrationFormPageProvider({
     await nameField[0].type(uuidv4());
   };
 
+  const inputIntegrationName = async (text: string) => {
+    const page = await testSubjects.find('createPackagePolicy_page');
+    const nameField = await page.findAllByCssSelector('input[id="name"]');
+    await nameField[0].clearValueWithKeyboard();
+    await nameField[0].type(text);
+  };
+
   const getSecretComponentReplaceButton = async (secretButtonSelector: string) => {
     const secretComponentReplaceButton = await testSubjects.find(secretButtonSelector);
     return secretComponentReplaceButton;
   };
 
+<<<<<<< HEAD
   const getElementText = async (selector: string) => {
     const element = await testSubjects.find(selector);
     const text = await element.getVisibleText();
@@ -464,6 +472,22 @@ export function AddCisIntegrationFormPageProvider({
 
     await navigateToEditIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
+=======
+  const getFirstCspmIntegrationPageIntegration = async () => {
+    const integration = await testSubjects.find('integrationNameLink');
+    return await integration.getVisibleText();
+  };
+
+  const getFirstCspmIntegrationPageAgent = async () => {
+    const agent = await testSubjects.find('agentPolicyNameLink');
+    // this is assuming that the agent was just created therefor should be the first element
+    return await agent.getVisibleText();
+  };
+
+  const getAgentBasedPolicyValue = async () => {
+    const agentName = await testSubjects.find('createAgentPolicyNameField');
+    return await agentName.getAttribute('value');
+>>>>>>> upstream/main
   };
 
   return {
@@ -504,10 +528,17 @@ export function AddCisIntegrationFormPageProvider({
     getReplaceSecretButton,
     getSecretComponentReplaceButton,
     inputUniqueIntegrationName,
+<<<<<<< HEAD
     getFieldAttributeValue,
     getElementText,
     createAgentlessIntegration,
     editAgentlessIntegration,
     testSubjectIds,
+=======
+    inputIntegrationName,
+    getFirstCspmIntegrationPageIntegration,
+    getFirstCspmIntegrationPageAgent,
+    getAgentBasedPolicyValue,
+>>>>>>> upstream/main
   };
 }
