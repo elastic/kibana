@@ -14,7 +14,7 @@ run(
   async ({ log }) => {
     const foundProdNativeModules = await checkProdNativeModules(log);
     if (foundProdNativeModules) {
-      throw createFailError('see above errors');
+      throw createFailError('Failed: check all previous errors before continuing');
     }
   },
   {

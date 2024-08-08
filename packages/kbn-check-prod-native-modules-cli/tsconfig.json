@@ -18,5 +18,6 @@
     "@kbn/tooling-log",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
+    "@kbn/yarn-lock-validator",
   ]
 }

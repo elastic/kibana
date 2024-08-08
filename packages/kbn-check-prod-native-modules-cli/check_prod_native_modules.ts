@@ -7,67 +7,10 @@
  */
 
 import * as path from 'path';
-import { promises as fs } from 'fs';
+import { promises as fs, existsSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-
-// Collect the direct devDependencies directly from the package.json file
-const getDevDependencies = async (): Promise<Set<string>> => {
-  const packageJsonPath = path.join(REPO_ROOT, 'package.json');
-  const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
-  return new Set(Object.keys(packageJson.devDependencies || {}));
-};
-
-// Reads and parses the yarn.lock file and from there builds a dependency graph
-const buildDependencyGraph = async (lockFilePath: string): Promise<{ [key: string]: string[] }> => {
-  const lockFile = await fs.readFile(lockFilePath, 'utf-8');
-  const dependencies: { [key: string]: string[] } = {};
-  const regex = /^"?(@?[^@\s]+@[^:\s]+)[^:\n]*:\n((?:\s+[^\n]+)+)/gm;
-  let match;
-  while ((match = regex.exec(lockFile)) !== null) {
-    const [, packageName, packageDependencies] = match;
-    dependencies[packageName] = packageDependencies.split('\n').reduce((acc: string[], line) => {
-      const depMatch = line.trim().match(/^dependencies\s+(@?[^@\s]+@[^:\s]+)$/);
-      if (depMatch) {
-        acc.push(depMatch[1]);
-      }
-      return acc;
-    }, []);
-  }
-  return dependencies;
-};
-
-// It traverses the provided dependency graph and classify dependencies as being installed directly or indirectly as a result
-// of a development dependency
-const traverseDependencies = (
-  graph: { [key: string]: string[] },
-  devDependencies: Set<string>
-): Set<string> => {
-  const visited: Set<string> = new Set();
-  const isDevDependency: Set<string> = new Set();
-
-  const visit = (pkg: string) => {
-    if (visited.has(pkg)) return;
-    visited.add(pkg);
-
-    const baseName = pkg.replace(/@[^@]+$/, '');
-    if (devDependencies.has(baseName)) {
-      isDevDependency.add(pkg);
-    }
-
-    const deps = graph[pkg] || [];
-    for (const dep of deps) {
-      visit(dep);
-      if (isDevDependency.has(dep)) {
-        isDevDependency.add(pkg);
-      }
-    }
-  };
-
-  Object.keys(graph).forEach(visit);
-
-  return isDevDependency;
-};
+import { findProductionDependencies, readYarnLock } from '@kbn/yarn-lock-validator';
 
 // Checks if a given path contains a native module or not recursively
 const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<boolean> => {
@@ -75,6 +18,11 @@ const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<bool
 
   while (stack.length > 0) {
     const currentPath: string = stack.pop() as string;
+
+    if (path.basename(currentPath) === 'node_modules') {
+      continue;
+    }
+
     try {
       const files = await fs.readdir(currentPath);
       for (const file of files) {
@@ -93,30 +41,79 @@ const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<bool
   return false;
 };
 
-// Checks if there are native modules in the production dependencies
-const checkProdNativeModules = async (log: ToolingLog) => {
-  log.info('Checking for native modules on production dependencies...');
-  const nodeModulesDir = path.join(REPO_ROOT, 'node_modules');
-  const yarnLockPath = path.join(REPO_ROOT, 'yarn.lock');
-  const prodNativeModulesFound = [];
+async function checkDependencies(
+  rootNodeModulesDir: string,
+  productionDependencies: Map<string, { name: string; version: string }>,
+  prodNativeModulesFound: Array<{ name: string; version: string; path: string }>,
+  log: ToolingLog
+) {
+  const stack = [rootNodeModulesDir];
 
-  try {
-    // It gets development dependencies and builds the dep graph
-    const devDependencies = await getDevDependencies();
-    const dependencyGraph = await buildDependencyGraph(yarnLockPath);
+  while (stack.length > 0) {
+    const currentDir: string = stack.pop() as string;
+    const files = await fs.readdir(currentDir, { withFileTypes: true });
 
-    // It traverses the whole dep graph and classify development dependencies
-    const isDevDependency = traverseDependencies(dependencyGraph, devDependencies);
+    for (const file of files) {
+      if (file.isDirectory()) {
+        const filePath = path.join(currentDir, file.name);
 
-    // Loops over all dependencies and checks for production native modules
-    for (const dep of Object.keys(dependencyGraph)) {
-      if (!isDevDependency.has(dep)) {
-        const depPath = path.join(nodeModulesDir, dep.replace(/@[^@]+$/, ''));
-        if (await isNativeModule(depPath, log)) {
-          prodNativeModulesFound.push(dep);
+        if (file.name.startsWith('@')) {
+          // Handle scoped packages
+          stack.push(filePath);
+        } else {
+          const packageJsonPath = path.join(filePath, 'package.json');
+
+          if (existsSync(packageJsonPath)) {
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            const packageJson = require(packageJsonPath);
+            const key = `${packageJson.name}@${packageJson.version}`;
+
+            if (productionDependencies.has(key)) {
+              if (await isNativeModule(filePath, log)) {
+                prodNativeModulesFound.push({
+                  name: packageJson.name,
+                  version: packageJson.version,
+                  path: filePath,
+                });
+              }
+            }
+          }
+
+          // Add nested node_modules to the stack
+          const nestedNodeModulesPath = path.join(filePath, 'node_modules');
+          if (existsSync(nestedNodeModulesPath)) {
+            stack.push(nestedNodeModulesPath);
+          }
         }
       }
     }
+  }
+}
+
+// Checks if there are native modules in the production dependencies
+const checkProdNativeModules = async (log: ToolingLog) => {
+  log.info('Checking for native modules on production dependencies...');
+  const rootNodeModulesDir = path.join(REPO_ROOT, 'node_modules');
+  const prodNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
+
+  try {
+    // Gets all production dependencies based on package.json and then searches across transient dependencies using lock file
+    const productionDependencies = findProductionDependencies(log, await readYarnLock());
+
+    // Fail if no root node_modules folder
+    if (!existsSync(rootNodeModulesDir)) {
+      throw new Error(
+        'No root node_modules folder was found in the project. Impossible to continue'
+      );
+    }
+
+    // Goes into the node_modules folder and for each node_module which is a production dependency (or a result of one) checks recursively if there are native modules
+    await checkDependencies(
+      rootNodeModulesDir,
+      productionDependencies,
+      prodNativeModulesFound,
+      log
+    );
 
     // In that case no prod native modules were found
     if (!prodNativeModulesFound.length) {
@@ -126,9 +123,10 @@ const checkProdNativeModules = async (log: ToolingLog) => {
 
     // Logs every detected native module at once
     prodNativeModulesFound.forEach((dep) => {
-      log.error(`Production native module detected: ${dep}`);
+      log.error(`Production native module detected: ${dep.path}`);
     });
-    throw new Error('Production native modules were detected');
+
+    throw new Error('Production native modules were detected and logged above');
   } catch (err) {
     log.error(err.message);
     return true;
