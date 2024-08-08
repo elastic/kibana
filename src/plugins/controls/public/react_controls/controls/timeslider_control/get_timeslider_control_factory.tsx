@@ -19,12 +19,7 @@ import {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { ControlFactory } from '../types';
-import {
-  TimesliderControlState,
-  TimesliderControlApi,
-  Services,
-  Timeslice,
-} from './types';
+import { TimesliderControlState, TimesliderControlApi, Services, Timeslice } from './types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
