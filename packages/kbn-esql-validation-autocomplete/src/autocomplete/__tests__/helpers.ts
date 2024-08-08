@@ -15,7 +15,17 @@ import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext } from '../types';
+import type { EditorContext, SuggestionRawDefinition } from '../types';
+import { TIME_SYSTEM_PARAMS } from '../factories';
+import { getFunctionSignatures } from '../../definitions/helpers';
+import { ESQLRealField } from '../../validation/types';
+import {
+  FieldType,
+  fieldTypes,
+  FunctionParameterType,
+  FunctionReturnType,
+  SupportedDataType,
+} from '../../definitions/types';
 
 export interface Integration {
   name: string;
@@ -27,25 +37,22 @@ export interface Integration {
   }>;
 }
 
+export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+
+export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
+  text: '',
+  label: 'Choose from the time picker',
+};
+
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
-  ...[
-    'string',
-    'number',
-    'date',
-    'boolean',
-    'ip',
-    'geo_point',
-    'geo_shape',
-    'cartesian_point',
-    'cartesian_shape',
-  ].map((type) => ({
+export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+  ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
-  { name: 'any#Char$Field', type: 'number', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'number' },
+  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
+  { name: 'kubernetes.something.something', type: 'double' },
 ];
 
 export const indexes = (
@@ -115,11 +122,11 @@ export const policies = [
  */
 export function getFunctionSignaturesByReturnType(
   command: string,
-  _expectedReturnType: string | string[],
+  _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
-    evalMath,
+    scalar,
     builtin,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -127,14 +134,14 @@ export function getFunctionSignaturesByReturnType(
   }: {
     agg?: boolean;
     grouping?: boolean;
-    evalMath?: boolean;
+    scalar?: boolean;
     builtin?: boolean;
     skipAssign?: boolean;
   } = {},
-  paramsTypes?: string[],
+  paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string
-) {
+): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
     : [_expectedReturnType];
@@ -149,7 +156,7 @@ export function getFunctionSignaturesByReturnType(
     list.push(...groupingFunctionDefinitions);
   }
   // eval functions (eval is a special keyword in JS)
-  if (evalMath) {
+  if (scalar) {
     list.push(...evalFunctionDefinitions);
   }
   if (builtin) {
@@ -168,7 +175,7 @@ export function getFunctionSignaturesByReturnType(
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType)
+          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
       if (!filteredByReturnType.length) {
         return false;
@@ -195,24 +202,38 @@ export function getFunctionSignaturesByReturnType(
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-    .map(({ type, name, signatures }) => {
+    .map<PartialSuggestionWithText>((definition) => {
+      const { type, name, signatures } = definition;
+
       if (type === 'builtin') {
-        return signatures.some(({ params }) => params.length > 1)
-          ? `${name.toUpperCase()} $0`
-          : name.toUpperCase();
+        return {
+          text: signatures.some(({ params }) => params.length > 1)
+            ? `${name.toUpperCase()} $0`
+            : name.toUpperCase(),
+          label: name.toUpperCase(),
+        };
       }
-      return `${name.toUpperCase()}($0)`;
+      const printedSignatures = getFunctionSignatures(definition, {
+        withTypes: true,
+        capitalize: true,
+      });
+      return {
+        text: `${name.toUpperCase()}($0)`,
+        label: printedSignatures[0].declaration,
+      };
     });
 }
 
-export function getFieldNamesByType(_requestedType: string | string[]) {
+export function getFieldNamesByType(
+  _requestedType: Readonly<FieldType | 'any' | Array<FieldType | 'any'>>
+) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
     .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: string | string[]) {
+export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
@@ -221,8 +242,13 @@ export function getLiteralsByType(_type: string | string[]) {
   return [];
 }
 
+export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
+  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
+  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
+}
+
 export function createCustomCallbackMocks(
-  customFields?: Array<{ name: string; type: string }>,
+  customFields?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -241,15 +267,12 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createSuggestContext(text: string, triggerCharacter?: string) {
+export function createCompletionContext(triggerCharacter?: string) {
   if (triggerCharacter) {
     return { triggerCharacter, triggerKind: 1 }; // any number is fine here
   }
-  const foundTriggerCharIndexes = triggerCharacters.map((char) => text.lastIndexOf(char));
-  const maxIndex = Math.max(...foundTriggerCharIndexes);
   return {
-    triggerCharacter: text[maxIndex],
-    triggerKind: 1,
+    triggerKind: 0,
   };
 }
 
@@ -290,11 +313,28 @@ export const setup = async (caret = '/') => {
     );
   };
 
-  const assertSuggestions = async (query: string, expected: string[], opts?: SuggestOptions) => {
+  const assertSuggestions = async (
+    query: string,
+    expected: Array<string | PartialSuggestionWithText>,
+    opts?: SuggestOptions
+  ) => {
     const result = await suggest(query, opts);
     const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    expect(resultTexts).toEqual([...expected].sort());
+    const expectedTexts = expected
+      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+      .sort();
+
+    expect(resultTexts).toEqual(expectedTexts);
+
+    const expectedNonStringSuggestions = expected.filter(
+      (suggestion) => typeof suggestion !== 'string'
+    ) as PartialSuggestionWithText[];
+
+    for (const expectedSuggestion of expectedNonStringSuggestions) {
+      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+    }
   };
 
   return {

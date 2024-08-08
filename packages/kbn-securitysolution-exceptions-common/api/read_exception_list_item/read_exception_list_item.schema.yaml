@@ -1,16 +1,14 @@
 openapi: 3.0.0
 info:
-  title: Get exception list item API endpoint
+  title: Read exception list item API endpoint
   version: '2023-10-31'
 paths:
   /api/exception_lists/items:
     get:
       x-labels: [serverless, ess]
-      operationId: GetExceptionListItem
+      operationId: ReadExceptionListItem
       x-codegen-enabled: true
       summary: Gets an exception list item
-      tags:
-        - Exceptions API
       parameters:
         - name: id
           in: query

@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TimelineId } from '../../../../common/types';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 
 const NEW_TIMELINE = i18n.translate('xpack.securitySolution.timelines.newTimelineButtonLabel', {
   defaultMessage: 'Create new Timeline',
@@ -41,7 +41,7 @@ export const NewTimelineButton = React.memo<NewTimelineButtonProps>(({ type }) =
   });
 
   const dataTestSubj = `timelines-page-create-new-${
-    type === TimelineType.default ? 'timeline' : 'timeline-template'
+    type === TimelineTypeEnum.default ? 'timeline' : 'timeline-template'
   }`;
 
   const handleCreateNewTimeline = useCallback(async () => {
@@ -55,7 +55,7 @@ export const NewTimelineButton = React.memo<NewTimelineButtonProps>(({ type }) =
       onClick={handleCreateNewTimeline}
       fill
     >
-      {type === TimelineType.default ? NEW_TIMELINE : NEW_TEMPLATE_TIMELINE}
+      {type === TimelineTypeEnum.default ? NEW_TIMELINE : NEW_TEMPLATE_TIMELINE}
     </EuiButton>
   );
 });

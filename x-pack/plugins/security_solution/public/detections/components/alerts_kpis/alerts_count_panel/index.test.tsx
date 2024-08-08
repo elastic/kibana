@@ -12,15 +12,11 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
 
 import type { Status } from '../../../../../common/api/detection_engine';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
-import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
-import { TABLE } from '../../../pages/detection_engine/chart_panels/chart_select/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ChartContextMenu } from '../chart_panels/chart_context_menu';
+import { COUNTS } from '../chart_panels/chart_select/translations';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -40,7 +36,6 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/page/use_refetch_by_session');
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('../../../../common/components/page/use_refetch_by_session');
@@ -48,38 +43,26 @@ jest.mock('../common/hooks', () => ({
   useInspectButton: jest.fn(),
   useStackByFields: jest.fn().mockReturnValue(() => []),
 }));
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const getMockUseIsExperimentalFeatureEnabled =
-  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
-    mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
-jest.mock('../../../../common/hooks/use_experimental_features');
 
+const mockSetIsExpanded = jest.fn();
 const defaultProps = {
-  inspectTitle: TABLE,
+  inspectTitle: COUNTS,
   signalIndexName: 'signalIndexName',
   stackByField0: DEFAULT_STACK_BY_FIELD,
   stackByField1: DEFAULT_STACK_BY_FIELD1,
   setStackByField0: jest.fn(),
   setStackByField1: jest.fn(),
   isExpanded: true,
-  setIsExpanded: jest.fn(),
+  setIsExpanded: mockSetIsExpanded,
   showBuildingBlockAlerts: false,
   showOnlyThreatIndicatorAlerts: false,
   status: 'open' as Status,
   extraActions: [{ id: 'resetGroupByFields' }] as Action[],
 };
-const mockSetToggle = jest.fn();
-const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('AlertsCountPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockImplementation(
-      getMockUseIsExperimentalFeatureEnabled({
-        alertsPageChartsEnabled: false,
-      })
-    );
   });
 
   it('renders correctly', async () => {
@@ -155,37 +138,11 @@ describe('AlertsCountPanel', () => {
           </TestProviders>
         );
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetToggle).toBeCalledWith(false);
-      });
-    });
-    it('alertsPageChartsEnabled is false and toggleStatus=true, render', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
-      });
-    });
-    it('alertsPageChartsEnabled is false and toggleStatus=false, hide', async () => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsCountPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(false);
+        expect(mockSetIsExpanded).toBeCalledWith(false);
       });
     });
 
-    it('alertsPageChartsEnabled is true and isExpanded=true, render', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        getMockUseIsExperimentalFeatureEnabled({
-          alertsPageChartsEnabled: true,
-        })
-      );
+    it('when isExpanded is true, render counts panel', async () => {
       await act(async () => {
         const wrapper = mount(
           <TestProviders>
@@ -195,12 +152,7 @@ describe('AlertsCountPanel', () => {
         expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
       });
     });
-    it('alertsPageChartsEnabled is true and isExpanded=false, hide', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        getMockUseIsExperimentalFeatureEnabled({
-          alertsPageChartsEnabled: true,
-        })
-      );
+    it('when isExpanded is false, hide counts panel', async () => {
       await act(async () => {
         const wrapper = mount(
           <TestProviders>

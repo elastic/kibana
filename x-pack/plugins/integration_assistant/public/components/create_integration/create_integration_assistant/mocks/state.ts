@@ -418,7 +418,7 @@ export const mockState: State = {
     dataStreamTitle: 'Mocked Data Stream Title',
     dataStreamName: 'mocked_datastream_name',
     dataStreamDescription: 'Mocked Data Stream Description',
-    inputType: 'filestream',
+    inputTypes: ['filestream'],
     logsSampleParsed: rawSamples,
   },
   isGenerating: false,

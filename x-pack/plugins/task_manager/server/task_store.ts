@@ -8,6 +8,8 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import murmurhash from 'murmurhash';
+import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -39,6 +41,7 @@ import {
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
+import { MAX_PARTITIONS } from './lib/task_partitioner';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -81,6 +84,11 @@ export interface FetchResult {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
+export interface BulkUpdateOpts {
+  validate: boolean;
+  excludeLargeFields?: boolean;
+}
+
 export type BulkUpdateResult = Result<
   ConcreteTaskInstance,
   { type: string; id: string; error: SavedObjectError }
@@ -105,6 +113,7 @@ export class TaskStore {
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
   public readonly taskValidator: TaskValidator;
+  private readonly logger: Logger;
 
   private esClient: ElasticsearchClient;
   private esClientWithoutRetries: ElasticsearchClient;
@@ -131,6 +140,7 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.logger = opts.logger;
     this.taskValidator = new TaskValidator({
       logger: opts.logger,
       definitions: opts.definitions,
@@ -165,12 +175,13 @@ export class TaskStore {
 
     let savedObject;
     try {
+      const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
-        taskInstanceToAttributes(validatedTaskInstance),
-        { id: taskInstance.id, refresh: false }
+        taskInstanceToAttributes(validatedTaskInstance, id),
+        { id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
         this.adHocTaskCounter.increment();
@@ -191,13 +202,14 @@ export class TaskStore {
    */
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
+      const id = taskInstance.id || v4();
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(validatedTaskInstance),
-        id: taskInstance.id,
+        attributes: taskInstanceToAttributes(validatedTaskInstance, id),
+        id,
       };
     });
 
@@ -227,15 +239,13 @@ export class TaskStore {
    * Fetches a list of scheduled tasks with default sorting.
    *
    * @param opts - The query options used to filter tasks
+   * @param limitResponse - Whether to exclude the task state and params from the source for a smaller respose payload
    */
-  public async fetch({
-    sort = [{ 'task.runAt': 'asc' }],
-    ...opts
-  }: SearchOpts = {}): Promise<FetchResult> {
-    return this.search({
-      ...opts,
-      sort,
-    });
+  public async fetch(
+    { sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {},
+    limitResponse: boolean = false
+  ): Promise<FetchResult> {
+    return this.search({ ...opts, sort }, limitResponse);
   }
 
   /**
@@ -252,7 +262,7 @@ export class TaskStore {
     const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
       validate: options.validate,
     });
-    const attributes = taskInstanceToAttributes(taskInstance);
+    const attributes = taskInstanceToAttributes(taskInstance, doc.id);
 
     let updatedSavedObject;
     try {
@@ -291,13 +301,23 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
-    options: { validate: boolean }
+    { validate, excludeLargeFields = false }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
+    // if we're excluding large fields (state and params), we cannot apply validation so log a warning
+    if (validate && excludeLargeFields) {
+      validate = false;
+      this.logger.warn(`Skipping validation for bulk update because excludeLargeFields=true.`);
+    }
+
     const attributesByDocId = docs.reduce((attrsById, doc) => {
       const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
-        validate: options.validate,
+        validate,
       });
-      attrsById.set(doc.id, taskInstanceToAttributes(taskInstance));
+      const taskAttributes = taskInstanceToAttributes(taskInstance, doc.id);
+      attrsById.set(
+        doc.id,
+        excludeLargeFields ? omit(taskAttributes, 'state', 'params') : taskAttributes
+      );
       return attrsById;
     }, new Map());
 
@@ -337,7 +357,7 @@ export class TaskStore {
         ),
       });
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
-        validate: options.validate,
+        validate,
       });
       return asOk(result);
     });
@@ -484,18 +504,20 @@ export class TaskStore {
     }
   }
 
-  private async search(opts: SearchOpts = {}): Promise<FetchResult> {
+  private async search(
+    opts: SearchOpts = {},
+    limitResponse: boolean = false
+  ): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
     try {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: {
-          ...opts,
-          query,
-        },
+        body: { ...opts, query },
+        ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
       });
+
       const {
         hits: { hits: tasks },
       } = result;
@@ -622,7 +644,10 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
-function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
+export function taskInstanceToAttributes(
+  doc: TaskInstance,
+  id: string
+): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
@@ -633,6 +658,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
+    partition: doc.partition || murmurhash.v3(id) % MAX_PARTITIONS,
   } as SerializedConcreteTaskInstance;
 }
 

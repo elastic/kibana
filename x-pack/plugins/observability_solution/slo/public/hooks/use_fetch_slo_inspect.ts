@@ -30,7 +30,7 @@ export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) 
       try {
         const body = JSON.stringify(slo);
         const response = await http.post<SLOInspectResponse>(
-          '/internal/api/observability/slos/_inspect',
+          '/internal/observability/slos/_inspect',
           {
             body,
             signal,

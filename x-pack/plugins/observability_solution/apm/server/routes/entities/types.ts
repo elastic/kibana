@@ -7,16 +7,16 @@
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { SignalTypes, EntityMetrics } from '../../../common/entities/types';
 
+export enum EntityType {
+  SERVICE = 'service',
+}
+
 export interface Entity {
   id: string;
   latestTimestamp: string;
-  identityFields: {
-    service: {
-      name: string;
-      environment?: string | null;
-    };
-  };
+  identityFields: string[];
   metrics: EntityMetrics;
+  hasLogMetrics: boolean;
 }
 
 export interface TraceMetrics {
@@ -27,6 +27,7 @@ export interface TraceMetrics {
 
 export interface ServiceEntities {
   serviceName: string;
+  environment?: string;
   agentName: AgentName;
   signalTypes: string[];
   entity: Entity;
@@ -39,6 +40,10 @@ export interface EntitiesRaw {
   data_stream: {
     type: string[];
   };
+  service: {
+    name: string;
+    environment: string;
+  };
   entity: Entity;
 }
 
@@ -48,4 +53,5 @@ export interface MergedServiceEntities {
   signalTypes: SignalTypes[];
   environments: string[];
   metrics: EntityMetrics[];
+  hasLogMetrics: boolean;
 }

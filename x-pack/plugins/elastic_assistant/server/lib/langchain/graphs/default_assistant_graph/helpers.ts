@@ -12,6 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { AIMessageChunk } from '@langchain/core/messages';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
@@ -20,7 +21,9 @@ import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
+  bedrockChatEnabled: boolean;
   inputs: { input: string };
+  llmType: string | undefined;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -40,6 +43,8 @@ interface StreamGraphParams {
  */
 export const streamGraph = async ({
   apmTracer,
+  llmType,
+  bedrockChatEnabled,
   assistantGraph,
   inputs,
   logger,
@@ -77,6 +82,42 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
+  if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
+    const stream = await assistantGraph.streamEvents(
+      inputs,
+      {
+        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+        runName: DEFAULT_ASSISTANT_GRAPH_ID,
+        tags: traceOptions?.tags ?? [],
+        version: 'v2',
+        streamMode: 'values',
+      },
+      llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+    );
+
+    for await (const { event, data, tags } of stream) {
+      if ((tags || []).includes(AGENT_NODE_TAG)) {
+        if (event === 'on_chat_model_stream') {
+          const msg = data.chunk as AIMessageChunk;
+
+          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+            push({ payload: msg.content as string, type: 'content' });
+          }
+        }
+
+        if (
+          event === 'on_chat_model_end' &&
+          !data.output.lc_kwargs?.tool_calls?.length &&
+          !didEnd
+        ) {
+          handleStreamEnd(data.output.content);
+        }
+      }
+    }
+    return responseWithHeaders;
+  }
+  let finalMessage = '';
+  let conversationId: string | undefined;
   const stream = assistantGraph.streamEvents(inputs, {
     callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
@@ -84,7 +125,6 @@ export const streamGraph = async ({
     tags: traceOptions?.tags ?? [],
     version: 'v1',
   });
-  let finalMessage = '';
 
   let currentOutput = '';
   let finalOutputIndex = -1;
@@ -168,6 +208,9 @@ export const streamGraph = async ({
         return handleStreamEnd(finalMessage);
       }
       logger.error(`Error streaming from LangChain: ${error.message}`);
+      if (conversationId) {
+        push({ payload: `Conversation id: ${conversationId}`, type: 'content' });
+      }
       push({ payload: error.message, type: 'content' });
       handleStreamEnd(error.message, true);
     }
@@ -189,6 +232,7 @@ interface InvokeGraphParams {
 interface InvokeGraphResponse {
   output: string;
   traceData: TraceData;
+  conversationId?: string;
 }
 
 /**
@@ -217,18 +261,17 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-
     const r = await assistantGraph.invoke(inputs, {
       callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
     });
     const output = r.agentOutcome.returnValues.output;
-
+    const conversationId = r.conversation?.id;
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }
 
-    return { output, traceData };
+    return { output, traceData, conversationId };
   });
 };

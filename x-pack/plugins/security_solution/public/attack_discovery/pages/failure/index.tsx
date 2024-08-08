@@ -6,6 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 import * as i18n from './translations';
@@ -18,7 +19,13 @@ const FailureComponent: React.FC<{ failureReason: string }> = ({ failureReason }
           iconType="error"
           color="danger"
           body={
-            <EuiText color="subdued" data-test-subj="bodyText">
+            <EuiText
+              color="subdued"
+              css={css`
+                word-wrap: break-word;
+              `}
+              data-test-subj="bodyText"
+            >
               {failureReason}
             </EuiText>
           }
