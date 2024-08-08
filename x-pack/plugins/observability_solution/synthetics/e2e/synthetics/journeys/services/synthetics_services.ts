@@ -10,8 +10,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import { SyntheticsMonitor } from '../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 
 export class SyntheticsServices {
