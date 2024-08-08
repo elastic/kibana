@@ -29,6 +29,7 @@ export const jobManagementPreRouting = async (
   jobId: JobId,
   user: ReportingUser,
   counters: Counters,
+  { isInternal }: { isInternal: boolean },
   cb: JobManagementResponseHandler
 ) => {
   const licenseInfo = await reporting.getLicenseInfo();
@@ -36,7 +37,7 @@ export const jobManagementPreRouting = async (
     management: { jobTypes = [] },
   } = licenseInfo;
 
-  const jobsQuery = jobsQueryFactory(reporting);
+  const jobsQuery = jobsQueryFactory(reporting, { isInternal });
 
   const doc = await jobsQuery.get(user, jobId);
   if (!doc) {

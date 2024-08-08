@@ -5,5 +5,14 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AssetsPluginStartDeps {}
+export const STATUS_CODES = {
+  COMPLETED: 200,
+  PENDING: {
+    INTERNAL: 202,
+    PUBLIC: 503,
+  },
+  FAILED: {
+    INTERNAL: 202,
+    PUBLIC: 500,
+  },
+};
