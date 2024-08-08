@@ -8,6 +8,7 @@
 import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { ChatCompleteParams } from '../../../common/inference/types';
+import { ConfigEntryView } from '../lib/dynamic_config/types';
 
 export interface InferenceActionParams {
   subAction: SUB_ACTION.CHAT_COMPLETE | SUB_ACTION.TEST;
@@ -17,11 +18,12 @@ export interface InferenceActionParams {
 export interface Config {
   provider: string;
   taskType: string;
-  providerConfig: Record<string, unknown>;
+  providerConfig?: Record<string, unknown>;
+  providerSchema: ConfigEntryView[];
 }
 
 export interface Secrets {
-  providerSecrets: Record<string, unknown>;
+  providerSecrets?: Record<string, unknown>;
 }
 
 export type InferenceConnector = ConnectorTypeModel<Config, Secrets, InferenceActionParams>;

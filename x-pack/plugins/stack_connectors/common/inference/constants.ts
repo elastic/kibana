@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const INFERENCE_CONNECTOR_TITLE = i18n.translate(
   'xpack.stackConnectors.components.inference.connectorTypeTitle',
   {
-    defaultMessage: 'Inference Service',
+    defaultMessage: 'Inference Endpoint',
   }
 );
 export const INFERENCE_CONNECTOR_ID = '.inference';

@@ -46,7 +46,7 @@ const compatibilityGenerativeAIForObservability = i18n.translate(
 const compatibilityGenerativeAIForSearchPlayground = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSearchPlayground',
   {
-    defaultMessage: 'Generative AI for Search Playground',
+    defaultMessage: 'Generative AI for Search',
   }
 );
 

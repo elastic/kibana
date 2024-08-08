@@ -17,15 +17,19 @@ interface ConnectorConfigurationFormItemsProps {
   isLoading: boolean;
   items: ConfigEntryView[];
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
+  direction?: 'column' | 'row' | 'rowReverse' | 'columnReverse' | undefined;
+  itemsGrow?: boolean;
 }
 
 export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFormItemsProps> = ({
   isLoading,
   items,
   setConfigEntry,
+  direction,
+  itemsGrow,
 }) => {
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction={direction}>
       {items.map((configEntry) => {
         const {
           default_value: defaultValue,
@@ -41,10 +45,10 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
 
         const helpText = defaultValue
           ? i18n.translate('searchConnectors.configurationConnector.config.defaultValue', {
-              defaultMessage: 'If left empty, the default value {defaultValue} will be used.',
+              defaultMessage: 'Defaults to {defaultValue}',
               values: { defaultValue },
             })
-          : '';
+          : tooltip;
         // toggle and sensitive textarea labels go next to the element, not in the row
         const rowLabel =
           display === DisplayType.TOGGLE || (display === DisplayType.TEXTAREA && sensitive) ? (
@@ -64,7 +68,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
 
         if (dependencies?.length > 0) {
           return (
-            <EuiFlexItem key={key}>
+            <EuiFlexItem key={key} grow={itemsGrow}>
               <EuiPanel color="subdued" borderRadius="none">
                 <EuiToolTip content={tooltip}>
                   <EuiFormRow

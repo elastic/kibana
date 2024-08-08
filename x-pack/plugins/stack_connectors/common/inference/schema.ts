@@ -11,11 +11,12 @@ import { DEFAULT_PROVIDER, DEFAULT_TASK_TYPE } from './constants';
 export const ConfigSchema = schema.object({
   provider: schema.string({ defaultValue: DEFAULT_PROVIDER }),
   taskType: schema.string({ defaultValue: DEFAULT_TASK_TYPE }),
-  providerSchema: schema.any(),
+  providerSchema: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), { defaultValue: [] }),
+  providerConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
 });
 
 export const SecretsSchema = schema.object({
-  providerSecrets: schema.any(),
+  providerSecrets: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
 });
 
 export const ChatCompleteParamsSchema = schema.object({

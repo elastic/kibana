@@ -4331,7 +4331,7 @@ components:
       title: Create Inference API connector request
       description: >-
         The Inference API connector uses axios to send a POST request to Elastic
-        Inference Service.
+        Inference Endpoint.
       type: object
       required:
         - config
@@ -4979,7 +4979,7 @@ components:
       properties:
         provider:
           type: string
-          description: Provider supported by inference service.
+          description: Provider supported by inference endpoint.
         taskType:
           type: string
           description: The type of inference task that the model performs.

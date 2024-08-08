@@ -24,7 +24,7 @@ export function getConnectorType(): InferenceConnector {
     id: INFERENCE_CONNECTOR_ID,
     iconClass: 'logoElasticsearch',
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
-      defaultMessage: 'Send a request to Inference Service.',
+      defaultMessage: 'Send a query to a LLM.',
     }),
     actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
     validateParams: async (

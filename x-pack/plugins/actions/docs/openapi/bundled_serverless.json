@@ -492,7 +492,7 @@
       },
       "create_connector_request_inference": {
         "title": "Create Inference API connector request",
-        "description": "The Inference API connector uses axios to send a POST request to Elastic inference service.",
+        "description": "The Inference API connector uses axios to send a POST request to Elastic inference endpoint.",
         "type": "object",
         "required": [
           "config",

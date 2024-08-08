@@ -8,3 +8,12 @@
 export const DEFAULT_CHAT_COMPLETE_BODY = JSON.stringify({
   input: 'What is Elastic?',
 });
+
+export const DEFAULT_TASK_TYPE = 'completion';
+
+export const SUPPORTED_TASK_TYPES = [
+  {
+    label: 'completion',
+    value: 'completion',
+  },
+];
