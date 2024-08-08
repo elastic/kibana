@@ -34,6 +34,7 @@ For each pipeline result you find matching values that would fit any of the rela
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - You can use as many processor objects as needed to map all relevant pipeline result fields to any of the ECS related fields.
+- If no relevant fields or values are found that could be mapped confidently to any of the related fields, then respond with an empty array [] as valid JSON enclosed with 3 backticks (\`).
 - Do not respond with anything except the array of processors as a valid JSON objects enclosed with 3 backticks (\`), see example response below.
 </guidelines>
 
@@ -73,12 +74,13 @@ Here is some context that you can reference for your task, read it carefully as 
 Follow these steps to help resolve the current ingest pipeline issues:
 1. Check first if any of the errors are similar to the common errors provided above, if one is found follow the recommended action.
 2. When multiple errors are involved, try to resolve them all one by one.
-3. If you do not know how to fix an error, then continue to the next and return the complete updated array of current append processors.
+3. If you are unable to resolve the error, then the processor should be removed from the response.
 4. Apply the relevant changes to the current processors and return the updated version.
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - Never use "split" in template values, only use the field name inside the triple brackets. If the error mentions "Improperly closed variable in query-template" then check each "value" field for any special characters and remove them.
+- If solving an error means removing the last processor in the list, then return an empty array [] as valid JSON enclosed with 3 backticks (\`).
 - Do not respond with anything except the complete updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.
 </guidelines>
 
@@ -126,7 +128,7 @@ For each pipeline result you find matching values that would fit any of the rela
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - You can use as many processor objects as needed to map all relevant pipeline result fields to any of the ECS related fields.
-- If not updates are needed you respond with the initially provided current processors.
+- If no updates are needed you respond with the initially provided current processors, if no processors are present you respond with an empty array [] as valid JSON enclosied with 3 backticks (\`).
 - Do not respond with anything except updated array of processors as a valid JSON object enclosed with 3 backticks (\`), see example response below.
 </guidelines>
 

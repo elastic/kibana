@@ -84,6 +84,9 @@ Here is some context that you can reference for your task, read it carefully as 
 <previous_errors>
 {previous_errors}
 </previous_errors>
+<previous_invalid_categorization>
+{previous_invalid_categorization}
+</previous_invalid_categorization>
 </context>`,
   ],
   [
@@ -99,7 +102,7 @@ For each pipeline result you review step by step, remember the below steps:
 1. Check if each of the pipeline results have at least one event.category and event.type added to them. If not then try to correlate the results with the current processors and see if either a new append processor should be added to the list with a matching if condition, or if any of the if conditions should be modified as they are not matching that is in the results.
 2. If the results have at least one event.category and event.type value, see if more of them could match, if so it could be added to the relevant append processor which added the initial values.
 3. When adding more values to event.type and event.category please keep in mind the compatibility_matrix in the context to make sure only compatible event.type , event.category pairs that are compatible are created.
-4. If previous errors above is not empty, do not add any processors that would cause any of the same errors again. If you are unsure about a specific object then do not add it to the response.
+4. If previous errors or invalid categorization above is not empty, do not add any processors that would cause any of the same errors again. If you are unsure about a specific object then do not add it to the response.
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
@@ -125,6 +128,7 @@ export const CATEGORIZATION_VALIDATION_PROMPT = ChatPromptTemplate.fromMessages(
   [
     'system',
     `You are a helpful, expert assistant on Elasticsearch Ingest Pipelines, focusing on resolving errors and issues with append processors used for categorization.
+
 Here is some context that you can reference for your task, read it carefully as you will get questions about it later:
 <context>
 <current_processors>
@@ -174,14 +178,15 @@ Here is some context that you can reference for your task, read it carefully as 
 <current_processors>
 {current_processors}
 </current_processors>
-<errors>
-{errors}
-</errors>
 </context>`,
   ],
   [
     'human',
-    `Please go through each error above, carefully review the provided current processors, and resolve the most likely cause to the supplied error by returning an updated version of the current_processors.
+    `Please go through each of the below errors, carefully review the provided current processors, and resolve the most likely cause to the supplied error by returning an updated version of the current_processors.
+
+<errors>
+{errors}
+</errors>
 
 Follow these steps to help resolve the current ingest pipeline issues:
 1. Try to fix all related errors before responding.

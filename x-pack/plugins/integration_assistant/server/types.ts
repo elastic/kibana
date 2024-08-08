@@ -37,7 +37,8 @@ export interface CategorizationState {
   reviewed: boolean;
   currentPipeline: object;
   currentProcessors: object[];
-  invalidCategorization: object;
+  invalidCategorization: object[];
+  previousInvalidCategorization: string;
   initialPipeline: object;
   results: object;
 }

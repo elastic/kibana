@@ -67,4 +67,10 @@ export const COMMON_ERRORS = [
     action:
       "Check which illegal character is used and remove it. Complex field names can be written inside square brackets for example like ctx['field.name'] != null, If this is not possible then remove the whole processor from your response",
   },
+  {
+    error: 'Illegal list shortcut value [value]',
+    reason: 'The field or value_field is trying to access a path which is currently an array.',
+    action:
+      'The field or value cannot be accessed because it is an array, remove the current processor from your response. If this was your only processor in the response then return an empty JSON object {}',
+  },
 ];

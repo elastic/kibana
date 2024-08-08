@@ -27,6 +27,7 @@ export async function handleReview(
   const currentProcessors = (await categorizationReview.invoke({
     current_processors: JSON.stringify(state.currentProcessors, null, 2),
     pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+    previous_invalid_categorization: state.previousInvalidCategorization,
     previous_errors: state.previousErrors,
     ex_answer: state?.exAnswer,
     package_name: state?.packageName,

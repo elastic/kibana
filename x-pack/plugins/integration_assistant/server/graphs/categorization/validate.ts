@@ -23,11 +23,16 @@ interface CategorizationError {
 }
 
 export function handleCategorizationValidation(state: CategorizationState): {
+  previousInvalidCategorization: string;
   invalidCategorization: CategorizationError[];
   lastExecutedChain: string;
 } {
+  let previousInvalidCategorization = '';
   const errors: CategorizationError[] = [];
   const pipelineResults = state.pipelineResults as PipelineResult[];
+  if (Object.keys(state.invalidCategorization).length > 0) {
+    previousInvalidCategorization = JSON.stringify(state.invalidCategorization, null, 2);
+  }
 
   // Loops through the pipeline results to find invalid categories and types
   for (const doc of pipelineResults) {
@@ -62,6 +67,7 @@ export function handleCategorizationValidation(state: CategorizationState): {
   }
 
   return {
+    previousInvalidCategorization,
     invalidCategorization: errors,
     lastExecutedChain: 'handleCategorizationValidation',
   };

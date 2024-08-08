@@ -18,7 +18,9 @@ export function combineProcessors(
 ): Pipeline {
   // Create a deep copy of the initialPipeline to avoid modifying the original input
   const currentPipeline = deepCopy(initialPipeline);
-
+  if (Object.keys(processors).length === 0) {
+    return currentPipeline;
+  }
   // Add the new processors right before the last 2 remove processor in the initial pipeline.
   // This is so all the processors if conditions are not accessing possibly removed fields.
   const currentProcessors = currentPipeline.processors;

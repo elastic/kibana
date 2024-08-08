@@ -88,8 +88,12 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
     default: () => [],
   },
   invalidCategorization: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
+    value: (x: object[], y?: object[]) => y ?? x,
+    default: () => [],
+  },
+  previousInvalidCategorization: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => '',
   },
   initialPipeline: {
     value: (x: object, y?: object) => y ?? x,
