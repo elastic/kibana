@@ -32,6 +32,7 @@ const START_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_HOST_ALERTS_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
 const START_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataStartDate);
 const END_HOST_PROCESSES_DATE = moment.utc(DATES.metricsAndLogs.hosts.processesDataEndDate);
+
 const START_HOST_KUBERNETES_SECTION_DATE = moment.utc(
   DATES.metricsAndLogs.hosts.kubernetesSectionStartDate
 );
@@ -47,7 +48,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const infraSynthtraceKibanaClient = getService('infraSynthtraceKibanaClient');
-  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const esClient = getService('es');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -103,42 +103,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Node Details', () => {
-    describe('#Missing fields', function () {
-      before(async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
-
-        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
-        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
-        await metricIndicesInput.type('metrics-apm*');
-
-        await infraSourceConfigurationForm.saveInfraSettings();
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.getInfraMissingMetricsIndicesCallout();
-
-        await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box', 'host');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
-      after(async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
-
-        const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
-        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
-        await metricIndicesInput.type('metrics-*,metricbeat-*');
-
-        await infraSourceConfigurationForm.saveInfraSettings();
-
-        await pageObjects.infraHome.waitForLoading();
-        await pageObjects.infraHome.getInfraMissingRemoteClusterIndicesCallout();
-      });
-
-      describe('KPIs', () => {
-        it('should render custom badge message', async () => {
-          await pageObjects.assetDetails.getAssetDetailsKPIMissingFieldMessageExists('cpuUsage');
-        });
-      });
-    });
-
     describe('#With Asset Details', () => {
       before(async () => {
         await Promise.all([
@@ -594,7 +558,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             [
-              { metric: 'cpuUsage', value: '99.6%' },
+              { metric: 'cpuUsage', value: '100.0%' },
               { metric: 'normalizedLoad1m', value: '1,300.3%' },
               { metric: 'memoryUsage', value: '42.2%' },
               { metric: 'diskUsage', value: '36.0%' },

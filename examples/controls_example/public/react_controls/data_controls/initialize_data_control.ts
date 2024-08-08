@@ -7,10 +7,14 @@
  */
 
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, first, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, first, skip, switchMap, tap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import {
+  DataView,
+  DataViewField,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+} from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { SerializedPanelState } from '@kbn/presentation-containers';
@@ -21,12 +25,16 @@ import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DefaultDataControlState } from './types';
+import { DataControlApi, DataControlFieldFormatter, DefaultDataControlState } from './types';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
   state: DefaultDataControlState,
+  /**
+   * `This state manager` should only include the state that the data control editor is
+   * responsible for managing
+   */
   editorStateManager: ControlStateManager<EditorState>,
   controlGroup: ControlGroupApi,
   services: {
@@ -37,9 +45,12 @@ export const initializeDataControl = <EditorState extends object = {}>(
   api: ControlApiInitialization<DataControlApi>;
   cleanup: () => void;
   comparators: StateComparators<DefaultDataControlState>;
+  setters: {
+    onSelectionChange: () => void;
+    setOutputFilter: (filter: Filter | undefined) => void;
+  };
   stateManager: ControlStateManager<DefaultDataControlState>;
   serialize: () => SerializedPanelState<DefaultControlState>;
-  untilFiltersInitialized: () => Promise<void>;
 } => {
   const defaultControl = initializeDefaultControlApi(state);
 
@@ -49,6 +60,11 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const filtersReady$ = new BehaviorSubject<boolean>(false);
+  const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
+  const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
+    String(toFormat)
+  );
 
   const stateManager: ControlStateManager<DefaultDataControlState> = {
     ...defaultControl.stateManager,
@@ -57,14 +73,14 @@ export const initializeDataControl = <EditorState extends object = {}>(
     title: panelTitle,
   };
 
-  function clearBlockingError() {
-    if (defaultControl.api.blockingError.value) {
-      defaultControl.api.setBlockingError(undefined);
-    }
-  }
-
   const dataViewIdSubscription = dataViewId
     .pipe(
+      tap(() => {
+        filtersReady$.next(false);
+        if (defaultControl.api.blockingError.value) {
+          defaultControl.api.setBlockingError(undefined);
+        }
+      }),
       switchMap(async (currentDataViewId) => {
         let dataView: DataView | undefined;
         try {
@@ -78,14 +94,17 @@ export const initializeDataControl = <EditorState extends object = {}>(
     .subscribe(({ dataView, error }) => {
       if (error) {
         defaultControl.api.setBlockingError(error);
-      } else {
-        clearBlockingError();
       }
       dataViews.next(dataView ? [dataView] : undefined);
     });
 
-  const fieldNameSubscription = combineLatest([dataViews, fieldName]).subscribe(
-    ([nextDataViews, nextFieldName]) => {
+  const fieldNameSubscription = combineLatest([dataViews, fieldName])
+    .pipe(
+      tap(() => {
+        filtersReady$.next(false);
+      })
+    )
+    .subscribe(([nextDataViews, nextFieldName]) => {
       const dataView = nextDataViews
         ? nextDataViews.find(({ id }) => dataViewId.value === id)
         : undefined;
@@ -103,12 +122,17 @@ export const initializeDataControl = <EditorState extends object = {}>(
             })
           )
         );
-      } else {
-        clearBlockingError();
+      } else if (defaultControl.api.blockingError.value) {
+        defaultControl.api.setBlockingError(undefined);
       }
+
+      field$.next(field);
       defaultPanelTitle.next(field ? field.displayName || field.name : nextFieldName);
-    }
-  );
+      const spec = field?.toSpec();
+      if (spec) {
+        fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
+      }
+    });
 
   const onEdit = async () => {
     // get the initial state from the state manager
@@ -116,6 +140,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
       ...stateManager,
       ...editorStateManager,
     } as ControlStateManager<DefaultDataControlState & EditorState>;
+
     const initialState = (
       Object.keys(mergedStateManager) as Array<keyof DefaultDataControlState & EditorState>
     ).reduce((prev, key) => {
@@ -153,17 +178,34 @@ export const initializeDataControl = <EditorState extends object = {}>(
     });
   };
 
+  const filtersReadySubscription = filters$.pipe(skip(1), debounceTime(0)).subscribe(() => {
+    // Set filtersReady$.next(true); in filters$ subscription instead of setOutputFilter
+    // to avoid signaling filters ready until after filters have been emitted
+    // to avoid timing issues
+    filtersReady$.next(true);
+  });
+
   const api: ControlApiInitialization<DataControlApi> = {
     ...defaultControl.api,
     panelTitle,
     defaultPanelTitle,
     dataViews,
+    field$,
+    fieldFormatter,
     onEdit,
     filters$,
-    setOutputFilter: (newFilter: Filter | undefined) => {
-      filters$.next(newFilter ? [newFilter] : undefined);
-    },
     isEditingEnabled: () => true,
+    untilFiltersReady: async () => {
+      return new Promise((resolve) => {
+        combineLatest([defaultControl.api.blockingError, filtersReady$])
+          .pipe(
+            first(([blockingError, filtersReady]) => filtersReady || blockingError !== undefined)
+          )
+          .subscribe(() => {
+            resolve();
+          });
+      });
+    },
   };
 
   return {
@@ -171,12 +213,21 @@ export const initializeDataControl = <EditorState extends object = {}>(
     cleanup: () => {
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
+      filtersReadySubscription.unsubscribe();
     },
     comparators: {
       ...defaultControl.comparators,
       title: [panelTitle, (value: string | undefined) => panelTitle.next(value)],
       dataViewId: [dataViewId, (value: string) => dataViewId.next(value)],
       fieldName: [fieldName, (value: string) => fieldName.next(value)],
+    },
+    setters: {
+      onSelectionChange: () => {
+        filtersReady$.next(false);
+      },
+      setOutputFilter: (newFilter: Filter | undefined) => {
+        filters$.next(newFilter ? [newFilter] : undefined);
+      },
     },
     stateManager,
     serialize: () => {
@@ -195,20 +246,6 @@ export const initializeDataControl = <EditorState extends object = {}>(
           },
         ],
       };
-    },
-    untilFiltersInitialized: async () => {
-      return new Promise((resolve) => {
-        combineLatest([defaultControl.api.blockingError, filters$])
-          .pipe(
-            first(
-              ([blockingError, filters]) =>
-                blockingError !== undefined || (filters?.length ?? 0) > 0
-            )
-          )
-          .subscribe(() => {
-            resolve();
-          });
-      });
     },
   };
 };

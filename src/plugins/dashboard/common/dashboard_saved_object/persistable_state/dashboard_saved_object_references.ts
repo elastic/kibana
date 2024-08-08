@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Reference } from '@kbn/content-management-utils';
+import type { Reference } from '@kbn/content-management-utils';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 

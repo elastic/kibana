@@ -18,7 +18,7 @@ import { createStreamDataTransformer, experimental_StreamData } from 'ai';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
-import { ChatMessage, MessageRole } from '../types';
+import { ChatMessage } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
@@ -49,25 +49,28 @@ interface ContextInputs {
   question: string;
 }
 
-const getSerialisedMessages = (chatHistory: ChatMessage[]) => {
+const getSerialisedMessages = (chatHistory: BaseMessage[]) => {
   const formattedDialogueTurns = chatHistory.map((message) => {
-    if (message.role === MessageRole.user) {
+    if (message instanceof HumanMessage) {
       return `Human: ${message.content}`;
-    } else if (message.role === MessageRole.assistant) {
+    } else if (message instanceof AIMessage) {
       return `Assistant: ${message.content}`;
     }
   });
   return formattedDialogueTurns.join('\n');
 };
 
-const getMessages = (chatHistory: ChatMessage[]) => {
-  return chatHistory.map((message) => {
-    if (message.role === 'human') {
-      return new HumanMessage(message.content);
-    } else {
-      return new AIMessage(message.content);
-    }
-  });
+export const getMessages = (chatHistory: ChatMessage[]) => {
+  return chatHistory
+    .map((message) => {
+      if (message.role === 'human') {
+        return new HumanMessage(message.content);
+      } else if (message.role === 'assistant') {
+        return new AIMessage(message.content);
+      }
+      return null;
+    })
+    .filter((message): message is BaseMessage => message !== null);
 };
 
 const buildContext = (docs: Document[]) => {
@@ -141,8 +144,9 @@ class ConversationalChainFn {
     const data = new experimental_StreamData();
 
     const messages = msgs ?? [];
-    const previousMessages = messages.slice(0, -1);
-    const question = messages[messages.length - 1]!.content;
+    const lcMessages = getMessages(messages);
+    const previousMessages = lcMessages.slice(0, -1);
+    const question = lcMessages[lcMessages.length - 1]!.content;
     const retrievedDocs: Document[] = [];
 
     let retrievalChain: Runnable = RunnableLambda.from(() => '');
@@ -165,7 +169,7 @@ class ConversationalChainFn {
       return input.question;
     });
 
-    if (previousMessages.length > 0) {
+    if (lcMessages.length > 1) {
       const questionRewritePromptTemplate = PromptTemplate.fromTemplate(
         this.options.questionRewritePrompt
       );
@@ -184,7 +188,6 @@ class ConversationalChainFn {
       });
     }
 
-    const lcMessages = getMessages(messages);
     const prompt = ChatPromptTemplate.fromMessages([
       SystemMessagePromptTemplate.fromTemplate(this.options.prompt),
       ...lcMessages,
@@ -195,6 +198,13 @@ class ConversationalChainFn {
         context: RunnableSequence.from([(input) => input.question, retrievalChain]),
         question: (input) => input.question,
       },
+      RunnableLambda.from((inputs) => {
+        data.appendMessageAnnotation({
+          type: 'search_query',
+          question: inputs.question,
+        });
+        return inputs;
+      }),
       RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
       RunnableLambda.from(registerContextTokenCounts(data)),
       prompt,
@@ -232,6 +242,10 @@ class ConversationalChainFn {
                 data.appendMessageAnnotation({
                   type: 'prompt_token_count',
                   count: getTokenEstimateFromMessages(msg),
+                });
+                data.appendMessageAnnotation({
+                  type: 'search_query',
+                  question,
                 });
               }
             },

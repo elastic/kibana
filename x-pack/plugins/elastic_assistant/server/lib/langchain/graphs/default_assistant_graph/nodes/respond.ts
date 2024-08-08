@@ -11,7 +11,7 @@ import { AGENT_NODE_TAG } from './run_agent';
 import { AgentState } from '../types';
 
 export const RESPOND_NODE = 'respond';
-export const respond = async ({ llm, state }: { llm: BaseChatModel; state: AgentState }) => {
+export const respond = async ({ model, state }: { model: BaseChatModel; state: AgentState }) => {
   if (state?.agentOutcome && 'returnValues' in state.agentOutcome) {
     const userMessage = [
       'user',
@@ -21,7 +21,7 @@ export const respond = async ({ llm, state }: { llm: BaseChatModel; state: Agent
     Do not verify, confirm or anything else. Just reply with the same content as provided above.`,
     ] as [StringWithAutocomplete<'user'>, string];
 
-    const responseMessage = await llm
+    const responseMessage = await model
       // use AGENT_NODE_TAG to identify as agent node for stream parsing
       .withConfig({ runName: 'Summarizer', tags: [AGENT_NODE_TAG] })
       .invoke([userMessage]);
