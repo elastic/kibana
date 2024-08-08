@@ -165,9 +165,13 @@ export const createInventoryMetricThresholdExecutor =
     }
     const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-    const [, { logsShared }] = await libs.getStartServices();
+    const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
+
+    const logSourcesService =
+      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
     const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
-      .getClient(savedObjectsClient, esClient)
+      .getClient(savedObjectsClient, esClient, logSourcesService)
       .getResolvedLogView({
         type: 'log-view-reference',
         logViewId: sourceId,

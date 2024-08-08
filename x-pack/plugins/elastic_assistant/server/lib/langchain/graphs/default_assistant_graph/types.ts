@@ -7,7 +7,6 @@
 
 import { BaseMessage } from '@langchain/core/messages';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import type { Logger } from '@kbn/logging';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 
@@ -25,5 +24,4 @@ export interface AgentState extends AgentStateBase {
 
 export interface NodeParamsBase {
   logger: Logger;
-  model: BaseChatModel;
 }
