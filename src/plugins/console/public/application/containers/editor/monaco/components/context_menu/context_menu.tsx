@@ -114,12 +114,12 @@ export const ContextMenu = ({
       if (aggregatedData !== '' && hasErrors) {
         notifications.toasts.addWarning({
           title: i18n.translate('console.consoleMenu.copyAsCurlSuccessWithWarning', {
-            defaultMessage: 'Some requests could not be copied to clipboard',
+            defaultMessage: 'Some requests could not be copied to clipboard because they are invalid',
           }),
         });
         // Otherwise we can just copy the data to clipboard
       } else {
-        notifications.toasts.add({
+        notifications.toasts.addSuccess({
           title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
             defaultMessage:
               '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
