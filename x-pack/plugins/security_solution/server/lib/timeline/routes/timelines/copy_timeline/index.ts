@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigType } from '../../../../..';
@@ -35,16 +36,15 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: Confi
           request: { body: buildRouteValidationWithZod(CopyTimelineRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<CopyTimelineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timeline, timelineIdToCopy } = request.body;
           const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
-          const body: CopyTimelineResponse = { data: { persistTimeline: copiedTimeline } };
           return response.ok({
-            body,
+            body: { data: { persistTimeline: copiedTimeline } },
           });
         } catch (err) {
           const error = transformError(err);

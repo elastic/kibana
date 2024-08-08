@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -38,7 +39,7 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter, _: Config
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<PersistNoteRouteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -52,10 +53,9 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter, _: Config
             note,
             overrideOwner: true,
           });
-          const body: PersistNoteRouteResponse = { data: { persistNote: res } };
 
           return response.ok({
-            body,
+            body: { data: { persistNote: res } },
           });
         } catch (err) {
           const error = transformError(err);

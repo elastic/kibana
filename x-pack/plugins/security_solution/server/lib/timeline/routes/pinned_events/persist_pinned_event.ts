@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { PINNED_EVENT_URL } from '../../../../../common/constants';
-
-import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
@@ -23,10 +22,7 @@ import {
 } from '../../../../../common/api/timeline';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
-export const persistPinnedEventRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType
-) => {
+export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: PINNED_EVENT_URL,
@@ -42,7 +38,11 @@ export const persistPinnedEventRoute = (
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PersistPinnedEventRouteResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -58,12 +58,10 @@ export const persistPinnedEventRoute = (
             timelineId
           );
 
-          const body: PersistPinnedEventRouteResponse = {
-            data: { persistPinnedEventOnTimeline: res },
-          };
-
           return response.ok({
-            body,
+            body: {
+              data: { persistPinnedEventOnTimeline: res },
+            },
           });
         } catch (err) {
           const error = transformError(err);

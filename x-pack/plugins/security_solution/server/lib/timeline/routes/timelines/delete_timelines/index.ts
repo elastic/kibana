@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigType } from '../../../../..';
@@ -35,7 +36,7 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           request: { body: buildRouteValidationWithZod(DeleteTimelinesRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<DeleteTimelinesResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -43,8 +44,7 @@ export const deleteTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           const { savedObjectIds, searchIds } = request.body;
 
           await deleteTimeline(frameworkRequest, savedObjectIds, searchIds);
-          const body: DeleteTimelinesResponse = { data: { deleteTimeline: true } };
-          return response.ok({ body });
+          return response.ok({ body: { data: { deleteTimeline: true } } });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -35,7 +36,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<GetNotesResponse>> => {
         try {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, request);
@@ -50,8 +51,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-              const body: GetNotesResponse = res ?? {};
-              return response.ok({ body });
+              return response.ok({ body: res ?? {} });
             } else {
               const options = {
                 type: noteSavedObjectType,
@@ -60,8 +60,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
-              const body: GetNotesResponse = res ?? {};
-              return response.ok({ body });
+              return response.ok({ body: res ?? {} });
             }
           } else {
             const perPage = queryParams?.perPage ? parseInt(queryParams.perPage, 10) : 10;
@@ -80,8 +79,7 @@ export const getNotesRoute = (router: SecuritySolutionPluginRouter, _: ConfigTyp
               filter,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
-            const body: GetNotesResponse = res ?? {};
-            return response.ok({ body });
+            return response.ok({ body: res ?? {} });
           }
         } catch (err) {
           const error = transformError(err);
