@@ -18,7 +18,7 @@ import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
 
-interface Props {
+export interface Props {
   allSystemPrompts: PromptResponse[];
   conversationId: string;
   conversations: Record<string, Conversation>;
@@ -265,13 +265,13 @@ export const useCurrentConversation = ({
       apiConfig: currentConversation?.apiConfig,
     });
 
-    await refetchCurrentUserConversations();
-
     if (newConversation) {
       handleOnConversationSelected({
         cId: newConversation.id,
         cTitle: newConversation.title,
       });
+    } else {
+      await refetchCurrentUserConversations();
     }
   }, [
     conversations,
