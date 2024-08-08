@@ -47,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await fieldEditor.typeScript("emit('abc')");
             await fieldEditor.save();
             await PageObjects.header.waitUntilLoadingHasFinished();
+            await testSubjects.missingOrFail('fieldEditor');
           });
         });
         it('should show all fields as available', async () => {
