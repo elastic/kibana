@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-
+import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiBadge,
   EuiButton,
@@ -76,6 +76,7 @@ export const ReactControlExample = ({
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
+  const isMounted = useMountedState();
   const dataLoading$ = useMemo(() => {
     return new BehaviorSubject<boolean | undefined>(false);
   }, []);
@@ -112,6 +113,7 @@ export const ReactControlExample = ({
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const [isControlGroupInitialized, setIsControlGroupInitialized] = useState(false);
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const dashboardApi = useMemo(() => {
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
@@ -361,9 +363,15 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                isDisabled={!controlGroupApi}
-                onClick={() => {
-                  controlGroupApi?.resetUnsavedChanges();
+                isDisabled={!controlGroupApi || isResetting}
+                isLoading={isResetting}
+                onClick={async () => {
+                  if (!controlGroupApi) {
+                    return;
+                  }
+                  setIsResetting(true);
+                  await controlGroupApi.asyncResetUnsavedChanges();
+                  if (isMounted()) setIsResetting(false);
                 }}
               >
                 Reset

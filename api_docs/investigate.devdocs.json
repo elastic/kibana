@@ -145,7 +145,7 @@
         "label": "getEsFilterFromGlobalParameters",
         "description": [],
         "signature": [
-          "({\n  filters,\n  timeRange,\n}: Partial<",
+          "({ timeRange }: Partial<",
           "GlobalWidgetParameters",
           ">) => { bool: ",
           {
@@ -166,7 +166,7 @@
             "id": "def-public.getEsFilterFromGlobalParameters.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  timeRange,\n}",
+            "label": "{ timeRange }",
             "description": [],
             "signature": [
               "Partial<",
@@ -487,27 +487,6 @@
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.GlobalWidgetParameters.filters",
-            "type": "Array",
-            "tags": [],
-            "label": "filters",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -681,17 +660,6 @@
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigateWidget.locked",
-            "type": "boolean",
-            "tags": [],
-            "label": "locked",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -751,27 +719,6 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-public.Investigation.revisions",
-            "type": "Array",
-            "tags": [],
-            "label": "revisions",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.InvestigationRevision",
-                "text": "InvestigationRevision"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
             "id": "def-public.Investigation.title",
             "type": "string",
             "tags": [],
@@ -783,43 +730,7 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-public.Investigation.revision",
-            "type": "string",
-            "tags": [],
-            "label": "revision",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "investigate",
-        "id": "def-public.InvestigationRevision",
-        "type": "Interface",
-        "tags": [],
-        "label": "InvestigationRevision",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigationRevision.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.InvestigationRevision.items",
+            "id": "def-public.Investigation.items",
             "type": "Array",
             "tags": [],
             "label": "items",
@@ -840,7 +751,7 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-public.InvestigationRevision.parameters",
+            "id": "def-public.Investigation.parameters",
             "type": "Object",
             "tags": [],
             "label": "parameters",
@@ -921,7 +832,7 @@
                     "section": "def-common.InvestigateWidget",
                     "text": "InvestigateWidget"
                   },
-                  "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
+                  "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
                   "_DeepPartialObject",
                   "<",
                   "GlobalWidgetParameters",
@@ -932,136 +843,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WidgetRenderAPI.blocks",
-            "type": "Object",
-            "tags": [],
-            "label": "blocks",
-            "description": [],
-            "signature": [
-              "{ publish: (blocks: ",
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.WorkflowBlock",
-                "text": "WorkflowBlock"
-              },
-              "[]) => UnregisterFunction; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "investigate",
-        "id": "def-public.WorkflowBlock",
-        "type": "Interface",
-        "tags": [],
-        "label": "WorkflowBlock",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.content",
-            "type": "string",
-            "tags": [],
-            "label": "content",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.loading",
-            "type": "boolean",
-            "tags": [],
-            "label": "loading",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.onClick",
-            "type": "Function",
-            "tags": [],
-            "label": "onClick",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.color",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "color",
-            "description": [],
-            "signature": [
-              "\"link\" | \"text\" | \"title\" | \"warning\" | \"disabled\" | \"success\" | \"body\" | \"highlight\" | \"primary\" | \"accent\" | \"danger\" | \"primaryText\" | \"accentText\" | \"successText\" | \"warningText\" | \"dangerText\" | \"emptyShade\" | \"lightestShade\" | \"lightShade\" | \"mediumShade\" | \"darkShade\" | \"darkestShade\" | \"fullShade\" | \"disabledText\" | \"shadow\" | \"subduedText\" | \"ghost\" | \"ink\" | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-public.WorkflowBlock.children",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "children",
-            "description": [],
-            "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1125,7 +906,7 @@
             "section": "def-common.InvestigateWidget",
             "text": "InvestigateWidget"
           },
-          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
+          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",
@@ -1175,7 +956,7 @@
                 "section": "def-common.InvestigateWidget",
                 "text": "InvestigateWidget"
               },
-              "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
+              "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
               "_DeepPartialObject",
               "<",
               "GlobalWidgetParameters",
@@ -1824,17 +1605,6 @@
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigateWidget.locked",
-            "type": "boolean",
-            "tags": [],
-            "label": "locked",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1894,27 +1664,6 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-common.Investigation.revisions",
-            "type": "Array",
-            "tags": [],
-            "label": "revisions",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "investigate",
-                "scope": "common",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-common.InvestigationRevision",
-                "text": "InvestigationRevision"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
             "id": "def-common.Investigation.title",
             "type": "string",
             "tags": [],
@@ -1926,43 +1675,7 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-common.Investigation.revision",
-            "type": "string",
-            "tags": [],
-            "label": "revision",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "investigate",
-        "id": "def-common.InvestigationRevision",
-        "type": "Interface",
-        "tags": [],
-        "label": "InvestigationRevision",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigationRevision.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.InvestigationRevision.items",
+            "id": "def-common.Investigation.items",
             "type": "Array",
             "tags": [],
             "label": "items",
@@ -1983,121 +1696,13 @@
           },
           {
             "parentPluginId": "investigate",
-            "id": "def-common.InvestigationRevision.parameters",
+            "id": "def-common.Investigation.parameters",
             "type": "Object",
             "tags": [],
             "label": "parameters",
             "description": [],
             "signature": [
               "GlobalWidgetParameters"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "investigate",
-        "id": "def-common.WorkflowBlock",
-        "type": "Interface",
-        "tags": [],
-        "label": "WorkflowBlock",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.content",
-            "type": "string",
-            "tags": [],
-            "label": "content",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.loading",
-            "type": "boolean",
-            "tags": [],
-            "label": "loading",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.onClick",
-            "type": "Function",
-            "tags": [],
-            "label": "onClick",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.color",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "color",
-            "description": [],
-            "signature": [
-              "\"link\" | \"text\" | \"title\" | \"warning\" | \"disabled\" | \"success\" | \"body\" | \"highlight\" | \"primary\" | \"accent\" | \"danger\" | \"primaryText\" | \"accentText\" | \"successText\" | \"warningText\" | \"dangerText\" | \"emptyShade\" | \"lightestShade\" | \"lightShade\" | \"mediumShade\" | \"darkShade\" | \"darkestShade\" | \"fullShade\" | \"disabledText\" | \"shadow\" | \"subduedText\" | \"ghost\" | \"ink\" | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "investigate",
-            "id": "def-common.WorkflowBlock.children",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "children",
-            "description": [],
-            "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/investigate/common/types.ts",
             "deprecated": false,
@@ -2138,7 +1743,7 @@
             "section": "def-common.InvestigateWidget",
             "text": "InvestigateWidget"
           },
-          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\" | \"locked\"> & { parameters: ",
+          "<{}, {}>, \"type\" | \"title\" | \"columns\" | \"description\" | \"rows\"> & { parameters: ",
           "_DeepPartialObject",
           "<",
           "GlobalWidgetParameters",
