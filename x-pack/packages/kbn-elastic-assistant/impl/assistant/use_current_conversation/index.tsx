@@ -10,6 +10,7 @@ import { QueryObserverResult } from '@tanstack/react-query';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import deepEqual from 'fast-deep-equal';
 import { find } from 'lodash';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
@@ -24,7 +25,7 @@ interface Props {
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
   conversationId: string;
-  defaultConnector: any;
+  defaultConnector?: AIConnector;
   mayUpdateConversations: boolean;
 }
 export const useCurrentConversation = ({
