@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolveLogViewError } from './errors';
@@ -31,12 +32,20 @@ export const resolveLogView = (
   logViewId: string,
   logViewAttributes: LogViewAttributes,
   dataViewsService: DataViewsContract,
+  logSourcesService: LogSourcesService,
   config: LogViewsStaticConfig
 ): Promise<ResolvedLogView> => {
   if (logViewAttributes.logIndices.type === 'index_name') {
     return resolveLegacyReference(logViewId, logViewAttributes, dataViewsService, config);
-  } else {
+  } else if (logViewAttributes.logIndices.type === 'data_view') {
     return resolveDataViewReference(logViewAttributes, dataViewsService);
+  } else {
+    return resolveKibanaAdvancedSettingReference(
+      logViewId,
+      logViewAttributes,
+      dataViewsService,
+      logSourcesService
+    );
   }
 };
 
@@ -107,6 +116,52 @@ const resolveDataViewReference = async (
     name: logViewAttributes.name,
     description: logViewAttributes.description,
     dataViewReference: dataView,
+  };
+};
+
+const resolveKibanaAdvancedSettingReference = async (
+  logViewId: string,
+  logViewAttributes: LogViewAttributes,
+  dataViewsService: DataViewsContract,
+  logSourcesService: LogSourcesService
+): Promise<ResolvedLogView> => {
+  if (logViewAttributes.logIndices.type !== 'kibana_advanced_setting') {
+    throw new Error(
+      'This function can only resolve references to the Log Sources Kibana advanced setting'
+    );
+  }
+
+  const indices = (await logSourcesService.getLogSources())
+    .map((logSource) => logSource.indexPattern)
+    .join(',');
+
+  const dataViewReference = await dataViewsService
+    .create(
+      {
+        id: `log-view-${logViewId}`,
+        name: logViewAttributes.name,
+        title: indices,
+        timeFieldName: TIMESTAMP_FIELD,
+        allowNoIndex: true,
+      },
+      false,
+      false
+    )
+    .catch((error) => {
+      throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
+    });
+
+  return {
+    indices,
+    timestampField: TIMESTAMP_FIELD,
+    tiebreakerField: TIEBREAKER_FIELD,
+    messageField: ['message'],
+    fields: dataViewReference.fields,
+    runtimeMappings: {},
+    columns: logViewAttributes.logColumns,
+    name: logViewAttributes.name,
+    description: logViewAttributes.description,
+    dataViewReference,
   };
 };
 

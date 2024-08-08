@@ -81,13 +81,13 @@ export async function installEntityDefinition({
     await upsertTemplate({
       esClient,
       logger,
-      template: getEntitiesHistoryIndexTemplateConfig(definition.id),
+      template: getEntitiesHistoryIndexTemplateConfig(definition),
     });
     installState.indexTemplates.history = true;
     await upsertTemplate({
       esClient,
       logger,
-      template: getEntitiesLatestIndexTemplateConfig(definition.id),
+      template: getEntitiesLatestIndexTemplateConfig(definition),
     });
     installState.indexTemplates.latest = true;
 
