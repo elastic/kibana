@@ -308,13 +308,13 @@ const comparisonFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
         ],
         returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'left', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
@@ -338,13 +338,13 @@ const comparisonFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
         ],
         returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'left', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
