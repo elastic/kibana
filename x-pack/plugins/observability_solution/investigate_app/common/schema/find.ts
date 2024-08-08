@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { investigationResponseSchema } from './investigation';
 
-const findInvestigationsParamsSchema = t.type({
+const findInvestigationsParamsSchema = t.partial({
   query: t.partial({
     page: t.string,
     perPage: t.string,

@@ -38,7 +38,7 @@ const findInvestigationsRoute = createInvestigateAppServerRoute({
     const soClient = (await params.context.core).savedObjects.client;
     const repository = investigationRepositoryFactory({ soClient, logger: params.logger });
 
-    return await findInvestigations(params.params.query, repository);
+    return await findInvestigations(params.params?.query ?? {}, repository);
   },
 });
 
