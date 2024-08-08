@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClient } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   CoreSetup,
   ElasticsearchClient,
@@ -156,6 +157,7 @@ export class UnenrollInactiveAgentsTask {
       const unenrolledBatch = await unenrollBatch(soClient, esClient, res.agents, {
         revoke: true,
         force: true,
+        actionId: `UnenrollInactiveAgentsTask-${uuidv4()}`,
       });
       auditLoggingService.writeCustomAuditLog({
         message: `Recurrent unenrollment of ${agentCounter} inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${unenrolledBatch.actionId}]`,

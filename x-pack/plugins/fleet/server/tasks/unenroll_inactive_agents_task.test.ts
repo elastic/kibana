@@ -144,7 +144,11 @@ describe('UnenrollInactiveAgentsTask', () => {
         expect.anything(),
         expect.anything(),
         agents,
-        { force: true, revoke: true }
+        {
+          force: true,
+          revoke: true,
+          actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
+        }
       );
     });
 
