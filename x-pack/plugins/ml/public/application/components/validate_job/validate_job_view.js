@@ -118,13 +118,11 @@ export class ValidateJobUI extends Component {
   };
 
   validate = () => {
-    console.log('VALIDATE?????');
     const docLinks = this.props.kibana.services.docLinks;
     const job = this.props.getJobConfig();
     const getDuration = this.props.getDuration;
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
-    console.log('VALIDATE', duration, fields, job);
 
     // Run job validation only if a job config has been passed on and the duration makes sense to run it.
     // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.

@@ -17,7 +17,6 @@ import { Description } from './description';
 export const TimeField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
-
   const { dateFields } = useNewJobCapsService();
   const [timeFieldName, setTimeFieldName] = useState(jobCreator.timeFieldName);
 

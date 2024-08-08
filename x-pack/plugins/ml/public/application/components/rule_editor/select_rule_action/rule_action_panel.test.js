@@ -16,6 +16,9 @@ import { RuleActionPanel } from './rule_action_panel';
 
 jest.mock('../../../services/job_service', () => 'mlJobService');
 
+// Mock the call for loading a filter.
+// The mock is hoisted to the top, so need to prefix the filter variable
+// with 'mock' so it can be used lazily.
 const mockTestFilter = {
   filter_id: 'eu-airlines',
   description: 'List of European airlines',

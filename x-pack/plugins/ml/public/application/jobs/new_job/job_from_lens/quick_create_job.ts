@@ -113,21 +113,24 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
           layerIndex
         );
 
-      const jobCreator = {
-        jobConfig,
-        datafeedConfig,
-        createdBy:
-          jobType === JOB_TYPE.SINGLE_METRIC
-            ? CREATED_BY_LABEL.SINGLE_METRIC
-            : CREATED_BY_LABEL.MULTI_METRIC,
-        start,
-        end,
-      } as JobCreatorType;
-
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      this.mlJobService.stashJobForCloning(jobCreator, true, includeTimeRange, !includeTimeRange);
+      this.mlJobService.stashJobForCloning(
+        {
+          jobConfig,
+          datafeedConfig,
+          createdBy:
+            jobType === JOB_TYPE.SINGLE_METRIC
+              ? CREATED_BY_LABEL.SINGLE_METRIC
+              : CREATED_BY_LABEL.MULTI_METRIC,
+          start,
+          end,
+        } as JobCreatorType,
+        true,
+        includeTimeRange,
+        !includeTimeRange
+      );
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
