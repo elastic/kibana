@@ -32,7 +32,7 @@ import styled from '@emotion/styled';
 import { isEmpty } from 'lodash';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
-import { useChatRefactor } from './use_chat_refactor';
+import { useDataStreamApis } from './use_data_stream_apis';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
@@ -116,7 +116,7 @@ const AssistantComponent: React.FC<Props> = ({
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
-  } = useChatRefactor({ http, baseConversations, isAssistantEnabled });
+  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
@@ -208,7 +208,8 @@ const AssistantComponent: React.FC<Props> = ({
     if (
       !isLoadingCurrentUserConversations &&
       isFetchedConnectors &&
-      currentConversation?.id !== ''
+      currentConversation &&
+      currentConversation.id !== ''
     ) {
       if (!currentConversation?.apiConfig?.connectorId) {
         return true;
@@ -220,13 +221,7 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return false;
-  }, [
-    isFetchedConnectors,
-    connectors,
-    currentConversation?.apiConfig?.connectorId,
-    currentConversation?.id,
-    isLoadingCurrentUserConversations,
-  ]);
+  }, [isFetchedConnectors, connectors, currentConversation, isLoadingCurrentUserConversations]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;

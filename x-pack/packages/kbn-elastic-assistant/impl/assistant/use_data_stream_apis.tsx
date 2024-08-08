@@ -45,7 +45,7 @@ export interface ChatRefactor {
   setIsStreaming: (isStreaming: boolean) => void;
 }
 
-export const useChatRefactor = ({
+export const useDataStreamApis = ({
   http,
   baseConversations,
   isAssistantEnabled,
