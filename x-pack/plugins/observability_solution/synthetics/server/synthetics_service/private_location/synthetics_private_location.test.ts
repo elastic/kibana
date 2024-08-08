@@ -119,7 +119,6 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('falls back to undefined when config namespace and private location namespace are not defined', async () => {
-      const agentPolicyNamespaceCached = 'agentPolicyNamespaceCached';
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const result = await syntheticsPrivateLocation.getPolicyNamespace(
         'default',
