@@ -88,7 +88,7 @@ export class AgentManager extends Manager {
     this.log.info(chalk.bold('Cleaning up the agent process'));
     if (this.agentContainerId) {
       this.log.indent(4, () =>
-        this.log.info(`Stopping and removing agent [${agentContainerId}] container`)
+        this.log.info(`Stopping and removing agent [${this.agentContainerId}] container`)
       );
 
       try {
@@ -97,7 +97,7 @@ export class AgentManager extends Manager {
         this.log.error('Error closing fleet agent process');
       }
       this.log.indent(4, () =>
-        this.log.info(`Stopped and removed agent [${agentContainerId}] container`)
+        this.log.info(`Stopped and removed agent [${this.agentContainerId}] container`)
       );
     }
   }
