@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import pMap from 'p-map';
 import {
   SavedObjectsUpdateResponse,
   SavedObjectsClientContract,
@@ -11,7 +12,6 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { getKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../types';
@@ -332,25 +332,18 @@ export class ProjectMonitorFormatter {
   private getDecryptedMonitors = async (
     monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
   ) => {
-    const configIds = monitors.map((monitor) => monitor.attributes[ConfigKey.CONFIG_ID]);
-    const monitorFilter = getKqlFilter({ field: ConfigKey.CONFIG_ID, values: configIds });
-    const finder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        {
-          search: monitorFilter,
-          type: syntheticsMonitorType,
-        }
-      );
-
-    const decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> =
-      [];
-    for await (const result of finder.find()) {
-      decryptedMonitors.push(...result.saved_objects);
-    }
-
-    finder.close().catch(() => {});
-
-    return decryptedMonitors;
+    return await pMap(
+      monitors,
+      async (monitor) =>
+        this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+          syntheticsMonitorType,
+          monitor.id,
+          {
+            namespace: monitor.namespaces?.[0],
+          }
+        ),
+      { concurrency: 100 }
+    );
   };
 
   private updateMonitorsBulk = async (
