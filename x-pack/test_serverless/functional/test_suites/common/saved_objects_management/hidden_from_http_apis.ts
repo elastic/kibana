@@ -11,6 +11,11 @@ import type { Response } from 'supertest';
 import { SavedObject } from '@kbn/core/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+interface MinimalSO {
+  id: string;
+  type: string;
+}
+
 function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));
 }
@@ -117,10 +122,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .then((resp) => {
-              interface MinimalSO {
-                id: string;
-                type: string;
-              }
               expect(
                 resp.body.saved_objects
                   .map((so: MinimalSO) => ({

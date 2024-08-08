@@ -12,6 +12,11 @@ import type { Response } from 'supertest';
 import { SavedObject } from '@kbn/core/types';
 import type { PluginFunctionalProviderContext } from '../../services';
 
+interface MinimalSO {
+  id: string;
+  type: string;
+}
+
 function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));
 }
@@ -111,10 +116,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('kbn-xsrf', 'true')
             .expect(200)
             .then((resp) => {
-              interface MinimalSO {
-                id: string;
-                type: string;
-              }
               expect(
                 resp.body.saved_objects
                   .map((so: MinimalSO) => ({
