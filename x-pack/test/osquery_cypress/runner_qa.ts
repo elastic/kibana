@@ -12,7 +12,7 @@ import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { AgentManager } from './agent';
 import { createAgentPolicy } from './utils';
 
-export async function beforeSpec(config: Cypress.PluginConfigOptions) {
+export async function beforeSpec(config: Record<string, string, number, boolean, undefined>) {
   const log = prefixedOutputLogger('cy.parallel(svl).beforeSpec', createToolingLogger());
   const stackServicesPromise = setupStackServicesUsingCypressConfig({ env: config });
   const { kbnClient } = await stackServicesPromise;
