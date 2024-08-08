@@ -7,37 +7,25 @@
 import { createRouter } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import { InvestigateDetailsPage } from '../pages/details';
+import { InvestigationListPage } from '../pages/list';
 
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
  */
 const investigateRoutes = {
+  '/': {
+    element: <InvestigationListPage />,
+  },
   '/new': {
     element: <InvestigateDetailsPage />,
-    params: t.partial({
-      query: t.partial({
-        revision: t.string,
-      }),
-    }),
   },
   '/{id}': {
     element: <InvestigateDetailsPage />,
-    params: t.intersection([
-      t.type({
-        path: t.type({ id: t.string }),
-      }),
-      t.partial({
-        query: t.partial({
-          revision: t.string,
-        }),
-      }),
-    ]),
-  },
-  '/': {
-    element: <Redirect to="/new" />,
+    params: t.type({
+      path: t.type({ id: t.string }),
+    }),
   },
 };
 
