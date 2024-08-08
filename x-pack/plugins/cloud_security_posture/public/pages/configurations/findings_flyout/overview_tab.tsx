@@ -189,13 +189,13 @@ export const OverviewTab = ({
   ruleFlyoutLink?: string;
 }) => {
   const { discover } = useKibana().services;
-  const latestFindingsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
+  const cdrMisconfigurationsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
 
   // link will navigate to our dataview in discover, filtered by the data source of the finding
   const discoverDataViewLink = useMemo(
     () =>
       discover.locator?.getRedirectUrl({
-        dataViewId: latestFindingsDataView.data?.id,
+        dataViewId: cdrMisconfigurationsDataView.data?.id,
         ...(data.data_stream?.dataset && {
           filters: [
             {
@@ -212,7 +212,7 @@ export const OverviewTab = ({
           ],
         }),
       }),
-    [data.data_stream?.dataset, discover.locator, latestFindingsDataView.data?.id]
+    [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
   const hasEvidence = !isEmpty(data.result?.evidence);
