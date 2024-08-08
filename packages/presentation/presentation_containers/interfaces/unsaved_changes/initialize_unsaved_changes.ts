@@ -70,18 +70,16 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
       getInitialValuesFromComparators(comparators, comparatorKeys)
     )
   );
-
   subscriptions.push(
     combineLatest(comparatorSubjects)
       .pipe(
-        skip(1),
         debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE),
-        map((latestStates) =>
-          comparatorKeys.reduce((acc, key, index) => {
+        map((latestStates) => {
+          return comparatorKeys.reduce((acc, key, index) => {
             acc[key] = latestStates[index] as RuntimeState[typeof key];
             return acc;
-          }, {} as Partial<RuntimeState>)
-        ),
+          }, {} as Partial<RuntimeState>);
+        }),
         combineLatestWith(lastSavedState$)
       )
       .subscribe(([latestState, lastSavedState]) => {
