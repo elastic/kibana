@@ -127,7 +127,7 @@ const checkProdNativeModules = async (log: ToolingLog) => {
 
     // Logs every detected native module at once
     prodNativeModulesFound.forEach((dep) => {
-      log.error(`Production native module detected: ${dep.path}`);
+      log.error(`Production native module detected: ${path.relative(REPO_ROOT, dep.path)}`);
     });
 
     throw new Error('Production native modules were detected and logged above');
