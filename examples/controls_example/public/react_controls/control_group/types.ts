@@ -55,10 +55,11 @@ export type ControlGroupApi = PresentationContainer &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
   PublishesDataLoading &
-  PublishesUnsavedChanges &
+  Pick<PublishesUnsavedChanges, 'unsavedChanges'> &
   PublishesControlGroupDisplaySettings &
   PublishesTimeslice &
   Partial<HasParentApi<PublishesUnifiedSearch> & HasSaveNotification> & {
+    asyncResetUnsavedChanges: () => Promise<void>;
     autoApplySelections$: PublishingSubject<boolean>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     getLastSavedControlState: (controlUuid: string) => object;
