@@ -339,7 +339,7 @@ export function InternalDashboardTopNav({
             }
           `}
         >
-          {createBadge(getManagedContentBadge(dashboardManagedBadge.getText()), 3)}
+          {createBadge(getManagedContentBadge(dashboardManagedBadge.getText(), true), 3)}
         </button>
       );
 
