@@ -13,9 +13,10 @@ import {
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
+import { EntityType } from '../../../../routes/entities/types';
 
-const ENTITIES_LATEST_INDEX_NAME = '.entities.v1.latest.builtin_services*';
-const ENTITIES_HISTORY_INDEX_NAME = '.entities.v1.history.builtin_services*';
+const ENTITIES_LATEST_INDEX_NAME = `entities-${EntityType.SERVICE}-latest`;
+const ENTITIES_HISTORY_INDEX_NAME = `entities-${EntityType.SERVICE}-history`;
 
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
@@ -60,7 +61,7 @@ export async function createEntitiesESClient({
     const promise = withApmSpan(operationName, () => {
       return cancelEsRequestOnAbort(
         esClient.search(
-          { ...searchRequest, index: [indexName] },
+          { ...searchRequest, index: [indexName], ignore_unavailable: true },
           {
             signal: controller.signal,
             meta: true,
@@ -99,6 +100,7 @@ export async function createEntitiesESClient({
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
               index: [ENTITIES_LATEST_INDEX_NAME],
+              ignore_unavailable: true,
             },
             {
               ...params.body,

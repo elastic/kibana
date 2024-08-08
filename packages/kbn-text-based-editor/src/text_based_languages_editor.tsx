@@ -763,8 +763,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       forceMoveMarkers: true,
                     },
                   ]);
+
                   setPopoverPosition({});
+
                   datePickerOpenStatusRef.current = false;
+
+                  // move the cursor past the date we just inserted
+                  editor1.current?.setPosition({
+                    lineNumber: currentCursorPosition?.lineNumber ?? 0,
+                    column: (currentCursorPosition?.column ?? 0) + addition.length - 1,
+                  });
+                  // restore focus to the editor
+                  editor1.current?.focus();
                 }
               }}
               inline
