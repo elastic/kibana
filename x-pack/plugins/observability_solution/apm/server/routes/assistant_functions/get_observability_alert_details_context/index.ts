@@ -164,7 +164,6 @@ export const getAlertDetailsContextHandler = (
     // log rate analysis
     dataFetchers.push(async () => {
       const logRateAnalysis = await getLogRateAnalysisForAlert({
-        apmEventClient,
         esClient,
         coreContext,
         arguments: {

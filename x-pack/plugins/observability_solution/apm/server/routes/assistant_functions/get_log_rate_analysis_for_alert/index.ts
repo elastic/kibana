@@ -9,17 +9,17 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT } from '../../../../common/es_fields/apm';
 import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
 
+/**
+ * Runs log rate analysis data an on index given some alert metadata.
+ */
 export async function getLogRateAnalysisForAlert({
-  apmEventClient,
   esClient,
   coreContext,
   arguments: args,
 }: {
-  apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
