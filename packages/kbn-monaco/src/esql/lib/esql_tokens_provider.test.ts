@@ -32,7 +32,7 @@ describe('ES|QL Tokens Provider', () => {
     const provider = new ESQLTokensProvider();
     const { tokens } = provider.tokenize(line, new ESQLState());
     const functionTokens = tokens.filter((t) => t.scopes === 'functions.esql');
-    expect(functionTokens).toHaveLength(3);
+    expect(functionTokens).toHaveLength(4);
   });
 
   it('should properly tokenize SORT... NULLS clauses', () => {
