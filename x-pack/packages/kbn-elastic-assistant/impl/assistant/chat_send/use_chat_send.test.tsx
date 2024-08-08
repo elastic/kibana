@@ -81,13 +81,6 @@ describe('use chat send', () => {
     });
     expect(setCurrentSystemPromptId).toHaveBeenCalledWith(defaultSystemPrompt.id);
   });
-  it('handlePromptChange updates prompt successfully', () => {
-    const { result } = renderHook(() => useChatSend(testProps), {
-      wrapper: TestProviders,
-    });
-    result.current.handlePromptChange('new prompt');
-    expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
-  });
   it('handleChatSend sends message with context prompt when a valid prompt text is provided', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(() => useChatSend(testProps), {

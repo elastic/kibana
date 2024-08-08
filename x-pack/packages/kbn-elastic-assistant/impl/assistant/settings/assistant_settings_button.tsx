@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
-import { ChatRefactor } from '../use_chat_refactor';
+import { DataStreamApis } from '../use_data_stream_apis';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantSettings } from './assistant_settings';
@@ -26,7 +26,7 @@ interface Props {
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
-  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   refetchPrompts?: (
     options?: RefetchOptions & RefetchQueryFilters<unknown>
   ) => Promise<QueryObserverResult<unknown, unknown>>;

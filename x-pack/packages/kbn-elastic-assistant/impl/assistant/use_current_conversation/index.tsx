@@ -45,6 +45,11 @@ interface UseCurrentConversation {
   setCurrentSystemPromptId: Dispatch<SetStateAction<string | undefined>>;
 }
 
+/**
+ * Manages the current conversation state. Interacts with the conversation API and keeps local state up to date.
+ * Manages system prompt as that is per conversation
+ * Provides methods to handle conversation selection, creation, deletion, and system prompt selection.
+ */
 export const useCurrentConversation = ({
   allSystemPrompts,
   conversationId,

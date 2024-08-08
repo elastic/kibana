@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
-import { ChatRefactor } from '../use_chat_refactor';
+import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
@@ -44,7 +44,7 @@ interface OwnProps {
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
-  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
   refetchPrompts?: (

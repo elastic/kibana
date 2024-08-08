@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ChatRefactor } from '../use_chat_refactor';
+import { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
@@ -21,7 +21,7 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 export const AssistantTitle: React.FC<{
   title?: string;
   selectedConversation: Conversation | undefined;
-  refetchCurrentUserConversations: ChatRefactor['refetchCurrentUserConversations'];
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
 }> = ({ title, selectedConversation, refetchCurrentUserConversations }) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);

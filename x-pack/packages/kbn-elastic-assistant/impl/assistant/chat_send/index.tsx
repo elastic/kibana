@@ -25,7 +25,7 @@ export interface Props extends Omit<UseChatSend, 'abortStream' | 'handleOnChatCl
  * Allows the user to clear the chat and switch between different system prompts.
  */
 export const ChatSend: React.FC<Props> = ({
-  handlePromptChange,
+  setUserPrompt,
   handleChatSend,
   isDisabled,
   isLoading,
@@ -43,14 +43,14 @@ export const ChatSend: React.FC<Props> = ({
 
   const onSendMessage = useCallback(() => {
     handleChatSend(promptTextAreaRef.current?.value?.trim() ?? '');
-    handlePromptChange('');
-  }, [handleChatSend, promptTextAreaRef, handlePromptChange]);
+    setUserPrompt('');
+  }, [handleChatSend, promptTextAreaRef, setUserPrompt]);
 
   useAutosizeTextArea(promptTextAreaRef?.current, promptValue);
 
   useEffect(() => {
-    handlePromptChange(promptValue);
-  }, [handlePromptChange, promptValue]);
+    setUserPrompt(promptValue);
+  }, [setUserPrompt, promptValue]);
 
   return (
     <EuiFlexGroup
@@ -68,7 +68,7 @@ export const ChatSend: React.FC<Props> = ({
         <PromptTextArea
           onPromptSubmit={handleChatSend}
           ref={promptTextAreaRef}
-          handlePromptChange={handlePromptChange}
+          setUserPrompt={setUserPrompt}
           value={promptValue}
           isDisabled={isDisabled}
         />

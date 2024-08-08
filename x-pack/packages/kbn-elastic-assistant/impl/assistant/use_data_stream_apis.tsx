@@ -24,7 +24,7 @@ interface Props {
   isAssistantEnabled: boolean;
 }
 
-export interface ChatRefactor {
+export interface DataStreamApis {
   allPrompts: PromptResponse[];
   allSystemPrompts: PromptResponse[];
   anonymizationFields: FindAnonymizationFieldsResponse;
@@ -49,7 +49,7 @@ export const useDataStreamApis = ({
   http,
   baseConversations,
   isAssistantEnabled,
-}: Props): ChatRefactor => {
+}: Props): DataStreamApis => {
   const [isStreaming, setIsStreaming] = useState(false);
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>

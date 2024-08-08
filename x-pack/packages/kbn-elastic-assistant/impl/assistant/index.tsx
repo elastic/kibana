@@ -187,8 +187,6 @@ const AssistantComponent: React.FC<Props> = ({
   ]);
 
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
-  const [userPrompt, setUserPrompt] = useState<string | null>(null);
-
   const [showAnonymizedValues, setShowAnonymizedValues] = useState<boolean>(false);
 
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();
@@ -331,14 +329,14 @@ const AssistantComponent: React.FC<Props> = ({
   const {
     abortStream,
     handleOnChatCleared,
-    handlePromptChange,
     handleChatSend,
     handleRegenerateResponse,
     isLoading: isLoadingChatSend,
+    setUserPrompt,
+    userPrompt,
   } = useChatSend({
     allSystemPrompts,
     currentConversation,
-    setUserPrompt,
     currentSystemPromptId,
     http,
     refetchCurrentUserConversations,
@@ -560,13 +558,13 @@ const AssistantComponent: React.FC<Props> = ({
 
                     <EuiFlexItem grow={false}>
                       <ChatSend
+                        handleChatSend={handleChatSend}
+                        setUserPrompt={setUserPrompt}
+                        handleRegenerateResponse={handleRegenerateResponse}
                         isDisabled={isSendingDisabled}
+                        isLoading={isLoadingChatSend}
                         shouldRefocusPrompt={shouldRefocusPrompt}
                         userPrompt={userPrompt}
-                        handlePromptChange={handlePromptChange}
-                        handleChatSend={handleChatSend}
-                        handleRegenerateResponse={handleRegenerateResponse}
-                        isLoading={isLoadingChatSend}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
