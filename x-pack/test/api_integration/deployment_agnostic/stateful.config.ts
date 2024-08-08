@@ -12,7 +12,4 @@ export default createStatefulTestConfig({
   junit: {
     reportName: 'Stateful - Deployment-agnostic API Integration Tests',
   },
-  // extra arguments
-  esServerArgs: [],
-  kbnServerArgs: [],
 });
