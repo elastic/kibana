@@ -21,6 +21,8 @@ import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
+import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/ensure_latest_rules_package_installed';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../../logic/import/create_rules_stream_from_ndjson';
 import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
@@ -74,6 +76,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
+          const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
@@ -100,6 +103,13 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const [{ exceptions, rules, actionConnectors }] = await createPromiseFromStreams<
             RuleExceptionsPromiseFromStreams[]
           >([request.body.file as HapiReadableStream, ...readAllStream]);
+
+          // TODO: optimize this so we only check/install if prebuilt rules are being imported?
+          if (prebuiltRulesCustomizationEnabled) {
+            const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+            await ensureLatestRulesPackageInstalled(ruleAssetsClient, config, ctx.securitySolution);
+            // TODO: calculate rule source, remove immutable field
+          }
 
           // import exceptions, includes validation
           const {
@@ -158,7 +168,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             detectionRulesClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
-            allowPrebuiltRules: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
+            allowPrebuiltRules: prebuiltRulesCustomizationEnabled,
           });
 
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];

@@ -1624,6 +1624,8 @@ export default ({ getService }: FtrProviderContext): void => {
             error: { message: 'rule_id: Required', status_code: 400 },
           });
         });
+
+        it('installs prebuilt rules package if it is not installed');
       });
 
       describe('calculation of the rule_source fields', () => {
