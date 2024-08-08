@@ -11,6 +11,10 @@ for use across tables in Kibana Stack Management for consistency.
 Usage:
 
 ```
+interface Props {
+  items: T[];
+}
+
 const MyTableComponent: FunctionComponent<Props> = ({ items }) => {
   const columns = [
     {
@@ -21,7 +25,7 @@ const MyTableComponent: FunctionComponent<Props> = ({ items }) => {
     ...
   ];
 
-  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<T>({
     tableId: 'myTableId',
     initialPageSize: 50,
     initialSort: {
@@ -40,7 +44,7 @@ const MyTableComponent: FunctionComponent<Props> = ({ items }) => {
       items={items}
       columns={columns}
       pagination={pagination}
-      sorting={{ sort }}
+      sorting={sorting}
     />
   );
 };
