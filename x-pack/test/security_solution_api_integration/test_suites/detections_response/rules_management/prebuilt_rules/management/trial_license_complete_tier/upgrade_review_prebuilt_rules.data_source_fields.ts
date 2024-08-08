@@ -251,6 +251,63 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
           });
         });
+
+        describe('when current version is undefined', () => {
+          it('should show in the upgrade/_review API response', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(
+              es,
+              getIndexRuleAssetSavedObjects()
+            );
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a data_source field on the installed rule
+            await updateRule(supertest, {
+              ...getPrebuiltRuleMock(),
+              rule_id: 'rule-1',
+              index: undefined,
+            } as RuleUpdateProps);
+
+            // Increment the version of the installed rule, do NOT update the related data_source field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                index: ['one', 'two', 'three'],
+                version: 2,
+              }),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that data_source diff field is returned but field does not have an update
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+            expect(fieldDiffObject.data_source).toEqual({
+              base_version: {
+                index_patterns: ['one', 'two', 'three'],
+                type: DataSourceType.index_patterns,
+              },
+              current_version: undefined,
+              target_version: {
+                index_patterns: ['one', 'two', 'three'],
+                type: DataSourceType.index_patterns,
+              },
+              merged_version: undefined,
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NONE,
+              has_update: false,
+              has_base_version: true,
+            });
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+
+            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+          });
+        });
       });
 
       describe('when rule field has an update but does not have a custom value - scenario AAB', () => {
@@ -737,6 +794,64 @@ export default ({ getService }: FtrProviderContext): void => {
                 index_patterns: ['one', 'two', 'four'],
                 type: DataSourceType.index_patterns,
               },
+              diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+              merge_outcome: ThreeWayMergeOutcome.Current,
+              conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+              has_update: true,
+              has_base_version: true,
+            });
+
+            expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1);
+            expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(1);
+
+            expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(1);
+          });
+        });
+
+        describe('when current version is undefined', () => {
+          it('should show a non-solvable conflict in the upgrade/_review API response', async () => {
+            // Install base prebuilt detection rule
+            await createHistoricalPrebuiltRuleAssetSavedObjects(
+              es,
+              getDataViewIdRuleAssetSavedObjects()
+            );
+            await installPrebuiltRules(es, supertest);
+
+            // Customize a data_source field on the installed rule
+            await updateRule(supertest, {
+              ...getPrebuiltRuleMock(),
+              rule_id: 'rule-1',
+              data_view_id: undefined,
+            } as RuleUpdateProps);
+
+            // Increment the version of the installed rule, update a data_source field, and create the new rule assets
+            const updatedRuleAssetSavedObjects = [
+              createRuleAssetSavedObject({
+                rule_id: 'rule-1',
+                version: 2,
+                data_view_id: 'C',
+              }),
+            ];
+            await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+            // Call the upgrade review prebuilt rules endpoint and check that one rule is eligible for update
+            // and data_source field update has conflict
+            const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+            const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+            expect(fieldDiffObject.data_source).toEqual({
+              base_version: {
+                data_view_id: 'A',
+                type: DataSourceType.data_view,
+              },
+              current_version: undefined,
+              target_version: {
+                data_view_id: 'C',
+                type: DataSourceType.data_view,
+              },
+              merged_version: undefined,
               diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
               merge_outcome: ThreeWayMergeOutcome.Current,
               conflict: ThreeWayDiffConflict.NON_SOLVABLE,
