@@ -43,7 +43,8 @@ export async function reassignBatch(
     total?: number;
   },
   givenAgents: Agent[],
-  outgoingErrors: Record<Agent['id'], Error>
+  outgoingErrors: Record<Agent['id'], Error>,
+  spaceId?: string
 ): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
@@ -86,8 +87,9 @@ export async function reassignBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-
   const now = new Date().toISOString();
+  const namespaces = spaceId ? { namespaces: [spaceId] } : {};
+
   await createAgentAction(esClient, {
     id: actionId,
     agents: agentsToUpdate.map((agent) => agent.id),
@@ -97,6 +99,7 @@ export async function reassignBatch(
     data: {
       policy_id: options.newAgentPolicyId,
     },
+    ...namespaces,
   });
 
   await createErrorActionResults(

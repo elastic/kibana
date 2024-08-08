@@ -17,8 +17,6 @@ import { appContextService } from '../app_context';
 
 import { FleetError } from '../../errors';
 
-import { getCurrentNamespace } from '../spaces/get_current_namespace';
-
 import { ActionRunner } from './action_runner';
 
 import { BulkActionTaskType } from './bulk_action_types';
@@ -63,7 +61,8 @@ export async function updateTagsBatch(
     total?: number;
     kuery?: string;
     retryCount?: number;
-  }
+  },
+  spaceId?: string
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
   const hostedAgentError = `Cannot modify tags on a hosted agent`;
@@ -151,8 +150,7 @@ export async function updateTagsBatch(
   const versionConflictCount = res.version_conflicts ?? 0;
   const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
 
-  const currentNameSpace = getCurrentNamespace(soClient);
-  const namespaces = currentNameSpace ? { namespaces: [currentNameSpace] } : {};
+  const namespaces = spaceId ? { namespaces: [spaceId] } : {};
 
   // creating an action doc so that update tags  shows up in activity
   // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
@@ -195,7 +193,7 @@ export async function updateTagsBatch(
       failures.map((failure) => ({
         agentId: failure.id,
         actionId,
-        namespace: currentNameSpace,
+        namespace: spaceId,
         error: failure.cause.reason,
       }))
     );
@@ -210,7 +208,7 @@ export async function updateTagsBatch(
         versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
-          namespace: currentNameSpace,
+          namespace: spaceId,
           error: 'version conflict on last retry',
         }))
       );

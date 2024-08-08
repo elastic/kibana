@@ -76,6 +76,7 @@ export async function sendUpgradeAgentsActions(
     batchSize?: number;
   }
 ): Promise<{ actionId: string }> {
+  const currentNameSpace = getCurrentNamespace(soClient);
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
@@ -95,7 +96,6 @@ export async function sendUpgradeAgentsActions(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const currentNameSpace = getCurrentNamespace(soClient);
     const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
 
@@ -122,5 +122,12 @@ export async function sendUpgradeAgentsActions(
     }
   }
 
-  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, options);
+  return await upgradeBatch(
+    soClient,
+    esClient,
+    givenAgents,
+    outgoingErrors,
+    options,
+    currentNameSpace
+  );
 }

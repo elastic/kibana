@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
 
-  describe('agents', async function () {
+  describe('agents TMPDEBUGME', async function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -46,6 +46,7 @@ export default function (providerContext: FtrProviderContext) {
 
     setupTestSpaces(providerContext);
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
+    let defaultSpacePolicy2: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
 
@@ -69,12 +70,15 @@ export default function (providerContext: FtrProviderContext) {
     }
 
     before(async () => {
-      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
-        apiClient.createAgentPolicy(),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-      ]);
+      const [_defaultSpacePolicy1, _defaultSpacePolicy2, _spaceTest1Policy1, _spaceTest1Policy2] =
+        await Promise.all([
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+        ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
+      defaultSpacePolicy2 = _defaultSpacePolicy2;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
 
@@ -360,6 +364,133 @@ export default function (providerContext: FtrProviderContext) {
           [testSpaceAgent1]: 'updating',
           [testSpaceAgent2]: 'updating',
         });
+      });
+    });
+
+    describe('POST /agents/{agentId}/reassign', () => {
+      it('should allow reassigning an agent in the current space to a policy in the current space', async () => {
+        let agent = await apiClient.getAgent(defaultSpaceAgent1);
+        expect(agent.item.policy_id).to.eql(defaultSpacePolicy1.item.id);
+        await apiClient.reassignAgent(defaultSpaceAgent1, defaultSpacePolicy2.item.id);
+        agent = await apiClient.getAgent(defaultSpaceAgent1);
+        expect(agent.item.policy_id).to.eql(defaultSpacePolicy2.item.id);
+
+        agent = await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
+        expect(agent.item.policy_id).to.eql(spaceTest1Policy1.item.id);
+        await apiClient.reassignAgent(testSpaceAgent1, spaceTest1Policy2.item.id, TEST_SPACE_1);
+        agent = await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
+        expect(agent.item.policy_id).to.eql(spaceTest1Policy2.item.id);
+
+        await apiClient.reassignAgent(defaultSpaceAgent1, defaultSpacePolicy1.item.id);
+        await apiClient.reassignAgent(testSpaceAgent1, spaceTest1Policy1.item.id, TEST_SPACE_1);
+      });
+
+      it('should not allow reassigning an agent in a different space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.reassignAgent(testSpaceAgent1, defaultSpacePolicy2.item.id);
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+
+      it('should not allow reassigning an agent in the current space to a policy in a different space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.reassignAgent(defaultSpaceAgent1, spaceTest1Policy2.item.id);
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+    });
+
+    describe('POST /agents/bulk_reassign', () => {
+      function getAgentPolicyIds(agents: GetAgentsResponse) {
+        return agents.items?.reduce((acc, item) => {
+          acc[item.id] = item.policy_id;
+          return acc;
+        }, {} as any);
+      }
+
+      it('should return 404 if the policy is in another space', async () => {
+        let err: Error | undefined;
+        try {
+          await apiClient.bulkReassignAgents({
+            agents: [defaultSpaceAgent1, testSpaceAgent1],
+            policy_id: spaceTest1Policy2.item.id,
+          });
+        } catch (_err) {
+          err = _err;
+        }
+
+        expect(err).to.be.an(Error);
+        expect(err?.message).to.match(/404 "Not Found"/);
+      });
+
+      it('should only reassign agents in the same space when passing a list of agent ids', async () => {
+        let agent = await apiClient.getAgent(defaultSpaceAgent1);
+        expect(agent.item.policy_id).to.eql(defaultSpacePolicy1.item.id);
+        agent = await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
+        expect(agent.item.policy_id).to.eql(spaceTest1Policy1.item.id);
+
+        await apiClient.bulkReassignAgents(
+          {
+            agents: [defaultSpaceAgent1, testSpaceAgent1],
+            policy_id: spaceTest1Policy2.item.id,
+          },
+          TEST_SPACE_1
+        );
+
+        agent = await apiClient.getAgent(defaultSpaceAgent1);
+        expect(agent.item.policy_id).to.eql(defaultSpacePolicy1.item.id);
+        agent = await apiClient.getAgent(testSpaceAgent1, TEST_SPACE_1);
+        expect(agent.item.policy_id).to.eql(spaceTest1Policy2.item.id);
+
+        await apiClient.reassignAgent(testSpaceAgent1, spaceTest1Policy1.item.id, TEST_SPACE_1);
+      });
+
+      it('should only reassign agents in the same space when passing a kuery', async () => {
+        let agents = await apiClient.getAgents();
+        let agentPolicyIds = getAgentPolicyIds(agents);
+        expect(agentPolicyIds).to.eql({
+          [defaultSpaceAgent1]: defaultSpacePolicy1.item.id,
+          [defaultSpaceAgent2]: defaultSpacePolicy2.item.id,
+        });
+        agents = await apiClient.getAgents(TEST_SPACE_1);
+        agentPolicyIds = getAgentPolicyIds(agents);
+        expect(agentPolicyIds).to.eql({
+          [testSpaceAgent1]: spaceTest1Policy1.item.id,
+          [testSpaceAgent2]: spaceTest1Policy2.item.id,
+        });
+
+        await apiClient.bulkReassignAgents(
+          {
+            agents: 'status:online',
+            policy_id: spaceTest1Policy2.item.id,
+          },
+          TEST_SPACE_1
+        );
+
+        agents = await apiClient.getAgents();
+        agentPolicyIds = getAgentPolicyIds(agents);
+        expect(agentPolicyIds).to.eql({
+          [defaultSpaceAgent1]: defaultSpacePolicy1.item.id,
+          [defaultSpaceAgent2]: defaultSpacePolicy2.item.id,
+        });
+        agents = await apiClient.getAgents(TEST_SPACE_1);
+        agentPolicyIds = getAgentPolicyIds(agents);
+        expect(agentPolicyIds).to.eql({
+          [testSpaceAgent1]: spaceTest1Policy2.item.id,
+          [testSpaceAgent2]: spaceTest1Policy2.item.id,
+        });
+
+        await apiClient.reassignAgent(testSpaceAgent1, spaceTest1Policy1.item.id, TEST_SPACE_1);
       });
     });
   });

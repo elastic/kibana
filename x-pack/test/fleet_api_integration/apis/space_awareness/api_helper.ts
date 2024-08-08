@@ -206,21 +206,35 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  async reassignAgent(agentId: string, policyId: string, spaceId?: string) {
+    await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/reassign`)
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        policy_id: policyId,
+      })
+      .expect(200);
+  }
+  async bulkReassignAgents(data: any, spaceId?: string) {
+    await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_reassign`)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data)
+      .expect(200);
+  }
   async upgradeAgent(agentId: string, data: any, spaceId?: string) {
-    this.supertest
+    await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/${agentId}/upgrade`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
       .expect(200);
   }
   async bulkUpgradeAgents(data: any, spaceId?: string) {
-    const { body: res } = await this.supertest
+    await this.supertest
       .post(`${this.getBaseUrl(spaceId)}/api/fleet/agents/bulk_upgrade`)
       .set('kbn-xsrf', 'xxxx')
       .send(data)
       .expect(200);
-
-    return res;
   }
   async bulkUpdateAgentTags(data: any, spaceId?: string) {
     const { body: res } = await this.supertest

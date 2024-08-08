@@ -99,6 +99,7 @@ export async function reassignAgents(
 ): Promise<{ actionId: string }> {
   await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
+  const currentNameSpace = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
   if ('agents' in options) {
@@ -116,7 +117,6 @@ export async function reassignAgents(
     }
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-    const currentNameSpace = getCurrentNamespace(soClient);
     const namespaceFilter = agentsKueryNamespaceFilter(currentNameSpace);
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
@@ -143,5 +143,12 @@ export async function reassignAgents(
     }
   }
 
-  return await reassignBatch(soClient, esClient, { newAgentPolicyId }, givenAgents, outgoingErrors);
+  return await reassignBatch(
+    soClient,
+    esClient,
+    { newAgentPolicyId },
+    givenAgents,
+    outgoingErrors,
+    currentNameSpace
+  );
 }
