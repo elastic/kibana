@@ -24,6 +24,7 @@ export enum EQL_ERROR_CODES {
   FAILED_REQUEST = 'EQL_ERR_FAILED_REQUEST',
   INVALID_EQL = 'EQL_ERR_INVALID_EQL',
   INVALID_SYNTAX = 'EQL_ERR_INVALID_SYNTAX',
+  MISSING_DATA_SOURCE = 'EQL_ERR_MISSING_DATA_SOURCE',
 }
 
 interface Params {
@@ -87,7 +88,7 @@ export const validateEql = async ({
     if (error instanceof Error && error.message.startsWith('index_not_found_exception')) {
       return {
         valid: false,
-        error: { code: EQL_ERROR_CODES.INVALID_EQL, messages: [error.message] },
+        error: { code: EQL_ERROR_CODES.MISSING_DATA_SOURCE, messages: [error.message] },
       };
     }
     return {
