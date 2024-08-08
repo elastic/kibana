@@ -69,6 +69,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
+  getLuceneRuleForTesting,
 } from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -117,7 +118,10 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload(auditbeatPath);
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
-      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
+      await deleteAllAlerts(supertest, log, es, [
+        '.preview.alerts-security.alerts-*',
+        '.alerts-security.alerts-*',
+      ]);
       await deleteAllRules(supertest, log);
     });
 
@@ -2748,6 +2752,19 @@ export default ({ getService }: FtrProviderContext) => {
           ...updatedAlerts.hits.hits[0]._source,
           [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         });
+      });
+    });
+
+    describe('with a Lucene query rule', () => {
+      it('should run successfully and generate an alert that matches the lucene query', async () => {
+        const luceneQueryRule = getLuceneRuleForTesting();
+        const { previewId } = await previewRule({ supertest, rule: luceneQueryRule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBeGreaterThan(0);
+        expect(previewAlerts[0]?._source?.destination).toEqual(
+          expect.objectContaining({ domain: 'aaa.stage.11111111.hello' })
+        );
+        expect(previewAlerts[0]?._source?.['event.dataset']).toEqual('network_traffic.tls');
       });
     });
   });
