@@ -78,9 +78,7 @@ export const OptionsListPopoverFooter = () => {
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) =>
-                stateManager.exclude.next(optionId === 'optionsList__excludeResults')
-              }
+              onChange={(optionId) => api.setExclude(optionId === 'optionsList__excludeResults')}
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
