@@ -14,4 +14,4 @@ export interface PersistData {
 export interface SortCriteria {
   field: string | number | symbol;
   direction: 'asc' | 'desc';
-};
+}
