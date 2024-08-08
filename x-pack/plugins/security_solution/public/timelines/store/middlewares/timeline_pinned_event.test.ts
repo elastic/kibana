@@ -66,7 +66,6 @@ describe('Timeline pinned event middleware', () => {
       data: {
         persistPinnedEventOnTimeline: {
           code: 200,
-          eventId: testEventId,
         },
       },
     });
