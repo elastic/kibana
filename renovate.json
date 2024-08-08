@@ -320,9 +320,9 @@
       "enabled": true
     },
     {
-      "groupName": "Profiling",
-      "matchDepNames": ["peggy", "@types/dagre"],
-      "reviewers": ["team:obs-ux-infra_services-team"],
+      "groupName": "Peggy",
+      "matchDepNames": ["peggy"],
+      "reviewers": ["team:kibana-operations", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip"],
       "minimumReleaseAge": "7 days",
