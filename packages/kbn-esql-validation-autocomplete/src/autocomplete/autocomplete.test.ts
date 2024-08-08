@@ -9,7 +9,7 @@
 import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import { commandDefinitions } from '../definitions/commands';
+import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import {
   getSafeInsertText,
   getUnitDuration,
@@ -45,6 +45,7 @@ const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as co
 const powParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const log10ParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
+const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 describe('autocomplete', () => {
   type TestArgs = [
     string,
