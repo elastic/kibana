@@ -69,3 +69,59 @@ export function generateDockerContainersData({
       containers.flatMap((container) => container.metrics().timestamp(timestamp))
     );
 }
+
+export function generateHostData({
+  from,
+  to,
+  count = 1,
+}: {
+  from: string;
+  to: string;
+  count: number;
+}) {
+  const range = timerange(from, to);
+
+  const hosts = Array(count)
+    .fill(0)
+    .map((_, idx) => infra.host(`host-name-${idx}`));
+
+  return range
+    .interval('30s')
+    .rate(1)
+    .generator((timestamp) =>
+      hosts.flatMap((host) => [
+        host.cpu().timestamp(timestamp),
+        host.memory().timestamp(timestamp),
+        host.network().timestamp(timestamp),
+        host.load().timestamp(timestamp),
+        host.filesystem().timestamp(timestamp),
+        host.diskio().timestamp(timestamp),
+      ])
+    );
+}
+
+export function generatePodsData({
+  from,
+  to,
+  count = 1,
+}: {
+  from: string;
+  to: string;
+  count: number;
+}) {
+  const range = timerange(from, to);
+
+  const pods = Array(count)
+    .fill(0)
+    .map((_, idx) => infra.pod(`pod-uid-${idx}`, `node-name-${idx}`));
+
+  return range
+    .interval('30s')
+    .rate(1)
+    .generator((timestamp) =>
+      pods.flatMap((pod, idx) => [
+        pod.metrics().timestamp(timestamp),
+        pod.container(`container-${idx}`).metrics().timestamp(timestamp),
+      ])
+    );
+}

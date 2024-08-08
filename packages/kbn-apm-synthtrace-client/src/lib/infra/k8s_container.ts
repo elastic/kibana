@@ -31,6 +31,7 @@ export class K8sContainer extends Entity<K8sContainerDocument> {
       ...this.fields,
       'kubernetes.container.cpu.usage.limit.pct': 46,
       'kubernetes.container.memory.usage.limit.pct': 30,
+      'kubernetes.pod.cpu.usage.limit.pct': 46,
     });
   }
 }
@@ -38,6 +39,7 @@ export class K8sContainer extends Entity<K8sContainerDocument> {
 export interface K8sContainerMetricsDocument extends K8sContainerDocument {
   'kubernetes.container.cpu.usage.limit.pct': number;
   'kubernetes.container.memory.usage.limit.pct': number;
+  'kubernetes.pod.cpu.usage.limit.pct': number;
 }
 
 class K8sContainerMetrics extends Serializable<K8sContainerMetricsDocument> {}
