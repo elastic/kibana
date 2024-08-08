@@ -152,7 +152,7 @@ const AssistantComponent: React.FC<Props> = ({
     () =>
       Object.keys(conversations).some(
         (conversation) =>
-          // if any conversation has a connector id, we're not in welcome set up
+          // if any conversation has a non-empty connector id, we're not in welcome set up
           conversations[conversation]?.apiConfig?.connectorId != null &&
           conversations[conversation]?.apiConfig?.connectorId !== ''
       )
