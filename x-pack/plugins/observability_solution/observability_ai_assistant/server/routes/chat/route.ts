@@ -41,14 +41,16 @@ const chatCompleteBaseRt = t.type({
         }),
       ]),
       instructions: t.array(
-        t.type({
-          doc_id: t.string,
-          text: t.string,
-          instruction_type: t.union([
-            t.literal('user_instruction'),
-            t.literal('application_instruction'),
-          ]),
-        })
+        t.intersection([
+          t.partial({ doc_id: t.string }),
+          t.type({
+            text: t.string,
+            instruction_type: t.union([
+              t.literal('user_instruction'),
+              t.literal('application_instruction'),
+            ]),
+          }),
+        ])
       ),
     }),
   ]),

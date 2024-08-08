@@ -98,7 +98,9 @@ export interface Instruction {
   text: string;
 }
 
-export interface AdHocInstruction extends Instruction {
+export interface AdHocInstruction {
+  doc_id?: string;
+  text: string;
   instruction_type: 'user_instruction' | 'application_instruction';
 }
 

@@ -62,10 +62,7 @@ import {
   RecalledEntry,
 } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
-import {
-  buildApplicationInstruction,
-  getSystemMessageFromInstructions,
-} from '../util/get_system_message_from_instructions';
+import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
 import { withAssistantSpan } from '../util/with_assistant_span';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
@@ -199,11 +196,10 @@ export class ObservabilityAIAssistantClient {
       'complete',
       ({ tracer: completeTracer }) => {
         if (responseLanguage) {
-          adHocInstructions.push(
-            buildApplicationInstruction(
-              `You MUST respond in the users preferred language which is: ${responseLanguage}.`
-            )
-          );
+          adHocInstructions.push({
+            instruction_type: 'application_instruction',
+            text: `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
+          });
         }
 
         const isConversationUpdate = persist && !!predefinedConversationId;
@@ -211,13 +207,12 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push(
-            buildApplicationInstruction(
-              `This conversation will be persisted in Kibana and available at this url: ${
-                kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-              }.`
-            )
-          );
+          adHocInstructions.push({
+            instruction_type: 'application_instruction',
+            text: `This conversation will be persisted in Kibana and available at this url: ${
+              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+            }.`,
+          });
         }
 
         const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());

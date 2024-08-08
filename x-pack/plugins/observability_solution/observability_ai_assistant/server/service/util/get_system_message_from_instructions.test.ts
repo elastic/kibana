@@ -37,17 +37,21 @@ describe('getSystemMessageFromInstructions', () => {
     ).toEqual(`first\n\nmyFunction`);
   });
 
-  it('overrides kb instructions with request instructions', () => {
+  it('overrides kb instructions with adhoc instructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ doc_id: 'second', text: 'second_kb' }],
+        userInstructions: [{ doc_id: 'second', text: 'second from kb' }],
         adHocInstructions: [
-          { doc_id: 'second', text: 'second_request', instruction_type: 'application_instruction' },
+          {
+            doc_id: 'second',
+            text: 'second from adhoc instruction',
+            instruction_type: 'user_instruction',
+          },
         ],
         availableFunctionNames: [],
       })
-    ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_request`);
+    ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond from adhoc instruction`);
   });
 
   it('includes kb instructions if there is no request instruction', () => {
