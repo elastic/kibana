@@ -46,6 +46,7 @@ test('getTopNavLinks result', () => {
         "label": "Try ES|QL",
         "run": [Function],
         "testId": "select-text-based-language-btn",
+        "tooltip": "ES|QL is Elastic's powerful new piped query language.",
       },
       Object {
         "description": "New Search",
@@ -110,6 +111,7 @@ test('getTopNavLinks result for ES|QL mode', () => {
         "label": "Switch to classic",
         "run": [Function],
         "testId": "switch-to-dataviews",
+        "tooltip": "Switch to KQL or Lucene syntax.",
       },
       Object {
         "description": "New Search",

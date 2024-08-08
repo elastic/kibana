@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { uniqBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { Logger } from '@kbn/logging';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import {
   createRandomSamplerWrapper,
@@ -21,6 +20,7 @@ import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../constants';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
+import type { FetchTopOptions } from './fetch_top_types';
 
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
 // `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
@@ -87,16 +87,16 @@ interface Aggs extends estypes.AggregationsLongTermsAggregate {
   buckets: estypes.AggregationsLongTermsBucket[];
 }
 
-export const fetchTopTerms = async (
-  esClient: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema,
-  fieldNames: string[],
-  logger: Logger,
+export const fetchTopTerms = async ({
+  esClient,
+  abortSignal,
+  emitError,
+  logger,
+  arguments: args,
+}: FetchTopOptions): Promise<SignificantItem[]> => {
   // The default value of 1 means no sampling will be used
-  sampleProbability: number = 1,
-  emitError: (m: string) => void,
-  abortSignal?: AbortSignal
-): Promise<SignificantItem[]> => {
+  const { fieldNames, sampleProbability = 1, ...params } = args;
+
   const randomSamplerWrapper = createRandomSamplerWrapper({
     probability: sampleProbability,
     seed: RANDOM_SAMPLER_SEED,

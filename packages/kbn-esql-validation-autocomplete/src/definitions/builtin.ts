@@ -308,13 +308,13 @@ const comparisonFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
         ],
         returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'left', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
@@ -338,13 +338,13 @@ const comparisonFunctions: FunctionDefinition[] = [
       {
         params: [
           { name: 'left', type: 'boolean' as const },
-          { name: 'right', type: 'string' as const, constantOnly: true },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
         ],
         returnType: 'boolean' as const,
       },
       {
         params: [
-          { name: 'left', type: 'string' as const, constantOnly: true },
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
           { name: 'right', type: 'boolean' as const },
         ],
         returnType: 'boolean' as const,
@@ -591,7 +591,16 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: ['eval', 'stats', 'metrics', 'row', 'dissect', 'where', 'enrich'],
+    supportedCommands: [
+      'eval',
+      'stats',
+      'inlinestats',
+      'metrics',
+      'row',
+      'dissect',
+      'where',
+      'enrich',
+    ],
     supportedOptions: ['by', 'with'],
     signatures: [
       {
