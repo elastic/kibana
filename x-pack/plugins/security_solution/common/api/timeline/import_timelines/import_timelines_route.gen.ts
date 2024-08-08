@@ -20,12 +20,12 @@ import { Readable, ImportTimelineResult } from '../model/components.gen';
 
 export type ImportTimelinesRequestBody = z.infer<typeof ImportTimelinesRequestBody>;
 export const ImportTimelinesRequestBody = z.object({
+  isImmutable: z.enum(['true', 'false']).optional(),
   file: Readable.merge(
     z.object({
       hapi: z.object({
         filename: z.string(),
         headers: z.object({}),
-        isImmutable: z.enum(['true', 'false']).optional(),
       }),
     })
   ),
@@ -33,6 +33,4 @@ export const ImportTimelinesRequestBody = z.object({
 export type ImportTimelinesRequestBodyInput = z.input<typeof ImportTimelinesRequestBody>;
 
 export type ImportTimelinesResponse = z.infer<typeof ImportTimelinesResponse>;
-export const ImportTimelinesResponse = z.object({
-  data: ImportTimelineResult,
-});
+export const ImportTimelinesResponse = ImportTimelineResult;
