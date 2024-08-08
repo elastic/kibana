@@ -7,4 +7,3 @@
  */
 
 export { registerUsageCountersUsageCollector } from './register_usage_counters_collector';
-export { registerUsageCountersRollups } from './rollups';

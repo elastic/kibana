@@ -19,6 +19,7 @@ import {
   EndpointDocGenerator,
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createAncestryArray, schemaWithAncestry, HEADERS } from './common';
 import {
@@ -27,9 +28,9 @@ import {
 } from '../../../../config/services/security_solution_edr_workflows_resolver';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
   const generator = new EndpointDocGenerator('resolver');
+  const utils = getService('securitySolutionUtils');
 
   const setEntityIDEmptyString = (event: Event) => {
     if (event.process?.entity_id) {
@@ -38,6 +39,12 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('@ess @serverless Resolver handling of entity ids', function () {
+    let adminSupertest: TestAgent;
+
+    before(async () => {
+      adminSupertest = await utils.createSuperTest();
+    });
+
     describe('entity api', () => {
       let origin: Event;
       let genData: InsertedEvents;
@@ -55,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('excludes events that have an empty entity_id field', async () => {
-        const { body }: { body: ResolverEntityIndex } = await supertest
+        const { body }: { body: ResolverEntityIndex } = await adminSupertest
           .get(
             // using the same indices value here twice to force the query parameter to be an array
             // for some reason using supertest's query() function doesn't construct a parsable array
@@ -104,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does not find children without a process entity_id', async () => {
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({
@@ -177,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
           return nodes.find((node) => node.id === id) !== undefined;
         };
-        const { body }: { body: ResolverNode[] } = await supertest
+        const { body }: { body: ResolverNode[] } = await adminSupertest
           .post('/api/endpoint/resolver/tree')
           .set(HEADERS)
           .send({

@@ -51,7 +51,13 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
                 anthropicVersion: inputBody.anthropic_version,
               },
             },
-          })) as { data: Readable };
+          })) as { data: Readable; status: string; message?: string; serviceMessage?: string };
+
+          if (data.status === 'error') {
+            throw new Error(
+              `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
+            );
+          }
 
           return {
             body: Readable.toWeb(data.data),
@@ -63,7 +69,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
-              messages: inputBody.messages,
+              messages: prepareMessages(inputBody.messages),
               temperature: params.temperature ?? inputBody.temperature,
               stopSequences: inputBody.stop_sequences,
               system: inputBody.system,
@@ -72,7 +78,18 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
               anthropicVersion: inputBody.anthropic_version,
             },
           },
-        })) as { status: string; data: { message: string } };
+        })) as {
+          status: string;
+          data: { message: string };
+          message?: string;
+          serviceMessage?: string;
+        };
+
+        if (data.status === 'error') {
+          throw new Error(
+            `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
+          );
+        }
 
         return {
           ok: data.status === 'ok',
@@ -82,3 +99,20 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     });
   }
 }
+
+const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
+  messages.reduce((acc, { role, content }) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (!lastMessage || lastMessage.role !== role) {
+      acc.push({ role, content });
+      return acc;
+    }
+
+    if (lastMessage.role === role) {
+      acc[acc.length - 1].content = lastMessage.content.concat(content);
+      return acc;
+    }
+
+    return acc;
+  }, [] as Array<{ role: string; content: string[] }>);

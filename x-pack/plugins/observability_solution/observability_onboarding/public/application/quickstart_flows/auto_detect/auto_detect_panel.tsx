@@ -114,6 +114,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       { defaultMessage: 'Your data is ready to explore!' }
                     )}
                     isLoading={false}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator"
                   />
                 ) : status === 'awaitingData' ? (
                   <ProgressIndicator
@@ -121,6 +122,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.installingElasticAgentFlexItemLabel',
                       { defaultMessage: 'Waiting for data to arrive...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelAwaitingDataProgressIndicator"
                   />
                 ) : status === 'inProgress' ? (
                   <ProgressIndicator
@@ -128,6 +130,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.autoDetectPanel.lookingForLogFilesFlexItemLabel',
                       { defaultMessage: 'Waiting for installation to complete...' }
                     )}
+                    data-test-subj="observabilityOnboardingAutoDetectPanelInProgressProgressIndicator"
                   />
                 ) : null}
                 {(status === 'awaitingData' || status === 'dataReceived') &&
