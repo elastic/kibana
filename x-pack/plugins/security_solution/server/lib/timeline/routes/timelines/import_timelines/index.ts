@@ -8,21 +8,17 @@
 import { extname } from 'path';
 import type { Readable } from 'stream';
 
-import type { IKibanaResponse } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../../config';
+import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { importTimelines } from './helpers';
-import {
-  ImportTimelinesRequestBody,
-  type ImportTimelinesResponse,
-} from '../../../../../../common/api/timeline';
+import { ImportTimelinesPayloadSchemaRt } from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';
@@ -43,13 +39,11 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
     .addVersion(
       {
         validate: {
-          request: {
-            body: buildRouteValidationWithZod(ImportTimelinesRequestBody),
-          },
+          request: { body: buildRouteValidationWithExcess(ImportTimelinesPayloadSchemaRt) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response): Promise<IKibanaResponse<ImportTimelinesResponse>> => {
+      async (context, request, response) => {
         try {
           const siemResponse = buildSiemResponse(response);
           const savedObjectsClient = (await context.core).savedObjects.client;
@@ -75,11 +69,8 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
             frameworkRequest,
             isImmutable === 'true'
           );
-          if (res instanceof Error || typeof res === 'string') {
-            throw res;
-          } else {
-            return response.ok({ body: res ?? {} });
-          }
+          if (typeof res !== 'string') return response.ok({ body: res ?? {} });
+          else throw res;
         } catch (err) {
           const error = transformError(err);
           const siemResponse = buildSiemResponse(response);

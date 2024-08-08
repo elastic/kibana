@@ -29,3 +29,32 @@ export const ImportTimelinesSchemaRt = rt.intersection([
 ]);
 
 export type ImportTimelinesSchema = rt.TypeOf<typeof ImportTimelinesSchemaRt>;
+
+const ReadableRt = rt.partial({
+  _maxListeners: rt.unknown,
+  _readableState: rt.unknown,
+  _read: rt.unknown,
+  readable: rt.boolean,
+  _events: rt.unknown,
+  _eventsCount: rt.number,
+  _data: rt.unknown,
+  _position: rt.number,
+  _encoding: rt.string,
+});
+
+const booleanInString = rt.union([rt.literal('true'), rt.literal('false')]);
+
+export const ImportTimelinesPayloadSchemaRt = rt.intersection([
+  rt.type({
+    file: rt.intersection([
+      ReadableRt,
+      rt.type({
+        hapi: rt.type({
+          filename: rt.string,
+          headers: rt.unknown,
+        }),
+      }),
+    ]),
+  }),
+  rt.partial({ isImmutable: booleanInString }),
+]);
