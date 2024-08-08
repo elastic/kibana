@@ -21,7 +21,7 @@ const emptyPreview = css`
   padding: 36px 0px 36px 0px;
 `;
 
-export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
+export function AddObservationUI({ onWidgetAdd, timeRange }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const [query, setQuery] = React.useState({ esql: '' });
@@ -111,7 +111,6 @@ export function AddObservationUI({ onWidgetAdd, timeRange, filters }: Props) {
                 </EuiFlexGroup>
               ) : (
                 <EsqlWidgetPreview
-                  filters={filters}
                   esqlQuery={submittedQuery.esql}
                   timeRange={timeRange}
                   onWidgetAdd={(widget) => {

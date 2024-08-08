@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CustomControlColumnConfiguration } from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 
 export interface DataTableCustomization {
   id: 'data_table';
   logsEnabled: boolean; // TODO / NOTE: Just temporary until Discover's data type contextual awareness lands.
-  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
+  rowAdditionalLeadingControls?: UnifiedDataTableProps['rowAdditionalLeadingControls'];
 }
