@@ -132,9 +132,9 @@ Elastic Security::
 * For the Elastic Security 8.15.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
 * UI for the custom integration creation with AI ({kibana-pull}186304[#186304]).
-* Change agent policies in edit package policy page ({kibana-pull}186084[#186084]).
-* Create shared package policy ({kibana-pull}185916[#185916]).
-* Introduce policy_ids in package policy SO ({kibana-pull}184636[#184636]).
+//* Change agent policies in edit package policy page ({kibana-pull}186084[#186084]).
+//* Create shared package policy ({kibana-pull}185916[#185916]).
+//* Introduce policy_ids in package policy SO ({kibana-pull}184636[#184636]).
 * Surface option to delete diagnostics files ({kibana-pull}183690[#183690]).
 * Allow to reset log level for agents >= 8.15.0 ({kibana-pull}183434[#183434]).
 * Adds warning if need root integrations trying to be used with unprivileged agents ({kibana-pull}183283[#183283]).
@@ -198,7 +198,7 @@ ES|QL::
 
 Fleet::
 * Use API key for standalone agent onboarding ({kibana-pull}187133[#187133]).
-* Adds action for upgrading all agents on policy ({kibana-pull}186827[#186827]).
+//* Adds action for upgrading all agents on policy ({kibana-pull}186827[#186827]).
 * Makes Fleet & Integrations layouts full width ({kibana-pull}186056[#186056]).
 * Adds support for setting `add_fields` processors on all agents under an agent policy ({kibana-pull}184693[#184693]).
 * Adds force flag to delete agent_policies API ({kibana-pull}184419[#184419]).
