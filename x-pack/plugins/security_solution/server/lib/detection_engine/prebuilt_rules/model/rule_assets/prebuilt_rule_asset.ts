@@ -83,3 +83,32 @@ export const PrebuiltRuleAsset = BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PR
       version: RuleVersion,
     })
   );
+
+/**
+ * Creates a Map of the fields that are upgradable during the Upgrade workflow, by type.
+ * This function creates the map dynamically, so that we don't need to manually
+ * add rule types if they are added, or manually add or remove any fields if they are
+ * added or removed to a specific rule type, or if we decide that they should not be part
+ * of the upgradable fields, since it's based on BaseCreateProps and TypeSpecificFields.
+ */
+function createUpgradableRuleFieldsByTypeMap() {
+  const baseFields = Object.keys(
+    BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET).shape
+  );
+
+  // Since we used Zod's .transform() method over TypeSpecificCreateProps above,
+  // the type of TypeSpecificFields is actually z.ZodEffects, and therefore does
+  // not have access to an options property. We need to transform it back into
+  // a z.ZodDiscriminatedUnion, accessing its underlying schema.
+  const TypeSpecificFieldsSchema = TypeSpecificFields._def.schema;
+
+  return new Map(
+    TypeSpecificFieldsSchema.options.map((option) => {
+      const typeName = option.shape.type.value;
+      const typeSpecificFields = Object.keys(option.shape);
+      return [typeName, [...baseFields, ...typeSpecificFields]];
+    })
+  );
+}
+
+export const UPGRADABLE_RULES_FIELDS_BY_TYPE_MAP = createUpgradableRuleFieldsByTypeMap();
