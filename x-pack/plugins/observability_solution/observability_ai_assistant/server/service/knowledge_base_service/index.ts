@@ -596,6 +596,7 @@ export class KnowledgeBaseService {
     user?: { name: string; id?: string };
     namespace?: string;
   }): Promise<void> => {
+    // for now we want to limit the number of user instructions to 1 per user
     if (document.type === KnowledgeBaseType.UserInstruction) {
       const existingId = await this.getExistingUserInstructionId({
         isPublic: document.public,
@@ -605,7 +606,7 @@ export class KnowledgeBaseService {
 
       if (existingId) {
         id = existingId;
-        document.doc_id = existingId; // this is infurating. Why the hell do we have 2 doc id fields???
+        document.doc_id = existingId;
       }
     }
 

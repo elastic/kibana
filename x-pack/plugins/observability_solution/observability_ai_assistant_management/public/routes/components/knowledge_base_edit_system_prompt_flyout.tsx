@@ -61,7 +61,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
           <h2>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h2.editEntryLabel',
-              { defaultMessage: 'Edit system prompt' }
+              { defaultMessage: 'AI User Profile' }
             )}
           </h2>
         </EuiTitle>
@@ -72,7 +72,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
           <h5>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPrompt.h5.editEntryLabel',
-              { defaultMessage: 'Personal system prompt' }
+              { defaultMessage: 'AI User Profile' }
             )}
           </h5>
         </EuiTitle>
@@ -82,7 +82,7 @@ export function KnowledgeBaseEditSystemPromptFlyout({
             'xpack.observabilityAiAssistantManagement.knowledgeBaseEditSystemPromptFlyout.personalPromptTextLabel',
             {
               defaultMessage:
-                'This prompt will be appended to the system prompt. Is will only be used for you and not shared with other users',
+                'The AI User Profile will be appended to the system prompt. It is space-aware and will only be used for your prompts - not shared with other users.',
             }
           )}
         </EuiText>
