@@ -30,8 +30,11 @@ interface HandlerOpts {
   res: KibanaResponseFactory;
 }
 
-export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
-  const jobsQuery = jobsQueryFactory(reporting);
+export const commonJobsRouteHandlerFactory = (
+  reporting: ReportingCore,
+  { isInternal }: { isInternal: boolean }
+) => {
+  const jobsQuery = jobsQueryFactory(reporting, { isInternal });
 
   const handleDownloadReport = ({ path, user, context, req, res }: HandlerOpts) => {
     const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
@@ -43,36 +46,48 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
 
     const { docId } = req.params;
 
-    return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
-      const payload = await jobsQuery.getDocumentPayload(doc);
-      const { contentType, content, filename, statusCode } = payload;
+    return jobManagementPreRouting(
+      reporting,
+      res,
+      docId,
+      user,
+      counters,
+      { isInternal },
+      async (doc) => {
+        const payload = await jobsQuery.getDocumentPayload(doc);
+        const { contentType, content, filename, statusCode } = payload;
 
-      if (!contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(contentType)) {
-        return res.badRequest({
-          body: `Unsupported content-type of ${contentType} specified by job output`,
-        });
+        if (!contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(contentType)) {
+          return res.badRequest({
+            body: `Unsupported content-type of ${contentType} specified by job output`,
+          });
+        }
+
+        const body = typeof content === 'string' ? Buffer.from(content) : content;
+
+        const headers = {
+          ...payload.headers,
+          'content-type': contentType,
+        };
+
+        if (filename) {
+          // event tracking of the downloaded file, if
+          // the report job was completed successfully
+          // and a file is available
+          const eventTracker = reporting.getEventTracker(
+            docId,
+            doc.jobtype,
+            doc.payload.objectType
+          );
+          const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
+          eventTracker?.downloadReport({ timeSinceCreation });
+
+          return res.file({ body, headers, filename });
+        }
+
+        return res.custom({ body, headers, statusCode });
       }
-
-      const body = typeof content === 'string' ? Buffer.from(content) : content;
-
-      const headers = {
-        ...payload.headers,
-        'content-type': contentType,
-      };
-
-      if (filename) {
-        // event tracking of the downloaded file, if
-        // the report job was completed successfully
-        // and a file is available
-        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
-        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
-        eventTracker?.downloadReport({ timeSinceCreation });
-
-        return res.file({ body, headers, filename });
-      }
-
-      return res.custom({ body, headers, statusCode });
-    });
+    );
   };
 
   const handleDeleteReport = ({ path, user, context, req, res }: HandlerOpts) => {
@@ -85,52 +100,64 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
 
     const { docId } = req.params;
 
-    return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) => {
-      const docIndex = doc.index;
-      const stream = await getContentStream(reporting, { id: docId, index: docIndex });
-      const reportingSetup = reporting.getPluginSetupDeps();
-      const logger = reportingSetup.logger.get('delete-report');
+    return jobManagementPreRouting(
+      reporting,
+      res,
+      docId,
+      user,
+      counters,
+      { isInternal },
+      async (doc) => {
+        const docIndex = doc.index;
+        const stream = await getContentStream(reporting, { id: docId, index: docIndex });
+        const reportingSetup = reporting.getPluginSetupDeps();
+        const logger = reportingSetup.logger.get('delete-report');
 
-      // An "error" event is emitted if an error is
-      // passed to the `stream.end` callback from
-      // the _final method of the ContentStream.
-      // This event must be handled.
-      stream.on('error', (err) => {
-        logger.error(err);
-      });
+        // An "error" event is emitted if an error is
+        // passed to the `stream.end` callback from
+        // the _final method of the ContentStream.
+        // This event must be handled.
+        stream.on('error', (err) => {
+          logger.error(err);
+        });
 
-      try {
-        // Overwriting existing content with an
-        // empty buffer to remove all the chunks.
-        await new Promise<void>((resolve, reject) => {
-          stream.end('', 'utf8', (error?: Error) => {
-            if (error) {
-              // handle error that could be thrown
-              // from the _write method of the ContentStream
-              reject(error);
-            } else {
-              resolve();
-            }
+        try {
+          // Overwriting existing content with an
+          // empty buffer to remove all the chunks.
+          await new Promise<void>((resolve, reject) => {
+            stream.end('', 'utf8', (error?: Error) => {
+              if (error) {
+                // handle error that could be thrown
+                // from the _write method of the ContentStream
+                reject(error);
+              } else {
+                resolve();
+              }
+            });
           });
-        });
 
-        await jobsQuery.delete(docIndex, docId);
+          await jobsQuery.delete(docIndex, docId);
 
-        // event tracking of the deleted report
-        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
-        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
-        eventTracker?.deleteReport({ timeSinceCreation });
+          // event tracking of the deleted report
+          const eventTracker = reporting.getEventTracker(
+            docId,
+            doc.jobtype,
+            doc.payload.objectType
+          );
+          const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
+          eventTracker?.deleteReport({ timeSinceCreation });
 
-        return res.ok({
-          body: { deleted: true },
-        });
-      } catch (error) {
-        logger.error(error);
-        return res.customError({
-          statusCode: 500,
-        });
+          return res.ok({
+            body: { deleted: true },
+          });
+        } catch (error) {
+          logger.error(error);
+          return res.customError({
+            statusCode: 500,
+          });
+        }
       }
-    });
+    );
   };
 
   return {
