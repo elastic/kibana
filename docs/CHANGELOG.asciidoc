@@ -231,7 +231,7 @@ Operations::
 * Adds password support to the Kibana keystore ({kibana-pull}180414[#180414]).
 Platform::
 * Adds http2 support to the Kibana server, that can be enabled using the `server.protocol: http2` Kibana setting ({kibana-pull}183465[#183465]).
-* Kibana's `rolling-file` appender now supports more advanced retention policies. Refer to the [Kibana logging documentation](https://www.elastic.co/guide/en/kibana/current/logging-configuration.html#rolling-file-appender) for more details ({kibana-pull}182346[#182346]).
+* Kibana's `rolling-file` appender now supports more advanced retention policies. Refer to the <<rolling-file-appender,Kibana logging documentation>> for more details ({kibana-pull}182346[#182346]).
 Security::
 * Adds an optional role description field to roles ({kibana-pull}183145[#183145]).
 * Adds the ability to filter audit logs by username using the `xpack.security.audit.ignore_filters.users` configuration setting ({kibana-pull}183137[#183137]).
@@ -7892,7 +7892,7 @@ Use spaces, cross-cluster replication, or cross-cluster search. To migrate to <<
 The logging configuration and log output format has changed. For more information, refer to {kibana-pull}112305[#112305].
 
 *Impact* +
-Use the new <<logging-configuration, logging system configuration>>.
+Use the new <<logging-configuration,logging system configuration>>.
 ====
 
 [float]
