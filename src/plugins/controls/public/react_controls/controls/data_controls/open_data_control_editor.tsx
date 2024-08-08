@@ -20,7 +20,7 @@ import { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditor } from './data_control_editor';
 import { DefaultDataControlState } from './types';
 
-export type DataControlEditorState = Omit<DefaultDataControlState, 'fieldName'> & {
+export type DataControlEditorState = Partial<DefaultDataControlState> & {
   fieldName?: string;
   controlType?: string;
   controlId?: string;

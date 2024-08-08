@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {
@@ -24,10 +26,11 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { Observable } from 'rxjs';
-import { ControlStyle, ControlWidth } from '../../types';
+
 import { ParentIgnoreSettings } from '../..';
+import { ControlInputTransform } from '../../../common';
 import { ControlGroupChainingSystem } from '../../../common/control_group/types';
+import { ControlStyle, ControlWidth } from '../../types';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../controls/types';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
@@ -66,7 +69,9 @@ export type ControlGroupApi = PresentationContainer &
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     allowExpensiveQueries$: PublishingSubject<boolean>;
     untilInitialized: () => Promise<void>;
-    openAddDataControlFlyout: () => void;
+    openAddDataControlFlyout: (settings?: {
+      controlInputTransform?: ControlInputTransform;
+    }) => void;
   };
 
 export interface ControlGroupRuntimeState {

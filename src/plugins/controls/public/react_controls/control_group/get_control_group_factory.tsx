@@ -40,6 +40,7 @@ import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState 
 import { ControlGroup } from './components/control_group';
 import { initSelectionsManager } from './selections_manager';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
+import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -162,25 +163,27 @@ export const getControlGroupEmbeddableFactory = (services: {
           i18n.translate('controls.controlGroup.displayName', {
             defaultMessage: 'Controls',
           }),
-        openAddDataControlFlyout: () => {
-          /* openDataControlEditor({
+        openAddDataControlFlyout: (settings) => {
+          const { controlInputTransform } = settings ?? {
+            controlInputTransform: (state) => state,
+          };
+          openDataControlEditor({
             initialState: {
-              grow: DEFAULT_CONTROL_GROW,
-              width: DEFAULT_CONTROL_WIDTH,
-              dataViewId: parentApi.lastUsedDataViewId.getValue(),
+              grow: api.grow.getValue(),
+              width: api.width.getValue(),
             },
             onSave: ({ type: controlType, state: initialState }) => {
-              controlsManager.api.addNewPanel({
+              api.addNewPanel({
                 panelType: controlType,
-                initialState,
+                initialState: controlInputTransform!(
+                  initialState as Partial<ControlGroupSerializedState>,
+                  controlType
+                ),
               });
             },
-            controlGroupApi,
-            services: {
-              core,
-              dataViews: dataViewsService,
-            },
-          });*/
+            controlGroupApi: api,
+            services,
+          });
         },
         serializeState: () => {
           const { panelsJSON, references } = controlsManager.serializeControls();
