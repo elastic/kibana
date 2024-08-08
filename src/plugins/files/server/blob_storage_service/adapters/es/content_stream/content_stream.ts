@@ -7,7 +7,7 @@
  */
 
 import { createId } from '@paralleldrive/cuid2';
-import * as cborx from 'cbor-x';
+import { encode, decode } from '@kbn/cbor';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -144,7 +144,7 @@ export class ContentStream extends Duplex {
       }
       const buffer = Buffer.concat(chunks);
       const decodedChunkDoc: GetResponse<FileChunkDocument> | undefined = buffer.byteLength
-        ? (cborx.decode(buffer) as GetResponse<FileChunkDocument>)
+        ? (decode(buffer) as GetResponse<FileChunkDocument>)
         : undefined;
 
       // Because `asStream` was used in retrieving the document, errors are also not be processed
@@ -245,7 +245,7 @@ export class ContentStream extends Duplex {
           id,
           index,
           op_type: 'create',
-          document: cborx.encode({
+          document: encode({
             data,
             bid,
             // Mark it as last?

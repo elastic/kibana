@@ -1444,36 +1444,6 @@
     "@types/tough-cookie" "^4.0.5"
     tough-cookie "^4.1.4"
 
-"@cbor-extract/cbor-extract-darwin-arm64@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-darwin-arm64/-/cbor-extract-darwin-arm64-2.0.0.tgz#cf0667e4c22111c9d45e16c29964892b12460a76"
-  integrity sha512-jebtLrruvsBbGMsUn0QxZW/8Z7caS9OkszVKZ64WTWajUkyohmolUdKL2nbfaTyyi3ABJrxVNM4YO1pvMsNI1g==
-
-"@cbor-extract/cbor-extract-darwin-x64@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-darwin-x64/-/cbor-extract-darwin-x64-2.0.0.tgz#7bc01e7911b97eee4c78ae074bd3108f2ff208c3"
-  integrity sha512-LGYjdlyqANBqCDzBujCqXpPcK70rvaQgw98/aquzBuEmK0KXS7i579CoVG1yS/eb3bMqiVPevBri45jbR6Tlsg==
-
-"@cbor-extract/cbor-extract-linux-arm64@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-linux-arm64/-/cbor-extract-linux-arm64-2.0.0.tgz#e40608afed5f373091560fa9dcd19c7f52f510b0"
-  integrity sha512-c1rbQcSF01yVgbG60zEfHNsUkXiEEQRNdYqm5qpqEAkLx4gA6DDU91IQbalkqXfwDuQzcMovOc1TC3uJJIi2OQ==
-
-"@cbor-extract/cbor-extract-linux-arm@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-linux-arm/-/cbor-extract-linux-arm-2.0.0.tgz#f52a7580fb23e305370e66ae9ff136de3729c4b8"
-  integrity sha512-cOGHEIif5rPbpix6qhpuatrZzm6HeC5rT0nXt8ynLTc7PzfXmovswD9x6d9h5NcHswkV5y3PbkNbpel/tLADYg==
-
-"@cbor-extract/cbor-extract-linux-x64@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-linux-x64/-/cbor-extract-linux-x64-2.0.0.tgz#8c936b8a93f915bf3c2459d5b4b78d244bda0f26"
-  integrity sha512-WYeE1b5WGf9pbbQH3qeNBXq710gGsuVFUiP148RY8In+2pCp/fxjBpe701ngam9/fF5D+gJs8B1i5wv/PN7JZA==
-
-"@cbor-extract/cbor-extract-win32-x64@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@cbor-extract/cbor-extract-win32-x64/-/cbor-extract-win32-x64-2.0.0.tgz#4d4ad91527a8313c3db1e2167a8821dfae9d6211"
-  integrity sha512-XqVuJEnE0jpl/RkuSp04FF2UE73gY52Y4nZaIE6j9GAeSH2cHYU5CCd4TaVMDi2M18ZpZv7XhL/k+nneQzyJpQ==
-
 "@cfaester/enzyme-adapter-react-18@^0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@cfaester/enzyme-adapter-react-18/-/enzyme-adapter-react-18-0.8.0.tgz#313814eb79658a6e74209f9f1743bcefff14a46f"
@@ -3275,26 +3245,6 @@
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.3.tgz#9df03bbd7c696a5c58885c34aa06da41c8543796"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
-
-"@jsonjoy.com/base64@^1.1.1":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@jsonjoy.com/base64/-/base64-1.1.2.tgz#cf8ea9dcb849b81c95f14fc0aaa151c6b54d2578"
-  integrity sha512-q6XAnWQDIMA3+FTiOYajoYqySkO+JSat0ytXGSuRdq9uXE7o92gzuQwQM14xaCRlBLGq3v5miDGC4vkVTn54xA==
-
-"@jsonjoy.com/json-pack@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@jsonjoy.com/json-pack/-/json-pack-1.1.0.tgz#33ca57ee29d12feef540f2139225597469dec894"
-  integrity sha512-zlQONA+msXPPwHWZMKFVS78ewFczIll5lXiVPwFPCZUsrOKdxc2AvxU1HoNBmMRhqDZUR9HkC3UOm+6pME6Xsg==
-  dependencies:
-    "@jsonjoy.com/base64" "^1.1.1"
-    "@jsonjoy.com/util" "^1.1.2"
-    hyperdyperid "^1.2.0"
-    thingies "^1.20.0"
-
-"@jsonjoy.com/util@^1.1.2":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@jsonjoy.com/util/-/util-1.3.0.tgz#e5623885bb5e0c48c1151e4dae422fb03a5887a1"
-  integrity sha512-Cebt4Vk7k1xHy87kHY7KSPLT77A7Ev7IfOblyLZhtYEhrdQ6fX4EoLq3xOQ3O/DRMEh2ok5nyC180E+ABS8Wmw==
 
 "@juggle/resize-observer@^3.3.1":
   version "3.4.0"
@@ -13970,26 +13920,10 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
-cbor-extract@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/cbor-extract/-/cbor-extract-2.0.2.tgz#8e45339627fb8b47071e8e71138c630019125939"
-  integrity sha512-QoLGEgPff03ad/L66P91ci5Zmf7Woq8bh4H5XT3+D5annlrPH5ObHf2Yvo53eDQaDkQtF9tJwMKSWANGXDmwUA==
-  dependencies:
-    node-gyp-build-optional-packages "5.0.3"
-  optionalDependencies:
-    "@cbor-extract/cbor-extract-darwin-arm64" "2.0.0"
-    "@cbor-extract/cbor-extract-darwin-x64" "2.0.0"
-    "@cbor-extract/cbor-extract-linux-arm" "2.0.0"
-    "@cbor-extract/cbor-extract-linux-arm64" "2.0.0"
-    "@cbor-extract/cbor-extract-linux-x64" "2.0.0"
-    "@cbor-extract/cbor-extract-win32-x64" "2.0.0"
-
-cbor-x@^1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/cbor-x/-/cbor-x-1.3.3.tgz#5ba0f6d3f6720ea5ba38804e583c020bccf2f762"
-  integrity sha512-y3V8GlypWM01t3NtYvXmDehuU3bt4q3tewCrvj5EMfUYT6v9HjRu4NHYH3EgbzJCOaZFroAhzci9PHvIIDuOEQ==
-  optionalDependencies:
-    cbor-extract "^2.0.2"
+cborg@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/cborg/-/cborg-2.0.5.tgz#b5393c8b1843d5c1a61f2b79b4c9f752052a4d44"
+  integrity sha512-xVW1rSIw1ZXbkwl2XhJ7o/jAv0vnVoQv/QlfQxV8a7V5PlA4UU/AcIiXqmpyybwNWy/GPQU1m/aBVNIWr7/T0w==
 
 ccount@^1.0.0:
   version "1.0.5"
@@ -19859,11 +19793,6 @@ humanize-ms@^1.2.1:
   dependencies:
     ms "^2.0.0"
 
-hyperdyperid@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/hyperdyperid/-/hyperdyperid-1.2.0.tgz#59668d323ada92228d2a869d3e474d5a33b69e6b"
-  integrity sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==
-
 hyphenate-style-name@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.3.tgz#097bb7fa0b8f1a9cf0bd5c734cf95899981a9b48"
@@ -24047,11 +23976,6 @@ node-forge@^1, node-forge@^1.2.1, node-forge@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
-
-node-gyp-build-optional-packages@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/node-gyp-build-optional-packages/-/node-gyp-build-optional-packages-5.0.3.tgz#92a89d400352c44ad3975010368072b41ad66c17"
-  integrity sha512-k75jcVzk5wnnc/FMxsf4udAoTEUv2jY3ycfdSd3yWu6Cnd1oee6/CfZJApyscA4FJOmdoixWwiwOyf16RzD5JA==
 
 node-gyp-build-optional-packages@5.0.7:
   version "5.0.7"
@@ -30224,11 +30148,6 @@ textarea-caret@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/textarea-caret/-/textarea-caret-3.1.0.tgz#5d5a35bb035fd06b2ff0e25d5359e97f2655087f"
   integrity sha512-cXAvzO9pP5CGa6NKx0WYHl+8CHKZs8byMkt3PCJBCmq2a34YA9pO1NrQET5pzeqnBjBdToF5No4rrmkDUgQC2Q==
-
-thingies@^1.20.0:
-  version "1.21.0"
-  resolved "https://registry.yarnpkg.com/thingies/-/thingies-1.21.0.tgz#e80fbe58fd6fdaaab8fad9b67bd0a5c943c445c1"
-  integrity sha512-hsqsJsFMsV+aD4s3CWKk85ep/3I9XzYV/IXaSouJMYIoDlgyi11cBhsqYe9/geRfB0YIikBQg6raRaM+nIMP9g==
 
 thread-stream@^2.0.0:
   version "2.3.0"

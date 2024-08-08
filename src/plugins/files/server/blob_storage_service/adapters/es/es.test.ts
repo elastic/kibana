@@ -7,7 +7,7 @@
  */
 
 import { Readable } from 'stream';
-import { encode } from 'cbor-x';
+import { encode } from '@kbn/cbor';
 import { promisify } from 'util';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
