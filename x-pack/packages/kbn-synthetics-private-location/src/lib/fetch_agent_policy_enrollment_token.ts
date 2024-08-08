@@ -1,32 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isError } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
-import { CliOptions } from '../types';
 import { KibanaAPIClient } from './kibana_api_client';
+import { CliOptions } from '../types';
 
-export async function generateFleetServiceToken(
+export async function fetchAgentPolicyEnrollmentToken(
   { kibanaUrl, kibanaPassword, kibanaUsername }: CliOptions,
   logger: ToolingLog,
-  kibanaApiClient: KibanaAPIClient
+  kibanaApiClient: KibanaAPIClient,
+  agentPolicyId: string
 ) {
   try {
     const response = await kibanaApiClient.sendRequest({
-      method: 'post',
-      url: 'api/fleet/service_tokens',
+      method: 'get',
+      url: `api/fleet/enrollment_api_keys?kuery=policy_id:${agentPolicyId}`,
     });
 
-    logger.info(`Generated fleet server service token saved`);
+    logger.info(`Fetching agent policy enrollment token`);
     return response.data;
   } catch (error) {
     if (isError(error)) {
-      logger.error(`Error generating fleet server service token: ${error.message} ${error.stack}`);
+      logger.error(`Error fetching agent enrollment token: ${error.message} ${error.stack}`);
     }
     throw error;
   }

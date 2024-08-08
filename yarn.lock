@@ -6708,7 +6708,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-private-location@link:packages/kbn-synthetics-private-location":
+"@kbn/synthetics-private-location@link:x-pack/packages/kbn-synthetics-private-location":
   version "0.0.0"
   uid ""
 
