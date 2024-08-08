@@ -43,7 +43,7 @@ const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<bool
 
 async function checkDependencies(
   rootNodeModulesDir: string,
-  productionDependencies: Map<string, { name: string; version: string }>,
+  productionDependencies: Map<string, boolean>,
   prodNativeModulesFound: Array<{ name: string; version: string; path: string }>,
   log: ToolingLog
 ) {
@@ -98,7 +98,11 @@ const checkProdNativeModules = async (log: ToolingLog) => {
 
   try {
     // Gets all production dependencies based on package.json and then searches across transient dependencies using lock file
-    const productionDependencies = findProductionDependencies(log, await readYarnLock());
+    const rawProductionDependencies = findProductionDependencies(log, await readYarnLock());
+    const productionDependencies: Map<string, boolean> = new Map();
+    rawProductionDependencies.forEach((depInfo, depKey) => {
+      productionDependencies.set(`${depInfo.name}@${depInfo.version}`, true);
+    });
 
     // Fail if no root node_modules folder
     if (!existsSync(rootNodeModulesDir)) {
