@@ -7,24 +7,21 @@
  */
 
 import { sendRequest } from './use_request';
+import type { EditorRequest } from '../application/containers/editor/monaco/types';
 
 export async function convertRequestToLanguage({
-  method,
-  path,
-  body,
+  requests,
   language,
   esHost,
 }: {
-  method: string;
-  path: string;
   language: string;
   esHost: string;
-  body: string[];
+  requests: EditorRequest[];
 }) {
   return sendRequest({
     path: `/api/console/convert_request_to_language`,
     method: 'post',
-    query: { method, path, language, esHost },
-    body,
+    query: { language, esHost },
+    body: requests,
   });
 }

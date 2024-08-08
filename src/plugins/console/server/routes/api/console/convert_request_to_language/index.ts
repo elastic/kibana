@@ -15,12 +15,18 @@ import { acceptedHttpVerb, nonEmptyString } from '../proxy/validation_config';
 
 const routeValidationConfig = {
   query: schema.object({
-    method: acceptedHttpVerb,
-    path: nonEmptyString,
     language: schema.string(),
     esHost: schema.string(),
   }),
-  body: schema.maybe(schema.arrayOf(schema.string())),
+  body: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        method: acceptedHttpVerb,
+        url: nonEmptyString,
+        data: schema.arrayOf(schema.string()),
+      })
+    )
+  ),
 };
 
 export type Query = TypeOf<typeof routeValidationConfig.query>;
@@ -32,16 +38,20 @@ export const registerConvertRequestRoute = ({
 }: RouteDependencies) => {
   const handler: RequestHandler<unknown, Query, Body> = async (ctx, req, response) => {
     const { body, query } = req;
-    const { method, path, language, esHost } = query;
+    const { language, esHost } = query;
 
     try {
-      let request = `${method} ${path} \n`;
-      // Add body if present, we can append all the lines into the request string
-      if (body && body.length > 0) {
-        request += body.join('\n');
-      }
+      // Iterate over each request and build all the requests into a single string
+      // that can be passed to the request-converter library
+      let devtoolsScript = '';
+      (body || []).forEach((request) => {
+        devtoolsScript += `${request.method} ${request.url}\n` as string;
+        if (request.data && request.data.length > 0) {
+          devtoolsScript += request.data.join('\n');
+        }
+      });
 
-      const codeSnippet = await convertRequests(request, language, {
+      const codeSnippet = await convertRequests(devtoolsScript, language, {
         checkOnly: false,
         printResponse: true,
         complete: true,

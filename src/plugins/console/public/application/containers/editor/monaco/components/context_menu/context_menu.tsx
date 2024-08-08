@@ -70,35 +70,16 @@ export const ContextMenu = ({
     // Get all the selected requests
     const requests = await getRequests();
 
-    // Convert each request using convertRequestToLanguage and handle all promises
-    const results = await Promise.allSettled(
-      requests.map((request: any) =>
-        convertRequestToLanguage({
-          method: request.method,
-          path: request.url,
-          body: request.data,
-          language: withLanguage,
-          esHost: esHostService.getHost(),
-        })
-      )
-    );
-
-    // Aggregate data and log errors
-    let aggregatedData = '';
-    let hasErrors = false;
-
-    results.forEach((result) => {
-      if (result.status === 'fulfilled' && !result.value.error) {
-        aggregatedData += result.value.data + '\n';
-      } else {
-        hasErrors = true;
-      }
+    const { data: requestsAsCode, error: requestError } = await convertRequestToLanguage({
+      language: withLanguage,
+      esHost: esHostService.getHost(),
+      requests,
     });
 
-    // If we dont have data and have errors, we should show an error toast saying
-    // that no requests could be converted
-    if (aggregatedData === '' && hasErrors) {
-      const error = new Error(`Failed to convert request to ${withLanguage}`);
+    if (requestError) {
+      const error = new Error(requestError.message);
+      error.name = requestError.error;
+
       notifications.toasts.addError(error, {
         title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
           defaultMessage:
@@ -108,31 +89,17 @@ export const ContextMenu = ({
       });
 
       return Promise.reject(error);
-    } else {
-      // If we have data and errors, we should show a warning toast saying that
-      // some requests could not be converted and copy the rest to clipboard
-      if (aggregatedData !== '' && hasErrors) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('console.consoleMenu.copyAsSuccessWithWarningMessage', {
-            defaultMessage: 'Some requests could not be copied to clipboard because they are invalid',
-          }),
-        });
-        // Otherwise we can just copy the data to clipboard
-      } else {
-        notifications.toasts.addSuccess({
-          title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
-            defaultMessage:
-              '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
-            values: { language: withLanguage, requestsCount: requests.length },
-          }),
-        });
-      }
-
-      // Regardless of whether there was a warniing or not, we should copy the
-      // data to clipboard
-      await copyText(aggregatedData);
     }
 
+    notifications.toasts.addSuccess({
+      title: i18n.translate('console.consoleMenu.copyAsSuccessMessage', {
+        defaultMessage:
+          '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
+        values: { language: withLanguage, requestsCount: requests.length },
+      }),
+    });
+
+    await copyText(requestsAsCode);
     return Promise.resolve();
   };
 
