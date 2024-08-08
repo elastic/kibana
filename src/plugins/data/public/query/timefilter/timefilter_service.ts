@@ -18,24 +18,28 @@ import {
 import { UI_SETTINGS } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 
+export interface TimeFilterServiceDependencies {
+  uiSettings: IUiSettingsClient;
+  storage: IStorageWrapper;
+  minRefreshInterval: number;
+}
+
 /**
  * Filter Service
  * @internal
  */
-
-export interface TimeFilterServiceDependencies {
-  uiSettings: IUiSettingsClient;
-  storage: IStorageWrapper;
-}
-
 export class TimefilterService {
   constructor(private readonly nowProvider: NowProviderInternalContract) {}
 
-  public setup({ uiSettings, storage }: TimeFilterServiceDependencies): TimefilterSetup {
+  public setup({
+    uiSettings,
+    storage,
+    minRefreshInterval,
+  }: TimeFilterServiceDependencies): TimefilterSetup {
     const timefilterConfig: TimefilterConfig = {
       timeDefaults: uiSettings.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS),
       refreshIntervalDefaults: uiSettings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS),
-      minRefreshIntervalDefault: 5000,
+      minRefreshIntervalDefault: minRefreshInterval,
     };
     const history = new TimeHistory(storage);
     const timefilter = new Timefilter(timefilterConfig, history, this.nowProvider);

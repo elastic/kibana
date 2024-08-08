@@ -27,7 +27,6 @@ import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loo
 
 export type { AutoRefreshDoneFn };
 
-// TODO: remove!
 export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);

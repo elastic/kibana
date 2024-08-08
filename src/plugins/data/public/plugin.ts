@@ -59,7 +59,7 @@ export class DataPublicPlugin
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
-    this.queryService = new QueryService();
+    this.queryService = new QueryService(initializerContext);
 
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();
