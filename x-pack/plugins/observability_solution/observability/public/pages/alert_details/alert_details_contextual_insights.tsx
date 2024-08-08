@@ -23,7 +23,6 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
     observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight;
 
   const getAlertContextMessages = useCallback(async () => {
-    console.log('alert', alert);
     const fields = alert?.formatted.fields as Record<string, string> | undefined;
     if (!observabilityAIAssistant || !fields || !alert) {
       return [];
@@ -59,24 +58,27 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
         .map(({ description, data }) => `${description}:\n${JSON.stringify(data, null, 2)}`)
         .join('\n\n');
 
-      return observabilityAIAssistant.getContextualInsightMessages({
-        message: `I'm looking at an alert and trying to understand why it was triggered`,
+      const param = {
+        message: `I'm looking at an alert and trying to understand why it was triggered based on contextual information.`,
         instructions: dedent(
           `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
 
         The following contextual information is available to help you understand the alert:
+
         ${obsAlertContext}
 
-        The user already know the alert reason so do not repeat this: ${alert.formatted.reason}
+        Use the contextual information above to provide insights into the alert. The insights should help the user understand why the alert was triggered, what it means, and what they should do next.
         Be brief and to the point.
         Do not list the alert details as bullet points.
-        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate
+        Pay special attention to regressions in downstream dependencies like big increases or decreases in throughput, latency or failure rate.
         Suggest reasons why the alert happened and what may have contributed to it.
         Present the primary insights in a single paragraph at the top in bold text. Add additional paragraphs with more detailed insights if needed but keep them brief.
         If the alert is a false positive, mention that in the first paragraph.
         `
         ),
-      });
+      };
+
+      return observabilityAIAssistant.getContextualInsightMessages(param);
     } catch (e) {
       console.error('An error occurred while fetching alert context', e);
       return observabilityAIAssistant.getContextualInsightMessages({

@@ -181,11 +181,9 @@ export const getAlertDetailsContextHandler = (
         },
       });
 
-      console.log('logRateAnalysis', logRateAnalysis);
-
       return {
         key: 'logRateAnalysis',
-        description: `Significant field/value pairs in log data that contributed to changes in the log rate.`,
+        description: `Significant field/value pairs in log data that contributed to changes in the log rate when the alert is active as compared to the time range before the alert.`,
         data: logRateAnalysis,
       };
     });
