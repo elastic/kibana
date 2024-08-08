@@ -6,7 +6,41 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "logsDataAccess",
+      "id": "def-public.LogsDataAccessPluginSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "LogsDataAccessPluginSetup",
+      "description": [],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/observability_solution/logs_data_access/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "logsDataAccess",
+      "id": "def-public.LogsDataAccessPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "LogsDataAccessPluginStart",
+      "description": [],
+      "signature": [
+        "{ services: { logSourcesService: ",
+        "LogSourcesService",
+        "; }; }"
+      ],
+      "path": "x-pack/plugins/observability_solution/logs_data_access/public/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -132,7 +166,17 @@
         "LogsErrorRateTimeseries",
         ") => Promise<",
         "LogsErrorRateTimeseriesReturnType",
-        ">; getLogSourcesService: (request: ",
+        ">; logSourcesServiceFactory: { getLogSourcesService(savedObjectsClient: ",
+        {
+          "pluginId": "@kbn/core-saved-objects-api-server",
+          "scope": "server",
+          "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+          "section": "def-server.SavedObjectsClientContract",
+          "text": "SavedObjectsClientContract"
+        },
+        "): Promise<",
+        "LogSourcesService",
+        ">; getScopedLogSourcesService(request: ",
         {
           "pluginId": "@kbn/core-http-server",
           "scope": "server",
@@ -140,11 +184,9 @@
           "section": "def-server.KibanaRequest",
           "text": "KibanaRequest"
         },
-        "<unknown, unknown, unknown, any>) => Promise<{ getLogSources: () => Promise<",
-        "LogSource",
-        "[]>; setLogSources: (sources: ",
-        "LogSource",
-        "[]) => Promise<void>; }>; }; }"
+        "<unknown, unknown, unknown, any>): Promise<",
+        "LogSourcesService",
+        ">; }; }; }"
       ],
       "path": "x-pack/plugins/observability_solution/logs_data_access/server/plugin.ts",
       "deprecated": false,

@@ -21,9 +21,27 @@ import type {
 } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
-import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
 import type { InternalStaticAssets } from '@kbn/core-http-server-internal';
-import { firstValueFrom, map, type Observable } from 'rxjs';
+import {
+  combineLatest,
+  concatMap,
+  firstValueFrom,
+  map,
+  type Observable,
+  ReplaySubject,
+  shareReplay,
+  Subject,
+  takeUntil,
+  timer,
+} from 'rxjs';
+import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { CoreAppConfig, type CoreAppConfigType, CoreAppPath } from './core_app_config';
 import { registerBundleRoutes } from './bundle_routes';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
@@ -41,12 +59,17 @@ interface CommonRoutesParams {
   ) => Promise<IKibanaResponse>;
 }
 
+const DYNAMIC_CONFIG_OVERRIDES_SO_TYPE = 'dynamic-config-overrides';
+const DYNAMIC_CONFIG_OVERRIDES_SO_ID = 'dynamic-config-overrides';
+
 /** @internal */
 export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;
   private readonly configService: IConfigService;
   private readonly config$: Observable<CoreAppConfig>;
+  private readonly savedObjectsStart$ = new ReplaySubject<InternalSavedObjectsServiceStart>(1);
+  private readonly stop$ = new Subject<void>();
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
@@ -70,8 +93,21 @@ export class CoreAppsService {
   async setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
     const config = await firstValueFrom(this.config$);
-    this.registerDefaultRoutes(coreSetup, uiPlugins, config);
+    this.registerDefaultRoutes(coreSetup, uiPlugins);
     this.registerStaticDirs(coreSetup, uiPlugins);
+    this.maybeRegisterDynamicConfigurationFeature({
+      config,
+      coreSetup,
+      savedObjectsStart$: this.savedObjectsStart$,
+    });
+  }
+
+  start(coreStart: InternalCoreStart) {
+    this.savedObjectsStart$.next(coreStart.savedObjects);
+  }
+
+  stop() {
+    this.stop$.next();
   }
 
   private registerPrebootDefaultRoutes(corePreboot: InternalCorePreboot, uiPlugins: UiPlugins) {
@@ -100,11 +136,7 @@ export class CoreAppsService {
     });
   }
 
-  private registerDefaultRoutes(
-    coreSetup: InternalCoreSetup,
-    uiPlugins: UiPlugins,
-    config: CoreAppConfig
-  ) {
+  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
@@ -167,18 +199,80 @@ export class CoreAppsService {
         }
       }
     );
+  }
+
+  private maybeRegisterDynamicConfigurationFeature({
+    config,
+    coreSetup,
+    savedObjectsStart$,
+  }: {
+    config: CoreAppConfig;
+    coreSetup: InternalCoreSetup;
+    savedObjectsStart$: Observable<InternalSavedObjectsServiceStart>;
+  }) {
+    // Always registering the Saved Objects to avoid ON/OFF conflicts in the migrations
+    coreSetup.savedObjects.registerType({
+      name: DYNAMIC_CONFIG_OVERRIDES_SO_TYPE,
+      hidden: true,
+      hiddenFromHttpApis: true,
+      namespaceType: 'agnostic',
+      mappings: {
+        dynamic: false,
+        properties: {},
+      },
+    });
 
     if (config.allowDynamicConfigOverrides) {
-      this.registerInternalCoreSettingsRoute(router);
+      const savedObjectsClient$ = savedObjectsStart$.pipe(
+        map((savedObjectsStart) =>
+          savedObjectsStart.createInternalRepository([DYNAMIC_CONFIG_OVERRIDES_SO_TYPE])
+        ),
+        shareReplay(1)
+      );
+
+      // Register the HTTP route
+      const router = coreSetup.http.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
+      this.registerInternalCoreSettingsRoute(router, savedObjectsClient$);
+
+      let latestOverrideVersion: string | undefined; // Use the document version to avoid calling override on every poll
+      // Poll for updates
+      combineLatest([savedObjectsClient$, timer(0, 10_000)])
+        .pipe(
+          concatMap(async ([soClient]) => {
+            try {
+              const persistedOverrides = await soClient.get<Record<string, unknown>>(
+                DYNAMIC_CONFIG_OVERRIDES_SO_TYPE,
+                DYNAMIC_CONFIG_OVERRIDES_SO_ID
+              );
+              if (latestOverrideVersion !== persistedOverrides.version) {
+                this.configService.setDynamicConfigOverrides(persistedOverrides.attributes);
+                latestOverrideVersion = persistedOverrides.version;
+              }
+            } catch (err) {
+              // Potential failures:
+              // - The SO document does not exist (404 error) => no need to log
+              // - The configuration overrides are invalid => they won't be applied and the validation error will be logged.
+              if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+                this.logger.warn(`Failed to apply the persisted dynamic config overrides: ${err}`);
+              }
+            }
+          }),
+          takeUntil(this.stop$)
+        )
+        .subscribe();
     }
   }
 
   /**
    * Registers the HTTP API that allows updating in-memory the settings that opted-in to be dynamically updatable.
    * @param router {@link IRouter}
+   * @param savedObjectClient$ An observable of a {@link SavedObjectsClientContract | savedObjects client} that will be used to update the document
    * @private
    */
-  private registerInternalCoreSettingsRoute(router: IRouter) {
+  private registerInternalCoreSettingsRoute(
+    router: IRouter,
+    savedObjectClient$: Observable<SavedObjectsClientContract>
+  ) {
     router.versioned
       .put({
         path: '/internal/core/_settings',
@@ -201,7 +295,12 @@ export class CoreAppsService {
         },
         async (context, req, res) => {
           try {
-            this.configService.setDynamicConfigOverrides(req.body);
+            const newGlobalOverrides = this.configService.setDynamicConfigOverrides(req.body);
+            const soClient = await firstValueFrom(savedObjectClient$);
+            await soClient.create(DYNAMIC_CONFIG_OVERRIDES_SO_TYPE, newGlobalOverrides, {
+              id: DYNAMIC_CONFIG_OVERRIDES_SO_ID,
+              overwrite: true,
+            });
           } catch (err) {
             if (err instanceof ValidationError) {
               return res.badRequest({ body: err });

@@ -25,13 +25,14 @@ import type {
 } from '../../../common/api/timeline';
 import {
   TimelineResponseType,
-  TimelineStatus,
+  TimelineStatusEnum,
   TimelineErrorResponseType,
   importTimelineResultSchema,
   allTimelinesResponse,
   responseFavoriteTimeline,
   SingleTimelineResponseType,
-  TimelineType,
+  type TimelineType,
+  TimelineTypeEnum,
   ResolvedSingleTimelineResponseType,
 } from '../../../common/api/timeline';
 import {
@@ -229,7 +230,7 @@ export const persistTimeline = async ({
   savedSearch,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
   try {
-    if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
+    if (isEmpty(timelineId) && timeline.status === TimelineStatusEnum.draft && timeline) {
       const temp: TimelineResponse | TimelineErrorResponse = await cleanDraftTimeline({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timelineType: timeline.timelineType!,
@@ -239,7 +240,7 @@ export const persistTimeline = async ({
 
       const draftTimeline = decodeTimelineResponse(temp);
       const templateTimelineInfo =
-        timeline.timelineType === TimelineType.template
+        timeline.timelineType === TimelineTypeEnum.template
           ? {
               templateTimelineId:
                 draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
@@ -355,7 +356,7 @@ export const cleanDraftTimeline = async ({
 }): Promise<TimelineResponse | TimelineErrorResponse> => {
   let requestBody;
   const templateTimelineInfo =
-    timelineType === TimelineType.template
+    timelineType === TimelineTypeEnum.template
       ? {
           templateTimelineId,
           templateTimelineVersion,
