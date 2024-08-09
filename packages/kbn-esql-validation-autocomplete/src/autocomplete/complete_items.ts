@@ -82,9 +82,9 @@ export const getBuiltinCompatibleFunctionDefinition = (
     .map(getSuggestionBuiltinDefinition);
 };
 
-export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands().map(
-  getSuggestionCommandDefinition
-);
+export const commandAutocompleteDefinitions: SuggestionRawDefinition[] = getAllCommands()
+  .filter(({ hidden }) => !hidden)
+  .map(getSuggestionCommandDefinition);
 
 function buildCharCompleteItem(
   label: string,

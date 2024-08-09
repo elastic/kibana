@@ -246,6 +246,7 @@ export async function suggest(
     if (!ast.length) {
       return suggestions.filter(isSourceCommand);
     }
+
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
