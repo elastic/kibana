@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CspFinding } from '@kbn/cloud-security-posture';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
 
 export const mockFindingsHit: CspFinding = {
   result: {

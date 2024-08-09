@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// export { useKibana } from '@kbn/cloud-security-posture';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana as useKibanaBase } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '../../types';

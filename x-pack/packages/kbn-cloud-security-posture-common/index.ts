@@ -5,6 +5,7 @@
  * 2.0.
  */
 export * from './constants';
+export * from './schema/csp_finding';
 export type { CspBenchmarkRulesStates } from './types/latest';
 export { showErrorToast } from './utils/show_error_toast';
 export { buildMutedRulesFilter } from './utils/helpers';

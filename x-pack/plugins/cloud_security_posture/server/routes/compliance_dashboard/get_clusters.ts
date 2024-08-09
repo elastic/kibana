@@ -16,7 +16,7 @@ import type {
 import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
-import { CspFinding } from '@kbn/cloud-security-posture';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
 import type { Cluster } from '../../../common/types_old';
 import { getPostureStatsFromAggs, failedFindingsAggQuery } from './get_grouped_findings_evaluation';
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';

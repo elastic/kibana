@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
-// import { useKibana } from '@kbn/cloud-security-posture'; WHY
 import {
   LATEST_FINDINGS_INDEX_PATTERN,
   SECURITY_DEFAULT_DATA_VIEW_ID,

@@ -17,10 +17,10 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
   MAX_FINDINGS_TO_LOAD,
   CspBenchmarkRulesStates,
+  CspFinding,
 } from '@kbn/cloud-security-posture-common';
 import { showErrorToast, buildMutedRulesFilter } from '@kbn/cloud-security-posture-common';
 import type { FindingsBaseEsQuery } from '../../type';
-import { CspFinding } from '../schema/csp_finding';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
 import { useKibana } from './use_kibana';
