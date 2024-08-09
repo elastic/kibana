@@ -772,6 +772,7 @@ export const nodeTypes: { [key: string]: any } = {
 const metricUnit: Record<string, { label: string }> = {
   count: { label: '' },
   cpu: { label: '%' },
+  cpuTotal: { label: '%' },
   memory: { label: '%' },
   rx: { label: 'bits/s' },
   tx: { label: 'bits/s' },
