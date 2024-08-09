@@ -24,8 +24,8 @@ const isValidFilter = (query: any): query is BoolQuery => {
     .every((clause) => Array.isArray(clause) || clause === undefined);
 };
 
-export const assertQueryStructure: (query: any) => asserts query is BoolQuery = (query) => {
-  if (!isValidFilter(query)) {
+export const assertQueryStructure: (query?: any) => asserts query is BoolQuery = (query) => {
+  if (!!query && !isValidFilter(query)) {
     throw Boom.badRequest('Invalid query');
   }
 };

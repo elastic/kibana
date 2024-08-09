@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { GetHostParameters } from '../types';
 import { getFilterByIntegration } from '../helpers/query';
@@ -18,7 +19,7 @@ export const getFilteredHostNames = async ({
   limit,
   query,
 }: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit'> & {
-  query: estypes.QueryDslQueryContainer;
+  query?: estypes.QueryDslQueryContainer;
 }) => {
   const response = await infraMetricsClient.search({
     allow_no_indices: true,
@@ -27,7 +28,7 @@ export const getFilteredHostNames = async ({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to), getFilterByIntegration('system')],
+          filter: [...castArray(query), ...rangeQuery(from, to), getFilterByIntegration('system')],
         },
       },
       aggs: {
@@ -54,7 +55,7 @@ export const getHasDataFromSystemIntegration = async ({
   to,
   query,
 }: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to'> & {
-  query: estypes.QueryDslQueryContainer;
+  query?: estypes.QueryDslQueryContainer;
 }) => {
   const hitCount = await infraMetricsClient.search({
     allow_no_indices: true,
@@ -65,7 +66,7 @@ export const getHasDataFromSystemIntegration = async ({
       track_total_hits: true,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to), getFilterByIntegration('system')],
+          filter: [...castArray(query), ...rangeQuery(from, to), getFilterByIntegration('system')],
         },
       },
     },

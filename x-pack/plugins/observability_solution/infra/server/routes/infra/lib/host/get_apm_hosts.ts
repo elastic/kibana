@@ -7,7 +7,6 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { GetHostParameters } from '../types';
-import { assertQueryStructure } from '../utils';
 
 export const getApmHostNames = async ({
   apmDataAccessServices,
@@ -16,11 +15,9 @@ export const getApmHostNames = async ({
   query,
   limit,
 }: Required<Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to'>> & {
-  query: estypes.QueryDslQueryContainer;
+  query?: estypes.QueryDslQueryContainer;
   limit?: number;
 }) => {
-  assertQueryStructure(query);
-
   const documentSources = await apmDataAccessServices.getDocumentSources({ start, end });
   return apmDataAccessServices.getHostNames({
     documentSources,
