@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { GetHostParameters } from '../types';
@@ -27,7 +27,7 @@ export const getFilteredHostNames = async ({
       track_total_hits: false,
       query: {
         bool: {
-          filter: [query, ...rangeQuery(from, to), ...existsQuery('system')],
+          filter: [query, ...rangeQuery(from, to), getFilterByIntegration('system')],
         },
       },
       aggs: {
@@ -48,7 +48,7 @@ export const getFilteredHostNames = async ({
   return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
 };
 
-export const getShouldFetchApmHosts = async ({
+export const getHasDataFromSystemIntegration = async ({
   infraMetricsClient,
   from,
   to,
@@ -71,5 +71,5 @@ export const getShouldFetchApmHosts = async ({
     },
   });
 
-  return hitCount.hits.total.value === 0;
+  return hitCount.hits.total.value > 0;
 };
