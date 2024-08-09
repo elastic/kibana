@@ -58,6 +58,7 @@ export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
+export const CASE_OBSERVABLES_URL = `${CASE_DETAILS_URL}/observable` as const;
 
 export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
@@ -199,6 +200,7 @@ export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
 export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 export const KIBANA_SYSTEM_USERNAME = 'elastic/kibana';
+export const MAX_OBSERVABLES_PER_CASE = 10;
 
 /**
  * Delays
@@ -257,3 +259,45 @@ export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
  * operation continues, otherwise we throw a 403.
  */
 export const OWNER_FIELD = 'owner';
+
+/**
+ * Exporting an array of built-in observable types for use in the application
+ */
+export const OBSERVABLE_TYPES_BUILTIN = [
+  {
+    label: 'IPv4',
+    key: '7cd21408-cb6a-406c-b6f2-db975f0ad9ab',
+  },
+  {
+    label: 'IPv6',
+    key: 'ff08a2de-a382-4f4a-9b16-58bad08b1abd',
+  },
+  {
+    label: 'URL',
+    key: '9dfbafca-8c51-4e05-ac87-627ebd2480f9',
+  },
+  {
+    label: 'Domain',
+    key: '18d916e5-1111-4fc4-b479-3aa2b0c8de57',
+  },
+  {
+    label: 'URI',
+    key: 'a7259d37-1591-4cce-94cc-9097ac6e5f1f',
+  },
+  {
+    label: 'Hostname',
+    key: 'eaae0882-d0c4-4e8e-a80c-d8d88717340f',
+  },
+  {
+    label: 'File hash',
+    key: '6e2b0ea5-a805-4edf-83c2-26f4be4fe9e3',
+  },
+  {
+    label: 'File path',
+    key: 'f51ba961-4d4e-4fb2-a4f7-3cf4fb0a2823',
+  },
+  {
+    label: 'Email',
+    key: '7cd21408-cb6a-406c-b6f2-db975f0ad9ab',
+  },
+];

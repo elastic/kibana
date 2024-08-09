@@ -72,6 +72,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getCasesByAlertID: jest.fn(),
     getCategories: jest.fn(),
     replaceCustomField: jest.fn(),
+    similar: jest.fn(),
   };
 };
 

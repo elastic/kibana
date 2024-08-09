@@ -21,9 +21,39 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
-import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
+import {
+  ACTIVITY_TAB,
+  ALERTS_TAB,
+  FILES_TAB,
+  OBSERVABLES_TAB,
+  SIMILAR_CASES_TAB,
+} from './translations';
 import type { CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
+import { useCaseObservables } from './use_case_observables';
+
+const ExperimentalBadge = ({
+  euiTheme,
+  'data-test-subj': testSubj,
+}: {
+  euiTheme: EuiThemeComputed<{}>;
+  'data-test-subj'?: string;
+}) => {
+  return (
+    <EuiBetaBadge
+      label={EXPERIMENTAL_LABEL}
+      size="s"
+      iconType="beaker"
+      tooltipContent={EXPERIMENTAL_DESC}
+      tooltipPosition="bottom"
+      css={css`
+        margin-left: ${euiTheme.size.xs};
+      `}
+      data-test-subj={testSubj}
+    />
+  );
+};
+ExperimentalBadge.displayName = 'ExperimentalBadge';
 
 const TabTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xxs">
@@ -61,6 +91,35 @@ const FilesBadge = ({
 
 FilesBadge.displayName = 'FilesBadge';
 
+const ObservablesBadge = ({
+  activeTab,
+  observableStatsData,
+  isLoading,
+  euiTheme,
+}: {
+  activeTab: string;
+  observableStatsData: { total: number } | undefined;
+  isLoading: boolean;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <>
+    {!isLoading && observableStatsData && (
+      <EuiNotificationBadge
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        data-test-subj="case-view-observables-stats-badge"
+        color={activeTab === CASE_VIEW_PAGE_TABS.OBSERVABLES ? 'accent' : 'subdued'}
+      >
+        {observableStatsData.total > 0 ? observableStatsData.total : 0}
+      </EuiNotificationBadge>
+    )}
+    <ExperimentalBadge euiTheme={euiTheme} />
+  </>
+);
+
+ObservablesBadge.displayName = 'ObservablesBadge';
+
 const AlertsBadge = ({
   activeTab,
   totalAlerts,
@@ -83,16 +142,9 @@ const AlertsBadge = ({
       {totalAlerts || 0}
     </EuiNotificationBadge>
     {isExperimental && (
-      <EuiBetaBadge
-        label={EXPERIMENTAL_LABEL}
-        size="s"
-        iconType="beaker"
-        tooltipContent={EXPERIMENTAL_DESC}
-        tooltipPosition="bottom"
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
+      <ExperimentalBadge
         data-test-subj="case-view-alerts-table-experimental-badge"
+        euiTheme={euiTheme}
       />
     )}
   </>
@@ -112,6 +164,11 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   const { data: fileStatsData, isLoading } = useGetCaseFileStats({
     caseId: caseData.id,
   });
+  const caseObservables = useCaseObservables(caseData);
+  const observableStatsData = useMemo(
+    () => ({ total: caseObservables.length }),
+    [caseObservables.length]
+  );
 
   const tabs = useMemo(
     () => [
@@ -147,15 +204,35 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
+      // FIXME: add feature flag
+      {
+        id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
+        name: OBSERVABLES_TAB,
+        badge: (
+          <ObservablesBadge
+            isLoading={isLoading}
+            observableStatsData={observableStatsData}
+            activeTab={activeTab}
+            euiTheme={euiTheme}
+          />
+        ),
+      },
+      // FIXME: add feature flag
+      {
+        id: CASE_VIEW_PAGE_TABS.SIMILAR,
+        name: SIMILAR_CASES_TAB,
+        badge: <ExperimentalBadge euiTheme={euiTheme} />,
+      },
     ],
     [
       features.alerts.enabled,
       features.alerts.isExperimental,
       caseData.totalAlerts,
       activeTab,
+      euiTheme,
       isLoading,
       fileStatsData,
-      euiTheme,
+      observableStatsData,
     ]
   );
 

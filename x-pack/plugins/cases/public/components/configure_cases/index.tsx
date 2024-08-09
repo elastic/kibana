@@ -29,6 +29,7 @@ import type {
   TemplateConfiguration,
   CustomFieldTypes,
   ActionConnector,
+  ObservableTypeConfiguration,
 } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
@@ -55,6 +56,8 @@ import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import { ObservableTypes } from '../observable_types';
+import { ObservableTypesForm } from '../observable_types/form';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -71,7 +74,7 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
 `;
 
 interface Flyout {
-  type: 'addConnector' | 'editConnector' | 'customField' | 'template';
+  type: 'addConnector' | 'editConnector' | 'customField' | 'template' | 'observableTypes';
   visible: boolean;
 }
 
@@ -123,6 +126,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
   const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
   const [templateToEdit, setTemplateToEdit] = useState<TemplateConfiguration | null>(null);
+  const [observableTypeToEdit, setObservableTypeToEdit] =
+    useState<ObservableTypeConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
 
   const {
@@ -139,6 +144,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     mappings,
     customFields,
     templates,
+    observableTypes,
   } = currentConfiguration;
 
   const {
@@ -178,6 +184,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         closureType,
         customFields,
         templates,
+        observableTypes: [],
         id: configurationId,
         version: configurationVersion,
       });
@@ -371,6 +378,86 @@ export const ConfigureCases: React.FC = React.memo(() => {
     setCustomFieldToEdit(null);
   }, [setFlyOutVisibility, setCustomFieldToEdit]);
 
+  const onEditObservableType = useCallback(
+    (key: string) => {
+      const selectedObservableType = observableTypes.find((item) => item.key === key);
+
+      if (selectedObservableType) {
+        setObservableTypeToEdit(selectedObservableType);
+      }
+      setFlyOutVisibility({ type: 'observableTypes', visible: true });
+    },
+    [setFlyOutVisibility, observableTypes]
+  );
+
+  const onDeleteObservableType = useCallback(
+    (key: string) => {
+      const remainingObservableTypes = observableTypes.filter((field) => field.key !== key);
+
+      persistCaseConfigure({
+        connector,
+        observableTypes: remainingObservableTypes,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        customFields,
+        templates,
+      });
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      observableTypes,
+      persistCaseConfigure,
+      customFields,
+      templates,
+    ]
+  );
+
+  const onCloseObservableTypesFlyout = useCallback(() => {
+    setFlyOutVisibility({ type: 'observableTypes', visible: false });
+  }, [setFlyOutVisibility]);
+
+  const onObservableTypeSave = useCallback(
+    (data: ObservableTypeConfiguration) => {
+      const existingObservableIndex = observableTypes.findIndex((item) => item.key === data.key);
+
+      let updatedObservableTypes = [];
+
+      if (existingObservableIndex === -1) {
+        updatedObservableTypes = [...observableTypes, data];
+      } else {
+        updatedObservableTypes = [...observableTypes];
+        updatedObservableTypes[existingObservableIndex] = data;
+      }
+
+      persistCaseConfigure({
+        connector,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        observableTypes: updatedObservableTypes,
+        customFields,
+        templates,
+      });
+
+      setFlyOutVisibility({ type: 'observableTypes', visible: false });
+      setObservableTypeToEdit(null);
+    },
+    [
+      observableTypes,
+      persistCaseConfigure,
+      connector,
+      configurationId,
+      configurationVersion,
+      closureType,
+      customFields,
+      templates,
+    ]
+  );
+
   const onCustomFieldSave = useCallback(
     (data: CustomFieldConfiguration) => {
       const updatedCustomFields = addOrReplaceField(customFields, data);
@@ -522,6 +609,26 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
+  const AddOrEditObservableTypeFlyout =
+    flyOutVisibility?.type === 'observableTypes' && flyOutVisibility?.visible ? (
+      <CommonFlyout<ObservableTypeConfiguration>
+        isLoading={loadingCaseConfigure || isPersistingConfiguration}
+        disabled={
+          !permissions.create ||
+          !permissions.update ||
+          loadingCaseConfigure ||
+          isPersistingConfiguration
+        }
+        onCloseFlyout={onCloseObservableTypesFlyout}
+        onSaveField={onObservableTypeSave}
+        renderHeader={() => <span>{i18n.ADD_OBSERVABLE_TYPE}</span>}
+      >
+        {({ onChange }) => (
+          <ObservableTypesForm onChange={onChange} initialValue={observableTypeToEdit} />
+        )}
+      </CommonFlyout>
+    ) : null;
+
   return (
     <EuiPageSection restrictWidth={true}>
       <HeaderPage
@@ -611,11 +718,31 @@ export const ConfigureCases: React.FC = React.memo(() => {
               />
             </EuiFlexItem>
           </div>
+
           <EuiSpacer size="xl" />
+
+          <div css={sectionWrapperCss}>
+            <EuiFlexItem grow={false}>
+              <ObservableTypes
+                observableTypes={observableTypes}
+                isLoading={isLoadingCaseConfiguration}
+                disabled={isLoadingCaseConfiguration}
+                handleAddObservableType={() =>
+                  setFlyOutVisibility({ type: 'observableTypes', visible: true })
+                }
+                handleDeleteObservableType={onDeleteObservableType}
+                handleEditObservableType={onEditObservableType}
+              />
+            </EuiFlexItem>
+          </div>
+
+          <EuiSpacer size="xl" />
+
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
           {AddOrEditCustomFieldFlyout}
           {AddOrEditTemplateFlyout}
+          {AddOrEditObservableTypeFlyout}
         </div>
       </EuiPageBody>
     </EuiPageSection>

@@ -86,6 +86,7 @@ const basicCase = {
       value: true,
     },
   ],
+  observables: [],
 };
 
 describe('RelatedCaseRt', () => {
@@ -194,6 +195,7 @@ describe('CaseAttributesRt', () => {
         value: true,
       },
     ],
+    observables: [],
   };
 
   it('has expected attributes in request', () => {

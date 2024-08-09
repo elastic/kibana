@@ -55,3 +55,47 @@ export const modelVersion1: SavedObjectsModelVersion = {
     },
   ],
 };
+
+/**
+ * Adds case observables to the cases SO.
+ */
+export const modelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        observables: {
+          type: 'nested',
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            typeKey: {
+              type: 'keyword',
+            },
+            value: {
+              type: 'keyword',
+            },
+            description: {
+              type: 'text',
+            },
+            isIoc: {
+              type: 'boolean',
+            },
+            hasBeenSighted: {
+              type: 'boolean',
+            },
+            createdAt: {
+              type: 'date',
+              ignore_malformed: true,
+            },
+            updatedAt: {
+              type: 'date',
+              ignore_malformed: true,
+            },
+          },
+        },
+      },
+    },
+  ],
+};

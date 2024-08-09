@@ -42,6 +42,7 @@ describe('usePersistConfiguration', () => {
     templates: [],
     version: '',
     id: '',
+    observableTypes: [],
   };
 
   let appMockRender: AppMockRenderer;
@@ -70,6 +71,7 @@ describe('usePersistConfiguration', () => {
         customFields: [],
         owner: 'securitySolution',
         templates: [],
+        observableTypes: [],
       });
     });
 
@@ -95,6 +97,7 @@ describe('usePersistConfiguration', () => {
         customFields: [],
         templates: [],
         owner: 'securitySolution',
+        observableTypes: [],
       });
     });
 
@@ -125,6 +128,7 @@ describe('usePersistConfiguration', () => {
         customFields: customFieldsConfigurationMock,
         templates: templatesConfigurationMock,
         owner: 'securitySolution',
+        observableTypes: [],
       });
     });
   });
@@ -148,6 +152,7 @@ describe('usePersistConfiguration', () => {
         customFields: [],
         templates: [],
         version: 'test-version',
+        observableTypes: [],
       });
     });
 
@@ -178,6 +183,7 @@ describe('usePersistConfiguration', () => {
         customFields: customFieldsConfigurationMock,
         templates: templatesConfigurationMock,
         version: 'test-version',
+        observableTypes: [],
       });
     });
   });

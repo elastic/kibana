@@ -383,6 +383,33 @@ export class CasesService {
     }
   }
 
+  public async findSimilarCases(
+    options?: SavedObjectFindOptionsKueryNode
+  ): Promise<SavedObjectsFindResponse<CaseTransformedAttributes>> {
+    try {
+      this.log.debug(`Attempting to find similar cases`);
+      const cases = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
+        sortField: defaultSortField,
+        ...options,
+        type: CASE_SAVED_OBJECT,
+      });
+
+      const res = transformFindResponseToExternalModel(cases);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => ({
+          ...so,
+          attributes: decodeRes.get(so.id) as CaseTransformedAttributes,
+        })),
+      };
+    } catch (error) {
+      this.log.error(`Error on find cases: ${error}`);
+      throw error;
+    }
+  }
+
   private asArray(id: string | string[] | undefined): string[] {
     if (id === undefined) {
       return [];

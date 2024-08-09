@@ -20,6 +20,7 @@ import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasesSearchRequest,
+  SimilarCasesSearchRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -36,6 +37,7 @@ import { bulkUpdate } from './bulk_update';
 import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
+import { similar } from './similar';
 
 /**
  * API for interacting with the cases entities.
@@ -102,6 +104,10 @@ export interface CasesSubClient {
    * Replace custom field with specific customFieldId and CaseId
    */
   replaceCustomField(params: ReplaceCustomFieldArgs): Promise<CaseCustomField>;
+  /**
+   * Returns cases that are similar to given case (by observables)
+   */
+  similar(params: SimilarCasesSearchRequest): Promise<CasesFindResponse>;
 }
 
 /**
@@ -130,6 +136,7 @@ export const createCasesSubClient = (
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
     replaceCustomField: (params: ReplaceCustomFieldArgs) =>
       replaceCustomField(params, clientArgs, casesClient),
+    similar: (params: SimilarCasesSearchRequest) => similar(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

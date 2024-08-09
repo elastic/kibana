@@ -585,6 +585,37 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "createdAt": {
+            "ignore_malformed": true,
+            "type": "date"
+          },
+          "description": {
+            "type": "text"
+          },
+          "hasBeenSighted": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "keyword"
+          },
+          "isIoc": {
+            "type": "boolean"
+          },
+          "typeKey": {
+            "type": "keyword"
+          },
+          "updatedAt": {
+            "ignore_malformed": true,
+            "type": "date"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
