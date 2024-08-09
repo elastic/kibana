@@ -27,10 +27,7 @@ export interface ControlsExampleStartDeps {
 export class ControlsExamplePlugin
   implements Plugin<void, void, SetupDeps, ControlsExampleStartDeps>
 {
-  public setup(
-    core: CoreSetup<ControlsExampleStartDeps>,
-    { developerExamples }: SetupDeps
-  ) {
+  public setup(core: CoreSetup<ControlsExampleStartDeps>, { developerExamples }: SetupDeps) {
     core.application.register({
       id: PLUGIN_ID,
       title: 'Controls examples',

@@ -8,7 +8,11 @@
 
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/public';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-plugin/common';
 
 const SERIALIZED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
