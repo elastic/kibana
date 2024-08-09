@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export * from './alerts';
 export * from './i18n_weekdays';
 export * from './routes';

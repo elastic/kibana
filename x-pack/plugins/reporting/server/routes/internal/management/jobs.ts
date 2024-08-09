@@ -22,7 +22,7 @@ const { JOBS } = INTERNAL_ROUTES;
 export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
-  const jobsQuery = jobsQueryFactory(reporting);
+  const jobsQuery = jobsQueryFactory(reporting, { isInternal: true });
 
   const registerInternalGetList = () => {
     // list jobs in the queue, paginated
@@ -105,7 +105,7 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   };
 
   // use common route handlers that are shared for public and internal routes
-  const jobHandlers = commonJobsRouteHandlerFactory(reporting);
+  const jobHandlers = commonJobsRouteHandlerFactory(reporting, { isInternal: true });
 
   const registerInternalGetInfo = () => {
     // return some info about the job
@@ -126,13 +126,20 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
         }
 
         const { docId } = req.params;
-        return jobManagementPreRouting(reporting, res, docId, user, counters, async (doc) =>
-          res.ok({
-            body: doc,
-            headers: {
-              'content-type': 'application/json',
-            },
-          })
+        return jobManagementPreRouting(
+          reporting,
+          res,
+          docId,
+          user,
+          counters,
+          { isInternal: true },
+          async (doc) =>
+            res.ok({
+              body: doc,
+              headers: {
+                'content-type': 'application/json',
+              },
+            })
         );
       })
     );
