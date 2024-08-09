@@ -20,7 +20,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 55082
+  controls: 60000
   core: 435325
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -79,6 +79,7 @@ pageLoadAssetSize:
   imageEmbeddable: 12500
   indexLifecycleManagement: 107090
   indexManagement: 140608
+  inference: 20403
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675

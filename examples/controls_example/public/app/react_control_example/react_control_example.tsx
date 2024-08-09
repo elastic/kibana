@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
-
+import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiBadge,
   EuiButton,
@@ -23,11 +23,8 @@ import {
   EuiToolTip,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import {
-  CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '@kbn/controls-plugin/common';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -53,8 +50,6 @@ import {
   getControlGroupRuntimeState,
   setControlGroupRuntimeState,
 } from './runtime_control_group_state';
-import { ControlGroupApi } from '../../react_controls/control_group/types';
-import { openDataControlEditor } from '../../react_controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
@@ -76,6 +71,7 @@ export const ReactControlExample = ({
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
+  const isMounted = useMountedState();
   const dataLoading$ = useMemo(() => {
     return new BehaviorSubject<boolean | undefined>(false);
   }, []);
@@ -112,6 +108,7 @@ export const ReactControlExample = ({
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const [isControlGroupInitialized, setIsControlGroupInitialized] = useState(false);
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const dashboardApi = useMemo(() => {
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
@@ -317,24 +314,7 @@ export const ReactControlExample = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
-                openDataControlEditor({
-                  initialState: {
-                    grow: DEFAULT_CONTROL_GROW,
-                    width: DEFAULT_CONTROL_WIDTH,
-                    dataViewId: dashboardApi.lastUsedDataViewId.getValue(),
-                  },
-                  onSave: ({ type: controlType, state: initialState }) => {
-                    controlGroupApi.addNewPanel({
-                      panelType: controlType,
-                      initialState,
-                    });
-                  },
-                  controlGroupApi,
-                  services: {
-                    core,
-                    dataViews: dataViewsService,
-                  },
-                });
+                controlGroupApi?.openAddDataControlFlyout();
               }}
               size="s"
             >
@@ -361,9 +341,15 @@ export const ReactControlExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                isDisabled={!controlGroupApi}
-                onClick={() => {
-                  controlGroupApi?.resetUnsavedChanges();
+                isDisabled={!controlGroupApi || isResetting}
+                isLoading={isResetting}
+                onClick={async () => {
+                  if (!controlGroupApi) {
+                    return;
+                  }
+                  setIsResetting(true);
+                  await controlGroupApi.asyncResetUnsavedChanges();
+                  if (isMounted()) setIsResetting(false);
                 }}
               >
                 Reset

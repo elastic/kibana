@@ -40,7 +40,7 @@ import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
-import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 
 jest.mock('@kbn/kibana-utils-plugin/public');
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query');

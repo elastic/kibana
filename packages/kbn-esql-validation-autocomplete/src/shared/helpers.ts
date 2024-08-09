@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW'].includes(label);
+  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -285,7 +285,6 @@ const arrayToSingularMap: Map<FunctionParameterType, FunctionParameterType> = ne
   ['counter_integer[]', 'counter_integer'],
   ['counter_long[]', 'counter_long'],
   ['counter_double[]', 'counter_double'],
-  ['string[]', 'string'],
   ['keyword[]', 'keyword'],
   ['text[]', 'text'],
   ['datetime[]', 'date'],
@@ -439,7 +438,7 @@ export function checkFunctionArgMatchesDefinition(
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = compareLiteralType(argType, arg);
+    const matched = compareLiteralType(argType as string, arg);
     return matched;
   }
   if (arg.type === 'function') {
@@ -465,7 +464,7 @@ export function checkFunctionArgMatchesDefinition(
       (ct) =>
         ['any', 'null'].includes(ct) ||
         argType === ct ||
-        (ct === 'string' && ['text', 'keyword'].includes(argType))
+        (ct === 'string' && ['text', 'keyword'].includes(argType as string))
     );
   }
   if (arg.type === 'inlineCast') {

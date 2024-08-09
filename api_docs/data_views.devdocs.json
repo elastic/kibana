@@ -1897,6 +1897,858 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.DataViewLazy",
+        "type": "Class",
+        "tags": [],
+        "label": "DataViewLazy",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          " extends ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          }
+        ],
+        "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.scriptedFieldsEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "scriptedFieldsEnabled",
+            "description": [
+              "\nReturns true if scripted fields are enabled"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "DataViewDeps"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getFields",
+            "description": [],
+            "signature": [
+              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => { [x: string]: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              "; }; getFieldMapSorted: () => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">; }>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.getFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    mapped = true,\n    scripted = true,\n    runtime = true,\n    fieldName,\n    forceRefresh = false,\n    unmapped,\n    indexFilter,\n    metaFields = true,\n  }",
+                "description": [],
+                "signature": [
+                  "GetFieldsParams"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getRuntimeFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getRuntimeFields",
+            "description": [],
+            "signature": [
+              "({ fieldName }: Pick<GetFieldsParams, \"fieldName\">) => DataViewFieldMap"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.getRuntimeFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ fieldName = ['*'] }",
+                "description": [],
+                "signature": [
+                  "Pick<GetFieldsParams, \"fieldName\">"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.addRuntimeField",
+            "type": "Function",
+            "tags": [],
+            "label": "addRuntimeField",
+            "description": [
+              "\nAdd a runtime field - Appended to existing mapped field or a new field is\ncreated as appropriate."
+            ],
+            "signature": [
+              "(name: string, runtimeField: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.RuntimeField",
+                "text": "RuntimeField"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.addRuntimeField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "Field name"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.addRuntimeField.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "runtimeField",
+                "description": [
+                  "Runtime field definition"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.RuntimeField",
+                    "text": "RuntimeField"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.removeRuntimeField",
+            "type": "Function",
+            "tags": [],
+            "label": "removeRuntimeField",
+            "description": [
+              "\nRemove a runtime field - removed from mapped field or removed unmapped\nfield as appropriate. Doesn't clear associated field attributes."
+            ],
+            "signature": [
+              "(name: string) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.removeRuntimeField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "- Field name to remove"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getScriptedFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedFields",
+            "description": [],
+            "signature": [
+              "({ fieldName }: Pick<GetFieldsParams, \"fieldName\">) => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.getScriptedFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ fieldName = ['*'] }",
+                "description": [],
+                "signature": [
+                  "Pick<GetFieldsParams, \"fieldName\">"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getScriptedFieldsForQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedFieldsForQuery",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              "ScriptField",
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getComputedFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getComputedFields",
+            "description": [],
+            "signature": [
+              "({ fieldName }: { fieldName: string[]; }) => Promise<{ scriptFields: Record<string, ",
+              "ScriptField",
+              ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
+              "MappingRuntimeFields",
+              "; }>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.getComputedFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ fieldName = ['*'] }",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewLazy.getComputedFields.$1.fieldName",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "fieldName",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getRuntimeMappings",
+            "type": "Function",
+            "tags": [],
+            "label": "getRuntimeMappings",
+            "description": [],
+            "signature": [
+              "() => ",
+              "MappingRuntimeFields"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.toSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toSpec",
+            "description": [
+              "\nCreates static representation of the data view."
+            ],
+            "signature": [
+              "(params?: { fieldParams?: GetFieldsParams | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.toSpec.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewLazy.toSpec.$1.fieldParams",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "fieldParams",
+                    "description": [],
+                    "signature": [
+                      "GetFieldsParams | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.toMinimalSpec",
+            "type": "Function",
+            "tags": [],
+            "label": "toMinimalSpec",
+            "description": [
+              "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
+            ],
+            "signature": [
+              "(params?: { keepFieldAttrs?: (\"customLabel\" | \"customDescription\")[] | undefined; } | undefined) => Omit<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", \"fields\">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.toMinimalSpec.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.DataViewLazy.toMinimalSpec.$1.keepFieldAttrs",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "keepFieldAttrs",
+                    "description": [],
+                    "signature": [
+                      "(\"customLabel\" | \"customDescription\")[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.removeScriptedField",
+            "type": "Function",
+            "tags": [],
+            "label": "removeScriptedField",
+            "description": [],
+            "signature": [
+              "(fieldName: string) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.removeScriptedField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.upsertScriptedField",
+            "type": "Function",
+            "tags": [],
+            "label": "upsertScriptedField",
+            "description": [],
+            "signature": [
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.upsertScriptedField.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.isTimeBased",
+            "type": "Function",
+            "tags": [],
+            "label": "isTimeBased",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.isTimeNanosBased",
+            "type": "Function",
+            "tags": [],
+            "label": "isTimeNanosBased",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getTimeField",
+            "type": "Function",
+            "tags": [],
+            "label": "getTimeField",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.getFieldByName",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldByName",
+            "description": [],
+            "signature": [
+              "(name: string, forceRefresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.getFieldByName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.getFieldByName.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "forceRefresh",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.setFieldCustomLabel",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomLabel",
+            "description": [
+              "\nSet field custom label"
+            ],
+            "signature": [
+              "(fieldName: string, customLabel: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.setFieldCustomLabel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.setFieldCustomLabel.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customLabel",
+                "description": [
+                  "custom label value. If undefined, custom label is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.setFieldCount",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCount",
+            "description": [],
+            "signature": [
+              "(fieldName: string, count: number | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.setFieldCount.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.setFieldCount.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "count",
+                "description": [],
+                "signature": [
+                  "number | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewLazy.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewLazy.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.DataViewsApiClient",
         "type": "Class",
         "tags": [],
@@ -3486,6 +4338,46 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-public.DataViewsService.getDataViewLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsService.getDataViewLazyFromCache",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazyFromCache",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.getDataViewLazyFromCache.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -9437,6 +10329,46 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-server.DataViewsService.getDataViewLazyFromCache",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazyFromCache",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.getDataViewLazyFromCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-server.DataViewsService.get",
             "type": "Function",
             "tags": [],
@@ -10944,7 +11876,7 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-server.DataViewsServerPluginSetupDependencies.usageCollection",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "usageCollection",
             "description": [
@@ -19552,6 +20484,46 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsService.getDataViewLazyFromCache",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazyFromCache",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.getDataViewLazyFromCache.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataViewsService.get",
             "type": "Function",
             "tags": [],
@@ -22987,8 +23959,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
               ", saveAttempts?: number | undefined, ignoreErrors?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<void>"
             ],
@@ -23010,8 +23982,8 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -23278,6 +24250,46 @@
               {
                 "parentPluginId": "dataViews",
                 "id": "def-common.DataViewsServicePublicMethods.getDataViewLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServicePublicMethods.getDataViewLazyFromCache",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazyFromCache",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.getDataViewLazyFromCache.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -26046,7 +27058,15 @@
             "section": "def-common.DataViewLazy",
             "text": "DataViewLazy"
           },
-          ">; createDataViewLazy: (spec: ",
+          ">; getDataViewLazyFromCache: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          " | undefined>; createDataViewLazy: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
