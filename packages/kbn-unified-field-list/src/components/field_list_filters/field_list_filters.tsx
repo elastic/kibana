@@ -9,7 +9,7 @@
 import React from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldNameSearch, type FieldNameSearchProps } from './field_name_search';
-import FieldTypeFilter, { type FieldTypeFilterProps } from './field_type_filter';
+import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
 import { type FieldListItem } from '../../types';
 
 /**

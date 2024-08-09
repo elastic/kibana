@@ -7,10 +7,9 @@
  */
 
 import React, { Fragment } from 'react';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldListFiltersProps, GenericFieldListFilters } from './field_list_filters';
-import type { FieldTypeFilterProps, GenericFieldTypeFilter } from './field_type_filter';
-import type { FieldListItem } from '../../types';
+import { type FieldListItem } from '../../types';
 
 const Fallback = () => <Fragment />;
 
@@ -30,20 +29,3 @@ function WrappedFieldListFilters<T extends FieldListItem = DataViewField>(
 
 export const FieldListFilters = WrappedFieldListFilters;
 export type { FieldListFiltersProps };
-
-const LazyFieldTypeFilter = React.lazy(
-  () => import('./field_type_filter')
-) as GenericFieldTypeFilter;
-
-function WrappedFieldTypeFilter<T extends FieldListItem = DataViewField>(
-  props: FieldTypeFilterProps<T>
-) {
-  return (
-    <React.Suspense fallback={<Fallback />}>
-      <LazyFieldTypeFilter<T> {...props} />
-    </React.Suspense>
-  );
-}
-
-export const FieldTypeFilter = WrappedFieldTypeFilter;
-export type { FieldTypeFilterProps };
