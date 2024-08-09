@@ -49,6 +49,11 @@ const DATE_PRESETS: DatePreset[] = [
     outputFormat: 'dd/MMM/yyyy:HH:mm:ss Z',
   },
   {
+    grokPattern: 'HTTPDERROR_DATE',
+    temporaryTarget: 'timestamp_httpderrordate',
+    outputFormat: 'EEE MMM dd HH:mm:ss yyyy',
+  },
+  {
     grokPattern: 'DATESTAMP_OTHER',
     temporaryTarget: 'timestamp_other',
     outputFormat: 'EEE MMM dd HH:mm:ss Z yyyy',

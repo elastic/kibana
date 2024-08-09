@@ -110,17 +110,8 @@ export class RecommendationsClient implements IRecommendationsClient {
       if (customTemplate) {
         // A custom template has been already created, update only mappings and pipeline
         if (tasks.processors) {
-          const previousDefaultPipelineProcessor =
-            newestIndex.settings?.index?.default_pipeline !== defaultPipelineName
-              ? {
-                  pipeline: {
-                    name: newestIndex.settings?.index?.default_pipeline,
-                  },
-                }
-              : null;
-
           const customPipelineDraft = {
-            processors: [previousDefaultPipelineProcessor, ...tasks.processors].filter(Boolean),
+            processors: tasks.processors,
           };
           await indexManager.updateIndexPipeline(defaultPipelineName, customPipelineDraft);
         }
