@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { type Filter } from '@kbn/es-query';
-import { skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, skip } from 'rxjs';
 import { DashboardContainer } from '../../dashboard_container';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 
@@ -30,11 +29,30 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer,
         dashboard.dispatch.setTimeslice(timeslice);
       })
   );
+
+  // --------------------------------------------------------------------------------------
+  // Set dashboard.filters$ to include unified search filters and control group filters
+  // --------------------------------------------------------------------------------------
+  function getCombinedFilters() {
+    return combineDashboardFiltersWithControlGroupFilters(
+      dashboard.getInput().filters ?? [],
+      controlGroupApi
+    );
+  }
+
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+  dashboard.filters$ = filters$;
+  
+  dashboard.integrationSubscriptions.add(
+    combineLatest([dashboard.unifiedSearchFilters$, controlGroupApi.filters$]).subscribe(() => {
+      filters$.next(getCombinedFilters());
+    })
+  );
 }
 
 export const combineDashboardFiltersWithControlGroupFilters = (
   dashboardFilters: Filter[],
-  controlGroup: ControlGroupContainer
+  controlGroupApi?: ControlGroupApi
 ): Filter[] => {
-  return [...dashboardFilters, ...(controlGroup.getOutput().filters ?? [])];
+  return [...dashboardFilters, ...(controlGroupApi?.filters$.value ?? [])];
 };

@@ -34,7 +34,7 @@ import {
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   HasRuntimeChildState,
@@ -53,7 +53,7 @@ import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, startWith } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
 import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
@@ -161,6 +161,7 @@ export class DashboardContainer
   public reload$ = new Subject<void>();
   public timeRestore$: BehaviorSubject<boolean | undefined>;
   public timeslice$: BehaviorSubject<[number, number] | undefined>;
+  public unifiedSearchFilters$: PublishingSubject<Filter[] | undefined>;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   public readonly executionContext: KibanaExecutionContext;
@@ -316,6 +317,18 @@ export class DashboardContainer
       DashboardContainerInput
     >(this.publishingSubscription, this, 'lastReloadRequestTime');
 
+    const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(this.getInput().filters);
+    this.unifiedSearchFilters$ = unifiedSearchFilters$;
+    this.publishingSubscription.add(this.getInput$().pipe(
+      startWith(this.getInput()),
+      map((input) => input.filters),
+      distinctUntilChanged((previous, current) => {
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
+      })
+    ).subscribe(unifiedSearchFilters => {
+      unifiedSearchFilters$.next(unifiedSearchFilters);
+    }));
+
     this.executionContext = initialInput.executionContext;
 
     this.dataLoading = new BehaviorSubject<boolean | undefined>(false);
@@ -421,10 +434,7 @@ export class DashboardContainer
       panels,
     } = this.input;
 
-    let combinedFilters = filters;
-    if (this.controlGroup) {
-      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
-    }
+    let combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroupApi$.value);
     const hasCustomTimeRange = Boolean(
       (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
     );

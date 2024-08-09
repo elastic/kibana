@@ -498,45 +498,6 @@ export const initializeDashboard = async ({
   );
 
   // --------------------------------------------------------------------------------------
-  // Set parentApi.filters$ to include dashboardContainer filters and control group filters
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboardContainer) => {
-    if (!dashboardContainer.controlGroup) {
-      return;
-    }
-
-    function getCombinedFilters() {
-      return combineDashboardFiltersWithControlGroupFilters(
-        dashboardContainer.getInput().filters ?? [],
-        dashboardContainer.controlGroup!
-      );
-    }
-
-    const filters$ = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
-    dashboardContainer.filters$ = filters$;
-
-    const inputFilters$ = dashboardContainer.getInput$().pipe(
-      startWith(dashboardContainer.getInput()),
-      map((input) => input.filters),
-      distinctUntilChanged((previous, current) => {
-        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
-      })
-    );
-
-    // Can not use onFiltersPublished$ directly since it does not have an intial value and
-    // combineLatest will not emit until each observable emits at least one value
-    const controlGroupFilters$ = dashboardContainer.controlGroup.onFiltersPublished$.pipe(
-      startWith(dashboardContainer.controlGroup.getOutput().filters)
-    );
-
-    dashboardContainer.integrationSubscriptions.add(
-      combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
-        filters$.next(getCombinedFilters());
-      })
-    );
-  });
-
-  // --------------------------------------------------------------------------------------
   // Set up parentApi.query$
   // Can not use legacyEmbeddableToApi since query$ setting is delayed
   // --------------------------------------------------------------------------------------
