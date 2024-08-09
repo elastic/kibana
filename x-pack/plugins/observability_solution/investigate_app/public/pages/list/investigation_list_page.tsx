@@ -27,6 +27,13 @@ export function InvestigationListPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
+        breadcrumbs: [
+          {
+            text: i18n.translate('xpack.investigateApp.listPage.breadcrumb.list', {
+              defaultMessage: 'Investigations',
+            }),
+          },
+        ],
         pageTitle: i18n.translate('xpack.investigateApp.listPage.title', {
           defaultMessage: 'Investigations',
         }),

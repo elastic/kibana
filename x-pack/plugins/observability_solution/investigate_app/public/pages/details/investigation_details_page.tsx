@@ -8,11 +8,15 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { InvestigationDetails } from './components/investigation_details';
+import { paths } from '../../../common/paths';
 import { useKibana } from '../../hooks/use_kibana';
+import { InvestigationDetails } from './components/investigation_details';
 
 export function InvestigationDetailsPage() {
   const {
+    core: {
+      http: { basePath },
+    },
     dependencies: {
       start: { observabilityShared },
     },
@@ -23,6 +27,19 @@ export function InvestigationDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
+        breadcrumbs: [
+          {
+            href: basePath.prepend(paths.investigations),
+            text: i18n.translate('xpack.investigateApp.detailsPage.breadcrumb.list', {
+              defaultMessage: 'Investigations',
+            }),
+          },
+          {
+            text: i18n.translate('xpack.investigateApp.detailsPage.breadcrumb.details', {
+              defaultMessage: 'Investigation details',
+            }),
+          },
+        ],
         pageTitle: i18n.translate('xpack.investigateApp.detailsPage.title', {
           defaultMessage: 'New investigation',
         }),
