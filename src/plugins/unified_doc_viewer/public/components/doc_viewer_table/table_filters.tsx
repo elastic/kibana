@@ -16,7 +16,7 @@ import type { FieldListItem } from '@kbn/unified-field-list';
 import {
   FieldTypeFilter,
   type FieldTypeFilterProps,
-} from '@kbn/unified-field-list/src/components/field_list_filters/field_type_filter';
+} from '@kbn/unified-field-list/src/components/field_list_filters';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 export const LOCAL_STORAGE_KEY_SEARCH_TERM = 'discover:searchText';

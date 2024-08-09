@@ -14,7 +14,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldTypeFilter, type FieldTypeFilterProps } from './field_type_filter';
+import FieldTypeFilter, { type FieldTypeFilterProps } from './field_type_filter';
 
 const docLinks = coreMock.createStart().docLinks;
 

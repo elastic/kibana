@@ -79,7 +79,7 @@ export interface FieldTypeFilterProps<T extends FieldListItem> {
  * @param onChange
  * @constructor
  */
-export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
+function FieldTypeFilterComponent<T extends FieldListItem = DataViewField>({
   'data-test-subj': dataTestSubject,
   docLinks,
   allFields,
@@ -273,3 +273,9 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
     </EuiPopover>
   );
 }
+
+export type GenericFieldTypeFilter = typeof FieldTypeFilterComponent;
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldTypeFilterComponent;
