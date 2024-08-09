@@ -20,7 +20,6 @@ import { useGetAdHocDataViewWithESQLQuery } from '../../../../../sourcerer/conta
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
-import type { SecuritySolutionESQLBasedQueryResponse } from '../../../../../common/containers/use_esql_based_query_events';
 import { useESQLBasedEvents } from '../../../../../common/containers/use_esql_based_query_events';
 import * as timelineActions from '../../../../store/actions';
 import type { ESQLOptions } from '../../../../store/types';
@@ -29,7 +28,7 @@ import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineTabs } from '../../../../../../common/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { UnifiedTimeline } from '../../unified_components';
-import type { ESQLTabHeaderProps } from './header';
+import type { ESQLHeaderOnQuerySubmit } from './header';
 import { ESQLTabHeader } from './header';
 import {
   defaultColumnHeaderType,
@@ -71,8 +70,6 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   const dispatch = useDispatch();
 
   const inspectorAdapters = useRef({ requests: new RequestAdapter() });
-
-  const previousESQLDataRef = useRef<SecuritySolutionESQLBasedQueryResponse | null>(null);
 
   const augumentedColumnsRef = useRef<{
     visibleColumns: ColumnHeaderOptions[];
@@ -153,7 +150,6 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   });
 
   const { getDataView, isLoading: isDataViewLoading } = useGetAdHocDataViewWithESQLQuery({
-    query: esqlQuery,
     dataViews,
     onDataViewCreationSuccess: onAdHocDataViewSuccessCallback,
   });
@@ -249,9 +245,12 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     });
   }, [esqlColumnsWithMeta.visibleColumns, updateESQLOptionsHandler]);
 
-  const onQuerySubmit: ESQLTabHeaderProps['onQuerySubmit'] = useCallback(async () => {
-    await getDataView();
-  }, [getDataView]);
+  const onQuerySubmit: ESQLHeaderOnQuerySubmit = useCallback(
+    async ({ query }) => {
+      await getDataView(query);
+    },
+    [getDataView]
+  );
 
   const dataLoadingState = useMemo(
     () =>

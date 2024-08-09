@@ -18,23 +18,23 @@ import { selectTimelineDateRange, selectTimelineESQLOptions } from '../../../../
 import type { State } from '../../../../../../common/store/types';
 import type { ESQLOptions } from '../../../../../store/types';
 
-interface OnQueryChangeArgs {
+interface ESQLHeaderOnQueryChangeArgs {
   query: AggregateQuery;
   dateRange: TimeRange;
 }
 
-interface OnQuerySubmitArgs {
+interface ESQLHeaderOnQuerySubmitArgs {
   query: AggregateQuery;
   dateRange: TimeRange;
 }
 
-type OnQueryChange = (args: OnQueryChangeArgs) => void;
+export type ESQLHeaderOnQueryChange = (args: ESQLHeaderOnQueryChangeArgs) => void;
 
-type OnQuerySubmit = (args: OnQuerySubmitArgs) => void;
+export type ESQLHeaderOnQuerySubmit = (args: ESQLHeaderOnQuerySubmitArgs) => void;
 
 export type ESQLTabHeaderProps = {
-  onQuerySubmit?: OnQuerySubmit;
-  onQueryChange?: OnQueryChange;
+  onQuerySubmit?: ESQLHeaderOnQuerySubmit;
+  onQueryChange?: ESQLHeaderOnQueryChange;
   timelineId: string;
 } & Omit<
   StatefulSearchBarProps<AggregateQuery>,

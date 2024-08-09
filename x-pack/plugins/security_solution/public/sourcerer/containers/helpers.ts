@@ -10,27 +10,14 @@ import type { PluginStartDependencies } from '@kbn/security-plugin/public/plugin
 
 export interface GetAdHocESQLDataView {
   dataViews: PluginStartDependencies['dataViews'];
-  indexPattern: string;
+  esqlQuery: string;
 }
 
 export async function getESQLAdHocDataViewForSecuritySolution({
   dataViews,
-  indexPattern,
+  esqlQuery,
 }: GetAdHocESQLDataView) {
   if (!dataViews) return;
-  const dataViewObj = await getESQLAdHocDataview(indexPattern, dataViews);
-
-  /*
-   *
-   * If the indexPatternFromQuery is empty string means that the user used either the ROW or SHOW META / SHOW INFO commands
-   * we don't want to add the @timestamp field in this case : https://github.com/elastic/kibana/issues/163417
-   *
-   * ESQL Ref: https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-commands.html
-   *
-   */
-  if (indexPattern && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-    dataViewObj.timeFieldName = '@timestamp';
-  }
-
+  const dataViewObj = await getESQLAdHocDataview(esqlQuery, dataViews);
   return dataViewObj;
 }

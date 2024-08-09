@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import type { AggregateQuery } from '@kbn/es-query';
+import { useCallback, useState } from 'react';
 import type { PluginStartDependencies } from '@kbn/security-plugin/public/plugin';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataView, DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getESQLAdHocDataViewForSecuritySolution } from './helpers';
 
 interface UseGetDataViewWithTextQueryArgs {
-  query: AggregateQuery;
   dataViews: PluginStartDependencies['dataViews'];
   onDataViewCreationSuccess?: (dataView?: DataView) => void;
   /*
@@ -32,37 +30,37 @@ interface UseGetDataViewWithTextQueryArgs {
 }
 
 export function useGetAdHocDataViewWithESQLQuery({
-  query,
   dataViews,
   onDataViewCreationSuccess: onSuccess,
 }: UseGetDataViewWithTextQueryArgs) {
   const [isLoading, setIsLoading] = useState(false);
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
 
-  const indexPatternFromQuery = useMemo(() => {
-    return getIndexPatternFromESQLQuery(query.esql);
-  }, [query]);
+  const getDataView = useCallback(
+    async (query) => {
+      setIsLoading(true);
+      const esqlQuery = query?.esql;
+      const indexPatternFromQuery = getIndexPatternFromESQLQuery(esqlQuery);
+      /*
+       * if indexPatternFromQuery is undefined, it means that the user used the ROW or SHOW META / SHOW INFO
+       * source-commands. In this case, make no changes to the dataView Object
+       *
+       */
+      if (!esqlQuery || !indexPatternFromQuery || indexPatternFromQuery === '') {
+        setIsLoading(false);
+        return;
+      }
+      const dataViewObj: DataView | undefined = await getESQLAdHocDataViewForSecuritySolution({
+        dataViews,
+        esqlQuery,
+      });
 
-  const getDataView = useCallback(async () => {
-    setIsLoading(true);
-    /*
-     * if indexPatternFromQuery is undefined, it means that the user used the ROW or SHOW META / SHOW INFO
-     * source-commands. In this case, make no changes to the dataView Object
-     *
-     */
-    if (!indexPatternFromQuery || indexPatternFromQuery === '') {
+      setDataView(dataViewObj);
+      onSuccess?.(dataViewObj);
       setIsLoading(false);
-      return;
-    }
-    const dataViewObj: DataView | undefined = await getESQLAdHocDataViewForSecuritySolution({
-      dataViews,
-      indexPattern: indexPatternFromQuery,
-    });
-
-    setDataView(dataViewObj);
-    onSuccess?.(dataViewObj);
-    setIsLoading(false);
-  }, [onSuccess, dataViews, indexPatternFromQuery]);
+    },
+    [onSuccess, dataViews]
+  );
 
   return {
     dataView,
