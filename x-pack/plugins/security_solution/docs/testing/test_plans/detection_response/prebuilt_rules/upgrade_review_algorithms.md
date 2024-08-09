@@ -310,7 +310,7 @@ Examples:
 
 ### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-AB`
 
-#### **Scenario: `-AC` - Rule field is a number or single line string**
+#### **Scenario: `-AB` - Rule field is a number or single line string**
 
 **Automation**: 4 integration tests with mock rules + a set of unit tests for the algorithms
 
@@ -382,7 +382,7 @@ Given at least 1 installed prebuilt rule has a new version available
 And the base version of the rule cannot be determined
 And customized data_source field is different than the Elastic update in this upgrade (current version != target version)
 And current version and target version are not both array fields in data_source
-Then for data_source field the diff algorithm should output the target version as the merged version with a non-solvable conflict
+Then for data_source field the diff algorithm should output the target version as the merged version with a solvable conflict
 And data_source field should be returned from the `upgrade/_review` API endpoint
 And data_source field should be shown in the upgrade preview UI
 
