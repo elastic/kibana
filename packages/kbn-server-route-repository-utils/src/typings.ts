@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { IKibanaResponse } from '@kbn/core-http-server';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import type {
+  RequestHandlerContext,
+  Logger,
+  RouteConfigOptions,
+  RouteMethod,
+  KibanaRequest,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 import * as t from 'io-ts';
 import { RequiredKeys } from 'utility-types';
 
@@ -137,9 +146,25 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
   TAdditionalClientOptions extends Record<string, any>
-> = <TEndpoint extends keyof TServerRouteRepository>(
+> = <TEndpoint extends Extract<keyof TServerRouteRepository, string>>(
   endpoint: TEndpoint,
   ...args: MaybeOptionalArgs<
     ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
   >
 ) => Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;
+
+export type DefaultClientOptions = HttpFetchOptions;
+
+interface CoreRouteHandlerResources {
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+  context: RequestHandlerContext;
+}
+
+export interface DefaultRouteHandlerResources extends CoreRouteHandlerResources {
+  logger: Logger;
+}
+
+export interface DefaultRouteCreateOptions {
+  options?: RouteConfigOptions<RouteMethod>;
+}
