@@ -11,9 +11,10 @@ import { promises as fs, existsSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { findProductionDependencies, readYarnLock } from '@kbn/yarn-lock-validator';
+import { loadPackageJson } from './helpers';
 
 // Checks if a given path contains a native module or not recursively
-const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<boolean> => {
+async function isNativeModule(modulePath: string, log: ToolingLog): Promise<boolean> {
   const stack: string[] = [modulePath];
 
   while (stack.length > 0) {
@@ -41,7 +42,7 @@ const isNativeModule = async (modulePath: string, log: ToolingLog): Promise<bool
     }
   }
   return false;
-};
+}
 
 // Searches through node_modules and for each module which is a prod dep (or a direct result of one) checks recursively for native modules
 async function checkDependencies(
@@ -70,8 +71,7 @@ async function checkDependencies(
 
         const packageJsonPath = path.join(entryPath, 'package.json');
         if (existsSync(packageJsonPath)) {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const packageJson = require(packageJsonPath);
+          const packageJson = loadPackageJson(packageJsonPath);
           const dependencyKey = `${packageJson.name}@${packageJson.version}`;
 
           if (productionDependencies.has(dependencyKey)) {
@@ -99,7 +99,7 @@ async function checkDependencies(
 }
 
 // Checks if there are native modules in the production dependencies
-const checkProdNativeModules = async (log: ToolingLog) => {
+async function checkProdNativeModules(log: ToolingLog) {
   log.info('Checking for native modules on production dependencies...');
   const rootNodeModulesDir = path.join(REPO_ROOT, 'node_modules');
   const prodNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
@@ -145,6 +145,6 @@ const checkProdNativeModules = async (log: ToolingLog) => {
     log.error(err.message);
     return true;
   }
-};
+}
 
-export { checkProdNativeModules };
+export { checkProdNativeModules, checkDependencies, isNativeModule, loadPackageJson };
