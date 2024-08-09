@@ -36,15 +36,20 @@ const BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET = zodMaskFor<BaseCreateProps>(
  * necessary fields in the rules types where they exist. Fields to extract:
  *  - response_actions: from Query and SavedQuery rules
  */
+const TYPE_SPECIFIC_FIELDS_TO_OMIT = new Set(['response_actions']);
+
+const filterTypeSpecificFields = (props: TypeSpecificCreateProps) =>
+  Object.fromEntries(
+    Object.entries(props).filter(([key]) => !TYPE_SPECIFIC_FIELDS_TO_OMIT.has(key))
+  );
+
 const TypeSpecificFields = TypeSpecificCreateProps.transform((val) => {
   switch (val.type) {
     case 'query': {
-      const { response_actions: _, ...rest } = val;
-      return rest;
+      return filterTypeSpecificFields(val);
     }
     case 'saved_query': {
-      const { response_actions: _, ...rest } = val;
-      return rest;
+      return filterTypeSpecificFields(val);
     }
     default:
       return val;
@@ -96,16 +101,13 @@ function createUpgradableRuleFieldsByTypeMap() {
     BaseCreateProps.omit(BASE_PROPS_REMOVED_FROM_PREBUILT_RULE_ASSET).shape
   );
 
-  // Since we used Zod's .transform() method over TypeSpecificCreateProps above,
-  // the type of TypeSpecificFields is actually z.ZodEffects, and therefore does
-  // not have access to an options property. We need to transform it back into
-  // a z.ZodDiscriminatedUnion, accessing its underlying schema.
-  const TypeSpecificFieldsSchema = TypeSpecificFields._def.schema;
-
   return new Map(
-    TypeSpecificFieldsSchema.options.map((option) => {
+    TypeSpecificCreateProps.options.map((option) => {
       const typeName = option.shape.type.value;
-      const typeSpecificFields = Object.keys(option.shape);
+      const typeSpecificFields = Object.keys(option.shape).filter(
+        // Filter out type-specific fields that should not be part of the upgradable fields
+        (field) => !TYPE_SPECIFIC_FIELDS_TO_OMIT.has(field)
+      );
       return [typeName, [...baseFields, ...typeSpecificFields]];
     })
   );
