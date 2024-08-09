@@ -47,7 +47,7 @@ import { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import { DataControlEditorState } from './open_data_control_editor';
-import { DataControlFactory, isDataControlFactory } from './types';
+import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
 
 export interface ControlEditorProps<State extends DataControlEditorState = DataControlEditorState> {
   initialState: State;
@@ -209,7 +209,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         data-test-subj="control-editor-custom-settings"
       >
         <CustomSettings
-          initialState={initialState}
+          initialState={initialState as DefaultDataControlState}
           field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
