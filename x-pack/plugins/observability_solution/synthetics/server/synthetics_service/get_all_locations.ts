@@ -20,7 +20,7 @@ export async function getAllLocations({
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
-  excludeAgentPolicies?: false;
+  excludeAgentPolicies?: boolean;
 }) {
   try {
     const [
