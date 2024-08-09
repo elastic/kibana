@@ -189,7 +189,12 @@ export default function ({ getService }: FtrProviderContext) {
               const fieldsExcludingCounterType = config.fields.filter(
                 // ES|QL supports counter_integer, counter_long, counter_double, date_period, etc.
                 // but they are not types suitable for Elasticsearch indices
-                (c: { type: string }) => !c.type.startsWith('counter_') && c.type !== 'date_period'
+                (c: { type: string }) =>
+                  !c.type.startsWith('counter_') &&
+                  c.type !== 'date_period' &&
+                  c.type !== 'time_duration' &&
+                  c.type !== 'null' &&
+                  c.type !== 'time_literal'
               );
               await es.indices.create(
                 createIndexRequest(

@@ -3438,10 +3438,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/assets-data-access-plugin@link:x-pack/plugins/observability_solution/assets_data_access":
-  version "0.0.0"
-  uid ""
-
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -4811,6 +4807,10 @@
   uid ""
 
 "@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/entities-data-access-plugin@link:x-pack/plugins/observability_solution/entities_data_access":
   version "0.0.0"
   uid ""
 
@@ -7182,10 +7182,10 @@
     "@launchdarkly/js-sdk-common" "2.5.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.4.7":
-  version "9.4.7"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.4.7.tgz#d8f923943b1750efa4c0f80baad079103ac5f700"
-  integrity sha512-9blKdS4c/ZGR0XjB8EqifDTdk08WBX/KZ91lZIc3ND3WA9D3qagysynaVkpBo3FiymHyCYyvwq4ZjiSMOIkrPw==
+"@launchdarkly/node-server-sdk@^9.5.0":
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.5.0.tgz#171c235a16836611e3c6d8d95945afa24832fc10"
+  integrity sha512-nNH011mToDKEUz5Nrux3bdatgmHj+SQGUCCD1+R5wgzpdvwZxhi7w1W+9Wl6QrqB+LcpBfKp2+vMQH/4KLsDXg==
   dependencies:
     "@launchdarkly/js-server-sdk-common" "2.4.4"
     https-proxy-agent "^5.0.1"
@@ -8208,12 +8208,12 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/cli@^1.18.1":
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.18.1.tgz#a811d33be83885cdae973bcdf30455b8bb2bffc1"
-  integrity sha512-+bRKj46R9wvTzMdnoYfMueJ9/ek0NprEsQNowV7XcHgOXifeFFikRtBFcpkwqCNxaQ/nWAJn4LHZaFcssbcHow==
+"@redocly/cli@^1.19.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.19.0.tgz#fa7ac88c50b8850c1358bb68a22a3330efe0e0b0"
+  integrity sha512-ev6J0eD+quprvW9PVCl9JmRFZbj6cuK+mnYPAjcrPvesy2RF752fflcpgQjGnyFaGb1Cj+DiwDi3dYr3EAp04A==
   dependencies:
-    "@redocly/openapi-core" "1.18.1"
+    "@redocly/openapi-core" "1.19.0"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -8238,10 +8238,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.7.0.tgz#e8d06dc1f2d9cb9a4b5c5ce09afbf8536b32161c"
   integrity sha512-6GKxTo/9df0654Mtivvr4lQnMOp+pRj9neVywmI5+BwfZLTtkJnj2qB3D6d8FHTr4apsNOf6zTa5FojX0Evh4g==
 
-"@redocly/openapi-core@1.18.1", "@redocly/openapi-core@^1.4.0":
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.18.1.tgz#b23cdc647db3ecb787995e9f78b569c13c33fb0d"
-  integrity sha512-y2ZR3aaVF80XRVoFP0Dp2z5DeCOilPTuS7V4HnHIYZdBTfsqzjkO169h5JqAaifnaLsLBhe3YArdgLb7W7wW6Q==
+"@redocly/openapi-core@1.19.0", "@redocly/openapi-core@^1.4.0":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.19.0.tgz#8c6db2f0286b7776d79e392335f89f702ea19432"
+  integrity sha512-ezK6qr80sXvjDgHNrk/zmRs9vwpIAeHa0T/qmo96S+ib4ThQ5a8f3qjwEqxMeVxkxCTbkaY9sYSJKOxv4ejg5w==
   dependencies:
     "@redocly/ajv" "^8.11.0"
     "@redocly/config" "^0.7.0"
@@ -26446,10 +26446,10 @@ react-colorful@^5.1.2:
   resolved "https://registry.yarnpkg.com/react-colorful/-/react-colorful-5.5.1.tgz#29d9c4e496f2ca784dd2bb5053a3a4340cfaf784"
   integrity sha512-M1TJH2X3RXEt12sWkpa6hLc/bbYS0H6F4rIqjQZ+RxNBstpY67d9TrFXtqdZwhpmBXcCwEi7stKqFue3ZRkiOg==
 
-react-diff-view@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/react-diff-view/-/react-diff-view-3.2.0.tgz#8fbf04782d78423903a59202ce7533f6312c1cc3"
-  integrity sha512-p58XoqMxgt71ujpiDQTs9Za3nqTawt1E4bTzKsYSqr8I8br6cjQj1b66HxGnV8Yrc6MD6iQPqS1aZiFoGqEw+g==
+react-diff-view@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/react-diff-view/-/react-diff-view-3.2.1.tgz#cc1473955fae999c1d486638c4425ceb48f3d465"
+  integrity sha512-JoDahgiyeReeH9W9lrI3Z4c4esbd/HNAOdThj6Pce/ZAukFBmXSbZ4Qv8ayo7yow+fTpRNfqtQ9gX5nArEi08w==
   dependencies:
     classnames "^2.3.2"
     diff-match-patch "^1.0.5"
