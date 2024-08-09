@@ -17,6 +17,7 @@ import { ViewSpaceTabFooter } from './footer';
 import { useViewSpaceServices } from './hooks/view_space_context_provider';
 import { ViewSpaceEnabledFeatures } from './view_space_features_tab';
 import type { Space } from '../../../common';
+import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../edit_space/confirm_alter_active_space_modal';
 import { CustomizeSpace } from '../edit_space/customize_space';
 import type { FormValues } from '../edit_space/manage_space_page';
@@ -33,9 +34,9 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const [spaceSettings, setSpaceSettings] = useState<Partial<Space>>(space);
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
-  const [shouldShowUserImpactWarning, setShouldShowUserImpactWarning] = useState(false);
-  const [shouldShowAlteringActiveSpaceDialog, setShouldShowAlteringActiveSpaceDialog] =
-    useState(false);
+  const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
+  const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
 
   const { http, overlays, notifications, navigateToUrl, spacesManager } = useViewSpaceServices();
 
@@ -67,12 +68,12 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   const onChangeFeatures = (updatedSpace: Partial<Space>) => {
     setSpaceSettings({ ...spaceSettings, ...updatedSpace });
     setIsDirty(true);
-    setShouldShowUserImpactWarning(true);
+    setShowUserImpactWarning(true);
   };
 
-  const onSubmit = () => {
-    if (shouldShowUserImpactWarning) {
-      setShouldShowAlteringActiveSpaceDialog(true);
+  const onClickSubmit = () => {
+    if (showUserImpactWarning) {
+      setShowAlteringActiveSpaceDialog(true);
     } else {
       performSave({ requiresReload: false });
     }
@@ -82,10 +83,14 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
     history.push('/');
   };
 
-  const onCancel = () => {
-    setShouldShowAlteringActiveSpaceDialog(false);
-    setShouldShowUserImpactWarning(false);
+  const onClickCancel = () => {
+    setShowAlteringActiveSpaceDialog(false);
+    setShowUserImpactWarning(false);
     backToSpacesList();
+  };
+
+  const onClickDeleteSpace = () => {
+    setShowConfirmDeleteModal(true);
   };
 
   // TODO cancel previous request, if there is one pending
@@ -113,8 +118,8 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
         i18n.translate(
           'xpack.spaces.management.spaceDetails.spaceSuccessfullySavedNotificationMessage',
           {
-            defaultMessage: `Space {name} was saved.`,
-            values: { name: `'${name}'` },
+            defaultMessage: `Space '{name}' was saved.`,
+            values: { name },
           }
         )
       );
@@ -139,11 +144,29 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
 
   const doShowAlteringActiveSpaceDialog = () => {
     return (
-      shouldShowAlteringActiveSpaceDialog && (
+      showAlteringActiveSpaceDialog && (
         <ConfirmAlterActiveSpaceModal
           onConfirm={() => performSave({ requiresReload: true })}
           onCancel={() => {
-            setShouldShowAlteringActiveSpaceDialog(false);
+            setShowAlteringActiveSpaceDialog(false);
+          }}
+        />
+      )
+    );
+  };
+
+  const doShowConfirmDeleteSpaceDialog = () => {
+    return (
+      showConfirmDeleteModal && (
+        <ConfirmDeleteModal
+          space={space}
+          spacesManager={spacesManager}
+          onCancel={() => {
+            setShowConfirmDeleteModal(false);
+          }}
+          onSuccess={() => {
+            setShowConfirmDeleteModal(false);
+            backToSpacesList();
           }}
         />
       )
@@ -154,7 +177,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   // Show if user has changed solution view
   const doShowUserImpactWarning = () => {
     return (
-      shouldShowUserImpactWarning && (
+      showUserImpactWarning && (
         <>
           <EuiSpacer />
           <EuiCallOut
@@ -174,6 +197,7 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
   return (
     <>
       {doShowAlteringActiveSpaceDialog()}
+      {doShowConfirmDeleteSpaceDialog()}
 
       <CustomizeSpace
         space={spaceSettings}
@@ -202,8 +226,9 @@ export const ViewSpaceSettings: React.FC<Props> = ({ space, features, history })
       <ViewSpaceTabFooter
         isDirty={isDirty}
         isLoading={isLoading}
-        onCancel={onCancel}
-        onSubmit={onSubmit}
+        onClickCancel={onClickCancel}
+        onClickSubmit={onClickSubmit}
+        onClickDeleteSpace={onClickDeleteSpace}
       />
     </>
   );

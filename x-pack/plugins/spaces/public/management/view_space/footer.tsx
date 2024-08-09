@@ -17,11 +17,18 @@ import React from 'react';
 interface Props {
   isDirty: boolean;
   isLoading: boolean;
-  onCancel: () => void;
-  onSubmit: () => void;
+  onClickCancel: () => void;
+  onClickSubmit: () => void;
+  onClickDeleteSpace: () => void;
 }
 
-export const ViewSpaceTabFooter: React.FC<Props> = ({ isDirty, isLoading, onCancel, onSubmit }) => {
+export const ViewSpaceTabFooter: React.FC<Props> = ({
+  isDirty,
+  isLoading,
+  onClickCancel,
+  onClickSubmit,
+  onClickDeleteSpace,
+}) => {
   return (
     <>
       {isLoading && (
@@ -34,7 +41,7 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({ isDirty, isLoading, onCanc
       {!isLoading && (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} color="danger">
+            <EuiButtonEmpty onClick={onClickDeleteSpace} color="danger">
               Delete space
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -43,13 +50,13 @@ export const ViewSpaceTabFooter: React.FC<Props> = ({ isDirty, isLoading, onCanc
           {isDirty && (
             <>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+                <EuiButtonEmpty onClick={onClickCancel}>Cancel</EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
                   fill
-                  onClick={onSubmit}
+                  onClick={onClickSubmit}
                   data-test-subj="save-space-button"
                 >
                   Update space
