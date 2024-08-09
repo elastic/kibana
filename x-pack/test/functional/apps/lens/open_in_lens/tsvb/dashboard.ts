@@ -28,8 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179307
-  describe.skip('Dashboard to TSVB to Lens', function describeIndexTests() {
+  describe('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -90,13 +89,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
-      await dashboardPanelActions.customizePanel();
-      await dashboardCustomizePanel.enableCustomTimeRange();
-      await dashboardCustomizePanel.openDatePickerQuickMenu();
-      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
-      await dashboardCustomizePanel.clickSaveButton();
-      await dashboard.waitForRenderComplete();
-      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
+      await retry.try(async () => {
+        await dashboardPanelActions.customizePanel();
+        await dashboardCustomizePanel.enableCustomTimeRange();
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
+        await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+        await dashboardCustomizePanel.clickSaveButton();
+        await dashboard.waitForRenderComplete();
+        await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
+      });
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
