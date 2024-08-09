@@ -5,43 +5,128 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import crypto from 'crypto';
+import expect from '@kbn/expect';
+import { type FtrProviderContext } from '../../ftr_provider_context';
 
-export default function enterSpaceFunctionalTests({
+export default function spaceDetailsViewFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['security', 'spaceSelector', 'common']);
-  const spacesService = getService('spaces');
+  const PageObjects = getPageObjects(['common', 'settings', 'spaceSelector']);
+
+  const find = getService('find');
+  const retry = getService('retry');
+  const spacesServices = getService('spaces');
   const testSubjects = getService('testSubjects');
 
-  const anotherSpace = {
-    id: 'space2',
-    name: 'space2',
-    disabledFeatures: [],
-  };
+  describe('Spaces', function () {
+    const testSpacesIds = [
+      'odyssey',
+      // this number is chosen intentionally to not exceed the default 10 items displayed by spaces table
+      ...Array.from(new Array(5)).map((_) => `space-${crypto.randomUUID()}`),
+    ];
 
-  describe('Spaces grid', function () {
     before(async () => {
-      await spacesService.create(anotherSpace);
-
-      await PageObjects.common.navigateToApp('spacesManagement');
-      await testSubjects.existOrFail('spaces-grid-page');
+      for (const testSpaceId of testSpacesIds) {
+        await spacesServices.create({ id: testSpaceId, name: `${testSpaceId}-name` });
+      }
     });
 
     after(async () => {
-      await spacesService.delete('another-space');
-      await kibanaServer.savedObjects.cleanStandardList();
+      for (const testSpaceId of testSpacesIds) {
+        await spacesServices.delete(testSpaceId);
+      }
     });
 
-    it('can switch to a space from the row in the grid', async () => {
-      // use the "current" badge confirm that Default is the current space
-      await testSubjects.existOrFail('spacesListCurrentBadge-default');
-      // click the switch button of "another space"
-      await PageObjects.spaceSelector.clickSwitchSpaceButton('space2');
-      // use the "current" badge confirm that "Another Space" is now the current space
-      await testSubjects.existOrFail('spacesListCurrentBadge-space2');
+    describe('Space listing', () => {
+      before(async () => {
+        await PageObjects.settings.navigateTo();
+        await testSubjects.existOrFail('spaces');
+      });
+
+      beforeEach(async () => {
+        await PageObjects.common.navigateToUrl('management', 'kibana/spaces', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
+        });
+
+        await testSubjects.existOrFail('spaces-grid-page');
+      });
+
+      it('should list all the spaces populated', async () => {
+        const renderedSpaceRow = await find.allByCssSelector(
+          '[data-test-subj*=spacesListTableRow-]'
+        );
+
+        expect(renderedSpaceRow.length).to.equal(testSpacesIds.length + 1);
+      });
+
+      it('does not display the space switcher button when viewing the details page for the current selected space', async () => {
+        const currentSpaceTitle = (
+          await PageObjects.spaceSelector.currentSelectedSpaceTitle()
+        )?.toLowerCase();
+
+        expect(currentSpaceTitle).to.equal('default');
+
+        await testSubjects.click('default-hyperlink');
+        await testSubjects.existOrFail('spaceDetailsHeader');
+        expect(
+          (await testSubjects.getVisibleText('spaceDetailsHeader'))
+            .toLowerCase()
+            .includes('default')
+        ).to.be(true);
+        await testSubjects.missingOrFail('spaceSwitcherButton');
+      });
+
+      it("displays the space switcher button when viewing the details page of the space that's not the current selected one", async () => {
+        const testSpaceId = testSpacesIds[Math.floor(Math.random() * testSpacesIds.length)];
+
+        const currentSpaceTitle = (
+          await PageObjects.spaceSelector.currentSelectedSpaceTitle()
+        )?.toLowerCase();
+
+        expect(currentSpaceTitle).to.equal('default');
+
+        await testSubjects.click(`${testSpaceId}-hyperlink`);
+        await testSubjects.existOrFail('spaceDetailsHeader');
+        expect(
+          (await testSubjects.getVisibleText('spaceDetailsHeader'))
+            .toLowerCase()
+            .includes(`${testSpaceId}-name`)
+        ).to.be(true);
+        await testSubjects.existOrFail('spaceSwitcherButton');
+      });
+
+      it('switches to a new space using the space switcher button', async () => {
+        const currentSpaceTitle = (
+          await PageObjects.spaceSelector.currentSelectedSpaceTitle()
+        )?.toLowerCase();
+
+        expect(currentSpaceTitle).to.equal('default');
+
+        const testSpaceId = testSpacesIds[Math.floor(Math.random() * testSpacesIds.length)];
+
+        await testSubjects.click(`${testSpaceId}-hyperlink`);
+        await testSubjects.click('spaceSwitcherButton');
+
+        await retry.try(async () => {
+          const detailsTitle = (
+            await testSubjects.getVisibleText('spaceDetailsHeader')
+          ).toLowerCase();
+
+          const currentSwitchSpaceTitle = (
+            await PageObjects.spaceSelector.currentSelectedSpaceTitle()
+          )?.toLocaleLowerCase();
+
+          return (
+            currentSwitchSpaceTitle &&
+            currentSwitchSpaceTitle === `${testSpaceId}-name` &&
+            detailsTitle.includes(currentSwitchSpaceTitle)
+          );
+        });
+      });
     });
   });
 }
