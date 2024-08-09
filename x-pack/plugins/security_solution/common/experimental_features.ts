@@ -86,7 +86,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scan response action on Endpoint
    */
-  responseActionScanEnabled: false,
+  responseActionScanEnabled: true,
 
   /**
    * Enables new notes
@@ -222,7 +222,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
-  filterProcessDescendantsForEventFiltersEnabled: false,
+  filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
    * Enables the new data ingestion hub
