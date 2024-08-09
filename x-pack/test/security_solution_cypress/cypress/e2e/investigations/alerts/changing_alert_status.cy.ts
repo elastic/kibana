@@ -26,7 +26,7 @@ import {
   goToOpenedAlerts,
   openAlerts,
   openFirstAlert,
-  selectCountTable,
+  selectAlertsCountTable,
   waitForPageFilters,
   sumAlertCountFromAlertCountTable,
   parseAlertsCountToInt,
@@ -61,7 +61,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       closeAlerts();
       waitForAlerts();
       waitForPageFilters();
-      selectCountTable();
+      selectAlertsCountTable();
     });
 
     it.skip('Open one alert when more than one closed alerts are selected', () => {
@@ -103,7 +103,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
               goToOpenedAlerts();
               waitForAlerts();
 
-              selectCountTable();
+              selectAlertsCountTable();
 
               cy.get(ALERTS_COUNT).should(
                 'have.text',
@@ -126,7 +126,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectCountTable();
+      selectAlertsCountTable();
     });
     it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
@@ -167,7 +167,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectCountTable();
+      selectAlertsCountTable();
     });
     it.skip('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
@@ -319,7 +319,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@skipInServerless'] }, 
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      selectCountTable();
+      selectAlertsCountTable();
     });
 
     it('Mark one alert as acknowledged when more than one open alerts are selected', () => {

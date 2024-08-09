@@ -95,7 +95,7 @@ import {
   isAggFunctionUsedAlready,
   removeQuoteForSuggestedSources,
 } from './helper';
-import { FunctionParameter, FunctionReturnType, SupportedFieldType } from '../definitions/types';
+import { FunctionParameter, FunctionReturnType, SupportedDataType } from '../definitions/types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetDataStreamsForIntegrationFn = (
@@ -246,6 +246,7 @@ export async function suggest(
     if (!ast.length) {
       return suggestions.filter(isSourceCommand);
     }
+
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
@@ -441,7 +442,7 @@ function extractFinalTypeFromArg(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ):
   | ESQLLiteral['literalType']
-  | SupportedFieldType
+  | SupportedDataType
   | FunctionReturnType
   | 'timeInterval'
   | string // @TODO remove this
@@ -787,7 +788,7 @@ async function getExpressionSuggestionsByType(
                   option,
                   argDef,
                   nodeArg,
-                  nodeArgType || 'any',
+                  (nodeArgType as string) || 'any',
                   references,
                   getFieldsByType
                 ))
@@ -882,7 +883,7 @@ async function getExpressionSuggestionsByType(
                     option,
                     argDef,
                     nodeArg,
-                    nodeArgType,
+                    nodeArgType as string,
                     references,
                     getFieldsByType
                   ))
@@ -1024,11 +1025,15 @@ async function getBuiltinFunctionNextArgument(
 
     if (isFnComplete.reason === 'fewArgs') {
       const fnDef = getFunctionDefinition(nodeArg.name);
-      if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
+      if (
+        fnDef?.signatures.every(({ params }) =>
+          params.some(({ type }) => isArrayType(type as string))
+        )
+      ) {
         suggestions.push(listCompleteItem);
       } else {
         const finalType = nestedType || nodeArgType || 'any';
-        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType);
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             // this is a special case with AND/OR
@@ -1037,7 +1042,7 @@ async function getBuiltinFunctionNextArgument(
             // to actually suggest a wider set of fields/functions
             finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
               ? ['any']
-              : supportedTypes,
+              : (supportedTypes as string[]),
             command.name,
             option?.name,
             getFieldsByType,
@@ -1146,11 +1151,7 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
-  // could also be in stats (bucket) but our autocomplete is not great yet
-  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
-
   const suggestions = filteredFieldsByType.concat(
-    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
@@ -1321,7 +1322,7 @@ async function getFunctionArgsSuggestions(
     //
     const [constantOnlyParamDefs, paramDefsWhichSupportFields] = partition(
       allParamDefinitionsForThisPosition,
-      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type)
+      (paramDef) => paramDef.constantOnly || /_literal$/.test(paramDef.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
@@ -1332,7 +1333,7 @@ async function getFunctionArgsSuggestions(
     suggestions.push(
       ...getCompatibleLiterals(
         command.name,
-        getTypesFromParamDefs(constantOnlyParamDefs),
+        getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         undefined,
         { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
       )
@@ -1341,7 +1342,7 @@ async function getFunctionArgsSuggestions(
     // Fields
     suggestions.push(
       ...pushItUpInTheList(
-        await getFieldsByType(getTypesFromParamDefs(paramDefsWhichSupportFields), [], {
+        await getFieldsByType(getTypesFromParamDefs(paramDefsWhichSupportFields) as string[], [], {
           addComma: shouldAddComma,
           advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
         }),
@@ -1354,7 +1355,7 @@ async function getFunctionArgsSuggestions(
       ...getCompatibleFunctionDefinition(
         command.name,
         option?.name,
-        getTypesFromParamDefs(paramDefsWhichSupportFields),
+        getTypesFromParamDefs(paramDefsWhichSupportFields) as string[],
         fnToIgnore
       ).map((suggestion) => ({
         ...suggestion,
@@ -1435,7 +1436,7 @@ async function getListArgsSuggestions(
         const otherArgs = node.args.filter(Array.isArray).flat().filter(isColumnItem);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
-            [argType],
+            [argType as string],
             command.name,
             undefined,
             getFieldsByType,
@@ -1639,7 +1640,7 @@ async function getOptionArgsSuggestions(
             option,
             { type: argDef?.type || 'any' },
             nodeArg,
-            nodeArgType,
+            nodeArgType as string,
             references,
             getFieldsByType
           ))
