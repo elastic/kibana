@@ -317,7 +317,7 @@ export const getUiSettings: (
   },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum cell height in the table',
+      defaultMessage: 'Maximum cell height in the classic table',
     }),
     value: TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
     category: ['discover'],
@@ -327,5 +327,11 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+    deprecation: {
+      message: i18n.translate('discover.advancedSettings.discover.maxCellHeightDeprecation', {
+        defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'discoverSettings',
+    },
   },
 });

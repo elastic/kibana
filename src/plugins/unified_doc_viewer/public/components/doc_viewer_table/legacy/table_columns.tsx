@@ -105,6 +105,8 @@ export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecordLegacy>> = [
           formattedValue={formattedValue}
           rawValue={flattenedField}
           ignoreReason={ignored}
+          isDetails={false}
+          isLegacy={true}
         />
       );
     },

@@ -15,20 +15,16 @@ import {
   EuiTextColor,
   EuiToolTip,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  IgnoredReason,
-  TRUNCATE_MAX_HEIGHT,
-  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
-} from '@kbn/discover-utils';
+import { IgnoredReason, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-const COLLAPSE_LINE_LENGTH = 350;
-const DOC_VIEWER_BETTER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110; // DocViewer's line height is denser than line height in the legacy table rows, so the height should be smaller
+const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 
 // Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
 const expandedFieldValuesSet = new Set<string>();
@@ -104,6 +100,7 @@ type TableFieldValueProps = Pick<FieldRecord['field'], 'field'> & {
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
+  isLegacy?: boolean; // true when inside legacy table
 };
 
 export const TableFieldValue = ({
@@ -112,25 +109,25 @@ export const TableFieldValue = ({
   rawValue,
   ignoreReason,
   isDetails,
+  isLegacy,
 }: TableFieldValueProps) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = getUnifiedDocViewerServices();
-  let truncateMaxHeight = uiSettings.get(TRUNCATE_MAX_HEIGHT);
+  const truncationHeight = isLegacy
+    ? uiSettings.get(TRUNCATE_MAX_HEIGHT)
+    : DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT;
 
-  if (truncateMaxHeight === TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE) {
-    truncateMaxHeight = DOC_VIEWER_BETTER_DEFAULT_TRUNCATE_MAX_HEIGHT;
-  }
-
-  const valueRef = useRef<HTMLDivElement>(null);
-  const [collapsedScrollHeight, setCollapsedScrollHeight] = useState<number>(0);
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  useResizeObserver(containerRef);
+  const containerScrollHeight = containerRef?.scrollHeight ?? 0;
 
   const [isValueExpanded, setIsValueExpanded] = useState(expandedFieldValuesSet.has(field));
   const isCollapsible =
     !isDetails &&
-    truncateMaxHeight > 0 &&
-    String(rawValue).length > COLLAPSE_LINE_LENGTH &&
-    // Don't collapse if the field value fits into the available height anyway (when the screen width is large enough)
-    (!collapsedScrollHeight || collapsedScrollHeight > truncateMaxHeight);
+    Boolean(rawValue) &&
+    truncationHeight > 0 &&
+    containerScrollHeight > 0 &&
+    containerScrollHeight > truncationHeight;
   const isCollapsed = isCollapsible && !isValueExpanded;
 
   const onToggleCollapse = useCallback(
@@ -146,12 +143,6 @@ export const TableFieldValue = ({
       }),
     [field, setIsValueExpanded]
   );
-
-  useEffect(() => {
-    if (isCollapsible && isCollapsed && valueRef.current?.scrollHeight) {
-      setCollapsedScrollHeight(valueRef.current.scrollHeight);
-    }
-  }, [isCollapsible, isCollapsed, setCollapsedScrollHeight]);
 
   const toggleButtonLabel = isCollapsed
     ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
@@ -200,13 +191,13 @@ export const TableFieldValue = ({
         )}
         <EuiFlexItem>
           <div
-            ref={valueRef}
+            ref={setContainerRef}
             className={valueClasses}
             css={
               shouldTruncate
                 ? css`
                     &.kbnDocViewer__value--truncated {
-                      max-height: ${truncateMaxHeight}px;
+                      max-height: ${truncationHeight}px;
                       overflow: hidden;
                     }
                   `

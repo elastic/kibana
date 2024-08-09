@@ -39,16 +39,9 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
-import {
-  FieldDescription,
-  fieldNameWildcardMatcher,
-  getFieldSearchMatchingHighlight,
-  getTextBasedColumnIconType,
-} from '@kbn/field-utils';
+import { fieldNameWildcardMatcher, getTextBasedColumnIconType } from '@kbn/field-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { TableFieldValue } from './table_cell_value';
 import {
   type TableRow,
   getFieldCellActions,
@@ -60,6 +53,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
+import { TableCell } from './table_cell';
 
 export type FieldRecord = TableRow;
 
@@ -147,7 +141,7 @@ export const DocViewerTable = ({
 }: DocViewRenderProps) => {
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -380,61 +374,17 @@ export const DocViewerTable = ({
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId, isDetails }) => {
-      const row = rows[rowIndex];
-
-      if (!row) {
-        return null;
-      }
-
-      const {
-        action: { flattenedField },
-        field: { field, fieldMapping, fieldType, scripted, pinned },
-        value: { formattedValue, ignored },
-      } = row;
-
-      if (columnId === 'name') {
-        return (
-          <div>
-            <FieldName
-              fieldName={field}
-              fieldType={fieldType}
-              fieldMapping={fieldMapping}
-              scripted={scripted}
-              highlight={getFieldSearchMatchingHighlight(
-                fieldMapping?.displayName ?? field,
-                searchText
-              )}
-              isPinned={pinned}
-            />
-
-            {isDetails && !!fieldMapping ? (
-              <div>
-                <FieldDescription
-                  fieldsMetadataService={fieldsMetadata}
-                  field={fieldMapping}
-                  truncate={false}
-                />
-              </div>
-            ) : null}
-          </div>
-        );
-      }
-
-      if (columnId === 'value') {
-        return (
-          <TableFieldValue
-            field={field}
-            formattedValue={formattedValue}
-            rawValue={flattenedField}
-            ignoreReason={ignored}
-            isDetails={isDetails}
-          />
-        );
-      }
-
-      return null;
+      return (
+        <TableCell
+          searchTerm={searchText}
+          rows={rows}
+          rowIndex={rowIndex}
+          columnId={columnId}
+          isDetails={isDetails}
+        />
+      );
     },
-    [rows, searchText, fieldsMetadata]
+    [rows, searchText]
   );
 
   const renderCellPopover = useCallback(

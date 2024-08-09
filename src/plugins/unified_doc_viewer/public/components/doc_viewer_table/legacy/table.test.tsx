@@ -12,11 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import {
-  buildDataTableRecord,
-  TRUNCATE_MAX_HEIGHT,
-  TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE,
-} from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../types';
 
@@ -25,9 +21,6 @@ const services = {
     get: (key: string) => {
       if (key === 'discover:showMultiFields') {
         return true;
-      }
-      if (key === TRUNCATE_MAX_HEIGHT) {
-        return TRUNCATE_MAX_HEIGHT_DEFAULT_VALUE;
       }
     },
   },
@@ -134,7 +127,6 @@ describe('DocViewTable at Discover', () => {
     {
       _property: '_index',
       addInclusiveFilterButton: true,
-      ['toggleLongFieldValue-message']: false,
       noMappingWarning: false,
       toggleColumnButton: true,
       underscoreWarning: false,
@@ -142,7 +134,6 @@ describe('DocViewTable at Discover', () => {
     {
       _property: 'message',
       addInclusiveFilterButton: false,
-      ['toggleLongFieldValue-message']: true,
       noMappingWarning: false,
       toggleColumnButton: true,
       underscoreWarning: false,
@@ -150,7 +141,6 @@ describe('DocViewTable at Discover', () => {
     {
       _property: '_underscore',
       addInclusiveFilterButton: false,
-      ['toggleLongFieldValue-message']: false,
       noMappingWarning: false,
       toggleColumnButton: true,
       underScoreWarning: true,
@@ -158,7 +148,6 @@ describe('DocViewTable at Discover', () => {
     {
       _property: 'scripted',
       addInclusiveFilterButton: false,
-      ['toggleLongFieldValue-message']: false,
       noMappingWarning: false,
       toggleColumnButton: true,
       underScoreWarning: false,
@@ -166,7 +155,6 @@ describe('DocViewTable at Discover', () => {
     {
       _property: 'not_mapped',
       addInclusiveFilterButton: false,
-      ['toggleLongFieldValue-message']: false,
       noMappingWarning: true,
       toggleColumnButton: true,
       underScoreWarning: false,
@@ -178,26 +166,21 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    (
-      [
-        'addInclusiveFilterButton',
-        'toggleLongFieldValue-message',
-        'toggleColumnButton',
-        'underscoreWarning',
-      ] as const
-    ).forEach((element) => {
-      const elementExist = check[element];
+    (['addInclusiveFilterButton', 'toggleColumnButton', 'underscoreWarning'] as const).forEach(
+      (element) => {
+        const elementExist = check[element];
 
-      if (typeof elementExist === 'boolean') {
-        const btn = findTestSubject(rowComponent, element, '^=');
+        if (typeof elementExist === 'boolean') {
+          const btn = findTestSubject(rowComponent, element, '^=');
 
-        it(`renders ${element} for '${check._property}' correctly`, () => {
-          const disabled = btn.length ? btn.props().disabled : true;
-          const clickAble = btn.length && !disabled ? true : false;
-          expect(clickAble).toBe(elementExist);
-        });
+          it(`renders ${element} for '${check._property}' correctly`, () => {
+            const disabled = btn.length ? btn.props().disabled : true;
+            const clickAble = btn.length && !disabled ? true : false;
+            expect(clickAble).toBe(elementExist);
+          });
+        }
       }
-    });
+    );
   });
 });
 
@@ -242,17 +225,6 @@ describe('DocViewTable at Discover Context', () => {
     expect(btn.length).toBe(1);
     btn.simulate('click');
     expect(props.filter).toBeCalled();
-  });
-
-  it(`renders functional collapse button`, () => {
-    const btn = findTestSubject(component, 'toggleLongFieldValue-message');
-    const html = component.html();
-
-    expect(html).toContain('kbnDocViewer__value--truncated');
-
-    expect(btn.length).toBe(1);
-    btn.simulate('click');
-    expect(component.html() !== html).toBeTruthy();
   });
 });
 
