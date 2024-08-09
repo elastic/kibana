@@ -11,6 +11,8 @@ import { services } from '../services';
 
 interface CreateTestConfigOptions {
   serverlessProject: ServerlessProjectType;
+  esServerArgs?: string[];
+  kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
@@ -53,6 +55,13 @@ const kbnServerArgsFromController = {
 
 export function createServerlessTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
+    if (options.esServerArgs || options.kbnServerArgs) {
+      throw new Error(
+        `FTR doesn't provision custom ES/Kibana server arguments into the serverless project on MKI.
+  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+      );
+    }
+
     const svlSharedConfig = await readConfigFile(
       require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
