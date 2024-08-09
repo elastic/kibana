@@ -57,7 +57,7 @@ declare global {
 
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
 
-      login(role: ServerlessRoleName, force?: boolean): void;
+      login(role: ServerlessRoleName, useCookiesForMKI?: boolean): void;
 
       waitUntil(fn: () => Cypress.Chainable): Cypress.Chainable | undefined;
     }
@@ -79,6 +79,8 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add('login', (role, useCookiesForMKI = true) => {
+  // MKI does not support multiple logins throughout the test suite using cookies.
+  // Until a better alternative is found, we will prevent multiple logins in the MKI environment in test suites.
   if (isCloudServerless && !useCookiesForMKI) {
     return;
   }

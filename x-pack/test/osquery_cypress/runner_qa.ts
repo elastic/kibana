@@ -22,6 +22,7 @@ export async function beforeSpec(config: Record<string, string | number | boolea
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
 
+  // For MKI, we need to fetch the fleet server URL. Therefore, we pass '0000' as the fleet server port, which will be ignored.
   await new AgentManager(policyEnrollmentKey, '0000', log, kbnClient).setup();
   await new AgentManager(policyEnrollmentKeyTwo, '0000', log, kbnClient).setup();
 }
