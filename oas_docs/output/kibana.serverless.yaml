@@ -65,7 +65,7 @@ paths:
         - $ref: '#/components/parameters/Connectors_kbn_xsrf'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.2:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               createEmailConnectorRequest:
                 $ref: >-
@@ -85,7 +85,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.2:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 createEmailConnectorResponse:
                   $ref: >-
@@ -121,7 +121,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.2:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getConnectorTypesServerlessResponse:
                   $ref: >-
@@ -202,7 +202,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.2:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getConnectorResponse:
                   $ref: '#/components/examples/Connectors_get_connector_response'
@@ -231,7 +231,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.2:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               createIndexConnectorRequest:
                 $ref: >-
@@ -242,7 +242,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.2:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 createIndexConnectorResponse:
                   $ref: >-
@@ -262,7 +262,7 @@ paths:
         - $ref: '#/components/parameters/Connectors_connector_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.2:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateIndexConnectorRequest:
                 $ref: >-
@@ -273,7 +273,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.2:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Connectors_connector_response_properties'
           description: Indicates a successful call.
@@ -292,7 +292,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.2:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getConnectorsResponse:
                   $ref: '#/components/examples/Connectors_get_connectors_response'
@@ -313,7 +313,7 @@ paths:
       operationId: createAgentKey
       requestBody:
         content:
-          application/json; Elastic-Api-Version=1.0.0:
+          application/json; Elastic-Api-Version=2023-10-31:
             schema:
               type: object
               properties:
@@ -330,7 +330,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -362,7 +362,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; Elastic-Api-Version=1.0.0:
+          application/json; Elastic-Api-Version=2023-10-31:
             schema:
               type: object
               properties:
@@ -385,7 +385,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -456,7 +456,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -734,7 +734,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getAllDataViewsResponse:
                   $ref: '#/components/examples/Data_views_get_data_views_response'
@@ -761,7 +761,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -775,7 +775,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_kbn_xsrf'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               createDataViewRequest:
                 $ref: '#/components/examples/Data_views_create_data_view_request'
@@ -785,13 +785,13 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_data_view_response_object'
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -811,7 +811,7 @@ paths:
           description: Indicates a successful call.
         '404':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
           description: Object is not found.
@@ -825,7 +825,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getDataViewResponse:
                   $ref: '#/components/examples/Data_views_get_data_view_response'
@@ -834,7 +834,7 @@ paths:
           description: Indicates a successful call.
         '404':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
           description: Object is not found.
@@ -848,7 +848,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_view_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateDataViewRequest:
                 $ref: '#/components/examples/Data_views_update_data_view_request'
@@ -858,13 +858,13 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_data_view_response_object'
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -882,7 +882,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_view_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateFieldsMetadataRequest:
                 $ref: '#/components/examples/Data_views_update_field_metadata_request'
@@ -898,7 +898,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -907,7 +907,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -922,7 +922,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_view_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               createRuntimeFieldRequest:
                 $ref: '#/components/examples/Data_views_create_runtime_field_request'
@@ -944,7 +944,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
           description: Indicates a successful call.
@@ -964,7 +964,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateRuntimeFieldRequest:
                 $ref: '#/components/examples/Data_views_create_runtime_field_request'
@@ -986,7 +986,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -999,7 +999,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -1017,7 +1017,7 @@ paths:
           description: Indicates a successful call.
         '404':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
           description: Object is not found.
@@ -1032,7 +1032,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getRuntimeFieldResponse:
                   $ref: '#/components/examples/Data_views_get_runtime_field_response'
@@ -1048,7 +1048,7 @@ paths:
           description: Indicates a successful call.
         '404':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_404_response'
           description: Object is not found.
@@ -1062,7 +1062,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_view_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               updateRuntimeFieldRequest:
                 $ref: '#/components/examples/Data_views_update_runtime_field_request'
@@ -1086,7 +1086,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -1099,7 +1099,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 getDefaultDataViewResponse:
                   $ref: >-
@@ -1112,7 +1112,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -1125,7 +1125,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_kbn_xsrf'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               setDefaultDataViewRequest:
                 $ref: '#/components/examples/Data_views_set_default_data_view_request'
@@ -1149,7 +1149,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -1158,7 +1158,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Data_views_400_response'
           description: Bad request
@@ -1176,7 +1176,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_kbn_xsrf'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               swapDataViewRequest:
                 $ref: '#/components/examples/Data_views_swap_data_view_request'
@@ -1186,7 +1186,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -1222,7 +1222,7 @@ paths:
         - $ref: '#/components/parameters/Data_views_kbn_xsrf'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               previewSwapDataViewRequest:
                 $ref: >-
@@ -1233,7 +1233,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 type: object
                 properties:
@@ -2634,6 +2634,7 @@ paths:
       summary: Finds endpoint list items
   /api/endpoint/action:
     get:
+      description: Get a list of action requests and their responses
       operationId: EndpointGetActionsList
       parameters:
         - in: query
@@ -2641,7 +2642,7 @@ paths:
           required: true
           schema:
             $ref: >-
-              #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointActionListRequestQuery
+              #/components/schemas/Security_Solution_Endpoint_Management_API_GetEndpointActionListRouteQuery
       responses:
         '200':
           content:
@@ -2655,20 +2656,22 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action_log/{agent_id}':
     get:
-      operationId: EndpointGetActionAuditLog
+      deprecated: true
+      description: Get action requests log
+      operationId: EndpointGetActionLog
       parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema:
+            $ref: >-
+              #/components/schemas/Security_Solution_Endpoint_Management_API_AgentId
         - in: query
           name: query
           required: true
           schema:
             $ref: >-
-              #/components/schemas/Security_Solution_Endpoint_Management_API_AuditLogRequestQuery
-        - in: path
-          name: query
-          required: true
-          schema:
-            $ref: >-
-              #/components/schemas/Security_Solution_Endpoint_Management_API_AuditLogRequestParams
+              #/components/schemas/Security_Solution_Endpoint_Management_API_ActionLogRequestQuery
       responses:
         '200':
           content:
@@ -2677,11 +2680,12 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
           description: OK
-      summary: Get action audit log schema
+      summary: Get action requests log schema
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action_status:
     get:
+      description: Get action status
       operationId: EndpointGetActionsStatus
       parameters:
         - in: query
@@ -2706,14 +2710,14 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}':
     get:
+      description: Get action details
       operationId: EndpointGetActionsDetails
       parameters:
         - in: path
-          name: query
+          name: action_id
           required: true
           schema:
-            $ref: >-
-              #/components/schemas/Security_Solution_Endpoint_Management_API_DetailsRequestParams
+            type: string
       responses:
         '200':
           content:
@@ -2727,14 +2731,19 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}/file/{file_id}/download`':
     get:
+      description: Download a file from an endpoint
       operationId: EndpointFileDownload
       parameters:
         - in: path
-          name: query
+          name: action_id
           required: true
           schema:
-            $ref: >-
-              #/components/schemas/Security_Solution_Endpoint_Management_API_FileDownloadRequestParams
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -2748,14 +2757,19 @@ paths:
         - Security Solution Endpoint Management API
   '/api/endpoint/action/{action_id}/file/{file_id}`':
     get:
+      description: Get file info
       operationId: EndpointFileInfo
       parameters:
         - in: path
-          name: query
+          name: action_id
           required: true
           schema:
-            $ref: >-
-              #/components/schemas/Security_Solution_Endpoint_Management_API_FileInfoRequestParams
+            type: string
+        - in: path
+          name: file_id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -2769,13 +2783,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/execute:
     post:
+      description: Execute a given command on an endpoint
       operationId: EndpointExecuteAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_ExecuteActionRequestBody
+                #/components/schemas/Security_Solution_Endpoint_Management_API_ExecuteRouteRequestBody
         required: true
       responses:
         '200':
@@ -2790,13 +2805,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/get_file:
     post:
+      description: Get a file from an endpoint
       operationId: EndpointGetFileAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_GetFileActionRequestBody
+                #/components/schemas/Security_Solution_Endpoint_Management_API_GetFileRouteRequestBody
         required: true
       responses:
         '200':
@@ -2811,28 +2827,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/isolate:
     post:
-      operationId: EndpointIsolateHostAction
+      description: Isolate an endpoint
+      operationId: EndpointIsolateAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                alert_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
-                case_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
-                comment:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
-                endpoint_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
-                parameters:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_IsolateRouteRequestBody
         required: true
       responses:
         '200':
@@ -2842,18 +2844,19 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
           description: OK
-      summary: Isolate host Action
+      summary: Isolate Action
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/kill_process:
     post:
+      description: Kill a running process on an endpoint
       operationId: EndpointKillProcessAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_ProcessActionSchemas
+                #/components/schemas/Security_Solution_Endpoint_Management_API_KillOrSuspendActionSchema
         required: true
       responses:
         '200':
@@ -2868,28 +2871,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/running_procs:
     post:
-      operationId: EndpointGetRunningProcessesAction
+      description: Get list of running processes on an endpoint
+      operationId: EndpointGetProcessesAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                alert_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
-                case_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
-                comment:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
-                endpoint_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
-                parameters:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_GetProcessesRouteRequestBody
         required: true
       responses:
         '200':
@@ -2904,13 +2893,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/scan:
     post:
+      description: Scan a file or directory
       operationId: EndpointScanAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_ScanActionRequestBody
+                #/components/schemas/Security_Solution_Endpoint_Management_API_ScanRouteRequestBody
         required: true
       responses:
         '200':
@@ -2939,13 +2929,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/suspend_process:
     post:
+      description: Suspend a running process on an endpoint
       operationId: EndpointSuspendProcessAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_ProcessActionSchemas
+                #/components/schemas/Security_Solution_Endpoint_Management_API_KillOrSuspendActionSchema
         required: true
       responses:
         '200':
@@ -2960,28 +2951,14 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      operationId: EndpointUnisolateHostAction
+      description: Release an endpoint
+      operationId: EndpointUnisolateAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
-              type: object
-              properties:
-                alert_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
-                case_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
-                comment:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
-                endpoint_ids:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
-                parameters:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_UnisolateRouteRequestBody
         required: true
       responses:
         '200':
@@ -2991,18 +2968,19 @@ paths:
                 $ref: >-
                   #/components/schemas/Security_Solution_Endpoint_Management_API_SuccessResponse
           description: OK
-      summary: Unisolate host Action
+      summary: Unisolate Action
       tags:
         - Security Solution Endpoint Management API
   /api/endpoint/action/upload:
     post:
+      description: Upload a file to an endpoint
       operationId: EndpointUploadAction
       requestBody:
         content:
           application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_FileUploadActionRequestBody
+                #/components/schemas/Security_Solution_Endpoint_Management_API_UploadRouteRequestBody
         required: true
       responses:
         '200':
@@ -3041,13 +3019,10 @@ paths:
       operationId: GetEndpointMetadata
       parameters:
         - in: path
-          name: query
+          name: id
           required: true
           schema:
-            type: object
-            properties:
-              id:
-                type: string
+            type: string
       responses:
         '200':
           content:
@@ -3099,6 +3074,7 @@ paths:
         - Security Solution Endpoint Management API
   /api/endpoint/policy/summaries:
     get:
+      deprecated: true
       operationId: GetAgentPolicySummary
       parameters:
         - in: query
@@ -6043,7 +6019,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 syncExample:
                   $ref: '#/components/examples/Machine_learning_APIs_mlSyncExample'
@@ -6052,7 +6028,7 @@ paths:
           description: Indicates a successful call
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
           description: Authorization information is missing or invalid.
@@ -6594,7 +6570,7 @@ paths:
         - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=0.1:
+          application/json; Elastic-Api-Version=2023-10-31:
             examples:
               exportSavedObjectsRequest:
                 $ref: >-
@@ -6629,7 +6605,7 @@ paths:
       responses:
         '200':
           content:
-            application/x-ndjson; Elastic-Api-Version=0.1:
+            application/x-ndjson; Elastic-Api-Version=2023-10-31:
               examples:
                 exportSavedObjectsResponse:
                   $ref: >-
@@ -6640,7 +6616,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Serverless_saved_objects_400_response'
           description: Bad request.
@@ -6699,7 +6675,7 @@ paths:
             type: boolean
       requestBody:
         content:
-          multipart/form-data; Elastic-Api-Version=0.1:
+          multipart/form-data; Elastic-Api-Version=2023-10-31:
             examples:
               importObjectsRequest:
                 $ref: >-
@@ -6719,7 +6695,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               examples:
                 importObjectsResponse:
                   $ref: >-
@@ -6766,7 +6742,7 @@ paths:
           description: Indicates a successful call.
         '400':
           content:
-            application/json; Elastic-Api-Version=0.1:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/Serverless_saved_objects_400_response'
           description: Bad request.
@@ -8235,31 +8211,31 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_find_slo_response'
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -8276,38 +8252,38 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=1.0:
+          application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: '#/components/schemas/SLOs_create_slo_request'
         required: true
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_create_slo_response'
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '409':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
@@ -8326,7 +8302,7 @@ paths:
         - $ref: '#/components/parameters/SLOs_space_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=1.0:
+          application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: '#/components/schemas/SLOs_delete_slo_instances_request'
         required: true
@@ -8335,19 +8311,19 @@ paths:
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
@@ -8369,25 +8345,25 @@ paths:
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -8412,31 +8388,31 @@ paths:
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -8454,38 +8430,38 @@ paths:
         - $ref: '#/components/parameters/SLOs_slo_id'
       requestBody:
         content:
-          application/json; Elastic-Api-Version=1.0:
+          application/json; Elastic-Api-Version=2023-10-31:
             schema:
               $ref: '#/components/schemas/SLOs_update_slo_request'
         required: true
       responses:
         '200':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_slo_definition_response'
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -8505,31 +8481,31 @@ paths:
       responses:
         '204':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_slo_definition_response'
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -8551,25 +8527,25 @@ paths:
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -8591,25 +8567,25 @@ paths:
           description: Successful request
         '400':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_400_response'
           description: Bad request
         '401':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_401_response'
           description: Unauthorized response
         '403':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
         '404':
           content:
-            application/json; Elastic-Api-Version=1.0:
+            application/json; Elastic-Api-Version=2023-10-31:
               schema:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
@@ -10481,7 +10457,7 @@ components:
   responses:
     Connectors_401:
       content:
-        application/json; Elastic-Api-Version=0.2:
+        application/json; Elastic-Api-Version=2023-10-31:
           schema:
             properties:
               error:
@@ -10501,7 +10477,7 @@ components:
       description: Authorization information is missing or invalid.
     Connectors_404:
       content:
-        application/json; Elastic-Api-Version=0.2:
+        application/json; Elastic-Api-Version=2023-10-31:
           schema:
             properties:
               error:
@@ -22079,6 +22055,20 @@ components:
       required:
         - status_code
         - message
+    Security_Solution_Endpoint_Management_API_ActionLogRequestQuery:
+      type: object
+      properties:
+        end_date:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_EndDate
+        page:
+          $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Page'
+        page_size:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_PageSize
+        start_date:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_StartDate
     Security_Solution_Endpoint_Management_API_AgentId:
       description: Agent ID
       type: string
@@ -22093,6 +22083,12 @@ components:
           type: array
         - minLength: 1
           type: string
+    Security_Solution_Endpoint_Management_API_AgentTypes:
+      enum:
+        - endpoint
+        - sentinel_one
+        - crowdstrike
+      type: string
     Security_Solution_Endpoint_Management_API_AlertIds:
       description: A list of alerts ids.
       items:
@@ -22100,26 +22096,6 @@ components:
           #/components/schemas/Security_Solution_Endpoint_Management_API_NonEmptyString
       minItems: 1
       type: array
-    Security_Solution_Endpoint_Management_API_AuditLogRequestParams:
-      type: object
-      properties:
-        agent_id:
-          $ref: >-
-            #/components/schemas/Security_Solution_Endpoint_Management_API_AgentId
-    Security_Solution_Endpoint_Management_API_AuditLogRequestQuery:
-      type: object
-      properties:
-        end_date:
-          $ref: >-
-            #/components/schemas/Security_Solution_Endpoint_Management_API_EndDate
-        page:
-          $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Page'
-        page_size:
-          $ref: >-
-            #/components/schemas/Security_Solution_Endpoint_Management_API_PageSize
-        start_date:
-          $ref: >-
-            #/components/schemas/Security_Solution_Endpoint_Management_API_StartDate
     Security_Solution_Endpoint_Management_API_CaseIds:
       description: Case IDs to be updated (cannot contain empty strings)
       items:
@@ -22138,6 +22114,7 @@ components:
         - get-file
         - execute
         - upload
+        - scan
       minLength: 1
       type: string
     Security_Solution_Endpoint_Management_API_Commands:
@@ -22147,20 +22124,64 @@ components:
     Security_Solution_Endpoint_Management_API_Comment:
       description: Optional comment
       type: string
-    Security_Solution_Endpoint_Management_API_DetailsRequestParams:
-      type: object
-      properties:
-        action_id:
-          type: string
     Security_Solution_Endpoint_Management_API_EndDate:
       description: End date
       type: string
-    Security_Solution_Endpoint_Management_API_EndpointActionListRequestQuery:
+    Security_Solution_Endpoint_Management_API_EndpointIds:
+      description: List of endpoint IDs (cannot contain empty strings)
+      items:
+        minLength: 1
+        type: string
+      minItems: 1
+      type: array
+    Security_Solution_Endpoint_Management_API_ExecuteRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                command:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Command
+                timeout:
+                  $ref: >-
+                    #/components/schemas/Security_Solution_Endpoint_Management_API_Timeout
+              required:
+                - command
+          required:
+            - parameters
+    Security_Solution_Endpoint_Management_API_GetEndpointActionListRouteQuery:
       type: object
       properties:
         agentIds:
           $ref: >-
             #/components/schemas/Security_Solution_Endpoint_Management_API_AgentIds
+        agentTypes:
+          $ref: >-
+            #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
         commands:
           $ref: >-
             #/components/schemas/Security_Solution_Endpoint_Management_API_Commands
@@ -22186,17 +22207,13 @@ components:
         withOutputs:
           $ref: >-
             #/components/schemas/Security_Solution_Endpoint_Management_API_WithOutputs
-    Security_Solution_Endpoint_Management_API_EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
-      items:
-        minLength: 1
-        type: string
-      minItems: 1
-      type: array
-    Security_Solution_Endpoint_Management_API_ExecuteActionRequestBody:
+    Security_Solution_Endpoint_Management_API_GetFileRouteRequestBody:
       allOf:
         - type: object
           properties:
+            agent_type:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
             alert_ids:
               $ref: >-
                 #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
@@ -22212,93 +22229,8 @@ components:
             parameters:
               $ref: >-
                 #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
-        - type: object
-          properties:
-            parameters:
-              type: object
-              properties:
-                command:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Command
-                timeout:
-                  $ref: >-
-                    #/components/schemas/Security_Solution_Endpoint_Management_API_Timeout
-              required:
-                - command
           required:
-            - parameters
-    Security_Solution_Endpoint_Management_API_FileDownloadRequestParams:
-      type: object
-      properties:
-        action_id:
-          type: string
-        file_id:
-          type: string
-      required:
-        - action_id
-        - file_id
-    Security_Solution_Endpoint_Management_API_FileInfoRequestParams:
-      type: object
-      properties:
-        action_id:
-          type: string
-        file_id:
-          type: string
-      required:
-        - action_id
-        - file_id
-    Security_Solution_Endpoint_Management_API_FileUploadActionRequestBody:
-      allOf:
-        - type: object
-          properties:
-            alert_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
-            case_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
-            comment:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
-            endpoint_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
-            parameters:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
-        - type: object
-          properties:
-            file:
-              format: binary
-              type: string
-            parameters:
-              type: object
-              properties:
-                overwrite:
-                  default: false
-                  type: boolean
-          required:
-            - parameters
-            - file
-    Security_Solution_Endpoint_Management_API_GetFileActionRequestBody:
-      allOf:
-        - type: object
-          properties:
-            alert_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
-            case_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
-            comment:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
-            endpoint_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
-            parameters:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+            - endpoint_ids
         - type: object
           properties:
             parameters:
@@ -22308,6 +22240,52 @@ components:
                   type: string
               required:
                 - path
+          required:
+            - parameters
+    Security_Solution_Endpoint_Management_API_GetProcessesRouteRequestBody:
+      $ref: >-
+        #/components/schemas/Security_Solution_Endpoint_Management_API_NoParametersRequestSchema
+    Security_Solution_Endpoint_Management_API_IsolateRouteRequestBody:
+      $ref: >-
+        #/components/schemas/Security_Solution_Endpoint_Management_API_NoParametersRequestSchema
+    Security_Solution_Endpoint_Management_API_KillOrSuspendActionSchema:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      minimum: 1
+                      type: integer
+                - type: object
+                  properties:
+                    entity_id:
+                      minLength: 1
+                      type: string
           required:
             - parameters
     Security_Solution_Endpoint_Management_API_ListRequestQuery:
@@ -22362,6 +22340,34 @@ components:
       minLength: 1
       pattern: ^(?! *$).+$
       type: string
+    Security_Solution_Endpoint_Management_API_NoParametersRequestSchema:
+      type: object
+      properties:
+        body:
+          type: object
+          properties:
+            agent_type:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+          required:
+            - endpoint_ids
+      required:
+        - body
     Security_Solution_Endpoint_Management_API_Page:
       default: 1
       description: Page number
@@ -22376,50 +22382,18 @@ components:
     Security_Solution_Endpoint_Management_API_Parameters:
       description: Optional parameters object
       type: object
-    Security_Solution_Endpoint_Management_API_ProcessActionSchemas:
-      allOf:
-        - type: object
-          properties:
-            alert_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
-            case_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
-            comment:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
-            endpoint_ids:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
-            parameters:
-              $ref: >-
-                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
-        - type: object
-          properties:
-            parameters:
-              oneOf:
-                - type: object
-                  properties:
-                    pid:
-                      minimum: 1
-                      type: integer
-                - type: object
-                  properties:
-                    entity_id:
-                      minLength: 1
-                      type: string
-          required:
-            - parameters
     Security_Solution_Endpoint_Management_API_ProtectionUpdatesNoteResponse:
       type: object
       properties:
         note:
           type: string
-    Security_Solution_Endpoint_Management_API_ScanActionRequestBody:
+    Security_Solution_Endpoint_Management_API_ScanRouteRequestBody:
       allOf:
         - type: object
           properties:
+            agent_type:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
             alert_ids:
               $ref: >-
                 #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
@@ -22435,6 +22409,8 @@ components:
             parameters:
               $ref: >-
                 #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+          required:
+            - endpoint_ids
         - type: object
           properties:
             parameters:
@@ -22457,16 +22433,59 @@ components:
       minimum: 1
       type: integer
     Security_Solution_Endpoint_Management_API_Type:
+      description: Type of response action
       enum:
         - automated
         - manual
       type: string
     Security_Solution_Endpoint_Management_API_Types:
+      description: List of types of response actions
       items:
         $ref: '#/components/schemas/Security_Solution_Endpoint_Management_API_Type'
       maxLength: 2
       minLength: 1
       type: array
+    Security_Solution_Endpoint_Management_API_UnisolateRouteRequestBody:
+      $ref: >-
+        #/components/schemas/Security_Solution_Endpoint_Management_API_NoParametersRequestSchema
+    Security_Solution_Endpoint_Management_API_UploadRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AgentTypes
+            alert_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_AlertIds
+            case_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_CaseIds
+            comment:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Comment
+            endpoint_ids:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_EndpointIds
+            parameters:
+              $ref: >-
+                #/components/schemas/Security_Solution_Endpoint_Management_API_Parameters
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            file:
+              format: binary
+              type: string
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  default: false
+                  type: boolean
+          required:
+            - parameters
+            - file
     Security_Solution_Endpoint_Management_API_UserIds:
       description: User IDs
       oneOf:
@@ -22478,7 +22497,7 @@ components:
         - minLength: 1
           type: string
     Security_Solution_Endpoint_Management_API_WithOutputs:
-      description: With Outputs
+      description: Shows detailed outputs for an action response
       oneOf:
         - items:
             minLength: 1
