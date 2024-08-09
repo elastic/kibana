@@ -183,7 +183,7 @@ export default createServerlessTestConfig({
 ES and Kibana project-specific arguments are defined and loaded from `serverless.config.base`. These arguments are copied from the Elasticsearch and Kibana controller repositories.
 
 Note: The FTR (Functional Test Runner) does not have the capability to provision custom ES/Kibana server arguments into the serverless project on MKI. Any custom arguments listed explicitly in this config file will apply **only to a local environment**.
-We do not recommend use of custom server arguments because it may lead to unxpected test failures on MKI.
+We do not recommend use of custom server arguments because it may lead to unexpected test failures on MKI.
 
 6. Add FTR Configs Path to FTR Manifest Files Located in `.buildkite/`
 
