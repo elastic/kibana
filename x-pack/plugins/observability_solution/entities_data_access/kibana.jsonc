@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/assets-data-access-plugin",
-  "owner": "@elastic/obs-knowledge-team",
+  "id": "@kbn/entities-data-access-plugin",
+  "owner": "@elastic/obs-entities",
   "plugin": {
-    "id": "assetsDataAccess",
+    "id": "entitiesDataAccess",
     "server": true,
     "browser": false,
     "requiredPlugins": [],

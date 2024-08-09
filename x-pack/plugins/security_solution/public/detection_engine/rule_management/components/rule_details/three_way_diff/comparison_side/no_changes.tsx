@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+import * as i18n from './translations';
 
-export interface RegisterServicesParams {
-  logger: Logger;
-  deps: {};
-}
-
-export function registerServices(params: RegisterServicesParams) {
-  return {};
+export function NoChanges() {
+  return (
+    <EuiText size="s" color="subdued">
+      {i18n.NO_CHANGES}
+    </EuiText>
+  );
 }

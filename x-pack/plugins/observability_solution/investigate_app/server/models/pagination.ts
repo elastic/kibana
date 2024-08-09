@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-const path = require('path');
+export interface Paginated<T> {
+  total: number;
+  page: number;
+  perPage: number;
+  results: T[];
+}
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../../..'),
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/assets_data_access'],
-};
+export interface Pagination {
+  page: number;
+  perPage: number;
+}
