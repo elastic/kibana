@@ -8,10 +8,8 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import type { OpsMetrics } from '@kbn/core-metrics-server';
-import type { Observable } from 'rxjs';
 import apm from 'elastic-apm-node';
-import { HistoryWindow } from './history_window';
+import { HistoryWindow, HISTORY_WINDOW_SIZE_LONG, HISTORY_WINDOW_SIZE_MED, HISTORY_WINDOW_SIZE_SHORT } from '../history_window';
 
 interface ELUHistoryResponse {
   /**
@@ -30,20 +28,10 @@ interface ELUHistoryResponse {
   };
 }
 
-const HISTORY_WINDOW_SIZE_SHORT = 3;
-const HISTORY_WINDOW_SIZE_MED = 6;
-const HISTORY_WINDOW_SIZE_LONG = 12;
-
 /**
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
-export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<OpsMetrics>) {
-  const eluHistoryWindow = new HistoryWindow(HISTORY_WINDOW_SIZE_LONG);
-
-  metrics$.subscribe((metrics) => {
-    eluHistoryWindow.addObservation(metrics.process.event_loop_utilization.utilization);
-  });
-
+export function registerEluHistoryRoute(router: IRouter, eluHistoryWindow: HistoryWindow) {
   // Report the same metrics to APM
   apm.registerMetric('elu.history.short', () =>
     eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT)

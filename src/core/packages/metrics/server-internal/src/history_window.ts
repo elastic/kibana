@@ -10,6 +10,10 @@
 /** We .ceil to rather _slightly_ over-report usage in certain circumstances */
 const twoDeci = (num: number) => Math.ceil(num * 100) / 100;
 
+export const HISTORY_WINDOW_SIZE_SHORT = 3;
+export const HISTORY_WINDOW_SIZE_MED = 6;
+export const HISTORY_WINDOW_SIZE_LONG = 12;
+
 export class HistoryWindow {
   readonly #window: number[];
   readonly #size: number;

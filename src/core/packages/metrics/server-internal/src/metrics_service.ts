@@ -17,6 +17,12 @@ import type {
   MetricsServiceSetup,
   MetricsServiceStart,
 } from '@kbn/core-metrics-server';
+import {
+  HISTORY_WINDOW_SIZE_LONG,
+  HISTORY_WINDOW_SIZE_MED,
+  HISTORY_WINDOW_SIZE_SHORT,
+  HistoryWindow,
+} from './history_window';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
@@ -73,12 +79,24 @@ export class MetricsService
     }, config.interval.asMilliseconds());
 
     const metricsObservable = this.metrics$.asObservable();
+    const eluHistoryWindow = new HistoryWindow(HISTORY_WINDOW_SIZE_LONG);
 
-    registerEluHistoryRoute(http.createRouter(''), metricsObservable);
+    metricsObservable.subscribe((metrics) => {
+      eluHistoryWindow.addObservation(metrics.process.event_loop_utilization.utilization);
+    });
+
+    registerEluHistoryRoute(http.createRouter(''), eluHistoryWindow);
 
     this.service = {
       collectionInterval: config.interval.asMilliseconds(),
       getOpsMetrics$: () => metricsObservable,
+      getEluHistory: () => {
+        return {
+          short: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT),
+          medium: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_MED),
+          long: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_LONG),
+        };
+      }
     };
 
     return this.service;
