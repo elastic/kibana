@@ -16,7 +16,7 @@ import { InvestigateSearchBar } from '../../../../components/investigate_search_
 import { InvestigateWidgetGrid } from '../../../../components/investigate_widget_grid';
 import { useDateRange } from '../../../../hooks/use_date_range';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { InvestigationNotes } from '../investigation_notes';
+import { InvestigationNotes } from '../investigation_notes/investigation_notes';
 
 function InvestigationDetailsWithUser({ user }: { user: AuthenticatedUser }) {
   const {

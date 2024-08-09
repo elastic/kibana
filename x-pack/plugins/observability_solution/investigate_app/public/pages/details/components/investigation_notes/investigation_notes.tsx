@@ -78,48 +78,47 @@ export function InvestigationNotes({ notes, addNote, deleteNote }: Props) {
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
-        <EuiFlexGroup direction="column">
-          <EuiFormRow
-            label={i18n.translate('xpack.investigateApp.investigationNotes.euiFormRow.notesLabel', {
-              defaultMessage: 'Notes',
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.investigateApp.investigationNotes.euiFormRow.notesLabel', {
+            defaultMessage: 'Notes',
+          })}
+        >
+          <ResizableTextInput
+            placeholder={i18n.translate('xpack.investigateApp.investigationNotes.placeholder', {
+              defaultMessage: 'Add a note to the investigation',
             })}
-          >
-            <ResizableTextInput
-              placeholder={i18n.translate('xpack.investigateApp.investigationNotes.placeholder', {
-                defaultMessage: 'Add a note to the investigation',
-              })}
-              disabled={loading}
-              value={note}
-              onChange={(value) => {
-                setNote(value);
-              }}
-              onSubmit={() => {
-                submit();
-              }}
-            />
-          </EuiFormRow>
+            disabled={loading}
+            value={note}
+            onChange={(value) => {
+              setNote(value);
+            }}
+            onSubmit={() => {
+              submit();
+            }}
+          />
+        </EuiFormRow>
 
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="investigateAppInvestigationNotesAddButton"
-              fullWidth
-              color="text"
-              aria-label={i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
-                defaultMessage: 'Add',
-              })}
-              disabled={loading || note.trim() === ''}
-              isLoading={loading}
-              size="m"
-              onClick={() => {
-                submit();
-              }}
-            >
-              {i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
-                defaultMessage: 'Add',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="investigateAppInvestigationNotesAddButton"
+            fullWidth
+            color="text"
+            aria-label={i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
+              defaultMessage: 'Add',
+            })}
+            disabled={loading || note.trim() === ''}
+            isLoading={loading}
+            size="m"
+            onClick={() => {
+              submit();
+            }}
+          >
+            {i18n.translate('xpack.investigateApp.investigationNotes.addButtonLabel', {
+              defaultMessage: 'Add',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
